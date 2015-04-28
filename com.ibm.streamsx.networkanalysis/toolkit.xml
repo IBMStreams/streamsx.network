@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.0.0.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <toolkit name="com.ibm.streamsx.networkanalysis" requiredProductVersion="4.0.0.0" version="1.0.0">
+    <description/>
+    <uriTable>
+      <uri index="2" value="com.ibm.streamsx.network.ipv4/native.function/function.xml"/>
+      <uri index="1" value="com.ibm.streamsx.network.ipv4/NetworkUtils.spl"/>
+    </uriTable>
+    <namespace name="com.ibm.streamsx.network.ipv4">
+      <function modelUriIndex="2" name="decToHex" native="true" public="true" returnType="rstring" uriIndex="0">
+        <prototype>public rstring decToHex(int64 value)</prototype>
+        <parameter name="value" type="int64"/>
+      </function>
+      <function modelUriIndex="2" name="decToOct" native="true" public="true" returnType="rstring" uriIndex="0">
+        <prototype>public rstring decToOct(int64 value)</prototype>
+        <parameter name="value" type="int64"/>
+      </function>
+      <function column="1" line="19" name="isIPv4Address" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isIPv4Address(rstring value)</prototype>
+        <parameter name="value" type="rstring"/>
+      </function>
+      <function column="1" line="55" name="convertToDottedDecimal" native="false" public="true" returnType="rstring" uriIndex="1">
+        <description>* Conversation functions **</description>
+        <prototype>public rstring convertToDottedDecimal(rstring value, IPv4_Notation value_type)</prototype>
+        <parameter name="value" type="rstring"/>
+        <parameter name="value_type" type="IPv4_Notation"/>
+      </function>
+      <function column="1" line="162" name="convertToDottedHexidecimal" native="false" public="true" returnType="rstring" uriIndex="1">
+        <prototype>public rstring convertToDottedHexidecimal(rstring value, IPv4_Notation value_type)</prototype>
+        <parameter name="value" type="rstring"/>
+        <parameter name="value_type" type="IPv4_Notation"/>
+      </function>
+      <function column="1" line="273" name="convertToDottedOctal" native="false" public="true" returnType="rstring" uriIndex="1">
+        <prototype>public rstring convertToDottedOctal(rstring value, IPv4_Notation value_type)</prototype>
+        <parameter name="value" type="rstring"/>
+        <parameter name="value_type" type="IPv4_Notation"/>
+      </function>
+      <function column="1" line="384" name="convertToDecimal" native="false" public="true" returnType="int64" uriIndex="1">
+        <prototype>public int64 convertToDecimal(rstring value, IPv4_Notation value_type)</prototype>
+        <parameter name="value" type="rstring"/>
+        <parameter name="value_type" type="IPv4_Notation"/>
+      </function>
+      <function column="1" line="496" name="convertToHexidecimal" native="false" public="true" returnType="rstring" uriIndex="1">
+        <prototype>public rstring convertToHexidecimal(rstring value, IPv4_Notation value_type)</prototype>
+        <parameter name="value" type="rstring"/>
+        <parameter name="value_type" type="IPv4_Notation"/>
+      </function>
+      <function column="1" line="517" name="convertToOctal" native="false" public="true" returnType="rstring" uriIndex="1">
+        <prototype>public rstring convertToOctal(rstring value, IPv4_Notation value_type)</prototype>
+        <parameter name="value" type="rstring"/>
+        <parameter name="value_type" type="IPv4_Notation"/>
+      </function>
+      <function column="1" line="533" name="isIPv4CIDRNotation" native="false" public="true" returnType="boolean" uriIndex="1">
+        <description>* IP functions **</description>
+        <prototype>public boolean isIPv4CIDRNotation(rstring networkCIDR)</prototype>
+        <parameter name="networkCIDR" type="rstring"/>
+      </function>
+      <function column="1" line="554" name="toCIDRNotation" native="false" public="true" returnType="CIDR_t" uriIndex="1">
+        <prototype>public CIDR_t toCIDRNotation(rstring networkCIDR)</prototype>
+        <parameter name="networkCIDR" type="rstring"/>
+      </function>
+      <function column="1" line="574" name="getIPNetworkRange" native="false" public="true" returnType="CIDR_IP_Range" uriIndex="1">
+        <prototype>public CIDR_IP_Range getIPNetworkRange(rstring networkCIDR)</prototype>
+        <parameter name="networkCIDR" type="rstring"/>
+      </function>
+      <function column="1" line="589" name="getDecimalNetworkRange" native="false" public="true" returnType="CIDR_Decimal_Range" uriIndex="1">
+        <prototype>public CIDR_Decimal_Range getDecimalNetworkRange(rstring networkCIDR)</prototype>
+        <parameter name="networkCIDR" type="rstring"/>
+      </function>
+      <function column="1" line="604" name="isInNetwork" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isInNetwork(rstring networkCIDR, rstring ip)</prototype>
+        <parameter name="networkCIDR" type="rstring"/>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="619" name="isInNetworkList" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isInNetworkList(list&lt;rstring&gt; networks, rstring ip)</prototype>
+        <parameter name="networks" type="list&lt;rstring>"/>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="634" name="isInIPRange" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isInIPRange(rstring ipStart, rstring ipEnd, rstring ip)</prototype>
+        <parameter name="ipStart" type="rstring"/>
+        <parameter name="ipEnd" type="rstring"/>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="653" name="isPrivate" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isPrivate(rstring ip)</prototype>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="663" name="isLoopback" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isLoopback(rstring ip)</prototype>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="671" name="isLinkLocal" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isLinkLocal(rstring ip)</prototype>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="682" name="isReserved" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isReserved(rstring ip)</prototype>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="698" name="isMulticast" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isMulticast(rstring ip)</prototype>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="709" name="isGlobal" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isGlobal(rstring ip)</prototype>
+        <parameter name="ip" type="rstring"/>
+      </function>
+      <function column="1" line="717" name="numAddressesInNetwork" native="false" public="true" returnType="int32" uriIndex="1">
+        <prototype>public int32 numAddressesInNetwork(rstring networkCIDR)</prototype>
+        <parameter name="networkCIDR" type="rstring"/>
+      </function>
+      <function column="1" line="734" name="numAddressesInIPRange" native="false" public="true" returnType="int32" uriIndex="1">
+        <prototype>public int32 numAddressesInIPRange(rstring networkStart, rstring networkEnd)</prototype>
+        <parameter name="networkStart" type="rstring"/>
+        <parameter name="networkEnd" type="rstring"/>
+      </function>
+      <function column="1" line="749" name="getAllAddressesInNetwork" native="false" public="true" returnType="list&lt;rstring>" uriIndex="1">
+        <prototype>public list&lt;rstring&gt; getAllAddressesInNetwork(rstring networkCIDR)</prototype>
+        <parameter name="networkCIDR" type="rstring"/>
+      </function>
+      <function column="1" line="769" name="isNetworkOverlap" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)</prototype>
+        <parameter name="networkCIDR1" type="rstring"/>
+        <parameter name="networkCIDR2" type="rstring"/>
+      </function>
+      <function column="1" line="790" name="isGreaterThan" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isGreaterThan(rstring ip1, rstring ip2)</prototype>
+        <parameter name="ip1" type="rstring"/>
+        <parameter name="ip2" type="rstring"/>
+      </function>
+      <function column="1" line="802" name="isLessThan" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isLessThan(rstring ip1, rstring ip2)</prototype>
+        <parameter name="ip1" type="rstring"/>
+        <parameter name="ip2" type="rstring"/>
+      </function>
+      <function column="1" line="814" name="isEqualTo" native="false" public="true" returnType="boolean" uriIndex="1">
+        <prototype>public boolean isEqualTo(rstring ip1, rstring ip2)</prototype>
+        <parameter name="ip1" type="rstring"/>
+        <parameter name="ip2" type="rstring"/>
+      </function>
+      <function column="1" line="833" name="compare" native="false" public="true" returnType="int64" uriIndex="1">
+        <prototype>public int64 compare(rstring ip1, rstring ip2)</prototype>
+        <parameter name="ip1" type="rstring"/>
+        <parameter name="ip2" type="rstring"/>
+      </function>
+      <type column="6" line="6" name="IPv4_Notation" static="true" type="enum { DOTTED_DECIMAL, DOTTED_HEXIDECIMAL, DOTTED_OCTAL, DECIMAL, HEXIDECIMAL, OCTAL }" uriIndex="1"/>
+      <type column="6" line="8" name="CIDR_t" static="true" type="tuple&lt;rstring ip, int32 prefix>" uriIndex="1"/>
+      <type column="6" line="9" name="CIDR_IP_Range" static="true" type="tuple&lt;rstring startIP, rstring endIP>" uriIndex="1"/>
+      <type column="6" line="10" name="CIDR_Decimal_Range" static="true" type="tuple&lt;int64 start, int64 end>" uriIndex="1"/>
+      <enumLiterals column="28" line="6" typeName="IPv4_Notation" uriIndex="1">
+        <enum>DOTTED_DECIMAL</enum>
+        <enum>DOTTED_HEXIDECIMAL</enum>
+        <enum>DOTTED_OCTAL</enum>
+        <enum>DECIMAL</enum>
+        <enum>HEXIDECIMAL</enum>
+        <enum>OCTAL</enum>
+      </enumLiterals>
+    </namespace>
+    <sabFiles>
+      <ti:include path="toolkit.xml" root="toolkitDir"/>
+      <ti:include path="impl/java/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/java/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/nl/*.dat" root="toolkitDir"/>
+      <ti:include path="etc/**" root="toolkitDir"/>
+      <ti:include path="lib/**" root="toolkitDir"/>
+      <ti:include path="nl/**" root="toolkitDir"/>
+      <ti:include path="opt/**" root="toolkitDir"/>
+    </sabFiles>
+  </toolkit>
+
+</toolkitModel>
