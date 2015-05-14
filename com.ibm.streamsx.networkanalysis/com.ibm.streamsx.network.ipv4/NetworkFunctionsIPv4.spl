@@ -1,5 +1,9 @@
-/* Copyright (C) 2013-2015, International Business Machines Corporation */
-/* All Rights Reserved */
+/**
+#######################################################################
+# Copyright (C)2015, International Business Machines Corporation and
+# others. All Rights Reserved.
+#######################################################################
+*/
 
 namespace com.ibm.streamsx.network.ipv4;
 
@@ -9,7 +13,7 @@ type CIDR_t = tuple<rstring ip, int32 prefix>;
 type CIDR_IP_Range = tuple<rstring startIP, rstring endIP>;
 type CIDR_Decimal_Range = tuple<int64 start, int64 end>; 
 
-/*
+/**
  * Returns true if the *value* parameter contains a valid 
  * IPv4 address in dotted-decimal notation (i.e 0.0.0.0)
  * 
@@ -35,9 +39,7 @@ public boolean isIPv4Address(rstring value)
 		return false;
 }
 
-/*** Conversation functions ***/
-
-/*
+/**
  * Converts the *value* to an IPv4 address in dotted-decimal notation. 
  * The *value_type* argument specifies the notation of the *value* argument.
  * 
@@ -142,7 +144,7 @@ public rstring convertToDottedDecimal(rstring value, IPv4_Notation value_type)
 	return INVALID_IP;
 }
 
-/*
+/**
  * Converts the *value* to an IPv4 address in dotted-hexidecimal notation. 
  * The *value_type* argument specifies the notation of the *value* argument.
  * 
@@ -255,7 +257,7 @@ public rstring convertToDottedHexidecimal(rstring value, IPv4_Notation value_typ
 	return INVALID_IP;
 }
 
-/*
+/**
  * Converts the *value* to an IPv4 address in dotted-octal notation. 
  * The *value_type* argument specifies the notation of the *value* argument.
  * 
@@ -366,7 +368,7 @@ public rstring convertToDottedOctal(rstring value, IPv4_Notation value_type)
 	return INVALID_IP;
 }
 
-/*
+/**
  * Converts the *value* to an IPv4 address in decimal notation. 
  * The *value_type* argument specifies the notation of the *value* argument.
  * 
@@ -476,7 +478,7 @@ public int64 convertToDecimal(rstring value, IPv4_Notation value_type)
 	return INVALID_IP;
 }
 
-/*
+/**
  * Converts the *value* to an IPv4 address in hexidecimal notation. 
  * The *value_type* argument specifies the notation of the *value* argument.
  * 
@@ -499,7 +501,7 @@ public rstring convertToHexidecimal(rstring value, IPv4_Notation value_type)
 	return decToHex(dec);
 }
 
-/*
+/**
  * Converts the *value* to an IPv4 address in dotted-hexidecimal notation. 
  * The *value_type* argument specifies the notation of the *value* argument.
  * 
@@ -521,9 +523,7 @@ public rstring convertToOctal(rstring value, IPv4_Notation value_type)
 }
 
 
-/*** IP functions ***/
-
-/*
+/**
  * Returns true if the *value* parameter contains a valid 
  * IPv4 network address using CIDR notation (i.e. 192.168.0.0/31)
  * 
@@ -547,7 +547,7 @@ public boolean isIPv4CIDRNotation(rstring networkCIDR)
 	return true;
 }
 
-/*
+/**
  * Parses the *networkCIDR* argument and returns a 
  * CIDR_t type.
  */
@@ -567,7 +567,7 @@ public CIDR_t toCIDRNotation(rstring networkCIDR)
 	return result;	
 }
 
-/*
+/**
  * Returns the start and end IP addresses, in dotted-decimal
  * notation, of the given network.
  */
@@ -582,7 +582,7 @@ public CIDR_IP_Range getIPNetworkRange(rstring networkCIDR)
 	return ipRange;
 }
 
-/*
+/**
  * Returns the start and end IP addresses, in decimal
  * notation, of the given network.
  */
@@ -597,7 +597,7 @@ public CIDR_Decimal_Range getDecimalNetworkRange(rstring networkCIDR)
 	return decRange;
 }
 
-/*
+/**
  * Checks whether an IPv4 address, *ip*, is in the given
  * network, *networkCIDR*.
  */
@@ -612,7 +612,7 @@ public boolean isInNetwork(rstring networkCIDR, rstring ip)
 	return false;	
 }
 
-/*
+/**
  * Checks whether an IPv4 address, *ip*, is in one of the
  * networks that appears in the list of provided *networks*. 
  */
@@ -627,7 +627,7 @@ public boolean isInNetworkList(list<rstring> networks, rstring ip)
 	return false;
 }
 
-/*
+/**
  * Checks whether an IPv4 address, *ip*, appears between the *ipStart* 
  * and *ipEnd* arguments
  */
@@ -647,7 +647,7 @@ public boolean isInIPRange(rstring ipStart, rstring ipEnd, rstring ip)
 	return false;	
 }
 
-/*
+/**
  * Returns true if the IP address is a private IP address (RFC1918).
  */
 public boolean isPrivate(rstring ip)
@@ -657,7 +657,7 @@ public boolean isPrivate(rstring ip)
 	return isInNetworkList(privateNetworks, ip);
 }
 
-/*
+/**
  * Returns true if the IP address is a loopback address (RFC6890).
  */
 public boolean isLoopback(rstring ip)
@@ -665,7 +665,7 @@ public boolean isLoopback(rstring ip)
 	return isInNetwork("127.0.0.0/8", ip);
 }
 
-/*
+/**
  * Returns true if the IP address is a link local address (RFC3927)
  */
 public boolean isLinkLocal(rstring ip)
@@ -673,7 +673,7 @@ public boolean isLinkLocal(rstring ip)
 	return isInNetwork("169.254.0.0/16", ip);
 }
 
-/*
+/**
  * Returns true if the IP address is a reserved address. 
  * Here, an IP address is considered to be reserved
  * if it falls within one of the special-use address 
@@ -692,7 +692,7 @@ public boolean isReserved(rstring ip)
 	return isInNetworkList(reservedNetworks, ip);
 }
 
-/*
+/**
  * Returns true if the IP address is a multicast address (RFC5771).
  */
 public boolean isMulticast(rstring ip)
@@ -700,7 +700,7 @@ public boolean isMulticast(rstring ip)
 	return isInNetwork("224.0.0.0/4", ip);
 }
 
-/*
+/**
  * Returns true if the IP address is not a reserved address
  * 
  * *NOTE: * Will return true for "6to4 Relay Anycast" addresses since
@@ -711,7 +711,7 @@ public boolean isGlobal(rstring ip)
 	return isInNetwork("192.88.99.0/24", ip) || !isReserved(ip);
 }
 
-/*
+/**
  * Returns the number of IP addresses contained within the network range
  */
 public int32 numAddressesInNetwork(rstring networkCIDR)
@@ -727,7 +727,7 @@ public int32 numAddressesInNetwork(rstring networkCIDR)
 	return (int32)(decNetwork.end - decNetwork.start) + 1; // '+ 1' to include start address
 }
 
-/*
+/**
  * Returns the number of IP addresses between networkStart (inclusive) and
  * networkEnd (exclusive)
  */
@@ -742,7 +742,7 @@ public int32 numAddressesInIPRange(rstring networkStart, rstring networkEnd)
 	return (int32)(end - start) + 1; // '+ 1' to include start address 
 }
 
-/*
+/**
  * Returns a list of IP addresses contained within the network 
  * as given by the *networkCIDR* argument. 
  */
@@ -761,7 +761,7 @@ public list<rstring> getAllAddressesInNetwork(rstring networkCIDR)
 	return addresses;
 }
 
-/*
+/**
  * Returns true if the networks given by the *networkCIDR1* and *networkCIDR2* 
  * arguments overlap. The networks are considered to be overlapping if at least
  * one IP address is common between the two networks.
@@ -783,7 +783,7 @@ public boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)
 	return false;
 }
 
-/*
+/**
  * Returns true if the *ip1* IPv4 address is greater
  * than the *ip2* IPv4 address. 
  */
@@ -795,7 +795,7 @@ public boolean isGreaterThan(rstring ip1, rstring ip2)
 	return ip1Dec > ip2Dec;
 }
 
-/*
+/**
  * Returns true if the *ip1* IPv4 address is less
  * than the *ip2* IPv4 address. 
  */
@@ -807,7 +807,7 @@ public boolean isLessThan(rstring ip1, rstring ip2)
 	return ip1Dec < ip2Dec;
 }
 
-/*
+/**
  * Returns true if the *ip1* IPv4 address is equal to
  * the *ip2* IPv4 address. 
  */
@@ -819,7 +819,7 @@ public boolean isEqualTo(rstring ip1, rstring ip2)
 	return ip1Dec == ip2Dec;	
 }
 
-/*
+/**
  * Compares the IPv4 addresses and returns an integer value 
  * indicating whether *ip1* is less than, equal to or greater
  * than *ip2*. 

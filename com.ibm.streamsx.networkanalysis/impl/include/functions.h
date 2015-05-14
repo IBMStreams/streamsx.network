@@ -1,5 +1,9 @@
-/* Copyright (C) 2013-2015, International Business Machines Corporation */
-/* All Rights Reserved */
+/*
+#######################################################################
+# Copyright (C)2015, International Business Machines Corporation and
+# others. All Rights Reserved.
+#######################################################################
+*/
 
 #ifndef _NETWORK_IPV4_FUNCTIONS_H_
 #define _NETWORK_IPV4_FUNCTIONS_H_
