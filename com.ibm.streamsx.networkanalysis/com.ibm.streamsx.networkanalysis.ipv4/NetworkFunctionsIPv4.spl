@@ -5,13 +5,13 @@
 #######################################################################
 */
 
-namespace com.ibm.streamsx.network.ipv4;
+namespace com.ibm.streamsx.networkanalysis.ipv4;
+
+use com.ibm.streamsx.networkanalysis::CIDR_t ;
+use com.ibm.streamsx.networkanalysis::CIDR_IP_Range ;
+use com.ibm.streamsx.networkanalysis::CIDR_Decimal_Range ;
 
 type IPv4_Notation = enum {DOTTED_DECIMAL, DOTTED_HEXIDECIMAL, DOTTED_OCTAL, DECIMAL, HEXIDECIMAL, OCTAL};
-
-type CIDR_t = tuple<rstring ip, int32 prefix>;
-type CIDR_IP_Range = tuple<rstring startIP, rstring endIP>;
-type CIDR_Decimal_Range = tuple<int64 start, int64 end>; 
 
 /**
  * Returns true if the *value* parameter contains a valid 
@@ -590,9 +590,9 @@ public CIDR_Decimal_Range getDecimalNetworkRange(rstring networkCIDR)
 {
 	mutable CIDR_Decimal_Range decRange = (CIDR_Decimal_Range){};
 	CIDR_t cidr = toCIDRNotation(networkCIDR);
-	decRange.start = convertToDecimal(cidr.ip,DOTTED_DECIMAL);
+	decRange.start = (decimal128)convertToDecimal(cidr.ip,DOTTED_DECIMAL);
 	
-	decRange.end = decRange.start + (int64)(1 << (32-cidr.prefix));
+	decRange.end = (decimal128)decRange.start + (decimal128)(1 << (32-cidr.prefix));
 	
 	return decRange;
 }
@@ -604,7 +604,7 @@ public CIDR_Decimal_Range getDecimalNetworkRange(rstring networkCIDR)
 public boolean isInNetwork(rstring networkCIDR, rstring ip)
 {
 	CIDR_Decimal_Range decRange = getDecimalNetworkRange(networkCIDR);
-	int64 decIP = convertToDecimal(ip,DOTTED_DECIMAL);
+	decimal128 decIP = (decimal128)convertToDecimal(ip,DOTTED_DECIMAL);
 	
 	if(decIP >= decRange.start && decIP <= decRange.end)
 		return true;
@@ -728,16 +728,16 @@ public int32 numAddressesInNetwork(rstring networkCIDR)
 }
 
 /**
- * Returns the number of IP addresses between networkStart (inclusive) and
- * networkEnd (exclusive)
+ * Returns the number of IP addresses between ipStart (inclusive) and
+ * ipEnd (exclusive)
  */
-public int32 numAddressesInIPRange(rstring networkStart, rstring networkEnd)
+public int32 numAddressesInIPRange(rstring ipStart, rstring ipEnd)
 {
-	if(!isIPv4Address(networkStart) || !isIPv4Address(networkEnd))
+	if(!isIPv4Address(ipStart) || !isIPv4Address(ipEnd))
 		return -1;
 
-	int64 start = convertToDecimal(networkStart,DOTTED_DECIMAL);
-	int64 end = convertToDecimal(networkEnd,DOTTED_DECIMAL);
+	int64 start = convertToDecimal(ipStart,DOTTED_DECIMAL);
+	int64 end = convertToDecimal(ipEnd,DOTTED_DECIMAL);
 	
 	return (int32)(end - start) + 1; // '+ 1' to include start address 
 }
@@ -751,7 +751,7 @@ public list<rstring> getAllAddressesInNetwork(rstring networkCIDR)
 	mutable list<rstring> addresses = [];
 	
 	CIDR_Decimal_Range decRange = getDecimalNetworkRange(networkCIDR);
-	mutable int64 decIP = decRange.start;
+	mutable decimal128 decIP = decRange.start;
 	while(decIP < decRange.end)
 	{
 		appendM(addresses,convertToDottedDecimal((rstring)decIP,DECIMAL));	
