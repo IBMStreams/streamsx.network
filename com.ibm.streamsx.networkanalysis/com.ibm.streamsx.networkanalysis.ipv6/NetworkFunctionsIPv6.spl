@@ -1,134 +1,131 @@
 namespace com.ibm.streamsx.networkanalysis.ipv6;
 
+use com.ibm.streamsx.networkanalysis::* ;
+
 use com.ibm.streamsx.networkanalysis::CIDR_t ;
 use com.ibm.streamsx.networkanalysis::CIDR_IP_Range ;
 use com.ibm.streamsx.networkanalysis::CIDR_Decimal_Range ;
 
 // TODO!!
 
-public rstring isIPv6Adress(rstring value)
-{
-
-}
-
-public decimal128 convertToDecimal(rstring value)
-{
-		
-}
-
-public rstring expandIPv6(rstring ip)
-{
-
-}
-
-public rstring compactIPv6(rstring ip)
-{
-
-}
-
-public rstring stripLeadingZeroesIPv6(rstring ip)
-{
-
-}
-
-public list<rstring> getAllAddressesInNetwork(rstring network)
-{
-
-}
-
-public CIDR_Decimal_Range getDecimalNetworkRange(rstring networkCIDR)
-{
-
-}
-
-public CIDR_IP_Range getIPNetworkRange(rstring networdCIDR)
-{
-
-}
-
-public boolean isEqualTo(rstring ip1, rstring ip2)
-{
-
-}
-
-public boolean isGlobal(rstring ip)
-{
-
-}
-
-public boolean isGreaterThan(rstring ip1, rstring ip2)
-{
-
-}
-
-public boolean isIPv6CIDRNotation(rstring networkCIDR)
-{
-
-}
-
-public boolean isInIPRange(rstring ipStart, rstring ipEnd, rstring ip)
-{
-
-}
-
-public boolean isInNetwork(rstring networkCIDR, rstring ip)
-{
-
-}
-
-
-public boolean isInNetworkList(list<rstring> networks, rstring ip)
-{
-
-}
-
-
-public boolean isLessThan(rstring ip1, rstring ip2)
-{
-
-}
-
-public boolean isLinkLocal(rstring ip)
-{
-
-}
-
-public boolean isLoopback(rstring ip)
-{
-
-}
-
-public boolean isMulticast(rstring ip)
-{
-
-}
-
-public boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)
-{
-
-}
-
-public boolean isPrivate(rstring ip)
-{
-
-}
-
-public boolean isReserved(rstring ip)
-{
-
-}
-
-public decimal128 numAddressesInIPRange(rstring networkStart, rstring networkEnd)
-{
-
-}
-
-public decimal numAddressesInNetwork(rstring networkCIDR)
-{
-
-}
-
-public CIDR_t toCIDRNotation(rstring networkCIDR)
-{
-
-}
+//public decimal128 convertToDecimal(rstring value)
+//{
+//		
+//}
+//
+//public rstring expandIPv6(rstring ip)
+//{
+//
+//}
+//
+//public rstring compactIPv6(rstring ip)
+//{
+//
+//}
+//
+//public rstring stripLeadingZeroesIPv6(rstring ip)
+//{
+//
+//}
+//
+//public list<rstring> getAllAddressesInNetwork(rstring network)
+//{
+//
+//}
+//
+//public CIDR_Decimal_Range getDecimalNetworkRange(rstring networkCIDR)
+//{
+//
+//}
+//
+//public CIDR_IP_Range getIPNetworkRange(rstring networdCIDR)
+//{
+//
+//}
+//
+//public boolean isEqualTo(rstring ip1, rstring ip2)
+//{
+//
+//}
+//
+//public boolean isGlobal(rstring ip)
+//{
+//
+//}
+//
+//public boolean isGreaterThan(rstring ip1, rstring ip2)
+//{
+//
+//}
+//
+//public boolean isIPv6CIDRNotation(rstring networkCIDR)
+//{
+//
+//}
+//
+//public boolean isInIPRange(rstring ipStart, rstring ipEnd, rstring ip)
+//{
+//
+//}
+//
+//public boolean isInNetwork(rstring networkCIDR, rstring ip)
+//{
+//
+//}
+//
+//
+//public boolean isInNetworkList(list<rstring> networks, rstring ip)
+//{
+//
+//}
+//
+//
+//public boolean isLessThan(rstring ip1, rstring ip2)
+//{
+//
+//}
+//
+//public boolean isLinkLocal(rstring ip)
+//{
+//
+//}
+//
+//public boolean isLoopback(rstring ip)
+//{
+//
+//}
+//
+//public boolean isMulticast(rstring ip)
+//{
+//
+//}
+//
+//public boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)
+//{
+//
+//}
+//
+//public boolean isPrivate(rstring ip)
+//{
+//
+//}
+//
+//public boolean isReserved(rstring ip)
+//{
+//
+//}
+//
+//public decimal128 numAddressesInIPRange(rstring networkStart, rstring networkEnd)
+//{
+//
+//}
+//
+//public decimal128 numAddressesInNetwork(rstring networkCIDR)
+//{
+//
+//}
+//
+//public CIDR_t toCIDRNotation(rstring networkCIDR)
+//{
+//
+//}

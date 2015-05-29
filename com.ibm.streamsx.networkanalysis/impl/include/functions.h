@@ -10,12 +10,12 @@
 
 // Define SPL types and functions
 #include "SPL/Runtime/Function/SPLFunctions.h"
+#include <arpa/inet.h>
 
 namespace com {
 namespace ibm {
 namespace streamsx {
-namespace network {
-namespace ipv4 {
+namespace networkanalysis {
 	inline SPL::rstring decToHex(SPL::int64 const & value)
 	{
 		std::ostringstream out;
@@ -29,7 +29,6 @@ namespace ipv4 {
 		out << std::oct << value;
 		return out.str();
 	};
-}
 }
 }
 }

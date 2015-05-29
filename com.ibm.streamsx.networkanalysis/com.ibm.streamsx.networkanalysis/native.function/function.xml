@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ASCII"?>
+<!--
+#######################################################################
+# Copyright (C)2015, International Business Machines Corporation and
+# others. All Rights Reserved.
+#######################################################################
+-->
+<function:functionModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+  <function:functionSet>
+    <function:headerFileName>functions.h</function:headerFileName>
+    <function:cppNamespaceName>com::ibm::streamsx::networkanalysis</function:cppNamespaceName>
+    <function:functions>
+      <function:function>
+        <function:description>Converts a decimal value to hexidecimal.</function:description>
+        <function:prototype>public rstring decToHex(int64 value)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Converts a decimal value to octal.</function:description>
+        <function:prototype>public rstring decToOct(int64 value)</function:prototype>
+      </function:function>
+    </function:functions>
+    <function:dependencies>
+      <function:library>
+        <common:description></common:description>
+        <common:managedLibrary>
+          <common:includePath>../../impl/include</common:includePath>
+        </common:managedLibrary>
+      </function:library>
+    </function:dependencies>
+  </function:functionSet>
+</function:functionModel>
