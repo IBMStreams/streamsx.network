@@ -1,0 +1,839 @@
+/**
+#######################################################################
+# Copyright (C)2015, International Business Machines Corporation and
+# others. All Rights Reserved.
+#######################################################################
+*/
+
+namespace com.ibm.streamsx.networkanalysis.ipv4;
+
+use com.ibm.streamsx.networkanalysis::CIDR_t ;
+use com.ibm.streamsx.networkanalysis::CIDR_IP_Range ;
+use com.ibm.streamsx.networkanalysis::CIDR_Decimal_Range ;
+
+type IPv4_Notation = enum {DOTTED_DECIMAL, DOTTED_HEXIDECIMAL, DOTTED_OCTAL, DECIMAL, HEXIDECIMAL, OCTAL};
+
+/**
+ * Returns true if the *value* parameter contains a valid 
+ * IPv4 address in dotted-decimal notation (i.e 0.0.0.0)
+ * 
+ * False is returned if the *value* parameter does not 
+ * contain a valid IPv4 address 
+ */
+public boolean isIPv4Address(rstring value)
+{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			for(rstring t in tokens)
+			{
+				mutable int32 numChars = -1;
+				int64 convertedToken = strtoll(t, 10, numChars);
+				if(numChars == -1 || convertedToken < 0l || convertedToken > 255l)
+					return false;
+			}
+			
+			return true;
+		}
+		
+		return false;
+}
+
+/**
+ * Converts the *value* to an IPv4 address in dotted-decimal notation. 
+ * The *value_type* argument specifies the notation of the *value* argument.
+ * 
+ * The supported notations are:
+ *   * DOTTED_DECIMAL
+ *   * DOTTED_HEXIDECIMAL
+ *   * DOTTED_OCTAL
+ *   * DECIMAL
+ *   * HEXIDECIMAL
+ *   * OCTAL
+ * 
+ * If the *value* argument cannot be converted to an IPv4 address, 
+ * then a value of "-1" is returned.
+ */
+public rstring convertToDottedDecimal(rstring value, IPv4_Notation value_type)
+{
+	rstring INVALID_IP = "-1";
+
+	if(value_type == DOTTED_DECIMAL)
+	{
+		if(!isIPv4Address(value))
+		{
+			return INVALID_IP;
+		}
+
+		return value;
+	}
+	else if(value_type == DOTTED_HEXIDECIMAL)
+	{
+		mutable rstring convertedIP = "";
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1;
+				int64 convertedToken = strtoll(tokens[i], 16, numChars);
+				if(numChars == -1 || convertedToken < 0l || convertedToken > 255l)
+					return INVALID_IP;
+				
+				convertedIP = (i+1 < 4) ? concat(convertedIP, (rstring)convertedToken) + "." : concat(convertedIP,(rstring)convertedToken) ;
+			}
+			
+			return convertedIP;
+		}
+	}
+	else if(value_type == DOTTED_OCTAL)
+	{
+		mutable rstring convertedIP = "";
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1 ;
+				int64 convertedToken = strtoll(tokens[i], 8, numChars);
+				if(numChars == -1 || convertedToken < 0l || convertedToken > 255l)
+					return INVALID_IP;
+					
+				convertedIP = (i+1 < 4) ? concat(convertedIP,(rstring)convertedToken) + "." : concat(convertedIP,(rstring)convertedToken);
+			}
+			return convertedIP;
+		}
+	}
+	else if(value_type == DECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 10, numChars);
+		if(numChars == -1 || valueInt > 4294967295l)
+			return INVALID_IP;
+	
+		mutable rstring convertedIP = "";
+		for(int32 i in range(4))
+		{
+			int64 convertedToken = valueInt & 255l;
+			convertedIP = (i+1 < 4) ? "." + concat((rstring)convertedToken,convertedIP) : concat((rstring)convertedToken,convertedIP) ;
+			
+			valueInt = valueInt >> 8; 
+		}
+
+		return convertedIP;
+	}	
+	else if(value_type == HEXIDECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 16, numChars);
+		if(numChars == -1)
+			return INVALID_IP;
+		
+		return convertToDottedDecimal((rstring)valueInt, DECIMAL);
+	}
+	else if(value_type == OCTAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 8, numChars);
+		if(valueInt > 4294967295l)
+			return INVALID_IP;
+		
+		return convertToDottedDecimal((rstring)valueInt, DECIMAL);
+	}	
+	
+	return INVALID_IP;
+}
+
+/**
+ * Converts the *value* to an IPv4 address in dotted-hexidecimal notation. 
+ * The *value_type* argument specifies the notation of the *value* argument.
+ * 
+ * **NOTE:** The returned value will not contain the prefix '0x'
+ * 
+ * The supported notations are:
+ *   * DOTTED_DECIMAL
+ *   * DOTTED_HEXIDECIMAL
+ *   * DOTTED_OCTAL
+ *   * DECIMAL
+ *   * HEXIDECIMAL
+ *   * OCTAL
+ * 
+ * If the *value* argument cannot be converted to an IPv4 address, 
+ * then a value of "-1" is returned.
+ */
+public rstring convertToDottedHexidecimal(rstring value, IPv4_Notation value_type)
+{
+	rstring INVALID_IP = "-1";
+
+	if(value_type == DOTTED_DECIMAL)
+	{	
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			mutable rstring convertedIP = "";
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1;
+				int64 tok = strtoll(tokens[i],10,numChars);
+				if(numChars == -1 || tok < 0l || tok > 255l)
+					return INVALID_IP;
+					
+				rstring convertedToken = decToHex(tok); 
+				convertedIP = (i+1 < 4) ? concat(convertedIP,(rstring)convertedToken) + "." : concat(convertedIP,(rstring)convertedToken);
+			}
+			return convertedIP;
+		}
+	}
+	else if(value_type == DOTTED_HEXIDECIMAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1;
+				int64 tok = strtoll(tokens[i], 16, numChars);
+				if(numChars == -1 || tok < 0l || tok > 255l)
+					return INVALID_IP;
+			}
+			
+			return value;
+		}
+	}
+	else if(value_type == DOTTED_OCTAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			mutable rstring decIP = "";
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1;
+				int64 decTok = strtoll(tokens[i], 8, numChars);
+				if(numChars == -1)
+					return INVALID_IP;
+				decIP = (i+1 < 4) ? concat(decIP, (rstring)decTok) + "." : concat(decIP,(rstring)decTok) ;
+			}
+			return convertToDottedHexidecimal(decIP, DOTTED_DECIMAL);
+		}
+	}
+	else if(value_type == DECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 10, numChars);
+		if(numChars == -1 || valueInt > 4294967295l)
+			return INVALID_IP;
+		
+		mutable rstring convertedIP = "";
+		for(int32 i in range(4))
+		{
+			rstring convertedToken = decToHex(valueInt & 255l);
+			convertedIP = (i+1 < 4) ? "." + concat(convertedToken,convertedIP) : concat(convertedToken,convertedIP) ;
+			
+			valueInt = valueInt >> 8; 
+		}
+		
+		return convertedIP;			
+	}	
+	else if(value_type == HEXIDECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 16, numChars);
+		if(numChars == -1)
+			return INVALID_IP;
+		
+		return convertToDottedHexidecimal((rstring)valueInt, DECIMAL);	
+	}
+	else if(value_type == OCTAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 8, numChars);
+		if(numChars == -1)
+			return INVALID_IP;
+		
+		return convertToDottedHexidecimal((rstring)valueInt, DECIMAL);	
+	}
+	
+	return INVALID_IP;
+}
+
+/**
+ * Converts the *value* to an IPv4 address in dotted-octal notation. 
+ * The *value_type* argument specifies the notation of the *value* argument.
+ * 
+ * The supported notations are:
+ *   * DOTTED_DECIMAL
+ *   * DOTTED_HEXIDECIMAL
+ *   * DOTTED_OCTAL
+ *   * DECIMAL
+ *   * HEXIDECIMAL
+ *   * OCTAL
+ * 
+ * If the *value* argument cannot be converted to an IPv4 address, 
+ * then a value of "-1" is returned.
+ */
+public rstring convertToDottedOctal(rstring value, IPv4_Notation value_type)
+{
+	rstring INVALID_IP = "-1";
+
+	if(value_type == DOTTED_DECIMAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			mutable rstring convertedIP = "";
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1;
+				int64 tok = strtoll(tokens[i], 10, numChars);
+				if(numChars == -1 || tok < 0l || tok > 255l)
+					return INVALID_IP;
+					
+				rstring convertedToken = decToOct(tok); 
+				convertedIP = (i+1 < 4) ? concat(convertedIP,(rstring)convertedToken) + "." : concat(convertedIP,(rstring)convertedToken);
+			}
+			return convertedIP;
+		}	
+	}
+	else if(value_type == DOTTED_HEXIDECIMAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			mutable rstring decIP = "";
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1;
+				int64 decTok = strtoll(tokens[i], 16, numChars);
+				if(numChars == -1)
+					return INVALID_IP;
+				decIP = (i+1 < 4) ? concat(decIP, (rstring)decTok) + "." : concat(decIP,(rstring)decTok) ;
+			}
+			return convertToDottedOctal(decIP, DOTTED_DECIMAL);
+		}			
+	}
+	else if(value_type == DOTTED_OCTAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			for(int32 i in range(4))
+			{
+				mutable int32 numChars = -1;
+				int64 tok = strtoll(tokens[i], 8, numChars);
+				if(numChars == -1 || tok < 0l || tok > 255l)
+					return INVALID_IP;
+			}
+			
+			return value;	
+		}
+	}
+	else if(value_type == DECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 10, numChars);
+		if(numChars == -1 || valueInt > 4294967295l)
+			return INVALID_IP;
+		
+		mutable rstring convertedIP = "";
+		for(int32 i in range(4))
+		{
+			rstring convertedToken = decToOct(valueInt & 255l);
+			convertedIP = (i+1 < 4) ? "." + concat(convertedToken,convertedIP) : concat(convertedToken,convertedIP) ;
+			
+			valueInt = valueInt >> 8; 
+		}
+		
+		return convertedIP;				
+	}
+	else if(value_type == HEXIDECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 16, numChars);
+		if(numChars == -1)
+			return INVALID_IP;
+		
+		return convertToDottedOctal((rstring)valueInt, DECIMAL);	
+	}
+	else if(value_type == OCTAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 8, numChars);
+		if(numChars == -1)
+			return INVALID_IP;
+		
+		return convertToDottedOctal((rstring)valueInt, DECIMAL);		
+	}
+	
+	return INVALID_IP;
+}
+
+/**
+ * Converts the *value* to an IPv4 address in decimal notation. 
+ * The *value_type* argument specifies the notation of the *value* argument.
+ * 
+ * The supported notations are:
+ *   * DOTTED_DECIMAL
+ *   * DOTTED_HEXIDECIMAL
+ *   * DOTTED_OCTAL
+ *   * DECIMAL
+ *   * HEXIDECIMAL
+ *   * OCTAL
+ * 
+ * If the *value* argument cannot be converted to an IPv4 address, 
+ * then a value of "-1" is returned.
+ */
+public int64 convertToDecimal(rstring value, IPv4_Notation value_type)
+{
+	int64 INVALID_IP = -1;
+
+	if(value_type == DOTTED_DECIMAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			mutable int64 convertedIP = 0l;
+			mutable int32 i = 3;
+			while(i >= 0)
+			{
+				mutable int32 numChars = -1;
+				int64 tok = strtoll(tokens[3-i], 10, numChars);
+				if(numChars == -1 || tok < 0l || tok > 255l)
+					return INVALID_IP;
+
+				convertedIP |= tok << (i*8);	
+				i--;
+			}
+			return convertedIP;
+		}	
+	}
+	else if(value_type == DOTTED_HEXIDECIMAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			mutable int64 convertedIP = 0l;
+			mutable int32 i = 3;
+			while(i >= 0)
+			{
+				mutable int32 numChars = -1;
+				int64 tok = strtoll(tokens[3-i], 16, numChars);
+				if(numChars == -1 || tok < 0l || tok > 255l)
+					return INVALID_IP;
+
+				convertedIP |= tok << (i*8);	
+				i--;
+			}
+			return convertedIP;
+		}		
+	}
+	else if(value_type == DOTTED_OCTAL)
+	{
+		list<rstring> tokens = spl.string::tokenize(value,".",false);
+		if(size(tokens) == 4)
+		{
+			mutable int64 convertedIP = 0l;
+			mutable int32 i = 3;
+			while(i >= 0)
+			{
+				mutable int32 numChars = -1;
+				int64 tok = strtoll(tokens[3-i], 8, numChars);
+				if(numChars == -1 || tok < 0l || tok > 255l)
+					return INVALID_IP;
+
+				convertedIP |= tok << (i*8);	
+				i--;
+			}
+			return convertedIP;
+		}		
+	}
+	else if(value_type == DECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 10, numChars);
+		if(numChars == -1 || valueInt > 4294967295l)
+			return INVALID_IP;
+			
+		return valueInt;				
+	}
+	else if(value_type == HEXIDECIMAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 16, numChars);
+		if(numChars == -1 || valueInt > 4294967295l)
+			return INVALID_IP;
+			
+		return valueInt;
+	}
+	else if(value_type == OCTAL)
+	{
+		mutable int32 numChars = -1;
+		mutable int64 valueInt = strtoll(value, 8, numChars);
+		if(numChars == -1 || valueInt > 4294967295l)
+			return INVALID_IP;
+			
+		return valueInt;	
+	}
+	
+	return INVALID_IP;
+}
+
+/**
+ * Converts the *value* to an IPv4 address in hexidecimal notation. 
+ * The *value_type* argument specifies the notation of the *value* argument.
+ * 
+ * **NOTE:** The returned value will not contain the prefix '0x'
+ * 
+ * The supported notations are:
+ *   * DOTTED_DECIMAL
+ *   * DOTTED_HEXIDECIMAL
+ *   * DOTTED_OCTAL
+ *   * DECIMAL
+ *   * HEXIDECIMAL
+ *   * OCTAL
+ * 
+ * If the *value* argument cannot be converted to an IPv4 address, 
+ * then a value of "-1" is returned.
+ */
+public rstring convertToHexidecimal(rstring value, IPv4_Notation value_type)
+{
+	int64 dec = convertToDecimal(value, value_type);
+	return decToHex(dec);
+}
+
+/**
+ * Converts the *value* to an IPv4 address in dotted-hexidecimal notation. 
+ * The *value_type* argument specifies the notation of the *value* argument.
+ * 
+ * The supported notations are:
+ *   * DOTTED_DECIMAL
+ *   * DOTTED_HEXIDECIMAL
+ *   * DOTTED_OCTAL
+ *   * DECIMAL
+ *   * HEXIDECIMAL
+ *   * OCTAL
+ * 
+ * If the *value* argument cannot be converted to an IPv4 address, 
+ * then a value of "-1" is returned.
+ */
+public rstring convertToOctal(rstring value, IPv4_Notation value_type)
+{
+	int64 dec = convertToDecimal(value, value_type);
+	return decToOct(dec);
+}
+
+
+/**
+ * Returns true if the *value* parameter contains a valid 
+ * IPv4 network address using CIDR notation (i.e. 192.168.0.0/31)
+ * 
+ * False is returned if the *value* parameter does not 
+ * contain a valid IPv4 network address in CIDR notation
+ */
+public boolean isIPv4CIDRNotation(rstring networkCIDR)
+{
+	list<rstring> tokens = spl.string::tokenize(networkCIDR,"/",false);
+	if(size(tokens) != 2)
+		return false;
+		
+	if(!isIPv4Address(tokens[0]))
+		return false;
+	
+	mutable int32 numChars = -1;
+	strtoll(tokens[1], 10, numChars);
+	if(numChars == -1)
+		return false;
+		
+	return true;
+}
+
+/**
+ * Parses the *networkCIDR* argument and returns a 
+ * CIDR_t type.
+ */
+public CIDR_t toCIDRNotation(rstring networkCIDR)
+{
+	mutable CIDR_t result = (CIDR_t){};
+	
+	list<rstring> tokens = spl.string::tokenize(networkCIDR,"/",false);
+	if(isIPv4CIDRNotation(networkCIDR))
+	{
+		result.ip = tokens[0];
+		result.prefix = (int32)strtoll(tokens[1], 10);
+		
+		return result;
+	}
+	
+	return result;	
+}
+
+/**
+ * Returns the start and end IP addresses, in dotted-decimal
+ * notation, of the given network.
+ */
+public CIDR_IP_Range getIPNetworkRange(rstring networkCIDR)
+{
+	mutable CIDR_IP_Range ipRange = (CIDR_IP_Range){};
+	CIDR_Decimal_Range decRange = getDecimalNetworkRange(networkCIDR);
+	
+	ipRange.startIP = convertToDottedDecimal((rstring)decRange.start,DECIMAL);
+	ipRange.endIP = convertToDottedDecimal((rstring)decRange.end,DECIMAL);
+	
+	return ipRange;
+}
+
+/**
+ * Returns the start and end IP addresses, in decimal
+ * notation, of the given network.
+ */
+public CIDR_Decimal_Range getDecimalNetworkRange(rstring networkCIDR)
+{
+	mutable CIDR_Decimal_Range decRange = (CIDR_Decimal_Range){};
+	CIDR_t cidr = toCIDRNotation(networkCIDR);
+	decRange.start = (decimal128)convertToDecimal(cidr.ip,DOTTED_DECIMAL);
+	
+	decRange.end = (decimal128)decRange.start + (decimal128)(1 << (32-cidr.prefix));
+	
+	return decRange;
+}
+
+/**
+ * Checks whether an IPv4 address, *ip*, is in the given
+ * network, *networkCIDR*.
+ */
+public boolean isInNetwork(rstring networkCIDR, rstring ip)
+{
+	CIDR_Decimal_Range decRange = getDecimalNetworkRange(networkCIDR);
+	decimal128 decIP = (decimal128)convertToDecimal(ip,DOTTED_DECIMAL);
+	
+	if(decIP >= decRange.start && decIP <= decRange.end)
+		return true;
+		
+	return false;	
+}
+
+/**
+ * Checks whether an IPv4 address, *ip*, is in one of the
+ * networks that appears in the list of provided *networks*. 
+ */
+public boolean isInNetworkList(list<rstring> networks, rstring ip)
+{
+	for(rstring network in networks)
+	{
+		if(isInNetwork(network, ip))
+			return true;		
+	}
+	
+	return false;
+}
+
+/**
+ * Checks whether an IPv4 address, *ip*, appears between the *ipStart* 
+ * and *ipEnd* arguments
+ */
+public boolean isInIPRange(rstring ipStart, rstring ipEnd, rstring ip)
+{
+	int64 decStart = convertToDecimal(ipStart, DOTTED_DECIMAL);
+	int64 decEnd = convertToDecimal(ipEnd,DOTTED_DECIMAL);
+	int64 decIP = convertToDecimal(ip, DOTTED_DECIMAL);
+	
+	// start address must be less than end address
+	if(decStart > decEnd)
+		return false;
+	
+	if(decIP >= decStart && decIP <= decEnd)
+		return true;
+		
+	return false;	
+}
+
+/**
+ * Returns true if the IP address is a private IP address (RFC1918).
+ */
+public boolean isPrivate(rstring ip)
+{
+	list<rstring> privateNetworks = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"];
+	
+	return isInNetworkList(privateNetworks, ip);
+}
+
+/**
+ * Returns true if the IP address is a loopback address (RFC6890).
+ */
+public boolean isLoopback(rstring ip)
+{
+	return isInNetwork("127.0.0.0/8", ip);
+}
+
+/**
+ * Returns true if the IP address is a link local address (RFC3927)
+ */
+public boolean isLinkLocal(rstring ip)
+{
+	return isInNetwork("169.254.0.0/16", ip);
+}
+
+/**
+ * Returns true if the IP address is a reserved address. 
+ * Here, an IP address is considered to be reserved
+ * if it falls within one of the special-use address 
+ * ranges as defined by RFC6890.
+ */
+public boolean isReserved(rstring ip)
+{
+	list<rstring> reservedNetworks = 
+		["0.0.0.0/8","10.0.0.0/8","100.64.0.0/10",
+		"127.0.0.0/8","169.254.0.0/16","172.16.0.0/12",
+		"192.0.0.0/24","192.0.0.0/29", "192.0.2.0/24", 
+		"192.88.99.0/24","192.168.0.0/16","198.18.0.0/15",
+		"198.51.100.0/24","203.0.113.0/24","240.0.0.0/4",
+		"255.255.255.255/32"];
+		
+	return isInNetworkList(reservedNetworks, ip);
+}
+
+/**
+ * Returns true if the IP address is a multicast address (RFC5771).
+ */
+public boolean isMulticast(rstring ip)
+{
+	return isInNetwork("224.0.0.0/4", ip);
+}
+
+/**
+ * Returns true if the IP address is not a reserved address
+ * 
+ * *NOTE: * Will return true for "6to4 Relay Anycast" addresses since
+ * these can be globally routed (RFC6890).
+ */
+public boolean isGlobal(rstring ip)
+{
+	return isInNetwork("192.88.99.0/24", ip) || !isReserved(ip);
+}
+
+/**
+ * Returns the number of IP addresses contained within the network range
+ */
+public int32 numAddressesInNetwork(rstring networkCIDR)
+{
+	if(!isIPv4CIDRNotation(networkCIDR))
+		return -1;
+
+	CIDR_t cidr = toCIDRNotation(networkCIDR);
+	return (int32)(1 << (32 - cidr.prefix));
+	
+	CIDR_Decimal_Range decNetwork = getDecimalNetworkRange(networkCIDR);
+	
+	return (int32)(decNetwork.end - decNetwork.start) + 1; // '+ 1' to include start address
+}
+
+/**
+ * Returns the number of IP addresses between ipStart (inclusive) and
+ * ipEnd (exclusive)
+ */
+public int32 numAddressesInIPRange(rstring ipStart, rstring ipEnd)
+{
+	if(!isIPv4Address(ipStart) || !isIPv4Address(ipEnd))
+		return -1;
+
+	int64 start = convertToDecimal(ipStart,DOTTED_DECIMAL);
+	int64 end = convertToDecimal(ipEnd,DOTTED_DECIMAL);
+	
+	return (int32)(end - start) + 1; // '+ 1' to include start address 
+}
+
+/**
+ * Returns a list of IP addresses contained within the network 
+ * as given by the *networkCIDR* argument. 
+ */
+public list<rstring> getAllAddressesInNetwork(rstring networkCIDR)
+{
+	mutable list<rstring> addresses = [];
+	
+	CIDR_Decimal_Range decRange = getDecimalNetworkRange(networkCIDR);
+	mutable decimal128 decIP = decRange.start;
+	while(decIP < decRange.end)
+	{
+		appendM(addresses,convertToDottedDecimal((rstring)decIP,DECIMAL));	
+		decIP++;
+	} 
+	
+	return addresses;
+}
+
+/**
+ * Returns true if the networks given by the *networkCIDR1* and *networkCIDR2* 
+ * arguments overlap. The networks are considered to be overlapping if at least
+ * one IP address is common between the two networks.
+ */
+public boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)
+{
+	if(!isIPv4CIDRNotation(networkCIDR1) || !isIPv4CIDRNotation(networkCIDR2))
+		return false;
+		
+	CIDR_Decimal_Range network1 = getDecimalNetworkRange(networkCIDR1);
+	CIDR_Decimal_Range network2 = getDecimalNetworkRange(networkCIDR2);
+	
+	if(network2.start >= network1.start && network2.start <= network1.end)
+		return true;
+		
+	if(network1.start >= network2.start && network1.start <= network2.end)
+		return true;	
+		
+	return false;
+}
+
+/**
+ * Returns true if the *ip1* IPv4 address is greater
+ * than the *ip2* IPv4 address. 
+ */
+public boolean isGreaterThan(rstring ip1, rstring ip2)
+{
+	int64 ip1Dec = convertToDecimal(ip1,DOTTED_DECIMAL);
+	int64 ip2Dec = convertToDecimal(ip2,DOTTED_DECIMAL);
+	
+	return ip1Dec > ip2Dec;
+}
+
+/**
+ * Returns true if the *ip1* IPv4 address is less
+ * than the *ip2* IPv4 address. 
+ */
+public boolean isLessThan(rstring ip1, rstring ip2)
+{
+	int64 ip1Dec = convertToDecimal(ip1,DOTTED_DECIMAL);
+	int64 ip2Dec = convertToDecimal(ip2,DOTTED_DECIMAL);
+	
+	return ip1Dec < ip2Dec;
+}
+
+/**
+ * Returns true if the *ip1* IPv4 address is equal to
+ * the *ip2* IPv4 address. 
+ */
+public boolean isEqualTo(rstring ip1, rstring ip2)
+{
+	int64 ip1Dec = convertToDecimal(ip1,DOTTED_DECIMAL);
+	int64 ip2Dec = convertToDecimal(ip2,DOTTED_DECIMAL);
+	
+	return ip1Dec == ip2Dec;	
+}
+
+/**
+ * Compares the IPv4 addresses and returns an integer value 
+ * indicating whether *ip1* is less than, equal to or greater
+ * than *ip2*. 
+ * 
+ * Returns:
+ *   * A negative value if *ip1* is less than *ip2*
+ *   * 0 if *ip1* equals *ip2*
+ *   * A positive value if *ip1* is greater than *ip2*
+ * 
+ */
+public int64 compare(rstring ip1, rstring ip2)
+{
+	int64 ip1Dec = convertToDecimal(ip1,DOTTED_DECIMAL);
+	int64 ip2Dec = convertToDecimal(ip2,DOTTED_DECIMAL);
+	
+	return ip1Dec - ip2Dec;
+}
