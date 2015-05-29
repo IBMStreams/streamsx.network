@@ -1,5 +1,0 @@
-namespace com.ibm.streamsx.networkanalysis ;
-
-type CIDR_t = tuple<rstring ip, int32 prefix>;
-type CIDR_IP_Range = tuple<rstring startIP, rstring endIP>;
-type CIDR_Decimal_Range = tuple<int64 start, int64 end>; 
