@@ -25,20 +25,20 @@
         <function:prototype cppName="convertIPV4AddressNumericToSubnet">public uint32 convertIPV4AddressNumericToSubnet(uint32 ipAddress, int32 maskbits)</function:prototype>
       </function:function>
       <function:function>
-        <function:description>This function converts a string representing an IP address into a hostname. If the string does not contain a valid IP address, or no hostname can be found for the IP address, an empty string is returned.</function:description>
-        <function:prototype cppName="convertIPAddressToHostname">public rstring convertIPAddressToHostname(rstring ipAddress)</function:prototype>
+        <function:description>This function converts a string containing an IPv4 address into a domain name, if the address has one. If not, the IP address is returned.</function:description>
+        <function:prototype cppName="convertIPV4AddressStringToHostname">public rstring convertIPV4AddressStringToHostname(rstring ipAddress)</function:prototype>
       </function:function>
       <function:function>
-        <function:description>This function converts a four-byte binary representation of an IPv4 address into a hostname. If no hostname can be found for the address, an empty string is returned.</function:description>
-        <function:prototype cppName="convertIPV4AddressNumericToHostname">public rstring convertIPV4AddressNumericToHostname(uint32 ip4AddressNumeric)</function:prototype>
-      </function:function>
-      <function:function>
-        <function:description>This function converts a hostname into a string representation of an IP address. If no address can be found for the hostname, an empty string is returned.</function:description>
-        <function:prototype cppName="convertHostnameToIPAddress">public rstring convertHostnameToIPAddress(rstring hostname)</function:prototype>
+        <function:description>This function converts a hostname into a string representation of an IPv4 address. If no address can be found for the hostname, an empty string is returned.</function:description>
+        <function:prototype cppName="convertHostnameToIPV4AddressString">public rstring convertHostnameToIPV4AddressString(rstring hostname)</function:prototype>
       </function:function>
       <function:function>
         <function:description>This function converts a hostname into a binary IPv4 address. If no address can be found for the hostname, zero is returned.</function:description>
         <function:prototype cppName="convertHostnameToIPV4AddressNumeric(">public uint32 convertHostnameToIPV4AddressNumeric(rstring hostname)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a four-byte binary representation of an IPv4 address into a hostname. If no hostname can be found for the address, an empty string is returned.</function:description>
+        <function:prototype cppName="convertIPV4AddressNumericToHostname">public rstring convertIPV4AddressNumericToHostname(uint32 ip4AddressNumeric)</function:prototype>
       </function:function>
     </function:functions>
   </function:functionSet>
