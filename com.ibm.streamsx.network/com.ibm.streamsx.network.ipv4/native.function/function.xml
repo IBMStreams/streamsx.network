@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+  <function:functionSet>
+    <function:headerFileName>IPv4AddressFunctions.h</function:headerFileName>
+    <function:cppNamespaceName>com::ibm::streamsx::network::ipv4</function:cppNamespaceName>
+    <function:functions>
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public void xxx()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a four-byte binary representation of an IPv4 address into a string representation.</function:description>
+        <function:prototype cppName="convertIPV4AddressNumericToString">public rstring convertIPV4AddressNumericToString(uint32 ip4AddressNumeric)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a string representation of an IPv4 address to a four-byte binary representation. If the string does not represent a valid IPv4 address, zero is returned.</function:description>
+        <function:prototype cppName="convertIPV4AddressStringToNumeric">public uint32 convertIPV4AddressStringToNumeric(rstring ip4AddressString)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a string representing an IPv4 address into a string representation of the subnet address, using the specified number of mask bits. If the string does not represent a valid IPv4 address, or the count is negative, zero is returned.</function:description>
+        <function:prototype cppName="convertIPV4AddressStringToSubnet">public rstring convertIPV4AddressStringToSubnet(rstring ipAddress, int32 maskbits)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a four-byte binary representation of an IPv4 address into a four-byte binary subnet address, using the specified number of mask bits.</function:description>
+        <function:prototype cppName="convertIPV4AddressNumericToSubnet">public uint32 convertIPV4AddressNumericToSubnet(uint32 ipAddress, int32 maskbits)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a string representing an IP address into a hostname. If the string does not contain a valid IP address, or no hostname can be found for the IP address, an empty string is returned.</function:description>
+        <function:prototype cppName="convertIPAddressToHostname">public rstring convertIPAddressToHostname(rstring ipAddress)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a four-byte binary representation of an IPv4 address into a hostname. If no hostname can be found for the address, an empty string is returned.</function:description>
+        <function:prototype cppName="convertIPV4AddressNumericToHostname">public rstring convertIPV4AddressNumericToHostname(uint32 ip4AddressNumeric)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a hostname into a string representation of an IP address. If no address can be found for the hostname, an empty string is returned.</function:description>
+        <function:prototype cppName="convertHostnameToIPAddress">public rstring convertHostnameToIPAddress(rstring hostname)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a hostname into a binary IPv4 address. If no address can be found for the hostname, zero is returned.</function:description>
+        <function:prototype cppName="convertHostnameToIPV4AddressNumeric(">public uint32 convertHostnameToIPV4AddressNumeric(rstring hostname)</function:prototype>
+      </function:function>
+    </function:functions>
+  </function:functionSet>
+</function:functionModel>

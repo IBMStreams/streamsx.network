@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+  <function:functionSet>
+    <function:headerFileName>IPv6AddressFunctions.h</function:headerFileName>
+    <function:cppNamespaceName>com::ibm::streamsx::network::ipv6</function:cppNamespaceName>
+    <function:functions>
+      <function:function>
+        <function:description>This function converts a sixteen-byte binary representation of an IPv6 address into a string representation.</function:description>
+        <function:prototype cppName="convertIPV6AddressNumericToString">public rstring convertIPV6AddressNumericToString(list &lt;uint8>[16] ipv6AddressNumeric)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts a string representation of an IPv6 address into a sixteen-byte binary representation. If the string does not represent a valid IPv6 address, zero is returned.</function:description>
+        <function:prototype cppName="convertIPV6AddressStringToNumeric">public list&lt;uint8>[16] convertIPV6AddressStringToNumeric(rstring ipv6AddressString)</function:prototype>
+      </function:function>
+    </function:functions>
+  </function:functionSet>
+</function:functionModel>
