@@ -68,4 +68,8 @@ Notes:
     conversions are quick.  However, use of these functions should be confined
     to branches of a Streams flow graph that can tolerate long delays.
 
+For more information about IP version 4 addresses, see:
+
+    https://en.wikipedia.org/wiki/IP_address
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

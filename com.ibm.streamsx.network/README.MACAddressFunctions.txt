@@ -36,4 +36,8 @@ Notes:
   * If a string argument passed to convertMACAddressStringToNumeric() does not
     contain a valid ethernet MAC address, a list of six zeroes is returned.
 
+For more information about ethernet MAC addresses, see:
+
+    https://en.wikipedia.org/wiki/MAC_address
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
