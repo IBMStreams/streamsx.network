@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+  <function:functionSet>
+    <function:headerFileName>MACAddressFunctions.h</function:headerFileName>
+    <function:cppNamespaceName>com::ibm::streamsx::network::mac</function:cppNamespaceName>
+    <function:functions>
+      <function:function>
+        <function:description>This function converts an ethernet MAC address from a six-byte binary value to a string representation.</function:description>
+        <function:prototype cppName="convertMACAddressNumericToString">public rstring convertMACAddressNumericToString(list&lt;uint8>[6] macAddressNumeric)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>This function converts an ethernet MAC address from a string representation to a six-byte binary value.</function:description>
+        <function:prototype cppName="convertMACAddressStringToNumeric">public list&lt;uint8>[6] convertMACAddressStringToNumeric(rstring macAddressString)</function:prototype>
+      </function:function>
+    </function:functions>
+  </function:functionSet>
+</function:functionModel>
