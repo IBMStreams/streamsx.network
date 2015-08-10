@@ -129,6 +129,39 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	  }
 
 
+	  // This function converts a four-byte binary representation of an IPv4
+	  // address into a hostname. If no hostname can be found for the address, an empty
+	  // string is returned.
+
+	  static SPL::rstring convertIPV4AddressNumericToHostname(SPL::uint32 ipv4AddressNumeric) {
+	    
+	    // save all conversions in this cache so the network resolution is only done once
+	    static SPL::map<SPL::uint32, SPL::rstring > mapping;
+	    
+	    // return the hostname saved in the cache, if this address has been converted before
+	    SPL::map<SPL::uint32, SPL::rstring >::iterator i = mapping.find(ipv4AddressNumeric);
+	    if (i != mapping.end()) return i->second;
+	    
+	    // store the IPv4 address in a socket structure
+	    const struct sockaddr_in sock = { AF_INET, 0, { htonl((uint32_t)ipv4AddressNumeric) } };
+	    
+	    // convert the binary representation of the IPv4 address in the sockaddr
+	    // structure into a hostname (if it has one) or an IPv4 address, depending 
+	    // upon the flags
+	    SPLLOG(L_DEBUG, "domain name lookup for '" << (uint32_t)ipv4AddressNumeric << "' ...", "convertIPV4AddressNumericToHostname");
+	    char hbuf[NI_MAXHOST];
+	    char sbuf[NI_MAXSERV];
+	    int rc = getnameinfo((const struct sockaddr*)(&sock), sizeof(sock), hbuf, sizeof(hbuf), sbuf, sizeof(sbuf), 0);
+	    if (rc) SPLLOG(L_ERROR, "getnameinfo(" << (uint32_t)ipv4AddressNumeric << ") failed, " << gai_strerror(rc), "convertIPV4AddressNumericToHostname");
+	    const SPL::rstring hostname = SPL::rstring(rc ? "" : hbuf);
+	    SPLLOG(L_DEBUG, "domain name found '" << (uint32_t)ipv4AddressNumeric << "' --> '" << hostname  << "', cachesize=" << mapping.getSize(), "convertIPV4AddressNumericToHostname");
+	    
+	    // add the mapping to the cache and return the hostname
+	    mapping.add(ipv4AddressNumeric, hostname);
+	    return hostname;
+	  }
+
+  
 	  // This function converts a hostname into a string representation of
 	  // an IPv4 address. If no address can be found for the hostname, an empty string is
 	  // returned.
@@ -185,39 +218,6 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	  }
 
 
-	  // This function converts a four-byte binary representation of an IPv4
-	  // address into a hostname. If no hostname can be found for the address, an empty
-	  // string is returned.
-
-	  static SPL::rstring convertIPV4AddressNumericToHostname(SPL::uint32 ipv4AddressNumeric) {
-	    
-	    // save all conversions in this cache so the network resolution is only done once
-	    static SPL::map<SPL::uint32, SPL::rstring > mapping;
-	    
-	    // return the hostname saved in the cache, if this address has been converted before
-	    SPL::map<SPL::uint32, SPL::rstring >::iterator i = mapping.find(ipv4AddressNumeric);
-	    if (i != mapping.end()) return i->second;
-	    
-	    // store the IPv4 address in a socket structure
-	    const struct sockaddr_in sock = { AF_INET, 0, { htonl((uint32_t)ipv4AddressNumeric) } };
-	    
-	    // convert the binary representation of the IPv4 address in the sockaddr
-	    // structure into a hostname (if it has one) or an IPv4 address, depending 
-	    // upon the flags
-	    SPLLOG(L_DEBUG, "domain name lookup for '" << (uint32_t)ipv4AddressNumeric << "' ...", "convertIPV4AddressNumericToHostname");
-	    char hbuf[NI_MAXHOST];
-	    char sbuf[NI_MAXSERV];
-	    int rc = getnameinfo((const struct sockaddr*)(&sock), sizeof(sock), hbuf, sizeof(hbuf), sbuf, sizeof(sbuf), 0);
-	    if (rc) SPLLOG(L_ERROR, "getnameinfo(" << (uint32_t)ipv4AddressNumeric << ") failed, " << gai_strerror(rc), "convertIPV4AddressNumericToHostname");
-	    const SPL::rstring hostname = SPL::rstring(rc ? "" : hbuf);
-	    SPLLOG(L_DEBUG, "domain name found '" << (uint32_t)ipv4AddressNumeric << "' --> '" << hostname  << "', cachesize=" << mapping.getSize(), "convertIPV4AddressNumericToHostname");
-	    
-	    // add the mapping to the cache and return the hostname
-	    mapping.add(ipv4AddressNumeric, hostname);
-	    return hostname;
-	  }
-
-  
 	  // This internal function handles domain name lookups for the 'convert*Hostname()' functions above.
 
 	  static SPL::rstring convertTo(SPL::rstring addressOrHostname, int flags) {
