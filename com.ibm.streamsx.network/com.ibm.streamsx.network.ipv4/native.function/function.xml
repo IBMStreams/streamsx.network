@@ -5,10 +5,6 @@
     <function:cppNamespaceName>com::ibm::streamsx::network::ipv4</function:cppNamespaceName>
     <function:functions>
       <function:function>
-        <function:description></function:description>
-        <function:prototype>public void xxx()</function:prototype>
-      </function:function>
-      <function:function>
         <function:description>This function converts a four-byte binary representation of an IPv4 address into a string representation.</function:description>
         <function:prototype cppName="convertIPV4AddressNumericToString">public rstring convertIPV4AddressNumericToString(uint32 ip4AddressNumeric)</function:prototype>
       </function:function>

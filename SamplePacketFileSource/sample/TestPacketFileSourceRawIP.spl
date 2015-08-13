@@ -1,0 +1,168 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketFileSourceRawIP {
+
+	type 
+	
+	PacketType =
+		float64 captureTime,	// time that packet was captured, in seconds since Unix epoch 
+		int64 packetNumber, // sequence number of packet, as emitted by operator
+	  uint32 sessionKey, // source and destination address and port numbers
+		blob rawPacket ;			// contents of packet captured, including all headers
+
+	AnnotatedPacketType =
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		rstring etherSrcAddressString,
+   		rstring etherDstAddressString,
+   		uint16 etherProtocol,
+		rstring srcAddress,
+		uint16 srcPort,
+		rstring dstAddress,
+		uint16 dstPort,
+		blob rawPacket ;			// contents of packet, including all headers
+	
+	PartialDNSMessageType = 
+		float64 captureTime,      	// when the message was captured, in seconds since the Unix epoch
+		rstring srcAddress,			// IP address of sender
+		uint16 srcPort,				// UDP port of sender
+		rstring dstAddress,			// IP address of receiver
+		uint16 dstPort,				// UDP port of receiver
+		uint16 requestIdentifier,   // request identifier assigned by requester
+		rstring questionName,		// domain name specified in question section 
+		uint16 questionType,		// type code specified in question section
+		boolean responseFlag,		// 'false' for requests, 'true' for responses
+	  	uint16 responseCode,		// error code for responses
+	  	rstring answerCanonical,	// canonical domain name, if 'questionName' is an alias
+	  	list<rstring> answerAddresses ; // list of IP addresses for 'questionName'
+	
+	FullDNSMessageType = 
+		float64 captureTime,      	// when the message was captured, in seconds since the Unix epoch
+		rstring srcAddress,			// IP address of sender
+		uint16 srcPort,				// UDP port of sender
+		rstring dstAddress,			// IP address of receiver
+		uint16 dstPort,				// UDP port of receiver
+		uint16 requestIdentifier,
+		uint8 opcode,
+		boolean responseFlag,
+		uint8 responseCode,
+		boolean authoritativeFlag,
+		boolean truncationFlag,
+		uint16 questionCount,
+		rstring questionName,
+		list<rstring> questionNames,
+		uint8 questionType,
+		list<uint8> questionTypes,
+		uint16 answerCount,
+		list<rstring> answerNames,
+		list<uint8> answerTypes,
+		list<uint8> answerTTLs,
+		list<rstring> answerData,
+		rstring answerCanonical,
+		rstring answerAddress,
+		list<rstring> answerAddresses,
+		uint16 nameserverCount,
+		list<rstring> nameserverNames,
+		list<uint16> nameserverTypes,
+		list<uint16> nameserverTTLs,
+		list<rstring> nameserverData,
+		uint16 additionalCount,
+		list<rstring> additionalNames,
+		list<uint16> additionalTypes,
+		list<uint16> additionalTTLs,
+		list<rstring> additionalData ;
+
+
+	
+	graph
+	
+	stream<PacketType> PacketStream as Out = PacketFileSource() { 
+		param
+			//pcapFilename: "/splanet/splanet/ingest/dnsdhcp.pcap/sample_50.pcap";
+			//pcapFilename: "/splanet/splanet/ingest/dnsdhcp.pcap/sample_5000.pcap";
+			//pcapFilename: "/splanet/splanet/ingest/dnsdhcp.pcap/sample_hour_20110722_192832_other.pcap";
+			//pcapFilename: "/splanet/splanet/ingest/dnsdhcp.pcap/sample_hour_20110722_192832_all.pcap";
+			//pcapFilename: "dns_sample_100_packets.pcap";
+			pcapFilename: "dns_sample_100_packets_rawIP.pcap";
+			//filterExpression: "udp port 53";  
+		output Out:
+			captureTime = timestampp(),
+			  packetNumber = packetNumber(),
+			  sessionKey = sessionKey(),
+			rawPacket = packet(); }
+	//() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceRawIP.PacketStream.out" ; format: txt; }	
+	
+	
+	
+	stream<AnnotatedPacketType> AnnotatedPacketStream as Out = PacketHeaderParser(PacketStream) {
+		param
+			packetAttribute: rawPacket;
+		output Out:
+			etherSrcAddressString = ETHER_SRC_ADDRESS_STRING(),
+   			etherDstAddressString = ETHER_DST_ADDRESS_STRING(),
+   			etherProtocol = ETHER_PROTOCOL(),
+			srcAddress = IP_SRC_ADDRESS_STRING(),
+			dstAddress = IP_DST_ADDRESS_STRING(),
+			srcPort = UDP_SRC_PORT(),
+			dstPort = UDP_DST_PORT() ; }
+	() as AnnotatedPacketSink = FileSink(AnnotatedPacketStream) { param file: "debug.TestPacketFileSourceRawIP.AnnotatedPacketStream.out" ; format: txt; }	
+		
+		
+	stream<PartialDNSMessageType> PartialDNSMessageStream as Out = DNSPacketParser(AnnotatedPacketStream) {
+		param
+			packetAttribute: rawPacket;
+		output Out:
+			requestIdentifier = IDENTIFIER(),
+			questionName = QUESTION_NAME(),
+			questionType = QUESTION_TYPE(),
+			responseFlag = RESPONSE_FLAG(),
+	  		responseCode = RESPONSE_CODE(),
+	  		answerCanonical = ANSWER_CANONICAL(),
+	  		answerAddresses = ANSWER_ADDRESSES(); }
+	() as PartialDNSMessageSink = FileSink(PartialDNSMessageStream) { param file: "debug.TestPacketFileSourceRawIP.PartialDNSMessageStream.out" ; format: txt; }	
+	
+
+	stream<FullDNSMessageType> FullDNSMessageStream as Out = DNSPacketParser(AnnotatedPacketStream) {
+		param
+			packetAttribute: rawPacket;
+			udpPort: 53uh;
+		output Out:
+			requestIdentifier = IDENTIFIER(),
+			opcode = OPCODE(),
+			responseFlag = RESPONSE_FLAG(),
+			responseCode = RESPONSE_CODE(),
+			authoritativeFlag = AUTHORITATIVE_FLAG(),
+			truncationFlag = TRUNCATION_FLAG(),
+			questionCount = QUESTION_COUNT(),
+			questionName = QUESTION_NAME(),
+			questionNames = QUESTION_NAMES(),
+			questionType = QUESTION_TYPE(),
+			questionTypes = QUESTION_TYPES(),
+			answerCount = ANSWER_COUNT(),
+			answerNames = ANSWER_NAMES(),
+			answerTypes = ANSWER_TYPES(),
+			answerTTLs = ANSWER_TTLS(),
+			answerData = ANSWER_DATA(),
+			answerCanonical = ANSWER_CANONICAL(),
+			answerAddress = ANSWER_ADDRESS(),
+			answerAddresses = ANSWER_ADDRESSES(),
+			nameserverCount = NAMESERVER_COUNT(),
+			nameserverNames = NAMESERVER_NAMES(),
+			nameserverTypes = NAMESERVER_TYPES(),
+			nameserverTTLs = NAMESERVER_TTLS(),
+			nameserverData = NAMESERVER_DATA(),
+			additionalCount = ADDITIONAL_COUNT(),
+			additionalNames = ADDITIONAL_NAMES(),
+			additionalTypes = ADDITIONAL_TYPES(),
+			additionalTTLs = ADDITIONAL_TTLS(),
+			additionalData = ADDITIONAL_DATA(); }
+	() as FullDNSMessageSink = FileSink(FullDNSMessageStream) { param file: "debug.TestPacketFileSourceRawIP.FullDNSMessageStream.out" ; format: txt; }	
+
+	
+}

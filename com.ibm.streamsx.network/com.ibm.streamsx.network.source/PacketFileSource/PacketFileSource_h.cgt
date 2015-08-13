@@ -1,0 +1,136 @@
+<%
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+#include <iostream>
+#include <iomanip>
+#include <limits>
+#include <locale>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <string.h>
+#include <sched.h>
+#include <linux/if_ether.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/ether.h>
+#include <netinet/ip.h>
+#include <netinet/udp.h>
+#include <netinet/tcp.h>
+
+#include <pcap.h>
+#include <pcap-bpf.h>
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+
+  // Processing for source and threaded operators   
+  void process(uint32_t idx);
+    
+  // Tuple processing for mutating ports 
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+  
+  // process one PCAP input file
+  void processPCAPfile(const std::string pcapFilename);
+
+  // file and statistics threads
+  <% if ($model->getParameterByName("pcapFilename")) { %> void file_thread(); <% } %>
+  <% if ($model->getNumberOfOutputPorts()==2) { %> void statistics_thread(); <% } %>
+
+private:
+
+  // input and output tuples
+  <% if ($model->getNumberOfInputPorts()==1) { %> Tuple const & inTuple; <% } %>
+  OPort0Type packetTuple;
+  <% if ($model->getNumberOfOutputPorts()==2) { %> OPort1Type statisticsTuple; <% } %>
+
+  // operator parameters
+  double statisticsInterval;
+  double now;
+
+  // handle for open PCAP interface
+  pcap_t* pcapDescriptor;
+  struct pcap_pkthdr* pcapHeader;
+  u_char* packetPointer;
+
+  // whether or not PCAP file is 'raw IP', meaning, whether or not ethernet headers are missing
+  bool isRawIP;
+  struct ethhdr dummyEthernetHeader;
+
+  // packet and octet counters 
+  uint64_t packetCounter, previousPacketCounter;
+  uint64_t octetCounter, previousOctetCounter;
+  uint64_t startTime;
+
+  // pointers to network headers within packet
+  struct ethhdr* etherHeader;
+  struct ip* ipHeader;
+  struct udphdr* udpHeader;
+  struct tcphdr* tcpHeader;
+
+  // output attribute assignment functions for port 0 (packet stream)
+
+  double captureTime() { 
+    return (double)(pcapHeader->ts.tv_sec) + ((double)(pcapHeader->ts.tv_usec))/1000000.0; }
+
+  uint32_t sessionKey() { 
+    uint32_t key = 0;
+    if (udpHeader) key += ntohs(udpHeader->source) + ntohs(udpHeader->dest);
+    if (tcpHeader) key += ntohs(tcpHeader->source) + ntohs(tcpHeader->dest);				
+    return key; }
+
+  uint64_t packetNumber() { 
+    return packetCounter; }  
+
+  uint32_t packetLength() { 
+    return pcapHeader->len + (isRawIP ? sizeof(struct ethhdr) : 0); } 
+
+  SPL::blob packetData() { 
+    if (!isRawIP) return SPL::blob(packetPointer, pcapHeader->caplen); 
+    const struct ip *ipHeader = (struct ip*)packetPointer; 
+    dummyEthernetHeader.h_proto = htons((ipHeader->ip_v)==6 ? ETH_P_IPV6 : ETH_P_IP);
+    SPL::blob dummyPacket( (unsigned char *)(&dummyEthernetHeader), sizeof(dummyEthernetHeader) );
+    dummyPacket.append( packetPointer, pcapHeader->caplen ); 
+    return dummyPacket; }  
+
+  // output attribute assignment functions for port 1 (statistics stream)
+
+  double statisticsTime() { 
+    return now; }
+
+  uint64_t packetsProduced() { 
+    return packetCounter - previousPacketCounter; }  
+
+  uint64_t octetsProduced() { 
+    return octetCounter - previousOctetCounter; }  
+
+}; 
+
+
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

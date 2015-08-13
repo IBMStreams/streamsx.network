@@ -1,0 +1,86 @@
+<%
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+
+#include <iostream>
+#include <iomanip>
+#include <limits>
+#include <locale>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <string.h>
+#include <sched.h>
+#include <linux/if_ether.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/ether.h>
+#include <netinet/ip.h>
+#include <netinet/udp.h>
+#include <netinet/tcp.h>
+
+#include <pcap.h>
+
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+
+  // Processing for source and threaded operators   
+  void process(uint32_t idx);
+    
+  // Tuple processing for mutating ports 
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+
+  // machine identifier, for type 'SPL::timestamp' assignments by timestampp() output function  	
+  int32_t machineID;
+  double statisticsInterval;
+
+  // packet and byte counters
+  uint64_t packetCounter;
+  uint64_t octetCounter;
+
+  // output tuples 
+  OPort0Type packetTuple;
+  <% if ($model->getNumberOfOutputPorts()==2) { %>OPort1Type statisticsTuple;<% } %>
+
+private:
+
+  // name of network interface	
+  const char* networkInterface;
+
+  // handle for open PCAP interface
+  pcap_t* pcapDescriptor;
+
+  // main loops for operator's threads
+  void process_pcap_packets();
+  void process_pcap_metrics();
+  <% if ($model->getNumberOfOutputPorts()==2) { %>void process_pcap_statistics(); <% } %>
+
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

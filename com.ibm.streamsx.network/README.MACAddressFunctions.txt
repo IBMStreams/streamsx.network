@@ -1,10 +1,10 @@
-Copyright (C) 2015, International Business Machines Corporation
+Copyright (C) 2011, 2015  International Business Machines Corporation
 All Rights Reserved
 
 
 
-Network Toolkit MAC Address functions
--------------------------------------
+Network Toolkit: MAC Address functions
+--------------------------------------
 
 
 _____Description_____

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>
+      </description>
+      <metrics>
+        <metric>
+          <name>nInterfaceOpens</name>
+          <description>Number of opens (sessions) to the network interface</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nPacketsReceivedCurrent</name>
+          <description>Number packets received in current session.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nPacketsDroppedCurrent</name>
+          <description>Number of packets dropped in current session because there was no room in the operating system's buffer when they arrived, because packets weren't being read fast enough</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nPacketsDroppedByInterfaceCurrent</name>
+          <description>Number of packets dropped in current session by the network interface or its driver.</description>
+          <kind>Counter</kind>
+        </metric>
+      </metrics>
+      <customLiterals>
+        <enumeration>
+          <name>TimestampType</name>
+          <value>host</value>
+          <value>adapter</value>
+          <value>adapter_unsynced</value>
+        </enumeration>
+      </customLiterals>
+      <customOutputFunctions>
+        <customOutputFunction>
+          <name>packet output functions</name>
+          <function>
+            <description>
+	    </description>
+            <prototype>&lt;any T> T timestampp()</prototype>
+          </function>
+          <function>
+            <description>
+	    </description>
+            <prototype>blob packet()</prototype>
+          </function>
+
+          <function>
+            <description>
+	    </description>
+            <prototype>&lt;numeric T> T sessionKey()</prototype>
+          </function>
+
+          <function>
+            <description>
+	    </description>
+            <prototype>&lt;numeric T> T packetNumber()</prototype>
+          </function>
+
+          <function>
+            <description>
+	    </description>
+            <prototype>&lt;numeric T> T length()</prototype>
+          </function>
+
+
+
+          <function>
+            <description>Seconds value of the timestamp.</description>
+            <prototype>int64 TimestampSeconds()</prototype>
+          </function>
+          <function>
+            <description>Microseconds value of the timestamp.</description>
+            <prototype>int32 TimestampMicroseconds()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;any T> T copy()</prototype>
+          </function>
+        </customOutputFunction>
+        <customOutputFunction>
+          <name>statistics output functions</name>
+          <function>
+            <description></description>
+            <prototype>&lt;any T> T timestampp()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;numeric T> T packetsReceived()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;numeric T> T packetsDropped()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;numeric T> T packetsDroppedByInterface()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;numeric T> T packetsProduced()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;numeric T> T octetsProduced()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;any T> T copy()</prototype>
+          </function>
+        </customOutputFunction>
+      </customOutputFunctions>
+      <libraryDependencies>
+        <library>
+          <cmn:description>
+	  </cmn:description>
+          <cmn:managedLibrary>
+            <cmn:command>../Common/libpcapPath.pl</cmn:command>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>networkInterface</name>
+        <description>
+	</description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+      <parameter>
+        <name>maximumLength</name>
+        <description>
+	</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint16</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+      <parameter>
+        <name>filterExpression</name>
+        <description>
+	</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+      <parameter>
+        <name>promiscuous</name>
+        <description>
+	</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+      <parameter>
+        <name>initDelay</name>
+        <description>
+	</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>machineID</name>
+        <description>
+	</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>int32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>bufferSize</name>
+        <description>set the size of the 'libpcap' buffer used for receiving packets ...</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>processorAffinity</name>
+        <description>assign the operator's thread to a particular processor core ...</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>timeout</name>
+        <description>Packet read timeout, in seconds</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>timestampType</name>
+        <description>Type of timestamp that will be assigned to the packet.</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>CustomLiteral</expressionMode>
+        <type>TimestampType</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>statisticsInterval</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts/>
+    <outputPorts>
+      <outputPortSet>
+        <description>
+	</description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>true</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <outputFunctions>
+          <default>copy</default>
+          <type>packet output functions</type>
+        </outputFunctions>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+      <outputPortSet>
+        <description></description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>true</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <outputFunctions>
+          <default>copy</default>
+          <type>statistics output functions</type>
+        </outputFunctions>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </outputPortSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

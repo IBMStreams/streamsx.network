@@ -1,0 +1,80 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketFileSource {
+
+	param		
+	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "data/dns_sample_100_packets.pcap" );
+	
+	type 
+	
+	FullPacketType =
+		float64 captureTime,		// time that packet was captured, in seconds.microseconds since Unix epoch 
+		uint32 sessionKey,			// hash of source and destination address and port numbers
+		uint64 packetNumber,		// sequence number of packet, as emitted by operator
+		uint32 packetLength,		// original length of packet (not necessarily all captured)
+		blob packetData ;			// contents of packet captured, including network headers (not necessarily complete)
+
+	FullStatisticsType = 
+		float64 statisticsTime,		// time that statistics were produced, in seconds.microseconds since Unix epoch 
+		uint64 packetsProduced,		// number of packets emitted by operator in this interval
+		uint64 octetsProduced;		// number of bytes emitted by operator in this interval
+
+	AlternatePacketType =
+		float64 captureTime,		// time that packet was captured, in seconds.microseconds since Unix epoch 
+		uint32 captureSeconds,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 captureMicroseconds,	// time that packet was captured, in microseconds since captureSeconds()
+		timestamp captureTimestamp,	// time that packet was captured, in seconds and nanoseconds since Unix epoch
+		uint64 packetNumber,		// sequence number of packet, as emitted by operator
+		uint64 packetNumberPlusOne,	// sequence number of packet plus one
+		int8 packetNumberModulo13,	// sequence number of packet modulo 13, as signed 8-bit integer
+		uint32 packetLength,		// original length of packet (not necessarily all captured)
+		int32 packetLengthSigned,	// original length of packet, as signed 32-bit integer
+		blob packetData ;			// contents of packet, including network headers (not necessarily complete)
+	
+	graph
+	
+	( stream<FullPacketType> FullPacketStream as OutPackets ;
+	  stream<FullStatisticsType> FullStatisticsStream as OutStatistics ) = PacketFileSource() {
+		param
+			pcapFilename: $pcapFilename;
+			statisticsInterval: 1.0;
+		output 
+		OutPackets:
+			captureTime = captureTime(),
+			sessionKey = sessionKey(),
+			packetNumber = packetNumber(),
+			packetLength = packetLength(),
+			packetData = packetData(); 
+		OutStatistics:
+			statisticsTime = statisticsTime(),
+			packetsProduced = packetsProduced(),
+			octetsProduced = octetsProduced();
+	}
+	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSource.FullPacketStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSource.FullStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
+	
+	stream<AlternatePacketType> AlternatePacketStream as Out = PacketFileSource() {
+		param
+			pcapFilename: $pcapFilename;
+		output Out:
+			captureTime = captureTime(),
+			captureSeconds = (uint32)(captureTime()),
+			captureMicroseconds =(uint32)(fmod(captureTime(),1.0)*1000000.0),
+			captureTimestamp = createTimestamp((int64)captureTime(), (uint32)(fmod(captureTime(),1.0)*1000000000.0), 0),
+			packetNumber = packetNumber(),
+			packetNumberPlusOne = packetNumber() + 1ul,
+			packetNumberModulo13 = (int8)(packetNumber() % 13ul),
+			packetLength = packetLength(),
+			packetLengthSigned = (int32)packetLength(),
+			packetData = packetData(); }
+	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSource.AlternatePacketStream.out" ; format: txt ; hasDelayField: true ; }	
+
+}
+

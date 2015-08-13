@@ -1,0 +1,81 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketLiveSource2 {
+	
+	type 
+	
+/**This type defines the tuples emitted by the PacketLiveSource operator below.*/
+	PacketType =
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 rawLength, 			// original length of packet (not necessarily all captured)
+		blob rawPacket ;			// contents of packet captured, including network headers (not necessarily complete)
+
+/**This type defines the tuples emitted by the PacketHeaderParser operator below.*/
+	HeaderType =
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 ipProtocol,
+   		uint32 udpDstPort,
+ 		blob rawPacket ;			// contents of packet, including all headers
+	
+	
+	
+	graph
+	
+	stream<PacketType> PacketStream as Out = PacketLiveSource() {
+		param
+		  networkInterface: "eth3";
+		  promiscuous: true;
+		  bufferSize: 10000000u;
+		  processorAffinity: 1u;	
+		  timeout: 0.5;
+		  //timestampType: adapter;
+		output Out:
+			captureTime = timestampp(),
+			rawLength = length(),
+			rawPacket = packet(); }
+	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketLiveSource2.PacketStream.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+
+	stream<HeaderType> HeaderStream as Out = PacketHeaderParser(PacketStream) {
+		param
+			packetAttribute: rawPacket;
+		output Out:
+			ipProtocol = IP_PROTOCOL(),
+   			udpDstPort = UDP_DST_PORT() ; } 
+	() as HeaderSink = FileSink(HeaderStream) { param file: "debug.TestPacketLiveSource2.HeaderStream.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+
+	stream<HeaderType> TCPStream = Filter(HeaderStream) {
+		param
+			filter: ipProtocol==6u;
+	}
+	() as TCPSink = FileSink(TCPStream) { param file: "debug.TestPacketLiveSource2.TCPStream.out"; format: txt; flush: 1u; hasDelayField: true; }	
+	
+
+
+	stream<HeaderType> UDPStream = Filter(HeaderStream) {
+		param
+			filter: ipProtocol==17u;
+	}
+	() as UDPSink = FileSink(UDPStream) { param file: "debug.TestPacketLiveSource2.UDPStream.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+
+	stream<HeaderType> NetflowStream = Filter(HeaderStream) {
+		param
+			filter: udpDstPort==2055u;
+	}
+	() as NetflowSink = FileSink(NetflowStream) { param file: "debug.TestPacketLiveSource2.NetflowStream.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+}
+

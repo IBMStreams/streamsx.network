@@ -1,0 +1,107 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketLiveSource3 {
+	
+	type 
+	
+/**This type defines the tuples emitted by the PacketLiveSource operator below.*/
+	PacketType =
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 rawLength, 			// original length of packet (not necessarily all captured)
+		blob rawPacket ;			// contents of packet captured, including network headers (not necessarily complete)
+
+/**This type defines the tuples emitted by the PacketHeaderParser operator below.*/
+	HeaderType =
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 ipProtocol,
+   		uint32 udpDstPort,
+ 		blob rawPacket ;			// contents of packet, including all headers
+	
+	
+	
+	graph
+	
+	stream<PacketType> PacketStreamA as OutA = PacketLiveSource() {
+		param
+		  networkInterface: "eth1";
+		  promiscuous: true;
+		  bufferSize: 1000000000u;
+		  processorAffinity: 0u;	
+		output OutA:
+			captureTime = timestampp(),
+			rawLength = length(),
+			rawPacket = packet(); }
+	() as PacketSinkA = FileSink(PacketStreamA) { param file: "debug.TestPacketLiveSource3.PacketStreamA.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+	stream<HeaderType> HeaderStreamA as OutA = PacketHeaderParser(PacketStreamA) {
+		param
+			packetAttribute: rawPacket;
+		output OutA:
+			ipProtocol = IP_PROTOCOL(),
+   			udpDstPort = UDP_DST_PORT() ; } 
+	() as HeaderSinkA = FileSink(HeaderStreamA) { param file: "debug.TestPacketLiveSource3.HeaderStreamA.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+	stream<HeaderType> TCPStreamA = Filter(HeaderStreamA) {
+		param
+			filter: ipProtocol==6u;
+	}
+	() as TCPSinkA = FileSink(TCPStreamA) { param file: "debug.TestPacketLiveSource3.TCPStreamA.out"; format: txt; flush: 1u; hasDelayField: true; }	
+	
+
+	stream<HeaderType> UDPStreamA = Filter(HeaderStreamA) {
+		param
+			filter: ipProtocol==17u;
+	}
+	() as UDPSinkA = FileSink(UDPStreamA) { param file: "debug.TestPacketLiveSource3.UDPStreamA.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+
+	stream<PacketType> PacketStreamB as OutB = PacketLiveSource() {
+		param
+		  networkInterface: "eth1";
+		  promiscuous: true;
+		  bufferSize: 1000000000u;
+		  processorAffinity: 1u;	
+		output OutB:
+			captureTime = timestampp(),
+			rawLength = length(),
+			rawPacket = packet(); }
+	() as PacketSinkB = FileSink(PacketStreamB) { param file: "debug.TestPacketLiveSource3.PacketStreamB.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+	stream<HeaderType> HeaderStreamB as OutB = PacketHeaderParser(PacketStreamB) {
+		param
+			packetAttribute: rawPacket;
+		output OutB:
+			ipProtocol = IP_PROTOCOL(),
+   			udpDstPort = UDP_DST_PORT() ; } 
+	() as HeaderSinkB = FileSink(HeaderStreamB) { param file: "debug.TestPacketLiveSource3.HeaderStreamB.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+	stream<HeaderType> TCPStreamB = Filter(HeaderStreamB) {
+		param
+			filter: ipProtocol==6u;
+	}
+	() as TCPSinkB = FileSink(TCPStreamB) { param file: "debug.TestPacketLiveSource3.TCPStreamB.out"; format: txt; flush: 1u; hasDelayField: true; }	
+	
+
+	stream<HeaderType> UDPStreamB = Filter(HeaderStreamB) {
+		param
+			filter: ipProtocol==17u;
+	}
+	() as UDPSinkB = FileSink(UDPStreamB) { param file: "debug.TestPacketLiveSource3.UDPStreamB.out"; format: txt; flush: 1u; hasDelayField: true; }	
+
+
+
+
+}
+
