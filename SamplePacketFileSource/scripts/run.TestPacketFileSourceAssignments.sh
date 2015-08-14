@@ -5,7 +5,7 @@
 ################### variables used in this script ##############################
 
 namespace=sample
-composite=TestPacketFileSource
+composite=TestPacketFileSourceAssignments
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -15,7 +15,7 @@ dataDirectory=$projectDirectory/data
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
 
 submitParameterList=(
-#pcapFilename=dns_sample_100_packets.pcap
+pcapFilename=$dataDirectory/dns_sample_100_packets.pcap
 )
 
 ################### functions used in this script #############################
@@ -32,8 +32,9 @@ step "configuration for application '$namespace::$composite' ..."
 echo -e "\ntrace level: $traceLevel"
 
 step "executing standalone application '$namespace::$composite' ..."
-executable=$buildDirectory/bin/$namespace.$composite
-### ??? gdb --args ...
+#executable=$buildDirectory/bin/$namespace.$composite
+executable=$buildDirectory/bin/standalone.exe
+###gdb --args ...
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

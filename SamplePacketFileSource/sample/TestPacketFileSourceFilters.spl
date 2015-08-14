@@ -1,0 +1,66 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketFileSourceFilters {
+
+	param		
+	expression<rstring> $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "data" );
+    expression<float64> $timeout: 5.0;
+	
+	type 
+	
+	PacketType =
+	  rstring filepath,         // copied from input tuple
+	  float64 captureTime,		// time that packet was captured, in seconds.microseconds since Unix epoch 
+	  uint32 sessionKey,		// hash of source and destination address and port numbers
+	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
+	  uint32 packetLength,		// original length of packet (not necessarily all captured)
+	  blob packetData ;			// contents of packet captured, including network headers (not necessarily complete)
+
+	graph
+
+	stream<rstring filepath> FilepathStream as Out = DirectoryScan() {
+	  param
+	      directory: $pcapDirectory; 
+	      pattern: "\\.pcap$"; 
+	output Out:
+	      filepath = FullPath(); }
+
+	stream<PacketType> DNSPacketStream as Out = PacketFileSource(FilepathStream) {
+		param
+		    filterExpression: "udp port 53";
+		output Out:
+			captureTime = captureTime(),
+			sessionKey = sessionKey(),
+			packetNumber = packetNumber(),
+			packetLength = packetLength(),
+			packetData = packetData(); 
+	}
+	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out" ; format: txt ; hasDelayField: true ; }	
+
+	stream<PacketType> DHCPPacketStream as Out = PacketFileSource(FilepathStream) {
+		param
+		    filterExpression: "udp port 67 or udp port 68";
+		output Out:
+			captureTime = captureTime(),
+			sessionKey = sessionKey(),
+			packetNumber = packetNumber(),
+			packetLength = packetLength(),
+			packetData = packetData(); 
+	}
+	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out" ; format: txt ; hasDelayField: true ; }	
+
+
+	() as Timeout = Custom() {
+	  logic onProcess: {
+		block($timeout);
+		shutdownPE(); }
+	}
+} 
+

@@ -5,7 +5,7 @@
 ################### parameters used in this script ##############################
 
 namespace=sample
-composite=TestPacketFileSource
+composite=TestPacketFileSourceAssignments
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )

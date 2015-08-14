@@ -5,6 +5,7 @@
 /.apt_generated/
 /.settings/
 /output/
+/data/debug.*
 /toolkit.xml
 /.toolkitList
 *_h.pm

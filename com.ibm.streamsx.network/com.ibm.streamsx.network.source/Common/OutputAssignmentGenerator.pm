@@ -15,6 +15,7 @@ sub generate($) {
 
     # this function requires the name of the output tuple and the output port object as its arguments
     my ($tupleName, $outputPort) = @_;
+	return unless $tupleName && $outputPort;
 
     # step through all of the output attributes, generating an attribute setter for each attribute that has an assignment
     for (my $i = 0; $i < $outputPort->getNumberOfAttributes(); ++$i) {

@@ -73,7 +73,7 @@
       <allowCustomLogic>true</allowCustomLogic>
     </context>
     <parameters>
-      <description/>
+      <description></description>
       <allowAny>false</allowAny>
       <parameter>
         <name>pcapFilename</name>
@@ -138,7 +138,7 @@
         <description></description>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>false</autoAssignment>
-        <completeAssignment>true</completeAssignment>
+        <completeAssignment>false</completeAssignment>
         <rewriteAllowed>true</rewriteAllowed>
         <outputFunctions>
           <default>copy</default>

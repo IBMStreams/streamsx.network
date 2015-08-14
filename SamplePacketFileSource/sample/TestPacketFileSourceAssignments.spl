@@ -7,7 +7,7 @@ namespace sample;
 
 use com.ibm.streamsx.network.source::*;
 
-composite TestPacketFileSource {
+composite TestPacketFileSourceAssignments {
 
 	param		
 	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "data/dns_sample_100_packets.pcap" );
@@ -39,12 +39,13 @@ composite TestPacketFileSource {
 		blob packetData ;			// contents of packet, including network headers (not necessarily complete)
 	
 	graph
-	
+
 	( stream<FullPacketType> FullPacketStream as OutPackets ;
 	  stream<FullStatisticsType> FullStatisticsStream as OutStatistics ) = PacketFileSource() {
 		param
 			pcapFilename: $pcapFilename;
-			statisticsInterval: 1.0;
+		    processorAffinity: 2u;
+		    statisticsInterval: 10.0;
 		output 
 		OutPackets:
 			captureTime = captureTime(),
@@ -57,12 +58,14 @@ composite TestPacketFileSource {
 			packetsProduced = packetsProduced(),
 			octetsProduced = octetsProduced();
 	}
-	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSource.FullPacketStream.out" ; format: txt ; hasDelayField: true ; }	
-	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSource.FullStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
-	
+	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceAssignments.FullPacketStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.FullStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
+
+
 	stream<AlternatePacketType> AlternatePacketStream as Out = PacketFileSource() {
 		param
 			pcapFilename: $pcapFilename;
+		    processorAffinity: 3u;
 		output Out:
 			captureTime = captureTime(),
 			captureSeconds = (uint32)(captureTime()),
@@ -74,7 +77,8 @@ composite TestPacketFileSource {
 			packetLength = packetLength(),
 			packetLengthSigned = (int32)packetLength(),
 			packetData = packetData(); }
-	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSource.AlternatePacketStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceAssignments.AlternatePacketStream.out" ; format: txt ; hasDelayField: true ; }	
+
 
 }
 
