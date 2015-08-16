@@ -13,14 +13,12 @@ use Switch;
 
 # get the name of this operator's template
 my $myOperatorKind = $model->getContext()->getKind();
+my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
 
 # get Perl objects for input and output ports
 my $inputPort = $model->getNumberOfInputPorts()>0 ? $model->getInputPortAt(0) : undef;
 my $outputPort0 = $model->getNumberOfOutputPorts()>0 ? $model->getOutputPortAt(0) : undef;
 my $outputPort1 = $model->getNumberOfOutputPorts()>1 ? $model->getOutputPortAt(1) : undef;
-
-# get C++ type of input tuple, if there is one
-my $inputPortType = $inputPort ? $inputPort->getCppTupleType() : undef;
 
 # get C++ expressions for getting the values of this operator's optional parameters
 my $pcapFilename = $model->getParameterByName("pcapFilename") ? $model->getParameterByName("pcapFilename")->getValueAt(0)->getCppExpression() : undef;
@@ -34,6 +32,7 @@ SPL::CodeGen::exit("Sorry, either 'pcapFilename' parameter or an input port must
 SPL::CodeGen::exit("Sorry, 'pcapFilename' parameter and an input port cannot both be specified") if $pcapFilename && $inputPort;
 SPL::CodeGen::exit("Sorry, 'initDelay' can only be specified when 'pcapFilename' is also specified") if $initDelay && !$pcapFilename;
 SPL::CodeGen::exit("Sorry, 'processorAffinity' can only be specified when 'pcapFilename' is also specified") if $processorAffinity>=0 && !$pcapFilename;
+SPL::CodeGen::exit("Sorry, an operator with an input port cannot start a consistent region") if $consistentRegion && $consistentRegion->isStartOfRegion() && $inputPort;
 
 %>
 
@@ -63,6 +62,7 @@ struct groupByThree : std::numpunct<char> {
 
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
+<% if ($consistentRegion) { %> : _crContext(static_cast<ConsistentRegionContext *>(getContext().getOptionalContext(CONSISTENT_REGION))) <% } %>
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketFileSource");
 
@@ -142,24 +142,24 @@ void MY_OPERATOR::prepareToShutdown()
 // start processing threads
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") ...", "PacketFileSource");
+	SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") ...", "PacketFileSource");
 
-<% if (!$inputPort && $outputPort1) { %>
+	<% if (!$inputPort && $outputPort1) { %>
 
-	switch (idx) {
+		switch (idx) {
 	    case 0: file_thread(); break;
 	    case 1: statistics_thread(); break;
 	    default: break; }
 	
-<% } elsif ($inputPort && $outputPort1) { %>
+		<% } elsif ($inputPort && $outputPort1) { %>
 	
-	statistics_thread();
+		statistics_thread();
 	
-<% } elsif (!$inputPort && !$outputPort1) { %>
+		<% } elsif (!$inputPort && !$outputPort1) { %>
 	
-	file_thread();
+		file_thread();
 	
-<% } %>
+		<% } %> ;
 
 	SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketFileSource");
 }
@@ -176,23 +176,19 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 // processing for non-source operator (that is, where an input port is configured)
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-<% if ($inputPort) { %>
-
+<% if ($inputPort) { %> 
 	if (getPE().getShutdownRequested()) return;
 
 	// point at the input tuple
 	inTuple = (Tuple*)&tuple;
-	<% my $tupleType = $inputPort->getCppTupleType(); %>
-	const <%=$tupleType%>& thisTuple = static_cast<const <%=$tupleType%>&>(tuple);
+	IPort0Type const & iport$0 = tuple;
 
 	// get the value of the first attribute
-	<% my $attributeName = $inputPort->getAttributeAt(0)->getName(); %>
-	const std::string pcapFilename = static_cast<const std::string>(thisTuple.get_<%=$attributeName%>());
+	const std::string pcapFilename = static_cast<const std::string>( iport$0.get_<%=$inputPort->getAttributeAt(0)->getName()%>() );
 
 	// process the PCAP input file specified by the first attribute in the tuple
 	processPCAPfile(pcapFilename);
-
-<% } %>
+<% } %> 
 }
 
 
@@ -200,14 +196,31 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
-SPLLOG(L_INFO, "entering <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");  
+	SPLLOG(L_INFO, "entering <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");  
 
 
-// ... set the 'done' flag ????
+	// ... set the 'done' flag on final punctution ?????????????????
 
 
-SPLLOG(L_INFO, "leaving <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");  
+	SPLLOG(L_INFO, "leaving <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");  
 }
+
+
+
+
+<% if ($consistentRegion) { %> 
+  void MY_OPERATOR::checkpoint(Checkpoint &ckpt) 
+  {
+  }
+  
+  void MY_OPERATOR::reset(Checkpoint &ckpt)
+  {		
+  }
+  
+  void MY_OPERATOR::resetToInitialState()
+  {
+  }
+  <% } %> ;
 
 
 
@@ -245,35 +258,39 @@ void MY_OPERATOR::processPCAPfile(const std::string pcapFilename)
   OPort0Type outTuple;
 
   // process each packet in the PCAP file
-  while(!getPE().getShutdownRequested()) {
+  while(!getPE().getShutdownRequested()) 
+	  {
 
-	// get the next packet, if there is one
-	int rc = pcap_next_ex(pcapDescriptor, &pcapHeader, (const u_char**)(&pcapBuffer));
-	if (rc==-2) break; // end of file
-	if (rc==-1) THROW (SPLRuntimeOperator, "error reading PCAP file, " << strerror(errno)); // something went wrong
-	//if (rc==0) ... // got another packet to process
+		  // get the next packet, if there is one
+		  int rc = pcap_next_ex(pcapDescriptor, &pcapHeader, (const u_char**)(&pcapBuffer));
+		  if (rc==-2) break; // end of file
+		  if (rc==-1) THROW (SPLRuntimeOperator, "error reading PCAP file, " << strerror(errno)); // something went wrong
+		  //if (rc==0) ... // got another packet to process
 
-	// find the network headers in the packet
-	parseNetworkHeaders((char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len, isRawIP);
-	if (!ipv4Header) { SPLLOG(L_INFO, "ignoring packet, no IPv4 header found", "PacketFileSource");  continue; }
+		  // find the network headers in the packet
+		  parseNetworkHeaders((char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len, isRawIP);
+		  if (!ipv4Header) { SPLLOG(L_INFO, "ignoring packet, no IPv4 header found", "PacketFileSource");  continue; }
 
-	// clear the output tuple
-	outTuple.clear();
+		  // clear the output tuple
+		  outTuple.clear();
 
-	// copy compatible attributes into output tuple from input tuple, if there is one
-	<% if ($inputPort) { %> outTuple.assignFrom(static_cast<const <%=$inputPortType%>&>(*inTuple), false); <% } %>
+		  // copy compatible attributes into output tuple from input tuple, if there is one		  
+<% if ($inputPort) { %> 
+			IPort0Type const & iport$0 = *inTuple;
+			outTuple.assignFrom(iport$0, false); 
+<% } %> ;
+		   
+		  // set explicitly assigned output attributes to computed values
+		  <% OutputAssignmentGenerator::generate("outTuple", $outputPort0); %> ;
 
-	// assign computed values to output attributes
-	<% OutputAssignmentGenerator::generate("outTuple", $model->getOutputPortAt(0)); %>
+		  // send the packet tuple downstream
+		  SPLLOG(L_TRACE, "submitting outTuple=" << outTuple, "PacketFileSource");
+		  submit(outTuple, 0);
 
-		 // send the packet tuple downstream
-		 SPLLOG(L_TRACE, "submitting outTuple=" << outTuple, "PacketFileSource");
-		 submit(outTuple, 0);
-
-		 // count the packets and octets processed
-		 packetCounter++;
-		 octetCounter += pcapHeader->len;
-  }
+		  // count the packets and octets processed
+		  packetCounter++;
+		  octetCounter += pcapHeader->len;
+	  }
 
   // close the PCAP file before returning
   pcap_close(pcapDescriptor);
@@ -287,92 +304,105 @@ void MY_OPERATOR::processPCAPfile(const std::string pcapFilename)
 
 <% if ($pcapFilename) { %>
 
-// When there is no input port, this thread processes the PCAP file specified with the 'pcapFilename' parameter
+	// When there is no input port, this thread processes the PCAP file specified with the 'pcapFilename' parameter
 
-void MY_OPERATOR::file_thread()
-{
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> file_thread()", "PacketFileSource");
+	void MY_OPERATOR::file_thread()
+	{
+		SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> file_thread()", "PacketFileSource");
 
-  // assign this thread to a particular processor core, if necessary
-  if (processorAffinity>=0) { 
-	SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "PacketFileSource");
-	cpu_set_t cpumask; // CPU affinity bit mask
-	CPU_ZERO(&cpumask);
-	CPU_SET(processorAffinity, &cpumask);
-	const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
-	if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
-  }
+		// assign this thread to a particular processor core, if necessary
+		if (processorAffinity>=0) { 
+			SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "PacketFileSource");
+			cpu_set_t cpumask; // CPU affinity bit mask
+			CPU_ZERO(&cpumask);
+			CPU_SET(processorAffinity, &cpumask);
+			const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
+			if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
+		}
 
-  // wait for a while before starting, if necessary
-  if (initDelay>0) {
-	SPLLOG(L_INFO, "waiting " << initDelay << " seconds before starting", "PacketFileSource");
-	getPE().blockUntilShutdownRequest(initDelay);
-	if (getPE().getShutdownRequested()) return;
-  }
+		// wait for a while before starting, if necessary
+		if (initDelay>0) {
+			SPLLOG(L_INFO, "waiting " << initDelay << " seconds before starting", "PacketFileSource");
+			getPE().blockUntilShutdownRequest(initDelay);
+			if (getPE().getShutdownRequested()) return;
+		}
 
-  // process the PCAP input file specified by the 'pcapFilename' parameter
-  const std::string pcapFilename = static_cast<const std::string>(<%=$pcapFilename%>);
-  processPCAPfile(pcapFilename);
-  done = true;
+		// convert PCAP input filename to absolute path, if necessary
+		streams_boost::filesystem::path pcapFilename(<%=$pcapFilename%>);
+		if(pcapFilename.is_relative()) {
+		  pcapFilename = streams_boost::filesystem::absolute(pcapFilename, getPE().getDataDirectory());
+		}
+     
+		// process the entire PCAP file, checkpointing if necessary
+		{
+		  <% if ($consistentRegion) { %> ConsistentRegionPermit crp(_crContext); <% } %> ;
+		  processPCAPfile( static_cast<const std::string>(pcapFilename.string()) );	
+		  <% if ($consistentRegion && $consistentRegion->isTriggerOperator()) { %> _crContext->makeConsistent(); <% } %> ;
+	    }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> file_thread()", "PacketFileSource");
-}
+	    // tell the statistics thread we're done, if there is one
+		done = true;
 
-<% } %>
-
-
-
-
-<% if ($outputPort1) { %>
-
-// When a second output port is configured, this thread periodically calls into libpcap
-// to get its statistcs counters, which are emitted as tuples on that output port
-
-void MY_OPERATOR::statistics_thread()
-{
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> statistics_thread()", "PacketFileSource");
-
-  // keep the previous interval's statistics in these variables
-  previousPacketCounter = packetCounter;
-  previousOctetCounter = octetCounter;
-
-  // the output tuple
-  OPort1Type outTuple;
-
-  // get statistics periodically and emit a tuple whenever they change
-  double previousStatisticsTime = SPL::Functions::Time::getTimestampInSecs();
-  while (!done && !getPE().getShutdownRequested()) {
-
-	// wait until the next interval, or the 'file' thread finishes, or the PE is shutting down
-	now = SPL::Functions::Time::getTimestampInSecs();
-	const double secondsToWait = previousStatisticsTime + statisticsInterval - now;
-	if (secondsToWait>0) {
-	  SPLLOG(L_DEBUG, "next statistics interval in " << secondsToWait << " seconds", "PacketFileSource");
-	  getPE().blockUntilShutdownRequest(secondsToWait);
-	  if (done || getPE().getShutdownRequested()) return;
-	  now = SPL::Functions::Time::getTimestampInSecs();
-	} else {
-	  SPLLOG(L_DEBUG, "missed statistics interval by " << -secondsToWait << " seconds", "PacketFileSource");
+		SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> file_thread()", "PacketFileSource");
 	}
 
-	// emit a statistics tuple if they have changed since the last interval
-	if ( packetCounter != previousPacketCounter ) {
-	  outTuple.clear();
-	  <% OutputAssignmentGenerator::generate("outTuple", $model->getOutputPortAt(1)); %>
-	  SPLLOG(L_TRACE, "submitting outTuple=" << outTuple, "PacketFileSource");
-	  submit(outTuple, 1);
-	}
+	<% } %>
+
+
+
+
+<% if ($outputPort1) { %> 
+
+	// When a second output port is configured, this thread periodically calls into libpcap
+	// to get its statistcs counters, which are emitted as tuples on that output port
+
+	void MY_OPERATOR::statistics_thread()
+	{
+		SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> statistics_thread()", "PacketFileSource");
+
+		// keep the previous interval's statistics in these variables
+		previousPacketCounter = packetCounter;
+		previousOctetCounter = octetCounter;
+
+		// the output tuple
+		OPort1Type outTuple;
+
+		// get statistics periodically and emit a tuple whenever they change
+		double previousStatisticsTime = SPL::Functions::Time::getTimestampInSecs();
+		while (!getPE().getShutdownRequested()) {
+
+			// wait until the next interval, or the 'file' thread finishes, or the PE is shutting down
+			now = SPL::Functions::Time::getTimestampInSecs();
+			const double secondsToWait = previousStatisticsTime + statisticsInterval - now;
+			if (secondsToWait>0) {
+				SPLLOG(L_DEBUG, "next statistics interval in " << secondsToWait << " seconds", "PacketFileSource");
+				getPE().blockUntilShutdownRequest(secondsToWait);
+				if (getPE().getShutdownRequested()) return;
+				now = SPL::Functions::Time::getTimestampInSecs();
+			} else {
+				SPLLOG(L_DEBUG, "missed statistics interval by " << -secondsToWait << " seconds", "PacketFileSource");
+			}
+
+			// emit a statistics tuple if they have changed since the last interval
+			if ( packetCounter != previousPacketCounter ) {
+				outTuple.clear();
+				<% OutputAssignmentGenerator::generate("outTuple", $model->getOutputPortAt(1)); %>
+					   SPLLOG(L_TRACE, "submitting outTuple=" << outTuple, "PacketFileSource");
+					   submit(outTuple, 1);
+			}
 	
-	// save the current statistics values for next time
-	previousPacketCounter = packetCounter;
-	previousOctetCounter = octetCounter;
-	previousStatisticsTime = now;
-  }
+			// save the current statistics values for next time
+			previousPacketCounter = packetCounter;
+			previousOctetCounter = octetCounter;
+			previousStatisticsTime = now;
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> statistics_thread()", "PacketFileSource");
-}
+			if (done) break;
+		}
 
-<% } %>
+		SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> statistics_thread()", "PacketFileSource");
+	}
+
+	<% } %> 
 
 
 

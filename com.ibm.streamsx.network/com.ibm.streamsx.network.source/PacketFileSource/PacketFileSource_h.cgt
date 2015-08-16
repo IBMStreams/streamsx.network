@@ -3,6 +3,8 @@
 ## Copyright (C) 2011, 2015  International Business Machines Corporation
 ## All Rights Reserved
 
+my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
+
 %>
 
 #include <iostream>
@@ -27,9 +29,12 @@
 #include <pcap.h>
 #include <pcap-bpf.h>
 
+#include <streams_boost/filesystem.hpp>
+
 <%SPL::CodeGen::headerPrologue($model);%>
 
 class MY_OPERATOR : public MY_BASE_OPERATOR 
+<% if($consistentRegion) { %> , public StateHandler <% } %> 
 {
 public:
 
@@ -44,6 +49,13 @@ public:
   void process(Tuple const & tuple, uint32_t port);
   void process(Punctuation const & punct, uint32_t port);
 
+<% if ($consistentRegion) { %>
+	ConsistentRegionContext * const crContext;
+	void checkpoint(Checkpoint &ckpt);
+	void reset(Checkpoint &ckpt);
+	void resetToInitialState();
+<% } %>  	  
+ 
   // ----------- additional operator methods ----------
 
   void processPCAPfile(const std::string pcapFilename);

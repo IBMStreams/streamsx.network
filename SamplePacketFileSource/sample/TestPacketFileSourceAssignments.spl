@@ -11,6 +11,7 @@ composite TestPacketFileSourceAssignments {
 
 	param		
 	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "data/dns_sample_100_packets.pcap" );
+    expression<float64> $timeout: 5.0;
 	
 	type 
 	
@@ -38,6 +39,14 @@ composite TestPacketFileSourceAssignments {
 		int32 packetLengthSigned,	// original length of packet, as signed 32-bit integer
 		blob packetData ;			// contents of packet, including network headers (not necessarily complete)
 	
+	AlternateStatisticsType = 
+		float64 statisticsTime,		// time that statistics were produced, in seconds.microseconds since Unix epoch 
+		uint64 packetsProduced,		// number of packets emitted by operator
+		float64 packetsProducedAsFloat,		// number of packets emitted by operator, as a 64-bit float
+		int32 packetsProducedAsInteger,		// number of packets emitted by operator, as a signed 32-bit integer
+		rstring packetsProducedAsString,		// number of packets emitted by operator, as a string
+		uint64 octetsProduced;		// number of bytes emitted by operator in this interval
+
 	graph
 
 	( stream<FullPacketType> FullPacketStream as OutPackets ;
@@ -45,7 +54,7 @@ composite TestPacketFileSourceAssignments {
 		param
 			pcapFilename: $pcapFilename;
 		    processorAffinity: 2u;
-		    statisticsInterval: 10.0;
+		    statisticsInterval: 1.0;
 		output 
 		OutPackets:
 			captureTime = captureTime(),
@@ -62,11 +71,13 @@ composite TestPacketFileSourceAssignments {
 	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.FullStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
 
 
-	stream<AlternatePacketType> AlternatePacketStream as Out = PacketFileSource() {
+	( stream<AlternatePacketType> AlternatePacketStream as OutPackets ;
+	  stream<AlternateStatisticsType> AlternateStatisticsStream as OutStatistics ) = PacketFileSource() {
 		param
 			pcapFilename: $pcapFilename;
-		    processorAffinity: 3u;
-		output Out:
+		    processorAffinity: 4u;
+		    statisticsInterval: 1.0;
+		output OutPackets:
 			captureTime = captureTime(),
 			captureSeconds = (uint32)(captureTime()),
 			captureMicroseconds =(uint32)(fmod(captureTime(),1.0)*1000000.0),
@@ -76,9 +87,19 @@ composite TestPacketFileSourceAssignments {
 			packetNumberModulo13 = (int8)(packetNumber() % 13ul),
 			packetLength = packetLength(),
 			packetLengthSigned = (int32)packetLength(),
-			packetData = packetData(); }
+			packetData = packetData(); 
+		OutStatistics:
+			statisticsTime = statisticsTime(),
+			packetsProduced = packetsProduced(),
+			packetsProducedAsFloat = (float64)packetsProduced(),
+			packetsProducedAsInteger = (int32)packetsProduced(),
+			packetsProducedAsString = (rstring)packetsProduced(),
+			octetsProduced = octetsProduced();
+	}
 	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceAssignments.AlternatePacketStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as AlternateStatisticsSink = FileSink(AlternateStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.AlternateStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
 
+	() as Timeout = Custom() { logic onProcess: { block($timeout); shutdownPE(); } }
 
 }
 

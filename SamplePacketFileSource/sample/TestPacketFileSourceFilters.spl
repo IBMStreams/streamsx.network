@@ -16,7 +16,8 @@ composite TestPacketFileSourceFilters {
 	type 
 	
 	PacketType =
-	  rstring filepath,         // copied from input tuple
+	  rstring filepath,         // implicitly copied from input tuple
+	  rstring filepathAgain,    // explicitly copied from input tuple
 	  float64 captureTime,		// time that packet was captured, in seconds.microseconds since Unix epoch 
 	  uint32 sessionKey,		// hash of source and destination address and port numbers
 	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
@@ -37,6 +38,7 @@ composite TestPacketFileSourceFilters {
 		    filterExpression: "udp port 53";
 		output Out:
 			captureTime = captureTime(),
+		    filepathAgain = filepath,
 			sessionKey = sessionKey(),
 			packetNumber = packetNumber(),
 			packetLength = packetLength(),
@@ -49,6 +51,7 @@ composite TestPacketFileSourceFilters {
 		    filterExpression: "udp port 67 or udp port 68";
 		output Out:
 			captureTime = captureTime(),
+		    filepathAgain = filepath,
 			sessionKey = sessionKey(),
 			packetNumber = packetNumber(),
 			packetLength = packetLength(),
@@ -57,10 +60,6 @@ composite TestPacketFileSourceFilters {
 	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out" ; format: txt ; hasDelayField: true ; }	
 
 
-	() as Timeout = Custom() {
-	  logic onProcess: {
-		block($timeout);
-		shutdownPE(); }
-	}
+	() as Timeout = Custom() { logic onProcess: { block($timeout); shutdownPE(); } }
 } 
 

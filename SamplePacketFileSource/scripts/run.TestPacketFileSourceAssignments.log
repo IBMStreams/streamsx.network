@@ -1,0 +1,98 @@
+
+[1;34mconfiguration for application 'sample::TestPacketFileSourceAssignments' ...[0m
+
+TestPacketFileSourceAssignments submission-time parameters:
+pcapFilename=/home/streams4/git/streamsx.network/SamplePacketFileSource/data/dns_sample_100_packets.pcap
+
+trace level: 3
+
+[1;34mexecuting standalone application 'sample::TestPacketFileSourceAssignments' ...[0m
+GNU gdb (GDB) Red Hat Enterprise Linux (7.2-75.el6)
+Copyright (C) 2010 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-redhat-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /home/streams4/git/streamsx.network/SamplePacketFileSource/output/build/TestPacketFileSourceAssignments/bin/standalone.exe...done.
+[?1034h(gdb) run
+Starting program: /home/streams4/git/streamsx.network/SamplePacketFileSource/output/build/TestPacketFileSourceAssignments/bin/standalone.exe -t 3 pcapFilename=/home/streams4/git/streamsx.network/SamplePacketFileSource/data/dns_sample_100_packets.pcap
+[Thread debugging using libthread_db enabled]
+14 Aug 2015 17:22:33.064 [28837] INFO spl_app M[StandaloneApplicationImpl.cpp:run:189]  - Entering MyApplication::run()
+14 Aug 2015 17:22:33.065 [28837] INFO spl_pe M[StandaloneApplicationImpl.cpp:createAADL:361]  - PE output directory is set to: '/home/streams4/git/streamsx.network/SamplePacketFileSource/output/build/TestPacketFileSourceAssignments'
+14 Aug 2015 17:22:33.065 [28837] INFO spl_pe M[StandaloneApplicationImpl.cpp:createAADL:363]  - PE application directory is set to: '/home/streams4/git/streamsx.network/SamplePacketFileSource/output/build/TestPacketFileSourceAssignments/toolkits/SamplePacketFileSource'
+14 Aug 2015 17:22:33.065 [28837] INFO spl_pe M[StandaloneApplicationImpl.cpp:createAADL:367]  - PE data directory is set to: '/home/streams4/git/streamsx.network/SamplePacketFileSource/data'
+14 Aug 2015 17:22:33.065 [28837] INFO spl_pe M[StandaloneApplicationImpl.cpp:createAADL:370]  - PE checkpoint directory is set to: '/home/streams4/git/streamsx.network/SamplePacketFileSource/data/ckpt'
+14 Aug 2015 17:22:33.066 [28837] INFO spl_pe M[StandaloneApplicationImpl.cpp:createAADL:373]  - PE executable directory is set to: '/home/streams4/git/streamsx.network/SamplePacketFileSource/output/build/TestPacketFileSourceAssignments/bin/sample.TestPacketFileSourceAssignments-a.dpe'
+14 Aug 2015 17:22:33.129 [28837] INFO spl_pe M[BackoffSpinner.cpp:setYieldBehaviour:52]  - BackoffSpinner: avoid pthread_yield()
+14 Aug 2015 17:22:33.129 [28837] INFO spl_pe M[PEImpl.cpp:initialize:161]  - PE version is 4010
+14 Aug 2015 17:22:33.130 [28837] INFO spl_pe M[PEImpl.cpp:initialize:250]  - Initializing PE performance metric collection...
+14 Aug 2015 17:22:33.130 [28837] INFO spl_pe M[PEImpl.cpp:initialize:254]  - Initialized PE performance metric collection.
+14 Aug 2015 17:22:33.130 [28837] INFO spl_pe M[PEImpl.cpp:initialize:257]  - Initialize JavaVM Factory
+14 Aug 2015 17:22:33.130 [28837] INFO spl_pe M[PEImpl.cpp:initialize:260]  - JavaVM Factory initialized
+14 Aug 2015 17:22:33.132 [28837] INFO spl_app M[StandaloneApplicationImpl.cpp:run:199]  - Starting the standalone application processing
+14 Aug 2015 17:22:33.132 [28837] INFO spl_pe M[PEImpl.cpp:process:802]  - Start processing...
+14 Aug 2015 17:22:33.133 [28837] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketLiveSource M[FullPacketStream.cpp:FullPacketStream$OP:63]  - using libpcap version 1.4.0
+14 Aug 2015 17:22:33.133 [28837] INFO spl_operator M[OperatorContextImpl.cpp:registerStateHandler:291]  - Running in standalone mode -- this call is quietly ignored
+14 Aug 2015 17:22:33.133 [28837] INFO spl_operator M[OperatorContextImpl.cpp:registerStateHandler:291]  - Running in standalone mode -- this call is quietly ignored
+14 Aug 2015 17:22:33.134 [28837] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketLiveSource M[AlternatePacketStream.cpp:AlternatePacketStream$OP:63]  - using libpcap version 1.4.0
+14 Aug 2015 17:22:33.134 [28837] INFO spl_operator M[OperatorContextImpl.cpp:registerStateHandler:291]  - Running in standalone mode -- this call is quietly ignored
+14 Aug 2015 17:22:33.134 [28837] INFO spl_pe M[PECleaners.cpp:initializeImpl:88]  - Opening ports...
+14 Aug 2015 17:22:33.134 [28837] INFO spl_pe M[PECleaners.cpp:initializeImpl:90]  - Opened all ports...
+14 Aug 2015 17:22:33.135 [28837] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketLiveSource M[FullPacketStream.cpp:allPortsReady:86]  - starting 2 threads
+14 Aug 2015 17:22:33.135 [28837] INFO spl_operator M[OperatorImpl.cpp:createThreads:293]  - Creating 2 operator threads
+14 Aug 2015 17:22:33.136 [28847] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketFileSource M[FullPacketStream.cpp:processPCAPfile:172]  - opening PCAP file '/home/streams4/git/streamsx.network/SamplePacketFileSource/data/dns_sample_100_packets.pcap'
+14 Aug 2015 17:22:33.137 [28837] INFO spl_operator M[OperatorImpl.cpp:createThreads:299]  - Created 2 operator threads
+14 Aug 2015 17:22:33.137 [28837] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketLiveSource M[AlternatePacketStream.cpp:allPortsReady:86]  - starting 1 threads
+14 Aug 2015 17:22:33.137 [28837] INFO spl_operator M[OperatorImpl.cpp:createThreads:293]  - Creating 1 operator threads
+14 Aug 2015 17:22:33.138 [28847] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketFileSource M[FullPacketStream.cpp:processPCAPfile:178]  - PCAP linktype of file is 1
+14 Aug 2015 17:22:33.139 [28837] INFO spl_operator M[OperatorImpl.cpp:createThreads:299]  - Created 1 operator threads
+14 Aug 2015 17:22:33.139 [28837] INFO spl_pe M[PEImpl.cpp:joinOperatorThreads:990]  - Joining operator threads...
+14 Aug 2015 17:22:33.139 [28849] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketFileSource M[AlternatePacketStream.cpp:processPCAPfile:169]  - opening PCAP file '/home/streams4/git/streamsx.network/SamplePacketFileSource/data/dns_sample_100_packets.pcap'
+14 Aug 2015 17:22:33.139 [28849] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketFileSource M[AlternatePacketStream.cpp:processPCAPfile:175]  - PCAP linktype of file is 1
+14 Aug 2015 17:22:33.140 [28847] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketFileSource M[FullPacketStream.cpp:processPCAPfile:271]  - closing PCAP file '/home/streams4/git/streamsx.network/SamplePacketFileSource/data/dns_sample_100_packets.pcap'
+14 Aug 2015 17:22:33.142 [28849] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketFileSource M[AlternatePacketStream.cpp:processPCAPfile:273]  - closing PCAP file '/home/streams4/git/streamsx.network/SamplePacketFileSource/data/dns_sample_100_packets.pcap'
+14 Aug 2015 17:22:34.138 [28837] INFO spl_pe M[PEImpl.cpp:joinOperatorThreads:994]  - Joined all operator threads...
+14 Aug 2015 17:22:34.138 [28837] INFO spl_pe M[PEImpl.cpp:joinWindowThreads:1008]  - Joining window threads...
+14 Aug 2015 17:22:34.138 [28837] INFO spl_pe M[PEImpl.cpp:joinWindowThreads:1012]  - Joined all window threads.
+14 Aug 2015 17:22:34.139 [28837] INFO spl_pe M[PEImpl.cpp:joinActiveQueues:999]  - Joining active queues...
+14 Aug 2015 17:22:34.139 [28837] INFO spl_pe M[PEImpl.cpp:joinActiveQueues:1003]  - Joined active queues.
+14 Aug 2015 17:22:34.139 [28837] INFO spl_pe M[PECleaners.cpp:finalizeImpl:116]  - Closing ports...
+14 Aug 2015 17:22:34.139 [28837] INFO spl_pe M[PECleaners.cpp:finalizeImpl:118]  - Closed all ports...
+14 Aug 2015 17:22:34.139 [28837] INFO spl_pe M[PEImpl.cpp:prepareOperatorsForTermination:981]  - Notifying operators of termination...
+14 Aug 2015 17:22:34.140 [28837] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketFileSource M[FullPacketStream.cpp:prepareToShutdown:108]  - read 100 packets in 1.007 seconds, average 99.297 packets/second
+14 Aug 2015 17:22:34.140 [28837] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketFileSource M[FullPacketStream.cpp:prepareToShutdown:111]  - read 15,317 octets in 1.007 seconds, average 15,209.273 octets/second
+14 Aug 2015 17:22:34.140 [28837] INFO #spllog,#splapptrc,J[0],P[0],FullPacketStream,PacketFileSource M[FullPacketStream.cpp:prepareToShutdown:114]  - read 122,536 bits in 1.007 seconds, average 121,674.185 bits/second
+14 Aug 2015 17:22:34.140 [28837] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketFileSource M[AlternatePacketStream.cpp:prepareToShutdown:108]  - read 100 packets in 1.007 seconds, average 99.328 packets/second
+14 Aug 2015 17:22:34.140 [28837] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketFileSource M[AlternatePacketStream.cpp:prepareToShutdown:111]  - read 15,317 octets in 1.007 seconds, average 15,214.122 octets/second
+14 Aug 2015 17:22:34.141 [28837] INFO #spllog,#splapptrc,J[0],P[0],AlternatePacketStream,PacketFileSource M[AlternatePacketStream.cpp:prepareToShutdown:114]  - read 122,536 bits in 1.007 seconds, average 121,712.979 bits/second
+14 Aug 2015 17:22:34.141 [28837] INFO spl_pe M[PEImpl.cpp:prepareOperatorsForTermination:985]  - Notified all operators of termination...
+14 Aug 2015 17:22:34.141 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1017]  - Flushing operator profile metrics...
+14 Aug 2015 17:22:34.141 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1021]  - Flushed all operator profile metrics...
+14 Aug 2015 17:22:34.141 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1023]  - Deleting active queues...
+14 Aug 2015 17:22:34.142 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1027]  - Deleted active queues.
+14 Aug 2015 17:22:34.142 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1029]  - Deleting input port tuple cache...
+14 Aug 2015 17:22:34.142 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1033]  - Deleted input port tuple cache.
+14 Aug 2015 17:22:34.142 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1038]  - Deleting all operators...
+14 Aug 2015 17:22:34.142 [28837] INFO spl_pe M[PEImpl.cpp:deleteOperators:1045]  - Deleted all operators.
+14 Aug 2015 17:22:34.143 [28837] INFO spl_pe M[PEImpl.cpp:process:875]  - Terminating...
+14 Aug 2015 17:22:34.143 [28837] INFO spl_app M[StandaloneApplicationImpl.cpp:run:201]  - Completed the standalone application processing
+14 Aug 2015 17:22:34.143 [28837] INFO spl_app M[StandaloneApplicationImpl.cpp:run:203]  - Leaving MyApplication::run()
+14 Aug 2015 17:22:34.143 [28846] INFO spl_pe M[PEImpl.cpp:shutdown:1084]  - Shutdown request received by PE...
+14 Aug 2015 17:22:34.144 [28846] INFO spl_pe M[PEImpl.cpp:shutdown:1092]  - isJobCancellation is set to 0
+14 Aug 2015 17:22:34.144 [28846] INFO spl_pe M[PEImpl.cpp:shutdown:1099]  - shutdownRequested set to true...
+14 Aug 2015 17:22:34.144 [28846] INFO spl_pe M[PEImpl.cpp:shutdown:1111]  - Exit PEImpl::shutdown()
+[New Thread 0x7fffe8e69700 (LWP 28846)]
+[New Thread 0x7fffe8468700 (LWP 28847)]
+[New Thread 0x7fffe7a67700 (LWP 28848)]
+[New Thread 0x7fffe7066700 (LWP 28849)]
+[Thread 0x7fffe8468700 (LWP 28847) exited]
+[Thread 0x7fffe7066700 (LWP 28849) exited]
+[Thread 0x7fffe7a67700 (LWP 28848) exited]
+[Thread 0x7fffe8e69700 (LWP 28846) exited]
+
+Program exited normally.
+Missing separate debuginfos, use: debuginfo-install glibc-2.12-1.149.el6_6.5.x86_64 krb5-libs-1.10.3-42.el6.x86_64 libattr-2.4.44-7.el6.x86_64 libcap-2.16-5.5.el6.x86_64 libcom_err-1.41.12-22.el6.x86_64 libgcc-4.4.7-16.el6.x86_64 libpcap-1.4.0-4.20130826git2dbcaa1.el6.x86_64 libstdc++-4.4.7-16.el6.x86_64 openssl-1.0.1e-42.el6.x86_64 zlib-1.2.3-29.el6.x86_64
+(gdb) quit

@@ -22,20 +22,21 @@ sub generate($) {
 
     	# skip attributes that don't have assignments
     	my $attribute = $outputPort->getAttributeAt($i);
-	next unless $attribute->hasAssignment();
+		next unless $attribute->hasAssignment();
 
-	# generate an approperiate setter for attributes that do have assignments
-   	my $attributeName = $attribute->getName();
-	if ($attribute->getAssignmentValue()) {
-	   my $cppExpression = $attribute->getAssignmentValue()->getCppExpression();
-	   my $splExpression = $attribute->getAssignmentValue()->getSPLExpression();
-	   print "$tupleName.set_$attributeName( $cppExpression ); // output assignment for attribute $attributeName is expression '$splExpression'\n";
-	} elsif ($attribute->hasAssignmentWithOutputFunction()) {
-	   my $functionName = $attribute->getAssignmentOutputFunctionName();
-	   print "$tupleName.set_$attributeName( $functionName() ); // output assignment for attribute $attributeName is function '$functionName()'\n";
-	} else {
-	  print "$tupleName.set_$attributeName( ??? ); // output assignment for attribute $attributeName is ???\n";
-	}
+		# generate an approperiate setter for attributes that do have assignments
+		my $attributeName = $attribute->getName();
+		my $attributeCppType = $attribute->getCppType();
+		if ($attribute->getAssignmentValue()) {
+			my $cppExpression = $attribute->getAssignmentValue()->getCppExpression();
+			my $splExpression = $attribute->getAssignmentValue()->getSPLExpression();
+			print "$tupleName.set_$attributeName( $cppExpression ); // output assignment is expression '$splExpression'\n";
+		} elsif ($attribute->hasAssignmentWithOutputFunction()) {
+			my $functionName = $attribute->getAssignmentOutputFunctionName();
+			print "$tupleName.set_$attributeName( $functionName() ); // output assignment is function '$functionName()'\n";
+		} else {
+			print "$tupleName.set_$attributeName( ??? ); // output assignment is ???\n";
+		}
     }
 
 

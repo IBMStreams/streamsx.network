@@ -12,7 +12,7 @@ projectDirectory=$( cd $here/.. ; pwd )
 buildDirectory=$projectDirectory/output/build/$composite
 dataDirectory=$projectDirectory/data
 
-traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
+traceLevel=4 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
 
 submitParameterList=(
 pcapFilename=$dataDirectory/dns_sample_100_packets.pcap
@@ -34,7 +34,7 @@ echo -e "\ntrace level: $traceLevel"
 step "executing standalone application '$namespace::$composite' ..."
 #executable=$buildDirectory/bin/$namespace.$composite
 executable=$buildDirectory/bin/standalone.exe
-###gdb --args ...
+#gdb --args 
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0
