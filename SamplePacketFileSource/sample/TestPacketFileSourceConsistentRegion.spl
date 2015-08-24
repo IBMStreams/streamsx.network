@@ -1,0 +1,43 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketFileSourceConsistentRegion {
+
+	param		
+	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap.pcap" );
+	
+	type 
+	
+	FullPacketType =
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 sessionKey,			// hash of source and destination address and port numbers
+		uint64 packetNumber,		// sequence number of packet, as emitted by operator
+		uint32 packetLength,		// original length of packet (not necessarily all captured)
+		blob packetData ;			// contents of packet captured, including network headers (not necessarily complete)
+
+
+	graph
+
+	@consistent(trigger=operatorDriven)
+	stream<FullPacketType> FullPacketStream as Out = PacketFileSource() {
+		param
+			pcapFilename: $pcapFilename;
+		output Out:
+			captureTime = captureTime(),
+			sessionKey = sessionKey(),
+			packetNumber = packetNumber(),
+			packetLength = packetLength(),
+			packetData = packetData(); 
+	}
+	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceConsistentRegion.FullPacketStream.out" ; format: txt ; hasDelayField: true ; }	
+
+	() as JCP = JobControlPlane() {}
+
+}
+
