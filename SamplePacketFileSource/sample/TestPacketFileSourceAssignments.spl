@@ -10,26 +10,25 @@ use com.ibm.streamsx.network.source::*;
 composite TestPacketFileSourceAssignments {
 
 	param		
-	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "data/dns_sample_100_packets.pcap" );
-    expression<float64> $timeout: 5.0;
+	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
 	
 	type 
 	
 	FullPacketType =
-		float64 captureTime,		// time that packet was captured, in seconds.microseconds since Unix epoch 
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
 		uint32 sessionKey,			// hash of source and destination address and port numbers
 		uint64 packetNumber,		// sequence number of packet, as emitted by operator
 		uint32 packetLength,		// original length of packet (not necessarily all captured)
 		blob packetData ;			// contents of packet captured, including network headers (not necessarily complete)
 
 	FullStatisticsType = 
-		float64 statisticsTime,		// time that statistics were produced, in seconds.microseconds since Unix epoch 
+		float64 statisticsTime,		// time that statistics were produced, in seconds since Unix epoch 
 		uint64 packetsProduced,		// number of packets emitted by operator in this interval
 		uint64 octetsProduced;		// number of bytes emitted by operator in this interval
 
 	AlternatePacketType =
-		float64 captureTime,		// time that packet was captured, in seconds.microseconds since Unix epoch 
-		uint32 captureSeconds,		// time that packet was captured, in seconds since Unix epoch 
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 captureSeconds,		// time that packet was captured, in seconds since Unix epoch (integer portion only)
 		uint32 captureMicroseconds,	// time that packet was captured, in microseconds since captureSeconds()
 		timestamp captureTimestamp,	// time that packet was captured, in seconds and nanoseconds since Unix epoch
 		uint64 packetNumber,		// sequence number of packet, as emitted by operator
@@ -40,11 +39,11 @@ composite TestPacketFileSourceAssignments {
 		blob packetData ;			// contents of packet, including network headers (not necessarily complete)
 	
 	AlternateStatisticsType = 
-		float64 statisticsTime,		// time that statistics were produced, in seconds.microseconds since Unix epoch 
+		float64 statisticsTime,		// time that statistics were produced, in seconds since Unix epoch 
 		uint64 packetsProduced,		// number of packets emitted by operator
 		float64 packetsProducedAsFloat,		// number of packets emitted by operator, as a 64-bit float
 		int32 packetsProducedAsInteger,		// number of packets emitted by operator, as a signed 32-bit integer
-		rstring packetsProducedAsString,		// number of packets emitted by operator, as a string
+		rstring packetsProducedAsString,	// number of packets emitted by operator, as a string
 		uint64 octetsProduced;		// number of bytes emitted by operator in this interval
 
 	graph
@@ -98,8 +97,6 @@ composite TestPacketFileSourceAssignments {
 	}
 	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceAssignments.AlternatePacketStream.out" ; format: txt ; hasDelayField: true ; }	
 	() as AlternateStatisticsSink = FileSink(AlternateStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.AlternateStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
-
-	() as Timeout = Custom() { logic onProcess: { block($timeout); shutdownPE(); } }
 
 }
 

@@ -49,12 +49,12 @@ public:
   void process(Tuple const & tuple, uint32_t port);
   void process(Punctuation const & punct, uint32_t port);
 
-<% if ($consistentRegion) { %>
+  <% if ($consistentRegion) { %>
 	ConsistentRegionContext * const crContext;
 	void checkpoint(Checkpoint &ckpt);
 	void reset(Checkpoint &ckpt);
 	void resetToInitialState();
-<% } %>  	  
+	<% } %> ; 	  
  
   // ----------- additional operator methods ----------
 
@@ -62,7 +62,7 @@ public:
   void file_thread(); 
   void statistics_thread(); 
 
-private:
+ private:
 
   // ----------- operator parameters (constant after constructor executes) ----------
 
@@ -85,7 +85,9 @@ private:
   struct pcap_pkthdr* pcapHeader;
   const u_char* pcapBuffer;
   
-  // ----------- network header parser (function and state) ----------
+  // ----------- network header parser (function and state), to be moved to /impl/include/parse ... ------
+
+  /*note: the following code does not handle variable-length network headers yet */
 
   bool packetRawIP;
   char* packetBuffer;
@@ -118,8 +120,6 @@ private:
 	tcpHeader = NULL;
 	etherHeaderLength = ipv4HeaderLength = udpHeaderLength = tcpHeaderLength = 0;
 	
-	/********* note: the following code does not handle variable-length headers yet *********/
-
 	// if there is an ethernet header, overlay an ethernet header structure on it
 	if (!isRawIP && captureLength>sizeof(struct ethhdr)) etherHeader = (struct ethhdr*)packet;
 		

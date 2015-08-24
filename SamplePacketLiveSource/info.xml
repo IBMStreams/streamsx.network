@@ -11,5 +11,9 @@
       <common:name>com.ibm.streamsx.network</common:name>
       <common:version>2.0.0</common:version>
     </info:toolkit>
+    <info:toolkit>
+      <common:name>SampleData</common:name>
+      <common:version>[2.0.0,3.0.0)</common:version>
+    </info:toolkit>
   </info:dependencies>
 </info:toolkitInfoModel>

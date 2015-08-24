@@ -10,15 +10,12 @@ use com.ibm.streamsx.network.source::*;
 composite TestPacketFileSourceFilters {
 
 	param		
-	expression<rstring> $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "data" );
-    expression<float64> $timeout: 5.0;
+	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
 	
 	type 
 	
 	PacketType =
-	  rstring filepath,         // implicitly copied from input tuple
-	  rstring filepathAgain,    // explicitly copied from input tuple
-	  float64 captureTime,		// time that packet was captured, in seconds.microseconds since Unix epoch 
+	  float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
 	  uint32 sessionKey,		// hash of source and destination address and port numbers
 	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
 	  uint32 packetLength,		// original length of packet (not necessarily all captured)
@@ -26,19 +23,12 @@ composite TestPacketFileSourceFilters {
 
 	graph
 
-	stream<rstring filepath> FilepathStream as Out = DirectoryScan() {
-	  param
-	      directory: $pcapDirectory; 
-	      pattern: "\\.pcap$"; 
-	output Out:
-	      filepath = FullPath(); }
-
-	stream<PacketType> DNSPacketStream as Out = PacketFileSource(FilepathStream) {
+	stream<PacketType> DNSPacketStream as Out = PacketFileSource() {
 		param
+			pcapFilename: $pcapFilename;
 		    filterExpression: "udp port 53";
 		output Out:
 			captureTime = captureTime(),
-		    filepathAgain = filepath,
 			sessionKey = sessionKey(),
 			packetNumber = packetNumber(),
 			packetLength = packetLength(),
@@ -46,12 +36,12 @@ composite TestPacketFileSourceFilters {
 	}
 	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out" ; format: txt ; hasDelayField: true ; }	
 
-	stream<PacketType> DHCPPacketStream as Out = PacketFileSource(FilepathStream) {
+	stream<PacketType> DHCPPacketStream as Out = PacketFileSource() {
 		param
+			pcapFilename: $pcapFilename;
 		    filterExpression: "udp port 67 or udp port 68";
 		output Out:
 			captureTime = captureTime(),
-		    filepathAgain = filepath,
 			sessionKey = sessionKey(),
 			packetNumber = packetNumber(),
 			packetLength = packetLength(),
@@ -59,7 +49,5 @@ composite TestPacketFileSourceFilters {
 	}
 	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out" ; format: txt ; hasDelayField: true ; }	
 
-
-	() as Timeout = Custom() { logic onProcess: { block($timeout); shutdownPE(); } }
-} 
+}
 
