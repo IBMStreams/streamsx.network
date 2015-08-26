@@ -41,14 +41,6 @@
           </function>
           <function>
             <description></description>
-            <prototype>uint64 packetsConsumed()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint64 octetsConsumed()</prototype>
-          </function>
-          <function>
-            <description></description>
             <prototype>uint64 packetsProduced()</prototype>
           </function>
           <function>

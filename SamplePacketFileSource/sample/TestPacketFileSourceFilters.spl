@@ -19,7 +19,7 @@ composite TestPacketFileSourceFilters {
 	  uint32 sessionKey,		// hash of source and destination address and port numbers
 	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
 	  uint32 packetLength,		// original length of packet (not necessarily all captured)
-	  blob packetData ;			// contents of packet captured, including network headers (not necessarily complete)
+	  blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
 
 	graph
 
@@ -34,7 +34,7 @@ composite TestPacketFileSourceFilters {
 			packetLength = packetLength(),
 			packetData = packetData(); 
 	}
-	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 	stream<PacketType> DHCPPacketStream as Out = PacketFileSource() {
 		param
@@ -47,7 +47,7 @@ composite TestPacketFileSourceFilters {
 			packetLength = packetLength(),
 			packetData = packetData(); 
 	}
-	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 }
 

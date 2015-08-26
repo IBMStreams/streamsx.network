@@ -25,60 +25,164 @@
 
 #include <pcap.h>
 
+#include <streams_boost/filesystem.hpp>
+
+#include <SPL/Runtime/Common/Metric.h>
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
 class MY_OPERATOR : public MY_BASE_OPERATOR 
 {
 public:
-  // Constructor
+
+  // ----------- standard operator methods ----------
+
   MY_OPERATOR();
-
-  // Destructor
   virtual ~MY_OPERATOR(); 
-
-  // Notify port readiness
   void allPortsReady(); 
-
-  // Notify pending shutdown
   void prepareToShutdown(); 
-
-  // Processing for source and threaded operators   
   void process(uint32_t idx);
-    
-  // Tuple processing for mutating ports 
   void process(Tuple & tuple, uint32_t port);
-    
-  // Tuple processing for non-mutating ports
   void process(Tuple const & tuple, uint32_t port);
-
-  // Punctuation processing
   void process(Punctuation const & punct, uint32_t port);
 
-  // machine identifier, for type 'SPL::timestamp' assignments by timestampp() output function  	
-  int32_t machineID;
-  double statisticsInterval;
+  // ----------- additional operator methods ----------
 
-  // packet and byte counters
-  uint64_t packetCounter;
-  uint64_t octetCounter;
+  void statistics_thread(); 
+  void pcap_thread();
+  void processPCAPbuffer(const struct pcap_pkthdr* header, const u_char* buffer); 
 
-  // output tuples 
-  OPort0Type packetTuple;
-  <% if ($model->getNumberOfOutputPorts()==2) { %>OPort1Type statisticsTuple;<% } %>
 
 private:
 
-  // name of network interface	
-  const char* networkInterface;
+  // ----------- operator parameters (constant after constructor executes) ----------
+ 
+  std::string networkInterface;
+  std::string filterExpression;
+  std::string timestampType;
+  double initDelay;
+  int32_t processorAffinity;
+  int32_t maximumLength;
+  int32_t bufferSize;
+  bool promiscuous;
+  double timeout;
+  double statisticsInterval;
 
-  // handle for open PCAP interface
+  // ----------- operator state variables ----------
+
+  double now;
+
+  struct pcap_stat pcapStatistics, previousPCAPStatistics;
+
+  uint64_t packetCounter, previousPacketCounter;
+  uint64_t octetCounter, previousOctetCounter;
+
+  // ----------- libpcap-specific variables ----------
+
   pcap_t* pcapDescriptor;
+  const struct pcap_pkthdr* pcapHeader;
+  const u_char* pcapBuffer;
 
-  // main loops for operator's threads
-  void process_pcap_packets();
-  void process_pcap_metrics();
-  <% if ($model->getNumberOfOutputPorts()==2) { %>void process_pcap_statistics(); <% } %>
+  // ----------- network header parser (function and state), to be moved to /impl/include/parse ... ------
+
+  /*note: the following code does not handle variable-length network headers yet */
+
+  bool packetRawIP;
+  char* packetBuffer;
+  int bufferLength;
+  int pktLength;
+
+  struct ethhdr dummyEthernetHeader;
+  struct ethhdr* etherHeader;
+  struct ip* ipv4Header;
+  struct udphdr* udpHeader;
+  struct tcphdr* tcpHeader;
+
+  int etherHeaderLength;
+  int ipv4HeaderLength;
+  int udpHeaderLength;
+  int tcpHeaderLength;
+  
+  void parseNetworkHeaders(char* packet, int captureLength, int fullLength, bool isRawIP=false) {
+
+	// save address and length of packet for the output attribute assignment functions 
+	packetRawIP = isRawIP;
+	packetBuffer = packet;
+	bufferLength = captureLength;
+	pktLength = fullLength;	
+
+	// clear network header pointers
+	etherHeader = NULL;
+	ipv4Header = NULL;
+	udpHeader = NULL;
+	tcpHeader = NULL;
+	etherHeaderLength = ipv4HeaderLength = udpHeaderLength = tcpHeaderLength = 0;
+	
+	// if there is an ethernet header, overlay an ethernet header structure on it
+	if (!isRawIP && captureLength>sizeof(struct ethhdr)) etherHeader = (struct ethhdr*)packet;
+		
+	// if this is an IP packet, and it actually has an IPv4 header, overlay an IPv4 header structure on it
+	if ( etherHeader && ntohs(etherHeader->h_proto)==ETH_P_IP && captureLength>=sizeof(struct ethhdr)+sizeof(struct ip) ) {
+	  ipv4Header = (struct ip*)(packet + sizeof(struct ethhdr)); }
+	else if ( isRawIP && captureLength>=sizeof(struct ip) ) {
+	  ipv4Header = (struct ip*)packet; }
+	
+	// if this is a UDP packet, and it actually has a UDP header, overlay a UDP header structure on it
+	if ( (ipv4Header && ipv4Header->ip_p==IPPROTO_UDP && captureLength>=sizeof(struct ethhdr)+sizeof(struct ip)+sizeof(struct udphdr)) ) {
+	  udpHeader = (struct udphdr*)((char*)ipv4Header + ipv4Header->ip_hl*4); }
+	
+	// if this is a TCP packet, and it actually has a TCP header, overlay a TCP header structure on it
+	if ( (ipv4Header && ipv4Header->ip_p==IPPROTO_TCP && captureLength>=sizeof(struct ethhdr)+sizeof(struct ip)+sizeof(struct tcphdr)) ) {
+	  tcpHeader = (struct tcphdr*)((char*)ipv4Header + ipv4Header->ip_hl*4); }	
+  }
+
+  // ----------- output attribute assignment functions for packet stream (port 0) ----------
+
+  double captureTime() { 
+    return (double)(pcapHeader->ts.tv_sec) + ((double)(pcapHeader->ts.tv_usec))/1000000.0; }
+
+  uint32_t sessionKey() { 
+    uint32_t key = 0;
+    if (ipv4Header) key += ntohl(ipv4Header->ip_src.s_addr) + ntohl(ipv4Header->ip_dst.s_addr);
+    if (udpHeader) key += ntohs(udpHeader->source) + ntohs(udpHeader->dest);
+    if (tcpHeader) key += ntohs(tcpHeader->source) + ntohs(tcpHeader->dest);				
+    return key; }
+
+  uint64_t packetNumber() { 
+    return packetCounter; }  
+
+  uint32_t packetLength() { 
+    return pktLength + (packetRawIP ? sizeof(struct ethhdr) : 0); } 
+
+  SPL::blob packetData() { 
+    if (!packetRawIP) return SPL::blob((const unsigned char*)packetBuffer, bufferLength); 
+    dummyEthernetHeader.h_proto = htons((ipv4Header->ip_v)==6 ? ETH_P_IPV6 : ETH_P_IP);
+    SPL::blob dummyPacket( (const unsigned char *)(&dummyEthernetHeader), sizeof(dummyEthernetHeader) );
+    dummyPacket.append((const unsigned char *)packetBuffer, bufferLength); 
+    return dummyPacket; }  
+
+  // ---------- output attribute assignment functions for statistics stream (port 1) ----------
+
+  double statisticsTime() { 
+    return now; }
+
+  uint64_t packetsReceived() { 
+    return pcapStatistics.ps_recv - previousPCAPStatistics.ps_recv; }  
+
+  uint64_t packetsDropped() { 
+    return pcapStatistics.ps_drop - previousPCAPStatistics.ps_drop; }  
+
+  uint64_t packetsDroppedByInterface() { 
+    return pcapStatistics.ps_ifdrop - previousPCAPStatistics.ps_ifdrop; }  
+
+  uint64_t packetsProduced() { 
+    return packetCounter - previousPacketCounter; }  
+
+  uint64_t octetsProduced() { 
+    return octetCounter - previousOctetCounter; }  
+
+  // ------------------------------------------------------------------------------------------
 
 }; 
 

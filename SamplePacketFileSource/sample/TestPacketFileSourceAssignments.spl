@@ -19,7 +19,7 @@ composite TestPacketFileSourceAssignments {
 		uint32 sessionKey,			// hash of source and destination address and port numbers
 		uint64 packetNumber,		// sequence number of packet, as emitted by operator
 		uint32 packetLength,		// original length of packet (not necessarily all captured)
-		blob packetData ;			// contents of packet captured, including network headers (not necessarily complete)
+		blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
 
 	FullStatisticsType = 
 		float64 statisticsTime,		// time that statistics were produced, in seconds since Unix epoch 
@@ -36,7 +36,7 @@ composite TestPacketFileSourceAssignments {
 		int8 packetNumberModulo13,	// sequence number of packet modulo 13, as signed 8-bit integer
 		uint32 packetLength,		// original length of packet (not necessarily all captured)
 		int32 packetLengthSigned,	// original length of packet, as signed 32-bit integer
-		blob packetData ;			// contents of packet, including network headers (not necessarily complete)
+		blob packetData;			// contents of packet, including network headers (not necessarily complete)
 	
 	AlternateStatisticsType = 
 		float64 statisticsTime,		// time that statistics were produced, in seconds since Unix epoch 
@@ -66,8 +66,8 @@ composite TestPacketFileSourceAssignments {
 			packetsProduced = packetsProduced(),
 			octetsProduced = octetsProduced();
 	}
-	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceAssignments.FullPacketStream.out" ; format: txt ; hasDelayField: true ; }	
-	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.FullStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceAssignments.FullPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.FullStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 
 	( stream<AlternatePacketType> AlternatePacketStream as OutPackets ;
@@ -82,8 +82,8 @@ composite TestPacketFileSourceAssignments {
 			captureMicroseconds =(uint32)(fmod(captureTime(),1.0)*1000000.0),
 			captureTimestamp = createTimestamp((int64)captureTime(), (uint32)(fmod(captureTime(),1.0)*1000000000.0), 0),
 			packetNumber = packetNumber(),
-			packetNumberPlusOne = packetNumber() + 1ul,
-			packetNumberModulo13 = (int8)(packetNumber() % 13ul),
+			packetNumberPlusOne = packetNumber() + (uint64)1u,
+			packetNumberModulo13 = (int8)(packetNumber() % (uint64)13),
 			packetLength = packetLength(),
 			packetLengthSigned = (int32)packetLength(),
 			packetData = packetData(); 
@@ -95,8 +95,8 @@ composite TestPacketFileSourceAssignments {
 			packetsProducedAsString = (rstring)packetsProduced(),
 			octetsProduced = octetsProduced();
 	}
-	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceAssignments.AlternatePacketStream.out" ; format: txt ; hasDelayField: true ; }	
-	() as AlternateStatisticsSink = FileSink(AlternateStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.AlternateStatisticsStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceAssignments.AlternatePacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as AlternateStatisticsSink = FileSink(AlternateStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.AlternateStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 }
 

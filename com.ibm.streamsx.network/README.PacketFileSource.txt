@@ -289,7 +289,7 @@ situations:
 _____Examples_____
 
 
-The SamplePacketLiveSource directory in this toolkit contains examples of this
+The SampleNetworkToolkitData project in this toolkit contains examples of this
 operator.
 
 

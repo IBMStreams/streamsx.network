@@ -9,30 +9,24 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketFileSourceConsistentRegion
+composite=TestPacketLiveSourceBasic1
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 workspaceDirectory=$( cd $here/../.. ; pwd )
 buildDirectory=$projectDirectory/output/build/$composite
-pcapDirectory=$workspaceDirectory/SampleNetworkToolkitData
-checkpointDirectory=$HOME/checkpoint
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
-instance=ConsistentInstance
-
 toolkitList=(
 $workspaceDirectory/com.ibm.streamsx.network
-$workspaceDirectory/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
 --verbose-mode
 --rebuild-toolkits
 --spl-path=$( IFS=: ; echo "${toolkitList[*]}" )
---part-mode=FALL
---allow-convenience-fusion-options
+--standalone-application
 --optimized-code-generation
 --cxx-flags=-g3
 --static-link
@@ -46,10 +40,11 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$pcapDirectory/sample_dns+dhcp.pcap
+networkInterface=eth0
+timeoutInterval=10.0
 )
 
-tracing=info # ... one of ... off, error, warn, info, debug, trace
+traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
 
 ################### functions used in this script #############################
 
@@ -62,28 +57,23 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 
-step "configuration for distributed application '$namespace::$composite' ..."
+step "configuration for standalone application '$namespace::$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
 ( IFS=$'\n' ; echo -e "\nStreams compiler options:\n${compilerOptionsList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite submission-time parameters:\n${submitParameterList[*]}" )
-echo -e "\ninstance: $instance"
-echo -e "\ntracing: $tracing"
+echo -e "\ntrace level: $traceLevel"
 
-step "building distributed application '$namespace::$composite' ..."
+step "building standalone application '$namespace::$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
 
-step "submitting distributed application '$namespace::$composite' ..."
-bundle=$buildDirectory/$namespace.$composite.sab
-parameters=$( printf ' --P %s' ${submitParameterList[*]} )
-streamtool submitjob --instance-id $instance --config tracing=$tracing $parameters $bundle || die "sorry, could not submit application '$composite', $?"
+step "setting execution capabilities for standalone application '$namespace::$composite' ..."
+executable=$buildDirectory/bin/standalone.exe
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
 
-step "waiting while application runs ..."
-sleep 5
-
-step "cancelling distributed application '$namespace::$composite' ..."
-jobs=$( streamtool lspes --instance-id $instance | grep $namespace::$composite | gawk '{ print $1 }' )
-streamtool canceljob --instance-id $instance --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
+step "executing standalone application '$namespace::$composite' ..."
+#sudo gdb --args 
+$executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0
 

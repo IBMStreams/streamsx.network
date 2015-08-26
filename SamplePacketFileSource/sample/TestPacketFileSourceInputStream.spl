@@ -22,7 +22,7 @@ composite TestPacketFileSourceInputStream {
 	  uint32 sessionKey,		// hash of source and destination address and port numbers
 	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
 	  uint32 packetLength,		// original length of packet (not necessarily all captured)
-	  blob packetData ;			// contents of packet captured, including network headers (not necessarily complete)
+	  blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
 
 	graph
 
@@ -42,7 +42,7 @@ composite TestPacketFileSourceInputStream {
 			packetLength = packetLength(),
 			packetData = packetData(); 
 	}
-	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceInputStream.PacketStream.out" ; format: txt ; hasDelayField: true ; }	
+	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceInputStream.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 } 

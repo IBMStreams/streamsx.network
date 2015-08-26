@@ -13,7 +13,7 @@
 *.splmm.idx
 *.splmm.xml
 *.splbuild
-StreamsLogsJob*.tgz
+StreamsLogs*.tgz
 
 # ignore GCC compiler and linker files
 *.o

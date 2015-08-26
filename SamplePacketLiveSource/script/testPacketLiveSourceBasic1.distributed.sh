@@ -9,22 +9,19 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketFileSourceConsistentRegion
+composite=TestPacketLiveSourceBasic1
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 workspaceDirectory=$( cd $here/../.. ; pwd )
-buildDirectory=$projectDirectory/output/build/$composite
-pcapDirectory=$workspaceDirectory/SampleNetworkToolkitData
-checkpointDirectory=$HOME/checkpoint
+buildDirectory=$projectDirectory/output/build/$composite.distributed
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
-instance=ConsistentInstance
+instance=CapabilitiesInstance
 
 toolkitList=(
 $workspaceDirectory/com.ibm.streamsx.network
-$workspaceDirectory/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -46,7 +43,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$pcapDirectory/sample_dns+dhcp.pcap
+networkInterface=eth0
+timeoutInterval=10.0
 )
 
 tracing=info # ... one of ... off, error, warn, info, debug, trace
@@ -67,7 +65,7 @@ step "configuration for distributed application '$namespace::$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams compiler options:\n${compilerOptionsList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite submission-time parameters:\n${submitParameterList[*]}" )
-echo -e "\ninstance: $instance"
+echo -e "\binstance: $instance"
 echo -e "\ntracing: $tracing"
 
 step "building distributed application '$namespace::$composite' ..."
@@ -79,7 +77,10 @@ parameters=$( printf ' --P %s' ${submitParameterList[*]} )
 streamtool submitjob --instance-id $instance --config tracing=$tracing $parameters $bundle || die "sorry, could not submit application '$composite', $?"
 
 step "waiting while application runs ..."
-sleep 5
+sleep 15
+
+step "getting logs for instance $instance ..."
+streamtool getlog --instance-id $instance || die "sorry, could not get logs, $!"
 
 step "cancelling distributed application '$namespace::$composite' ..."
 jobs=$( streamtool lspes --instance-id $instance | grep $namespace::$composite | gawk '{ print $1 }' )
