@@ -7,7 +7,7 @@ namespace sample;
 
 use com.ibm.streamsx.network.source::*;
 
-composite TestPacketFileSourceAssignments {
+composite TestPacketFileSourceExpressions {
 
 	param		
 	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
@@ -66,8 +66,8 @@ composite TestPacketFileSourceAssignments {
 			packetsProduced = packetsProduced(),
 			octetsProduced = octetsProduced();
 	}
-	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceAssignments.FullPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.FullStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceExpressions.FullPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSourceExpressions.FullStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 
 	( stream<AlternatePacketType> AlternatePacketStream as OutPackets ;
@@ -95,8 +95,8 @@ composite TestPacketFileSourceAssignments {
 			packetsProducedAsString = (rstring)packetsProduced(),
 			octetsProduced = octetsProduced();
 	}
-	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceAssignments.AlternatePacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as AlternateStatisticsSink = FileSink(AlternateStatisticsStream) { param file: "debug.TestPacketFileSourceAssignments.AlternateStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceExpressions.AlternatePacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as AlternateStatisticsSink = FileSink(AlternateStatisticsStream) { param file: "debug.TestPacketFileSourceExpressions.AlternateStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 }
 

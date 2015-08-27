@@ -103,10 +103,15 @@
       </customOutputFunctions>
       <libraryDependencies>
         <library>
-          <cmn:description>
-	  </cmn:description>
+          <cmn:description>'libpcap' version determined dynamically at compile time</cmn:description>
           <cmn:managedLibrary>
-            <cmn:command>../Common/libpcapPath.pl</cmn:command>
+            <cmn:command>../../impl/bin/libpcapPath.pl</cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description>common code for toolkit operators</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
           </cmn:managedLibrary>
         </library>
       </libraryDependencies>

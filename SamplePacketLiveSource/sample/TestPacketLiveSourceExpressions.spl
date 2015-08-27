@@ -7,7 +7,7 @@ namespace sample;
 
 use com.ibm.streamsx.network.source::*;
 
-composite TestPacketLiveSourceAssignments {
+composite TestPacketLiveSourceExpressions {
 
 	param		
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
@@ -69,8 +69,8 @@ composite TestPacketLiveSourceAssignments {
 			packetsProducedAsString = (rstring)packetsProduced(),
 			octetsProduced = octetsProduced();
 	}
-	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketLiveSourceAssignments.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as StatisticsSink = FileSink(StatisticsStream) { param file: "debug.TestPacketLiveSourceAssignments.StatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketLiveSourceExpressions.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as StatisticsSink = FileSink(StatisticsStream) { param file: "debug.TestPacketLiveSourceExpressions.StatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 }

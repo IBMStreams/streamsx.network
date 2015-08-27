@@ -3,7 +3,7 @@
 ## Copyright (C) 2011, 2015  International Business Machines Corporation
 ## All Rights Reserved
 
-unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/Common";
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require OutputAssignmentGenerator;
 
 # These fragments of Perl code get strings from the operator's declaration
@@ -19,9 +19,9 @@ my $inputPort = $model->getNumberOfInputPorts()>0 ? $model->getInputPortAt(0) : 
 my $outputPort0 = $model->getNumberOfOutputPorts()>0 ? $model->getOutputPortAt(0) : undef;
 my $outputPort1 = $model->getNumberOfOutputPorts()>1 ? $model->getOutputPortAt(1) : undef;
 
-# get C++ expressions for getting the values of this operator's optional parameters
+# get C++ expressions for getting the values of this operator's parameters
 my $pcapFilename = $model->getParameterByName("pcapFilename") ? $model->getParameterByName("pcapFilename")->getValueAt(0)->getCppExpression() : undef;
-my $filterExpression = $model->getParameterByName("filterExpression") ? $model->getParameterByName("filterExpression")->getValueAt(0)->getCppExpression() : "";
+my $filterExpression = $model->getParameterByName("filterExpression") ? $model->getParameterByName("filterExpression")->getValueAt(0)->getCppExpression() : undef;
 my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterByName("initDelay")->getValueAt(0)->getCppExpression() : 0;
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
 my $statisticsInterval = $model->getParameterByName("statisticsInterval") ? $model->getParameterByName("statisticsInterval")->getValueAt(0)->getCppExpression() : 10.0;
@@ -59,7 +59,8 @@ MY_OPERATOR::MY_OPERATOR()
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketFileSource");
 
   // set operator parameters
-  filterExpression = "<%=$filterExpression%>";
+  pcapFilename = <%=$pcapFilename?$pcapFilename:'""'%>;
+  filterExpression = <%=$filterExpression?$filterExpression:'""'%>;
   initDelay = <%=$initDelay%>;
   processorAffinity = <%=$processorAffinity%>;
   statisticsInterval = <%=$statisticsInterval%>;
@@ -67,9 +68,6 @@ MY_OPERATOR::MY_OPERATOR()
   // initialize operator state variables
   startTimeInNanoseconds = SPL::Functions::Time::getCPUCounterInNanoSeconds();
   done = false;
-
-  // clear the dummy ethernet header
-  memset(&dummyEthernetHeader, 0, sizeof(dummyEthernetHeader));
 
 #if defined(lib_pcap_pcap_h)
   // log the 'libpcap' version that will be used
@@ -161,10 +159,10 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 	IPort0Type const & iport$0 = tuple;
 
 	// get the value of the first attribute
-	const std::string pcapFilename = static_cast<const std::string>( iport$0.get_<%=$inputPort->getAttributeAt(0)->getName()%>() );
+	const std::string filename = static_cast<const std::string>( iport$0.get_<%=$inputPort->getAttributeAt(0)->getName()%>() );
 
 	// process the PCAP input file specified by the first attribute in the tuple
-	processPCAPfile(pcapFilename);
+	processPCAPfile(filename);
 	<% } %> ;
 }
 
@@ -201,13 +199,16 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 
 
 // Process one PCAP file, specified either with a parameter or an input tuple
-void MY_OPERATOR::processPCAPfile(const std::string pcapFilename)
+void MY_OPERATOR::processPCAPfile(const std::string filename)
 {
+  SPLLOG(L_INFO, "opening PCAP file '" << filename << "'", "PacketFileSource");
   char pcapError[PCAP_ERRBUF_SIZE] = "\0";
+  pcap_t* pcapDescriptor = pcap_open_offline(filename.c_str(), pcapError);
+  if (!pcapDescriptor) THROW (SPLRuntimeOperator, "error opening PCAP file '" << filename << "', " << pcapError);
 
-  SPLLOG(L_INFO, "opening PCAP file '" << pcapFilename << "'", "PacketFileSource");
-  pcap_t* pcapDescriptor = pcap_open_offline(pcapFilename.c_str(), pcapError);
-  if (!pcapDescriptor) THROW (SPLRuntimeOperator, "error opening PCAP file '" << pcapFilename << "', " << pcapError);
+  // we'll need to append packets that lack ethernet headers to an empty one in a temporary buffer
+  struct ethhdr emptyEthernetHeader = {};
+  SPL::blob rawIPBuffer;
 
   // remember whether or not packets in this PCAP file have ethernet headers
   const int linktype = pcap_datalink(pcapDescriptor);
@@ -216,7 +217,7 @@ void MY_OPERATOR::processPCAPfile(const std::string pcapFilename)
   switch(linktype) {
   case DLT_EN10MB: isRawIP = false; break;
   case DLT_RAW: isRawIP = true; break;
-  default: THROW (SPLRuntimeOperator, "unsupported PCAP linktype " << linktype << " in file '" << pcapFilename << "', " << pcapError);
+  default: THROW (SPLRuntimeOperator, "unsupported PCAP linktype " << linktype << " in file '" << filename << "', " << pcapError);
   }
 
   // compile and activate a filter expression, if there is one
@@ -242,9 +243,19 @@ void MY_OPERATOR::processPCAPfile(const std::string pcapFilename)
 	if (rc==-1) THROW (SPLRuntimeOperator, "error reading PCAP file, " << strerror(errno)); // something went wrong
 	//if (rc==0) ... // got another packet to process
 
-	// find the network headers in the packet
-	parseNetworkHeaders((char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len, isRawIP);
-	if (!ipv4Header) { SPLLOG(L_INFO, "ignoring packet, no IPv4 header found", "PacketFileSource");  continue; }
+	// locate the network headers in the packet, or a copy of the packet, if it does not have an ethernet header
+	if (isRawIP) {
+	  emptyEthernetHeader.h_proto = htons( ( ((struct ip*)pcapBuffer)->ip_v ) == 6 ? ETH_P_IPV6 : ETH_P_IP );
+	  rawIPBuffer.clear();
+	  rawIPBuffer.append( (const unsigned char *)(&emptyEthernetHeader), sizeof(emptyEthernetHeader) );
+	  rawIPBuffer.append( (const unsigned char *)pcapBuffer, pcapHeader->caplen ); 
+	  headers.locateNetworkHeaders( (char*)rawIPBuffer.getData(), rawIPBuffer.getSize(), pcapHeader->len );
+	} else {
+	  headers.locateNetworkHeaders( (char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len );
+	}
+
+	// ignore non-IPv4 packets
+	if (!headers.ipv4Header) { SPLLOG(L_INFO, "ignoring packet, no IPv4 header found", "PacketFileSource");  continue; }
 
 	// clear the output tuple
 	outTuple.clear();
@@ -270,58 +281,58 @@ void MY_OPERATOR::processPCAPfile(const std::string pcapFilename)
   // close the PCAP file before returning
   pcap_close(pcapDescriptor);
 
-  SPLLOG(L_INFO, "closing PCAP file '" << pcapFilename << "'", "PacketFileSource");
+  SPLLOG(L_INFO, "closing PCAP file '" << filename << "'", "PacketFileSource");
 }
 
 
 
 
 
-<% if ($pcapFilename) { %>
 
-  // When there is no input port, this thread processes the PCAP file specified with the 'pcapFilename' parameter
 
-  void MY_OPERATOR::file_thread()
-  {
-	SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> file_thread()", "PacketFileSource");
+// When there is no input port, this thread processes the PCAP file specified with the 'pcapFilename' parameter
 
-	// assign this thread to a particular processor core, if necessary
-	if (processorAffinity>=0) { 
-	  SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "PacketFileSource");
-	  cpu_set_t cpumask; // CPU affinity bit mask
-	  CPU_ZERO(&cpumask);
-	  CPU_SET(processorAffinity, &cpumask);
-	  const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
-	  if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
-	}
+void MY_OPERATOR::file_thread()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> file_thread()", "PacketFileSource");
 
-	// wait for a while before starting, if necessary
-	if (initDelay>0) {
-	  SPLLOG(L_INFO, "waiting " << initDelay << " seconds before starting", "PacketFileSource");
-	  getPE().blockUntilShutdownRequest(initDelay);
-	  if (getPE().getShutdownRequested()) return;
-	}
-
-	// convert PCAP input filename to absolute path, if necessary
-	streams_boost::filesystem::path pcapFilename(<%=$pcapFilename%>);
-	if(pcapFilename.is_relative()) {
-	  pcapFilename = streams_boost::filesystem::absolute(pcapFilename, getPE().getDataDirectory());
-	}
-     
-	// process the entire PCAP file, checkpointing if necessary
-	{
-	  <% if ($consistentRegion) { %> ConsistentRegionPermit crp(crContext); <% } %> ;
-	  processPCAPfile( static_cast<const std::string>(pcapFilename.string()) );	
-	  <% if ($consistentRegion && $consistentRegion->isTriggerOperator()) { %> crContext->makeConsistent(); <% } %> ;
-	}
-
-	// tell the statistics thread we're done, if there is one
-	done = true;
-
-	SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> file_thread()", "PacketFileSource");
+  // assign this thread to a particular processor core, if necessary
+  if (processorAffinity>=0) { 
+	SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "PacketFileSource");
+	cpu_set_t cpumask; // CPU affinity bit mask
+	CPU_ZERO(&cpumask);
+	CPU_SET(processorAffinity, &cpumask);
+	const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
+	if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
   }
 
-  <% } %> ;
+  // wait for a while before starting, if necessary
+  if (initDelay>0) {
+	SPLLOG(L_INFO, "waiting " << initDelay << " seconds before starting", "PacketFileSource");
+	getPE().blockUntilShutdownRequest(initDelay);
+	if (getPE().getShutdownRequested()) return;
+  }
+
+  // convert pcapFilename parameter value to absolute path, if necessary
+  streams_boost::filesystem::path filepath(pcapFilename);
+  if(filepath.is_relative()) {
+	filepath = streams_boost::filesystem::absolute(filepath, getPE().getDataDirectory());
+  }
+     
+  // process the entire PCAP file, checkpointing if necessary
+  {
+	<% if ($consistentRegion) { %> ConsistentRegionPermit crp(crContext); <% } %> ;
+	processPCAPfile( static_cast<const std::string>(filepath.string()) );	
+	<% if ($consistentRegion && $consistentRegion->isTriggerOperator()) { %> crContext->makeConsistent(); <% } %> ;
+  }
+
+  // tell the statistics thread we're done, if there is one
+  done = true;
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> file_thread()", "PacketFileSource");
+}
+
+
 
 
 

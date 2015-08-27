@@ -5,6 +5,7 @@
 */.apt_generated/
 */.settings/
 */output/
+*/log/
 */data/debug.*
 */toolkit.xml
 */.toolkitList

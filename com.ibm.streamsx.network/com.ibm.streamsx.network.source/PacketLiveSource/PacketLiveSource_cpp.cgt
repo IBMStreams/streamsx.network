@@ -5,7 +5,7 @@
 ### for valid values of 'networkInterface' parameter, type '/sbin/ifconfig' on deployment machine
 ### for valid values of 'filterExpression' parameter, see man page for 'tcpdump' at http://linux.die.net/man/8/tcpdump
 
-unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/Common";
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require OutputAssignmentGenerator;
 
 # These fragments of Perl code get strings from the operator's declaration
@@ -23,8 +23,8 @@ my $outputPort1 = $model->getNumberOfOutputPorts()>1 ? $model->getOutputPortAt(1
 my $networkInterface = $model->getParameterByName("networkInterface")->getValueAt(0)->getCppExpression();
   
 # get C++ expressions for getting the values of this operator's optional parameters  
-my $filterExpression = $model->getParameterByName("filterExpression") ? $model->getParameterByName("filterExpression")->getValueAt(0)->getCppExpression() : "";
-my $timestampType = $model->getParameterByName("timestampType") ? $model->getParameterByName("timestampType")->getValueAt(0)->getCppExpression() : "";
+my $filterExpression = $model->getParameterByName("filterExpression") ? $model->getParameterByName("filterExpression")->getValueAt(0)->getCppExpression() : undef;
+my $timestampType = $model->getParameterByName("timestampType") ? $model->getParameterByName("timestampType")->getValueAt(0)->getCppExpression() : undef;
 my $maximumLength = $model->getParameterByName("maximumLength") ? $model->getParameterByName("maximumLength")->getValueAt(0)->getCppExpression() : 65535;
 my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterByName("initDelay")->getValueAt(0)->getCppExpression() : 0;
 my $bufferSize = $model->getParameterByName("bufferSize") ? $model->getParameterByName("bufferSize")->getValueAt(0)->getCppExpression() : 0;
@@ -57,8 +57,8 @@ MY_OPERATOR::MY_OPERATOR()
 
   // set operator parameters
   networkInterface = <%=$networkInterface%>;
-  filterExpression = "<%=$filterExpression%>";
-  timestampType = "<%=$timestampType%>";
+  filterExpression = <%=$filterExpression?$filterExpression:'""'%>;
+  timestampType = <%=$timestampType?$timestampType:'""'%>;
   maximumLength = <%=$maximumLength%>;
   initDelay = <%=$initDelay%>;
   bufferSize = <%=$bufferSize%>; 
@@ -264,12 +264,12 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   // save pointers to the packet header and buffer for the output assignment functions
   pcapHeader = header;
   pcapBuffer = buffer;
-
-  // find the network headers in the packet
-  parseNetworkHeaders((char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len);
+  
+  // locate the network headers in the packet
+  headers.locateNetworkHeaders((char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len);
 
   // ignore non-IPv4 packets
-  if (!ipv4Header) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 header found", "PacketLiveSource");  return; }
+  if (!headers.ipv4Header) { SPLLOG(L_INFO, "ignoring packet, no IPv4 header found", "PacketLiveSource");  return; }
 
   // set explicitly assigned output attributes to computed values
   OPort0Type outTuple;

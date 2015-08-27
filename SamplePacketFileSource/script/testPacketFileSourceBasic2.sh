@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketFileSourceAssignments
+composite=TestPacketFileSourceBasic2
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
