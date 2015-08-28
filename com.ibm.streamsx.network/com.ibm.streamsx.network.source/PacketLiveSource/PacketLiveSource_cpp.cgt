@@ -268,8 +268,8 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   // locate the network headers in the packet
   headers.locateNetworkHeaders((char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len);
 
-  // ignore non-IPv4 packets
-  if (!headers.ipv4Header) { SPLLOG(L_INFO, "ignoring packet, no IPv4 header found", "PacketLiveSource");  return; }
+  // ignore non-IP packets
+  if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_INFO, "ignoring packet, no IPv4 or IPv6 header found", "PacketLiveSource");  return; }
 
   // set explicitly assigned output attributes to computed values
   OPort0Type outTuple;

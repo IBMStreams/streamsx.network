@@ -89,9 +89,9 @@ private:
 
   uint64_t packetNumber() { return packetCounter; }  
 
-  uint32_t packetLength() { return headers.pktLength; } 
+  uint32_t packetLength() { return headers.packetFullLength; } 
 
-  SPL::blob packetData() {return SPL::blob((const unsigned char*)headers.packetBuffer, headers.bufferLength); }  
+  SPL::blob packetData() {return SPL::blob((const unsigned char*)headers.packetBuffer, headers.packetCapturedLength); }  
 
   uint32_t sessionKey() { // this output assignment function will probably be removed ?????????????????
     uint32_t key = 0;

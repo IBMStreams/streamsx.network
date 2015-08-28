@@ -254,8 +254,8 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 	  headers.locateNetworkHeaders( (char*)pcapBuffer, pcapHeader->caplen, pcapHeader->len );
 	}
 
-	// ignore non-IPv4 packets
-	if (!headers.ipv4Header) { SPLLOG(L_INFO, "ignoring packet, no IPv4 header found", "PacketFileSource");  continue; }
+	// ignore non-IP packets
+	if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_INFO, "ignoring packet, no IPv4 or IPv6 header found", "PacketFileSource");  continue; }
 
 	// clear the output tuple
 	outTuple.clear();
