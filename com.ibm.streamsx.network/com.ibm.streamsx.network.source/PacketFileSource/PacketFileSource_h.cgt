@@ -85,6 +85,7 @@ public:
 
   // ----------- libpcap-specific variables ----------
 
+  pcap_t* pcapDescriptor;
   struct pcap_pkthdr* pcapHeader;
   const u_char* pcapBuffer;
 

@@ -206,7 +206,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 {
   SPLLOG(L_INFO, "opening PCAP file '" << filename << "'", "PacketFileSource");
   char pcapError[PCAP_ERRBUF_SIZE] = "\0";
-  pcap_t* pcapDescriptor = pcap_open_offline(filename.c_str(), pcapError);
+  pcapDescriptor = pcap_open_offline(filename.c_str(), pcapError);
   if (!pcapDescriptor) THROW (SPLRuntimeOperator, "error opening PCAP file '" << filename << "', " << pcapError);
 
   // we'll need to append packets that lack ethernet headers to an empty one in a temporary buffer
@@ -279,12 +279,12 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
 	// locate the network headers in the packet
 	headers.locatePacketHeaders(packetBuffer, packetBufferLength);
-	if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_INFO, "ignoring packet, no IPv4 or IPv6 header found", "PacketFileSource");  continue; }
+	if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketFileSource");  continue; }
 
 	// point at the input tuple with the name used by the code generator, if there is one
 	<% if ($inputPort) { print "IPort0Type& iport\$0 = (IPort0Type&)(*inTuple);"; } %> ;
 
-	// submit output tuples to output ports, as selected by output filters if specified
+	// submit output tuples to output ports, as selected by output filters, if specified
 	<% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
 	  <% if (scalar(@outputFilterList)) { print "if (bpf_filter(outputFilterPrograms[$i].bf_insns, (const u_char*)packetBuffer, pcapHeader->len, packetBufferLength))"; } %> 
 		   {

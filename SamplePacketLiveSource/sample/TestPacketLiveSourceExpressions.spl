@@ -20,57 +20,31 @@ composite TestPacketLiveSourceExpressions {
 		uint32 captureSeconds,		// time that packet was captured, in seconds since Unix epoch (integer portion only)
 		uint32 captureMicroseconds,	// time that packet was captured, in microseconds since captureSeconds()
 		timestamp captureTimestamp,	// time that packet was captured, in seconds and nanoseconds since Unix epoch
-		uint64 packetNumber,		// sequence number of packet, as emitted by operator
-		uint64 packetNumberPlusOne,	// sequence number of packet plus one
+	    uint32 sessionKey,			// combination of addresses and ports, for downstream @parallel annotations
 		int8 packetNumberModulo13,	// sequence number of packet modulo 13, as signed 8-bit integer
-		uint32 packetLength,		// original length of packet (not necessarily all captured)
-		int32 packetLengthSigned,	// original length of packet, as signed 32-bit integer
-		blob packetData;			// contents of packet, including network headers (not necessarily complete)
-	
-	StatisticsType = 
-		float64 statisticsTime,		// time that statistics were produced, in seconds since Unix epoch 
-		uint64 packetsReceived,		// number of packets received by network interface in this interval
-		uint64 packetsDropped,		// number of packets dropped in this interval
-		uint64 packetsDroppedByInterface, // number of packets dropped by network interface in this interval
-		uint64 packetsIgnoredByStreams, // number of packets ignored by Streams in this interval
-		uint64 packetsProduced,		// number of packets emitted by operator
-		float64 packetsProducedAsFloat,		// number of packets emitted by operator, as a 64-bit float
-		int32 packetsProducedAsInteger,		// number of packets emitted by operator, as a signed 32-bit integer
-		rstring packetsProducedAsString,	// number of packets emitted by operator, as a string
-		uint64 octetsProduced;		// number of bytes emitted by operator in this interval
+		int32 packetLength,			// length of packet (not necessarily all captured)
+	    int32 packetCaptureLength, 	// length of captured packet (possibly less than packetLength())
+		int32 packetHeaderLength,	// length of network headers in packet
+		int32 packetPayloadLength;	// length of payload following network headers
 
 	graph
 
-	( stream<PacketType> PacketStream as OutPackets ;
-	  stream<StatisticsType> StatisticsStream as OutStatistics ) = PacketLiveSource() {
+	stream<PacketType> PacketStream as Out = PacketLiveSource() {
 		param
 			networkInterface: $networkInterface;
-		    statisticsInterval: 1.0;
-		output OutPackets:
+		output Out:
 			captureTime = captureTime(),
 			captureSeconds = (uint32)(captureTime()),
 			captureMicroseconds =(uint32)(fmod(captureTime(),1.0)*1000000.0),
 			captureTimestamp = createTimestamp((int64)captureTime(), (uint32)(fmod(captureTime(),1.0)*1000000000.0), 0),
-			packetNumber = packetNumber(),
-			packetNumberPlusOne = packetNumber() + (uint64)1,
-			packetNumberModulo13 = (int8)(packetNumber() % (uint64)13),
-			packetLength = packetLength(),
-			packetLengthSigned = (int32)packetLength(),
-			packetData = packetData(); 
-		OutStatistics:
-			statisticsTime = statisticsTime(),
-		    packetsReceived = packetsReceived(),
-		    packetsDropped = packetsDropped(),
-		    packetsDroppedByInterface = packetsDroppedByInterface(),
-		    packetsIgnoredByStreams =  packetsReceived() - packetsProduced() - packetsDropped(),
-			packetsProduced = packetsProduced(),
-			packetsProducedAsFloat = (float64)packetsProduced(),
-			packetsProducedAsInteger = (int32)packetsProduced(),
-			packetsProducedAsString = (rstring)packetsProduced(),
-			octetsProduced = octetsProduced();
+		    sessionKey = IPV4_SRC_ADDRESS() + IPV4_DST_ADDRESS() + (uint32)IP_SRC_PORT() + (uint32)IP_DST_PORT(),
+			packetNumberModulo13 = (int8)((packetsProcessed()-(uint64)1) % (uint64)13),
+			packetLength = (int32)packetLength(),
+		    packetCaptureLength = size(packetData()),
+		    packetHeaderLength = size(packetData()) - (int32)payloadLength(),
+		    packetPayloadLength = (int32)payloadLength();
 	}
 	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketLiveSourceExpressions.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as StatisticsSink = FileSink(StatisticsStream) { param file: "debug.TestPacketLiveSourceExpressions.StatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 }

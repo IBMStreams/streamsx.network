@@ -31,7 +31,7 @@ composite TestPacketFileSourceBasic2 {
 	    uint64 octetsProcessed,			// total number of octets of packet data processed by operator, so far
 		blob packetData,				// contents of packet captured, including network headers (possibly truncated)
 		blob payloadData;				// contents of packet payload, following all network headers
-	StatisticsType = 
+	MetricsType = 
 		float64 metricsTime,			// time that metrics were produced, in seconds since Unix epoch 
 		uint64 packetNumber,			// sequence number of packet, as emitted by operator
 		uint32 packetLength,			// original length of packet (not necessarily all captured)
@@ -41,7 +41,7 @@ composite TestPacketFileSourceBasic2 {
 	graph
 
 	( stream<PacketType> PacketStream as OutPackets ;
-	  stream<StatisticsType> MetricsStream as OutMetrics ) = PacketFileSource() {
+	  stream<MetricsType> MetricsStream as OutMetrics ) = PacketFileSource() {
 	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			pcapFilename: $pcapFilename;
