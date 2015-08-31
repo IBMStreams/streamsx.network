@@ -5,6 +5,8 @@
 
 namespace sample;
 
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.source::*;
 
 composite TestPacketFileSourceFilters {
@@ -14,40 +16,97 @@ composite TestPacketFileSourceFilters {
 	
 	type 
 	
-	PacketType =
-	  float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
-	  uint32 sessionKey,		// hash of source and destination address and port numbers
-	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
-	  uint32 packetLength,		// original length of packet (not necessarily all captured)
-	  blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
+	DHCPPacketType =
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
+	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
+	  rstring etherSourceAddress,		// ethernet source address, or empty list if 'raw IP' PCAP recording
+	  rstring etherDestinationAddress,	// ethernet destination address, or empty list if 'raw IP' PCAP recording
+	  rstring ipSourceAddress,			// IP source address
+	  rstring ipDestinationAddress,		// IP destination address
+	  uint32 dhcpLength,				// length of DHCP message in packet (possibly truncated))
+	  blob dhcpMessage;					// DHCP message, excluding network headers (possibly truncated)
+
+	DNSPacketType =
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
+	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
+	  rstring ipSourceAddress,			// IP source address
+	  rstring ipDestinationAddress,		// IP destination address
+	  uint32 dnsLength,					// length of DNS message in packet (possibly truncated))
+	  blob dnsMessage;					// DNS message, excluding network headers (possibly truncated)
+
+	PingPacketType =
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
+	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
+	  rstring ipSourceAddress,			// IP source address
+	  rstring ipDestinationAddress,		// IP destination address
+	  uint32 pingLength,				// length of Ping message in packet (possibly truncated))
+	  blob pingMessage;					// Ping message, excluding network headers (possibly truncated)
+
+	AllPacketType =
+		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
+		uint64 packetNumber,			// sequence number of packet, as emitted by operator
+	    uint8 ipVersion,				// IP version: 4 for IPv4, 6 for IPv6
+	    rstring ipProtocol,				// IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+	    rstring ipSourceAddress,		// IP source address, or empty if not IP packet
+	    uint16 ipSourcePort,			// IP source port, or zero if not UDP or TCP packet
+	    rstring ipDestinationAddress,	// IP destination address, or empty if not IP packet
+	    uint16 ipDestinationPort,		// IP destination port, or zero if not UDP or TCP packet
+		uint32 payloadLength,			// length of packet payload, following all network headers
+		uint32 packetLength,			// original length of packet (not necessarily all captured)
+		blob packetData;				// contents of packet captured, including network headers (possibly truncated)
 
 	graph
 
-	stream<PacketType> DNSPacketStream as Out = PacketFileSource() {
+	( stream<DHCPPacketType> DHCPPacketStream as DHCPOut ; 
+	  stream<DNSPacketType> DNSPacketStream as DNSOut ;
+	  stream<PingPacketType> PingPacketStream as PingOut ;
+	  stream<AllPacketType> AllPacketStream as AllOut ) = PacketFileSource() {
+	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			pcapFilename: $pcapFilename;
-		    filterExpression: "udp port 53";
-		output Out:
+		    inputFilter: "udp or icmp";
+		    outputFilters: "udp port 67 or udp port 68", "udp port 53", "icmp[icmptype] = icmp-echo or icmp[icmptype] = icmp-echoreply", "";
+		output 
+		DHCPOut:
 			captureTime = captureTime(),
-			sessionKey = sessionKey(),
-			packetNumber = packetNumber(),
-			packetLength = packetLength(),
-			packetData = packetData(); 
-	}
-	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-
-	stream<PacketType> DHCPPacketStream as Out = PacketFileSource() {
-		param
-			pcapFilename: $pcapFilename;
-		    filterExpression: "udp port 67 or udp port 68";
-		output Out:
+			packetNumber = packetsProcessed() - 1ul,
+			etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
+			etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
+			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+			dhcpLength = payloadLength(),
+			dhcpMessage = payloadData(); 
+		DNSOut:
 			captureTime = captureTime(),
-			sessionKey = sessionKey(),
-			packetNumber = packetNumber(),
-			packetLength = packetLength(),
-			packetData = packetData(); 
+			packetNumber = packetsProcessed() - 1ul,
+			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+			dnsLength = payloadLength(),
+			dnsMessage = payloadData(); 
+		PingOut:
+			captureTime = captureTime(),
+			packetNumber = packetsProcessed() - 1ul,
+			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+			pingLength = payloadLength(),
+			pingMessage = payloadData(); 
+		AllOut:
+			captureTime = captureTime(),
+			packetNumber = packetsProcessed() - 1ul,
+			ipVersion = IP_VERSION(),
+			ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
+			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+			ipSourcePort = IP_SRC_PORT(),
+			ipDestinationPort = IP_DST_PORT(),
+			payloadLength = payloadLength(),
+		    packetLength = packetLength(),
+			packetData = packetData();
 	}
 	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as PingPacketSink = FileSink(PingPacketStream) { param file: "debug.TestPacketFileSourceFilters.PingPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as AllPacketSink = FileSink(AllPacketStream) { param file: "debug.TestPacketFileSourceFilters.AllPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 }
 

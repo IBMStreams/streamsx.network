@@ -17,9 +17,8 @@ composite TestPacketFileSourceInputStream {
 	
 	PacketType =
 	  rstring filepath,         // implicitly copied from input tuple
-	  rstring filepathAgain,    // explicitly copied from input tuple
+	  rstring filename,    		// explicitly extracted from input tuple's 'filepath' attribute
 	  float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
-	  uint32 sessionKey,		// hash of source and destination address and port numbers
 	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
 	  uint32 packetLength,		// original length of packet (not necessarily all captured)
 	  blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
@@ -35,10 +34,9 @@ composite TestPacketFileSourceInputStream {
 
 	stream<PacketType> PacketStream as Out = PacketFileSource(FilepathStream) {
 		output Out:
-		    filepathAgain = filepath,
+		    filename = regexMatchPerl(filepath, "([^/]+)$")[0],
 			captureTime = captureTime(),
-			sessionKey = sessionKey(),
-			packetNumber = packetNumber(),
+			packetNumber = packetsProcessed() - 1ul,
 			packetLength = packetLength(),
 			packetData = packetData(); 
 	}

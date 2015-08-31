@@ -11,11 +11,49 @@
 #include <netinet/in.h>
 #include <netinet/ether.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <string.h>
+
 #include <streams_boost/lexical_cast.hpp>
+
 #include "SPL/Runtime/Function/SPLFunctions.h"
 
 namespace com { namespace ibm { namespace streamsx { namespace network { namespace ipv4 {
+
+
+
+	  // This internal function handles domain name lookups for the 'convert*Hostname()' functions below.
+
+	  static SPL::rstring convertTo(SPL::rstring addressOrHostname, int flags) {
+	    
+	    // convert the string (whether its an IPv4 address or hostname) 
+	    // into a binary representation of an IPv4 address (if it has one), 
+	    // stored in a sockaddr structure
+	    struct addrinfo *result;
+	    SPLLOG(L_DEBUG, "domain name lookup for '" << addressOrHostname << "' ...", "convertIPV4AddressToHostname");
+	    int rc1 = getaddrinfo(addressOrHostname.c_str(), NULL, NULL, &result);
+	    if (rc1) {
+	      SPLLOG(L_ERROR, "getaddrinfo(" << addressOrHostname << ") failed, " << gai_strerror(rc1), "convertIPV4AddressToHostname");
+	      return addressOrHostname;
+	    }
+
+	    // convert the binary representation of the IPv4 address in the sockaddr
+	    // structure into a hostname (if it has one) or an IPv4 address, depending 
+	    // upon the flags
+	    char hbuf[NI_MAXHOST];
+	    char sbuf[NI_MAXSERV];
+	    int rc2 = getnameinfo(result->ai_addr, sizeof(struct sockaddr), hbuf, sizeof(hbuf), sbuf, sizeof(sbuf), flags);
+	    if (rc2) {
+	      SPLLOG(L_ERROR, "getnameinfo(" << addressOrHostname << ") failed, " << gai_strerror(rc2), "convertIPV4AddressToHostname");
+	      return addressOrHostname;
+	    }
+	    
+	    // return the converted string
+	    SPLLOG(L_DEBUG, "domain name lookup for '" << addressOrHostname << "' found '" << hbuf << "'", "convertIPV4AddressToHostname");
+	    return SPL::rstring(hbuf);
+	  }
+
+
 
 	  // This function converts a four-byte binary representation of an IPv4
 	  // address into a string representation.
@@ -28,6 +66,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	  }
 
 
+
 	  // This function converts a string representation of an IPv4 address
 	  // to a four-byte binary representation. If the string does not represent a valid
 	  // IPv4 address, zero is returned.
@@ -37,6 +76,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	    inet_pton(AF_INET, ipv4AddressString.c_str(), &ipv4Address);
 	    return ntohl(ipv4Address.s_addr);
 	  }
+
 
 
 	  // This function converts a string representing an IPv4 address into a
@@ -64,9 +104,9 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	    
 	    // convert the string representation of the IPv4 address to binary
 	    struct in_addr address;
-	    const int rc = inet_aton(ipv4address.c_str(), &address);
+	    const int rc = inet_aton(ipv4Address.c_str(), &address);
 	    if (rc==0) {
-	      SPLLOG(L_ERROR, "inet_aton(" << ipv4address << ") failed, rc=" << rc, "convertIPV4AddressToSubnet");
+	      SPLLOG(L_ERROR, "inet_aton(" << ipv4Address << ") failed, rc=" << rc, "convertIPV4AddressToSubnet");
 	      address.s_addr = 0; // set 'address' to zeroes
 	    }
 	    
@@ -84,11 +124,12 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	  }
 
 
+
 	  // This function converts a four-byte binary representation of an IPv4
 	  // address into a four-byte binary subnet address, using the specified number of
 	  // mask bits.
 
-	  static SPL::uint32 convertIPV4AddressNumericToSubnet(SPL::uint32 ipv4address, SPL::int32 maskbits) { 
+	  static SPL::uint32 convertIPV4AddressNumericToSubnet(SPL::uint32 ipv4Address, SPL::int32 maskbits) { 
 	    
 	    // create the bitmask
 	    if (maskbits<0) maskbits = 0;
@@ -97,7 +138,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	    
 	    // apply the bitmask to the binary representation of the IPv4 address
 	    // to produce its subnet address
-	    SPL::uint32 subnetAddress = ipv4address & bitmask;
+	    SPL::uint32 subnetAddress = ipv4Address & bitmask;
 	    
 	    // return the string representation of the subnet address
 	    return subnetAddress;
@@ -110,23 +151,24 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	  // a string containing a fully-qualified domain name, if it has one, or else
 	  // return the 'dotted decimal' representation
 
-	  static SPL::rstring convertIPV4AddressStringToHostname(SPL::rstring ipv4address) { 
+	  static SPL::rstring convertIPV4AddressStringToHostname(SPL::rstring ipv4Address) { 
 	    
 	    // save all conversions in this cache so the network resolution is only done once
 	    static SPL::map<SPL::rstring, SPL::rstring > mapping;
 	    //SPLLOG(L_DEBUG, "domain name lookup for '" << ipv4address << "' ...", "convertIPV4AddressToHostname");
 	    
 	    // return the hostname saved in the cache, if this IPv4 address has been converted before
-	    SPL::map<SPL::rstring, SPL::rstring >::iterator i = mapping.find(ipv4address);
+	    SPL::map<SPL::rstring, SPL::rstring >::iterator i = mapping.find(ipv4Address);
 	    if (i != mapping.end()) return i->second;
 	    
 	    // otherwise, resolve the IPv4 address into a hostname with a domain name lookup
-	    const SPL::rstring hostname = convertTo(ipv4address, 0); 
+	    const SPL::rstring hostname = convertTo(ipv4Address, 0); 
 	    //SPLLOG(L_DEBUG, "domain name found '" << ipv4address << "' --> '" << hostname  << "'...", "convertIPV4AddressToHostname");
-	    mapping.add(ipv4address, hostname);
+	    mapping.add(ipv4Address, hostname);
 	    
 	    return hostname;
 	  }
+
 
 
 	  // This function converts a four-byte binary representation of an IPv4
@@ -162,6 +204,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	  }
 
   
+
 	  // This function converts a hostname into a string representation of
 	  // an IPv4 address. If no address can be found for the hostname, an empty string is
 	  // returned.
@@ -183,6 +226,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	    
 	    return ipv4address;
 	  }
+
 
 	  
 	  // This function converts a hostname into a binary IPv4 address. If no
@@ -217,37 +261,6 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 	    return ipv4AddressNumeric;
 	  }
 
-
-	  // This internal function handles domain name lookups for the 'convert*Hostname()' functions above.
-
-	  static SPL::rstring convertTo(SPL::rstring addressOrHostname, int flags) {
-	    
-	    // convert the string (whether its an IPv4 address or hostname) 
-	    // into a binary representation of an IPv4 address (if it has one), 
-	    // stored in a sockaddr structure
-	    struct addrinfo *result;
-	    SPLLOG(L_DEBUG, "domain name lookup for '" << addressOrHostname << "' ...", "convertIPV4AddressToHostname");
-	    int rc1 = getaddrinfo(addressOrHostname.c_str(), NULL, NULL, &result);
-	    if (rc1) {
-	      SPLLOG(L_ERROR, "getaddrinfo(" << addressOrHostname << ") failed, " << gai_strerror(rc1), "convertIPV4AddressToHostname");
-	      return addressOrHostname;
-	    }
-
-	    // convert the binary representation of the IPv4 address in the sockaddr
-	    // structure into a hostname (if it has one) or an IPv4 address, depending 
-	    // upon the flags
-	    char hbuf[NI_MAXHOST];
-	    char sbuf[NI_MAXSERV];
-	    int rc2 = getnameinfo(result->ai_addr, sizeof(struct sockaddr), hbuf, sizeof(hbuf), sbuf, sizeof(sbuf), flags);
-	    if (rc2) {
-	      SPLLOG(L_ERROR, "getnameinfo(" << addressOrHostname << ") failed, " << gai_strerror(rc2), "convertIPV4AddressToHostname");
-	      return addressOrHostname;
-	    }
-	    
-	    // return the converted string
-	    SPLLOG(L_DEBUG, "domain name lookup for '" << addressOrHostname << "' found '" << hbuf << "'", "convertIPV4AddressToHostname");
-	    return SPL::rstring(hbuf);
-	  }
 
 
 } } } } } 

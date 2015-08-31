@@ -3,12 +3,10 @@
 ** All Rights Reserved
 */
 
-#ifndef NETWORKHEADERLOCATOR_H_
-#define NETWORKHEADERLOCATOR_H_
+#ifndef PACKETHEADERLOCATOR_H_
+#define PACKETHEADERLOCATOR_H_
 
-#include <linux/if_ether.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
+//??????#include <netinet/in.h>
 #include <netinet/ether.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
@@ -27,20 +25,19 @@ struct JMirrorHeaders {
 } __attribute__((packed)) ;
 const uint16_t jmirrorPort = 30030;
 
-class NetworkHeaderLocator {
+class PacketHeaderLocator {
 
  public:
 
-  // packet buffer and length, as passed to locateNetworkHeaders() function
+  // packet buffer and length, as passed to locatePacketHeaders() function
 
-  char* packetBuffer; // address of captured packet
-  int packetCapturedLength; // captured length of packet, perhaps truncated
-  int packetFullLength; // full length of packet, perhaps not all captured
+  char* packetBuffer; // address of packet
+  int packetLength; // length of packet, possibly truncated
 
-  // network header pointers and lengths, as returned by locateNetworkHeaders() function
+  // network header pointers and lengths, as returned by locatePacketHeaders() function
 
   struct ethhdr* etherHeader; int etherHeaderLength;
-  struct ip* ipv4Header; int ipv4HeaderLength;
+  struct iphdr* ipv4Header; int ipv4HeaderLength;
   struct ip6_hdr* ipv6Header; int ipv6HeaderLength;
   struct udphdr* udpHeader; int udpHeaderLength;
   struct tcphdr* tcpHeader; int tcpHeaderLength;
@@ -50,12 +47,11 @@ class NetworkHeaderLocator {
   // Note: this function does not yet handle variable-length ethernet headers, such as those with
   // VLAN tags, or variable-length IPv6 headers, such as those with extension headers
 
-  void locateNetworkHeaders(char* buffer, int length, int fullLength) {
+  void locatePacketHeaders(char* buffer, int length) {
 
 	// set address and length of packet for the output attribute assignment functions 
 	packetBuffer = buffer;
-	packetCapturedLength = length;
-	packetFullLength = fullLength;	
+	packetLength = length;
 
 	// clear network header pointers and lengths to be returned
 	etherHeader = NULL; etherHeaderLength = 0;
@@ -75,22 +71,23 @@ class NetworkHeaderLocator {
 	length -= etherHeaderLength; 
 	
 	// if the buffer contains a Juniper Networks mirror packet, step over the 'jmirror' headers
+	// (note that field tests are not in natural order so the 'if' will fail faster in the usual case)
 	if ( length>=sizeof(struct JMirrorHeaders) ) {
 	  struct JMirrorHeaders& jmirror = *(struct JMirrorHeaders*)buffer;
-	  if ( jmirror.ipHeader.ip_v==4 && 
+	  if ( ntohs(jmirror.udpHeader.source)==jmirrorPort && 
+		   ntohs(jmirror.udpHeader.dest)==jmirrorPort &&
+		   jmirror.ipHeader.ip_v==4 && 
 		   jmirror.ipHeader.ip_hl==5 && 
-		   jmirror.ipHeader.ip_p==IPPROTO_UDP && 
-		   ntohs(jmirror.udpHeader.source)==jmirrorPort && 
-		   ntohs(jmirror.udpHeader.dest)==jmirrorPort ) {
+		   jmirror.ipHeader.ip_p==IPPROTO_UDP ) {
 		buffer += sizeof(struct JMirrorHeaders);
 		length -= sizeof(struct JMirrorHeaders);
 	  }
 	}
 
 	// if the buffer contains an IPv4 packet, overlay an IPv4 header on it
-	if ( ntohs(etherHeader->h_proto)==ETH_P_IP && length>=sizeof(struct ip) && ((struct ip*)buffer)->ip_v==4 ) {
-	  ipv4Header = (struct ip*)buffer; 
-	  ipv4HeaderLength = ipv4Header->ip_hl * 4;
+	if ( ntohs(etherHeader->h_proto)==ETH_P_IP && length>=sizeof(struct ip) && ((struct iphdr*)buffer)->version==4 ) {
+	  ipv4Header = (struct iphdr*)buffer; 
+	  ipv4HeaderLength = ipv4Header->ihl * 4;
 	  buffer += ipv4HeaderLength;
 	  length -= ipv4HeaderLength;
 	}
@@ -107,7 +104,7 @@ class NetworkHeaderLocator {
 	if ( ! (ipv4Header || ipv6Header ) ) return;
 
 	// if the buffer contains a UDP packet, and it has a UDP header, overlay a UDP header on it
-	if ( ( ipv4Header && ipv4Header->ip_p==IPPROTO_UDP && length>=sizeof(struct udphdr) ) || 
+	if ( ( ipv4Header && ipv4Header->protocol==IPPROTO_UDP && length>=sizeof(struct udphdr) ) || 
 		 ( ipv6Header && ipv6Header->ip6_nxt==IPPROTO_UDP && length>=sizeof(struct udphdr) ) ) {
 	  udpHeader = (struct udphdr*)buffer;
 	  udpHeaderLength = sizeof(struct udphdr);
@@ -116,7 +113,7 @@ class NetworkHeaderLocator {
 	}
 	
 	// if the buffer contains a TCP packet, and it has a TCP header, overlay a TCP header on it
-	if ( ( ipv4Header && ipv4Header->ip_p==IPPROTO_TCP && length>=sizeof(struct tcphdr) ) ||
+	if ( ( ipv4Header && ipv4Header->protocol==IPPROTO_TCP && length>=sizeof(struct tcphdr) ) ||
          ( ipv6Header && ipv6Header->ip6_nxt==IPPROTO_TCP && length>=sizeof(struct tcphdr) ) ) {
 	  tcpHeader = (struct tcphdr*)buffer;
 	  tcpHeaderLength = tcpHeader->doff * 4;
@@ -133,5 +130,5 @@ class NetworkHeaderLocator {
 
 };
 
-#endif /* NETWORKHEADERLOCATOR_H_ */
+#endif /* PACKETHEADERLOCATOR_H_ */
 

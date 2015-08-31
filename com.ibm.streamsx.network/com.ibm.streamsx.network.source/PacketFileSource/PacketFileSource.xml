@@ -11,16 +11,6 @@
             <prototype>float64 captureTime()</prototype>
           </function>
           <function>
-            <description>
-	    </description>
-            <prototype>uint32 sessionKey()</prototype>
-          </function>
-          <function>
-            <description>
-	    </description>
-            <prototype>uint64 packetNumber()</prototype>
-          </function>
-          <function>
             <description></description>
             <prototype>uint32 packetLength()</prototype>
           </function>
@@ -30,22 +20,115 @@
           </function>
           <function>
             <description></description>
-            <prototype>&lt;any T> T copy()</prototype>
-          </function>
-        </customOutputFunction>
-        <customOutputFunction>
-          <name>statistics output functions</name>
-          <function>
-            <description></description>
-            <prototype>float64 statisticsTime() </prototype>
+            <prototype>list&lt;uint8>[6] ETHER_SRC_ADDRESS()</prototype>
           </function>
           <function>
             <description></description>
-            <prototype>uint64 packetsProduced()</prototype>
+            <prototype>list&lt;uint8>[6] ETHER_DST_ADDRESS()</prototype>
           </function>
           <function>
             <description></description>
-            <prototype>uint64 octetsProduced()</prototype>
+            <prototype>uint16 ETHER_PROTOCOL()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint8 IP_VERSION()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint8 IP_PROTOCOL()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 IPV4_SRC_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 IPV4_DST_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>list&lt;uint8>[16] IPV6_SRC_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>list&lt;uint8>[16] IPV6_DST_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 IP_SRC_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 IP_DST_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 UDP_SRC_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 UDP_DST_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 TCP_SRC_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 TCP_DST_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 TCP_SEQUENCE()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 TCP_ACKNOWLEDGEMENT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_URGENT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_ACK()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_PUSH()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_RESET()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_SYN()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_FIN()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 TCP_WINDOW()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 payloadLength()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>blob payloadData()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint64 packetsProcessed()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint64 octetsProcessed()</prototype>
           </function>
           <function>
             <description></description>
@@ -83,13 +166,22 @@
         <cardinality>1</cardinality>
       </parameter>
       <parameter>
-        <name>filterExpression</name>
+        <name>inputFilter</name>
         <description></description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
         <type>rstring</type>
         <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>outputFilters</name>
+        <description/>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>-1</cardinality>
       </parameter>
       <parameter>
         <name>initDelay</name>
@@ -112,7 +204,7 @@
         <cardinality>1</cardinality>
       </parameter>
       <parameter>
-        <name>statisticsInterval</name>
+        <name>metricsInterval</name>
         <description></description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
@@ -124,6 +216,7 @@
     <inputPorts>
       <inputPortSet>
         <description></description>
+        <windowingDescription/>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
         <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
@@ -132,8 +225,8 @@
       </inputPortSet>
     </inputPorts>
     <outputPorts>
-      <outputPortSet>
-        <description></description>
+      <outputPortOpenSet>
+        <description/>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>false</autoAssignment>
         <completeAssignment>false</completeAssignment>
@@ -142,30 +235,11 @@
           <default>copy</default>
           <type>packet output functions</type>
         </outputFunctions>
-        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
-        <cardinality>1</cardinality>
-        <optional>false</optional>
-      </outputPortSet>
-      <outputPortSet>
-        <description></description>
-        <expressionMode>Expression</expressionMode>
-        <autoAssignment>false</autoAssignment>
-        <completeAssignment>true</completeAssignment>
-        <rewriteAllowed>true</rewriteAllowed>
-        <outputFunctions>
-          <default>copy</default>
-          <type>statistics output functions</type>
-        </outputFunctions>
-        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
-        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
-        <tupleMutationAllowed>false</tupleMutationAllowed>
-        <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
-        <cardinality>1</cardinality>
-        <optional>true</optional>
-      </outputPortSet>
+      </outputPortOpenSet>
     </outputPorts>
   </cppOperatorModel>
 </operatorModel>

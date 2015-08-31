@@ -77,6 +77,10 @@
           </function>
           <function>
             <description></description>
+            <prototype>float64 statisticsDuration() </prototype>
+          </function>
+          <function>
+            <description></description>
             <prototype>uint64 packetsReceived()</prototype>
           </function>
           <function>

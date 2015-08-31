@@ -14,89 +14,36 @@ composite TestPacketFileSourceExpressions {
 	
 	type 
 	
-	FullPacketType =
-		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
-		uint32 sessionKey,			// hash of source and destination address and port numbers
-		uint64 packetNumber,		// sequence number of packet, as emitted by operator
-		uint32 packetLength,		// original length of packet (not necessarily all captured)
-		blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
-
-	FullStatisticsType = 
-		float64 statisticsTime,		// time that statistics were produced, in seconds since Unix epoch 
-		uint64 packetsProduced,		// number of packets emitted by operator in this interval
-		uint64 octetsProduced;		// number of bytes emitted by operator in this interval
-
-	AlternatePacketType =
+	PacketType =
 		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
 		uint32 captureSeconds,		// time that packet was captured, in seconds since Unix epoch (integer portion only)
 		uint32 captureMicroseconds,	// time that packet was captured, in microseconds since captureSeconds()
 		timestamp captureTimestamp,	// time that packet was captured, in seconds and nanoseconds since Unix epoch
-		uint64 packetNumber,		// sequence number of packet, as emitted by operator
-		uint64 packetNumberPlusOne,	// sequence number of packet plus one
+	    uint32 sessionKey,			// combination of addresses and ports, for downstream @parallel annotations
 		int8 packetNumberModulo13,	// sequence number of packet modulo 13, as signed 8-bit integer
-		uint32 packetLength,		// original length of packet (not necessarily all captured)
-		int32 packetLengthSigned,	// original length of packet, as signed 32-bit integer
-		blob packetData;			// contents of packet, including network headers (not necessarily complete)
-	
-	AlternateStatisticsType = 
-		float64 statisticsTime,		// time that statistics were produced, in seconds since Unix epoch 
-		uint64 packetsProduced,		// number of packets emitted by operator
-		float64 packetsProducedAsFloat,		// number of packets emitted by operator, as a 64-bit float
-		int32 packetsProducedAsInteger,		// number of packets emitted by operator, as a signed 32-bit integer
-		rstring packetsProducedAsString,	// number of packets emitted by operator, as a string
-		uint64 octetsProduced;		// number of bytes emitted by operator in this interval
+		int32 packetLength,			// length of packet (not necessarily all captured)
+	    int32 packetCaptureLength, 	// length of captured packet (possibly less than packetLength())
+		int32 packetHeaderLength,	// length of network headers in packet
+		int32 packetPayloadLength;	// length of payload following network headers
 
 	graph
 
-	( stream<FullPacketType> FullPacketStream as OutPackets ;
-	  stream<FullStatisticsType> FullStatisticsStream as OutStatistics ) = PacketFileSource() {
+	stream<PacketType> PacketStream as Out = PacketFileSource() {
 		param
 			pcapFilename: $pcapFilename;
-		    processorAffinity: 2u;
-		    statisticsInterval: 1.0;
-		output 
-		OutPackets:
-			captureTime = captureTime(),
-			sessionKey = sessionKey(),
-			packetNumber = packetNumber(),
-			packetLength = packetLength(),
-			packetData = packetData(); 
-		OutStatistics:
-			statisticsTime = statisticsTime(),
-			packetsProduced = packetsProduced(),
-			octetsProduced = octetsProduced();
-	}
-	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceExpressions.FullPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as FullStatisticsSink = FileSink(FullStatisticsStream) { param file: "debug.TestPacketFileSourceExpressions.FullStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-
-
-	( stream<AlternatePacketType> AlternatePacketStream as OutPackets ;
-	  stream<AlternateStatisticsType> AlternateStatisticsStream as OutStatistics ) = PacketFileSource() {
-		param
-			pcapFilename: $pcapFilename;
-		    processorAffinity: 4u;
-		    statisticsInterval: 1.0;
-		output OutPackets:
+		output Out:
 			captureTime = captureTime(),
 			captureSeconds = (uint32)(captureTime()),
 			captureMicroseconds =(uint32)(fmod(captureTime(),1.0)*1000000.0),
 			captureTimestamp = createTimestamp((int64)captureTime(), (uint32)(fmod(captureTime(),1.0)*1000000000.0), 0),
-			packetNumber = packetNumber(),
-			packetNumberPlusOne = packetNumber() + (uint64)1u,
-			packetNumberModulo13 = (int8)(packetNumber() % (uint64)13),
-			packetLength = packetLength(),
-			packetLengthSigned = (int32)packetLength(),
-			packetData = packetData(); 
-		OutStatistics:
-			statisticsTime = statisticsTime(),
-			packetsProduced = packetsProduced(),
-			packetsProducedAsFloat = (float64)packetsProduced(),
-			packetsProducedAsInteger = (int32)packetsProduced(),
-			packetsProducedAsString = (rstring)packetsProduced(),
-			octetsProduced = octetsProduced();
+		    sessionKey = IPV4_SRC_ADDRESS() + IPV4_DST_ADDRESS() + (uint32)IP_SRC_PORT() + (uint32)IP_DST_PORT(),
+			packetNumberModulo13 = (int8)((packetsProcessed()-(uint64)1) % (uint64)13),
+			packetLength = (int32)packetLength(),
+		    packetCaptureLength = size(packetData()),
+		    packetHeaderLength = size(packetData()) - (int32)payloadLength(),
+		    packetPayloadLength = (int32)payloadLength();
 	}
-	() as AlternatePacketSink = FileSink(AlternatePacketStream) { param file: "debug.TestPacketFileSourceExpressions.AlternatePacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as AlternateStatisticsSink = FileSink(AlternateStatisticsStream) { param file: "debug.TestPacketFileSourceExpressions.AlternateStatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceExpressions.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 }
 
