@@ -1,0 +1,41 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketFileSourceMinimalA {
+
+	param		
+	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+	
+	type 
+	
+	PacketType =
+		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
+	    uint32 ipv4SourceAddress,		// IP source address, or zero if not IP packet
+	    uint32 ipv4DestinationAddress,	// IP destination address, or zero if not IP packet
+		blob dnsMessage;				// DNS message, excluding all network headers
+
+	graph
+
+	stream<PacketType> PacketStream as OutPackets = PacketFileSource() {
+		param
+			pcapFilename: $pcapFilename;
+		    inputFilter: "udp port 53";
+		    metricsInterval: 0.1;
+		output OutPackets:
+			captureTime = captureTime(),
+			ipv4SourceAddress = IPV4_SRC_ADDRESS(),
+			ipv4DestinationAddress = IPV4_DST_ADDRESS(),
+			dnsMessage = payloadData();
+	}
+	//() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalA.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+	stream<PacketType> FilteredPacketStream = Filter(PacketStream) { param filter: true; }
+
+}
+

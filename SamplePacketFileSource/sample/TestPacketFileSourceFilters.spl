@@ -64,8 +64,11 @@ composite TestPacketFileSourceFilters {
 	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			pcapFilename: $pcapFilename;
-		    inputFilter: "udp or icmp";
-		    outputFilters: "udp port 67 or udp port 68", "udp port 53", "icmp[icmptype] = icmp-echo or icmp[icmptype] = icmp-echoreply", "";
+		    inputFilter:   "udp or icmp";                     // process only UDP and ICMP payloads
+		    outputFilters: "udp port 67 or udp port 68",      // output port 0 emits only DHCP payloads
+		                   "udp port 53",                     // output port 1 emits only DNS payloads
+		                   "icmp[icmptype] = icmp-echo or icmp[icmptype] = icmp-echoreply", // output port 2 emits only Ping payloads
+		                   "";                                // output port 3 emits all packets processed
 		output 
 		DHCPOut:
 			captureTime = captureTime(),

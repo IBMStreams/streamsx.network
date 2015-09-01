@@ -3,6 +3,8 @@
 ## Copyright (C) 2011, 2015  International Business Machines Corporation
 ## All Rights Reserved
 
+### for valid values of 'inputFilter' and 'outputFilters' parameters, see http://www.tcpdump.org/manpages/pcap-filter.7.html or http://linux.die.net/man/7/pcap-filter
+
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require OutputAssignmentGenerator;
 
@@ -345,7 +347,7 @@ void MY_OPERATOR::file_thread()
 	<% if ($consistentRegion && $consistentRegion->isTriggerOperator()) { %> crContext->makeConsistent(); <% } %> ;
   }
 
-  // tell the statistics thread we're done
+  // tell the metrics thread we're done
   done = true;
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> file_thread()", "PacketFileSource");

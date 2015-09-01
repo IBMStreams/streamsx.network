@@ -84,7 +84,6 @@ private:
 
   pcap_t* pcapDescriptor;
   const struct pcap_pkthdr* pcapHeader;
-  const u_char* pcapBuffer;
 
   // ----------- network header locator ----------
 

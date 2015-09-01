@@ -11,33 +11,70 @@ _____Description_____
 
 
 PacketFileSource is an operator for the IBM InfoSphere Streams product that
-reads pre-recorded ethernet packets from 'packet capture (PCAP)' files and emits
-them as output attributes.  Each tuple produced by the operator contains one
-packet, including all network headers, in an attribute of type 'blob (binary
-large object)'.  The tuple may also contain the time the packet was captured.
+reads pre-recorded network packets from 'packet capture (PCAP)' files, parses
+the network headers, and emits tuples containing packet data.  The tuples may
+contain the entire packet, the payload portion of the packet, or individual
+fields from the network headers, as specified by output attribute assignments.
+The operator may produce zero, one, or more tuples from each packet it
+processes, depending upon optional input and output filters.
 
 The PacketFileSource operator expects PCAP files to contain complete ethernet
 packets, starting with the ethernet header, including all protocol-specific
 headers and the packet payload.  The ethernet frame format is described here:
 
     http://en.wikipedia.org/wiki/Ethernet_frame
+
+The PacketFileSource operator can parse fields from the ethernet, IPv4, IPv6,
+UDP, and TCP headers of the input packet, and can assign the values of
+individual fields to output attributes, as specified by the output assignment
+expressions.  Fields are not parsed unless the corresponding output function is
+specified.
+
+The ethernet header and the fields it contains are described here:
+
     http://linux.die.net/include/net/ethernet.h
     http://linux.die.net/include/linux/if_ether.h
+
+The IPv4 header and the fields it contains are described here:
+
+    http://en.wikipedia.org/wiki/IPv4
+    http://www.ietf.org/rfc/rfc791.txt
+    http://linux.die.net/include/netinet/in.h
+    http://linux.die.net/include/netinet/ip.h
+
+The IPv6 header and the fields it contains are described here:
+
+    https://en.wikipedia.org/wiki/IPv6_packet
+    https://tools.ietf.org/html/rfc2460
+    http://linux.die.net/include/netinet/ip6.h
+
+The UDP header and the fields it contains are described here:
+
+    http://en.wikipedia.org/wiki/User_Datagram_Protocol
+    http://tools.ietf.org/html/rfc768
+    http://linux.die.net/include/netinet/udp.h
+
+The TCP header and the fields it contains are described here:
+
+    http://en.wikipedia.org/wiki/Transmission_Control_Protocol
+    http://tools.ietf.org/html/rfc793
+    http://linux.die.net/include/netinet/tcp.h
 
 Files containing complete ethernet packets can be created in PCAP format by a
 variety of network diagnostic tools, such as the Linux 'tcpdump' command and the
 'Wireshark' open-source tools.  For details, see for example:
 
+    http://www.tcpdump.org/
     http://linux.die.net/man/8/tcpdump
     http://www.wireshark.org/
 
-Each input tuple consumed by the PacketFileSource operator produces many output
-tuples, since each PCAP input file typically contains many packets.  However,
-the operator may optionally be configured to filter packets, that is, to produce
-as tuples only packets that meet a particular specification.
+This operator steps quietly over 'jmirror' headers prepended to packets
+by Juniper Networks 'mirror encapsulation', as described here:
 
-This operator is part of the network toolkit. The toolkit also includes sample
-applications that illustrate how to use the operator.
+    http://wiki.wireshark.org/jmirror
+
+This operator is part of the network toolkit. The toolkit includes several
+sample applications that illustrate how to use the operator.
 
 
 _____Dependencies_____
@@ -79,9 +116,6 @@ before compiling an application that contains the PacketLiveSource operator:
     export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=.../directory/libpcap-X.Y.Z
     export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
 
-See the 'TestPacketFileSource.standalone.sh' script in the 'scripts' directory
-for an example of compiling an application with alternative versions of libpcap.
-
 For more information on configuring, building, and installing 'libpcap', refer
 to its 'INSTALL.txt' file.
 
@@ -113,25 +147,24 @@ The PacketFileSource operator has one optional input port:
     first attribute must be of type 'rstring', and specifies the pathname of an
     input PCAP file for the operator to read.
 
+The packets in the PCAP file or files may optionally be filtered on input (see
+the 'inputFilter' parameter below.)
+
 
 _____Output Ports_____
 
 
-The PacketFileSource operator has one required output port and one optional
-port: 
+The PacketFileSource operator has one or more output ports: 
 
-  * Output port 0 produces tuples that contain network packets received by the
-    specified network adpater (see the 'networkInterface' parameter below),
-    subject to filtering (see the 'filterExpression' parameter below).  The
-    output attributes for port 0 must be assigned by output functions (see the
-    'Assignments' section below).
+  * Each output port may produce tuples containing packets, payloads, or network
+    header fields, as specified by output attribute assignments (see the
+    Assignments section below). The tuples may optionally be filtered on output
+    (see the 'outputFilter' parameter below).
 
-  * Output port 1, if defined, produces tuples periodically (see the
-    'statisticsInterval' parameter below) that contain statistics for the
-    specified network adapter.  The output attributes for port 0 must be
-    assigned by output functions (see the 'Assignments' section below).
-
-The PacketFileSource operator does not produce punctuation.
+Each packet processed by the operator (and passed by the input filter, if one is
+specified) may be emitted by each output port (if passed by the corresponding
+output filter, if one is specified), and may assign different fields to
+different output attributes.
 
 
 _____Parameters_____
@@ -143,15 +176,27 @@ _____Parameters_____
       parameter is required; if the operator has an input port, this parameter
       is not allowed.
 
-   filterExpression -- This optional parameter takes an expression of type
-      'rstring' that specifies which captured packets should be produced as
-      tuples. The value of this string must be a valid PCAP filter expression,
-      as documented in the manual page 'pcap-filter', for example here:
+   inputFilter -- This optional parameter takes an expression of type 'rstring'
+      that specifies which input packets should be processed. The value of this
+      string must be a valid PCAP filter expression, as defined here:
 
+          http://www.tcpdump.org/manpages/pcap-filter.7.html
           http://linux.die.net/man/7/pcap-filter
 
-      The default value of the 'filterExpression' parameter is an empty string,
-      which causes all packets read from the PCAP file to be produced as tuples.
+      The default value of the 'inputFilter' parameter is an empty string, which
+      causes all packets read from the PCAP file to be processed.
+
+   outputFilters -- This optional parameter takes a list of expressions of type
+      'rstring' that specify which input packets should be emitted by the
+      corresponding output port. The number of expressions in the list must
+      match the number of output ports.  The values of the strings must be
+      valid PCAP filter expressions, as defined here:
+
+          http://www.tcpdump.org/manpages/pcap-filter.7.html
+          http://linux.die.net/man/7/pcap-filter
+
+      The default value of the 'outputFilters' parameter is an empty list, which
+      causes all packets processed to be emitted by all output ports.
 
    initDelay -- This optional parameter takes an expression of type 'float64'
       that specifies the number of seconds the operator will wait before it
@@ -172,12 +217,11 @@ _____Parameters_____
 
       The default is to dispatch the operator's thread on any available processor.
 
-   statisticsInterval -- This optional parameter is valid only if a second
-      output port is defined for the operator.  It takes an expression of type
-      'float64' that specifies the interval, in seconds, for producing
-      statistics tuples on that output port.
+   metricsInterval -- This optional parameter takes an expression of type
+      'float64' that specifies the interval, in seconds, for sending operator
+      metrics to the Streams runtime.
 
-      The default value of the 'statisticsInterval' parameter is '1.0'.
+      The default value of the 'metricsInterval' parameter is '10.0'.
 
 
 _____Windowing_____
@@ -189,23 +233,20 @@ The PacketFileSource operator does not accept any window congfiguration.
 _____Assignments____
 
 
-The PacketFileSource operator requires that all attributes of the first output
-port be assigned values with one of these output functions:
+The PacketFileSource operator requires that all attributes of the output
+ports be assigned values, either with explicit assignment expressions,
+or implicitly by copy from input tuples (when an input port is specified).
+
+Output attribute assignments are SPL expressions. They may use any of the
+built-in SPL functions, and any of the following functions, which are specific
+to this operator:
 
    float64 captureTime() -- This function assigns the time that a packet was
       originally captured (not the time it was read from the PCAP file) to an
       output attribute.  The value is represented as seconds since the beginning
       of the Unix epoch (midnight in the GMT/UTC timezone on January 1st, 1970),
-      according to the system clock, and has a resolution of microseconds.
-
-   uint32 sessionKey() -- This function assigns a 32-bit key, based on the IP
-      version 4 source and destination addresses, and for UDP and TCP packets,
-      the source and destination port numbers.  The addresses and ports are
-      combined such that packets flowing in either direction between endpoints
-      have the same session key.  The key can be used to distribute packets
-      across multiple parallel processing channels such that all packets that
-      are part of a UDP or TCP session are routed to the same instance of the
-      processor.
+      according to the system clock, and has a resolution of at least
+      microseconds.
 
    uint32 packetLength() -- This function assigns the length of a packet to an
       output attribute.  The value includes all network headers and the entire
@@ -213,64 +254,127 @@ port be assigned values with one of these output functions:
       binary data assigned to a 'blob' attribute by the 'packetData()' function
       if the packet was truncated when the PCAP file was created.
 
-   uint64 packetNumber() -- This function assigns the sequence number of this
-      packet tuple, starting at zero, incrementing by one for each packet tuple
-      produced by the operator.
-
    blob packetData() -- This function assigns the packet data to an output
       attribute.  The value includes all network headers and the entire packet
       body.  Note that the data may be truncated when the PCAP file was created.
 
-The PacketFileSource operator requires that all attributes of the second output
-port, if defined, be assigned values with one of these output functions:
+   uint32 payloadLength() -- This function assigns the length of the payload
+      portion of a packet to an output attribute.  The value includes only the
+      length of the body of the packet, and excludes the length of the network
+      headers.  Note that this value may be larger than the length of the binary
+      data assigned to a 'blob' attribute by the 'payloadData()' function if the
+      packet was truncated when the PCAP file was created.
 
-   float64 statisticsTime() -- This function assigns the time that statistics
-      were produced by the PacketFileSource operator.  The value is represented
-      as seconds since the beginning of the Unix epoch (midnight in the GMT/UTC
-      timezone on January 1st, 1970), according to the system clock, and has a
-      resolution of microseconds.
+   blob payloadData() -- This function assigns the payload portion of a packet
+      to an output attribute.  The value includes only the body of the packet,
+      excluding all network headers.  Note that the data may be truncated when
+      the PCAP file was created.
 
-   uint64 packetsConsumed() -- This function assigns the number of packets read
-      from the input file during the current interval.
+   uint64 packetsProcessed() -- This function assigns the total number of packets
+      that have been processed so far. When an input filter is specified, this value
+      includes only the packets that pass the filter.
 
-   uint64 packetsProduced() -- This function assigns the number of tuples
-      produced by the first output port during the current interval.
+   uint64 octetsProcessed() -- This function assigns the total number of bytes
+      of packet data that have been processed so far. When an input filter is
+      specified, this value includes only the packets that pass the filter.
 
-   uint64 octetsProduced() -- This function assigns the number of bytes,
-      including network headers, in the tuples produced by the first output port
-      during the current interval.
+  list<uint8> ETHER_SRC_ADDRESS() -- This function returns the source MAC
+      address from the ethernet header of the packet.
 
+  list<uint8> ETHER_DST_ADDRESS() -- This function returns the destination MAC
+      address from the ethernet header of the packet.
+
+  uint32 ETHER_PROTOCOL() -- This function returns the protocol field from the
+      ethernet header of the packet.  For example, a value of 0x0800==2048 means
+      the packet contains an IPv4 header, and 0x86DD==34525 means the packet
+      contains an IPv6 header.
+
+  uint8 IP_VERSION() -- This function returns the version field from the IP
+      header of the packet, if it has one, or zero if not.  For example, a value
+      of 4 means the header is in IPv4 format, and 6 means the header is in IPv6
+      format.
+  
+  uint8 IP_PROTOCOL() -- This function returns the protocol field from the IP
+      header of the packet, if it has one, or zero if not.  For example, a value
+      of 0x01==1 means the packet contains an ICMP header, a value of 0x6==6
+      means it contains a TCP header, and a value of 0x11==17 means it contains
+      a UDP header.
+
+  uint32 IPV4_SRC_ADDRESS() -- This function returns the source address field
+      from the IPv4 header of the packet, if it has one, or zero if not.
+
+  uint32 IPV4_DST_ADDRESS() -- This function returns the destination address
+      field from the IPv4 header of the packet, if it has one, or zero if not.
+
+  list<uint8> IPV6_SRC_ADDRESS() -- This function returns the source address field
+      from the IPv6 header of the packet, if it has one, or zero if not.
+
+  list<uint8> IPV6_DST_ADDRESS() -- This function returns the destination address
+      field from the IPv6 header of the packet, if it has one, or zero if not.
+
+  uint16 IP_SRC_PORT() -- This function returns the source port field from
+      the UDP or TCP header of the packet, if it has one, or zero if not.
+  
+  uint16 IP_DST_PORT() -- This function returns the destination port field from
+      the UDP or TCP header of the packet, if it has one, or zero if not.
+  
+  uint16 UDP_SRC_PORT() -- This function returns the source port field from
+      the UDP header of the packet, if it has one, or zero if not.
+  
+  uint16 UDP_DST_PORT() -- This function returns the destination port field from
+      the UDP header of the packet, if it has one, or zero if not.
+
+  uint16 TCP_SRC_PORT() -- This function returns the source port field from
+      the TCP header of the packet, if it has one, or zero if not.
+
+  uint16 TCP_DST_PORT() -- This function returns the destination port field from
+      the TCP header of the packet, if it has one, or zero if not.
+
+  uint32 TCP_SEQUENCE() -- This function returns the sequence number field from
+      the TCP header of the packet, if it has one, or zero if not.
+
+  uint32 TCP_ACKNOWLEDGEMENT() -- This function returns the sequence number
+      acknowledgement field from the TCP header of the packet, if it has one, or
+      zero if not.
+
+  boolean TCP_FLAGS_URGENT() -- This function returns the urgent flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_ACK() -- This function returns the acknowledgement flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_PUSH() -- This function returns the push flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_RESET() -- This function returns the reset flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_SYN() -- This function returns the synchronize flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_FIN() -- This function returns the final flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  uint16 TCP_WINDOW() -- This function returns the window size field from
+      the TCP header of the packet, if it has one, or zero if not.
 
 
 _____Threads_____
 
 
+The PacketFileOperator contains a separate thread for reporting its metrics to
+the Streams runtime.
+
 When the PacketFileSource operator is configured without an input port, it
-contains a thread of execution which runs asynchronously from other
-threads in the PE containing the operator.  The operator reads the entire input
-PCAP file specified by the 'pcapFilename' operator.  When the operator reaches
-end-of-file, it terminates the thread, which terminates the operator.
-
-When the operator has an input port, and is fused in a PE with upstream
-operators, it runs on the thread of the upstream operator that sends an input
-tuple containing an input PCAP filename.  The PacketFileSource operator reads
-the entire input PCAP file specified by each tuple before the thread returns
-to the upstream operator.
-
-When the PacketFileSource operator has a second output port, it contains
-another thread that produceds statistics tuples on that port.
+contains another thread which reads the PCAP file specified by the
+'pcapFilename' operator.  When the operator reaches end-of-file, it terminates
+the thread and terminates the operator.
 
 
 _____Metrics_____
 
 
 The PacketFileSource operator has no Streams metrics.
-
-The operator counts the total number of packets and bytes read during the
-lifetime of the PE containing it.  When the operator terminates, it logs these
-counts, along with its average throughput.  The lifetime of the PE includes the
-processing of other operators that may be fused with the PacketFileSource
-operator, but excludes all initialization and termination.
 
 
 _____Exceptions_____
@@ -279,18 +383,21 @@ _____Exceptions_____
 The PacketFileSource operator will throw an exception and terminate in these
 situations:
 
-   -- An input PCAP file specified with the 'pcapFilename' parameter, or by an
-      input tuple, does not exist, or cannot be read.
+   -- The 'pcapFilename' parameter does not specify a valid PCAP recording.
 
-   -- The parameter 'filterExpression' does not specify a valid PCAP filter
-      expression.
+   -- An input tuple's first parameter is not of type 'rstring', or does not
+      specify a valid PCAP recording.
+
+   -- The 'inputFilter' and 'outputFilters' parameters do not specify a valid
+      PCAP filter expression.
 
 
 _____Examples_____
 
 
-The SampleNetworkToolkitData project in this toolkit contains examples of this
-operator.
+The SamplePacketFileSource project in this toolkit contains examples of this
+operator.  The SampleNetworkToolkitData project in this toolkit contains data
+for the sample applications.
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

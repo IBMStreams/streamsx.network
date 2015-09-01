@@ -3,8 +3,7 @@
 ## All Rights Reserved
 
 ### for valid values of 'networkInterface' parameter, type '/sbin/ifconfig' on deployment machine
-### for valid values of 'inputFilter' parameter, see http://linux.die.net/man/7/pcap-filter
-### for valid values of 'outputFilters' parameter, see http://linux.die.net/man/7/pcap-filter
+### for valid values of 'inputFilter' and 'outputFilters' parameters, see http://www.tcpdump.org/manpages/pcap-filter.7.html or http://linux.die.net/man/7/pcap-filter
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require OutputAssignmentGenerator;
@@ -282,21 +281,20 @@ inline void pcapCallback(u_char* correlator, const struct pcap_pkthdr* header, c
 
 void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_char* buffer) 
 {
-  // save pointers to the packet header and buffer for the output assignment functions
+  // save pointers to the packet header for the output assignment functions
   pcapHeader = header;
-  pcapBuffer = buffer;
   
   // count the packets and octets processed so far
   packetCounter++;
-  octetCounter += pcapHeader->len;
+  octetCounter += header->len;
   
   // locate the network headers in the packet
-  headers.locatePacketHeaders((char*)pcapBuffer, pcapHeader->caplen);
+  headers.locatePacketHeaders((char*)buffer, header->caplen);
   if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketLiveSource");  return; }
 
   // submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-	<% if (scalar(@outputFilterList)) { print "if (bpf_filter(outputFilterPrograms[$i].bf_insns, (const u_char*)pcapBuffer, pcapHeader->len, pcapHeader->caplen))"; } %> 
+	<% if (scalar(@outputFilterList)) { print "if (bpf_filter(outputFilterPrograms[$i].bf_insns, (const u_char*)buffer, header->len, header->caplen))"; } %> 
 		 {
 		   outTuple<%=$i%>.clear();
 		   <% OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;

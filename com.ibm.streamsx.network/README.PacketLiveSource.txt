@@ -11,64 +11,96 @@ _____Description_____
 
 
 PacketLiveSource is an operator for the IBM InfoSphere Streams product that
-captures ethernet packets from a network interface and emits them as output
-attributes.  Each tuple produced by the operator contains one packet, including
-all network headers, in an attribute of type 'blob (binary large object)'.  The
-tuple may also contain the time the packet was captured.
+captures live network packets from one of the network interfaces attached to the
+machine where it executes. The operator parses the network headers, and emits
+tuples containing packet data.  The tuples may contain the entire packet, the
+payload portion of the packet, or individual fields from the network headers, as
+specified by output attribute assignments.  The operator may produce zero, one,
+or more tuples from each packet it processes, depending upon optional input and
+output filters.
 
-The PacketLiveSource operator must be configured to capture packets from one of
-the network interfaces attached to the Linux machine where it executes.  It may
-optionally be configured to filter captured packets, that is, to produce as
-tuples only packets that meet a particular specification.
-
-The PacketLiveSource operator captures complete ethernet packets, starting with
-the ethernet header, including all protocol-specific headers and the packet
-payload (subject to truncation by the 'maximumLength' parameter).  The ethernet
-frame format is described here:
+The PacketLiveSource operator reads complete ethernet packets, starting with the
+ethernet header, including all protocol-specific headers and the packet payload.
+The ethernet frame format is described here:
 
     http://en.wikipedia.org/wiki/Ethernet_frame
+
+The PacketLiveSource operator can parse fields from the ethernet, IPv4, IPv6,
+UDP, and TCP headers of the input packet, and can assign the values of
+individual fields to output attributes, as specified by the output assignment
+expressions.  Fields are not parsed unless the corresponding output function is
+specified.
+
+The ethernet header and the fields it contains are described here:
+
     http://linux.die.net/include/net/ethernet.h
     http://linux.die.net/include/linux/if_ether.h
 
-Network interfaces attached to a shared ethernet segment normally ignore packets
-that are not addressed to them.  However, when 'promiscious' mode is enabled on
-a network interface, it can capture all network packets on its ethernet segment,
-even those that are not addressed to it.  This is sometimes referred to as
-"network sniffing".  Modern ethernet switches normally send network interfaces
-only packets that are addressed to them; 'promiscious' mode is useful only when
-a switch has been specifically configured to send packets that are not addressed
-to a network interface.
+The IPv4 header and the fields it contains are described here:
+
+    http://en.wikipedia.org/wiki/IPv4
+    http://www.ietf.org/rfc/rfc791.txt
+    http://linux.die.net/include/netinet/in.h
+    http://linux.die.net/include/netinet/ip.h
+
+The IPv6 header and the fields it contains are described here:
+
+    https://en.wikipedia.org/wiki/IPv6_packet
+    https://tools.ietf.org/html/rfc2460
+    http://linux.die.net/include/netinet/ip6.h
+
+The UDP header and the fields it contains are described here:
+
+    http://en.wikipedia.org/wiki/User_Datagram_Protocol
+    http://tools.ietf.org/html/rfc768
+    http://linux.die.net/include/netinet/udp.h
+
+The TCP header and the fields it contains are described here:
+
+    http://en.wikipedia.org/wiki/Transmission_Control_Protocol
+    http://tools.ietf.org/html/rfc793
+    http://linux.die.net/include/netinet/tcp.h
+
+This operator steps quietly over 'jmirror' headers prepended to packets
+by Juniper Networks 'mirror encapsulation', as described here:
+
+    http://wiki.wireshark.org/jmirror
+
+This operator is part of the network toolkit. The toolkit includes several
+sample applications that illustrate how to use the operator.
+
+
+_____Capabilities_____
+
+
+Network interfaces normally ignore packets that are not addressed to them.
+However, when 'promiscious' mode is enabled on a network interface, it can
+capture all network packets on its ethernet segment, even those that are not
+addressed to it.  This is sometimes referred to as "network sniffing".  Modern
+ethernet switches normally send network interfaces only packets that are
+addressed to them; 'promiscious' mode is useful only when a switch has been
+specifically configured to send packets that are not addressed to a network
+interface.
 
 The PacketLiveSource operator may enable 'promiscuous' mode in a ethernet
 interface if its 'promiscous' parameter is set to 'true', or the value of its
-'filterExpression' parameter requires it.  If so, the operator will require
-special privileges to execute.  In this case, the Streams processing element
-(PE) containing the operator must be compiled with the '--static-link' option,
-and must run with special privileges.
+'inputFilter' parameter requires it.  If so, the operator will require
+special Linux capabilities to execute. Linux capabilities are described here:
 
-In RHEL/CentOS 6, the special privileges needed by PacketLiveSource operators
-can be granted to PEs that contain them after the application is compiled, but
-before it runs, with this command:
+    http://linux.die.net/man/7/capabilities
 
-    setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' pe-executable-file
+The PacketLiveSource operator requires these Linux capabilities:
 
-In RHEL/CentOS 5, PEs containing PacketLiveSource operators must be executed
-with 'root' privileges.  To run a 'standalone' SPL application with 'root'
-privileges, it can be executed by the 'root' user, or it can be executed by a
-normal user with the 'sudo' command.  To run a PE that is part of a
-'distributed' SPL application with 'root' privileges, the PE's executable file
-must be changed so that it is owned by the 'root' user, and its Linux 'setuid'
-flag is set.
+    CAP_NET_RAW+eip 
+    CAP_NET_ADMIN+eip
 
-For examples of how to run SPL applications containing PacketLiveSource
-operators with special privileges in RHEL/CentOS 5 and 6, see these scripts in
-the toolkit:
+Streams applications that are built in standalone mode should be compiled with
+the '--static-link' option and then granted these permissions like this:
 
-    .../scripts/TestPacketLiveSource1.standalone.sh
-    .../scripts/TestPacketLiveSource1.distributed.sh
+    sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
 
-This operator is part of the network toolkit. The toolkit also includes sample
-applications that illustrate how to use the operator.
+Streams applications that are built in standalone mode should be compiled with
+the '--static-link' option and then ...
 
 
 _____Dependencies_____
@@ -77,12 +109,11 @@ _____Dependencies_____
 The PacketLiveSource operator depends upon the Linux 'packet capture library
 (libpcap)'.  The library must be installed on the machine where this operator
 executes. It is available as an installable 'repository package (RPM)' from the
-'base' RHEL and CentOS repositories, and can be installed with administrator
+'base' RHEL and CentOS repositories.  It can be installed with administrator
 tools such as 'yum'.  This requires root privileges, which can be acquired
 temporarily with administrator tools such as 'sudo'.
 
-To install 'libpcap' as an administrator for all users, enter this command at a
-Linux command prompt:
+To install 'libpcap', enter this command at a Linux command prompt:
 
     sudo yum install libpcap-devel
 
@@ -105,14 +136,11 @@ command prompt:
     make
 
 To instruct the Streams compiler (that is, the 'sc' command) to use your version
-of libpcap instead of the system version, set these environment variables before
-compiling an application that contains the PacketLiveSource operator:
+of 'libpcap' instead of the system version, set these environment variables
+before compiling an application that contains the PacketLiveSource operator:
 
     export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=.../directory/libpcap-X.Y.Z
     export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
-
-See the 'TestPacketLiveSourceX.standalone.sh' scripts in the 'scripts' directory
-for examples of compiling an application with alternative versions of libpcap.
 
 For more information on configuring, building, and installing 'libpcap', refer
 to its 'INSTALL.txt' file.
@@ -135,31 +163,26 @@ in the manual page 'pcap', for example here:
 _____Input Ports_____
 
 
-The PacketLiveSource operator has no input ports.
+The PacketLiveSource operator has no input ports.  
 
 
 _____Output Ports_____
 
 
-The PacketLiveSource operator has one required output port and one optional
-port: 
+The PacketLiveSource operator has one or more output ports: 
 
-  * Output port 0 produces tuples that contain network packets received by the
-    specified network adpater (see the 'networkInterface' parameter below),
-    subject to filtering (see the 'filterExpression' parameter below).  The
-    output attributes for port 0 must be assigned by output functions (see the
-    'Assignments' section below).
+  * Each output port may produce tuples containing packets, payloads, or network
+    header fields, as specified by output attribute assignments (see the
+    Assignments section below). The tuples may optionally be filtered on output
+    (see the 'outputFilter' parameter below).
 
-  * Output port 1, if defined, produces tuples periodically (see the
-    'statisticsInterval' parameter below) that contain statistics for the
-    specified network adapter.  The output attributes for port 0 must be
-    assigned by output functions (see the 'Assignments' section below).
-
-The PacketLiveSource operator does not produce punctuation.
+Each packet processed by the operator (and passed by the input filter, if one is
+specified) may be emitted by each output port (if passed by the corresponding
+output filter, if one is specified), and may assign different fields to
+different output attributes.
 
 
 _____Parameters_____
-
 
    networkInterface -- This required parameter takes an expression of type
       'rstring' that specifies which network interface the operator will capture
@@ -168,7 +191,7 @@ _____Parameters_____
       display a list of configured network interface names, type this at a Linux
       command prompt:
 
-      /sbin/ifconfig
+          /sbin/ifconfig
 
    maximumLength -- This optional parameter takes an expression of type 'uint16'
       that specifies the maximum length in bytes of the packet data that will be
@@ -177,46 +200,17 @@ _____Parameters_____
 
       The default value of the 'maximumLength' parameter is 65,535 bytes.
 
-   filterExpression -- This optional parameter takes an expression of type
-      'rstring' that specifies which captured packets should be produced as
-      tuples. The value of this string must be a valid 'pcap' filter expression,
-      as documented in the manual page 'pcap-filter', for example here:
-
-          http://linux.die.net/man/7/pcap-filter
-
-      The default value of the 'filterExpression' parameter is an empty string,
-      which causes all captured packets to be produced as tuples.
-
-      Note that some values of the 'filterExpression' parameter, including the
-      default value, require that 'promiscuous' mode be enabled on the network
-      interface, which requires that the operator execute with 'root'
-      privileges.
-
    promiscuous -- This optional parameter takes an expression of type 'boolean'
       that specifies whether or not 'promiscuous' mode should be enabled on the
       network interface.
 
       The default value of the 'promiscuous' parameter is 'false'.  However,
-      some values of the 'filterExpression' parameter, including the default
-      value, require that 'promiscuous' mode be enabled on the network
-      interface, even if the 'promiscous' parameter is not specified, or set to
-      'false'.
+      some values of the 'inputFilter' parameter, including the default value,
+      require that 'promiscuous' mode be enabled on the network interface, even
+      if the 'promiscous' parameter is not specified, or set to 'false'.
 
       Note that if 'promiscious' mode is enabled on the network interface, the
-      operator must execute with 'root' privileges.
-
-   initDelay -- This optional parameter takes an expression of type 'float64'
-      that specifies the number of seconds the operator will wait before it
-      begins to produced tuples.
-
-      The default value of the 'initDelay' parameter is '0.0'.
-
-   machineID -- This optional parameter takes an expression of type 'int32' that
-      specifies a value for the 'machineID' field of the SPL type 'timestamp',
-      to be used when the 'timestampp()' output function is assigned to an
-      attribute of SPL type 'timestamp'.
-
-      The default value of the 'machineID' parameter is '0'.
+      operator must execute with special Linux capabilities, as described above.
 
    bufferSize -- This optional parameter takes an expression of type 'uint32'
       that specifies the size, in bytes, of the 'libpcap' buffer used for
@@ -225,15 +219,6 @@ _____Parameters_____
 
       The default value of the 'bufferSize' parameter is determined by 'libpcap'.
 
-   processorAffinity -- This optional parameter takes an expression of type
-      'unit32' that specifies which processor core the operator's thread will
-      run on.  The maximum value is 'P-1', where P is the number of processors
-      on the machine where the operator will run.  If this parameter is
-      specified, then the operator's thread will be dispatched only on the
-      specified processor.
-
-      The default is to dispatch the operator's thread on any available processor.
-
    timeout -- This optional parameter takes an expression of type 'float64' that
       specifies a timeout for the 'libpcap' interface.  If this value is
       specified, the operator will call the 'libpcap' interface again whenever
@@ -241,7 +226,7 @@ _____Parameters_____
       signal.  
 
       The default is no timeout.  This may cause the thread that runs the
-      'libpcap' interface to on shutdown until another packet is received.
+      'libpcap' interface to hang on shutdown until another packet is received.
 
    timestampType -- This optional parameter takes a value of 'host', 'adapter',
       or 'adapter_unsynced', which specifies which type of timestamp will be
@@ -249,12 +234,52 @@ _____Parameters_____
 
       The default value is 'host'.
 
-   statisticsInterval -- This optional parameter is valid only if a second
-      output port is defined for the operator.  It takes an expression of type
-      'float64' that specifies the interval, in seconds, for producing
-      statistics tuples on that output port.
+   inputFilter -- This optional parameter takes an expression of type 'rstring'
+      that specifies which input packets should be processed. The value of this
+      string must be a valid PCAP filter expression, as defined here:
 
-      The default value of the 'statisticsInterval' parameter is '1.0'.
+          http://www.tcpdump.org/manpages/pcap-filter.7.html
+          http://linux.die.net/man/7/pcap-filter
+
+      The default value of the 'inputFilter' parameter is an empty string, which
+      causes all packets read from the PCAP file to be processed.
+
+   outputFilters -- This optional parameter takes a list of expressions of type
+      'rstring' that specify which input packets should be emitted by the
+      corresponding output port. The number of expressions in the list must
+      match the number of output ports.  The values of the strings must be
+      valid PCAP filter expressions, as defined here:
+
+          http://www.tcpdump.org/manpages/pcap-filter.7.html
+          http://linux.die.net/man/7/pcap-filter
+
+      The default value of the 'outputFilters' parameter is an empty list, which
+      causes all packets processed to be emitted by all output ports.
+
+   initDelay -- This optional parameter takes an expression of type 'float64'
+      that specifies the number of seconds the operator will wait before it
+      begins to produce tuples.  This parameter is allowed only when the
+      'pcapFilename' parameter is also specified.  
+
+      The default value of the 'initDelay' parameter is '0.0'.
+
+   processorAffinity -- This optional parameter takes an expression of type
+      'unit32' that specifies which processor core the operator's thread will
+      run on.  The maximum value is 'P-1', where P is the number of processors
+      on the machine where the operator will run.  If this parameter is
+      specified, then the operator's thread will be dispatched only on the
+      specified processor.  This parameter is allowed only if the 'pcapFilename'
+      parameter is also specified.  If instead the operator is configured with
+      an input port, then the operator runs on the thread of the upstream
+      operator, and is dispatched according to that thread's processor affinity.
+
+      The default is to dispatch the operator's thread on any available processor.
+
+   metricsInterval -- This optional parameter takes an expression of type
+      'float64' that specifies the interval, in seconds, for sending operator
+      metrics to the Streams runtime.
+
+      The default value of the 'metricsInterval' parameter is '10.0'.
 
 
 _____Windowing_____
@@ -266,103 +291,158 @@ The PacketLiveSource operator does not accept any window congfiguration.
 _____Assignments____
 
 
-The PacketLiveSource operator requires that all attributes of the first output
-port be assigned values with one of these output functions:
+The PacketLiveSource operator requires that all attributes of the output
+ports be assigned values, either with explicit assignment expressions,
+or implicitly by copy from input tuples (when an input port is specified).
 
-   <numeric T> T length() -- This function assigns the length of a captured
-      packet to an output attribute.  The value includes all network headers and
-      the entire packet body.  Note that this value may be larger than the
-      length of the binary data assigned to a 'blob' attribute by the 'packet()'
-      function if the packet is truncated due to the parameter 'maximumLength'.
+Output attribute assignments are SPL expressions. They may use any of the
+built-in SPL functions, and any of the following functions, which are specific
+to this operator:
 
-   blob packet() -- This function assigns the captured packet data to an output
+   float64 captureTime() -- This function assigns the time that a packet was
+      originally captured (not the time it was read from the PCAP file) to an
+      output attribute.  The value is represented as seconds since the beginning
+      of the Unix epoch (midnight in the GMT/UTC timezone on January 1st, 1970),
+      according to the system clock, and has a resolution of at least
+      microseconds.
+
+   uint32 packetLength() -- This function assigns the length of a packet to an
+      output attribute.  The value includes all network headers and the entire
+      packet body.  Note that this value may be larger than the length of the
+      binary data assigned to a 'blob' attribute by the 'packetData()' function
+      if the packet was truncated when the PCAP file was created.
+
+   blob packetData() -- This function assigns the packet data to an output
       attribute.  The value includes all network headers and the entire packet
-      body.  Note that the data may be truncated due to the parameter
-      'maximumLength'.
+      body.  Note that the data may be truncated when the PCAP file was created.
 
-   <numeric T> T packetNumber() -- This function assigns the sequence number of
-      this packet tuple, starting at zero, incrementing by one for each packet
-      tuple produced by the operator.
+   uint32 payloadLength() -- This function assigns the length of the payload
+      portion of a packet to an output attribute.  The value includes only the
+      length of the body of the packet, and excludes the length of the network
+      headers.  Note that this value may be larger than the length of the binary
+      data assigned to a 'blob' attribute by the 'payloadData()' function if the
+      packet was truncated when the PCAP file was created.
 
-   <numeric T> T sessionKey() -- This function assigns a 32-bit key, based on
-      the IP version 4 source and destination addresses, and for UDP and TCP
-      packets, the source and destination port numbers.  The addresses and ports
-      are combined such that packets flowing in either direction between
-      endpoints have the same session key.  The key can be used to distribute
-      packets across multiple parallel processing channels such that all packets
-      that are part of a UDP or TCP session are routed to the same instance of
-      the processor.
+   blob payloadData() -- This function assigns the payload portion of a packet
+      to an output attribute.  The value includes only the body of the packet,
+      excluding all network headers.  Note that the data may be truncated when
+      the PCAP file was created.
 
-   <numeric|timestamp T> T timestampp() -- This function assigns the time that a
-      packet was captured.  The value is represented as seconds and microseconds
-      since the beginning of the Unix epoch (midnight in the GMT/UTC timezone on
-      January 1st, 1970), according to the system clock.  The attribute must be
-      either a numeric type or SPL type 'timestamp'.  For attributes of type
-      'timestamp', the 'machineID' field is set according to the 'machineID'
-      parameter.
+   uint64 packetsReceived() -- This function assigns the total number of packets
+      received by the network interface, as counted by 'libpcap'.
 
-   int64 timestampSeconds() -- This function assigns the integer portion of the
-      time that a packet was captured, that is, the number of seconds since the
-      beginning of the Unix epoch (midnight in the GMT/UTC timezone on January
-      1st, 1970), according to the system clock.
-
-   int32 timestampMicroseconds() -- This function assigns the fractional portion
-      of the time that a packet was captured, that is, the number of
-      microseconds since the value assigned by the TimestampSeconds() function.
-
-The PacketLiveSource operator requires that all attributes of the second output
-port, if defined, be assigned values with one of these output functions:
-
-   <numeric T> T packetsReceived() -- This function assigns the number of
-      packets received by the network interface during the current interval, as
-      counted by 'libpcap'.
-
-   <numeric T> T packetsDropped() -- This function assigns the number of packets
-      dropped during the current interval because there was no room in the
-      operating system's buffer when they arrived, as counted by 'libpcap'.  The
-      value will always be zero on Linux kernels prior to version 2.4, which do
-      not count dropped packets.  You can display the kernel version of your
-      machine by typing this at a Linux command prompt:
+   uint64 packetsDropped() -- This function assigns the total number of
+      packets dropped because there was no room in the operating system's buffer
+      when they arrived, as counted by 'libpcap'.  The value will always be zero
+      on Linux kernels prior to version 2.4, which do not count dropped packets.
+      You can display the kernel version of your machine by typing this at a
+      Linux command prompt:
 
           uname -r
 
-   <numeric T> T packetsDroppedByInterface() -- This function assigns number of
+   uint64 packetsDroppedByInterface() -- This function assigns total number of
       packets dropped by the network interface adapter or its kernel driver, as
       counted by 'libpcap'.  The value may be zero if the counter is not
       implemented by the adapter or driver.
 
-   <numeric T> T packetsProduced() -- This function assigns the number of packet
-      tuples produced by the first output port during the current interval, as
-      counted by the operator.
+   uint64 packetsProcessed() -- This function assigns the total number of packets
+      that have been processed so far. When an input filter is specified, this value
+      includes only the packets that pass the filter.
 
-   <numeric T> T octetsProduced() -- This function assigns the number of bytes,
-      including network headers, in the packet tuples produced by the first
-      output port during the current interval, as counted by the operator.
+   uint64 octetsProcessed() -- This function assigns the total number of bytes
+      of packet data that have been processed so far. When an input filter is
+      specified, this value includes only the packets that pass the filter.
 
-   <numeric|timestamp T> T timestampp() -- This function assigns the time that
-      statistics were produced by the PacketLiveSource operator.  The value is
-      represented as seconds and microseconds since the beginning of the Unix
-      epoch (midnight in the GMT/UTC timezone on January 1st, 1970), according
-      to the system clock.  The attribute must be either a numeric type or SPL
-      type 'timestamp'.  For attributes of type 'timestamp', the 'machineID'
-      field is set according to the 'machineID' parameter.
+  list<uint8> ETHER_SRC_ADDRESS() -- This function returns the source MAC
+      address from the ethernet header of the packet.
 
+  list<uint8> ETHER_DST_ADDRESS() -- This function returns the destination MAC
+      address from the ethernet header of the packet.
+
+  uint32 ETHER_PROTOCOL() -- This function returns the protocol field from the
+      ethernet header of the packet.  For example, a value of 0x0800==2048 means
+      the packet contains an IPv4 header, and 0x86DD==34525 means the packet
+      contains an IPv6 header.
+
+  uint8 IP_VERSION() -- This function returns the version field from the IP
+      header of the packet, if it has one, or zero if not.  For example, a value
+      of 4 means the header is in IPv4 format, and 6 means the header is in IPv6
+      format.
+  
+  uint8 IP_PROTOCOL() -- This function returns the protocol field from the IP
+      header of the packet, if it has one, or zero if not.  For example, a value
+      of 0x01==1 means the packet contains an ICMP header, a value of 0x6==6
+      means it contains a TCP header, and a value of 0x11==17 means it contains
+      a UDP header.
+
+  uint32 IPV4_SRC_ADDRESS() -- This function returns the source address field
+      from the IPv4 header of the packet, if it has one, or zero if not.
+
+  uint32 IPV4_DST_ADDRESS() -- This function returns the destination address
+      field from the IPv4 header of the packet, if it has one, or zero if not.
+
+  list<uint8> IPV6_SRC_ADDRESS() -- This function returns the source address field
+      from the IPv6 header of the packet, if it has one, or zero if not.
+
+  list<uint8> IPV6_DST_ADDRESS() -- This function returns the destination address
+      field from the IPv6 header of the packet, if it has one, or zero if not.
+
+  uint16 IP_SRC_PORT() -- This function returns the source port field from
+      the UDP or TCP header of the packet, if it has one, or zero if not.
+  
+  uint16 IP_DST_PORT() -- This function returns the destination port field from
+      the UDP or TCP header of the packet, if it has one, or zero if not.
+  
+  uint16 UDP_SRC_PORT() -- This function returns the source port field from
+      the UDP header of the packet, if it has one, or zero if not.
+  
+  uint16 UDP_DST_PORT() -- This function returns the destination port field from
+      the UDP header of the packet, if it has one, or zero if not.
+
+  uint16 TCP_SRC_PORT() -- This function returns the source port field from
+      the TCP header of the packet, if it has one, or zero if not.
+
+  uint16 TCP_DST_PORT() -- This function returns the destination port field from
+      the TCP header of the packet, if it has one, or zero if not.
+
+  uint32 TCP_SEQUENCE() -- This function returns the sequence number field from
+      the TCP header of the packet, if it has one, or zero if not.
+
+  uint32 TCP_ACKNOWLEDGEMENT() -- This function returns the sequence number
+      acknowledgement field from the TCP header of the packet, if it has one, or
+      zero if not.
+
+  boolean TCP_FLAGS_URGENT() -- This function returns the urgent flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_ACK() -- This function returns the acknowledgement flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_PUSH() -- This function returns the push flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_RESET() -- This function returns the reset flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_SYN() -- This function returns the synchronize flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  boolean TCP_FLAGS_FIN() -- This function returns the final flag from the
+      TCP header of the packet, if it has one, or zero if not.
+
+  uint16 TCP_WINDOW() -- This function returns the window size field from
+      the TCP header of the packet, if it has one, or zero if not.
 
 
 _____Threads_____
 
 
-The PacketLiveSource operator contains two or three threads of execution:
+The PacketLiveSource operator contains a separate thread for running 'libpcap',
+which receives network packets from the operating system and produces tuples
+from them.
 
-  * The first thread executes 'libpcap', which receives network packets from the
-    operating system and produces packet tuples containing them on the first output
-    port.
-
-  * The second thread provides Streams metrics when the operator is executed in a
-    Distributed mode application.
-
-  * The third thread produces statistics tuples when a second output port is
-    defined.
+The PacketLiveOperator contains a separate thread for reporting its metrics to
+the Streams runtime.
 
 
 _____Metrics_____
@@ -383,6 +463,13 @@ in Distributed mode application:
     interface adapter or its kernel driver, as counted by 'libpcap'.  The value
     may be zero if the counter is not implemented by the adapter or driver.
 
+  * nPacketsProcessedCurrent: number of packets processed by the operator.  When
+    an input filter is specified, this includes only packets that pass the
+    filter.
+
+  * nOctetsProcessedCurrent: number of bytes of packet data processed by the
+    operator.  When an input filter is specified, this includes only packets
+    that pass the filter.
 
 
 _____Exceptions_____
@@ -391,11 +478,11 @@ _____Exceptions_____
 The PacketLiveSource operator will throw an exception and terminate in these
 situations:
 
-   -- The parameter 'networkInterface' does not specify a network interfaces
-      defined in Linux on the machine where the operator executes.
+   -- The parameter 'networkInterface' does not specify a network interface
+      defined on the machine where the operator executes.
 
-   -- The parameter 'filterExpression' does not specify a valid 'pcap' filter
-      expression.
+   -- The 'inputFilter' and 'outputFilters' parameters do not specify a valid
+      PCAP filter expression.
 
 
 _____Tuning_____
@@ -451,62 +538,9 @@ For more information, refer to 'http://fasterdata.es.net/host-tuning/linux/'.
 _____Examples_____
 
 
-This operator declaration will configure a PacketLiveSource operator that
-captures all packets received by network interface "eth0", and produce tuples
-containing all of the packet data plus the time the packets were captured:
-	
-    stream<
-	float64 captureTime, 
-    	blob rawPacket
-    > PacketStream as Out = PacketLiveSource() {
-        param
-	    networkInterface: "eth0";
-	output Out:
-	    captureTime = timestampp(),
-	    rawPacket = packet(); }
-
-This operator declaration will configure a PacketLiveSource operator to capture
-only DNS and DHCP packets received by network interface "eth4", and produce
-tuples containing all of the packet data plus the time the packets were
-captured:
-
-    stream<
-	float64 captureTime, 
-	blob rawPacket
-    > PacketStream as Out = PacketLiveSource() {
-        param
-	    networkInterface: "eth4";
-	    filterExpression: "udp port 53 or udp port 67";
-	output Out:
-	    captureTime = timestampp(),
-	    rawPacket = packet(); }
-
-This operator declaration will configure a PacketLiveSource operator to capture
-only the first 512 bytes of data from packets recevied on port 2055, and assign
-the time of capture to several attributes of various types:
-
-    stream<
-	uint32 uint32CaptureTime,
-	float64 float64CaptureTime,
-	timestampCaptureTime,
-	blob rawPacket
-    > PacketStream as Out = PacketLiveSource() {
-        param
-	    networkInterface: "eth4";
-	    filterExpression: "port 2055";
-	    maximumLength: 512;
-	output Out:
-	    uint32CaptureTime = timestampp(),
-	    float64CaptureTime = timestampp(),
-	    timestampCaptureTime = timestampp(),
-	    rawPacket = packet(); }
-
-The PacketLiveSource operator may require 'root' privileges to execute properly.
-The project contains two scripts that illustrate how to do this for 'standalone'
-and 'distributed' applications:
-
-    .../scripts/TestPacketLiveSource1.standalone.sh   
-    .../scripts/TestPacketLiveSource1.distributed.sh   
+The SamplePacketLiveSource project in this toolkit contains examples of this
+operator.  The SampleNetworkToolkitData project in this toolkit contains data
+for the sample applications.
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

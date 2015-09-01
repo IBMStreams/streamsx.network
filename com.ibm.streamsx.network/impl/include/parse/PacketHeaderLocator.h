@@ -6,7 +6,6 @@
 #ifndef PACKETHEADERLOCATOR_H_
 #define PACKETHEADERLOCATOR_H_
 
-//??????#include <netinet/in.h>
 #include <netinet/ether.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
@@ -14,16 +13,21 @@
 #include <netinet/tcp.h>
 
 // structure of Juniper Networks 'jmirror' headers
-  struct JMirrorHeader {
+
+struct JMirrorHeader {
 	uint32_t interceptionIdentifier;       
 	uint32_t sessionIdentifier;
   } __attribute__((packed)) ;
+
 struct JMirrorHeaders {
   struct ip ipHeader;
   struct udphdr udpHeader;
   struct JMirrorHeader jmirrorHeader;
 } __attribute__((packed)) ;
+
 const uint16_t jmirrorPort = 30030;
+
+// this class locates ethernet, IPv4, IPv6, UDP, and TCP headers in network packets
 
 class PacketHeaderLocator {
 
@@ -66,7 +70,7 @@ class PacketHeaderLocator {
 
 	// overlay an ethernet header on the buffer and step over it
 	etherHeader = (struct ethhdr*)buffer; 
-	etherHeaderLength = sizeof(struct ethhdr); // ... plus length of optional VLAN tag ???????????????????
+	etherHeaderLength = sizeof(struct ethhdr); // ... plus length of optional VLAN tag ?
 	buffer += etherHeaderLength;
 	length -= etherHeaderLength; 
 	
@@ -95,7 +99,7 @@ class PacketHeaderLocator {
 	// if the buffer contains an IPv6 packet, overlay an IPv6 header on it
 	if ( ntohs(etherHeader->h_proto)==ETH_P_IPV6 && length>=sizeof(struct ip6_hdr) && (((struct ip6_hdr*)buffer)->ip6_vfc)>>4==6 ) {
 	  ipv6Header = (struct ip6_hdr*)buffer; 
-	  ipv6HeaderLength = sizeof(struct ip6_hdr); // ... plus length of optional extension headers ??????????????????
+	  ipv6HeaderLength = sizeof(struct ip6_hdr); // ... plus length of optional extension headers ?
 	  buffer += ipv6HeaderLength;
 	  length -= ipv6HeaderLength;
 	}
