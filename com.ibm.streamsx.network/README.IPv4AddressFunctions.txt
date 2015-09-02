@@ -1,10 +1,10 @@
-Copyright (C) 2015, International Business Machines Corporation
+Copyright (C) 2011, 2015  International Business Machines Corporation
 All Rights Reserved
 
 
 
-Network Toolkit IPv4 Address functions
---------------------------------------
+Network Toolkit: IPv4 Address functions
+---------------------------------------
 
 
 _____Description_____
@@ -43,10 +43,10 @@ The functions use these representations of IP version 4 addresses:
     is, an 'rstring' type) of decimal characters separated by periods. For
     example, '74.89.138.153'.
 
-  * The string representation of an IP version 4 subnet address (that is, a CIDR
-    address) is an SPL string (that is, an 'rstring' type) of decimal characters
-    separated by periods, followed by a slash and an integer indicting the
-    number of mask bits. For example, '74.89.138.0/24'.
+  * The string representation of an IP version 4 subnet uses CIDR notation, that
+    is, an SPL string of decimal characters separated by periods, followed by a
+    slash and an integer indicting the number of mask bits. For example,
+    '74.89.138.0/24'.
 
 Notes:
 
@@ -71,5 +71,7 @@ Notes:
 For more information about IP version 4 addresses, see:
 
     https://en.wikipedia.org/wiki/IP_address
+
+    https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#CIDR_notation
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

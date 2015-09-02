@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description></description>
+      <customOutputFunctions>
+        <customOutputFunction>
+          <name>packet output functions</name>
+          <function>
+            <description></description>
+            <prototype>float64 captureTime()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 packetLength()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>blob packetData()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>list&lt;uint8>[6] ETHER_SRC_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>list&lt;uint8>[6] ETHER_DST_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 ETHER_PROTOCOL()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint8 IP_VERSION()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint8 IP_PROTOCOL()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 IPV4_SRC_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 IPV4_DST_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>list&lt;uint8>[16] IPV6_SRC_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>list&lt;uint8>[16] IPV6_DST_ADDRESS()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 IP_SRC_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 IP_DST_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 UDP_SRC_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 UDP_DST_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 TCP_SRC_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 TCP_DST_PORT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 TCP_SEQUENCE()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 TCP_ACKNOWLEDGEMENT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_URGENT()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_ACK()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_PUSH()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_RESET()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_SYN()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>boolean TCP_FLAGS_FIN()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint16 TCP_WINDOW()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 payloadLength()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>blob payloadData()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint64 packetsProcessed()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint64 octetsProcessed()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;any T> T copy()</prototype>
+          </function>
+        </customOutputFunction>
+      </customOutputFunctions>
+      <libraryDependencies>
+        <library>
+          <cmn:description>'libpcap' version determined dynamically at compile time</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:command>../../impl/bin/libpcapPath.pl</cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description>common code for toolkit operators</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>pcapFilename</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>inputFilter</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>outputFilters</name>
+        <description/>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+      <parameter>
+        <name>initDelay</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>processorAffinity</name>
+        <description>assign the operator's thread (if it has one) to a particular processor
+        core ... if operator has an input port, the operator
+        runs on the upstream thread, and this parameter is ignored ...</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>metricsInterval</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description></description>
+        <windowingDescription/>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortOpenSet>
+        <description/>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <outputFunctions>
+          <default>copy</default>
+          <type>packet output functions</type>
+        </outputFunctions>
+        <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
+      </outputPortOpenSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

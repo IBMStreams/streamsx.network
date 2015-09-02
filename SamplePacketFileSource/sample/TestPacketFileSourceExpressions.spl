@@ -1,0 +1,49 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketFileSourceExpressions {
+
+	param		
+	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+	
+	type 
+	
+	PacketType =
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
+		uint32 captureSeconds,		// time that packet was captured, in seconds since Unix epoch (integer portion only)
+		uint32 captureMicroseconds,	// time that packet was captured, in microseconds since captureSeconds()
+		timestamp captureTimestamp,	// time that packet was captured, in seconds and nanoseconds since Unix epoch
+	    uint32 sessionKey,			// combination of addresses and ports, for downstream @parallel annotations
+		int8 packetNumberModulo13,	// sequence number of packet modulo 13, as signed 8-bit integer
+		int32 packetLength,			// length of packet (not necessarily all captured)
+	    int32 packetCaptureLength, 	// length of captured packet (possibly less than packetLength())
+		int32 packetHeaderLength,	// length of network headers in packet
+		int32 packetPayloadLength;	// length of payload following network headers
+
+	graph
+
+	stream<PacketType> PacketStream as Out = PacketFileSource() {
+		param
+			pcapFilename: $pcapFilename;
+		output Out:
+			captureTime = captureTime(),
+			captureSeconds = (uint32)(captureTime()),
+			captureMicroseconds =(uint32)(fmod(captureTime(),1.0)*1000000.0),
+			captureTimestamp = createTimestamp((int64)captureTime(), (uint32)(fmod(captureTime(),1.0)*1000000000.0), 0),
+		    sessionKey = IPV4_SRC_ADDRESS() + IPV4_DST_ADDRESS() + (uint32)IP_SRC_PORT() + (uint32)IP_DST_PORT(),
+			packetNumberModulo13 = (int8)((packetsProcessed()-(uint64)1) % (uint64)13),
+			packetLength = (int32)packetLength(),
+		    packetCaptureLength = size(packetData()),
+		    packetHeaderLength = size(packetData()) - (int32)payloadLength(),
+		    packetPayloadLength = (int32)payloadLength();
+	}
+	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceExpressions.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+}
+

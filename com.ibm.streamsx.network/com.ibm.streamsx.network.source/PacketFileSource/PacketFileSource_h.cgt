@@ -1,0 +1,169 @@
+<%
+
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+
+my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
+
+%>
+
+#include <iostream>
+#include <iomanip>
+#include <limits>
+#include <locale>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <string.h>
+#include <sched.h>
+#include <pcap.h>
+#include <pcap-bpf.h>
+
+#include <streams_boost/filesystem.hpp>
+
+#include "parse/PacketHeaderLocator.h"
+
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+<% if($consistentRegion) { %> , public StateHandler <% } %> 
+{
+public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR(); 
+  void allPortsReady(); 
+  void prepareToShutdown(); 
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+  <% if ($consistentRegion) { %>
+	ConsistentRegionContext * const crContext;
+	void checkpoint(Checkpoint &ckpt);
+	void reset(Checkpoint &ckpt);
+	void resetToInitialState();
+	<% } %> ; 	  
+ 
+  // ----------- additional operator methods ----------
+
+  void processPCAPfile(const std::string pcapFilename);
+  void fileThread(); 
+  void metricsThread(); 
+
+ private:
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  std::string pcapFilename;
+  double initDelay;
+  int32_t processorAffinity;
+  double metricsInterval;
+  std::string inputFilter;
+  std::vector<std::string> outputFilters;
+
+  // ----------- input and output tuples ----------
+
+  <% if ($model->getNumberOfInputPorts()) { print "IPort0Type* inTuple"; } %> ;
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+
+  // ----------- operator state variables ----------
+
+  uint64_t packetCounter;
+  uint64_t octetCounter;
+  uint64_t startTimeInNanoseconds;
+  double now, then;
+  struct bpf_program inputFilterProgram;
+  std::vector<struct bpf_program> outputFilterPrograms;
+  boolean done;
+
+  // ----------- libpcap-specific variables ----------
+
+  pcap_t* pcapDescriptor;
+  struct pcap_pkthdr* pcapHeader;
+  const u_char* pcapBuffer;
+
+  // ----------- packet header locator ----------
+
+  char* packetBuffer;
+  uint32_t packetBufferLength;
+  PacketHeaderLocator headers;
+
+  // ----------- output attribute assignment functions for packet stream (port 0) ----------
+
+  SPL::float64 captureTime() { return (double)(pcapHeader->ts.tv_sec) + ((double)(pcapHeader->ts.tv_usec))/1000000.0; }
+
+  SPL::uint32 packetLength() { return pcapHeader->len; } 
+
+  SPL::blob packetData() { return SPL::blob((const unsigned char*)headers.packetBuffer, headers.packetLength); }
+
+  SPL::list<uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
+
+  SPL::list<uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+
+  SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
+  
+  SPL::uint8 IP_VERSION() { return headers.ipv4Header ? headers.ipv4Header->version : ( headers.ipv6Header ? headers.ipv6Header->ip6_vfc>>4 : 0 ); }
+  
+  SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
+  
+  SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
+
+  SPL::uint32 IPV4_DST_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->daddr) : 0; }
+
+  SPL::list<uint8> IPV6_SRC_ADDRESS() { return headers.ipv6Header ? SPL::list<uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
+
+  SPL::list<uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
+
+  SPL::uint16 IP_SRC_PORT() { return UDP_SRC_PORT() + TCP_SRC_PORT(); }
+  
+  SPL::uint16 IP_DST_PORT() { return UDP_DST_PORT() + TCP_DST_PORT(); }
+  
+  SPL::uint16 UDP_SRC_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->source) : 0; }
+  
+  SPL::uint16 UDP_DST_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->dest) : 0; }
+
+  SPL::uint16 TCP_SRC_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->source) : 0; }
+
+  SPL::uint16 TCP_DST_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->dest) : 0; }
+
+  SPL::uint32 TCP_SEQUENCE() { return headers.tcpHeader ? ntohl(headers.tcpHeader->seq) : 0; }
+
+  SPL::uint32 TCP_ACKNOWLEDGEMENT() { return headers.tcpHeader ? ntohl(headers.tcpHeader->ack_seq) : 0; }
+
+  SPL::boolean TCP_FLAGS_URGENT() { return headers.tcpHeader ? headers.tcpHeader->urg : false; }
+
+  SPL::boolean TCP_FLAGS_ACK() { return headers.tcpHeader ? headers.tcpHeader->ack : false; }
+
+  SPL::boolean TCP_FLAGS_PUSH() { return headers.tcpHeader ? headers.tcpHeader->psh : false; }
+
+  SPL::boolean TCP_FLAGS_RESET() { return headers.tcpHeader ? headers.tcpHeader->rst : false; }
+
+  SPL::boolean TCP_FLAGS_SYN() { return headers.tcpHeader ? headers.tcpHeader->syn : false; }
+
+  SPL::boolean TCP_FLAGS_FIN() { return headers.tcpHeader ? headers.tcpHeader->fin : false; }
+
+  SPL::uint16 TCP_WINDOW() { return headers.tcpHeader ? ntohs(headers.tcpHeader->window) : 0; }
+
+  SPL::uint32 payloadLength() { return headers.payloadLength; }
+
+  SPL::blob payloadData() { return headers.payload ? SPL::blob((const unsigned char*)headers.payload, headers.payloadLength) : SPL::blob(); }
+
+  SPL::uint64 packetsProcessed() { return packetCounter; }  
+
+  SPL::uint64 octetsProcessed() { return octetCounter; }  
+
+  // ------------------------------------------------------------------------------------------
+
+}; 
+
+
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

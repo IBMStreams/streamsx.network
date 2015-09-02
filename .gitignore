@@ -2,16 +2,19 @@
 
 
 # ignore InfoSphere Streams directories and files
-/.apt_generated/
-/.settings/
-/output/
-/toolkit.xml
-/.toolkitList
+*/.apt_generated/
+*/.settings/
+*/output/
+*/log/
+*/data/debug.*
+*/toolkit.xml
+*/.toolkitList
 *_h.pm
 *_cpp.pm
 *.splmm.idx
 *.splmm.xml
 *.splbuild
+StreamsLogs*.tgz
 
 # ignore GCC compiler and linker files
 *.o

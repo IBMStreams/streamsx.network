@@ -1,10 +1,10 @@
-Copyright (C) 2015, International Business Machines Corporation
+Copyright (C) 2011, 2015  International Business Machines Corporation
 All Rights Reserved
 
 
 
-Network Toolkit IPv6 Address functions
---------------------------------------
+Network Toolkit: IPv6 Address functions
+---------------------------------------
 
 
 _____Description_____
