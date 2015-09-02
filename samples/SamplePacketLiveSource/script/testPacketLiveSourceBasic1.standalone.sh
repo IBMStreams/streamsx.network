@@ -13,13 +13,14 @@ composite=TestPacketLiveSourceBasic1
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-workspaceDirectory=$( cd $here/../.. ; pwd )
-buildDirectory=$projectDirectory/output/build/$composite
+toolkitDirectory=$( cd $here/../../.. ; pwd )
+
+buildDirectory=$projectDirectory/output/build/$composite.standalone
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
-$workspaceDirectory/com.ibm.streamsx.network
+$toolkitDirectory/com.ibm.streamsx.network
 )
 
 compilerOptionsList=(
@@ -67,12 +68,8 @@ echo -e "\ntrace level: $traceLevel"
 step "building standalone application '$namespace::$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
 
-step "setting execution capabilities for standalone application '$namespace::$composite' ..."
-executable=$buildDirectory/bin/standalone.exe
-sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
-
 step "executing standalone application '$namespace::$composite' ..."
-#sudo gdb --args 
+executable=$buildDirectory/bin/$namespace.$composite
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

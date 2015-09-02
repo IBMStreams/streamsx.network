@@ -54,9 +54,7 @@ composite TestPacketFileSourceBasic1 {
 			packetData = packetData(),
 			payloadData = payloadData();
 	}
-	//() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceBasic1.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-
-	stream<PacketType> FilteredPacketStream = Filter(PacketStream) { param filter: true; }
+	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceBasic1.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 }
 

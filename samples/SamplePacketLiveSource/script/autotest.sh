@@ -9,9 +9,17 @@
 #set -o pipefail
 
 here=$( cd ${0%/*} ; pwd )
-dataDirectory=$( cd $here/../data ; pwd )
-buildDirectory=$here/../output 
-logDirectory=$here/../log
+projectDirectory=$( cd $here/.. ; pwd )
+
+buildDirectory=$projectDirectory/output/build
+dataDirectory=$projectDirectory/data
+logDirectory=$projectDirectory/log
+
+scripts=(
+$here/setupCapabilitiesInstance.sh
+$here/test*.sh
+$here/teardownCapabilitiesInstance.sh
+)
 
 ################### functions used in this script #############################
 
@@ -30,7 +38,7 @@ scriptCount=0
 successCount=0
 failureCount=0
 
-for script in $here/test*.sh ; do 
+for script in ${scripts[*]} ; do 
 	scriptname=$( basename $script .sh )
 	echo $scriptname ...
 	logname=$logDirectory/$scriptname.log
@@ -45,4 +53,4 @@ echo -e "\n$successCount of $scriptCount scripts succeeded"
 
 [ $failureCount -ne 0 ] && echo -e "\n$failureCount scripts failed:" && ( cd $logDirectory ; ls -1 *.failed )
 
-exit 0
+exit $failureCount

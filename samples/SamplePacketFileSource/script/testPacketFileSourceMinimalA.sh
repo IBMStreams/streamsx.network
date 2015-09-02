@@ -9,19 +9,19 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketFileSourceBasic1
+composite=TestPacketFileSourceMinimalA
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-workspaceDirectory=$( cd $here/../.. ; pwd )
+toolkitDirectory=$( cd $here/../../.. ; pwd )
+
 buildDirectory=$projectDirectory/output/build/$composite
-pcapDirectory=$workspaceDirectory/SampleNetworkToolkitData
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
-$workspaceDirectory/com.ibm.streamsx.network
-$workspaceDirectory/SampleNetworkToolkitData
+$toolkitDirectory/com.ibm.streamsx.network
+$toolkitDirectory/samples/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -42,7 +42,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$pcapDirectory/sample_dns+dhcp.pcap
+pcapFilename=$HOME/data.splanet01/dnsdhcp_sample_hour_20110722_192832_all.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

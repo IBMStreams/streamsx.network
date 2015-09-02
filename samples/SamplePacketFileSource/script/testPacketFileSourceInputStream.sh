@@ -9,19 +9,19 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketFileSourceExpressions
+composite=TestPacketFileSourceInputStream
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-workspaceDirectory=$( cd $here/../.. ; pwd )
+toolkitDirectory=$( cd $here/../../.. ; pwd )
+
 buildDirectory=$projectDirectory/output/build/$composite
-pcapDirectory=$workspaceDirectory/SampleNetworkToolkitData
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
-$workspaceDirectory/com.ibm.streamsx.network
-$workspaceDirectory/SampleNetworkToolkitData
+$toolkitDirectory/com.ibm.streamsx.network
+$toolkitDirectory/samples/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -42,7 +42,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$pcapDirectory/sample_dns+dhcp.pcap
+pcapDirectory=$toolkitDirectory/samples/SampleNetworkToolkitData
+timeoutInterval=5.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -70,7 +71,7 @@ sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, co
 
 step "executing standalone application '$namespace::$composite' ..."
 executable=$buildDirectory/bin/standalone.exe
-#gdb --args 
+###gdb --args ...
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

@@ -9,19 +9,18 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketFileSourceInputStream
+composite=TestPacketLiveSourceFull
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-workspaceDirectory=$( cd $here/../.. ; pwd )
+toolkitDirectory=$( cd $here/../../.. ; pwd )
+
 buildDirectory=$projectDirectory/output/build/$composite
-pcapDirectory=$workspaceDirectory/SampleNetworkToolkitData
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
-$workspaceDirectory/com.ibm.streamsx.network
-$workspaceDirectory/SampleNetworkToolkitData
+$toolkitDirectory/com.ibm.streamsx.network
 )
 
 compilerOptionsList=(
@@ -42,8 +41,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapDirectory=$pcapDirectory
-timeoutInterval=5.0
+networkInterface=eth0
+timeoutInterval=10.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -69,9 +68,12 @@ echo -e "\ntrace level: $traceLevel"
 step "building standalone application '$namespace::$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
 
-step "executing standalone application '$namespace::$composite' ..."
+step "setting execution capabilities for standalone application '$namespace::$composite' ..."
 executable=$buildDirectory/bin/standalone.exe
-###gdb --args ...
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
+
+step "executing standalone application '$namespace::$composite' ..."
+#sudo gdb --args 
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0
