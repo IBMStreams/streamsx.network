@@ -138,8 +138,8 @@ void MY_OPERATOR::process(uint32_t idx)
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") ...", "PacketFileSource");
 
 	switch (idx) {
-	case 0: metrics_thread(); break;
-	case 1: file_thread(); break;
+	case 0: if (metricsInterval>0) metricsThread(); break;
+	case 1: fileThread(); break;
 	default: break; }
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketFileSource");
@@ -313,7 +313,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
 // When there is no input port, this thread processes the PCAP file specified with the 'pcapFilename' parameter
 
-void MY_OPERATOR::file_thread()
+void MY_OPERATOR::fileThread()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> file_thread()", "PacketFileSource");
 
@@ -362,7 +362,7 @@ void MY_OPERATOR::file_thread()
 // When a second output port is configured, this thread periodically emits
 // statistics tuples on that output port
 
-void MY_OPERATOR::metrics_thread()
+void MY_OPERATOR::metricsThread()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metrics_thread()", "PacketFileSource");
 

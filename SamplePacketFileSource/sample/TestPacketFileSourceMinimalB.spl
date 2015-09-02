@@ -27,7 +27,7 @@ composite TestPacketFileSourceMinimalB {
 		param
 			pcapFilename: $pcapFilename;
 		    inputFilter: "udp port 53";
-		    metricsInterval: 0.1;
+		    metricsInterval: 0.0;
 		output OutPackets:
 			captureTime = captureTime(),
 			ipv4SourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),

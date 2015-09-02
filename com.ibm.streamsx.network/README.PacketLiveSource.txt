@@ -277,7 +277,9 @@ _____Parameters_____
 
    metricsInterval -- This optional parameter takes an expression of type
       'float64' that specifies the interval, in seconds, for sending operator
-      metrics to the Streams runtime.
+      metrics to the Streams runtime. If the value is zero or less, the operator
+      will not report metrics to the runtime, and the output assigment functions
+      for 'libpcap' statistics will be zero.
 
       The default value of the 'metricsInterval' parameter is '10.0'.
 
@@ -442,7 +444,7 @@ which receives network packets from the operating system and produces tuples
 from them.
 
 The PacketLiveOperator contains a separate thread for reporting its metrics to
-the Streams runtime.
+the Streams runtime if the 'metricsInterval' parameter is greater than zero.
 
 
 _____Metrics_____

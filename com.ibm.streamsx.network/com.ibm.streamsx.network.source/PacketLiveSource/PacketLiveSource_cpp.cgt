@@ -240,8 +240,8 @@ void MY_OPERATOR::process(uint32_t idx)
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
     
   switch (idx) {
-  case 0: metrics_thread(); break;
-  case 1: pcap_thread(); break;
+  case 0: if (metricsInterval>0) metricsThread(); break;
+  case 1: pcapThread(); break;
   default: break; }
          
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
@@ -310,7 +310,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 // receive ethernet packets captured from the network interface, which are emitted
 // as tuples on output port 0
 
-void MY_OPERATOR::pcap_thread()
+void MY_OPERATOR::pcapThread()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> pcap_thread() for " << networkInterface, "PacketLiveSource");
 
@@ -346,7 +346,7 @@ void MY_OPERATOR::pcap_thread()
   // This method executes on a separate thread, calling into libpcap periodically
   // to get its statistcs counters
 
-  void MY_OPERATOR::metrics_thread()
+  void MY_OPERATOR::metricsThread()
   {
 	SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metrics_thread() for " << networkInterface, "PacketLiveSource");
 

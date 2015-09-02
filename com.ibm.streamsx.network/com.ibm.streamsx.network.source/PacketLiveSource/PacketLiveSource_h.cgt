@@ -46,8 +46,8 @@ public:
 
   // ----------- additional operator methods ----------
 
-  void metrics_thread(); 
-  void pcap_thread();
+  void metricsThread(); 
+  void pcapThread();
   void processPCAPbuffer(const struct pcap_pkthdr* header, const u_char* buffer); 
 
 

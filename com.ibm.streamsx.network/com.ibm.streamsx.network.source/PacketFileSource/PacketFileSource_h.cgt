@@ -54,8 +54,8 @@ public:
   // ----------- additional operator methods ----------
 
   void processPCAPfile(const std::string pcapFilename);
-  void file_thread(); 
-  void metrics_thread(); 
+  void fileThread(); 
+  void metricsThread(); 
 
  private:
 
