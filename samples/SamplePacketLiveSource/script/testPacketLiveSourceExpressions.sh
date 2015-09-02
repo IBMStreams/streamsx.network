@@ -9,17 +9,18 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketLiveSourceFull
+composite=TestPacketLiveSourceExpressions
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-workspaceDirectory=$( cd $here/../.. ; pwd )
+toolkitDirectory=$( cd $here/../../.. ; pwd )
+
 buildDirectory=$projectDirectory/output/build/$composite
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
-$workspaceDirectory/com.ibm.streamsx.network
+$toolkitDirectory/com.ibm.streamsx.network
 )
 
 compilerOptionsList=(
