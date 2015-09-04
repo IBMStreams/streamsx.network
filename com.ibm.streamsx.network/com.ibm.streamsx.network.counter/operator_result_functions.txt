@@ -1,0 +1,68 @@
+
+
+	stream<LineType> EvenLineStream as Out = TupleCounter(LineStream) {
+	  param
+	      filter: ( tupleNumber() % 2ul ) == 0ul;
+	  output Out:
+	      lineNumber = tupleNumber(),
+	      lineNumberModulo13 = tupleNumber() % 13ul;
+	}
+
+
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+  <% if ($filter) { print "if ($filter)"; } %>
+  {
+    outTuple.clear();
+    outTuple.assignFrom(iport$0, false);
+    <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple", $outputPort)%> ;
+    submit(outTuple, 0);
+  }
+
+
+
+
+void MY_OPERATOR_SCOPE::MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+  if ((SPL::uint64(::TupleCounter::tupleNumber() % lit$1) == lit$0))
+  {
+    outTuple.clear();
+    outTuple.assignFrom(iport$0, false);
+    outTuple.set_lineNumber( ::TupleCounter::tupleNumber() ); 
+    outTuple.set_lineNumberModulo13( SPL::uint64(::TupleCounter::tupleNumber() % lit$2) ); // output assignment is expression 'tupleNumber() % 13'
+    submit(outTuple, 0);
+  }
+
+
+
+SPL::CodeGen::implementationEpilogue()
+SPL::CodeGenHelper::implementationEpilogueImpl()
+...
+SPL::CodeGenHelper::parameterValueInitList()
+SPL::CodeGenHelper::isParamWithNoStreamAttributes()
+SPL::Operator::Instance::Expression::hasStreamAttributes()
+$parameter->->getValueAt(i)->{xml_}->{hasStreamAttributes}->[0]
+
+
+
+$model->getParameterByName("filter")->getValueAt(0)->{xml_}->{hasStreamAttributes}->[0]="true" if $filter && (index($filter, "::TupleCounter::") != -1);
+
+
+
+MY_BASE_OPERATOR::MY_BASE_OPERATOR()
+ : Operator() {
+    PE & pe = PE::instance();
+    uint32_t index = getIndex();
+    initRTC(*this, lit$0, "lit$0");
+    initRTC(*this, lit$1, "lit$1");
+    initRTC(*this, lit$2, "lit$2");
+    param$filter$0 = (SPL::uint64(::TupleCounter::tupleNumber() % lit$1) == lit$0); // <<<<<<<<<
+    addParameterValue ("filter", SPL::ConstValueHandle(param$filter$0));
+    (void) getParameters(); // ensure thread safety by initializing here
+    $oportBitset = OPortBitsetType(std::string("01"));
+}
+
+
+

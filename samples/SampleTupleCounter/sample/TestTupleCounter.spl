@@ -1,0 +1,66 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.counter::*;
+
+composite TestTupleCounter {
+
+	param expression<rstring> $filename: getSubmissionTimeValue("filename", "./ozymandias.txt" );
+	
+	type 
+
+	LineTypeA =
+	  rstring line,
+	  uint64 lineNumber,
+	  uint64 lineNumberA,
+	  uint64 lineNumberModulo13;
+
+	LineTypeB =
+	  rstring line,
+	  uint64 lineNumber,
+	  uint64 lineNumberB,
+	  uint64 lineNumberModulo7;
+
+	graph
+
+	stream<rstring line> LineStream = FileSource() {
+		param
+			file: $filename;
+		    format: line;
+	}
+	() as LineSink = FileSink(LineStream) { param file: "debug.TestTupleCounter.LineStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+	stream<LineTypeA> AllLineStream as Out = TupleCounterA(LineStream) {
+	  output Out:
+	      lineNumber = tupleNumber(),
+	      lineNumberA = tupleNumberA(),
+	      lineNumberModulo13 = tupleNumber() % 13ul;
+	}
+	() as AllLineSink = FileSink(AllLineStream) { param file: "debug.TestTupleCounter.AllLineStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+	stream<LineTypeA> EvenLineStream as Out = TupleCounterA(LineStream) {
+	  param
+	      filter: ( tupleNumber() % 2ul ) == 0ul;
+	  output Out:
+	      lineNumber = tupleNumber(),
+	      lineNumberA = tupleNumberA(),
+	      lineNumberModulo13 = tupleNumber() % 13ul;
+	}
+	() as EvenLineSink = FileSink(EvenLineStream) { param file: "debug.TestTupleCounter.EvenLineStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+	stream<LineTypeB> OddLineStream as Out = TupleCounterB(LineStream) {
+	  param
+	      filter: ( tupleNumber() % 2ul ) != 0ul;
+	  output Out:
+	      lineNumber = tupleNumber(),
+	      lineNumberB = tupleNumberB(),
+	      lineNumberModulo7 = tupleNumber() % 7ul;
+	}
+	() as OddLineSink = FileSink(OddLineStream) { param file: "debug.TestTupleCounter.OddLineStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+}
+

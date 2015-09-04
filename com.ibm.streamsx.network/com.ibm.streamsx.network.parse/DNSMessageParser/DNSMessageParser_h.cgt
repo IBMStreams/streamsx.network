@@ -1,0 +1,122 @@
+<%
+
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+
+%>
+
+#include "parse/DNSFieldLocator.h"
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR(); 
+  void allPortsReady(); 
+  void prepareToShutdown(); 
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+private:
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  // ----------- input and output tuples ----------
+
+  OPort0Type outTuple;
+
+  // ----------- operator state variables ----------
+
+  uint64_t tupleCounter;
+  
+  // ----------- DNS field locator ----------
+
+  DNSFieldLocator fields;
+
+  // ----------- assignment functions for output attributes ----------
+
+  SPL::boolean parseError() { return fields.error ? true : false; }
+
+  SPL::rstring parseErrorMessage() { return fields.error ? fields.error : ""; }
+
+  SPL::uint64 messagesProcessed() { return tupleCounter; }
+
+  SPL::uint16 IDENTIFIER() { return ntohs(fields.dnsHeader->identifier); }
+
+  SPL::uint8 OPCODE() { return fields.dnsHeader->opcodeField; }
+
+  SPL::boolean RESPONSE_FLAG() { return fields.dnsHeader->responseFlag; }
+
+  SPL::uint8 RESPONSE_CODE() { return fields.dnsHeader->responseCode; }
+
+  SPL::boolean AUTHORITATIVE_FLAG() { return fields.dnsHeader->authoritativeFlag; }
+
+  SPL::boolean TRUNCATION_FLAG() { return fields.dnsHeader->truncatedFlag; }
+
+  SPL::uint16 QUESTION_COUNT() { return fields.questionCount; }
+
+  SPL::rstring QUESTION_NAME() { return fields.questionCount>0 ? fields.convertDNSNameToString(fields.questionRecords[0].name) : ""; }
+
+  SPL::list<rstring> QUESTION_NAMES() { return fields.convertResourceNamesToStringList(fields.questionRecords, fields.questionCount); }
+
+  SPL::uint16 QUESTION_TYPE() { return fields.questionCount>0 ? fields.questionRecords[0].type : 0; }
+
+  SPL::list<uint16> QUESTION_TYPES() { return fields.convertResourceTypesToIntegerList(fields.questionRecords, fields.questionCount); }
+
+  SPL::uint16 QUESTION_CLASS() { return fields.questionCount>0 ? fields.questionRecords[0].classs : 0; }
+
+  SPL::list<uint16> QUESTION_CLASSES() { return fields.convertResourceClassesToIntegerList(fields.questionRecords, fields.questionCount); }
+
+  SPL::uint16 ANSWER_COUNT() { return fields.answerCount; }
+
+  SPL::list<rstring> ANSWER_NAMES() { return fields.convertResourceNamesToStringList(fields.answerRecords, fields.answerCount); }
+
+  SPL::list<uint16> ANSWER_TYPES() { return fields.convertResourceTypesToIntegerList(fields.answerRecords, fields.answerCount); }
+
+  SPL::list<uint16> ANSWER_CLASSES() { return fields.convertResourceClassesToIntegerList(fields.answerRecords, fields.answerCount); }
+
+  SPL::list<uint32> ANSWER_TTLS() { return fields.convertResourceTTLsToIntegerList(fields.answerRecords, fields.answerCount); }
+
+  SPL::list<rstring> ANSWER_DATA() { return fields.convertResourceDataToStringList(fields.answerRecords, fields.answerCount); }
+
+  SPL::rstring ANSWER_CANONICAL() { return fields.canonicalCount>0 ? fields.convertResourceDataToString(fields.canonicalRecords[0]) : ""; }
+
+  SPL::rstring ANSWER_ADDRESS() { return fields.addressCount>0 ? fields.convertDNSNameToString(fields.addressRecords[0].name) : ""; }
+
+  SPL::list<rstring> ANSWER_ADDRESSES() { return fields.convertResourceDataToStringList(fields.addressRecords, fields.addressCount); }
+
+  SPL::uint16 NAMESERVER_COUNT() { return fields.nameserverCount; }
+
+  SPL::list<rstring> NAMESERVER_NAMES() { return fields.convertResourceNamesToStringList(fields.nameserverRecords, fields.nameserverCount); }
+
+  SPL::list<uint16> NAMESERVER_TYPES() { return fields.convertResourceTypesToIntegerList(fields.nameserverRecords, fields.nameserverCount); }
+
+  SPL::list<uint16> NAMESERVER_CLASSES() { return fields.convertResourceClassesToIntegerList(fields.nameserverRecords, fields.nameserverCount); }
+
+  SPL::list<uint32> NAMESERVER_TTLS() { return fields.convertResourceTTLsToIntegerList(fields.nameserverRecords, fields.nameserverCount); }
+
+  SPL::list<rstring> NAMESERVER_DATA() { return fields.convertResourceDataToStringList(fields.nameserverRecords, fields.nameserverCount); }
+
+  SPL::uint16 ADDITIONAL_COUNT() { return fields.additionalCount; }
+
+  SPL::list<rstring> ADDITIONAL_NAMES() { return fields.convertResourceNamesToStringList(fields.additionalRecords, fields.additionalCount); }
+
+  SPL::list<uint16> ADDITIONAL_TYPES() { return fields.convertResourceTypesToIntegerList(fields.additionalRecords, fields.additionalCount); }
+
+  SPL::list<uint16> ADDITIONAL_CLASSES() { return fields.convertResourceClassesToIntegerList(fields.additionalRecords, fields.additionalCount); }
+
+  SPL::list<uint32> ADDITIONAL_TTLS() { return fields.convertResourceTTLsToIntegerList(fields.additionalRecords, fields.additionalCount); }
+
+  SPL::list<rstring> ADDITIONAL_DATA() { return fields.convertResourceDataToStringList(fields.additionalRecords, fields.additionalCount); }
+
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

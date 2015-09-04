@@ -3,8 +3,8 @@
 ** All Rights Reserved
 */
 
-#ifndef IPV4ADDRESSFUNCTIONS_H_
-#define IPV4ADDRESSFUNCTIONS_H_
+#ifndef IPV4_ADDRESS_FUNCTIONS_H_
+#define IPV4_ADDRESS_FUNCTIONS_H_
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -265,5 +265,5 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 
 } } } } } 
 
-#endif /* IPV4ADDRESSFUNCTIONS_H_ */
+#endif /* IPV4_ADDRESS_FUNCTIONS_H_ */
 

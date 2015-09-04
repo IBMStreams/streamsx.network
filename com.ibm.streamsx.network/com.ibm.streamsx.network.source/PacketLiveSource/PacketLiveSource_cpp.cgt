@@ -70,6 +70,10 @@ MY_OPERATOR::MY_OPERATOR()
   <% foreach my $outputFilter (@outputFilterList) { bless $outputFilter,"SPL::Operator::Instance::Expression"; print "outputFilters.push_back(" . $outputFilter->getCppExpression() . "); "; } %> ;
   metricsInterval = <%=$metricsInterval%>;
 
+  // initialize operator state variables
+  packetCounter = 0;
+  octetCounter = 0;
+
 #if defined(lib_pcap_pcap_h)
 
   // log the 'libpcap' version that will be used
@@ -289,7 +293,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   octetCounter += header->len;
   
   // locate the network headers in the packet
-  headers.locatePacketHeaders((char*)buffer, header->caplen);
+  headers.locateNetworkHeaders((char*)buffer, header->caplen);
   if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketLiveSource");  return; }
 
   // submit output tuples to output ports, as selected by output filters, if specified
@@ -312,7 +316,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 
 void MY_OPERATOR::pcapThread()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> pcap_thread() for " << networkInterface, "PacketLiveSource");
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> pcapThread() for " << networkInterface, "PacketLiveSource");
 
   // assign this thread to a particular processor core, if specified
   if (processorAffinity>-1) {
@@ -334,7 +338,7 @@ void MY_OPERATOR::pcapThread()
 	const int rc = pcap_loop(pcapDescriptor, -1, &pcapCallback, (u_char*)this);
 	SPLLOG(L_TRACE, "pcap_loop() returned " << rc, "PacketLiveSource"); }
 	
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> pcap_thread() for " << networkInterface, "PacketLiveSource");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> pcapThread() for " << networkInterface, "PacketLiveSource");
 }
 	
 	
@@ -348,12 +352,7 @@ void MY_OPERATOR::pcapThread()
 
   void MY_OPERATOR::metricsThread()
   {
-	SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metrics_thread() for " << networkInterface, "PacketLiveSource");
-
-	// keep the operator's  statistics in these variables
-	pcapStatistics  = (const struct pcap_stat){0};
-	packetCounter = 0;
-	octetCounter = 0;
+	SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metricsThread() for " << networkInterface, "PacketLiveSource");
 
 	// expose the operator's statistics in these metrics
 	OperatorMetrics& opm = getContext().getMetrics();
@@ -362,6 +361,9 @@ void MY_OPERATOR::pcapThread()
 	Metric* totalPacketsDroppedByInterface = &opm.getCustomMetricByName("nPacketsDroppedByInterfaceCurrent");
 	Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
 	Metric* totalOctetsProcessed = &opm.getCustomMetricByName("nOctetsProcessedCurrent");
+
+	// keep the operator's  statistics in these variables
+	pcapStatistics  = (const struct pcap_stat){0};
 
 	// get statistics periodically and emit a tuple whenever they change
 	double previousStatisticsTime = SPL::Functions::Time::getTimestampInSecs();
@@ -392,7 +394,7 @@ void MY_OPERATOR::pcapThread()
 	  then = now;
 	}
 
-	SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> metrics_thread() for " << networkInterface, "PacketLiveSource");
+	SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread() for " << networkInterface, "PacketLiveSource");
   }
 
 

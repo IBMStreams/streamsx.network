@@ -1,0 +1,136 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+composite TestDNSMessageParserFull {
+
+	param		
+	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+	
+	type 
+	
+	PacketType =
+		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
+	    rstring ipSourceAddress,		// IP source address
+	    rstring ipDestinationAddress,	// IP destination address
+		blob dnsMessage;				// contents of packet payload, following all network headers
+
+	DNSMessageType = 
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
+	  rstring ipSourceAddress,			// IP source address
+	  rstring ipDestinationAddress,		// IP destination address
+	  boolean parseError,
+	  rstring parseErrorMessage,
+	  uint64 messagesProcessed,
+	  uint16 IDENTIFIER,
+	  uint8 OPCODE,
+	  boolean RESPONSE_FLAG,
+	  uint8 RESPONSE_CODE,
+	  rstring RESPONSE_CODE_AS_STRING,
+	  boolean AUTHORITATIVE_FLAG,
+	  boolean TRUNCATION_FLAG,
+	  uint16 QUESTION_COUNT,
+	  rstring QUESTION_NAME,
+	  uint16 QUESTION_TYPE,
+	  rstring QUESTION_TYPE_AS_STRING,
+	  uint16 QUESTION_CLASS,
+	  list<rstring> QUESTION_NAMES,
+	  list<uint16> QUESTION_TYPES,
+	  list<uint16> QUESTION_CLASSES,
+	  uint16 ANSWER_COUNT,
+	  list<rstring> ANSWER_NAMES,
+	  list<uint16> ANSWER_TYPES,
+	  list<uint16> ANSWER_CLASSES,
+	  list<uint32> ANSWER_TTLS,
+	  list<rstring> ANSWER_DATA,
+	  rstring ANSWER_CANONICAL,
+	  rstring ANSWER_ADDRESS,
+	  list<rstring> ANSWER_ADDRESSES,
+	  uint16 NAMESERVER_COUNT,
+	  list<rstring> NAMESERVER_NAMES,
+	  list<uint16> NAMESERVER_TYPES,
+	  list<uint16> NAMESERVER_CLASSES,
+	  list<uint32> NAMESERVER_TTLS,
+	  list<rstring> NAMESERVER_DATA,
+	  uint16 ADDITIONAL_COUNT,
+	  list<rstring> ADDITIONAL_NAMES,
+	  list<uint16> ADDITIONAL_TYPES,
+	  list<uint16> ADDITIONAL_CLASSES,
+	  list<uint32> ADDITIONAL_TTLS,
+	  list<rstring> ADDITIONAL_DATA;
+
+	graph
+
+	stream<PacketType> PacketStream as Out = PacketFileSource() {
+		param
+			pcapFilename: $pcapFilename;
+		    inputFilter: "udp port 53";
+		    metricsInterval: 0.0;
+		output Out:
+			captureTime = captureTime(),
+			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+			dnsMessage = payloadData();
+	}
+	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+	stream<DNSMessageType> DNSMessageStream as Out = DNSMessageParser(PacketStream) {
+	  logic state: { 
+		map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+		map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; 
+	  } 
+	  param
+	  	  payloadAttribute: dnsMessage;
+	  output Out:
+	      parseError = parseError(),
+	      parseErrorMessage = parseErrorMessage(),
+	      messagesProcessed = messagesProcessed(),
+	  	  IDENTIFIER = IDENTIFIER(),
+	  	  OPCODE = OPCODE(),
+	  	  RESPONSE_FLAG = RESPONSE_FLAG(),
+	  	  RESPONSE_CODE = RESPONSE_CODE(),
+	  	  RESPONSE_CODE_AS_STRING = RESPONSE_CODE() in dnsResponseCodes ? dnsResponseCodes[RESPONSE_CODE()] : (rstring)RESPONSE_CODE(),
+	  	  AUTHORITATIVE_FLAG = AUTHORITATIVE_FLAG(),
+	  	  TRUNCATION_FLAG = TRUNCATION_FLAG(),
+	  	  QUESTION_COUNT = QUESTION_COUNT(),
+	  	  QUESTION_NAME = QUESTION_NAME(),
+	  	  QUESTION_TYPE = QUESTION_TYPE(),
+	  	  QUESTION_TYPE_AS_STRING = QUESTION_TYPE() in dnsTypes ? dnsTypes[QUESTION_TYPE()] : (rstring)QUESTION_TYPE(),
+	  	  QUESTION_CLASS = QUESTION_CLASS(),
+	  	  QUESTION_NAMES = QUESTION_NAMES(),
+	  	  QUESTION_TYPES = QUESTION_TYPES(),
+	  	  QUESTION_CLASSES = QUESTION_CLASSES(),
+	  	  ANSWER_COUNT = ANSWER_COUNT(),
+	  	  ANSWER_NAMES = ANSWER_NAMES(),
+	  	  ANSWER_TYPES = ANSWER_TYPES(),
+	  	  ANSWER_CLASSES = ANSWER_CLASSES(),
+	  	  ANSWER_TTLS = ANSWER_TTLS(),
+	  	  ANSWER_DATA = ANSWER_DATA(),
+	  	  ANSWER_CANONICAL = ANSWER_CANONICAL(),
+	  	  ANSWER_ADDRESS = ANSWER_ADDRESS(),
+	  	  ANSWER_ADDRESSES = ANSWER_ADDRESSES(),
+	  	  NAMESERVER_COUNT = NAMESERVER_COUNT(),
+	  	  NAMESERVER_NAMES = NAMESERVER_NAMES(),
+	  	  NAMESERVER_TYPES = NAMESERVER_TYPES(),
+	  	  NAMESERVER_CLASSES = NAMESERVER_CLASSES(),
+	  	  NAMESERVER_TTLS = NAMESERVER_TTLS(),
+	  	  NAMESERVER_DATA = NAMESERVER_DATA(),
+	  	  ADDITIONAL_COUNT = ADDITIONAL_COUNT(),
+	  	  ADDITIONAL_NAMES = ADDITIONAL_NAMES(),
+	  	  ADDITIONAL_TYPES = ADDITIONAL_TYPES(),
+	  	  ADDITIONAL_CLASSES = ADDITIONAL_CLASSES(),
+	  	  ADDITIONAL_TTLS = ADDITIONAL_TTLS(),
+	  	  ADDITIONAL_DATA = ADDITIONAL_DATA();
+	}
+	() as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserFull.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+
+
+}
+

@@ -3,8 +3,8 @@
 ** All Rights Reserved
 */
 
-#ifndef PACKETHEADERLOCATOR_H_
-#define PACKETHEADERLOCATOR_H_
+#ifndef NETWORK_HEADER_LOCATOR_H_
+#define NETWORK_HEADER_LOCATOR_H_
 
 #include <netinet/ether.h>
 #include <netinet/ip.h>
@@ -29,7 +29,7 @@ const uint16_t jmirrorPort = 30030;
 
 // this class locates ethernet, IPv4, IPv6, UDP, and TCP headers in network packets
 
-class PacketHeaderLocator {
+class NetworkHeaderLocator {
 
  public:
 
@@ -51,7 +51,7 @@ class PacketHeaderLocator {
   // Note: this function does not yet handle variable-length ethernet headers, such as those with
   // VLAN tags, or variable-length IPv6 headers, such as those with extension headers
 
-  void locatePacketHeaders(char* buffer, int length) {
+  void locateNetworkHeaders(char* buffer, int length) {
 
 	// set address and length of packet for the output attribute assignment functions 
 	packetBuffer = buffer;
@@ -134,5 +134,5 @@ class PacketHeaderLocator {
 
 };
 
-#endif /* PACKETHEADERLOCATOR_H_ */
+#endif /* NETWORK_HEADER_LOCATOR_H_ */
 

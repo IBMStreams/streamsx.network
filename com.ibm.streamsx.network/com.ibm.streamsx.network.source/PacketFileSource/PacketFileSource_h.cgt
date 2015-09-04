@@ -23,7 +23,7 @@ my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegio
 
 #include <streams_boost/filesystem.hpp>
 
-#include "parse/PacketHeaderLocator.h"
+#include "parse/NetworkHeaderLocator.h"
 
 
 <%SPL::CodeGen::headerPrologue($model);%>
@@ -70,7 +70,7 @@ public:
 
   // ----------- input and output tuples ----------
 
-  <% if ($model->getNumberOfInputPorts()) { print "IPort0Type* inTuple"; } %> ;
+  <% if ($model->getNumberOfInputPorts()) { print "IPort0Type* inTuple;"; } %> ;
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
 
   // ----------- operator state variables ----------
@@ -93,9 +93,9 @@ public:
 
   char* packetBuffer;
   uint32_t packetBufferLength;
-  PacketHeaderLocator headers;
+  NetworkHeaderLocator headers;
 
-  // ----------- output attribute assignment functions for packet stream (port 0) ----------
+  // ----------- assignment functions for output attributes ----------
 
   SPL::float64 captureTime() { return (double)(pcapHeader->ts.tv_sec) + ((double)(pcapHeader->ts.tv_usec))/1000000.0; }
 
@@ -103,9 +103,9 @@ public:
 
   SPL::blob packetData() { return SPL::blob((const unsigned char*)headers.packetBuffer, headers.packetLength); }
 
-  SPL::list<uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
+  SPL::list<SPL::uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
 
-  SPL::list<uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+  SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
 
   SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
   
@@ -117,9 +117,9 @@ public:
 
   SPL::uint32 IPV4_DST_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->daddr) : 0; }
 
-  SPL::list<uint8> IPV6_SRC_ADDRESS() { return headers.ipv6Header ? SPL::list<uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
+  SPL::list<SPL::uint8> IPV6_SRC_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
 
-  SPL::list<uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
+  SPL::list<SPL::uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
 
   SPL::uint16 IP_SRC_PORT() { return UDP_SRC_PORT() + TCP_SRC_PORT(); }
   
