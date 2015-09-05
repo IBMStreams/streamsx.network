@@ -11,63 +11,63 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestDNSMessageParserAnalysis {
 
-	param		
-	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
-	
-	type 
-	
-	PacketType =
-		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
-	    rstring dstAddress,				// IP destination address
-		blob dnsMessage;				// contents of packet payload, following all network headers
+    param       
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    
+    type 
+    
+    PacketType =
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring dstAddress,             // IP destination address
+        blob dnsMessage;                // contents of packet payload, following all network headers
 
     PBDNSResponseMessageType = 
-	  float64 captureTime,
-	  rstring dstAddress,
-	  rstring questionName,
-	  uint8 responseCode,
-	  list<rstring> answerData,
-	  list<uint16> answerTypes,
-	  list<uint32> answerTTLs,
-	  list<rstring> nameserverData,
-	  list<uint16> nameserverTypes,
-	  list<uint32> nameserverTTLs,
-	  list<rstring> additionalData,
-	  list<uint16> additionalTypes,
-	  list<uint32> additionalTTLs;
-	
-	graph
+      float64 captureTime,
+      rstring dstAddress,
+      rstring questionName,
+      uint8 responseCode,
+      list<rstring> answerData,
+      list<uint16> answerTypes,
+      list<uint32> answerTTLs,
+      list<rstring> nameserverData,
+      list<uint16> nameserverTypes,
+      list<uint32> nameserverTTLs,
+      list<rstring> additionalData,
+      list<uint16> additionalTypes,
+      list<uint32> additionalTTLs;
+    
+    graph
 
-	stream<PacketType> PacketStream as Out = PacketFileSource() {
-		param
-			pcapFilename: $pcapFilename;
-		    inputFilter: "udp port 53";
-		    metricsInterval: 0.0;
-		output Out:
-			captureTime = captureTime(),
-			dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			dnsMessage = payloadData();
-	}
-	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 53";
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = captureTime(),
+            dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dnsMessage = payloadData();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
 
-	stream<PBDNSResponseMessageType> PBDNSResponseMessageStream as Out = DNSMessageParser(PacketStream) {
-	  param
-	      payloadAttribute: dnsMessage;
-	      outputFilters: DNS_RESPONSE_FLAG() && !parseError();
-	  output Out:
-	  	  questionName = DNS_QUESTION_NAME(),
-	  	  responseCode = DNS_RESPONSE_CODE(),
-	  	  answerData = DNS_ANSWER_DATA(),
-	  	  answerTypes = DNS_ANSWER_TYPES(),
-	  	  answerTTLs = DNS_ANSWER_TTLS(),
-	  	  nameserverData = DNS_NAMESERVER_DATA(),
-	  	  nameserverTypes = DNS_NAMESERVER_TYPES(),
-	  	  nameserverTTLs = DNS_NAMESERVER_TTLS(),
-	  	  additionalData = DNS_ADDITIONAL_DATA(),
-	  	  additionalTypes = DNS_ADDITIONAL_TYPES(),
-	  	  additionalTTLs = DNS_ADDITIONAL_TTLS();
-	}
-	() as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.PBDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+    stream<PBDNSResponseMessageType> PBDNSResponseMessageStream as Out = DNSMessageParser(PacketStream) {
+      param
+          payloadAttribute: dnsMessage;
+          outputFilters: DNS_RESPONSE_FLAG() && !parseError();
+      output Out:
+          questionName = DNS_QUESTION_NAME(),
+          responseCode = DNS_RESPONSE_CODE(),
+          answerData = DNS_ANSWER_DATA(),
+          answerTypes = DNS_ANSWER_TYPES(),
+          answerTTLs = DNS_ANSWER_TTLS(),
+          nameserverData = DNS_NAMESERVER_DATA(),
+          nameserverTypes = DNS_NAMESERVER_TYPES(),
+          nameserverTTLs = DNS_NAMESERVER_TTLS(),
+          additionalData = DNS_ADDITIONAL_DATA(),
+          additionalTypes = DNS_ADDITIONAL_TYPES(),
+          additionalTTLs = DNS_ADDITIONAL_TTLS();
+    }
+    () as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.PBDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
 
 
 }
