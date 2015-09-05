@@ -296,13 +296,13 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   headers.locateNetworkHeaders((char*)buffer, header->caplen);
   if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketLiveSource");  return; }
 
-  // submit output tuples to output ports, as selected by output filters, if specified
+  // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
 	<% if (scalar(@outputFilterList)) { print "if (bpf_filter(outputFilterPrograms[$i].bf_insns, (const u_char*)buffer, header->len, header->caplen))"; } %> 
 		 {
 		   outTuple<%=$i%>.clear();
 		   <% OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
-		   SPLLOG(L_TRACE, "submitting outTuple=" << outTuple<%=$i%>, "PacketLiveSource");
+		   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketLiveSource");
 		   submit(outTuple<%=$i%>, <%=$i%>);
 		 }
 		 <% } %> ;

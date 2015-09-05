@@ -94,7 +94,6 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   const IPort0Type& iport$0 = tuple;
 
   // submit output tuples to output ports, as selected by filter, if specified
-
   <% if ($filter) { print "if ($filter)"; } %>
   {
     outTuple.clear();
@@ -114,11 +113,6 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "TupleCounterA");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "TupleCounterA");
 }
-
-
-
-
-
 
 
 <%SPL::CodeGen::implementationEpilogue($model);%>

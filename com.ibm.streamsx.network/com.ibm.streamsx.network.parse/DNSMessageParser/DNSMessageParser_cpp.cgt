@@ -15,21 +15,39 @@ my $myOperatorKind = $model->getContext()->getKind();
 
 # get Perl objects for input and output ports
 my $inputPort = $model->getInputPortAt(0);
-my $outputPort = $model->getOutputPortAt(0);
+my @outputPortList = @{ $model->getOutputPorts() };
 
 # get C++ expressions for getting the values of this operator's parameter
 my $payloadAttribute = $model->getParameterByName("payloadAttribute")->getValueAt(0)->getCppExpression();
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) { 
+  foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+	my $expression = $value->getCppExpression();
+	push @outputFilterList, $expression;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::DNSMessageParser_result_functions::") != -1;
+  }
+}
+
+# basic safety checks
+SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
 
 %>
 
 
 <%SPL::CodeGen::implementationPrologue($model);%>
 
-// calls to output assignment functions within expressions are generated with
-// an explicit namespace matching the operator tempate name, so it must be
-// equated to the operator's namespace
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the xxx_h.cgt file
 
-#define DNSMessageParser MY_OPERATOR
+#define common_result_functions MY_OPERATOR
+#define DNSMessageParser_result_functions MY_OPERATOR
 
 
 // Constructor
@@ -91,17 +109,24 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   char* buffer = (char*)<%=$payloadAttribute%>.getData();
   int bufferLength = <%=$payloadAttribute%>.getSize();
 
-  // locate DNS fields within the DNS message
-  fields.locateDNSFields(buffer, bufferLength);
-  if ( ! fields.dnsHeader ) { SPLLOG(L_INFO, "ignoring tuple, no DNS header found", "DNSMessageParser");  return; }
+  // parse the DNS message
+  parser.parseDNSMessage(buffer, bufferLength);
+  if ( ! parser.dnsHeader ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no DNS header found", "DNSMessageParser");  return; }
+  if ( parser.error ) { SPLLOG(L_INFO, "error parsing tuple " << tupleCounter << " at DNS message offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DNSMessageParser"); }
 
-  // submit output tuples to output ports, as selected by output filters, if specified
-  outTuple.clear();
-  outTuple.assignFrom(iport$0, false);
-  <% OutputAssignmentGenerator::generate("outTuple", $outputPort); %> ;
-  SPLLOG(L_TRACE, "submitting outTuple=" << outTuple, "DNSMessageParser");
-  submit(outTuple, 0);
-  
+  // fill in and submit output tuples to output ports, as selected by output filters, if specified
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+	<% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+		 {
+		   outTuple<%=$i%>.clear();
+		   outTuple<%=$i%>.assignFrom(iport$0, false);
+		   <% ####### OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
+		   <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
+		   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSMessageParser");
+		   submit(outTuple<%=$i%>, <%=$i%>);
+		 }
+		 <% } %> ;
+
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 }
 
@@ -111,16 +136,6 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DNSMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 }
-
-
-
-
-
-
-
-
-
-
 
 
 <%SPL::CodeGen::implementationEpilogue($model);%>

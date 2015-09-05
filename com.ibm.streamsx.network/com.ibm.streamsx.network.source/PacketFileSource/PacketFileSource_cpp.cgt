@@ -288,14 +288,14 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 	// point at the input tuple with the name used by the code generator, if there is one
 	<% if ($inputPort) { print "IPort0Type& iport\$0 = (IPort0Type&)(*inTuple);"; } %> ;
 
-	// submit output tuples to output ports, as selected by output filters, if specified
+	// fill in and submit output tuples to output ports, as selected by output filters, if specified
 	<% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
 	  <% if (scalar(@outputFilterList)) { print "if (bpf_filter(outputFilterPrograms[$i].bf_insns, (const u_char*)packetBuffer, pcapHeader->len, packetBufferLength))"; } %> 
 		   {
 			 outTuple<%=$i%>.clear();
 			 <% if ($inputPort) { print "outTuple$i.assignFrom(*inTuple, false);"; } %> ;
 			 <% OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
-			 SPLLOG(L_TRACE, "submitting outTuple=" << outTuple<%=$i%>, "PacketFileSource");
+			 SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketFileSource");
 			 submit(outTuple<%=$i%>, <%=$i%>);
 		   }
 		   <% } %> ;

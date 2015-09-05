@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+
+  <function:functionSet>
+    <function:headerFileName></function:headerFileName>
+    <function:cppNamespaceName>common_result_functions</function:cppNamespaceName>
+    <function:functions>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public boolean parseError()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring parseErrorDescription()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 parseErrorOffset()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 messagesProcessed()</function:prototype>
+      </function:function>
+
+    </function:functions>
+  </function:functionSet>
+
+  <function:functionSet>
+    <function:headerFileName></function:headerFileName>
+    <function:cppNamespaceName>DNSMessageParser_result_functions</function:cppNamespaceName>
+    <function:functions>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 DNS_IDENTIFIER()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 DNS_OPCODE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 DNS_RESPONSE_CODE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public boolean DNS_RESPONSE_FLAG()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public boolean DNS_AUTHORITATIVE_FLAG()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public boolean DNS_TRUNCATION_FLAG()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 DNS_QUESTION_COUNT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring DNS_QUESTION_NAME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_QUESTION_NAMES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 DNS_QUESTION_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_QUESTION_TYPES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 DNS_QUESTION_CLASS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_QUESTION_CLASSES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 DNS_ANSWER_COUNT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_ANSWER_NAMES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_ANSWER_TYPES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_ANSWER_CLASSES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint32> DNS_ANSWER_TTLS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_ANSWER_DATA()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring DNS_ANSWER_CANONICAL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring DNS_ANSWER_ADDRESS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_ANSWER_ADDRESSES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 DNS_NAMESERVER_COUNT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_NAMESERVER_NAMES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_NAMESERVER_TYPES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_NAMESERVER_CLASSES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint32> DNS_NAMESERVER_TTLS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_NAMESERVER_DATA()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 DNS_ADDITIONAL_COUNT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_ADDITIONAL_NAMES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_ADDITIONAL_TYPES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint16> DNS_ADDITIONAL_CLASSES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint32> DNS_ADDITIONAL_TTLS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;rstring> DNS_ADDITIONAL_DATA()</function:prototype>
+      </function:function>
+
+    </function:functions>
+  </function:functionSet>
+
+</function:functionModel>

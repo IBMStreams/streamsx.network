@@ -2,163 +2,6 @@
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-      <customOutputFunctions>
-        <customOutputFunction>
-          <name>packet output functions</name>
-          <function>
-            <description></description>
-            <prototype>boolean parseError()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>rstring parseErrorMessage()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint64 messagesProcessed()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 IDENTIFIER()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint8 OPCODE()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean RESPONSE_FLAG()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint8 RESPONSE_CODE()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean AUTHORITATIVE_FLAG()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean TRUNCATION_FLAG()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 QUESTION_COUNT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>rstring QUESTION_NAME()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring> QUESTION_NAMES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 QUESTION_TYPE()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16> QUESTION_TYPES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 QUESTION_CLASS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16> QUESTION_CLASSES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 ANSWER_COUNT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring> ANSWER_NAMES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16> ANSWER_TYPES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16> ANSWER_CLASSES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint32> ANSWER_TTLS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring>  ANSWER_DATA()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>rstring ANSWER_CANONICAL()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>rstring ANSWER_ADDRESS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring>  ANSWER_ADDRESSES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 NAMESERVER_COUNT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring> NAMESERVER_NAMES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16>  NAMESERVER_TYPES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16> NAMESERVER_CLASSES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint32> NAMESERVER_TTLS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring> NAMESERVER_DATA()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 ADDITIONAL_COUNT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring> ADDITIONAL_NAMES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16> ADDITIONAL_TYPES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint16> ADDITIONAL_CLASSES()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint32> ADDITIONAL_TTLS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;rstring> ADDITIONAL_DATA()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>&lt;any T> T copy()</prototype>
-          </function>
-        </customOutputFunction>
-      </customOutputFunctions>
       <libraryDependencies>
         <library>
           <cmn:description>common code for toolkit operators</cmn:description>
@@ -182,6 +25,15 @@
         <type>blob</type>
         <cardinality>1</cardinality>
       </parameter>
+      <parameter>
+        <name>outputFilters</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
     </parameters>
     <inputPorts>
       <inputPortSet>
@@ -195,23 +47,17 @@
       </inputPortSet>
     </inputPorts>
     <outputPorts>
-      <outputPortSet>
-        <description></description>
+      <outputPortOpenSet>
+        <description/>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>false</autoAssignment>
         <completeAssignment>false</completeAssignment>
         <rewriteAllowed>true</rewriteAllowed>
-        <outputFunctions>
-          <default>copy</default>
-          <type>packet output functions</type>
-        </outputFunctions>
         <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
-        <cardinality>1</cardinality>
-        <optional>false</optional>
-      </outputPortSet>
+      </outputPortOpenSet>
     </outputPorts>
   </cppOperatorModel>
 </operatorModel>
