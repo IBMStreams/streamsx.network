@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestDNSMessageParserFilters
+composite=TestDNSMessageParserParallelAnalysis
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -45,6 +45,8 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
+#pcapFilename=$HOME/data.haifa/dns_tunneling_long.pcap
+parallelChannels=3
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

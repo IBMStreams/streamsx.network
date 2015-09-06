@@ -1,0 +1,99 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+composite TestDNSMessageParserParallelAnalysis {
+
+    param       
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
+    
+    type 
+    
+    PacketType =
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring dstAddress,             // string representation of IPv4 destination address
+	    uint32 partitionKey,			// combination of addresses and ports, for downstream @parallel annotations
+        blob dnsMessage;                // contents of packet payload, following all network headers
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 53";
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = captureTime(),
+            dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+		    partitionKey = IPV4_SRC_ADDRESS() + 
+		                   IPV4_DST_ADDRESS() + 
+		                   (uint32)hashCode(IPV6_SRC_ADDRESS()) + 
+		                   (uint32)hashCode(IPV6_DST_ADDRESS()) + 
+		                   (uint32)IP_SRC_PORT() + 
+		                   (uint32)IP_DST_PORT(),
+            dnsMessage = payloadData();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+
+	@parallel(width=$parallelChannels, partitionBy=[{port=PacketStream, attributes=[partitionKey]}])
+	stream<PBDNSAnalytic.PBDNSAnalyticResultType> PBDNSAnalyticResultStream = PBDNSAnalytic(PacketStream) {} 
+}
+
+
+
+composite PBDNSAnalytic ( input PacketStream ; output PBDNSAnalyticResultStream ) {
+
+  type
+
+  PBDNSResponseMessageType = 
+      float64 captureTime,
+      rstring dstAddress,
+      rstring questionName,
+      uint8 responseCode,
+      list<rstring> answerData,
+      list<uint16> answerTypes,
+      list<uint32> answerTTLs,
+      list<rstring> nameserverData,
+      list<uint16> nameserverTypes,
+      list<uint32> nameserverTTLs,
+      list<rstring> additionalData,
+      list<uint16> additionalTypes,
+      list<uint32> additionalTTLs;
+    
+  static PBDNSAnalyticResultType = 
+	  int32 result;
+
+  graph
+	
+    stream<PBDNSResponseMessageType> PBDNSResponseMessageStream as Out = DNSMessageParser(PacketStream) {
+      param
+          payloadAttribute: dnsMessage;
+          outputFilters: DNS_RESPONSE_FLAG() && !parseError();
+      output Out:
+          questionName = DNS_QUESTION_NAME(),
+          responseCode = DNS_RESPONSE_CODE(),
+          answerData = DNS_ANSWER_DATA(),
+          answerTypes = DNS_ANSWER_TYPES(),
+          answerTTLs = DNS_ANSWER_TTLS(),
+          nameserverData = DNS_NAMESERVER_DATA(),
+          nameserverTypes = DNS_NAMESERVER_TYPES(),
+          nameserverTTLs = DNS_NAMESERVER_TTLS(),
+          additionalData = DNS_ADDITIONAL_DATA(),
+          additionalTypes = DNS_ADDITIONAL_TYPES(),
+          additionalTTLs = DNS_ADDITIONAL_TTLS();
+    }
+    () as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PBDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; } 
+
+	stream<PBDNSAnalyticResultType> PBDNSAnalyticResultStream = Custom(PBDNSResponseMessageStream) {}
+}
+
+
+

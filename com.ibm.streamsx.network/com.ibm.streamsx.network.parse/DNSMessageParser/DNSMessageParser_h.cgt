@@ -62,15 +62,15 @@ private:
 
   SPL::uint16 DNS_QUESTION_COUNT() { return parser.questionCount; }
 
-  SPL::rstring DNS_QUESTION_NAME() { return parser.questionCount>0 ? parser.convertDNSEncodedNameToString(parser.questionRecords[0].name) : ""; }
+  SPL::rstring DNS_QUESTION_NAME() { return parser.questionRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.questionRecords[0].name) : ""; }
 
   SPL::list<rstring> DNS_QUESTION_NAMES() { return parser.convertResourceNamesToStringList(parser.questionRecords, parser.questionRecordCount); }
 
-  SPL::uint16 DNS_QUESTION_TYPE() { return parser.questionCount>0 ? parser.questionRecords[0].type : 0; }
+  SPL::uint16 DNS_QUESTION_TYPE() { return parser.questionRecordCount>0 ? parser.questionRecords[0].type : 0; }
 
   SPL::list<uint16> DNS_QUESTION_TYPES() { return parser.convertResourceTypesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
 
-  SPL::uint16 DNS_QUESTION_CLASS() { return parser.questionCount>0 ? parser.questionRecords[0].classs : 0; }
+  SPL::uint16 DNS_QUESTION_CLASS() { return parser.questionRecordCount>0 ? parser.questionRecords[0].classs : 0; }
 
   SPL::list<uint16> DNS_QUESTION_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
 
@@ -86,9 +86,9 @@ private:
 
   SPL::list<rstring> DNS_ANSWER_DATA() { return parser.convertResourceDataToStringList(parser.answerRecords, parser.answerRecordCount); }
 
-  SPL::rstring DNS_ANSWER_CANONICAL() { return parser.canonicalCount>0 ? parser.convertResourceDataToString(parser.canonicalRecords[0]) : ""; }
+  SPL::rstring DNS_ANSWER_CANONICAL() { return parser.canonicalRecordCount>0 ? parser.convertResourceDataToString(parser.canonicalRecords[0]) : ""; }
 
-  SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressCount>0 ? parser.convertDNSEncodedNameToString(parser.addressRecords[0].name) : ""; }
+  SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.addressRecords[0].name) : ""; }
 
   SPL::list<rstring> DNS_ANSWER_ADDRESSES() { return parser.convertResourceDataToStringList(parser.addressRecords, parser.addressRecordCount); }
 

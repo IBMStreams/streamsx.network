@@ -75,7 +75,7 @@ composite TestDNSMessageParserFilters {
       }
       param
           payloadAttribute: dnsMessage;
-          outputFilters: !DNS_RESPONSE_FLAG(), 
+          outputFilters: !DNS_RESPONSE_FLAG() && !parseError(), 
                          DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && !parseError(), 
                          DNS_RESPONSE_CODE()!=0ub || parseError();
       output 

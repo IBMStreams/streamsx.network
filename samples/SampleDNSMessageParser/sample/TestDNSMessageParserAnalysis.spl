@@ -18,7 +18,7 @@ composite TestDNSMessageParserAnalysis {
     
     PacketType =
         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
-        rstring dstAddress,             // IP destination address
+        rstring dstAddress,             // string representation of IP destination address
         blob dnsMessage;                // contents of packet payload, following all network headers
 
     PBDNSResponseMessageType = 
