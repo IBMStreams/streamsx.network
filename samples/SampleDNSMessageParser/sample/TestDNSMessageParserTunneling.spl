@@ -78,7 +78,7 @@ boolean isGoogleSiteVerificationAnswer(list<rstring> answerList) {
 }
 
 boolean isBase64EncodedAnswer(list<rstring> answerList) {
-	for (rstring answer in answerList) { if ( size(regexMatchPerl(answer, "[a-zA-Z0-9/+]{16,}={0,2}")) > 0 ) return true; }
+	for (rstring answer in answerList) { if ( size(regexMatchPerl(answer, "[a-zA-Z0-9/+]{24,}={0,2}")) > 0 ) return true; }
 	return false;
 }
 
