@@ -21,7 +21,7 @@ composite TestDNSMessageParserTunneling {
         uint64  packetNumber,			// tuple sequence number
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
-        blob dnsMessage;                // contents of packet payload, following all network headers
+        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     DNSMessageType = 
         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
@@ -50,7 +50,7 @@ composite TestDNSMessageParserTunneling {
 
     stream<DNSMessageType> DNSMessageStream as Out = DNSMessageParser(PacketStream) {
       param
-          payloadAttribute: dnsMessage;
+          messageAttribute: dnsMessage;
 	      outputFilters: DNS_QUESTION_TYPE()==16uh && 
 	                     DNS_RESPONSE_FLAG() && 
 	                     DNS_RESPONSE_CODE()==0ub && 

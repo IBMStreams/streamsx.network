@@ -19,7 +19,7 @@ composite TestDNSMessageParserAnalysis {
     PacketType =
         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
         rstring dstAddress,             // string representation of IP destination address
-        blob dnsMessage;                // contents of packet payload, following all network headers
+        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     PBDNSResponseMessageType = 
       float64 captureTime,
@@ -52,7 +52,7 @@ composite TestDNSMessageParserAnalysis {
 
     stream<PBDNSResponseMessageType> PBDNSResponseMessageStream as Out = DNSMessageParser(PacketStream) {
       param
-          payloadAttribute: dnsMessage;
+          messageAttribute: dnsMessage;
           outputFilters: DNS_RESPONSE_FLAG() && !parseError();
       output Out:
           questionName = DNS_QUESTION_NAME(),

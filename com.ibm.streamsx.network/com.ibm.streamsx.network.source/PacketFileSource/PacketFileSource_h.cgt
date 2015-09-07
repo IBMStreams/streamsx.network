@@ -23,7 +23,7 @@ my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegio
 
 #include <streams_boost/filesystem.hpp>
 
-#include "parse/NetworkHeaderLocator.h"
+#include "parse/NetworkHeaderParser.h"
 
 
 <%SPL::CodeGen::headerPrologue($model);%>
@@ -89,11 +89,11 @@ public:
   struct pcap_pkthdr* pcapHeader;
   const u_char* pcapBuffer;
 
-  // ----------- packet header locator ----------
+  // ----------- packet header parser ----------
 
   char* packetBuffer;
   uint32_t packetBufferLength;
-  NetworkHeaderLocator headers;
+  NetworkHeaderParser headers;
 
   // ----------- assignment functions for output attributes ----------
 

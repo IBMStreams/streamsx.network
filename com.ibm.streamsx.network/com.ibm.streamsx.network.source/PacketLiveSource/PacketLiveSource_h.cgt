@@ -24,7 +24,7 @@
 #include <SPL/Runtime/Common/Metric.h>
 #include <SPL/Runtime/Operator/OperatorMetrics.h>
 
-#include "parse/NetworkHeaderLocator.h"
+#include "parse/NetworkHeaderParser.h"
 
 
 <%SPL::CodeGen::headerPrologue($model);%>
@@ -85,9 +85,9 @@ private:
   pcap_t* pcapDescriptor;
   const struct pcap_pkthdr* pcapHeader;
 
-  // ----------- network header locator ----------
+  // ----------- network header parser ----------
 
-  NetworkHeaderLocator headers;
+  NetworkHeaderParser headers;
 
   // ----------- assignment functions for output attributes ----------
 

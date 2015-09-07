@@ -21,7 +21,7 @@ composite TestDNSMessageParserParallelAnalysis {
         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
         rstring dstAddress,             // string representation of IPv4 destination address
 	    uint32 partitionKey,			// combination of addresses and ports, for downstream @parallel annotations
-        blob dnsMessage;                // contents of packet payload, following all network headers
+        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     graph
 
@@ -75,7 +75,7 @@ composite PBDNSAnalytic ( input PacketStream ; output PBDNSAnalyticResultStream 
 	
     stream<PBDNSResponseMessageType> PBDNSResponseMessageStream as Out = DNSMessageParser(PacketStream) {
       param
-          payloadAttribute: dnsMessage;
+          messageAttribute: dnsMessage;
           outputFilters: DNS_RESPONSE_FLAG() && !parseError();
       output Out:
           questionName = DNS_QUESTION_NAME(),

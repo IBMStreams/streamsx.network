@@ -281,8 +281,8 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 	  packetBufferLength = rawIPBuffer.getSize();
 	}
 
-	// locate the network headers in the packet
-	headers.locateNetworkHeaders(packetBuffer, packetBufferLength);
+	// parse the network headers in the packet
+	headers.parseNetworkHeaders(packetBuffer, packetBufferLength);
 	if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketFileSource");  continue; }
 
 	// point at the input tuple with the name used by the code generator, if there is one

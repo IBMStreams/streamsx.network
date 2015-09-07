@@ -175,12 +175,14 @@ The PacketLiveSource operator has one or more output ports:
   * Each output port may produce tuples containing packets, payloads, or network
     header fields, as specified by output attribute assignments (see the
     Assignments section below). The tuples may optionally be filtered on output
-    (see the 'outputFilter' parameter below).
+    (see the 'outputFilters' parameter below).
 
 Each packet processed by the operator (and passed by the input filter, if one is
 specified) may be emitted by each output port (if passed by the corresponding
 output filter, if one is specified), and may assign different fields to
 different output attributes.
+
+The PacketLiveSource operator does not produce punctuation.
 
 
 _____Parameters_____

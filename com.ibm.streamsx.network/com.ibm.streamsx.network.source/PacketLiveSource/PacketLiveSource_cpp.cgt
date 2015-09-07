@@ -292,8 +292,8 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   packetCounter++;
   octetCounter += header->len;
   
-  // locate the network headers in the packet
-  headers.locateNetworkHeaders((char*)buffer, header->caplen);
+  // parse the network headers in the packet
+  headers.parseNetworkHeaders((char*)buffer, header->caplen);
   if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketLiveSource");  return; }
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified

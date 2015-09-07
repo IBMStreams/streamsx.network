@@ -18,7 +18,7 @@ my $inputPort = $model->getInputPortAt(0);
 my @outputPortList = @{ $model->getOutputPorts() };
 
 # get C++ expressions for getting the values of this operator's parameter
-my $payloadAttribute = $model->getParameterByName("payloadAttribute")->getValueAt(0)->getCppExpression();
+my $messageAttribute = $model->getParameterByName("messageAttribute")->getValueAt(0)->getCppExpression();
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -106,8 +106,8 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   const IPort0Type& iport$0 = tuple;
 
   // get address and length of DNS message from input tuple
-  char* buffer = (char*)<%=$payloadAttribute%>.getData();
-  int bufferLength = <%=$payloadAttribute%>.getSize();
+  char* buffer = (char*)<%=$messageAttribute%>.getData();
+  int bufferLength = <%=$messageAttribute%>.getSize();
 
   // parse the DNS message
   parser.parseDNSMessage(buffer, bufferLength);

@@ -44,7 +44,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$HOME/data.splanet01/dnsdhcp_sample_hour_20110722_192832_all.pcap
+#pcapFilename=$HOME/data.yorktown/dnsdhcp_sample_hour_20110722_192832_all.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

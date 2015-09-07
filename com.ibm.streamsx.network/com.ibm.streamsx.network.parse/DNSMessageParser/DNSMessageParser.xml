@@ -17,7 +17,7 @@
       <description></description>
       <allowAny>false</allowAny>
       <parameter>
-        <name>payloadAttribute</name>
+        <name>messageAttribute</name>
         <description></description>
         <optional>false</optional>
         <rewriteAllowed>true</rewriteAllowed>

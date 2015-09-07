@@ -451,7 +451,6 @@ class DNSMessageParser {
 	for (int i=0; i<answerRecordCount; i++) {
 	  switch(answerRecords[i].type) {
 	  case 1:  // type A record   
-	  case 16: // type TXT record 
 	  case 28: // type AAAA record
 		addressRecords[addressRecordCount++] = answerRecords[i]; break;
 	  case 5:  // type CNAME record

@@ -22,7 +22,7 @@ composite TestDNSMessageParserErrors {
         uint32  packetLength,
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
-        blob dnsMessage;                // contents of packet payload, following all network headers
+        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
     
     DNSErrorMessageType = 
         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
@@ -66,7 +66,7 @@ composite TestDNSMessageParserErrors {
         map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; 
       }
       param
-          payloadAttribute: dnsMessage;
+          messageAttribute: dnsMessage;
           outputFilters:  parseError();
       output 
       Out:
