@@ -111,8 +111,8 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   // parse the DNS message
   parser.parseDNSMessage(buffer, bufferLength);
+  if ( parser.error ) { SPLLOG(L_DEBUG, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DNSMessageParser"); }
   if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring tuple " << tupleCounter << ", no DNS header found", "DNSMessageParser");  return; }
-  if ( parser.error ) { SPLLOG(L_DEBUG, "error parsing tuple " << tupleCounter << " at DNS message offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DNSMessageParser"); }
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
@@ -129,6 +129,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 }
+
 
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)

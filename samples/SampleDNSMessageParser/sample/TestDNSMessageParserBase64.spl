@@ -9,7 +9,7 @@ use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
 
-composite TestDNSMessageParserTunneling {
+composite TestDNSMessageParserBase64 {
 
     param       
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns_only_txt_base64.pcap" );
@@ -46,7 +46,7 @@ composite TestDNSMessageParserTunneling {
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dnsMessage = payloadData();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserTunneling.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    // as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserBase64.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
     stream<DNSMessageType> DNSMessageStream as Out = DNSMessageParser(PacketStream) {
       param
@@ -56,14 +56,13 @@ composite TestDNSMessageParserTunneling {
 	                     DNS_RESPONSE_CODE()==0ub && 
 	                     !isSPFAnswer(DNS_ANSWER_DATA()) &&
 	                     !isGoogleSiteVerificationAnswer(DNS_ANSWER_DATA()) &&
-	                     isBase64EncodedAnswer(DNS_ANSWER_DATA()) && 
-	                     !parseError();
+	                     ( isBase64EncodedAnswer(DNS_ANSWER_NAMES()) || isBase64EncodedAnswer(DNS_ANSWER_DATA()) );
       output Out:
           questionName = DNS_QUESTION_NAME(),
           answerNames = DNS_ANSWER_NAMES(),
           answerData = DNS_ANSWER_DATA();
     }
-    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserTunneling.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserBase64.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
 }
 
@@ -81,4 +80,5 @@ boolean isBase64EncodedAnswer(list<rstring> answerList) {
 	for (rstring answer in answerList) { if ( size(regexMatchPerl(answer, "[a-zA-Z0-9/+]{24,}={0,2}")) > 0 ) return true; }
 	return false;
 }
+
 

@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestDNSMessageParserTunneling
+composite=TestDNSMessageParserBase64
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -44,8 +44,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns_only_txt_base64.pcap
-#pcapFilename=$HOME/data.haifa/dns_tunneling_long.pcap
+#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns_only_txt_base64.pcap
+pcapFilename=$HOME/data.haifa/dns_tunneling_long.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

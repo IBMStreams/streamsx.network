@@ -72,7 +72,7 @@ class DNSMessageParser {
 
 
   // This structure defines the fixed-size copies of variable-size DNS resource
-  // records used temporarily by the parser in this class.
+  // records created by the parser in this class.
 
   struct Record {
 	uint8_t* name;
@@ -357,8 +357,8 @@ class DNSMessageParser {
 
   // These variables contain the results of the parser function below.
 
-  char* dnsBuffer; // address of DNS message
-  int dnsBufferLength; // length of DNS message, possibly truncated
+  char* dnsBuffer; // address of DNS message passed to parser
+  int dnsBufferLength; // length of DNS message passed to parser (possibly truncated)
 
   struct DNSHeader* dnsHeader;
   uint8_t* dnsStart;
@@ -423,11 +423,11 @@ class DNSMessageParser {
 	addressRecordCount = 0; 
 
 	// basic safety checks
-	  if (length<sizeof(struct DNSHeader)) return;
+	if ( length < sizeof(struct DNSHeader) ) { error = "message too short"; return; }
 	  if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS || 
 		   ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS || 
 		   ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS || 
-		   ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) return;
+		   ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = "counts too large"; return; }
 	
 	// store pointers to the DNS message in the buffer
 	dnsHeader = (struct DNSHeader*)buffer;
