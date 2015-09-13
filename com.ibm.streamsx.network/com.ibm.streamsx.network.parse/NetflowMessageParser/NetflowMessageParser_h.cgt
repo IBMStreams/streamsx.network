@@ -1,0 +1,238 @@
+<%
+
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+
+%>
+
+#include "parse/NetflowMessageParser.h"
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR(); 
+  void allPortsReady(); 
+  void prepareToShutdown(); 
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+private:
+
+  // ----------- output tuples ----------
+
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+
+  // ----------- operator state variables ----------
+
+  uint64_t tupleCounter;
+  
+  // ----------- Netflow message parser ----------
+
+  NetflowMessageParser parser;
+
+  // ----------- assignment functions for output attributes ----------
+
+  SPL::boolean parseError() { return parser.error ? true : false; }
+
+  SPL::rstring parseErrorDescription() { return parser.error ? parser.error : ""; }
+
+  SPL::uint32 parseErrorOffset() { return parser.errorOffset(); }
+
+  SPL::uint64 messagesProcessed() { return tupleCounter; }
+
+
+  SPL::uint16 NETFLOW_VERSION() { return parser.netflow9Header ? ntohs(parser.netflow9Header->version) : parser.netflow5Header ? ntohs(parser.netflow5Header->version) : 0; } // header: Netflow version 
+
+  SPL::uint16 NETFLOW_COUNT() { return parser.netflow9Header ? ntohs(parser.netflow9Header->count) : parser.netflow5Header ? ntohs(parser.netflow5Header->count) : 0; } // header: number of records (including templates, options, and flows)
+
+  SPL::uint32 NETFLOW_SYSTEM_UPTIME() { return parser.netflow9Header ? ntohl(parser.netflow9Header->systemMilliseconds) : parser.netflow5Header ? ntohl(parser.netflow5Header->systemUptime) : 0; } // time since source was booted, in milliseonds
+
+  SPL::uint32 NETFLOW_UNIX_SECONDS() { return parser.netflow9Header ? ntohl(parser.netflow9Header->unixSeconds) : parser.netflow5Header ? ntohl(parser.netflow5Header->unixSeconds) : 0; } // time since beginning of Unix epoch, in seconds
+
+  SPL::uint32 NETFLOW_UNIX_NANOSECONDS() { return parser.netflow5Header ? ntohl(parser.netflow5Header->unixNanoseconds) : 0; } // fractional second since time since NETFLOW_UNIX_SECONDS, in nanoseconds
+
+  SPL::uint32 NETFLOW_SEQUENCE_NUMBER() { return parser.netflow9Header ? ntohl(parser.netflow9Header->packetSequence) : parser.netflow5Header ? ntohl(parser.netflow5Header->flowSequence) : 0; } // sequence number of this message
+
+  SPL::uint32 NETFLOW_SOURCE_ID() { return parser.netflow9Header ? ntohl(parser.netflow9Header->sourceID) : 0; } // identifier of source of this message
+
+
+  SPL::uint64 NETFLOW_IN_BYTES() { return parser.netflow9FieldAsInteger(1); } // field 1: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
+
+  SPL::uint64 NETFLOW_IN_PKTS() { return parser.netflow9FieldAsInteger(2); } // field 2: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
+
+  SPL::uint64 NETFLOW_FLOWS() { return parser.netflow9FieldAsInteger(3); } // field 3: Number of flows that were aggregated; default for N is 4
+
+  SPL::uint8 NETFLOW_PROTOCOL() { return parser.netflow9FieldAsInteger(4); } // field 4: IP protocol byte
+
+  SPL::uint8 NETFLOW_SRC_TOS() { return parser.netflow9FieldAsInteger(5); } // field 5: Type of Service byte setting when entering incoming interface
+
+  SPL::uint8 NETFLOW_TCP_FLAGS() { return parser.netflow9FieldAsInteger(6); } // field 6: Cumulative of all the TCP flags seen for this flow
+
+  SPL::uint16 NETFLOW_SRC_PORT() { return parser.netflow9FieldAsInteger(7); } // field 7: TCP/UDP source port number i.e.: FTP, Telnet, or equivalent
+
+  SPL::uint32 NETFLOW_IPV4_SRC_ADDR() { return parser.netflow9FieldAsInteger(8); } // field 8: IPv4 source address
+
+  SPL::uint8 NETFLOW_SRC_MASK() { return parser.netflow9FieldAsInteger(9); } // field 9: The number of contiguous bits in the source address subnet mask i.e.: the submask in slash notation
+
+  SPL::uint32 NETFLOW_INPUT_INTERFACE() { return parser.netflow9FieldAsInteger(10); } // field 10: Input interface index; default for N is 2 but higher values could be used
+
+  SPL::uint16 NETFLOW_DST_PORT() { return parser.netflow9FieldAsInteger(11); } // field 11: TCP/UDP destination port number i.e.: FTP, Telnet, or equivalent
+
+  SPL::uint32 NETFLOW_IPV4_DST_ADDR() { return parser.netflow9FieldAsInteger(12); } // field 12: IPv4 destination address
+
+  SPL::uint8 NETFLOW_DST_MASK() { return parser.netflow9FieldAsInteger(13); } // field 13: The number of contiguous bits in the destination address subnet mask i.e.: the submask in slash notation
+
+  SPL::uint32 NETFLOW_OUTPUT_INTERFACE() { return parser.netflow9FieldAsInteger(14); } // field 14: Output interface index; default for N is 2 but higher values could be used
+
+  SPL::uint32 NETFLOW_IPV4_NEXT_HOP() { return parser.netflow9FieldAsInteger(15); } // field 15: IPv4 address of next-hop router
+
+  SPL::uint32 NETFLOW_SRC_AS() { return parser.netflow9FieldAsInteger(16); } // field 16: Source BGP autonomous system number where N could be 2 or 4
+
+  SPL::uint32 NETFLOW_DST_AS() { return parser.netflow9FieldAsInteger(17); } // field 17: Destination BGP autonomous system number where N could be 2 or 4
+
+  SPL::uint32 NETFLOW_BGP_IPV4_NEXT_HOP() { return parser.netflow9FieldAsInteger(18); } // field 18: Next-hop router's IP in the BGP domain
+
+  SPL::uint64 NETFLOW_MUL_DST_PKTS() { return parser.netflow9FieldAsInteger(19); } // field 19: IP multicast outgoing packet counter with length N x 8 bits for packets associated with the IP Flow
+
+  SPL::uint64 NETFLOW_MUL_DST_BYTES() { return parser.netflow9FieldAsInteger(20); } // field 20: IP multicast outgoing byte counter with length N x 8 bits for bytes associated with the IP Flow
+
+  SPL::uint32 NETFLOW_LAST_SWITCHED() { return parser.netflow9FieldAsInteger(21); } // field 21: System uptime at which the last packet of this flow was switched
+
+  SPL::uint32 NETFLOW_FIRST_SWITCHED() { return parser.netflow9FieldAsInteger(22); } // field 22: System uptime at which the first packet of this flow was switched
+
+  SPL::uint64 NETFLOW_OUT_BYTES() { return parser.netflow9FieldAsInteger(23); } // field 23: Outgoing counter with length N x 8 bits for the number of bytes associated with an IP Flow
+
+  SPL::uint64 NETFLOW_OUT_PKTS() { return parser.netflow9FieldAsInteger(24); } // field 24: Outgoing counter with length N x 8 bits for the number of packets associated with an IP Flow.
+
+  SPL::uint16 NETFLOW_MIN_PKT_LNGTH() { return parser.netflow9FieldAsInteger(25); } // field 25: Minimum IP packet length on incoming packets of the flow
+
+  SPL::uint16 NETFLOW_MAX_PKT_LNGTH() { return parser.netflow9FieldAsInteger(26); } // field 26: Maximum IP packet length on incoming packets of the flow
+
+  SPL::list<SPL::uint8> NETFLOW_IPV6_SRC_ADDR() { return parser.netflow9FieldAsByteList(27); } // field 27: IPv6 Source Address
+
+  SPL::list<SPL::uint8> NETFLOW_IPV6_DST_ADDR() { return parser.netflow9FieldAsByteList(28); } // field 28: IPv6 Destination Address
+
+  SPL::uint8 NETFLOW_IPV6_SRC_MASK() { return parser.netflow9FieldAsInteger(29); } // field 29: Length of the IPv6 source mask in contiguous bits
+
+  SPL::uint8 NETFLOW_IPV6_DST_MASK() { return parser.netflow9FieldAsInteger(30); } // field 30: Length of the IPv6 destination mask in contiguous bits
+
+  SPL::uint32 NETFLOW_IPV6_FLOW_LABEL() { return parser.netflow9FieldAsInteger(31); } // field 31: IPv6 flow label as per RFC 2460 definition
+
+  SPL::uint16 NETFLOW_ICMP_TYPE() { return parser.netflow9FieldAsInteger(32); } // field 32: Internet Control Message Protocol (ICMP) packet type; reported as ((ICMP Type*256) + ICMP code)
+
+  SPL::uint8 NETFLOW_MUL_IGMP_TYPE() { return parser.netflow9FieldAsInteger(33); } // field 33: Internet Group Management Protocol (IGMP) packet type
+
+  SPL::uint32 NETFLOW_SAMPLING_INTERVAL() { return parser.netflow9FieldAsInteger(34); } // field 34: When using sampled NetFlow, the rate at which packets are sampled i.e.: a value of 100 indicates that one of every 100 packets is sampled
+
+  SPL::uint8 NETFLOW_SAMPLING_ALGORITHM() { return parser.netflow9FieldAsInteger(35); } // field 35: The type of algorithm used for sampled NetFlow: 0x01 Deterministic Sampling ,0x02 Random Sampling
+
+  SPL::uint16 NETFLOW_FLOW_ACTIVE_TIMEOUT() { return parser.netflow9FieldAsInteger(36); } // field 36: Timeout value (in seconds) for active flow entries in the NetFlow cache
+
+  SPL::uint16 NETFLOW_FLOW_INACTIVE_TIMEOUT() { return parser.netflow9FieldAsInteger(37); } // field 37: Timeout value (in seconds) for inactive flow entries in the NetFlow cache
+
+  SPL::uint8 NETFLOW_ENGINE_TYPE() { return parser.netflow5Header ? parser.netflow5Header->engineType : parser.netflow9FieldAsInteger(38); } // field 38: Type of flow switching engine: RP = 0, VIP/Linecard = 1
+
+  SPL::uint8 NETFLOW_ENGINE_ID() { return parser.netflow5Header ? parser.netflow5Header->engineID : parser.netflow9FieldAsInteger(39); } // field 39: ID number of the flow switching engine
+
+  SPL::uint64 NETFLOW_TOTAL_BYTES_EXP() { return parser.netflow9FieldAsInteger(40); } // field 40: Counter with length N x 8 bits for bytes for the number of bytes exported by the Observation Domain
+
+  SPL::uint64 NETFLOW_TOTAL_PKTS_EXP() { return parser.netflow9FieldAsInteger(41); } // field 41: Counter with length N x 8 bits for bytes for the number of packets exported by the Observation Domain
+
+  SPL::uint64 NETFLOW_TOTAL_FLOWS_EXP() { return parser.netflow9FieldAsInteger(42); } // field 42: Counter with length N x 8 bits for bytes for the number of flows exported by the Observation Domain
+
+  SPL::uint32 NETFLOW_IPV4_SRC_PREFIX() { return parser.netflow9FieldAsInteger(44); } // field 44: IPv4 source address prefix (specific for Catalyst architecture)
+
+  SPL::uint32 NETFLOW_IPV4_DST_PREFIX() { return parser.netflow9FieldAsInteger(45); } // field 45: IPv4 destination address prefix (specific for Catalyst architecture)
+
+  SPL::uint8 NETFLOW_MPLS_TOP_LABEL_TYPE() { return parser.netflow9FieldAsInteger(46); } // field 46: MPLS Top Label Type: 0x00 UNKNOWN 0x01 TE-MIDPT 0x02 ATOM 0x03 VPN 0x04 BGP 0x05 LDP
+
+  SPL::uint32 NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR() { return parser.netflow9FieldAsInteger(47); } // field 47: Forwarding Equivalent Class corresponding to the MPLS Top Label
+
+  SPL::uint8 NETFLOW_FLOW_SAMPLER_ID() { return parser.netflow9FieldAsInteger(48); } // field 48: Identifier shown in "show flow-sampler"
+
+  SPL::uint8 NETFLOW_FLOW_SAMPLER_MODE() { return parser.netflow9FieldAsInteger(49); } // field 49: The type of algorithm used for sampling data: 0x02 random sampling. Use in connection with FLOW_SAMPLER_MODE
+
+  SPL::uint32 NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL() { return parser.netflow9FieldAsInteger(50); } // field 50: Packet interval at which to sample. Use in connection with FLOW_SAMPLER_MODE
+
+  SPL::uint8 NETFLOW_MIN_TTL() { return parser.netflow9FieldAsInteger(52); } // field 52: Minimum TTL on incoming packets of the flow
+
+  SPL::uint8 NETFLOW_MAX_TTL() { return parser.netflow9FieldAsInteger(53); } // field 53: Maximum TTL on incoming packets of the flow
+
+  SPL::uint16 NETFLOW_IPV4_IDENT() { return parser.netflow9FieldAsInteger(54); } // field 54: The IP v4 identification field
+
+  SPL::uint8 NETFLOW_DST_TOS() { return parser.netflow9FieldAsInteger(55); } // field 55: Type of Service byte setting when exiting outgoing interface
+  
+  SPL::list<SPL::uint8> NETFLOW_MAC_SRC_ADDR_IN() { return parser.netflow9FieldAsByteList(56); } // field 56: Incoming source MAC address
+	
+  SPL::list<SPL::uint8> NETFLOW_MAC_DST_ADDR_OUT() { return parser.netflow9FieldAsByteList(57); } // field 57: Outgoing destination MAC address
+
+  SPL::uint16 NETFLOW_SRC_VLAN() { return parser.netflow9FieldAsInteger(58); } // field 58: Virtual LAN identifier associated with ingress interface
+
+  SPL::uint16 NETFLOW_DST_VLAN() { return parser.netflow9FieldAsInteger(59); } // field 59: Virtual LAN identifier associated with egress interface
+
+  SPL::uint8 NETFLOW_IP_PROTOCOL_VERSION() { return parser.netflow9FieldAsInteger(60); } // field 60: Internet Protocol Version Set to 4 for IPv4, set to 6 for IPv6. If not present in the template, then version 4 is assumed.
+
+  SPL::uint8 NETFLOW_DIRECTION() { return parser.netflow9FieldAsInteger(61); } // field 61: Flow direction: 0 - ingress flow, 1 - egress flow
+
+  SPL::list<SPL::uint8> NETFLOW_IPV6_NEXT_HOP() { return parser.netflow9FieldAsByteList(62); } // field 62: IPv6 address of the next-hop router
+
+  SPL::list<SPL::uint8> NETFLOW_BPG_IPV6_NEXT_HOP() { return parser.netflow9FieldAsByteList(63); } // field 63: Next-hop router in the BGP domain
+
+  SPL::uint32 NETFLOW_IPV6_OPTION_HEADERS() { return parser.netflow9FieldAsInteger(64); } // field 64: Bit-encoded field identifying IPv6 option headers found in the flow
+
+  SPL::list<SPL::uint8> NETFLOW_MPLS_LABEL(SPL::uint32 position) { return position>=1 && position<=10 ? parser.netflow9FieldAsByteList(70+position) : SPL::list<SPL::uint8>(); } // field 70 to 79: MPLS label at position 1 to 10 in the stack. This comprises 20 bits of MPLS label, 3 EXP (experimental) bits and 1 S (end-of-stack) bit.
+
+  SPL::list<SPL::uint8> NETFLOW_MAC_DST_ADDR_IN() { return parser.netflow9FieldAsByteList(80); } // field 80: Incoming destination MAC address
+
+  SPL::list<SPL::uint8> NETFLOW_MAC_SRC_ADDR_OUT() { return parser.netflow9FieldAsByteList(81); } // field 81: Outgoing source MAC address
+
+  SPL::rstring NETFLOW_IF_NAME() { return parser.netflow9FieldAsString(82); }  // field 82: Shortened interface name i.e.: "FE1/0"
+
+  SPL::rstring NETFLOW_IF_DESC() { return parser.netflow9FieldAsString(83); }  // field 83: Full interface name i.e.: "'FastEthernet 1/0"
+
+  SPL::rstring NETFLOW_SAMPLER_NAME() { return parser.netflow9FieldAsString(84); }  // field 84: Name of the flow sampler
+
+  SPL::uint64 NETFLOW_IN_PERMANENT_BYTES() { return parser.netflow9FieldAsInteger(85); } // field 85: Running byte counter for a permanent flow
+
+  SPL::uint64 NETFLOW_IN_PERMANENT_PKTS() { return parser.netflow9FieldAsInteger(86); } // field 86: Running packet counter for a permanent flow
+
+  SPL::uint16 NETFLOW_FRAGMENT_OFFSET() { return parser.netflow9FieldAsInteger(88); } // field 88: The fragment-offset value from fragmented IP packets
+
+  SPL::uint8 NETFLOW_FORWARDING_STATUS() { return parser.netflow9FieldAsInteger(89); } // field 89: Forwarding status is encoded on 1 byte with the 2 left bits giving the status and the 6 remaining bits giving the reason code.
+
+  SPL::list<SPL::uint8> NETFLOW_MPLS_PAL_RD() { return parser.netflow9FieldAsByteList(90); } // field 90: MPLS PAL Route Distinguisher.
+
+  SPL::uint8 NETFLOW_MPLS_PREFIX_LEN() { return parser.netflow9FieldAsInteger(91); } // field 91: Number of consecutive bits in the MPLS prefix length.
+
+  SPL::uint32 NETFLOW_SRC_TRAFFIC_INDEX() { return parser.netflow9FieldAsInteger(92); } // field 92: BGP Policy Accounting Source Traffic Index
+
+  SPL::uint32 NETFLOW_DST_TRAFFIC_INDEX() { return parser.netflow9FieldAsInteger(93); } // field 93: BGP Policy Accounting Destination Traffic Index
+
+  SPL::rstring NETFLOW_APPLICATION_DESCRIPTION() { return parser.netflow9FieldAsString(94); }  // field 94: Application description.
+
+  SPL::list<uint8> NETFLOW_APPLICATION_TAG() { return parser.netflow9FieldAsByteList(95); } // field 95: 8 bits of engine ID, followed by n bits of classification.
+
+  SPL::rstring NETFLOW_APPLICATION_NAME() { return parser.netflow9FieldAsString(96); }  // field 96: Name associated with a classification.
+
+  SPL::uint8 NETFLOW_POST_IP_DSCP() { return parser.netflow9FieldAsInteger(98); } // field 98: The value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.
+
+  SPL::uint32 NETFLOW_REPLICATION_FACTOR() { return parser.netflow9FieldAsInteger(99); } // field 99: Multicast replication factor.
+
+  SPL::uint64 NETFLOW_FIELD_AS_INTEGER(SPL::int32 field) { return parser.netflow9FieldAsInteger(field); } // The value of the specified field, cast to an integer
+
+  SPL::rstring NETFLOW_FIELD_AS_STRING(SPL::int32 field) { return parser.netflow9FieldAsString(field); } // The value of the specified field, cast to an string
+
+  SPL::list<uint8> NETFLOW_FIELD_AS_BYTE_LIST(SPL::int32 field) { return parser.netflow9FieldAsByteList(field); } // The value of the specified field, cast to a byte list
+
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

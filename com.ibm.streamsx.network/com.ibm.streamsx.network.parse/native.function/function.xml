@@ -207,4 +207,467 @@
     </function:functions>
   </function:functionSet>
 
+  <function:functionSet>
+    <function:headerFileName></function:headerFileName>
+    <function:cppNamespaceName>NetflowMessageParser_result_functions</function:cppNamespaceName>
+    <function:functions>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_VERSION()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_COUNT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_SYSTEM_UPTIME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_UNIX_SECONDS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_UNIX_NANOSECONDS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_SEQUENCE_NUMBER()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_SOURCE_ID()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_IN_BYTES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_IN_PKTS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_FLOWS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_PROTOCOL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_SRC_TOS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_TCP_FLAGS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_SRC_PORT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_IPV4_SRC_ADDR()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_SRC_MASK()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_INPUT_INTERFACE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_DST_PORT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_IPV4_DST_ADDR()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_DST_MASK()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_OUTPUT_INTERFACE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_IPV4_NEXT_HOP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_SRC_AS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_DST_AS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_BGP_IPV4_NEXT_HOP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_MUL_DST_PKTS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_MUL_DST_BYTES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_LAST_SWITCHED()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_FIRST_SWITCHED()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_OUT_BYTES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_OUT_PKTS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_MIN_PKT_LNGTH()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_MAX_PKT_LNGTH()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[16] NETFLOW_IPV6_SRC_ADDR()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[16] NETFLOW_IPV6_DST_ADDR()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_IPV6_SRC_MASK()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_IPV6_DST_MASK()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_IPV6_FLOW_LABEL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_ICMP_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_MUL_IGMP_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_SAMPLING_INTERVAL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_SAMPLING_ALGORITHM()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_FLOW_ACTIVE_TIMEOUT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_FLOW_INACTIVE_TIMEOUT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_ENGINE_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_ENGINE_ID()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_TOTAL_BYTES_EXP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_TOTAL_PKTS_EXP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_TOTAL_FLOWS_EXP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_IPV4_SRC_PREFIX()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_IPV4_DST_PREFIX()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_MPLS_TOP_LABEL_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_FLOW_SAMPLER_ID()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_FLOW_SAMPLER_MODE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_MIN_TTL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_MAX_TTL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_IPV4_IDENT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_DST_TOS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[6] NETFLOW_MAC_SRC_ADDR_IN()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[6] NETFLOW_MAC_DST_ADDR_OUT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_SRC_VLAN()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_DST_VLAN()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_IP_PROTOCOL_VERSION()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_DIRECTION()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[16] NETFLOW_IPV6_NEXT_HOP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[16] NETFLOW_BPG_IPV6_NEXT_HOP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_IPV6_OPTION_HEADERS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8> NETFLOW_MPLS_LABEL(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[6] NETFLOW_MAC_DST_ADDR_IN()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8>[6] NETFLOW_MAC_SRC_ADDR_OUT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring NETFLOW_IF_NAME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring NETFLOW_IF_DESC()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring NETFLOW_SAMPLER_NAME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_IN_PERMANENT_BYTES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_IN_PERMANENT_PKTS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint16 NETFLOW_FRAGMENT_OFFSET()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_FORWARDING_STATUS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8> NETFLOW_MPLS_PAL_RD()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_MPLS_PREFIX_LEN()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_SRC_TRAFFIC_INDEX()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_DST_TRAFFIC_INDEX()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring NETFLOW_APPLICATION_DESCRIPTION()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8> NETFLOW_APPLICATION_TAG()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring NETFLOW_APPLICATION_NAME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint8 NETFLOW_POST_IP_DSCP()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint32 NETFLOW_REPLICATION_FACTOR()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_FIELD_AS_INTEGER(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring NETFLOW_FIELD_AS_STRING(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8> NETFLOW_FIELD_AS_BYTE_LIST(int32)</function:prototype>
+      </function:function>
+
+    </function:functions>
+  </function:functionSet>
+
 </function:functionModel>
