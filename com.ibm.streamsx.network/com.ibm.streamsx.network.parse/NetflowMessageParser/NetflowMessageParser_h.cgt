@@ -64,39 +64,39 @@ private:
   SPL::uint32 NETFLOW_SOURCE_ID() { return parser.netflow9Header ? ntohl(parser.netflow9Header->sourceID) : 0; } // identifier of source of this message
 
 
-  SPL::uint64 NETFLOW_IN_BYTES() { return parser.netflow9FieldAsInteger(1); } // field 1: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
+  SPL::uint64 NETFLOW_IN_BYTES() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->octets) : parser.netflow9FieldAsInteger(1); } // field 1: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
 
-  SPL::uint64 NETFLOW_IN_PKTS() { return parser.netflow9FieldAsInteger(2); } // field 2: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
+  SPL::uint64 NETFLOW_IN_PKTS() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->packets) : parser.netflow9FieldAsInteger(2); } // field 2: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
 
   SPL::uint64 NETFLOW_FLOWS() { return parser.netflow9FieldAsInteger(3); } // field 3: Number of flows that were aggregated; default for N is 4
 
-  SPL::uint8 NETFLOW_PROTOCOL() { return parser.netflow9FieldAsInteger(4); } // field 4: IP protocol byte
+  SPL::uint8 NETFLOW_PROTOCOL() { return parser.netflow5Flow ? parser.netflow5Flow->prot : parser.netflow9FieldAsInteger(4); } // field 4: IP protocol byte
 
-  SPL::uint8 NETFLOW_SRC_TOS() { return parser.netflow9FieldAsInteger(5); } // field 5: Type of Service byte setting when entering incoming interface
+  SPL::uint8 NETFLOW_SRC_TOS() { return parser.netflow5Flow ? parser.netflow5Flow->tos : parser.netflow9FieldAsInteger(5); } // field 5: Type of Service byte setting when entering incoming interface
 
-  SPL::uint8 NETFLOW_TCP_FLAGS() { return parser.netflow9FieldAsInteger(6); } // field 6: Cumulative of all the TCP flags seen for this flow
+  SPL::uint8 NETFLOW_TCP_FLAGS() { return parser.netflow5Flow ? parser.netflow5Flow->tcpFlags : parser.netflow9FieldAsInteger(6); } // field 6: Cumulative of all the TCP flags seen for this flow
 
-  SPL::uint16 NETFLOW_SRC_PORT() { return parser.netflow9FieldAsInteger(7); } // field 7: TCP/UDP source port number i.e.: FTP, Telnet, or equivalent
+  SPL::uint16 NETFLOW_SRC_PORT() { return parser.netflow5Flow ? ntohs(parser.netflow5Flow->srcPort) : parser.netflow9FieldAsInteger(7); } // field 7: TCP/UDP source port number i.e.: FTP, Telnet, or equivalent
 
-  SPL::uint32 NETFLOW_IPV4_SRC_ADDR() { return parser.netflow9FieldAsInteger(8); } // field 8: IPv4 source address
+  SPL::uint32 NETFLOW_IPV4_SRC_ADDR() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->srcAddr) : parser.netflow9FieldAsInteger(8); } // field 8: IPv4 source address
 
-  SPL::uint8 NETFLOW_SRC_MASK() { return parser.netflow9FieldAsInteger(9); } // field 9: The number of contiguous bits in the source address subnet mask i.e.: the submask in slash notation
+  SPL::uint8 NETFLOW_SRC_MASK() { return parser.netflow5Flow ? parser.netflow5Flow->srcMask : parser.netflow9FieldAsInteger(9); } // field 9: The number of contiguous bits in the source address subnet mask i.e.: the submask in slash notation
 
-  SPL::uint32 NETFLOW_INPUT_INTERFACE() { return parser.netflow9FieldAsInteger(10); } // field 10: Input interface index; default for N is 2 but higher values could be used
+  SPL::uint32 NETFLOW_INPUT_INTERFACE() { return parser.netflow5Flow ? ntohs(parser.netflow5Flow->input) : parser.netflow9FieldAsInteger(10); } // field 10: Input interface index; default for N is 2 but higher values could be used
 
-  SPL::uint16 NETFLOW_DST_PORT() { return parser.netflow9FieldAsInteger(11); } // field 11: TCP/UDP destination port number i.e.: FTP, Telnet, or equivalent
+  SPL::uint16 NETFLOW_DST_PORT() { return parser.netflow5Flow ? ntohs(parser.netflow5Flow->dstPort) : parser.netflow9FieldAsInteger(11); } // field 11: TCP/UDP destination port number i.e.: FTP, Telnet, or equivalent
 
-  SPL::uint32 NETFLOW_IPV4_DST_ADDR() { return parser.netflow9FieldAsInteger(12); } // field 12: IPv4 destination address
+  SPL::uint32 NETFLOW_IPV4_DST_ADDR() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->dstAddr) : parser.netflow9FieldAsInteger(12); } // field 12: IPv4 destination address
 
-  SPL::uint8 NETFLOW_DST_MASK() { return parser.netflow9FieldAsInteger(13); } // field 13: The number of contiguous bits in the destination address subnet mask i.e.: the submask in slash notation
+  SPL::uint8 NETFLOW_DST_MASK() { return parser.netflow5Flow ? parser.netflow5Flow->dstMask : parser.netflow9FieldAsInteger(13); } // field 13: The number of contiguous bits in the destination address subnet mask i.e.: the submask in slash notation
 
-  SPL::uint32 NETFLOW_OUTPUT_INTERFACE() { return parser.netflow9FieldAsInteger(14); } // field 14: Output interface index; default for N is 2 but higher values could be used
+  SPL::uint32 NETFLOW_OUTPUT_INTERFACE() { return parser.netflow5Flow ? ntohs(parser.netflow5Flow->output) : parser.netflow9FieldAsInteger(14); } // field 14: Output interface index; default for N is 2 but higher values could be used
 
-  SPL::uint32 NETFLOW_IPV4_NEXT_HOP() { return parser.netflow9FieldAsInteger(15); } // field 15: IPv4 address of next-hop router
+  SPL::uint32 NETFLOW_IPV4_NEXT_HOP() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->nexthop) : parser.netflow9FieldAsInteger(15); } // field 15: IPv4 address of next-hop router
 
-  SPL::uint32 NETFLOW_SRC_AS() { return parser.netflow9FieldAsInteger(16); } // field 16: Source BGP autonomous system number where N could be 2 or 4
+  SPL::uint32 NETFLOW_SRC_AS() { return parser.netflow5Flow ? ntohs(parser.netflow5Flow->srcAS) : parser.netflow9FieldAsInteger(16); } // field 16: Source BGP autonomous system number where N could be 2 or 4
 
-  SPL::uint32 NETFLOW_DST_AS() { return parser.netflow9FieldAsInteger(17); } // field 17: Destination BGP autonomous system number where N could be 2 or 4
+  SPL::uint32 NETFLOW_DST_AS() { return parser.netflow5Flow ? ntohs(parser.netflow5Flow->dstAS) : parser.netflow9FieldAsInteger(17); } // field 17: Destination BGP autonomous system number where N could be 2 or 4
 
   SPL::uint32 NETFLOW_BGP_IPV4_NEXT_HOP() { return parser.netflow9FieldAsInteger(18); } // field 18: Next-hop router's IP in the BGP domain
 
@@ -104,13 +104,13 @@ private:
 
   SPL::uint64 NETFLOW_MUL_DST_BYTES() { return parser.netflow9FieldAsInteger(20); } // field 20: IP multicast outgoing byte counter with length N x 8 bits for bytes associated with the IP Flow
 
-  SPL::uint32 NETFLOW_LAST_SWITCHED() { return parser.netflow9FieldAsInteger(21); } // field 21: System uptime at which the last packet of this flow was switched
+  SPL::uint32 NETFLOW_LAST_SWITCHED() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->last) : parser.netflow9FieldAsInteger(21); } // field 21: System uptime at which the last packet of this flow was switched
 
-  SPL::uint32 NETFLOW_FIRST_SWITCHED() { return parser.netflow9FieldAsInteger(22); } // field 22: System uptime at which the first packet of this flow was switched
+  SPL::uint32 NETFLOW_FIRST_SWITCHED() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->first) : parser.netflow9FieldAsInteger(22); } // field 22: System uptime at which the first packet of this flow was switched
 
-  SPL::uint64 NETFLOW_OUT_BYTES() { return parser.netflow9FieldAsInteger(23); } // field 23: Outgoing counter with length N x 8 bits for the number of bytes associated with an IP Flow
+  SPL::uint64 NETFLOW_OUT_BYTES() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->octets) : parser.netflow9FieldAsInteger(23); } // field 23: Outgoing counter with length N x 8 bits for the number of bytes associated with an IP Flow
 
-  SPL::uint64 NETFLOW_OUT_PKTS() { return parser.netflow9FieldAsInteger(24); } // field 24: Outgoing counter with length N x 8 bits for the number of packets associated with an IP Flow.
+  SPL::uint64 NETFLOW_OUT_PKTS() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->packets) : parser.netflow9FieldAsInteger(24); } // field 24: Outgoing counter with length N x 8 bits for the number of packets associated with an IP Flow.
 
   SPL::uint16 NETFLOW_MIN_PKT_LNGTH() { return parser.netflow9FieldAsInteger(25); } // field 25: Minimum IP packet length on incoming packets of the flow
 
@@ -130,7 +130,7 @@ private:
 
   SPL::uint8 NETFLOW_MUL_IGMP_TYPE() { return parser.netflow9FieldAsInteger(33); } // field 33: Internet Group Management Protocol (IGMP) packet type
 
-  SPL::uint32 NETFLOW_SAMPLING_INTERVAL() { return parser.netflow9FieldAsInteger(34); } // field 34: When using sampled NetFlow, the rate at which packets are sampled i.e.: a value of 100 indicates that one of every 100 packets is sampled
+  SPL::uint32 NETFLOW_SAMPLING_INTERVAL() { return parser.netflow5Header ? ntohl(parser.netflow5Header->samplingInterval) : parser.netflow9FieldAsInteger(34); } // field 34: When using sampled NetFlow, the rate at which packets are sampled i.e.: a value of 100 indicates that one of every 100 packets is sampled
 
   SPL::uint8 NETFLOW_SAMPLING_ALGORITHM() { return parser.netflow9FieldAsInteger(35); } // field 35: The type of algorithm used for sampled NetFlow: 0x01 Deterministic Sampling ,0x02 Random Sampling
 
