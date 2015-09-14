@@ -127,6 +127,7 @@ class NetflowMessageParser {
 	uint32_t sourceAddress; // part of table index
 	uint32_t sourceID; // part of table index
 	uint32_t previousSequenceNumber;
+	uint16_t previousFlowCount;
   };
   std::tr1::unordered_map<uint64_t, struct SourceState*> sourceTable; // indexed by sourceAddress+sourceID
 	
@@ -181,6 +182,27 @@ class NetflowMessageParser {
   // will return 'true' after setting the 'netflow5Flow' pointer, or else it will return 'false'.
 
   bool nextFlow5() {
+
+	// if we are already parsing the message, and there are more flows in it, return the next one
+	if (netflow5Flow && flowCount>1) {
+	  //???printf("nextFlow5 A, flowCount=%u ...\n", flowCount);
+	  if ( (uint8_t*)netflow5Flow + flowLength > messageEnd ) { error = "netflow5 flow truncated"; return false; }
+	  netflow5Flow = (Netflow5Flow*)((uint8_t*)netflow5Flow + flowLength);
+	  flowCount--;
+	  return true;
+	}
+
+	// if we were already parsing the message, but there are no more flows in it, return 'false'
+	if (netflow5Flow) return false;
+
+	// if we have not yet started parsing the message, and there is at least one flow in it, return the first one
+	flowCount = ntohs(netflow5Header->count);
+	flowLength = sizeof(struct Netflow5Flow);
+	if (flowCount>0) { 
+	  netflow5Flow = netflow5Header->flows;
+	  return true;
+	}
+
 	return false;
   }
 
@@ -190,6 +212,32 @@ class NetflowMessageParser {
 
 	if ( messageLength < sizeof(struct Netflow5Header) ) { error = "netflow5 message too short"; return; }
 	netflow5Header = (struct Netflow5Header*)messageStart;
+
+	//???printf("prepareMessage5(), source=0x%08x count=0x%04x sequence=0x%08x seconds=0x%08x nano=0x%08x\n", sourceAddress, ntohs(netflow5Header->count), ntohl(netflow5Header->flowSequence), ntohl(netflow5Header->unixSeconds), ntohl(netflow5Header->unixNanoseconds));
+
+	// find the state structure for this message's source, or create a new one
+	const uint32_t sourceID = netflow5Header->engineID;
+	const uint64_t index = ((uint64_t)sourceAddress)<<32 | (uint64_t)sourceID;
+	struct SourceState* sourceState = sourceTable[index];
+	if (!sourceState) {
+		sourceState = new SourceState;
+		sourceState->sourceAddress = sourceAddress;
+		sourceState->sourceID = sourceID;
+		sourceState->previousSequenceNumber = 0;
+		sourceState->previousFlowCount = 0;
+		sourceTable[index] = sourceState;
+	}
+
+	// check for missed messages from this message's source
+	const uint32_t thisSequenceNumber = ntohl(netflow5Header->flowSequence);
+	const uint32_t thisFlowCount = ntohs(netflow5Header->count);
+	const uint32_t previousSequenceNumber = sourceState->previousSequenceNumber;
+	const uint32_t previousFlowCount = sourceState->previousFlowCount;
+	if ( thisSequenceNumber && previousSequenceNumber && thisSequenceNumber!=previousSequenceNumber+previousFlowCount ) {
+	  messageMissedCount = thisSequenceNumber - ( previousSequenceNumber + previousFlowCount + 1);
+	}
+	sourceState->previousSequenceNumber = thisSequenceNumber;
+	sourceState->previousFlowCount = thisFlowCount;
   }
   
   // This function stores all of the templates from a Netflow version 9 template flowset in a state table.
@@ -197,7 +245,7 @@ class NetflowMessageParser {
   void storeTemplateFlowset() {
 
 	// store each template in this flowset in a separate state table
-	printf("storeTemplateFlowset() ...\n");
+	//???printf("storeTemplateFlowset() ...\n");
 	for ( struct Netflow9Template* netflow9Template = netflow9Flowset->u.templates;
 		  (uint8_t*)netflow9Template < (uint8_t*)netflow9Flowset + ntohs(netflow9Flowset->length);
 		  netflow9Template = (struct Netflow9Template*)( (uint8_t*)netflow9Template + sizeof(struct Netflow9Template) + ntohs(netflow9Template->fieldCount)*sizeof(netflow9Template->fields[0]) ) ) {
@@ -205,7 +253,7 @@ class NetflowMessageParser {
 	  // get the identifier of this template and the number of fields it contains
 	  const uint16_t templateID = ntohs(netflow9Template->templateID);
 	  const uint16_t fieldCount = ntohs(netflow9Template->fieldCount);
-	  printf("storing templateID %d with %d fields ...\n", templateID, fieldCount);
+	  //???printf("storing templateID %d with %d fields ...\n", templateID, fieldCount);
 	  if (templateID<256) { error = "netflow9 templateID too small"; return; }
 	  if (!fieldCount) { error = "netflow9 field count zero"; return; }
 
@@ -236,7 +284,7 @@ class NetflowMessageParser {
 		// get the type and length of this field
 		uint16_t fieldType = ntohs(netflow9Template->fields[i].type);
 		uint16_t fieldLength = ntohs(netflow9Template->fields[i].length);
-		printf("template loop, templateID=%u fieldCount=%u i=%d type=%u length=%u offset=%u\n", templateID, fieldCount, i, fieldType, fieldLength, templateState->flowLength);
+		//???printf("template loop, templateID=%u fieldCount=%u i=%d type=%u length=%u offset=%u\n", templateID, fieldCount, i, fieldType, fieldLength, templateState->flowLength);
 		if (fieldType>FIELD_TYPE_MAXIMUM) continue;
 		if (!fieldLength) { error = "netflow9 template field length zero"; return; } 
 		
@@ -265,7 +313,7 @@ class NetflowMessageParser {
 
 	// if we are currently parsing a flowset that contains flows, and there are more flows in it, return the next one
 	if (netflow9Flow && flowCount>1) {
-	  printf("nextFlow9 A, flowCount=%u ...\n", flowCount);
+	  //???printf("nextFlow9 A, flowCount=%u ...\n", flowCount);
 		if ( (uint8_t*)netflow9Flow + flowLength > messageEnd ) { error = "netflow9 flow truncated"; return false; }
 		netflow9Flow = (Netflow9Flow*)((uint8_t*)netflow9Flow + flowLength);
 		flowCount--;
@@ -275,10 +323,10 @@ class NetflowMessageParser {
 	// or, if we have finished parsing the current flowset, advance to the next flowset,
 	// or, if we have not started parsing this Netflow message yet, point at the first flowset in it
 	if (netflow9Flowset) {
-		printf("nextFlow9 B, flowCount=%u ...\n", flowCount);
+	  //???printf("nextFlow9 B, flowCount=%u ...\n", flowCount);
 		netflow9Flowset = (Netflow9Flowset*)((uint8_t*)netflow9Flowset + ntohs(netflow9Flowset->length));
 	} else {
-		printf("nextFlow9 C, flowCount=%u ...\n", flowCount);
+	  //???printf("nextFlow9 C, flowCount=%u ...\n", flowCount);
 		netflow9Flowset = netflow9Header->flowsets;
 	}
 	
@@ -295,7 +343,7 @@ class NetflowMessageParser {
 	  // check for truncated flowset
 	  uint16_t flowsetID = ntohs(netflow9Flowset->flowsetID);
 	  uint16_t flowsetLength = ntohs(netflow9Flowset->length);
-	  printf("nextFlow9 E, flowsetID=%u, flowsetLength=%u ...\n", flowsetID, flowsetLength);
+	  //???printf("nextFlow9 E, flowsetID=%u, flowsetLength=%u ...\n", flowsetID, flowsetLength);
 	  if ( flowsetLength < sizeof(Netflow9Flowset) ) { error = "netflow9 flowset too small"; return false; }
 	  if ( (uint8_t*)netflow9Flowset + flowsetLength > messageEnd ) { error = "netflow9 flowset truncated"; return false; }
 
@@ -311,7 +359,7 @@ class NetflowMessageParser {
 		if (!flowLength) { error = "netflow9 flow length zero"; return false; }
 
 		flowCount = ntohs(netflow9Flowset->length) / flowLength; 
-		printf("nextFlow9 F, flowsetID=%u, flowsetLength=%u flowCount=%u...\n", flowsetID, flowsetLength, flowCount);
+		//???printf("nextFlow9 F, flowsetID=%u, flowsetLength=%u flowCount=%u...\n", flowsetID, flowsetLength, flowCount);
 		if (!flowCount) { error = "netflow9 flowset empty"; return false; }
 
 		netflow9Flow = netflow9Flowset->u.flows;
@@ -336,7 +384,7 @@ class NetflowMessageParser {
   void prepareMessage9() {
 
 	// point at the Netflow version 9 header structure in the messages
-	printf("prepareMessage9() ...\n");
+	//???printf("prepareMessage9() ...\n");
 	if ( messageLength < sizeof(struct Netflow9Header) ) { error = "header too short"; return; }
 	netflow9Header = (struct Netflow9Header*)messageStart;
 
@@ -349,6 +397,7 @@ class NetflowMessageParser {
 		sourceState->sourceAddress = sourceAddress;
 		sourceState->sourceID = sourceID;
 		sourceState->previousSequenceNumber = 0;
+		sourceState->previousFlowCount = 0;
 		sourceTable[index] = sourceState;
 	}
 
@@ -437,16 +486,21 @@ class NetflowMessageParser {
 	if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FIELD_TYPE_MAXIMUM ) return 0;
 
 	// get the length of the field and its offset within the flow record, according to the template
-	const uint16_t offset =  templateState->fields[fieldType].offset;
-	const uint16_t length =  templateState->fields[fieldType].length;
-	if (!length) return 0;
-
-	// address the flow's byte array
-	const uint8_t* fields = netflow9Flow->fields;
+	uint16_t offset =  templateState->fields[fieldType].offset;
+	uint16_t length =  templateState->fields[fieldType].length;
 
 	// get the value of the field from the flow record as an integer and return it
 	uint64_t value = 0;
 	switch(length) {
+	case 8: value =              netflow9Flow->fields[offset++];
+	case 7: value = (value<<8) | netflow9Flow->fields[offset++];
+	case 6: value = (value<<8) | netflow9Flow->fields[offset++];
+	case 5: value = (value<<8) | netflow9Flow->fields[offset++];
+	case 4: value = (value<<8) | netflow9Flow->fields[offset++];
+	case 3: value = (value<<8) | netflow9Flow->fields[offset++];
+	case 2: value = (value<<8) | netflow9Flow->fields[offset++];
+	case 1: value = (value<<8) | netflow9Flow->fields[offset++]; break;
+#if 0
 	case 1: value = ((uint64_t)fields[offset+0])     ; break;
 	case 2: value = ((uint64_t)fields[offset+0]<<8 ) | ((uint64_t)fields[offset+1])     ; break;
 	case 3: value = ((uint64_t)fields[offset+0]<<16) | ((uint64_t)fields[offset+1]<<8 ) | ((uint64_t)fields[offset+2])     ; break;
@@ -455,6 +509,7 @@ class NetflowMessageParser {
 	case 6: value = ((uint64_t)fields[offset+0]<<40) | ((uint64_t)fields[offset+1]<<32) | ((uint64_t)fields[offset+2]<<24) | ((uint64_t)fields[offset+3]<<16) | ((uint64_t)fields[offset+4]<<8 ) | ((uint64_t)fields[offset+5])     ; break;
 	case 7: value = ((uint64_t)fields[offset+0]<<48) | ((uint64_t)fields[offset+1]<<40) | ((uint64_t)fields[offset+2]<<32) | ((uint64_t)fields[offset+3]<<24) | ((uint64_t)fields[offset+4]<<16) | ((uint64_t)fields[offset+5]<<8)  | ((uint64_t)fields[offset+6])    ; break;
 	case 8: value = ((uint64_t)fields[offset+0]<<56) | ((uint64_t)fields[offset+1]<<48) | ((uint64_t)fields[offset+2]<<40) | ((uint64_t)fields[offset+3]<<32) | ((uint64_t)fields[offset+4]<<24) | ((uint64_t)fields[offset+5]<<16) | ((uint64_t)fields[offset+6]<<8) | ((uint64_t)fields[offset+7]) ; break;
+#endif
 	default: break;
 	}
 	return value;

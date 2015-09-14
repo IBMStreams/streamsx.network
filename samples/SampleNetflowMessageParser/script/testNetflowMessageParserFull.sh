@@ -32,7 +32,7 @@ compilerOptionsList=(
 --spl-path=$( IFS=: ; echo "${toolkitList[*]}" )
 --standalone-application
 --optimized-code-generation
---cxx-flags=-g
+--cxx-flags=-g3
 --static-link
 --main-composite=$namespace::$composite
 --output-directory=$buildDirectory 
@@ -44,7 +44,9 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_old.pcap
+#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_old.pcap
+#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow5_port9500.pcap
+pcapFilename=$HOME/data.simpleweb.org/netflow183.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

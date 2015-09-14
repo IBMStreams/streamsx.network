@@ -134,7 +134,8 @@ composite TestNetflowMessageParserFull {
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-            inputFilter: "udp port 2055";
+	        //????inputFilter: "udp port 2055";
+	        inputFilter: "udp port 9500"; // Netflow5 recording uses non-standard port
             metricsInterval: 0.0;
         output Out:
             captureTime = captureTime(),
