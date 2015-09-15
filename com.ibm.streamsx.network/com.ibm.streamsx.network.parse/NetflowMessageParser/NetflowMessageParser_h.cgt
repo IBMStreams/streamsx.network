@@ -48,7 +48,6 @@ private:
 
   SPL::uint64 messagesProcessed() { return tupleCounter; }
 
-
   SPL::uint16 NETFLOW_VERSION() { return parser.netflow9Header ? ntohs(parser.netflow9Header->version) : parser.netflow5Header ? ntohs(parser.netflow5Header->version) : 0; } // header: Netflow version 
 
   SPL::uint16 NETFLOW_COUNT() { return parser.netflow9Header ? ntohs(parser.netflow9Header->count) : parser.netflow5Header ? ntohs(parser.netflow5Header->count) : 0; } // header: number of records (including templates, options, and flows)
@@ -57,12 +56,17 @@ private:
 
   SPL::uint32 NETFLOW_UNIX_SECONDS() { return parser.netflow9Header ? ntohl(parser.netflow9Header->unixSeconds) : parser.netflow5Header ? ntohl(parser.netflow5Header->unixSeconds) : 0; } // time since beginning of Unix epoch, in seconds
 
-  SPL::uint32 NETFLOW_UNIX_NANOSECONDS() { return parser.netflow5Header ? ntohl(parser.netflow5Header->unixNanoseconds) : 0; } // fractional second since time since NETFLOW_UNIX_SECONDS, in nanoseconds
+  SPL::uint32 NETFLOW_UNIX_NANOSECONDS() { return parser.netflow5Header ? ntohl(parser.netflow5Header->unixNanoseconds) : 0; } // fraction of a second since NETFLOW_UNIX_SECONDS, in nanoseconds
 
   SPL::uint32 NETFLOW_SEQUENCE_NUMBER() { return parser.netflow9Header ? ntohl(parser.netflow9Header->packetSequence) : parser.netflow5Header ? ntohl(parser.netflow5Header->flowSequence) : 0; } // sequence number of this message
 
   SPL::uint32 NETFLOW_SOURCE_ID() { return parser.netflow9Header ? ntohl(parser.netflow9Header->sourceID) : 0; } // identifier of source of this message
 
+  SPL::uint64 NETFLOW_FIELD_AS_INTEGER(SPL::int32 field) { return parser.netflow9FieldAsInteger(field); } // The value of the specified field, cast to an integer
+
+  SPL::rstring NETFLOW_FIELD_AS_STRING(SPL::int32 field) { return parser.netflow9FieldAsString(field); } // The value of the specified field, cast to an string
+
+  SPL::list<uint8> NETFLOW_FIELD_AS_BYTE_LIST(SPL::int32 field) { return parser.netflow9FieldAsByteList(field); } // The value of the specified field, cast to a byte list
 
   SPL::uint64 NETFLOW_IN_BYTES() { return parser.netflow5Flow ? ntohl(parser.netflow5Flow->octets) : parser.netflow9FieldAsInteger(1); } // field 1: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
 
@@ -225,12 +229,6 @@ private:
   SPL::uint8 NETFLOW_POST_IP_DSCP() { return parser.netflow9FieldAsInteger(98); } // field 98: The value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.
 
   SPL::uint32 NETFLOW_REPLICATION_FACTOR() { return parser.netflow9FieldAsInteger(99); } // field 99: Multicast replication factor.
-
-  SPL::uint64 NETFLOW_FIELD_AS_INTEGER(SPL::int32 field) { return parser.netflow9FieldAsInteger(field); } // The value of the specified field, cast to an integer
-
-  SPL::rstring NETFLOW_FIELD_AS_STRING(SPL::int32 field) { return parser.netflow9FieldAsString(field); } // The value of the specified field, cast to an string
-
-  SPL::list<uint8> NETFLOW_FIELD_AS_BYTE_LIST(SPL::int32 field) { return parser.netflow9FieldAsByteList(field); } // The value of the specified field, cast to a byte list
 
 }; 
 

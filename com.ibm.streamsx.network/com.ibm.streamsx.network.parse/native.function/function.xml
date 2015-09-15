@@ -249,6 +249,21 @@
 
       <function:function>
         <function:description></function:description>
+        <function:prototype>public uint64 NETFLOW_FIELD_AS_INTEGER(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public rstring NETFLOW_FIELD_AS_STRING(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
+        <function:prototype>public list&lt;uint8> NETFLOW_FIELD_AS_BYTE_LIST(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description></function:description>
         <function:prototype>public uint64 NETFLOW_IN_BYTES()</function:prototype>
       </function:function>
 
@@ -650,21 +665,6 @@
       <function:function>
         <function:description></function:description>
         <function:prototype>public uint32 NETFLOW_REPLICATION_FACTOR()</function:prototype>
-      </function:function>
-
-      <function:function>
-        <function:description></function:description>
-        <function:prototype>public uint64 NETFLOW_FIELD_AS_INTEGER(int32)</function:prototype>
-      </function:function>
-
-      <function:function>
-        <function:description></function:description>
-        <function:prototype>public rstring NETFLOW_FIELD_AS_STRING(int32)</function:prototype>
-      </function:function>
-
-      <function:function>
-        <function:description></function:description>
-        <function:prototype>public list&lt;uint8> NETFLOW_FIELD_AS_BYTE_LIST(int32)</function:prototype>
       </function:function>
 
     </function:functions>

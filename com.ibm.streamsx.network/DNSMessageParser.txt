@@ -52,7 +52,7 @@ attribute:
     by the required parameter 'messageAttribute'.
 
 The 'payloadData' output assignment function of the PacketLiveSource and
-PacketFileSource operators in the toolkit can be used to produce attribures that
+PacketFileSource operators in the toolkit can be used to produce attributes that
 can be consumed by the DNSMessageParser operator.
 
 
