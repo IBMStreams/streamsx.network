@@ -6,8 +6,6 @@
 namespace sample;
 
 use com.ibm.streamsx.network.ipv4::*;
-use com.ibm.streamsx.network.ipv6::*;
-use com.ibm.streamsx.network.mac::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
 
