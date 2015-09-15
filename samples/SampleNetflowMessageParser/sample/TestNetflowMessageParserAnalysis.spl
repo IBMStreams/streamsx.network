@@ -24,20 +24,20 @@ composite TestNetflowMessageParserAnalysis {
     netflow_t = 
       uint64 endTime,       // time that flow ended, relative to Unix epoch, in milliseconds, according to capturing machine's clock
       uint64 startTime,     // time that flow started, relative to Unix epoch, in milliseconds, according to capturing machine's clock  
-	  uint8  protocol, 		// IP protocol number of flow, usually 1 for "icmp", 6 for "tcp", or 17 for "udp" 
-	  uint32 srcAddress, 	// IPv4 address of source of flow
-	  uint16 srcPort, 		// UDP/TCP port of source of flow
-	  uint32 dstAddress, 	// IPv4 address of destination of flow
-	  uint16 dstPort, 		// UDP/TCP port of destination of flow
-	  uint64 packetCount, 	// count of packets in flow
-	  uint64 byteCount; 	// count of bytes in flow
-		
+      uint8  protocol,      // IP protocol number of flow, usually 1 for "icmp", 6 for "tcp", or 17 for "udp" 
+      uint32 srcAddress,    // IPv4 address of source of flow
+      uint16 srcPort,       // UDP/TCP port of source of flow
+      uint32 dstAddress,    // IPv4 address of destination of flow
+      uint16 dstPort,       // UDP/TCP port of destination of flow
+      uint64 packetCount,   // count of packets in flow
+      uint64 byteCount;     // count of bytes in flow
+        
     graph
 
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-	        inputFilter: "udp port 2055";
+            inputFilter: "udp port 2055";
             metricsInterval: 0.0;
         output Out:
             captureTime = captureTime(),
@@ -47,20 +47,20 @@ composite TestNetflowMessageParserAnalysis {
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
     stream<netflow_t> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
-      param
+      parahttps://github.com/ejpring/streamsx.network/blob/master/samples/SampleNetflowMessageParser/sample/TestNetflowMessageParserAnalysis.splm
           messageAttribute: netflowMessage;
-	      sourceAttribute: netflowSource;
-	      outputFilters: !parseError();
+          sourceAttribute: netflowSource;
+          outputFilters: !parseError();
       output Out:
-	      endTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_LAST_SWITCHED() ),
-	      startTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_FIRST_SWITCHED() ),
-	      protocol = NETFLOW_PROTOCOL(),
-	      srcAddress = NETFLOW_IPV4_SRC_ADDR(),
-	      srcPort = NETFLOW_SRC_PORT(),
-	      dstAddress = NETFLOW_IPV4_DST_ADDR(),
-	      dstPort = NETFLOW_DST_PORT(),
-	      byteCount = NETFLOW_IN_BYTES(),
-	      packetCount = NETFLOW_IN_PKTS();
+          endTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_LAST_SWITCHED() ),
+          startTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_FIRST_SWITCHED() ),
+          protocol = NETFLOW_PROTOCOL(),
+          srcAddress = NETFLOW_IPV4_SRC_ADDR(),
+          srcPort = NETFLOW_SRC_PORT(),
+          dstAddress = NETFLOW_IPV4_DST_ADDR(),
+          dstPort = NETFLOW_DST_PORT(),
+          byteCount = NETFLOW_IN_BYTES(),
+          packetCount = NETFLOW_IN_PKTS();
     }
     () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserAnalysis.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
