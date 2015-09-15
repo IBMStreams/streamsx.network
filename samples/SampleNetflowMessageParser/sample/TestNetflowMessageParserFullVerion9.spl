@@ -11,7 +11,7 @@ use com.ibm.streamsx.network.mac::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
 
-composite TestNetflowMessageParserFull {
+composite TestNetflowMessageParserFullVersion9 {
 
     param       
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow9_new.pcap" );
@@ -134,15 +134,14 @@ composite TestNetflowMessageParserFull {
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-	        //????inputFilter: "udp port 2055";
-	        inputFilter: "udp port 9500"; // Netflow5 recording uses non-standard port
+	        inputFilter: "udp port 2055";
             metricsInterval: 0.0;
         output Out:
             captureTime = captureTime(),
             netflowSource = IPV4_SRC_ADDRESS(),
             netflowMessage = payloadData();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserFullVersion9.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
     stream<NetflowMessageType> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
       param
@@ -155,10 +154,10 @@ composite TestNetflowMessageParserFull {
         messagesProcessed = messagesProcessed(),
 	    NETFLOW_VERSION = NETFLOW_VERSION(), // header: Netflow version 
 	    NETFLOW_COUNT = NETFLOW_COUNT(), // header: number of records (including templates, options, and flows)
-	    NETFLOW_SYSTEM_UPTIME = (float64)NETFLOW_SYSTEM_UPTIME()/1000.0, // time since source was booted, in milliseonds, converted to seconds
-	    NETFLOW_UNIX_SECONDS = (float64)NETFLOW_UNIX_SECONDS() + (float64)NETFLOW_UNIX_NANOSECONDS()/1000000000.0, // time since beginning of Unix epoch, in seconds
-	    NETFLOW_SEQUENCE_NUMBER = NETFLOW_SEQUENCE_NUMBER(), // sequence number of this message
-	    NETFLOW_SOURCE_ID = NETFLOW_SOURCE_ID(), // identifier of source of this message
+	    NETFLOW_SYSTEM_UPTIME = (float64)NETFLOW_SYSTEM_UPTIME()/1000.0, // header: time since source was booted, in milliseonds, converted to seconds
+	    NETFLOW_UNIX_SECONDS = (float64)NETFLOW_UNIX_SECONDS() + (float64)NETFLOW_UNIX_NANOSECONDS()/1000000000.0, // header: time since beginning of Unix epoch, in seconds
+	    NETFLOW_SEQUENCE_NUMBER = NETFLOW_SEQUENCE_NUMBER(), // header: sequence number of this message
+	    NETFLOW_SOURCE_ID = NETFLOW_SOURCE_ID(), // header: identifier of source of this message
         NETFLOW_IN_BYTES = NETFLOW_IN_BYTES(), // field 1: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
         NETFLOW_IN_PKTS = NETFLOW_IN_PKTS(), // field 2: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
         NETFLOW_FLOWS = NETFLOW_FLOWS(), // field 3: Number of flows that were aggregated; default for N is 4
@@ -255,7 +254,7 @@ composite TestNetflowMessageParserFull {
 
 
     }
-    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserFull.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserFullVersion9.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
 
 }

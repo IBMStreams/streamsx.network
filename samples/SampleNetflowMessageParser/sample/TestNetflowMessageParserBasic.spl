@@ -1,0 +1,78 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+composite TestNetflowMessageParserBasic {
+
+    param       
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow5_port9500.pcap" );
+    
+    type 
+    
+    PacketType =
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        uint32 netflowSource,        	// IP source address of Netflow message
+        blob netflowMessage;            // the Netflow message from a packet, excluding all network headers
+
+    NetflowMessageType = 
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        uint64  messageNumber,
+	    float64 flowTime,             	// time of flow, according to Netflow source, relative to Unix epoch, in seconds
+	    float64 flowDuration,           // duration of this flow, in seconds
+        uint64  flowOctets,             // number of bytes in this flow
+        uint64  flowPackets,            // number of packets in this flow
+        rstring ipProtocol,             // IP protocol byte
+        rstring ipSourceAddress,        // IP source address
+        uint16  ipSourcePort,           // TCP/UDP source port number
+        rstring ipDestinationAddress,   // IP destination address
+        uint16  ipDestinationPort,      // TCP/UDP destination port number
+        uint8   tcpFlags;             	// all the TCP flags seen for this flow
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+	        inputFilter: "udp port 2055";
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = captureTime(),
+            netflowSource = IPV4_SRC_ADDRESS(),
+            netflowMessage = payloadData();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+
+    stream<NetflowMessageType> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
+	  logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
+      param
+          messageAttribute: netflowMessage;
+	      sourceAttribute: netflowSource;
+	      outputFilters: !parseError();
+      output Out:
+	      messageNumber = messagesProcessed(),
+	      flowTime = (float64)NETFLOW_UNIX_SECONDS() + (float64)NETFLOW_UNIX_NANOSECONDS()/1000000000.0,
+	      flowDuration = ( (float64)NETFLOW_LAST_SWITCHED() - (float64)NETFLOW_FIRST_SWITCHED() ) / 1000.0,
+          flowOctets = NETFLOW_IN_BYTES(), // flow: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.,
+          flowPackets = NETFLOW_IN_PKTS(), // flow: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow,
+          ipProtocol = NETFLOW_PROTOCOL() in ipProtocols ? ipProtocols[NETFLOW_PROTOCOL()] : (rstring)NETFLOW_PROTOCOL(),
+          ipSourceAddress = NETFLOW_IPV4_SRC_ADDR()>0u ? convertIPV4AddressNumericToString(NETFLOW_IPV4_SRC_ADDR()) : size(NETFLOW_IPV6_SRC_ADDR())>0 ? convertIPV6AddressNumericToString(NETFLOW_IPV6_SRC_ADDR())  : "",
+          ipSourcePort = NETFLOW_SRC_PORT(),
+          ipDestinationAddress = NETFLOW_IPV4_DST_ADDR()>0u ? convertIPV4AddressNumericToString(NETFLOW_IPV4_DST_ADDR()) : size(NETFLOW_IPV6_DST_ADDR())>0 ? convertIPV6AddressNumericToString(NETFLOW_IPV6_DST_ADDR())  : "",
+          ipDestinationPort = NETFLOW_DST_PORT(),
+          tcpFlags = NETFLOW_TCP_FLAGS();
+
+    }
+    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserBasic.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+
+
+}
+

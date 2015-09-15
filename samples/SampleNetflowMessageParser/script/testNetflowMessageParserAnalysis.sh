@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestNetflowMessageParserBasic
+composite=TestNetflowMessageParserAnalysis
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )

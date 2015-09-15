@@ -69,7 +69,7 @@ class NetflowMessageParser {
   struct Netflow9Template {
 	  uint16_t templateID; // templateID values are >255
 	  uint16_t fieldCount; // the number of type/length pairs in 'fields' field
-	  struct { uint16_t type; uint16_t length; } fields[0];
+	  struct { uint16_t type; uint16_t length; } fieldTemplate[0];
   } __attribute__((packed)) ;
 	
   struct Netflow9Option {
@@ -131,15 +131,17 @@ class NetflowMessageParser {
   };
   std::tr1::unordered_map<uint64_t, struct SourceState*> sourceTable; // indexed by sourceAddress+sourceID
 	
-  static const uint16_t FIELD_TYPE_MAXIMUM = 512;
+  static const uint16_t FIELD_TEMPLATE_MAXIMUM = 256;
+  static const uint16_t FLOW_FIELDS_MAXIMUM = 1024;
   struct TemplateState {
 	uint32_t sourceAddress; // part of table index
 	uint32_t sourceID; // part of table index
 	uint16_t templateID; // part of table index
-	uint16_t flowLength;
-	uint16_t fieldCount;
-	uint16_t fieldTypeMaximum;
-	struct { uint16_t offset; uint16_t length; } fields[FIELD_TYPE_MAXIMUM+1]; // indexed by fieldType
+	uint16_t fieldCount; // number of fields in fieldTemplate
+	struct { uint16_t type; uint16_t length; } fieldTemplate[FIELD_TEMPLATE_MAXIMUM+1]; // types and lengths of fields in flows that use this template, indexed by field count
+	uint16_t flowLength; // length of flows that use this template
+	uint16_t flowTypeMaximum; // largest value of 'type' used in this template
+	struct { uint16_t offset; uint16_t length; } flowFields[FLOW_FIELDS_MAXIMUM+1]; // offsets and lengths of fields in flows that use this template, indexed by field type
   };
   std::tr1::unordered_map<uint64_t, struct TemplateState*> templateTable; // indexed by sourceAddress+sourceID+templateID
 
@@ -248,16 +250,11 @@ class NetflowMessageParser {
 	//???printf("storeTemplateFlowset() ...\n");
 	for ( struct Netflow9Template* netflow9Template = netflow9Flowset->u.templates;
 		  (uint8_t*)netflow9Template < (uint8_t*)netflow9Flowset + ntohs(netflow9Flowset->length);
-		  netflow9Template = (struct Netflow9Template*)( (uint8_t*)netflow9Template + sizeof(struct Netflow9Template) + ntohs(netflow9Template->fieldCount)*sizeof(netflow9Template->fields[0]) ) ) {
-
-	  // get the identifier of this template and the number of fields it contains
-	  const uint16_t templateID = ntohs(netflow9Template->templateID);
-	  const uint16_t fieldCount = ntohs(netflow9Template->fieldCount);
-	  //???printf("storing templateID %d with %d fields ...\n", templateID, fieldCount);
-	  if (templateID<256) { error = "netflow9 templateID too small"; return; }
-	  if (!fieldCount) { error = "netflow9 field count zero"; return; }
+		  netflow9Template = (struct Netflow9Template*)( (uint8_t*)netflow9Template + sizeof(struct Netflow9Template) + ntohs(netflow9Template->fieldCount)*sizeof(netflow9Template->fieldTemplate[0]) ) ) {
 
 	  // find the state table for this template, if there is one, or create a new one if not
+	  const uint16_t templateID = ntohs(netflow9Template->templateID);
+	  if (templateID<256) { error = "netflow9 templateID too small"; return; }
 	  const uint32_t sourceID = ntohl(netflow9Header->sourceID);
 	  const uint64_t index = (((uint64_t)sourceAddress)<<32) + ((uint64_t)sourceID<<16) + ((uint64_t)templateID);
 	  struct TemplateState *templateState = templateTable[index];
@@ -266,38 +263,53 @@ class NetflowMessageParser {
 		templateState->sourceAddress = sourceAddress;
 		templateState->sourceID = sourceID;
 		templateState->templateID = templateID;
-		templateState->fieldTypeMaximum = FIELD_TYPE_MAXIMUM;
+		templateState->fieldCount = 0;
+		templateState->flowTypeMaximum = 0;
+		templateState->flowLength = 0;
+		memset( templateState->fieldTemplate, 0, sizeof(templateState->fieldTemplate) );
+		memset( templateState->flowFields, 0, sizeof(templateState->flowFields) );
 		templateTable[index] = templateState;
 	  }
 
-	  // clear the previous template's data out of the state table
-	  templateState->flowLength = 0;
-	  templateState->fieldCount = fieldCount;
+	  // get the number of fields in this template
+	  const uint16_t fieldCount = ntohs(netflow9Template->fieldCount);
+	  if (fieldCount<1) { error = "netflow9 field count zero"; return; }
+	  if (fieldCount>FIELD_TEMPLATE_MAXIMUM) { error = "netflow9 field count too large"; return; }
+
+	  // if this templateID has been parsed before and the template itself is unchanged, don't reparse it
+	  const uint32_t templateLength = fieldCount * sizeof(netflow9Template->fieldTemplate[0]);
+	  //???printf("storeTemplateFlowset(), sourceAddress=0x%08x sourceID=%d templateID=%u, fieldCount=%u comparison=%d\n", sourceAddress, sourceID, templateID, fieldCount, memcmp(templateState->fieldTemplate, netflow9Template->fieldTemplate, templateLength));
+	  if ( memcmp(templateState->fieldTemplate, netflow9Template->fieldTemplate, templateLength) == 0 ) continue;
 
 	  // clear the portion of the field array used by the previous template
-	  memset( templateState->fields, 0, ( templateState->fieldTypeMaximum + 1 ) * sizeof(templateState->fields[0]) );
-	  templateState->fieldTypeMaximum = 0;
+	  templateState->flowLength = 0;
+	  templateState->flowTypeMaximum = 0;
+	  memset( templateState->flowFields, 0, ( templateState->flowTypeMaximum + 1 ) * sizeof(templateState->flowFields[0]) );
 
-	  // store each field from this template in the state table
+	  // store the offset and length of each field from this template in the state table
 	  for (int i=0; i<fieldCount; i++) {
 
 		// get the type and length of this field
-		uint16_t fieldType = ntohs(netflow9Template->fields[i].type);
-		uint16_t fieldLength = ntohs(netflow9Template->fields[i].length);
+		uint16_t fieldType = ntohs(netflow9Template->fieldTemplate[i].type);
+		uint16_t fieldLength = ntohs(netflow9Template->fieldTemplate[i].length);
 		//???printf("template loop, templateID=%u fieldCount=%u i=%d type=%u length=%u offset=%u\n", templateID, fieldCount, i, fieldType, fieldLength, templateState->flowLength);
-		if (fieldType>FIELD_TYPE_MAXIMUM) continue;
+		if (fieldType>FLOW_FIELDS_MAXIMUM) continue;
 		if (!fieldLength) { error = "netflow9 template field length zero"; return; } 
 		
 		// store the offset and length this field will have in flow records
-		templateState->fields[fieldType].offset = templateState->flowLength;
-		templateState->fields[fieldType].length = fieldLength;
+		templateState->flowFields[fieldType].offset = templateState->flowLength;
+		templateState->flowFields[fieldType].length = fieldLength;
 
 		// keep track of the length this flow will have in flow records
 		templateState->flowLength += fieldLength;
 
-		// keep track of how much of the field array this template uses
-		if ( templateState->fieldTypeMaximum < fieldType ) templateState->fieldTypeMaximum = fieldType;
+		// keep track of how much of the flow field array this template uses
+		if ( templateState->flowTypeMaximum < fieldType ) templateState->flowTypeMaximum = fieldType;
 	  }
+
+	  // store the template itself in the state table
+	  templateState->fieldCount = fieldCount;
+	  memcpy(templateState->fieldTemplate, netflow9Template->fieldTemplate, templateLength);
 	}
   }
   
@@ -483,11 +495,11 @@ class NetflowMessageParser {
   SPL::uint64 netflow9FieldAsInteger(const uint16_t fieldType) {
 
 	// return zero if there is no such field in this flow
-	if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FIELD_TYPE_MAXIMUM ) return 0;
+	if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FLOW_FIELDS_MAXIMUM ) return 0;
 
 	// get the length of the field and its offset within the flow record, according to the template
-	uint16_t offset =  templateState->fields[fieldType].offset;
-	uint16_t length =  templateState->fields[fieldType].length;
+	uint16_t offset =  templateState->flowFields[fieldType].offset;
+	uint16_t length =  templateState->flowFields[fieldType].length;
 
 	// get the value of the field from the flow record as an integer and return it
 	uint64_t value = 0;
@@ -500,16 +512,6 @@ class NetflowMessageParser {
 	case 3: value = (value<<8) | netflow9Flow->fields[offset++];
 	case 2: value = (value<<8) | netflow9Flow->fields[offset++];
 	case 1: value = (value<<8) | netflow9Flow->fields[offset++]; break;
-#if 0
-	case 1: value = ((uint64_t)fields[offset+0])     ; break;
-	case 2: value = ((uint64_t)fields[offset+0]<<8 ) | ((uint64_t)fields[offset+1])     ; break;
-	case 3: value = ((uint64_t)fields[offset+0]<<16) | ((uint64_t)fields[offset+1]<<8 ) | ((uint64_t)fields[offset+2])     ; break;
-	case 4: value = ((uint64_t)fields[offset+0]<<24) | ((uint64_t)fields[offset+1]<<16) | ((uint64_t)fields[offset+2]<<8 ) | ((uint64_t)fields[offset+3])     ; break;
-	case 5: value = ((uint64_t)fields[offset+0]<<32) | ((uint64_t)fields[offset+1]<<24) | ((uint64_t)fields[offset+2]<<16) | ((uint64_t)fields[offset+3]<<8 ) | ((uint64_t)fields[offset+4])     ; break;
-	case 6: value = ((uint64_t)fields[offset+0]<<40) | ((uint64_t)fields[offset+1]<<32) | ((uint64_t)fields[offset+2]<<24) | ((uint64_t)fields[offset+3]<<16) | ((uint64_t)fields[offset+4]<<8 ) | ((uint64_t)fields[offset+5])     ; break;
-	case 7: value = ((uint64_t)fields[offset+0]<<48) | ((uint64_t)fields[offset+1]<<40) | ((uint64_t)fields[offset+2]<<32) | ((uint64_t)fields[offset+3]<<24) | ((uint64_t)fields[offset+4]<<16) | ((uint64_t)fields[offset+5]<<8)  | ((uint64_t)fields[offset+6])    ; break;
-	case 8: value = ((uint64_t)fields[offset+0]<<56) | ((uint64_t)fields[offset+1]<<48) | ((uint64_t)fields[offset+2]<<40) | ((uint64_t)fields[offset+3]<<32) | ((uint64_t)fields[offset+4]<<24) | ((uint64_t)fields[offset+5]<<16) | ((uint64_t)fields[offset+6]<<8) | ((uint64_t)fields[offset+7]) ; break;
-#endif
 	default: break;
 	}
 	return value;
@@ -520,11 +522,11 @@ class NetflowMessageParser {
   SPL::rstring netflow9FieldAsString(const uint16_t fieldType) {
 
 	// return zero if there is no such field in this flow
-	if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FIELD_TYPE_MAXIMUM ) return SPL::rstring();
+	if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FLOW_FIELDS_MAXIMUM ) return SPL::rstring();
 
 	// get the length of the field and its offset within the flow record, according to the template
-	const uint16_t offset =  templateState->fields[fieldType].offset;
-	const uint16_t length =  templateState->fields[fieldType].length;
+	const uint16_t offset =  templateState->flowFields[fieldType].offset;
+	const uint16_t length =  templateState->flowFields[fieldType].length;
 	if (!length) return SPL::rstring();
 
 	// address the flow's byte array
@@ -539,11 +541,11 @@ class NetflowMessageParser {
   SPL::list<SPL::uint8> netflow9FieldAsByteList(const uint16_t fieldType) {
 
 	// return zero if this flow does not contain the specified field
-	if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FIELD_TYPE_MAXIMUM ) return SPL::list<SPL::uint8>();
+	if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FLOW_FIELDS_MAXIMUM ) return SPL::list<SPL::uint8>();
 
 	// get the length of the field and its offset within the flow record, according to the template
-	const uint16_t offset =  templateState->fields[fieldType].offset;
-	const uint16_t length =  templateState->fields[fieldType].length;
+	const uint16_t offset =  templateState->flowFields[fieldType].offset;
+	const uint16_t length =  templateState->flowFields[fieldType].length;
 	if (!length) return SPL::list<SPL::uint8>();
 
 	// address the flow's byte array

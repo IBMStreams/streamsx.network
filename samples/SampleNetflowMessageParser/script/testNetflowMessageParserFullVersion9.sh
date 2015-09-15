@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestNetflowMessageParserFull
+composite=TestNetflowMessageParserFullVersion9
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -44,9 +44,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_old.pcap
-#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow5_port9500.pcap
-pcapFilename=$HOME/data.simpleweb.org/netflow183.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_old.pcap
+#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_new.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
