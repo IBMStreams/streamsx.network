@@ -17,13 +17,13 @@ composite TestNetflowMessageParserAnalysis {
     type 
     
     PacketType =
-	  float64 captureTime,  // time that packet was captured, relative to Unix epoch, in seconds, accurate to microseconds
-	  uint32 netflowSource, // IP source address of Netflow message
-	  blob netflowMessage;  // the Netflow message from a packet, excluding all network headers
+      float64 captureTime,  // time that packet was captured, relative to Unix epoch, in seconds, accurate to microseconds
+      uint32 netflowSource, // IP source address of Netflow message
+      blob netflowMessage;  // the Netflow message from a packet, excluding all network headers
 
-	netflow_t = 
-	  uint64 endTime, 		// time that flow ended, relative to Unix epoch, in milliseconds, according to capturing machine's clock,  
-	  uint64 startTime, 	// time that flow started, relative to Unix epoch, in milliseconds, according to capturing machine's clock,  
+    netflow_t = 
+      uint64 endTime,       // time that flow ended, relative to Unix epoch, in milliseconds, according to capturing machine's clock
+      uint64 startTime,     // time that flow started, relative to Unix epoch, in milliseconds, according to capturing machine's clock  
 	  uint8  protocol, 		// IP protocol number of flow, usually 1 for "icmp", 6 for "tcp", or 17 for "udp" 
 	  uint32 srcAddress, 	// IPv4 address of source of flow
 	  uint16 srcPort, 		// UDP/TCP port of source of flow
