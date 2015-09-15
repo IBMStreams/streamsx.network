@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestDNSMessageParserBase64
+composite=TestNetflowMessageParserParallelAnalysis
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -44,8 +44,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns_only_txt_base64.pcap
-#pcapFilename=$HOME/data.haifa/dns_tunneling_long.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_new.pcap
+parallelChannels=3
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -76,7 +76,7 @@ sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, co
 
 step "executing standalone application '$namespace::$composite' ..."
 executable=$buildDirectory/bin/standalone.exe
-#gdb --args 
+#gdb --args ...
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

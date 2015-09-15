@@ -9,10 +9,11 @@ use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
 
-composite TestNetflowMessageParserAnalysis {
+composite TestNetflowMessageParserParallelAnalysis {
 
     param       
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow9_new.pcap" );
+    expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
     
     type 
     
@@ -30,7 +31,8 @@ composite TestNetflowMessageParserAnalysis {
       uint32 dstAddress,    // IPv4 address of destination of flow
       uint16 dstPort,       // UDP/TCP port of destination of flow
       uint64 packetCount,   // count of packets in flow
-      uint64 byteCount;     // count of bytes in flow
+      uint64 byteCount,     // count of bytes in flow
+	  uint64 partitionKey;	// combination of addresses and ports, for downstream @parallel annotation
         
     graph
 
@@ -44,7 +46,7 @@ composite TestNetflowMessageParserAnalysis {
             netflowSource = IPV4_SRC_ADDRESS(),
             netflowMessage = payloadData();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
     stream<netflow_t> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
       param
@@ -60,9 +62,33 @@ composite TestNetflowMessageParserAnalysis {
           dstAddress = NETFLOW_IPV4_DST_ADDR(),
           dstPort = NETFLOW_DST_PORT(),
           byteCount = NETFLOW_IN_BYTES(),
-          packetCount = NETFLOW_IN_PKTS();
+          packetCount = NETFLOW_IN_PKTS(),
+		  partitionKey = hashCode(NETFLOW_IPV4_SRC_ADDR()) + 
+		                 hashCode(NETFLOW_IPV4_DST_ADDR()) + 
+		                 hashCode(NETFLOW_SRC_PORT()) + 
+		                 hashCode(NETFLOW_DST_PORT());
     }
-    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserAnalysis.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
+	@parallel(width=$parallelChannels, partitionBy=[{port=NetflowMessageStream, attributes=[partitionKey]}])
+	stream<NetflowAnalytic.NetflowAnalyticResultType> NetflowAnalyticResultStream = NetflowAnalytic(NetflowMessageStream) {} 
+
+}
+
+
+
+
+composite NetflowAnalytic ( input NetflowMessageStream ; output NetflowAnalyticResultStream ) {
+
+  type
+
+    // output from Netflow analytic
+    static NetflowAnalyticResultType = 
+	  int32 result;
+
+  graph
+	
+	// placeholder for Netflow analytic
+	stream<NetflowAnalyticResultType> NetflowAnalyticResultStream = Custom(NetflowMessageStream) {} 
 
 }

@@ -20,7 +20,7 @@ composite TestDNSMessageParserParallelAnalysis {
     PacketType =
         timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch 
         rstring dstAddress,             // string representation of IPv4 destination address
-	    uint64 partitionKey,			// combination of addresses and ports, for downstream @parallel annotations
+	    uint64 partitionKey,			// combination of addresses and ports, for downstream @parallel annotation
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     graph
@@ -33,12 +33,12 @@ composite TestDNSMessageParserParallelAnalysis {
         output Out:
             captureTime = createTimestamp((int64)captureTime(), (uint32)(fmod(captureTime(),1.0)*1000000000.0), 0),
             dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-		    partitionKey = (uint64)IPV4_SRC_ADDRESS() + 
-		                   (uint64)IPV4_DST_ADDRESS() + 
+		    partitionKey = hashCode(IPV4_SRC_ADDRESS()) + 
+		                   hashCode(IPV4_DST_ADDRESS()) + 
 		                   hashCode(IPV6_SRC_ADDRESS()) + 
 		                   hashCode(IPV6_DST_ADDRESS()) + 
-		                   (uint64)IP_SRC_PORT() + 
-		                   (uint64)IP_DST_PORT(),
+		                   hashCode(IP_SRC_PORT()) + 
+		                   hashCode(IP_DST_PORT()),
             dnsMessage = payloadData();
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   

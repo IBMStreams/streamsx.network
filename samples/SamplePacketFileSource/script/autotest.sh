@@ -49,8 +49,8 @@ for script in ${scripts[*]} ; do
 	(( scriptCount++ ))
 done
 
-echo -e "\n$successCount of $scriptCount scripts succeeded"
+echo -e "\n$successCount of $scriptCount tests succeeded"
 
-[ $failureCount -ne 0 ] && echo -e "\n$failureCount scripts failed:" && ( cd $logDirectory ; ls -1 *.failed )
+[ $failureCount -ne 0 ] && echo -e "\n$failureCount tests failed:" && ( cd $logDirectory ; ls -1 *.failed )
 
 exit $failureCount
