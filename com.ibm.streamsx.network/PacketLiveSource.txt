@@ -308,8 +308,7 @@ to this operator:
       originally captured (not the time it was read from the PCAP file) to an
       output attribute.  The value is represented as seconds since the beginning
       of the Unix epoch (midnight in the GMT/UTC timezone on January 1st, 1970),
-      according to the system clock, and has a resolution of at least
-      microseconds.
+      according to the system clock, and has a precision of microseconds.
 
    uint32 packetLength() -- This function assigns the length of a packet to an
       output attribute.  The value includes all network headers and the entire
