@@ -91,11 +91,27 @@ private:
 
   // ----------- assignment functions for output attributes ----------
 
-  double captureTime() { return (double)(pcapHeader->ts.tv_sec) + ((double)(pcapHeader->ts.tv_usec))/1000000.0; }
+  uint64_t packetsReceived() { return pcapStatistics.ps_recv; }  
 
-  uint32_t packetLength() { return pcapHeader->len; } 
+  uint64_t packetsDropped() { return pcapStatistics.ps_drop; }  
 
-  SPL::blob packetData() { return SPL::blob((const unsigned char*)headers.packetBuffer, headers.packetLength); }
+  uint64_t packetsDroppedByInterface() { return pcapStatistics.ps_ifdrop; }  
+
+  uint64_t packetsProcessed() { return packetCounter; }  
+
+  uint64_t octetsProcessed() { return octetCounter; }  
+
+  SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
+
+  SPL::uint32 CAPTURE_MICROSECONDS() { return pcapHeader->ts.tv_usec; }
+
+  SPL::uint32 PACKET_LENGTH() { return pcapHeader->len; } 
+
+  SPL::blob PACKET_DATA() { return SPL::blob((const unsigned char*)headers.packetBuffer, headers.packetLength); }
+
+  SPL::uint32 PAYLOAD_LENGTH() { return headers.payloadLength; }
+
+  SPL::blob PAYLOAD_DATA() { return headers.payload ? SPL::blob((const unsigned char*)headers.payload, headers.payloadLength) : SPL::blob(); }
 
   SPL::list<SPL::uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
 
@@ -144,20 +160,6 @@ private:
   SPL::boolean TCP_FLAGS_FIN() { return headers.tcpHeader ? headers.tcpHeader->fin : false; }
 
   SPL::uint16 TCP_WINDOW() { return headers.tcpHeader ? ntohs(headers.tcpHeader->window) : 0; }
-
-  SPL::uint32 payloadLength() { return headers.payloadLength; }
-
-  SPL::blob payloadData() { return headers.payload ? SPL::blob((const unsigned char*)headers.payload, headers.payloadLength) : SPL::blob(); }
-
-  uint64_t packetsReceived() { return pcapStatistics.ps_recv; }  
-
-  uint64_t packetsDropped() { return pcapStatistics.ps_drop; }  
-
-  uint64_t packetsDroppedByInterface() { return pcapStatistics.ps_ifdrop; }  
-
-  uint64_t packetsProcessed() { return packetCounter; }  
-
-  uint64_t octetsProcessed() { return octetCounter; }  
 
   // ------------------------------------------------------------------------------------------
 

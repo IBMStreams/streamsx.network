@@ -13,14 +13,15 @@ composite TestPacketLiveSourceBasic2 {
 
 	param		
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
-    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("statisticsInterval", "0.333333" );
+    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
+    expression<float64> $statisticsInterval: (float64)getSubmissionTimeValue("statisticsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 	
 	type 
 	
 	PacketType =
-		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
 		uint64 packetNumber,			// sequence number of packet, as emitted by operator
+		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
 	    uint8 ipVersion,				// IP version: 4 for IPv4, 6 for IPv6
 	    rstring ipProtocol,				// IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
 	    rstring ipSourceAddress,		// IP source address, or empty if not IP packet
@@ -29,14 +30,12 @@ composite TestPacketLiveSourceBasic2 {
 	    uint16 ipDestinationPort,		// IP destination port, or zero if not UDP or TCP packet
 		uint32 packetLength,			// original length of packet (not necessarily all captured)
 		uint32 payloadLength,			// length of packet payload, following all network headers
-	    uint64 packetsProcessed, 		// total number of packets processed by operator, so far
-	    uint64 octetsProcessed,			// total number of octets of packet data processed by operator, so far
 		blob packetData,				// contents of packet captured, including network headers (possibly truncated)
 		blob payloadData;				// contents of packet payload, following all network headers
 
-	MetricsType = 
-		float64 metricsTime,			// time that metrics were produced, in seconds since Unix epoch 
-	    uint64 metricsSequenceCounter, 	// sequential counter for metrics intervals
+	CounterType = 
+		float64 counterTime,			// time that counters were produced, in seconds since Unix epoch 
+	    uint64 counterSequenceCounter, 	// sequential counter for counters
 		uint64 packetNumber,			// sequence number of packet, as emitted by operator
 		uint32 packetLength,			// original length of packet (not necessarily all captured)
 		uint64 packetsReceived,			// number of packets received by network interface in this interval
@@ -47,40 +46,38 @@ composite TestPacketLiveSourceBasic2 {
 
 	StatisticsType = 
 		float64 statisticsTime,			// time that statistics were produced, in seconds since Unix epoch 
-	    float64 averagePacketsRecieved, // average packets received per second during this metrics interval
-	    float64 averagePacketsDropped,  // average packets dropped per second during this metrics interval
-	    float64 averagePacketsProcessed,// average packets processed per second during this metrics interval
-	    float64 averageOctetsProcessed; // average octets of packet data processed per second during this metrics interval
+	    float64 averagePacketsRecieved, // average packets received per second during this counter interval
+	    float64 averagePacketsDropped,  // average packets dropped per second during this counter interval
+	    float64 averagePacketsProcessed,// average packets processed per second during this counter interval
+	    float64 averageOctetsProcessed; // average octets of packet data processed per second during this counter interval
 
 	graph
 
 	( stream<PacketType> PacketStream as OutPackets ;
-	  stream<MetricsType> MetricsStream as OutMetrics ) = PacketLiveSource() {
+	  stream<CounterType> CounterStream as OutCounters ) = PacketLiveSource() {
 	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			networkInterface: $networkInterface;
 		    metricsInterval: $metricsInterval;
 		output 
 		OutPackets:
-			captureTime = captureTime(),
 			packetNumber = packetsProcessed() - 1ul,
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
 			ipVersion = IP_VERSION(),
 			ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
 			ipSourceAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_SRC_ADDRESS()) : ""),
 			ipDestinationAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_DST_ADDRESS()) : ""),
 			ipSourcePort = IP_SRC_PORT(),
 			ipDestinationPort = IP_DST_PORT(),
-		    packetLength = packetLength(),
-			payloadLength = payloadLength(),
-			packetsProcessed = packetsProcessed(),
-			octetsProcessed = octetsProcessed(),
-			packetData = packetData(),
-			payloadData = payloadData();
-		OutMetrics:
-			metricsTime = captureTime(),
-		    metricsSequenceCounter = (uint64)(captureTime() / $metricsInterval),
+		    packetLength = PACKET_LENGTH(),
+			payloadLength = PAYLOAD_LENGTH(),
+			packetData = PACKET_DATA(),
+			payloadData = PAYLOAD_DATA();
+		OutCounters:
+			counterTime = getTimestampInSecs(),
+		    counterSequenceCounter = (uint64)( ( (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0 ) / $statisticsInterval),
 			packetNumber = packetsProcessed() - 1ul,
-			packetLength = packetLength(),
+			packetLength = PACKET_LENGTH(),
 		    packetsReceived = packetsReceived(),
 		    packetsDropped = packetsDropped(),
 		    packetsDroppedByInterface = packetsDroppedByInterface(),
@@ -88,18 +85,18 @@ composite TestPacketLiveSourceBasic2 {
 			octetsProcessed = octetsProcessed();
 	}
 	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketLiveSourceBasic2.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as MetricsSink = FileSink(MetricsStream) { param file: "debug.TestPacketLiveSourceBasic2.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+	() as CounterSink = FileSink(CounterStream) { param file: "debug.TestPacketLiveSourceBasic2.CounterStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
-	stream<MetricsType> SequentialMetricsStream = Filter(MetricsStream as In) {
-	  param filter: metricsSequenceCounter != In[1].metricsSequenceCounter; }
+	stream<CounterType> SequentialCounterStream = Filter(CounterStream as In) {
+	  param filter: counterSequenceCounter != In[1].counterSequenceCounter; }
 
-	stream<StatisticsType> StatisticsStream as Out = Functor(SequentialMetricsStream as In) {
+	stream<StatisticsType> StatisticsStream as Out = Functor(SequentialCounterStream as In) {
 	  output Out:
-	    statisticsTime = metricsTime,
-	    averagePacketsRecieved = (float64)(packetsReceived - In[1].packetsReceived) / (metricsTime - In[1].metricsTime),
-	    averagePacketsDropped = (float64)(packetsDropped - In[1].packetsDropped) / (metricsTime - In[1].metricsTime),
-	    averagePacketsProcessed = (float64)(packetsProcessed - In[1].packetsProcessed) / (metricsTime - In[1].metricsTime),
-	    averageOctetsProcessed = (float64)(octetsProcessed - In[1].octetsProcessed) / (metricsTime - In[1].metricsTime); }
+	    statisticsTime = counterTime,
+	    averagePacketsRecieved = (float64)(packetsReceived - In[1].packetsReceived) / (counterTime - In[1].counterTime),
+	    averagePacketsDropped = (float64)(packetsDropped - In[1].packetsDropped) / (counterTime - In[1].counterTime),
+	    averagePacketsProcessed = (float64)(packetsProcessed - In[1].packetsProcessed) / (counterTime - In[1].counterTime),
+	    averageOctetsProcessed = (float64)(octetsProcessed - In[1].octetsProcessed) / (counterTime - In[1].counterTime); }
 	() as StatisticsSink = FileSink(StatisticsStream) { param file: "debug.TestPacketLiveSourceBasic2.StatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 

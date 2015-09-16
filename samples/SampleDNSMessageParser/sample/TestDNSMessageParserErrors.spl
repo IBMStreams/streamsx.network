@@ -51,12 +51,12 @@ composite TestDNSMessageParserErrors {
             inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
-            captureTime = captureTime(),
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
             packetNumber = packetsProcessed(),
-            packetLength = packetLength(),
+            packetLength = PACKET_LENGTH(),
             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-            dnsMessage = payloadData();
+            dnsMessage = PAYLOAD_DATA();
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserErrors.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
 

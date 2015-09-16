@@ -42,9 +42,9 @@ composite TestNetflowMessageParserParallelAnalysis {
             inputFilter: "udp port 2055";
             metricsInterval: 0.0;
         output Out:
-            captureTime = captureTime(),
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
             netflowSource = IPV4_SRC_ADDRESS(),
-            netflowMessage = payloadData();
+            netflowMessage = PAYLOAD_DATA();
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 

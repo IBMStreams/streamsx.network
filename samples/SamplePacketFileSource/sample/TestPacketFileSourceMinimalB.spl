@@ -29,10 +29,10 @@ composite TestPacketFileSourceMinimalB {
 		    inputFilter: "udp port 53";
 		    metricsInterval: 0.0;
 		output OutPackets:
-			captureTime = captureTime(),
+			captureTime =(float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 			ipv4SourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
 			ipv4DestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			dnsPacket = packetData();
+			dnsPacket = PACKET_DATA();
 	}
 	//() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalB.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 

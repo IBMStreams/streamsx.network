@@ -18,8 +18,8 @@ composite TestPacketLiveSourceFilters {
 	type 
 	
 	DHCPPacketType =
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  rstring etherSourceAddress,		// ethernet source address, or empty list if 'raw IP' PCAP recording
 	  rstring etherDestinationAddress,	// ethernet destination address, or empty list if 'raw IP' PCAP recording
 	  rstring ipSourceAddress,			// IP source address
@@ -28,32 +28,32 @@ composite TestPacketLiveSourceFilters {
 	  blob dhcpMessage;					// DHCP message, excluding network headers (possibly truncated)
 
 	DNSPacketType =
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  rstring ipSourceAddress,			// IP source address
 	  rstring ipDestinationAddress,		// IP destination address
 	  uint32 dnsLength,					// length of DNS message in packet (possibly truncated))
 	  blob dnsMessage;					// DNS message, excluding network headers (possibly truncated)
 
 	HTTPPacketType =
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  rstring ipSourceAddress,			// IP source address and port
 	  rstring ipDestinationAddress,		// IP destination address and port
 	  uint32 httpLength,				// length of HTTP data in packet (possibly truncated))
 	  blob httpData;					// HTTP data, excluding network headers (possibly truncated)
 
 	PingPacketType =
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
+	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
 	  rstring ipSourceAddress,			// IP source address 
 	  rstring ipDestinationAddress,		// IP destination address 
 	  uint32 pingLength,				// length of Ping message in packet (possibly truncated))
 	  blob pingMessage;					// Ping message, excluding network headers (possibly truncated)
 
 	AllPacketType =
-		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
 		uint64 packetNumber,			// sequence number of packet, as emitted by operator
+		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
 	    uint8 ipVersion,				// IP version: 4 for IPv4, 6 for IPv6
 	    rstring ipProtocol,				// IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
 	    rstring ipSourceAddress,		// IP source address, or empty if not IP packet
@@ -82,37 +82,37 @@ composite TestPacketLiveSourceFilters {
                            "";                              // output port 4 emits all packets processed
 		output 
 		DHCPOut:
-			captureTime = captureTime(),
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 			packetNumber = packetsProcessed() - 1ul,
 			etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
 			etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
 			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
 			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			dhcpLength = payloadLength(),
-			dhcpMessage = payloadData(); 
+			dhcpLength = PAYLOAD_LENGTH(),
+			dhcpMessage = PAYLOAD_DATA(); 
 		DNSOut:
-			captureTime = captureTime(),
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 			packetNumber = packetsProcessed() - 1ul,
 			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
 			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			dnsLength = payloadLength(),
-			dnsMessage = payloadData(); 
+			dnsLength = PAYLOAD_LENGTH(),
+			dnsMessage = PAYLOAD_DATA(); 
 		HTTPOut:
-			captureTime = captureTime(),
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 			packetNumber = packetsProcessed() - 1ul,
 			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()) + ":" + (rstring)TCP_SRC_PORT(),
 			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()) + ":" + (rstring)TCP_DST_PORT(),
-			httpLength = payloadLength(),
-			httpData = payloadData(); 
+			httpLength = PAYLOAD_LENGTH(),
+			httpData = PAYLOAD_DATA(); 
 		PingOut:
-			captureTime = captureTime(),
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 			packetNumber = packetsProcessed() - 1ul,
 			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
 			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			pingLength = payloadLength(),
-			pingMessage = payloadData(); 
+			pingLength = PAYLOAD_LENGTH(),
+			pingMessage = PAYLOAD_DATA(); 
 		AllOut:
-			captureTime = captureTime(),
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 			packetNumber = packetsProcessed() - 1ul,
 			ipVersion = IP_VERSION(),
 			ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
@@ -120,9 +120,9 @@ composite TestPacketLiveSourceFilters {
 			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
 			ipSourcePort = IP_SRC_PORT(),
 			ipDestinationPort = IP_DST_PORT(),
-			payloadLength = payloadLength(),
-		    packetLength = packetLength(),
-			packetData = packetData();
+			payloadLength = PAYLOAD_LENGTH(),
+		    packetLength = PACKET_LENGTH(),
+			packetData = PACKET_DATA();
 	}
 	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	

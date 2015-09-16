@@ -17,7 +17,7 @@ composite TestNetflowMessageParserAnalysis {
     type 
     
     PacketType =
-      float64 captureTime,  // time that packet was captured, relative to Unix epoch, in seconds, accurate to microseconds
+      uint64 captureTime,  // time that packet was captured, relative to Unix epoch, in milliseconds, accurate to microseconds
       uint32 netflowSource, // IP source address of Netflow message
       blob netflowMessage;  // the Netflow message from a packet, excluding all network headers
 
@@ -40,9 +40,9 @@ composite TestNetflowMessageParserAnalysis {
             inputFilter: "udp port 2055";
             metricsInterval: 0.0;
         output Out:
-            captureTime = captureTime(),
+            captureTime = (uint64)CAPTURE_SECONDS() * 1000ul + (uint64)CAPTURE_MICROSECONDS() / 1000ul,	
             netflowSource = IPV4_SRC_ADDRESS(),
-            netflowMessage = payloadData();
+            netflowMessage = PAYLOAD_DATA();
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
 
@@ -52,8 +52,8 @@ composite TestNetflowMessageParserAnalysis {
           sourceAttribute: netflowSource;
           outputFilters: !parseError();
       output Out:
-          endTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_LAST_SWITCHED() ),
-          startTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_FIRST_SWITCHED() ),
+          endTime = captureTime - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_LAST_SWITCHED() ),
+          startTime = captureTime - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_FIRST_SWITCHED() ),
           protocol = NETFLOW_PROTOCOL(),
           srcAddress = NETFLOW_IPV4_SRC_ADDR(),
           srcPort = NETFLOW_SRC_PORT(),

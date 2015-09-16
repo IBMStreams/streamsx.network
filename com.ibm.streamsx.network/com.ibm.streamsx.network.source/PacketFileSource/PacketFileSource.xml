@@ -6,18 +6,41 @@
       <customOutputFunctions>
         <customOutputFunction>
           <name>packet output functions</name>
+
           <function>
             <description></description>
-            <prototype>float64 captureTime()</prototype>
+            <prototype>uint64 packetsProcessed()</prototype>
           </function>
           <function>
             <description></description>
-            <prototype>uint32 packetLength()</prototype>
+            <prototype>uint64 octetsProcessed()</prototype>
+          </function>
+
+          <function>
+            <description></description>
+            <prototype>uint32 CAPTURE_SECONDS()</prototype>
           </function>
           <function>
             <description></description>
-            <prototype>blob packetData()</prototype>
+            <prototype>uint32 CAPTURE_MICROSECONDS()</prototype>
           </function>
+          <function>
+            <description></description>
+            <prototype>uint32 PACKET_LENGTH()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>blob PACKET_DATA()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>uint32 PAYLOAD_LENGTH()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>blob PAYLOAD_DATA()</prototype>
+          </function>
+
           <function>
             <description></description>
             <prototype>list&lt;uint8>[6] ETHER_SRC_ADDRESS()</prototype>
@@ -113,22 +136,6 @@
           <function>
             <description></description>
             <prototype>uint16 TCP_WINDOW()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 payloadLength()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>blob payloadData()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint64 packetsProcessed()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint64 octetsProcessed()</prototype>
           </function>
           <function>
             <description></description>

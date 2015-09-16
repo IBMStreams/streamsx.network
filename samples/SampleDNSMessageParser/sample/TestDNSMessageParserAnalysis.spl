@@ -57,9 +57,9 @@ composite TestDNSMessageParserAnalysis {
             inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
-            captureTime = createTimestamp((int64)captureTime(), (uint32)(fmod(captureTime(),1.0)*1000000000.0), 0),
+            captureTime = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
             dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-            dnsMessage = payloadData();
+            dnsMessage = PAYLOAD_DATA();
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
 
