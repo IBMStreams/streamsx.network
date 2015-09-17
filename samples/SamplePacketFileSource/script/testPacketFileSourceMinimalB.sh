@@ -17,6 +17,8 @@ toolkitDirectory=$( cd $here/../../.. ; pwd )
 
 buildDirectory=$projectDirectory/output/build/$composite
 
+libpcapDirectory=$HOME/libpcap-1.7.4
+
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
@@ -42,7 +44,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$HOME/data.splanet01/dnsdhcp_sample_hour_20110722_192832_all.pcap
+#pcapFilename=$HOME/data.yorktown/dnsdhcp_sample_hour_20110722_192832_all.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -57,6 +60,9 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
+
+[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
+[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
 step "configuration for standalone application '$namespace::$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )

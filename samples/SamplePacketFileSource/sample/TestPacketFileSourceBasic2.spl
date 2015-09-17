@@ -17,8 +17,8 @@ composite TestPacketFileSourceBasic2 {
 	type 
 	
 	PacketType =
-		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
 		uint64 packetNumber,			// sequence number of packet, as emitted by operator
+		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
 	    uint8 ipVersion,				// IP version: 4 for IPv4, 6 for IPv6
 	    rstring ipProtocol,				// IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
 	    rstring ipSourceAddress,		// IP source address, or empty if not IP packet
@@ -27,14 +27,9 @@ composite TestPacketFileSourceBasic2 {
 	    uint16 ipDestinationPort,		// IP destination port, or zero if not UDP or TCP packet
 		uint32 packetLength,			// original length of packet (not necessarily all captured)
 		uint32 payloadLength,			// length of packet payload, following all network headers
-	    uint64 packetsProcessed, 		// total number of packets processed by operator, so far
-	    uint64 octetsProcessed,			// total number of octets of packet data processed by operator, so far
-		blob packetData,				// contents of packet captured, including network headers (possibly truncated)
 		blob payloadData;				// contents of packet payload, following all network headers
 	MetricsType = 
 		float64 metricsTime,			// time that metrics were produced, in seconds since Unix epoch 
-		uint64 packetNumber,			// sequence number of packet, as emitted by operator
-		uint32 packetLength,			// original length of packet (not necessarily all captured)
 	  	uint64 packetsProcessed,		// number of packets processed by operator, so far
 		uint64 octetsProcessed;			// number of bytes processed by operator, so far
 
@@ -47,22 +42,19 @@ composite TestPacketFileSourceBasic2 {
 			pcapFilename: $pcapFilename;
 		output 
 		OutPackets:
-			captureTime = captureTime(),
 			packetNumber = packetsProcessed() - 1ul,
-			packetLength = packetLength(),
-			packetData = packetData(),
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
 			ipVersion = IP_VERSION(),
 			ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
-			ipSourceAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_SRC_ADDRESS()) : ""),
-			ipDestinationAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_DST_ADDRESS()) : ""),
+			ipSourceAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_SRC_ADDRESS_AS_BYTES()) : ""),
+			ipDestinationAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_DST_ADDRESS_AS_BYTES()) : ""),
 			ipSourcePort = IP_SRC_PORT(),
 			ipDestinationPort = IP_DST_PORT(),
-			payloadLength = payloadLength(),
-			payloadData = payloadData();
+			packetLength = PACKET_LENGTH(),
+			payloadLength = PAYLOAD_LENGTH(),
+			payloadData = PAYLOAD_DATA();
 		OutMetrics:
-			metricsTime = captureTime(),
-			packetNumber = packetsProcessed() - 1ul,
-			packetLength = packetLength(),
+			metricsTime = getTimestampInSecs(),
 			packetsProcessed = packetsProcessed(),
 			octetsProcessed = octetsProcessed();
 	}

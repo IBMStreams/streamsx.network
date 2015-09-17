@@ -3,8 +3,8 @@
 ** All Rights Reserved
 */
 
-#ifndef PACKETHEADERLOCATOR_H_
-#define PACKETHEADERLOCATOR_H_
+#ifndef NETWORK_HEADER_PARSER_H_
+#define NETWORK_HEADER_PARSER_H_
 
 #include <netinet/ether.h>
 #include <netinet/ip.h>
@@ -27,18 +27,18 @@ struct JMirrorHeaders {
 
 const uint16_t jmirrorPort = 30030;
 
-// this class locates ethernet, IPv4, IPv6, UDP, and TCP headers in network packets
+// this class parses ethernet, IPv4, IPv6, UDP, and TCP headers in network packets
 
-class PacketHeaderLocator {
+class NetworkHeaderParser {
 
  public:
 
-  // packet buffer and length, as passed to locatePacketHeaders() function
+  // packet buffer and length, as passed to parsePacketHeaders() function
 
   char* packetBuffer; // address of packet
   int packetLength; // length of packet, possibly truncated
 
-  // network header pointers and lengths, as returned by locatePacketHeaders() function
+  // network header pointers and lengths, as returned by parsePacketHeaders() function
 
   struct ethhdr* etherHeader; int etherHeaderLength;
   struct iphdr* ipv4Header; int ipv4HeaderLength;
@@ -47,11 +47,11 @@ class PacketHeaderLocator {
   struct tcphdr* tcpHeader; int tcpHeaderLength;
   char* payload; int payloadLength;
 
-  // This function locates network headers within a packet and sets the member variables above.
+  // This function parses network headers within a packet and sets the member variables above.
   // Note: this function does not yet handle variable-length ethernet headers, such as those with
   // VLAN tags, or variable-length IPv6 headers, such as those with extension headers
 
-  void locatePacketHeaders(char* buffer, int length) {
+  void parseNetworkHeaders(char* buffer, int length) {
 
 	// set address and length of packet for the output attribute assignment functions 
 	packetBuffer = buffer;
@@ -134,5 +134,5 @@ class PacketHeaderLocator {
 
 };
 
-#endif /* PACKETHEADERLOCATOR_H_ */
+#endif /* NETWORK_HEADER_PARSER_H_ */
 

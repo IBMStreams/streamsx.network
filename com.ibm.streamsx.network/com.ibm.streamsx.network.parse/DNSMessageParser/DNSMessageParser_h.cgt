@@ -1,0 +1,122 @@
+<%
+
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+
+%>
+
+#include "parse/DNSMessageParser.h"
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR(); 
+  void allPortsReady(); 
+  void prepareToShutdown(); 
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+private:
+
+  // ----------- output tuples ----------
+
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+
+  // ----------- operator state variables ----------
+
+  uint64_t tupleCounter;
+  
+  // ----------- DNS message parser ----------
+
+  DNSMessageParser parser;
+
+  // ----------- assignment functions for output attributes ----------
+
+  SPL::boolean parseError() { return parser.error ? true : false; }
+
+  SPL::rstring parseErrorDescription() { return parser.error ? parser.error : ""; }
+
+  SPL::uint32 parseErrorOffset() { return parser.error ? ( parser.dnsPointer - parser.dnsStart ) : 0; }
+
+  SPL::uint64 messagesProcessed() { return tupleCounter; }
+
+  SPL::uint16 DNS_IDENTIFIER() { return ntohs(parser.dnsHeader->identifier); }
+
+  SPL::uint8 DNS_OPCODE() { return parser.dnsHeader->opcodeField; }
+
+  SPL::uint8 DNS_RESPONSE_CODE() { return parser.dnsHeader->responseCode; }
+
+  SPL::boolean DNS_RESPONSE_FLAG() { return parser.dnsHeader->responseFlag; }
+
+  SPL::boolean DNS_AUTHORITATIVE_FLAG() { return parser.dnsHeader->authoritativeFlag; }
+
+  SPL::boolean DNS_TRUNCATION_FLAG() { return parser.dnsHeader->truncatedFlag; }
+
+  SPL::uint16 DNS_QUESTION_COUNT() { return parser.questionCount; }
+
+  SPL::rstring DNS_QUESTION_NAME() { return parser.questionRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.questionRecords[0].name) : ""; }
+
+  SPL::list<rstring> DNS_QUESTION_NAMES() { return parser.convertResourceNamesToStringList(parser.questionRecords, parser.questionRecordCount); }
+
+  SPL::uint16 DNS_QUESTION_TYPE() { return parser.questionRecordCount>0 ? parser.questionRecords[0].type : 0; }
+
+  SPL::list<uint16> DNS_QUESTION_TYPES() { return parser.convertResourceTypesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
+
+  SPL::uint16 DNS_QUESTION_CLASS() { return parser.questionRecordCount>0 ? parser.questionRecords[0].classs : 0; }
+
+  SPL::list<uint16> DNS_QUESTION_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
+
+  SPL::uint16 DNS_ANSWER_COUNT() { return parser.answerCount; }
+
+  SPL::list<rstring> DNS_ANSWER_NAMES() { return parser.convertResourceNamesToStringList(parser.answerRecords, parser.answerRecordCount); }
+
+  SPL::list<uint16> DNS_ANSWER_TYPES() { return parser.convertResourceTypesToIntegerList(parser.answerRecords, parser.answerRecordCount); }
+
+  SPL::list<uint16> DNS_ANSWER_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.answerRecords, parser.answerRecordCount); }
+
+  SPL::list<uint32> DNS_ANSWER_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.answerRecords, parser.answerRecordCount); }
+
+  SPL::list<rstring> DNS_ANSWER_DATA() { return parser.convertResourceDataToStringList(parser.answerRecords, parser.answerRecordCount); }
+
+  SPL::rstring DNS_ANSWER_CANONICAL() { return parser.canonicalRecordCount>0 ? parser.convertResourceDataToString(parser.canonicalRecords[0]) : ""; }
+
+  SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.addressRecords[0].name) : ""; }
+
+  SPL::list<rstring> DNS_ANSWER_ADDRESSES() { return parser.convertResourceDataToStringList(parser.addressRecords, parser.addressRecordCount); }
+
+  SPL::uint16 DNS_NAMESERVER_COUNT() { return parser.nameserverCount; }
+
+  SPL::list<rstring> DNS_NAMESERVER_NAMES() { return parser.convertResourceNamesToStringList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  SPL::list<uint16> DNS_NAMESERVER_TYPES() { return parser.convertResourceTypesToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  SPL::list<uint16> DNS_NAMESERVER_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  SPL::list<uint32> DNS_NAMESERVER_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  SPL::list<rstring> DNS_NAMESERVER_DATA() { return parser.convertResourceDataToStringList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  SPL::uint16 DNS_ADDITIONAL_COUNT() { return parser.additionalCount; }
+
+  SPL::list<rstring> DNS_ADDITIONAL_NAMES() { return parser.convertResourceNamesToStringList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  SPL::list<uint16> DNS_ADDITIONAL_TYPES() { return parser.convertResourceTypesToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  SPL::list<uint16> DNS_ADDITIONAL_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  SPL::list<uint32> DNS_ADDITIONAL_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  SPL::list<rstring> DNS_ADDITIONAL_DATA() { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount); }
+
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

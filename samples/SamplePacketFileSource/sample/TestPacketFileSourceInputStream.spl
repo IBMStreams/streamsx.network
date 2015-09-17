@@ -16,10 +16,10 @@ composite TestPacketFileSourceInputStream {
 	type 
 	
 	PacketType =
+	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
 	  rstring filepath,         // implicitly copied from input tuple
 	  rstring filename,    		// explicitly extracted from input tuple's 'filepath' attribute
 	  float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
-	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
 	  uint32 packetLength,		// original length of packet (not necessarily all captured)
 	  blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
 
@@ -34,11 +34,11 @@ composite TestPacketFileSourceInputStream {
 
 	stream<PacketType> PacketStream as Out = PacketFileSource(FilepathStream) {
 		output Out:
-		    filename = regexMatchPerl(filepath, "([^/]+)$")[0],
-			captureTime = captureTime(),
 			packetNumber = packetsProcessed() - 1ul,
-			packetLength = packetLength(),
-			packetData = packetData(); 
+		    filename = regexMatchPerl(filepath, "([^/]+)$")[0],
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+			packetLength = PACKET_LENGTH(),
+			packetData = PACKET_DATA(); 
 	}
 	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceInputStream.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 

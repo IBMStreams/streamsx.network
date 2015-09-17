@@ -1,0 +1,120 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+composite TestNetflowMessageParserFullVersion5 {
+
+    param       
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow5_port9500.pcap" );
+    expression<rstring> $netflowPort: getSubmissionTimeValue("netflowPort", "2055" );
+    
+    type 
+    
+    PacketType =
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        uint32 netflowSource,        	// IP source address of Netflow message
+        blob netflowMessage;            // the Netflow message from a packet, excluding all network headers
+
+    NetflowMessageType = 
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        boolean parseError,
+        rstring parseErrorDescription,
+        uint32 parseErrorOffset,
+        uint64 messagesProcessed,
+	    uint16 NETFLOW_VERSION, // header: Netflow version 
+	    uint16 NETFLOW_COUNT, // header: number of records (including templates, options, and flows)
+	    float64 NETFLOW_SYSTEM_UPTIME, // header: time since source was booted, in milliseconds converted to seconds
+	    float64 NETFLOW_UNIX_SECONDS, // header: time since beginning of Unix epoch, in seconds
+	    uint32 NETFLOW_SEQUENCE_NUMBER, // header: sequence number of this message
+        uint64 NETFLOW_IN_BYTES, // flow: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
+        uint64 NETFLOW_IN_PKTS, // flow: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
+        uint8 NETFLOW_PROTOCOL, // flow: IP protocol byte
+        uint8 NETFLOW_SRC_TOS, // flow: Type of Service byte setting when entering incoming interface
+        uint8 NETFLOW_TCP_FLAGS, // flow: Cumulative of all the TCP flags seen for this flow
+        uint16 NETFLOW_SRC_PORT, // flow: TCP/UDP source port number i.e.: FTP, Telnet, or equivalent
+        rstring NETFLOW_IPV4_SRC_ADDR, // flow: IPv4 source address
+        uint8 NETFLOW_SRC_MASK, // flow: The number of contiguous bits in the source address subnet mask i.e.: the submask in slash notation
+        uint32 NETFLOW_INPUT_INTERFACE, // flow: Input interface index; default for N is 2 but higher values could be used
+        uint16 NETFLOW_DST_PORT, // flow: TCP/UDP destination port number i.e.: FTP, Telnet, or equivalent
+        rstring NETFLOW_IPV4_DST_ADDR, // flow: IPv4 destination address
+        uint8 NETFLOW_DST_MASK, // flow: The number of contiguous bits in the destination address subnet mask i.e.: the submask in slash notation
+        uint32 NETFLOW_OUTPUT_INTERFACE, // flow: Output interface index; default for N is 2 but higher values could be used
+        rstring NETFLOW_IPV4_NEXT_HOP, // flow: IPv4 address of next-hop router
+        uint32 NETFLOW_SRC_AS, // flow: Source BGP autonomous system number where N could be 2 or 4
+        uint32 NETFLOW_DST_AS, // flow: Destination BGP autonomous system number where N could be 2 or 4
+        float64 NETFLOW_LAST_SWITCHED, // flow: System uptime at which the last packet of this flow was switched, in milliseconds
+        float64 NETFLOW_FIRST_SWITCHED, // flow: System uptime at which the first packet of this flow was switched, in milliseconds
+        uint64 NETFLOW_OUT_BYTES, // flow: Outgoing counter with length N x 8 bits for the number of bytes associated with an IP Flow
+        uint64 NETFLOW_OUT_PKTS, // flow: Outgoing counter with length N x 8 bits for the number of packets associated with an IP Flow.
+        uint32 NETFLOW_SAMPLING_INTERVAL, // flow: When using sampled NetFlow, the rate at which packets are sampled i.e.: a value of 100 indicates that one of every 100 packets is sampled
+        uint8 NETFLOW_ENGINE_TYPE, // flow: Type of flow switching engine: RP = 0, VIP/Linecard = 1
+        uint8 NETFLOW_ENGINE_ID; // flow: ID number of the flow switching engine
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+	        inputFilter: "udp port " + $netflowPort; // Note: 'sample_netflow5_port9500.pcap' recording uses non-standard port
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+            netflowSource = IPV4_SRC_ADDRESS(),
+            netflowMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserFullVersion5.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+
+    stream<NetflowMessageType> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
+      param
+          messageAttribute: netflowMessage;
+	      sourceAttribute: netflowSource;
+      output Out:
+        parseError = parseError(),
+        parseErrorDescription = parseErrorDescription(),
+        parseErrorOffset = parseErrorOffset(),
+        messagesProcessed = messagesProcessed(),
+	    NETFLOW_VERSION = NETFLOW_VERSION(), // header: Netflow version 
+	    NETFLOW_COUNT = NETFLOW_COUNT(), // header: number of records (including templates, options, and flows)
+	    NETFLOW_SYSTEM_UPTIME = (float64)NETFLOW_SYSTEM_UPTIME()/1000.0, // header: time since source was booted, in milliseonds, converted to seconds
+	    NETFLOW_UNIX_SECONDS = (float64)NETFLOW_UNIX_SECONDS() + (float64)NETFLOW_UNIX_NANOSECONDS()/1000000000.0, // header: time since beginning of Unix epoch, in seconds
+	    NETFLOW_SEQUENCE_NUMBER = NETFLOW_SEQUENCE_NUMBER(), // header: sequence number of this message
+        NETFLOW_IN_BYTES = NETFLOW_IN_BYTES(), // flow: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
+        NETFLOW_IN_PKTS = NETFLOW_IN_PKTS(), // flow: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
+        NETFLOW_PROTOCOL = NETFLOW_PROTOCOL(), // flow: IP protocol byte
+        NETFLOW_SRC_TOS = NETFLOW_SRC_TOS(), // flow: Type of Service byte setting when entering incoming interface
+        NETFLOW_TCP_FLAGS = NETFLOW_TCP_FLAGS(), // flow: Cumulative of all the TCP flags seen for this flow
+        NETFLOW_SRC_PORT = NETFLOW_SRC_PORT(), // flow: TCP/UDP source port number i.e.: FTP, Telnet, or equivalent
+        NETFLOW_IPV4_SRC_ADDR = convertIPV4AddressNumericToString(NETFLOW_IPV4_SRC_ADDR()), // flow: IPv4 source address
+        NETFLOW_SRC_MASK = NETFLOW_SRC_MASK(), // flow: The number of contiguous bits in the source address subnet mask i.e.: the submask in slash notation
+        NETFLOW_INPUT_INTERFACE = NETFLOW_INPUT_INTERFACE(), // flow: Input interface index; default for N is 2 but higher values could be used
+        NETFLOW_DST_PORT = NETFLOW_DST_PORT(), // flow: TCP/UDP destination port number i.e.: FTP, Telnet, or equivalent
+        NETFLOW_IPV4_DST_ADDR = convertIPV4AddressNumericToString(NETFLOW_IPV4_DST_ADDR()), // flow: IPv4 destination address
+        NETFLOW_DST_MASK = NETFLOW_DST_MASK(), // flow: The number of contiguous bits in the destination address subnet mask i.e.: the submask in slash notation
+        NETFLOW_OUTPUT_INTERFACE = NETFLOW_OUTPUT_INTERFACE(), // flow: Output interface index; default for N is 2 but higher values could be used
+        NETFLOW_IPV4_NEXT_HOP = convertIPV4AddressNumericToString(NETFLOW_IPV4_NEXT_HOP()), // flow: IPv4 address of next-hop router
+        NETFLOW_SRC_AS = NETFLOW_SRC_AS(), // flow: Source BGP autonomous system number where N could be 2 or 4
+        NETFLOW_DST_AS = NETFLOW_DST_AS(), // flow: Destination BGP autonomous system number where N could be 2 or 4
+        NETFLOW_LAST_SWITCHED = (float64)NETFLOW_LAST_SWITCHED()/1000.0, // flow: System uptime at which the last packet of this flow was switched
+        NETFLOW_FIRST_SWITCHED = (float64)NETFLOW_FIRST_SWITCHED()/1000.0, // flow: System uptime at which the first packet of this flow was switched
+        NETFLOW_OUT_BYTES = NETFLOW_OUT_BYTES(), // flow: Outgoing counter with length N x 8 bits for the number of bytes associated with an IP Flow
+        NETFLOW_OUT_PKTS = NETFLOW_OUT_PKTS(), // flow: Outgoing counter with length N x 8 bits for the number of packets associated with an IP Flow.
+        NETFLOW_SAMPLING_INTERVAL = NETFLOW_SAMPLING_INTERVAL(), // flow: When using sampled NetFlow, the rate at which packets are sampled i.e.: a value of 100 indicates that one of every 100 packets is sampled
+        NETFLOW_ENGINE_TYPE = NETFLOW_ENGINE_TYPE(), // flow: Type of flow switching engine: RP = 0, VIP/Linecard = 1
+        NETFLOW_ENGINE_ID = NETFLOW_ENGINE_ID(); // flow: ID number of the flow switching engine
+
+
+    }
+    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserFullVersion5.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+
+
+}
+

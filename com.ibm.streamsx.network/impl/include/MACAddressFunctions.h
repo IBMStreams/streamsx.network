@@ -3,8 +3,8 @@
 ** All Rights Reserved
 */
 
-#ifndef MACADDRESSFUNCTIONS_H_
-#define MACADDRESSFUNCTIONS_H_
+#ifndef MAC_ADDRESS_FUNCTIONS_H_
+#define MAC_ADDRESS_FUNCTIONS_H_
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -32,5 +32,5 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 
 } } } } } 
 
-#endif /* MACADDRESSFUNCTIONS_H_ */
+#endif /* MAC_ADDRESS_FUNCTIONS_H_ */
 

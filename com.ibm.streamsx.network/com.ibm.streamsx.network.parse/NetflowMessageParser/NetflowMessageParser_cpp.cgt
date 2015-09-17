@@ -1,0 +1,148 @@
+<%
+
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require OutputAssignmentGenerator;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort = $model->getInputPortAt(0);
+my @outputPortList = @{ $model->getOutputPorts() };
+
+# get C++ expressions for getting the values of this operator's parameter
+my $messageAttribute = $model->getParameterByName("messageAttribute")->getValueAt(0)->getCppExpression();
+my $sourceAttribute = $model->getParameterByName("sourceAttribute")->getValueAt(0)->getCppExpression();
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) { 
+  foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+	my $expression = $value->getCppExpression();
+	push @outputFilterList, $expression;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::NetflowMessageParser_result_functions::") != -1;
+  }
+}
+
+# basic safety checks
+SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+
+%>
+
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the xxx_h.cgt file
+
+#define common_result_functions MY_OPERATOR
+#define NetflowMessageParser_result_functions MY_OPERATOR
+
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
+
+  tupleCounter = 0;
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() 
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() 
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() 
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+}
+
+// Processing for source and threaded operators   
+void MY_OPERATOR::process(uint32_t idx)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+}
+
+// Tuple processing for mutating ports 
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+
+  tupleCounter++;
+
+  // point at the input tuple
+  const IPort0Type& iport$0 = tuple;
+
+  // get address and length of Netflow message from input tuple
+  char* buffer = (char*)<%=$messageAttribute%>.getData();
+  int length = <%=$messageAttribute%>.getSize();
+  uint32_t source = <%=$sourceAttribute%>;
+
+  // prepare the Netflow message for parsing
+  parser.prepareMessage(buffer, length, source);
+  if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser");  return; }
+
+  // parse the flow records in the Netflow message, submitting output tuples to output ports, as selected by output filters, if specified
+  while(parser.nextFlow()) 
+	{
+	  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+		<% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+			 {
+			   outTuple<%=$i%>.clear();
+			   outTuple<%=$i%>.assignFrom(iport$0, false);
+			   <% ####### OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
+			   <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
+			   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "NetflowMessageParser");
+			   submit(outTuple<%=$i%>, <%=$i%>);
+			 }
+			 <% } %> ;
+	}
+  if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); return; }
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+}
+
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+}
+
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+
