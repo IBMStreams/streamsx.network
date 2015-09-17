@@ -20,7 +20,13 @@ composite TestPacketLiveSourceFull {
 	type 
 	
 	PacketType =
-		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
+	    uint64 packetsReceived,			// total number of packet received, as of last metrics interval
+	    uint64 packetsDropped, 			// total number of packet dropped, as of last metrics interval
+	    uint64 packetsDroppedByInterface, // total number of packet dropped by network interface, as of last metrics interval
+	    uint64 packetsProcessed, 		// total number of packets processed by operator, so far
+	    uint64 octetsProcessed,			// total number of octets of packet data processed by operator, so far
+		uint32 CAPTURE_SECONDS,				// time that packet was captured, in seconds since Unix epoch 
+		uint32 CAPTURE_MICROSECONDS,		// time since CAPTURE_SECONDS, in microseconds
 		list<uint8>[6] ETHER_SRC_ADDRESS,	// ethernet source address, or empty list if 'raw IP' PCAP recording
 		list<uint8>[6] ETHER_DST_ADDRESS,	// ethernet destination address, or empty list if 'raw IP' PCAP recording
 		rstring ETHER_SRC_ADDRESS_AS_STRING,// string representation of ethernet source address
@@ -51,15 +57,10 @@ composite TestPacketLiveSourceFull {
 		boolean TCP_FLAGS_SYN,			// TCP synchronize flag, or false if not TCP packet
 		boolean TCP_FLAGS_FIN,			// TCP final flag, or false if not TCP packet
 		uint16 TCP_WINDOW,				// TCP window size, or zero if not TCP packet
-	    uint64 packetsReceived,			// total number of packet received, as of last metrics interval
-	    uint64 packetsDropped, 			// total number of packet dropped, as of last metrics interval
-	    uint64 packetsDroppedByInterface, // total number of packet dropped by network interface, as of last metrics interval
-	    uint64 packetsProcessed, 		// total number of packets processed by operator, so far
-	    uint64 octetsProcessed,			// total number of octets of packet data processed by operator, so far
-		uint32 packetLength,			// original length of packet (not necessarily all captured)
-		uint32 payloadLength,			// length of packet payload, following all network headers
-		blob packetData,				// contents of packet captured, including network headers (not necessarily complete)
-		blob payloadData;				// contents of packet payload, following all network headers
+		uint32 PACKET_LENGTH,			// original length of packet (not necessarily all captured)
+		uint32 PAYLOAD_LENGTH,			// length of packet payload, following all network headers
+		blob PACKET_DATA,				// contents of packet captured, including network headers (not necessarily complete)
+		blob PAYLOAD_DATA;				// contents of packet payload, following all network headers
 
 	graph
 
@@ -69,7 +70,13 @@ composite TestPacketLiveSourceFull {
 			networkInterface: $networkInterface;
 		    metricsInterval: 1.0;
 		output Out:
-			captureTime = captureTime(),
+	    	packetsReceived = packetsReceived(),
+	    	packetsDropped = packetsDropped(),
+	    	packetsDroppedByInterface = packetsDroppedByInterface(),
+			packetsProcessed = packetsProcessed(),
+			octetsProcessed = octetsProcessed(),
+		    CAPTURE_SECONDS = CAPTURE_SECONDS(),	
+		    CAPTURE_MICROSECONDS = CAPTURE_MICROSECONDS(),	
 			ETHER_SRC_ADDRESS = ETHER_SRC_ADDRESS(),
 			ETHER_DST_ADDRESS = ETHER_DST_ADDRESS(),
 			ETHER_SRC_ADDRESS_AS_STRING = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
@@ -100,15 +107,10 @@ composite TestPacketLiveSourceFull {
 			TCP_FLAGS_SYN = TCP_FLAGS_SYN(),
 			TCP_FLAGS_FIN = TCP_FLAGS_FIN(),
 			TCP_WINDOW = TCP_WINDOW(),
-	    	packetsReceived = packetsReceived(),
-	    	packetsDropped = packetsDropped(),
-	    	packetsDroppedByInterface = packetsDroppedByInterface(),
-			packetsProcessed = packetsProcessed(),
-			octetsProcessed = octetsProcessed(),
-			packetLength = packetLength(),
-			payloadLength = payloadLength(),
-			packetData = packetData(),
-			payloadData = payloadData();
+			PACKET_LENGTH = PACKET_LENGTH(),
+			PAYLOAD_LENGTH = PAYLOAD_LENGTH(),
+			PACKET_DATA = PACKET_DATA(),
+			PAYLOAD_DATA = PAYLOAD_DATA();
 	}
 	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketLiveSourceFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 

@@ -152,6 +152,7 @@ This operator has been tested with these version of 'libpcap':
     libpcap 1.4.0, included in RHEL/CentOS 6.5
     libpcap 1.6.1
     libpcap 1.6.2
+	libpcap 1.7.4
 
 This operator is implemented in C/C++, and calls the library 'libpcap' via the
 functions defined in the header file <pcap.h>.  These functions are documented
@@ -174,12 +175,14 @@ The PacketLiveSource operator has one or more output ports:
   * Each output port may produce tuples containing packets, payloads, or network
     header fields, as specified by output attribute assignments (see the
     Assignments section below). The tuples may optionally be filtered on output
-    (see the 'outputFilter' parameter below).
+    (see the 'outputFilters' parameter below).
 
 Each packet processed by the operator (and passed by the input filter, if one is
 specified) may be emitted by each output port (if passed by the corresponding
 output filter, if one is specified), and may assign different fields to
 different output attributes.
+
+The PacketLiveSource operator does not produce punctuation.
 
 
 _____Parameters_____
@@ -293,42 +296,11 @@ The PacketLiveSource operator does not accept any window congfiguration.
 _____Assignments____
 
 
-The PacketLiveSource operator requires that all attributes of the output
-ports be assigned values, either with explicit assignment expressions,
-or implicitly by copy from input tuples (when an input port is specified).
-
-Output attribute assignments are SPL expressions. They may use any of the
-built-in SPL functions, and any of the following functions, which are specific
-to this operator:
-
-   float64 captureTime() -- This function assigns the time that a packet was
-      originally captured (not the time it was read from the PCAP file) to an
-      output attribute.  The value is represented as seconds since the beginning
-      of the Unix epoch (midnight in the GMT/UTC timezone on January 1st, 1970),
-      according to the system clock, and has a resolution of at least
-      microseconds.
-
-   uint32 packetLength() -- This function assigns the length of a packet to an
-      output attribute.  The value includes all network headers and the entire
-      packet body.  Note that this value may be larger than the length of the
-      binary data assigned to a 'blob' attribute by the 'packetData()' function
-      if the packet was truncated when the PCAP file was created.
-
-   blob packetData() -- This function assigns the packet data to an output
-      attribute.  The value includes all network headers and the entire packet
-      body.  Note that the data may be truncated when the PCAP file was created.
-
-   uint32 payloadLength() -- This function assigns the length of the payload
-      portion of a packet to an output attribute.  The value includes only the
-      length of the body of the packet, and excludes the length of the network
-      headers.  Note that this value may be larger than the length of the binary
-      data assigned to a 'blob' attribute by the 'payloadData()' function if the
-      packet was truncated when the PCAP file was created.
-
-   blob payloadData() -- This function assigns the payload portion of a packet
-      to an output attribute.  The value includes only the body of the packet,
-      excluding all network headers.  Note that the data may be truncated when
-      the PCAP file was created.
+The PacketLiveSource operator emits one output tuple for each packet read from
+an ethernet interface.  All attributes of output tuples must be assigned values,
+either with explicit assignment expressions, or implicitly by copy from input
+tuples (when an input port is specified).  Assignment expressions may use any of
+the following functions, which are specific to this operator:
 
    uint64 packetsReceived() -- This function assigns the total number of packets
       received by the network interface, as counted by 'libpcap'.
@@ -354,6 +326,37 @@ to this operator:
    uint64 octetsProcessed() -- This function assigns the total number of bytes
       of packet data that have been processed so far. When an input filter is
       specified, this value includes only the packets that pass the filter.
+
+   uint32 CAPTURE_SECONDS() -- This function assigns the time when the packet
+      was captured to an output attribute.  The value is represented as seconds
+      since the beginning of the Unix epoch (midnight in the GMT/UTC timezone on
+      January 1st, 1970).
+
+   uint32 CAPTURE_MICROSECONDS() -- This function assigns the faction of a
+      second past CAPTURE_SECONDS() when the packet was captured.  The value is
+      represented as microseconds.
+
+   uint32 PACKET_LENGTH() -- This function assigns the length of a packet to an
+      output attribute.  The value includes all network headers and the entire
+      packet body.  Note that this value may be larger than the length of the
+      binary data assigned to a 'blob' attribute by the 'PACKET_DATA()' function
+      if the packet was truncated when the PCAP file was created.
+
+   blob PACKET_DATA() -- This function assigns the packet data to an output
+      attribute.  The value includes all network headers and the entire packet
+      body.  Note that the data may be truncated when the PCAP file was created.
+
+   uint32 PAYLOAD_LENGTH() -- This function assigns the length of the payload
+      portion of a packet to an output attribute.  The value includes only the
+      length of the body of the packet, and excludes the length of the network
+      headers.  Note that this value may be larger than the length of the binary
+      data assigned to a 'blob' attribute by the 'PAYLOAD_DATA()' function if the
+      packet was truncated when the PCAP file was created.
+
+   blob PAYLOAD_DATA() -- This function assigns the payload portion of a packet
+      to an output attribute.  The value includes only the body of the packet,
+      excluding all network headers.  Note that the data may be truncated when
+      the PCAP file was created.
 
   list<uint8> ETHER_SRC_ADDRESS() -- This function returns the source MAC
       address from the ethernet header of the packet.

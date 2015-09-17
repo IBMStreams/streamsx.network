@@ -15,8 +15,8 @@ composite TestPacketFileSourceConsistentRegion {
 	type 
 	
 	FullPacketType =
-		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
 		uint64 packetNumber,		// sequence number of packet, as emitted by operator
+		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
 		uint32 packetLength,		// original length of packet (not necessarily all captured)
 		blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
 
@@ -28,10 +28,10 @@ composite TestPacketFileSourceConsistentRegion {
 		param
 			pcapFilename: $pcapFilename;
 		output Out:
-			captureTime = captureTime(),
 			packetNumber = packetsProcessed() - 1ul,
-			packetLength = packetLength(),
-			packetData = packetData(); 
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+			packetLength = PACKET_LENGTH(),
+			packetData = PACKET_DATA(); 
 	}
 	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceConsistentRegion.FullPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
