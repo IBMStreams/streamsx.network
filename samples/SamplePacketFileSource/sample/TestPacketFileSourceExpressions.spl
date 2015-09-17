@@ -38,7 +38,7 @@ composite TestPacketFileSourceExpressions {
 		    captureTimeAsMicroseconds = (uint64)CAPTURE_SECONDS() * 1000000ul + (uint64)CAPTURE_MICROSECONDS(),	
 		    captureTimeAsFloat = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 		    captureTimeAsTimestamp = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
-		    partitionKey = hashCode(IPV4_SRC_ADDRESS()) + hashCode(IPV4_DST_ADDRESS()) + hashCode(IPV6_SRC_ADDRESS_AS_BYTES()) + hashCode(IPV6_DST_ADDRESS_AS_BYTES()) + hashCode(IP_SRC_PORT()) + hashCode(IP_DST_PORT()),
+		    partitionKey = hashCode(IPV4_SRC_ADDRESS()) + hashCode(IPV4_DST_ADDRESS()) + hashCode(IPV6_SRC_ADDRESS()) + hashCode(IPV6_DST_ADDRESS()) + hashCode(IP_SRC_PORT()) + hashCode(IP_DST_PORT()),
 			packetNumberModulo13 = (int8)((packetsProcessed()-(uint64)1) % (uint64)13),
 			packetLength = (int32)PACKET_LENGTH(),
 		    packetCaptureLength = size(PACKET_DATA()),

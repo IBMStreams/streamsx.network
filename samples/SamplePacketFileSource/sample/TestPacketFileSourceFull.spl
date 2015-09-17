@@ -22,12 +22,10 @@ composite TestPacketFileSourceFull {
 	    uint64 octetsProcessed,				// total number of octets of packet data processed by operator, so far
 		uint32 CAPTURE_SECONDS,				// time that packet was captured, in seconds since Unix epoch 
 		uint32 CAPTURE_MICROSECONDS,		// time since CAPTURE_SECONDS, in microseconds
-		list<uint8>[6] ETHER_SRC_ADDRESS_AS_BYTES,	// ethernet source address, or empty list if 'raw IP' PCAP recording
-		list<uint8>[6] ETHER_DST_ADDRESS_AS_BYTES,	// ethernet destination address, or empty list if 'raw IP' PCAP recording
+		list<uint8>[6] ETHER_SRC_ADDRESS,	// ethernet source address, or empty list if 'raw IP' PCAP recording
+		list<uint8>[6] ETHER_DST_ADDRESS,	// ethernet destination address, or empty list if 'raw IP' PCAP recording
 		rstring ETHER_SRC_ADDRESS_AS_STRING,// string representation of ethernet source address
 		rstring ETHER_DST_ADDRESS_AS_STRING,// string representation of ethernet destination address
-		blob ETHER_SRC_ADDRESS_AS_BLOB,// blob representation of ethernet source address
-		blob ETHER_DST_ADDRESS_AS_BLOB,// blob representation of ethernet destination address
 	    uint16 ETHER_PROTOCOL,				// ethernet protocol: 0x0800==2048 for IPv4, 0x86DD==34525 for IPv6
 		uint8 IP_VERSION,					// IP version: 4 for IPv4, 6 for IPv6
 		uint8 IP_PROTOCOL,					// IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
@@ -35,12 +33,10 @@ composite TestPacketFileSourceFull {
 		uint32 IPV4_DST_ADDRESS,			// IPv4 destination address, or zero if not IPv4 packet
 		rstring IPV4_SRC_ADDRESS_AS_STRING,	// string representation of IPv4 source address
 		rstring IPV4_DST_ADDRESS_AS_STRING,	// string representation of IPv4 destination address
-		list<uint8>[16] IPV6_SRC_ADDRESS_AS_BYTES,	// IPv6 source address, or zero if not IPv6 packet
-		list<uint8>[16] IPV6_DST_ADDRESS_AS_BYTES,	// IPv6 destination address, or zero if not IPv6 packet
+		list<uint8>[16] IPV6_SRC_ADDRESS,	// IPv6 source address, or zero if not IPv6 packet
+		list<uint8>[16] IPV6_DST_ADDRESS,	// IPv6 destination address, or zero if not IPv6 packet
 		rstring IPV6_SRC_ADDRESS_AS_STRING,	// string representation of IPv6 source address
 		rstring IPV6_DST_ADDRESS_AS_STRING,	// string representation of IPv6 destination address
-		blob IPV6_SRC_ADDRESS_AS_BLOB,	// IPv6 source address, or zero if not IPv6 packet
-		blob IPV6_DST_ADDRESS_AS_BLOB,	// IPv6 destination address, or zero if not IPv6 packet
 		uint16 IP_SRC_PORT,					// IP source port, or zero if not UDP or TCP packet
 		uint16 IP_DST_PORT,					// IP destination port, or zero if not UDP or TCP packet
 		uint16 UDP_SRC_PORT,				// UDP source port, or zero if not UDP packet
@@ -71,12 +67,10 @@ composite TestPacketFileSourceFull {
 			octetsProcessed = octetsProcessed(),
 		    CAPTURE_SECONDS = CAPTURE_SECONDS(),	
 		    CAPTURE_MICROSECONDS = CAPTURE_MICROSECONDS(),	
-			ETHER_SRC_ADDRESS_AS_BYTES = ETHER_SRC_ADDRESS_AS_BYTES(),
-			ETHER_DST_ADDRESS_AS_BYTES = ETHER_DST_ADDRESS_AS_BYTES(),
-			ETHER_SRC_ADDRESS_AS_STRING = convertMACAddressNumericToString(ETHER_SRC_ADDRESS_AS_BYTES()),
-			ETHER_DST_ADDRESS_AS_STRING = convertMACAddressNumericToString(ETHER_DST_ADDRESS_AS_BYTES()),
-			ETHER_SRC_ADDRESS_AS_BLOB = ETHER_SRC_ADDRESS_AS_BLOB(),
-			ETHER_DST_ADDRESS_AS_BLOB = ETHER_DST_ADDRESS_AS_BLOB(),
+			ETHER_SRC_ADDRESS = ETHER_SRC_ADDRESS(),
+			ETHER_DST_ADDRESS = ETHER_DST_ADDRESS(),
+			ETHER_SRC_ADDRESS_AS_STRING = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
+			ETHER_DST_ADDRESS_AS_STRING = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
 		    ETHER_PROTOCOL = ETHER_PROTOCOL(),
 			IP_VERSION = IP_VERSION(),
 			IP_PROTOCOL = IP_PROTOCOL(),
@@ -84,12 +78,10 @@ composite TestPacketFileSourceFull {
 			IPV4_DST_ADDRESS = IPV4_DST_ADDRESS(),
 			IPV4_SRC_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
 			IPV4_DST_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			IPV6_SRC_ADDRESS_AS_BYTES = IPV6_SRC_ADDRESS_AS_BYTES(),
-			IPV6_DST_ADDRESS_AS_BYTES = IPV6_DST_ADDRESS_AS_BYTES(),
-			IPV6_SRC_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(IPV6_SRC_ADDRESS_AS_BYTES()),
-			IPV6_DST_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(IPV6_DST_ADDRESS_AS_BYTES()),
-			IPV6_SRC_ADDRESS_AS_BLOB = IPV6_SRC_ADDRESS_AS_BLOB(),
-			IPV6_DST_ADDRESS_AS_BLOB = IPV6_DST_ADDRESS_AS_BLOB(),
+			IPV6_SRC_ADDRESS = IPV6_SRC_ADDRESS(),
+			IPV6_DST_ADDRESS = IPV6_DST_ADDRESS(),
+			IPV6_SRC_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(IPV6_SRC_ADDRESS()),
+			IPV6_DST_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(IPV6_DST_ADDRESS()),
 			IP_SRC_PORT = IP_SRC_PORT(),
 			IP_DST_PORT = IP_DST_PORT(),
 			UDP_SRC_PORT = UDP_SRC_PORT(),

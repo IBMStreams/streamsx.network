@@ -43,22 +43,12 @@
 
           <function>
             <description></description>
-            <prototype>list&lt;uint8>[6] ETHER_SRC_ADDRESS_AS_BYTES()</prototype>
+            <prototype>list&lt;uint8>[6] ETHER_SRC_ADDRESS()</prototype>
           </function>
           <function>
             <description></description>
-            <prototype>list&lt;uint8>[6] ETHER_DST_ADDRESS_AS_BYTES()</prototype>
+            <prototype>list&lt;uint8>[6] ETHER_DST_ADDRESS()</prototype>
           </function>
-
-          <function>
-            <description></description>
-            <prototype>blob ETHER_SRC_ADDRESS_AS_BLOB()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>blob ETHER_DST_ADDRESS_AS_BLOB()</prototype>
-          </function>
-
           <function>
             <description></description>
             <prototype>uint16 ETHER_PROTOCOL()</prototype>
@@ -79,25 +69,14 @@
             <description></description>
             <prototype>uint32 IPV4_DST_ADDRESS()</prototype>
           </function>
-
           <function>
             <description></description>
-            <prototype>list&lt;uint8>[16] IPV6_SRC_ADDRESS_AS_BYTES()</prototype>
+            <prototype>list&lt;uint8>[16] IPV6_SRC_ADDRESS()</prototype>
           </function>
           <function>
             <description></description>
-            <prototype>list&lt;uint8>[16] IPV6_DST_ADDRESS_AS_BYTES()</prototype>
+            <prototype>list&lt;uint8>[16] IPV6_DST_ADDRESS()</prototype>
           </function>
-
-          <function>
-            <description></description>
-            <prototype>blob IPV6_SRC_ADDRESS_AS_BLOB()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>blob IPV6_DST_ADDRESS_AS_BLOB()</prototype>
-          </function>
-
           <function>
             <description></description>
             <prototype>uint16 IP_SRC_PORT()</prototype>

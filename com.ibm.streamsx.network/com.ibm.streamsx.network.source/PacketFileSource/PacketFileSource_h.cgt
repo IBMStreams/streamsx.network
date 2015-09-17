@@ -113,13 +113,9 @@ public:
 
   SPL::blob PAYLOAD_DATA() { return headers.payload ? SPL::blob((const unsigned char*)headers.payload, headers.payloadLength) : SPL::blob(); }
 
-  SPL::list<SPL::uint8> ETHER_SRC_ADDRESS_AS_BYTES() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
+  SPL::list<SPL::uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
 
-  SPL::list<SPL::uint8> ETHER_DST_ADDRESS_AS_BYTES() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
-
-  SPL::blob ETHER_SRC_ADDRESS_AS_BLOB() { return headers.etherHeader ? SPL::blob((const unsigned char*)headers.etherHeader->h_source, sizeof(headers.etherHeader->h_source)) : SPL::blob(); }
-
-  SPL::blob ETHER_DST_ADDRESS_AS_BLOB() { return headers.etherHeader ? SPL::blob((const unsigned char*)headers.etherHeader->h_dest, sizeof(headers.etherHeader->h_dest)) : SPL::blob(); }
+  SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
 
   SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
   
@@ -131,13 +127,9 @@ public:
 
   SPL::uint32 IPV4_DST_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->daddr) : 0; }
 
-  SPL::list<SPL::uint8> IPV6_SRC_ADDRESS_AS_BYTES() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
+  SPL::list<SPL::uint8> IPV6_SRC_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
 
-  SPL::list<SPL::uint8> IPV6_DST_ADDRESS_AS_BYTES() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
-
-  SPL::blob IPV6_SRC_ADDRESS_AS_BLOB() { return headers.ipv6Header ? SPL::blob((const unsigned char*)headers.ipv6Header->ip6_src.s6_addr, sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::blob(); }
-
-  SPL::blob IPV6_DST_ADDRESS_AS_BLOB() { return headers.ipv6Header ? SPL::blob((const unsigned char*)headers.ipv6Header->ip6_dst.s6_addr, sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::blob(); }
+  SPL::list<SPL::uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
 
   SPL::uint16 IP_SRC_PORT() { return UDP_SRC_PORT() + TCP_SRC_PORT(); }
   
