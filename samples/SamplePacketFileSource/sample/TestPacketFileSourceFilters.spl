@@ -73,8 +73,8 @@ composite TestPacketFileSourceFilters {
 		DHCPOut:
 			packetNumber = packetsProcessed() - 1ul,
 			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
-			etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
+			etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS_AS_BYTES()),
+			etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS_AS_BYTES()),
 			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
 			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
 			dhcpLength = PAYLOAD_LENGTH(),
