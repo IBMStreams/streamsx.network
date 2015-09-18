@@ -17,6 +17,8 @@ toolkitDirectory=$( cd $here/../../.. ; pwd )
 
 buildDirectory=$projectDirectory/output/build/$composite.distributed
 
+dataDirectory=$projectDirectory/data
+
 libpcapDirectory=$HOME/libpcap-1.7.4
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
@@ -62,7 +64,7 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
-
+[ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
