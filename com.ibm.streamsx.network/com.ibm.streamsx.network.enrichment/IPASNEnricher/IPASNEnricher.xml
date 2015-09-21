@@ -6,6 +6,7 @@ others. All Rights Reserved.
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
+<<<<<<< HEAD
       <description>This operator enriches IPv4 and IPv6 addresses with ASN data. Only the MaxMind&#169; GeoLite ASN database is supported. 
       
 In order to use this operator, you must download the MaxMind&#169; GeoLite ASN database files in CSV format from the [http://dev.maxmind.com/geoip/legacy/geolite/|MaxMind&#169;] website. 
@@ -112,6 +113,82 @@ This input port expects a tuple containing a single attribute of type `rstring`.
       <outputPortSet>
         <description>Submits a tuple for each input tuple received on input port 0. Custom output functions are used to retrieve the enrichment information. 
 Output tuple attributes whose assignments are not specified are assigned from input attributes.</description>
+=======
+      <customOutputFunctions>
+        <customOutputFunction>
+          <name>EnrichFunctions</name>
+          <function>
+            <description></description>
+            <prototype>&lt;any T> T AsIs()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;any T> T getASNInfo()</prototype>
+          </function>
+          <function>
+            <description></description>
+            <prototype>&lt;any T> T getASNumber()</prototype>
+          </function>
+        </customOutputFunction>
+      </customOutputFunctions>
+      <providesSingleThreadedContext>Never</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>inputIPAttr</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>asnIPv4File</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>asnIPv6File</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description></description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+      <inputPortSet>
+        <description></description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>true</controlPort>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortSet>
+        <description></description>
+>>>>>>> refs/remotes/origin/master
         <expressionMode>Expression</expressionMode>
         <autoAssignment>true</autoAssignment>
         <completeAssignment>false</completeAssignment>
