@@ -16,14 +16,22 @@
 
 #include <SPL/Runtime/Type/SPLType.h>
 
+// suppress " warning: array subscript is above array bounds [-Warray-bounds] " messages
+// from GCC version 4.8.3 in RHEL 7.1 ... maybe better to change "xxxx[0]" array declarations 
+// to "xxxx[]" declarations ???????
+
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
+////////////////////////////////////////////////////////////////////////////////
 // This class locates Netflow fields within a Netflow message
+////////////////////////////////////////////////////////////////////////////////
 
 class NetflowMessageParser {
 
- public:
+ private:
 
-	// structure of Netflow version 5 messages, according to:
-	// http://www.cisco.com/c/en/us/td/docs/net_mgmt/netflow_collection_engine/3-6/user/guide/format.html#wp1006108
+  // This is the structure of Netflow version 5 messages, according to:
+  // http://www.cisco.com/c/en/us/td/docs/net_mgmt/netflow_collection_engine/3-6/user/guide/format.html#wp1006108
 
   struct Netflow5Flow {
 	uint32_t srcAddr; // Source IP address
@@ -61,58 +69,56 @@ class NetflowMessageParser {
 	struct Netflow5Flow flows[0];
   } __attribute__((packed)) ;
 	
-  // struture of Netflow version 9 messages, according to:
+  // This is the struture of Netflow version 9 messages, according to:
   // http://www.cisco.com/en/US/technologies/tk648/tk362/technologies_white_paper09186a00800a3db9.html 
   // https://www.ietf.org/rfc/rfc3954.txt
   // http://www.iana.org/assignments/ipfix/ipfix.xhtml
 
   struct Netflow9Template {
-	  uint16_t templateID; // templateID values are >255
-	  uint16_t fieldCount; // the number of type/length pairs in 'fields' field
-	  struct { uint16_t type; uint16_t length; } fieldTemplate[0];
+	uint16_t templateID; // templateID values are >255
+	uint16_t fieldCount; // the number of type/length pairs in 'fields' field
+	struct { uint16_t type; uint16_t length; } fieldTemplate[0];
   } __attribute__((packed)) ;
 	
   struct Netflow9Option {
-	  uint16_t templateID; // templateID values are >255
-	  uint16_t scopeLength; // length of 'scopeFields' field
-	  uint16_t optionLength; // length of 'optionFields' field
-	  struct { uint16_t type; uint16_t length; } scopeFields[0];
-	  struct { uint16_t type; uint16_t length; } optionFields[0];
-	  uint8_t padding[0];
+	uint16_t templateID; // templateID values are >255
+	uint16_t scopeLength; // length of 'scopeFields' field
+	uint16_t optionLength; // length of 'optionFields' field
+	struct { uint16_t type; uint16_t length; } scopeFields[0];
+	struct { uint16_t type; uint16_t length; } optionFields[0];
+	uint8_t padding[0];
   } __attribute__((packed)) ;
 	
   struct Netflow9Flow {
-	  uint8_t fields[0]; // flow fields (number and length according to template specified by templateID)
-	  uint8_t padding[0];
+	uint8_t fields[0]; // flow fields (number and length according to template specified by templateID)
+	uint8_t padding[0];
   } __attribute__((packed)) ;
 	
   struct Netflow9Flowset {
-	  uint16_t flowsetID; // flowsetID is 0 for templates, 1 for options, >255 for flows
-	  uint16_t length; // length of 'flowsetID' plus 'length' plus 'templates/options/flows' fields
-	  union {
-		  struct Netflow9Template templates[0];
-		  struct Netflow9Option options[0];
-		  struct Netflow9Flow flows[0];
-	  } u;
+	uint16_t flowsetID; // flowsetID is 0 for templates, 1 for options, >255 for flows
+	uint16_t length; // length of 'flowsetID' plus 'length' plus 'templates/options/flows' fields
+	union {
+	  struct Netflow9Template templates[0];
+	  struct Netflow9Option options[0];
+	  struct Netflow9Flow flows[0];
+	} u;
   } __attribute__((packed)) ;
 	
   struct Netflow9Header {
-	  uint16_t version; // '9' in Netflow version 9 messages
-	  uint16_t count; // number of records in this message (including templates, options, and flows)
-	  uint32_t systemMilliseconds; // elapsed time since sender was booted, in milliseconds
-	  uint32_t unixSeconds; // time when packet was sent, according to sender's clock, in seconds since UNIX epoch
-	  uint32_t packetSequence; // packet sequence number, according to sender
-	  uint32_t sourceID; // unique identifier for source of flows, for correlating templates and data
-	  struct Netflow9Flowset flowsets[0];
+	uint16_t version; // '9' in Netflow version 9 messages
+	uint16_t count; // number of records in this message (including templates, options, and flows)
+	uint32_t systemMilliseconds; // elapsed time since sender was booted, in milliseconds
+	uint32_t unixSeconds; // time when packet was sent, according to sender's clock, in seconds since UNIX epoch
+	uint32_t packetSequence; // packet sequence number, according to sender
+	uint32_t sourceID; // unique identifier for source of flows, for correlating templates and data
+	struct Netflow9Flowset flowsets[0];
   } __attribute__((packed)) ;
 
   struct NetflowCommonHeader {
-	  uint16_t version; // version of this Netflow message
-	  uint16_t count; // number of records in this message (including templates, options, and flows)
+	uint16_t version; // version of this Netflow message
+	uint16_t count; // number of records in this message (including templates, options, and flows)
   } __attribute__((packed)) ;
 
-  // structure of Netflow messages
-	
   struct NetflowHeader {
 	union {
 	  struct NetflowCommonHeader common;
@@ -121,7 +127,8 @@ class NetflowMessageParser {
 	};
   } __attribute__((packed)) ;
 
-  // these structures retain templates parsed from Netflow version 9 messages
+  // This table keeps track of the last sequence number in Netflow messages received from 
+  // each processor engine in each switch/router device.
 
   struct SourceState {
 	uint32_t sourceAddress; // part of table index
@@ -130,6 +137,12 @@ class NetflowMessageParser {
 	uint16_t previousFlowCount;
   };
   std::tr1::unordered_map<uint64_t, struct SourceState*> sourceTable; // indexed by sourceAddress+sourceID
+
+  // This table keeps track of the flow templates received from each processor
+  // engine in each switch/router device. Each template is stored as received
+  // (in the 'fieldTemplate' variables) and as an offset/length array, indexed
+  // by field number (in the 'flowFields' array), for faster access when flow
+  // records are parsed.
 	
   static const uint16_t FIELD_TEMPLATE_MAXIMUM = 256;
   static const uint16_t FLOW_FIELDS_MAXIMUM = 1024;
@@ -145,45 +158,63 @@ class NetflowMessageParser {
   };
   std::tr1::unordered_map<uint64_t, struct TemplateState*> templateTable; // indexed by sourceAddress+sourceID+templateID
 
-  // the prepareMessage() function stores the IP address of the source of the Netflow message here
+  // the prepareNetflowMessage() function below stores the IP address of the
+  // switch/router that sent the Netflow message in this variable.
 
   uint32_t sourceAddress; 
 
-  // the prepareMessage() function keeps track of the Netflow message being parsed in these variables
+  // the prepareNetflowMessage() function below keeps track of the Netflow
+  // message being parsed in these variables.
 
   int messageLength;
   uint8_t* messageStart;
   uint8_t* messageEnd;
   uint64_t messageMissedCount;
 
-  // the prepareMessage() function returns the address of the Netflow message header in these variables
-
-  struct Netflow9Header* netflow9Header;
-  struct Netflow5Header* netflow5Header;
-
-  // the nextFlow() function returns the address of the next flow record in these variables
+  // ?????
 
   struct Netflow9Flowset* netflow9Flowset;
-  struct Netflow9Flow* netflow9Flow;
-  struct Netflow5Flow* netflow5Flow;
 
-  // the 'netFlow() function keeps track of the template for the current flow in this variable
+  // The nextFlowRecord() function keeps track of the template for the current
+  // flow in this variable.
 
   struct TemplateState *templateState;
 
-  // the nextFlow() function keeps track of the number and length of the current flow in these variables
+  // the nextFlowRecord() function keeps track of the number and length of the
+  // current flow in these variables
 
   int flowCount;
   int flowLength;
 
-  // the prepareMessage() and nextFLow() functions set this variable when they find problems in the Netflow message
+ public:
+
+  // The prepareNetflowMessage() function below returns the address of the
+  // Netflow message header in one of these variables, depending upon its version.
+  // The other variable is set to NULL.
+
+  struct Netflow9Header* netflow9Header;
+  struct Netflow5Header* netflow5Header;
+
+  // The nextFlowRecord() function below returns the address of the next flow
+  // record in one these variables, depending upon its version.  The other
+  // variable is set to NULL.
+ 
+  struct Netflow9Flow* netflow9Flow;
+  struct Netflow5Flow* netflow5Flow;
+
+  // The prepareNetflowMessage() and nextFlowRecord() functions below set this
+  // variable when they find an encoding error in the Netflow message, or set it
+  // to NULL if no problems are found.
 
   char const* error;
+
+ private: 
 
   // If the current Netflow message is version 5, and there is another flow record in it, this function
   // will return 'true' after setting the 'netflow5Flow' pointer, or else it will return 'false'.
 
-  bool nextFlow5() {
+
+  bool nextFlow5Record() {
 
 	// if we are already parsing the message, and there are more flows in it, return the next one
 	if (netflow5Flow && flowCount>1) {
@@ -210,7 +241,7 @@ class NetflowMessageParser {
 
   // This function parses a Netflow version 5 message ...................
 
-  void prepareMessage5() {
+  void prepareNetflow5Message() {
 
 	if ( messageLength < sizeof(struct Netflow5Header) ) { error = "netflow5 message too short"; return; }
 	netflow5Header = (struct Netflow5Header*)messageStart;
@@ -321,7 +352,7 @@ class NetflowMessageParser {
   // If the current Netflow message is version 5, and there is another flow record in it, this function
   // will return 'true' after setting the 'netflow5Flow' pointer, or else it will return 'false'.
 
-  bool nextFlow9() {
+  bool nextFlow9Record() {
 
 	// if we are currently parsing a flowset that contains flows, and there are more flows in it, return the next one
 	if (netflow9Flow && flowCount>1) {
@@ -393,7 +424,7 @@ class NetflowMessageParser {
 
   // This function prepares the parser for a Netflow version 9 message .................
 
-  void prepareMessage9() {
+  void prepareNetflow9Message() {
 
 	// point at the Netflow version 9 header structure in the messages
 	//???printf("prepareMessage9() ...\n");
@@ -422,73 +453,7 @@ class NetflowMessageParser {
 	sourceState->previousSequenceNumber = thisSequenceNumber;
   }
 
-  // This function prepares the parser for a Netflow message. It sets 'netflow9Header' or 
-  // 'netflow5Header', depending upon the version of the message. It sets 'error' if a 
-  // problem is found.
-
-  void prepareMessage(char* buffer, int length, uint32_t source) {
-
-	  // clear all of the variables results will be returned in 
-	  messageLength = 0;
-	  messageStart = NULL;
-	  messageEnd = NULL;
-	  messageMissedCount = 0;
-	  sourceAddress = 0; 
-	  netflow9Header = NULL;
-	  netflow5Header = NULL;
-	  netflow9Flowset = NULL;
-	  netflow9Flow = NULL;
-	  netflow5Flow = NULL;
-	  templateState = NULL;
-	  flowCount = 0;
-	  error = NULL;
-
-	  // basic safety checks
-	  if ( length < sizeof(struct NetflowCommonHeader) ) { error = "no header"; return; }
-	  if ( ntohs( ((struct NetflowCommonHeader*)buffer)->version) != 5 && 
-		   ntohs( ((struct NetflowCommonHeader*)buffer)->version) != 9 ) { error = "version not 5 or 9"; return; } 
-	  if ( ntohs( ((struct NetflowCommonHeader*)buffer)->count) > 32 ) { error = "header count too large"; return; }
-	
-	  // store pointers to the Netflow message in the buffer
-	  messageLength = length;
-	  messageStart = (uint8_t*)buffer;
-	  messageEnd = (uint8_t*)buffer + length;
-	  sourceAddress = source;
-
-	  // call the appropriate preparation function
-	  switch (ntohs(((struct NetflowCommonHeader*)messageStart)->version)) {
-	      case 5: prepareMessage5(); break;
-	      case 9: prepareMessage9(); break;
-	      default: error = "unsupported Netflow version"; break;
-	  }
-  }
-
-  // This function advances the parser to the next flow record in the prepared Netflow message.
-  // It there is a next flow record, it returns 'true' after setting 'netflow9Flow' or 'netflow5Flow'.
-  // If there are no more flow records in this Netfow message, it returns 'false'. It sets 'error'
-  // if a problem is found.
-
-  bool nextFlow() {
-
-	  if (error) return false;
-
-	  switch (ntohs(((struct NetflowCommonHeader*)messageStart)->version)) {
-	      case 5:  return nextFlow5(); break;
-	      case 9:  return nextFlow9(); break;
-	      default: return false;       break;
-	  }
-	  return false;
-  }
-
-  // ............................
-
-  SPL::uint32 errorOffset() {
-	if (!error) return 0;
-	if (netflow5Flow) return (uint8_t*)netflow5Flow - messageStart;
-	if (netflow9Flow) return (uint8_t*)netflow9Flow - messageStart;
-	if (netflow9Flowset) return (uint8_t*)netflow9Flowset - messageStart;
-	return 0;
-  }
+ public: 
 
   //.............................
 
@@ -554,6 +519,75 @@ class NetflowMessageParser {
 	// get the value of the field from the flow record as an SPL byte list and return it
 	return SPL::list<SPL::uint8>(&fields[offset], &fields[offset+length]);
   }
+
+  // ............................
+
+  SPL::uint32 errorOffset() {
+	if (!error) return 0;
+	if (netflow5Flow) return (uint8_t*)netflow5Flow - messageStart;
+	if (netflow9Flow) return (uint8_t*)netflow9Flow - messageStart;
+	if (netflow9Flowset) return (uint8_t*)netflow9Flowset - messageStart;
+	return 0;
+  }
+
+  // This function prepares the parser for a Netflow message. It sets 'netflow9Header' or 
+  // 'netflow5Header', depending upon the version of the message. It sets 'error' if a 
+  // problem is found.
+
+  void prepareNetflowMessage(char* buffer, int length, uint32_t source) {
+
+	  // clear all of the variables results will be returned in 
+	  messageLength = 0;
+	  messageStart = NULL;
+	  messageEnd = NULL;
+	  messageMissedCount = 0;
+	  sourceAddress = 0; 
+	  netflow9Header = NULL;
+	  netflow5Header = NULL;
+	  netflow9Flowset = NULL;
+	  netflow9Flow = NULL;
+	  netflow5Flow = NULL;
+	  templateState = NULL;
+	  flowCount = 0;
+	  error = NULL;
+
+	  // basic safety checks
+	  if ( length < sizeof(struct NetflowCommonHeader) ) { error = "no header"; return; }
+	  if ( ntohs( ((struct NetflowCommonHeader*)buffer)->version) != 5 && 
+		   ntohs( ((struct NetflowCommonHeader*)buffer)->version) != 9 ) { error = "version not 5 or 9"; return; } 
+	  if ( ntohs( ((struct NetflowCommonHeader*)buffer)->count) > 32 ) { error = "header count too large"; return; }
+	
+	  // store pointers to the Netflow message in the buffer
+	  messageLength = length;
+	  messageStart = (uint8_t*)buffer;
+	  messageEnd = (uint8_t*)buffer + length;
+	  sourceAddress = source;
+
+	  // call the appropriate preparation function
+	  switch (ntohs(((struct NetflowCommonHeader*)messageStart)->version)) {
+	      case 5: prepareNetflow5Message(); break;
+	      case 9: prepareNetflow9Message(); break;
+	      default: error = "unsupported Netflow version"; break;
+	  }
+  }
+
+  // This function advances the parser to the next flow record in the prepared Netflow message.
+  // It there is a next flow record, it returns 'true' after setting 'netflow9Flow' or 'netflow5Flow'.
+  // If there are no more flow records in this Netfow message, it returns 'false'. It sets 'error'
+  // if a problem is found.
+
+  bool nextFlowRecord() {
+
+	  if (error) return false;
+
+	  switch (ntohs(((struct NetflowCommonHeader*)messageStart)->version)) {
+	      case 5:  return nextFlow5Record(); break;
+	      case 9:  return nextFlow9Record(); break;
+	      default: return false;       break;
+	  }
+	  return false;
+  }
+
 
 };
 

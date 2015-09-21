@@ -248,7 +248,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 	// compile output filter programs for each output port
 	for (int i = 0; i<outputFilters.size(); i++) {
 	  SPLLOG(L_INFO, "filtering packets on output port " << i << " with '" << outputFilters[i] << "'", "PacketFileSource");
-	  int rc = pcap_compile(pcapDescriptor, &outputFilterPrograms[i], outputFilters[i].c_str(), 0, PCAP_NETMASK_UNKNOWN);
+	  int rc = pcap_compile(pcapDescriptor, &outputFilterPrograms[i], outputFilters[i].c_str(), 0, 0xFFFFFFFF); // ... was ... PCAP_NETMASK_UNKNOWN
 	  if (rc) THROW (SPLRuntimeOperator, "error compiling output filter '" << outputFilters[i] << "', rc=" << rc << ", " << pcap_geterr(pcapDescriptor));
 	  struct bpf_insn* instruction = outputFilterPrograms[i].bf_insns;
 	  for (int j = 0; j<outputFilterPrograms[i].bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "PacketFileSource"); }
