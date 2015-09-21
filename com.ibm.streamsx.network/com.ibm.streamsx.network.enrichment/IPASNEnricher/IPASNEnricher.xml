@@ -6,19 +6,37 @@ others. All Rights Reserved.
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
+      <description>This operator enriches IPv4 and IPv6 addresses with ASN data. Only the MaxMind&#169; GeoLite ASN database is supported. 
+      
+In order to use this operator, you must download the MaxMind&#169; GeoLite ASN database files in CSV format from the [http://dev.maxmind.com/geoip/legacy/geolite/|MaxMind&#169;] website. 
+These files can then be loaded directly into the operator using the **asnIPv4File** and **asnIPv6File** parameters. To dynamically update the operator whenever
+a new version of the database is downloaded, a DirectoryScan operator can be connected to the control input port (input port 1) of this operator. Whenever a new
+version of the database files are downloaded into the directory being scanned, the DirectoryScan operator will submit the file paths to the IPASNEnricher operator. 
+The operator will parse the database files and update it's internal tables.</description>
       <customOutputFunctions>
         <customOutputFunction>
           <name>EnrichFunctions</name>
           <function>
-            <description></description>
+            <description>The default function for output attributes. By default, this function assigns the output attribute to the value of the input attribute with the same name.</description>
             <prototype>&lt;any T> T AsIs()</prototype>
           </function>
           <function>
-            <description></description>
+            <description>Returns the ASN record associated with the input IP address(es). 
+            
+The return type of this function depends on the type of input attribute specified by the **inputIPAttr** parameter.
+
+  * If the input attribute has type `rstring`, then the return type of this function is `rstring`. 
+  * If the input attribute has type `list&lt;rstring>`, then the return type of this function is `list&lt;rstring>`.</description>
             <prototype>&lt;any T> T getASNInfo()</prototype>
           </function>
           <function>
-            <description></description>
+            <description>Returns the 32-bit ASN number associated with the input IP address(es). For example, if the ASN record associated with the input IP is &quot;AS26062 IBM&quot;, 
+            then the function will return &quot;26062&quot;.
+
+The return type of this function depends on the type of input attribute specified by the **inputIPAttr** parameter.
+
+  * If the input attribute has type `rstring`, then the return type of this function is `uint32`. 
+  * If the input attribute has type `list&lt;rstring>`, then the return type of this function is `list&lt;uint32>`.</description>
             <prototype>&lt;any T> T getASNumber()</prototype>
           </function>
         </customOutputFunction>
@@ -31,7 +49,9 @@ others. All Rights Reserved.
       <allowAny>false</allowAny>
       <parameter>
         <name>inputIPAttr</name>
-        <description></description>
+        <description>Specifies the input attribute containing the IP address (or IP addresses). The attribute can contain either IPv4 or IPv6 addresses. 
+The supported data types for this attribute are `rstring` and `list&lt;rstring>`. In the case where the input attributes refers to a type of `list&lt;rstring>`,
+the list can contain a mixture of both IPv4 and IPv6 addresses.</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
@@ -39,7 +59,8 @@ others. All Rights Reserved.
       </parameter>
       <parameter>
         <name>asnIPv4File</name>
-        <description></description>
+        <description>Specifies the file path of the MaxMind IPv4 ASN database file. Only the CSV-version of the database is supported. 
+This parameter should not be used if input port 1 is defined.</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>
@@ -48,7 +69,8 @@ others. All Rights Reserved.
       </parameter>
       <parameter>
         <name>asnIPv6File</name>
-        <description></description>
+        <description>Specifies the file path of the MaxMind IPv6 ASN database file. Only the CSV-version of the database is supported. 
+This parameter should not be used if input port 1 is defined.</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>
@@ -58,7 +80,7 @@ others. All Rights Reserved.
     </parameters>
     <inputPorts>
       <inputPortSet>
-        <description></description>
+        <description>Ingests tuples containing IP addresses. The `inputIPAttr` parameter specifies the attribute containing the IP addresses.</description>
         <windowingDescription></windowingDescription>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
@@ -67,7 +89,16 @@ others. All Rights Reserved.
         <optional>false</optional>
       </inputPortSet>
       <inputPortSet>
-        <description></description>
+        <description>Control port that ingests a file path pointing to a MaxMind ASN database CSV file. The operator determines whether the database contains
+IPv4 or IPv6 information based on the name of the file. The expected file names are:
+
+  * For IPv4: &quot;GeoIPASNum2.csv&quot;
+  * For IPv6: &quot;GeoIPASNum2v6.csv&quot;
+
+This control port can be used to dynamically update the operator's internal ASN database. Each time a tuple is received containing a path to one of 
+the files listed above, the operator will update it's internal table with the data in the file.
+
+This input port expects a tuple containing a single attribute of type `rstring`.</description>
         <windowingDescription></windowingDescription>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
@@ -79,7 +110,8 @@ others. All Rights Reserved.
     </inputPorts>
     <outputPorts>
       <outputPortSet>
-        <description></description>
+        <description>Submits a tuple for each input tuple received on input port 0. Custom output functions are used to retrieve the enrichment information. 
+Output tuple attributes whose assignments are not specified are assigned from input attributes.</description>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>true</autoAssignment>
         <completeAssignment>false</completeAssignment>
