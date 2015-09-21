@@ -389,7 +389,7 @@ rstring MY_OPERATOR::convertToAbsolutePath(rstring filename)
 	streams_boost::filesystem::path absPath(filename);
 	if(!absPath.is_absolute()) {
 		absPath = getPE().getDataDirectory();
-		absPath /= filename;
+		absPath /= filename.string();
 	}
 	string pathName = absPath.string();
 	
