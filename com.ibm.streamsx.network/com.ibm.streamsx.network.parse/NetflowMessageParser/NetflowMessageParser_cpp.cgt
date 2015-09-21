@@ -112,11 +112,11 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   uint32_t source = <%=$sourceAttribute%>;
 
   // prepare the Netflow message for parsing
-  parser.prepareMessage(buffer, length, source);
+  parser.prepareNetflowMessage(buffer, length, source);
   if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser");  return; }
 
   // parse the flow records in the Netflow message, submitting output tuples to output ports, as selected by output filters, if specified
-  while(parser.nextFlow()) 
+  while(parser.nextFlowRecord()) 
 	{
 	  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
 		<% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 

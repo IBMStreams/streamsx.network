@@ -45,7 +45,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eth0
+networkInterface=eno1
 timeoutInterval=10.0
 )
 
@@ -77,7 +77,7 @@ sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, co
 
 step "setting execution capabilities for standalone application '$namespace::$composite' ..."
 executable=$buildDirectory/bin/standalone.exe
-sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
+sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
 
 step "executing standalone application '$namespace::$composite' ..."
 #sudo gdb --args 
