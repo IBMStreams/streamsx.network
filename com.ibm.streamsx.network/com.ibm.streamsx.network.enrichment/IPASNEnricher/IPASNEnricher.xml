@@ -6,10 +6,9 @@ others. All Rights Reserved.
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-<<<<<<< HEAD
-      <description>This operator enriches IPv4 and IPv6 addresses with ASN data. Only the MaxMind&#169; GeoLite ASN database is supported. 
+      <description>This operator enriches IPv4 and IPv6 addresses with ASN data. Only the MaxMind© GeoLite ASN database is supported. 
       
-In order to use this operator, you must download the MaxMind&#169; GeoLite ASN database files in CSV format from the [http://dev.maxmind.com/geoip/legacy/geolite/|MaxMind&#169;] website. 
+In order to use this operator, you must download the MaxMind© GeoLite ASN database files in CSV format from the [http://dev.maxmind.com/geoip/legacy/geolite/|MaxMind©] website. 
 These files can then be loaded directly into the operator using the **asnIPv4File** and **asnIPv6File** parameters. To dynamically update the operator whenever
 a new version of the database is downloaded, a DirectoryScan operator can be connected to the control input port (input port 1) of this operator. Whenever a new
 version of the database files are downloaded into the directory being scanned, the DirectoryScan operator will submit the file paths to the IPASNEnricher operator. 
@@ -99,83 +98,7 @@ IPv4 or IPv6 information based on the name of the file. The expected file names 
 This control port can be used to dynamically update the operator's internal ASN database. Each time a tuple is received containing a path to one of 
 the files listed above, the operator will update it's internal table with the data in the file.
 
-This input port expects a tuple containing a single attribute of type `rstring`.</description>
-        <windowingDescription></windowingDescription>
-        <tupleMutationAllowed>false</tupleMutationAllowed>
-        <windowingMode>NonWindowed</windowingMode>
-        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
-        <controlPort>true</controlPort>
-        <cardinality>1</cardinality>
-        <optional>true</optional>
-      </inputPortSet>
-    </inputPorts>
-    <outputPorts>
-      <outputPortSet>
-        <description>Submits a tuple for each input tuple received on input port 0. Custom output functions are used to retrieve the enrichment information. 
-Output tuple attributes whose assignments are not specified are assigned from input attributes.</description>
-=======
-      <customOutputFunctions>
-        <customOutputFunction>
-          <name>EnrichFunctions</name>
-          <function>
-            <description></description>
-            <prototype>&lt;any T> T AsIs()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>&lt;any T> T getASNInfo()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>&lt;any T> T getASNumber()</prototype>
-          </function>
-        </customOutputFunction>
-      </customOutputFunctions>
-      <providesSingleThreadedContext>Never</providesSingleThreadedContext>
-      <allowCustomLogic>true</allowCustomLogic>
-    </context>
-    <parameters>
-      <description></description>
-      <allowAny>false</allowAny>
-      <parameter>
-        <name>inputIPAttr</name>
-        <description></description>
-        <optional>true</optional>
-        <rewriteAllowed>false</rewriteAllowed>
-        <expressionMode>Expression</expressionMode>
-        <cardinality>1</cardinality>
-      </parameter>
-      <parameter>
-        <name>asnIPv4File</name>
-        <description></description>
-        <optional>true</optional>
-        <rewriteAllowed>false</rewriteAllowed>
-        <expressionMode>AttributeFree</expressionMode>
-        <type>rstring</type>
-        <cardinality>1</cardinality>
-      </parameter>
-      <parameter>
-        <name>asnIPv6File</name>
-        <description></description>
-        <optional>true</optional>
-        <rewriteAllowed>false</rewriteAllowed>
-        <expressionMode>AttributeFree</expressionMode>
-        <type>rstring</type>
-        <cardinality>1</cardinality>
-      </parameter>
-    </parameters>
-    <inputPorts>
-      <inputPortSet>
-        <description></description>
-        <windowingDescription></windowingDescription>
-        <tupleMutationAllowed>false</tupleMutationAllowed>
-        <windowingMode>NonWindowed</windowingMode>
-        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
-        <cardinality>1</cardinality>
-        <optional>false</optional>
-      </inputPortSet>
-      <inputPortSet>
-        <description></description>
+This input port expected a tuple containing a single attribute of type `rstring`.</description>
         <windowingDescription></windowingDescription>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
@@ -188,7 +111,6 @@ Output tuple attributes whose assignments are not specified are assigned from in
     <outputPorts>
       <outputPortSet>
         <description></description>
->>>>>>> refs/remotes/origin/master
         <expressionMode>Expression</expressionMode>
         <autoAssignment>true</autoAssignment>
         <completeAssignment>false</completeAssignment>
