@@ -1,0 +1,106 @@
+/* Additional includes go here */
+
+<%
+use IPSpatialEnricherCommon;
+IPSpatialEnricherCommon::init($model);
+IPSpatialEnricherCommon::validate($model);
+%>
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+    
+  // Tuple processing for mutating ports 
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+  
+	struct blocks_record_t {
+		uint32 start_ip[4];
+		uint32 end_ip[4];
+		uint32 geoname_id;
+		uint32 reg_country_id;
+		uint32 rep_country_id;
+	//		boolean is_anon; // deprecated
+	//		boolean is_sat; // deprecated
+		rstring postal_code;
+		float64 latitude;
+		float64 longitude;
+	} ;
+	
+	struct location_record_t {
+		uint32 geoname_id;
+		rstring locale_code;
+		rstring continent_code;
+		rstring continent_name;
+		rstring country_iso_code;
+		rstring country_name;
+		rstring subdivision_iso_1;
+		rstring subdivision_name_1;
+		rstring subdivision_iso_2;
+		rstring subdivision_name_2;
+		rstring city_name;
+		rstring metro_code;
+		rstring timezone;		
+	} ;
+	
+	struct spatial_info_t {
+		blocks_record_t block_record;
+		location_record_t ip_loc;
+		location_record_t reg_country_loc;
+		location_record_t rep_country_loc;
+	} ;
+  
+private:
+
+	// enum
+	enum protocol { IPv4, IPv6 } ;
+
+	// typedefs
+	typedef std::vector<blocks_record_t> BlocksList;
+	typedef std::tr1::unordered_map<unsigned int, location_record_t> LocationTable;
+
+	// Members
+	SPL::Mutex mutex_ ;
+	BlocksList * blocks4List_;
+	BlocksList * blocks6List_;
+	LocationTable * locationTable_;
+	rstring locale_;
+	
+  	
+  	// Functions
+    void parseBlocksFile(rstring filename, protocol proto);
+    void parseLocationFile(rstring filename);
+ 	rstring convertToAbsolutePath(rstring filename);
+ 
+    void lookupIP(const rstring &ipStr, spatial_info_t &ip_info);  
+    void lookupIPv4(const uint32 &numIP, spatial_info_t &ip_info);
+    void lookupIPv6(const uint32 (&numIP)[4], spatial_info_t &ip_info);
+    
+    void calculateIPv4Range(uint32 &startIP, uint32 &endIP, uint32 &networkIP, uint32 &prefix);
+    void calculateIPv6Range(uint32 (&startIP)[4], uint32 (&endIP)[4], uint32 (&networkIP)[4], uint32 &prefix);
+    
+    <% if(defined $::baseCppOutputType) {%>
+    	void getMaxMindLocation(<%=$::baseCppOutputType%> &outputLoc, location_record_t &loc_record, blocks_record_t &block_record);
+    <%}%>
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

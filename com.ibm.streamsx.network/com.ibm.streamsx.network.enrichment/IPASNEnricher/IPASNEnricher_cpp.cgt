@@ -1,0 +1,495 @@
+<%
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/* Additional includes go here */
+#include <fstream>
+#include <string>
+#include <streams_boost/filesystem.hpp>
+#include <streams_boost/tokenizer.hpp>
+#include <streams_boost/token_iterator.hpp>
+#include <streams_boost/algorithm/string/replace.hpp>
+#include <streams_boost/algorithm/string/trim.hpp>
+#include <streams_boost/algorithm/string/classification.hpp>
+#include <streams_boost/lexical_cast.hpp>
+#include <arpa/inet.h>
+
+#define IP_ASN "IP_ASN"
+
+<%
+use IPASNEnricherCommon;
+IPASNEnricherCommon::init($model);
+IPASNEnricherCommon::validate($model);
+%>
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+using namespace SPL;
+using namespace std;
+
+#define ASN4FILE_FIELD_COUNT 3
+#define ASN6FILE_FIELD_COUNT 4
+#define DEFAULT_NUMIP 0
+
+#define ASN_CAPACITY 300000
+#define INVALID_ASN ""
+
+#define IS_EQUAL_TO_IPV6(a,b) \
+			((a[0] == b[0]) \
+			&& (a[1] == b[1]) \
+			&& (a[2] == b[2]) \
+			&& (a[3] == b[3]))
+
+#define	IS_LESS_THAN_IPV6(a,b) \
+			((a[0] < b[0]) \
+			|| (a[0] == b[0] && a[1] < b[1]) \
+			|| (a[0] == b[0] && a[1] == b[1] && a[2] < b[2]) \
+			|| (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] < b[3]))
+
+#define	IS_GREATER_THAN_IPV6(a,b) \
+			((a[0] > b[0]) \
+			|| (a[0] == b[0] && a[1] > b[1]) \
+			|| (a[0] == b[0] && a[1] == b[1] && a[2] > b[2]) \
+			|| (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] > b[3]))
+
+#define ntohl6(a) \
+{ \
+	a[0] = ntohl(a[0]); \
+	a[1] = ntohl(a[1]); \
+	a[2] = ntohl(a[2]); \
+	a[3] = ntohl(a[3]); \
+}
+
+#define htonl6(a) \
+{ \
+	a[0] = htonl(a[0]); \
+	a[1] = htonl(a[1]); \
+	a[2] = htonl(a[2]); \
+	a[3] = htonl(a[3]); \
+}
+
+static bool sortIPv6(MY_OPERATOR::asn_record_t ar1, MY_OPERATOR::asn_record_t ar2)
+{
+	// if startIP1 == startIP2, check end IP
+	if(IS_EQUAL_TO_IPV6(ar1.start_ip, ar2.start_ip))
+		if(IS_EQUAL_TO_IPV6(ar1.end_ip, ar2.end_ip))
+			return false; // IP range is identical
+		else
+			return IS_LESS_THAN_IPV6(ar1.end_ip, ar2.end_ip); 		
+	else
+		return IS_LESS_THAN_IPV6(ar1.start_ip, ar2.start_ip);
+}
+
+static bool sortIPv4(MY_OPERATOR::asn_record_t ar1, MY_OPERATOR::asn_record_t ar2)
+{
+	if(ar1.start_ip[0] == ar2.start_ip[0])
+		if(ar1.end_ip[0] == ar2.end_ip[0])
+			return false; // IP range is identical
+		else
+			return ar1.end_ip[0] < ar2.end_ip[0];
+	else
+		return ar1.start_ip[0] < ar2.start_ip[0];
+}
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{
+	asn4List_ = new ASNList();
+	asn6List_ = new ASNList();
+	
+	<% if(defined $::asnIPv4FileParam) {%>
+		parseASNFile(<%=$::asnIPv4FileParamCppValue%>, IPv4);
+	<%}%>
+	
+	<% if(defined $::asnIPv6FileParam) {%>
+		parseASNFile(<%=$::asnIPv6FileParamCppValue%>, IPv6);
+	<%}%>
+	
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() 
+{
+	delete asn4List_;
+	delete asn6List_;
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() 
+{
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() 
+{
+    // This is an asynchronous call
+}
+
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{
+	Tuple const & t = tuple;
+	process(t, port);
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+	if(port == 0)
+	{
+    	const IPort0Type & <%=$::inputPort0CppName%> = static_cast <IPort0Type>(tuple);
+    	// enrich IP
+		 
+		<%=$::outputAttributeCppType%> results; 
+    	<% if($::isScalar) {%>
+    		rstring strResults;
+    		uint32 numResults;
+    		asn_record_t asn_info = {};
+			{
+				AutoPortMutex am(mutex_, *this);
+				lookupIP(<%=$::inputIPAttrParamCppValue%>, asn_info);
+			}
+			
+			strResults = asn_info.data;
+			numResults = asn_info.number;
+				
+    	<%} elsif($::isVector) {%>  
+    		SPL::list<rstring> strResults;
+    		SPL::list<uint32> numResults;
+    	
+    		<%=$::inputIPAttrParamCppType%>::iterator it;
+    		<%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+    		for(it = data.begin(); it != data.end(); ++it)
+    		{ 
+    			asn_record_t asn_info = {};
+    			{
+					AutoPortMutex am(mutex_, *this);
+					lookupIP(*it, asn_info);
+				} 
+    			
+    			results.push_back(asn_info.data);
+    			numResults.push_back(asn_info.number); 		
+    		}
+    	<%} elsif($::isMatrix) {%>
+    		SPL::list<SPL::list<rstring> > strResults;
+    		SPL::list<SPL::list<uint32> > numResults;
+    	
+    		<%=$::inputIPAttrParamCppType%>::iterator matrixIt;
+    		<%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+    		for(matrixIt = data.begin(); matrixIt != data.end(); ++matrixIt)
+    		{
+    			SPL::list<rstring> vecStrResultList;
+    			SPL::list<uint32> vecNumResultList;
+    			<%=$::inputIPAttrParamCppType%>::value_type::iterator vectorIt;
+    			for(vectorIt = (*matrixIt).begin(); vectorIt != (*matrixIt).end(); ++vectorIt)
+    			{
+    				asn_record_t asn_info = {};
+    				{
+						AutoPortMutex am(mutex_, *this);
+						lookupIP(*vectorIt, asn_info);
+    				}
+    				
+    				vecStrResultList.push_back(asn_info.data);
+    				vecNumResultList.push_back(asn_info.number);
+    			}
+    			strResults.push_back(vecStrResultList);
+    			numResults.push_back(vecNumResultList);
+    		}	
+    	<%}%>
+    	
+        OPort0Type otuple;
+    	<%  foreach my $attribute (@{ $::outputPort0->getAttributes()}) {
+            my $name = $attribute->getName();
+            my $operation = $attribute->getAssignmentOutputFunctionName();
+            if ($operation eq "AsIs") {
+                my $init = $attribute->getAssignmentValue()->getCppExpression();%>
+                otuple.set_<%=$name%>(<%=$init%>);
+            <%} elsif($operation eq "getASNInfo") {%>
+				otuple.set_<%=$name%>(strResults);
+			<%} elsif($operation eq "getASNumber") {%>
+				otuple.set_<%=$name%>(numResults);                    
+            <%}%>
+        <%}%>
+	
+		submit(otuple,0);		
+	}
+	<% if(defined $::inputPort1) {%>
+	else if(port == 1)
+	{
+		const <%=$::inputPort1CppType%> & <%=$::inputPort1CppName%> = static_cast <<%=$::inputPort1CppType%>>(tuple);
+    	
+    	// regex to determine if incoming file is v4 IPs or v6 IPs
+    	streams_boost::filesystem::path filePath(<%=$::inputPort1CppName%>.get_<%=$::filenameAttribute%>());
+		SPL::list<rstring> asnMatch;
+		
+		// ASN IPv4
+		const rstring asnIPv4Regex("^GeoIPASNum2\\.csv");
+		asnMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), asnIPv4Regex);
+		if(asnMatch.size() > 0)
+		{
+			{
+				AutoPortMutex am(mutex_, *this);
+				asn4List_->clear();
+				parseASNFile(filePath.string(), IPv4);
+			}
+			
+			return;
+		}
+		asnMatch.clear();
+		
+		// ASN IPv6
+		const rstring asnIPv6Regex("^GeoIPASNum2v6\\.csv");
+		asnMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), asnIPv6Regex);
+		if(asnMatch.size() > 0)
+		{
+			{
+				AutoPortMutex am(mutex_, *this);
+				asn6List_->clear();
+				parseASNFile(filePath.string(), IPv6);
+			}
+			
+			return;
+		}		
+	}
+	<%}%>
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+    /*
+      if(punct==Punctuation::WindowMarker) {
+        // ...;
+      } else if(punct==Punctuation::FinalMarker) {
+        // ...;
+      }
+    */
+}
+
+void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
+{
+	rstring absPath = convertToAbsolutePath(filename);
+	SPLAPPTRC(L_DEBUG, "Parsing " << proto << " asn file: " << absPath << "'", IP_ASN);
+	
+	// parse file and store in list
+	ifstream asnFile;
+	asnFile.open(absPath.c_str());
+	std::string line;
+	 
+	typedef streams_boost::tokenizer<streams_boost::escaped_list_separator<char> > LineTokenizer;
+	
+	while(std::getline(asnFile, line))
+	{
+		streams_boost::replace_all(line, "\\", "\\\\");
+		LineTokenizer tokens(line);
+		std::vector<string> lineTokens;
+		for(LineTokenizer::iterator it = tokens.begin(); it != tokens.end(); ++it)
+		{
+			string s = *it;
+			lineTokens.push_back(streams_boost::trim_copy_if(s, streams_boost::is_any_of("\"")));
+		}
+			
+		try {
+			asn_record_t a = {};
+			if(proto == IPv4)
+			{
+				if(lineTokens.size() != ASN4FILE_FIELD_COUNT)
+				{
+					SPLAPPLOG(L_ERROR, "Unknown error while parsing asnIPv4 record: " << line, IP_ASN);
+					continue;
+				}
+
+				a.start_ip[0] = (lineTokens[0].empty() ? DEFAULT_NUMIP : streams_boost::lexical_cast<uint32>(lineTokens[0]));
+				a.end_ip[0] = (lineTokens[1].empty() ? DEFAULT_NUMIP : streams_boost::lexical_cast<uint32>(lineTokens[1]));
+				a.data = lineTokens[2];
+				a.number = parseASNumber(lineTokens[2]);
+				
+				asn4List_->push_back(a);
+			}
+			else if(proto == IPv6)
+			{
+				if(lineTokens.size() != ASN6FILE_FIELD_COUNT)
+				{
+					SPLAPPLOG(L_ERROR, "Unknown error while parsing asnIPv6 record: " << line, IP_ASN);
+					continue;
+				}
+				
+				if(!lineTokens[1].empty() && !lineTokens[2].empty())
+				{
+					uint32_t ipStart[4];
+					if(inet_pton(AF_INET6, lineTokens[1].c_str(), ipStart) == 0)
+					{
+						SPLAPPLOG(L_ERROR, "Unable to convert start IPv6 to decimal: " << lineTokens[1], IP_ASN);
+						continue;
+					}
+					ntohl6(ipStart);
+					
+					uint32_t ipEnd[4];
+					if(inet_pton(AF_INET6, lineTokens[2].c_str(), ipEnd) == 0)
+					{
+						SPLAPPLOG(L_ERROR, "Unable to convert start IPv6 to decimal: " << lineTokens[2], IP_ASN);
+						continue;
+					}
+					ntohl6(ipEnd);
+					
+					memcpy(&a.start_ip, ipStart, 4 * sizeof(uint32));
+					memcpy(&a.end_ip, ipEnd, 4 * sizeof(uint32));
+					a.data = lineTokens[0];
+					a.number = parseASNumber(lineTokens[0]);
+					
+					asn6List_->push_back(a);
+				} 
+			}
+		}
+		catch (streams_boost::bad_lexical_cast &e)
+		{
+			SPLAPPLOG(L_ERROR, "(" << e.what() << ") - Error parsing ASN record: " << line, IP_ASN);
+		} 
+	}
+	
+	if(proto == IPv4)
+	{
+		SPLAPPTRC(L_DEBUG, "Sorting IPv4 list", IP_ASN);
+		std::sort(asn4List_->begin(), asn4List_->end(), sortIPv4);
+	}
+	else if(proto == IPv6)
+	{
+		SPLAPPTRC(L_DEBUG, "Sorting IPv6 list", IP_ASN);
+		std::sort(asn6List_->begin(), asn6List_->end(), sortIPv6);		
+	}	
+	
+	SPLAPPTRC(L_DEBUG, "ASN IPv4 list size=" << asn4List_->size(), IP_ASN);
+	SPLAPPTRC(L_DEBUG, "ASN IPv6 list size=" << asn6List_->size(), IP_ASN);
+}
+
+uint32 MY_OPERATOR::parseASNumber(rstring asnData)
+{
+	SPL::list<rstring> matches = SPL::Functions::String::regexMatchPerl(asnData, "AS([0-9]*)");
+	if(matches.size() > 1)
+	{
+		uint32 num = SPL::spl_cast<SPL::uint32, SPL::rstring >::cast(matches[1]);
+		return num;
+	} 
+	else 
+	{
+		cout << "Unable to parse ASN record: " << asnData << endl;
+		throw new SPLRuntimeException("parseASNumber", "Unable to parse ASN record: " + asnData);
+	}	
+}
+
+rstring MY_OPERATOR::convertToAbsolutePath(rstring filename)
+{
+	// check file path
+	streams_boost::filesystem::path absPath(filename);
+	if(!absPath.is_absolute()) {
+		absPath = getPE().getDataDirectory();
+		absPath /= filename;
+	}
+	string pathName = absPath.string();
+	
+	if(!streams_boost::filesystem::exists(pathName))
+	{
+		// TODO - fix error handling
+		string const msg = "File does not exist: " + pathName;
+		SPLAPPLOG(L_ERROR, msg, IP_ASN);
+		throw new SPLRuntimeException("parseLocationFile", msg);
+	}
+	
+	return pathName;	
+}
+
+void inline MY_OPERATOR::lookupIP(const rstring &ipStr, MY_OPERATOR::asn_record_t &asn_info)
+{	
+	// IPv4 lookup
+	in_addr ip;
+	if(inet_pton(AF_INET, ipStr.c_str(), &ip) != 0)
+	{
+		lookupIPv4(ip.s_addr, asn_info);
+	}
+	
+	// IPv6 lookup
+	uint32 numIP[4];
+	if(inet_pton(AF_INET6, ipStr.c_str(), &numIP) != 0)
+	{
+		lookupIPv6(numIP, asn_info);
+	}
+}
+
+void inline MY_OPERATOR::lookupIPv4(const uint32 &numIP, MY_OPERATOR::asn_record_t &asn_info)
+{
+	unsigned int first = 0;
+	unsigned int last = asn4List_->size();
+	unsigned int asnList_size = asn4List_->size();
+	
+	uint32 hostIP = ntohl(numIP);
+	
+	while(first <= last)
+	{
+		unsigned int middle = (first+last)/2;
+		
+		if(middle >= asnList_size)
+		{
+			SPLAPPLOG(L_DEBUG, "Unable to find range for numeric IP: " << hostIP, IP_ASN);
+			break;
+		}
+		
+		if(hostIP > (*asn4List_)[middle].end_ip[0])
+		{
+			first = middle + 1;
+		}
+		else if(hostIP < (*asn4List_)[middle].start_ip[0])
+		{
+			last = middle - 1;
+		}
+		else
+		{
+			asn_info = (*asn4List_)[middle];
+			break;
+		}
+	}
+}
+
+void MY_OPERATOR::lookupIPv6(const uint32 (&numIP)[4], MY_OPERATOR::asn_record_t &asn_info)
+{
+	unsigned int first = 0;
+	unsigned int last = asn6List_->size() ;
+	unsigned int asnList_size = asn6List_->size();
+	
+	uint32 hostIP[4];
+	memcpy(&hostIP, numIP, 4 * sizeof(uint32));
+	ntohl6(hostIP);
+	
+	while(first <= last)
+	{
+		unsigned int middle = (first+last)/2;
+		
+		if(middle >= asnList_size)
+		{
+			SPLAPPLOG(L_DEBUG, "Unable to find range for numeric IPv6: [" << hostIP[0] << "," << hostIP[1] << "," << hostIP[2] << "," << hostIP[3] << "]", IP_ASN);
+			break;
+		}
+		
+		if(IS_GREATER_THAN_IPV6(hostIP, (*asn6List_)[middle].end_ip))
+		{
+			first = middle + 1;
+		}
+		else if(IS_LESS_THAN_IPV6(hostIP, (*asn6List_)[middle].start_ip))
+		{
+			last = middle - 1;
+		}
+		else
+		{
+			asn_info = (*asn6List_)[middle];
+			break;
+		}
+	}
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+
