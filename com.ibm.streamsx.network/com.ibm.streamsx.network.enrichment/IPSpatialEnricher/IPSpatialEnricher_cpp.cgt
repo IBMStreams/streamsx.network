@@ -1,3 +1,8 @@
+<%
+## Copyright (C) 2015  International Business Machines Corporation
+## All Rights Reserved
+%>
+
 /* Additional includes go here */
 #include <fstream>
 #include <string>
