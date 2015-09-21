@@ -1,0 +1,68 @@
+<%
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/* Additional includes go here */
+
+<%
+use IPASNEnricherCommon;
+IPASNEnricherCommon::init($model);
+IPASNEnricherCommon::validate($model);
+%>
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+    
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+  
+  struct asn_record_t {
+  	uint32 start_ip[4];
+  	uint32 end_ip[4];
+  	rstring data;
+  	uint32_t number;
+  };
+  
+private:
+  	// enum
+	enum protocol { IPv4, IPv6 } ;
+	
+	typedef std::vector<asn_record_t> ASNList;
+	
+	// Members
+	SPL::Mutex mutex_ ;
+	ASNList * asn4List_;
+	ASNList * asn6List_;
+	
+	void parseASNFile(rstring filename, protocol proto);
+	uint32 parseASNumber(rstring asnData);
+	rstring convertToAbsolutePath(rstring filename);
+	
+    void lookupIP(const rstring &ipStr, asn_record_t &asn_info);  
+    void lookupIPv4(const uint32 &numIP, asn_record_t &asn_info);
+    void lookupIPv6(const uint32 (&numIP)[4], asn_record_t &asn_info);
+        
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+
