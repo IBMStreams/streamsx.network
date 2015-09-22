@@ -99,40 +99,42 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+	SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 
-  tupleCounter++;
+	tupleCounter++;
 
-  // point at the input tuple
-  const IPort0Type& iport$0 = tuple;
+	// point at the input tuple
+	const IPort0Type& iport$0 = tuple;
 
-  // get address and length of Netflow message from input tuple
-  char* buffer = (char*)<%=$messageAttribute%>.getData();
-  int length = <%=$messageAttribute%>.getSize();
-  uint32_t source = <%=$sourceAttribute%>;
+	// get address and length of Netflow message from input tuple
+	char* buffer = (char*)<%=$messageAttribute%>.getData();
+	int length = <%=$messageAttribute%>.getSize();
+	uint32_t source = <%=$sourceAttribute%>;
 
-  // prepare the Netflow message for parsing
-  parser.prepareNetflowMessage(buffer, length, source);
-  if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser");  return; }
+	// prepare the Netflow message for parsing
+	parser.prepareNetflowMessage(buffer, length, source);
+	if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser"); }
 
-  // parse the flow records in the Netflow message, submitting output tuples to output ports, as selected by output filters, if specified
-  while(parser.nextFlowRecord()) 
-	{
-	  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-		<% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
-			 {
-			   outTuple<%=$i%>.clear();
-			   outTuple<%=$i%>.assignFrom(iport$0, false);
-			   <% ####### OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
-			   <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
-			   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "NetflowMessageParser");
-			   submit(outTuple<%=$i%>, <%=$i%>);
-			 }
-			 <% } %> ;
-	}
-  if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); return; }
-
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+	// parse the flow records in the Netflow message, submitting output tuples to output ports, as selected by output filters, if specified
+	while( !parser.error && !parser.done )
+		{
+			parser.nextFlowRecord();
+			if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); break; }
+			if ( parser.done ) { break; }
+			<% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+				<% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+					   {
+						   outTuple<%=$i%>.clear();
+						   outTuple<%=$i%>.assignFrom(iport$0, false);
+						   <% ####### OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
+						   <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
+						   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "NetflowMessageParser");
+						   submit(outTuple<%=$i%>, <%=$i%>);
+					   }
+					   <% } %> ;
+		}
+  
+	SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 }
 
 

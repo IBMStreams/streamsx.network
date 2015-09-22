@@ -12,11 +12,13 @@
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
 
+
 /////////////////////////////////////////////////////////////////////////////////////
 // this class parses ethernet, IPv4, IPv6, UDP, and TCP headers in network packets
 /////////////////////////////////////////////////////////////////////////////////////
 
 class NetworkHeaderParser {
+
 
  private: 
 
@@ -35,6 +37,7 @@ class NetworkHeaderParser {
 
 	static const uint16_t jmirrorPort = 30030;
 
+
  public:
 
 	// The parseNetworkHeaders() function below returns the address and length
@@ -47,12 +50,13 @@ class NetworkHeaderParser {
 	// of the packet's network headers and payload data in these variables, if
 	// present, or NULL and zero, if absent.
 
-	struct ethhdr* etherHeader; int etherHeaderLength;
-	struct iphdr* ipv4Header; int ipv4HeaderLength;
-	struct ip6_hdr* ipv6Header; int ipv6HeaderLength;
-	struct udphdr* udpHeader; int udpHeaderLength;
-	struct tcphdr* tcpHeader; int tcpHeaderLength;
-	char* payload; int payloadLength;
+	struct ethhdr*  etherHeader; int etherHeaderLength;
+	struct iphdr*   ipv4Header;  int ipv4HeaderLength;
+	struct ip6_hdr* ipv6Header;  int ipv6HeaderLength;
+	struct udphdr*  udpHeader;   int udpHeaderLength;
+	struct tcphdr*  tcpHeader;   int tcpHeaderLength;
+	char*           payload;     int payloadLength;
+
 
 	// The parseNetworkHeaders() function below locates the network headers and
 	// payload data in the ethernet packet contained in the specified buffer and
