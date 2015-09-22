@@ -110,7 +110,8 @@ This input port expected a tuple containing a single attribute of type `rstring`
     </inputPorts>
     <outputPorts>
       <outputPortSet>
-        <description></description>
+        <description>Submits a tuple for each input tuple received on input port 0. Custom output functions are used to specify which attribute should contain the enrichment data. 
+The output tuple attributes whose assignments are not specified are assigned from input attributes.</description>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>true</autoAssignment>
         <completeAssignment>false</completeAssignment>
