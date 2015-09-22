@@ -1,0 +1,34 @@
+// *******************************************************************************
+// * Copyright (C)2015, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+
+namespace com.ibm.streamsx.network.enrichment;
+
+/**
+ * MaxMind 
+ */
+
+type
+	IPLocation_t =	rstring localeCode,
+					rstring continentCode,
+					rstring continentName,
+					rstring countryISOCode,
+					rstring countryName,
+					rstring subdivisionISOCode1,
+					rstring subdivisionISOName1,
+					rstring subdivisionISOCode2,
+					rstring subdivisionISOName2,
+					rstring cityName,
+					rstring metroCode,
+					rstring timezone,
+					rstring postalCode, 
+					float64 latitude, 
+					float64 longitude ; 
+	
+type
+	IPASNumber_t = uint32;
+	
+type
+	IPASNInfo_t = rstring;
+			  	 				
