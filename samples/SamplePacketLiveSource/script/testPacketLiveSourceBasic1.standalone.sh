@@ -15,7 +15,7 @@ here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 toolkitDirectory=$( cd $here/../../.. ; pwd )
 
-buildDirectory=$projectDirectory/output/build/$composite.standalone
+buildDirectory=$projectDirectory/output/build/$composite
 
 dataDirectory=$projectDirectory/data
 
@@ -45,7 +45,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eth0
+networkInterface=eno1
 timeoutInterval=10.0
 )
 
@@ -75,8 +75,11 @@ echo -e "\ntrace level: $traceLevel"
 step "building standalone application '$namespace::$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
 
+step "setting execution capabilities for standalone application '$namespace::$composite' ..."
+executable=$buildDirectory/bin/standalone.exe
+sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
+
 step "executing standalone application '$namespace::$composite' ..."
-executable=$buildDirectory/bin/$namespace.$composite
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketLiveSourceBasic1
+composite=LiveDNSMessageParserAnalysis
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -25,6 +25,7 @@ coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
 $toolkitDirectory/com.ibm.streamsx.network
+$toolkitDirectory/samples/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -45,7 +46,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eno1
+networkInterface=ens6f3
 timeoutInterval=10.0
 )
 
@@ -80,7 +81,6 @@ executable=$buildDirectory/bin/standalone.exe
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
 
 step "executing standalone application '$namespace::$composite' ..."
-#sudo gdb --args 
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

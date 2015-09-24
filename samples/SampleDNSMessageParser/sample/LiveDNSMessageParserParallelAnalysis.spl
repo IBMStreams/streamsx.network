@@ -9,10 +9,11 @@ use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
 
-composite TestDNSMessageParserParallelAnalysis {
+composite LiveDNSMessageParserParallelAnalysis {
 
     param       
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
     expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
     
     type 
@@ -25,10 +26,11 @@ composite TestDNSMessageParserParallelAnalysis {
 
     graph
 
-    stream<PacketType> PacketStream as Out = PacketFileSource() {
+    stream<PacketType> PacketStream as Out = PacketLiveSource() {
         param
-            pcapFilename: $pcapFilename;
+			networkInterface: $networkInterface;
             inputFilter: "udp port 53";
+		    promiscuous: true;
             metricsInterval: 0.0;
         output Out:
             captureTime = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
@@ -41,17 +43,19 @@ composite TestDNSMessageParserParallelAnalysis {
 		                   hashCode(IP_DST_PORT()),
             dnsMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.LiveDNSMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
 
 	@parallel(width=$parallelChannels, partitionBy=[{port=PacketStream, attributes=[partitionKey]}])
-	( stream<TestDNSAnalytics.PBDNSAnalyticResultType> PBDNSAnalyticResultStream ;
-	  stream<TestDNSAnalytics.DPDNSAnalyticResultType> DPDNSAnalyticResultStream ;
-	  stream<TestDNSAnalytics.HPDNSAnalyticResultType> HPDNSAnalyticResultStream ) = TestDNSAnalytics(PacketStream) {} 
+	( stream<LiveDNSAnalytics.PBDNSAnalyticResultType> PBDNSAnalyticResultStream ;
+	  stream<LiveDNSAnalytics.DPDNSAnalyticResultType> DPDNSAnalyticResultStream ;
+	  stream<LiveDNSAnalytics.HPDNSAnalyticResultType> HPDNSAnalyticResultStream ) = LiveDNSAnalytics(PacketStream) {} 
+
+	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 }
 
 
 
-composite TestDNSAnalytics ( input PacketStream ; output PBDNSAnalyticResultStream, DPDNSAnalyticResultStream, HPDNSAnalyticResultStream ) {
+composite LiveDNSAnalytics ( input PacketStream ; output PBDNSAnalyticResultStream, DPDNSAnalyticResultStream, HPDNSAnalyticResultStream ) {
 
   type
 
@@ -60,6 +64,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PBDNSAnalyticResultStre
       timestamp captureTime,
       rstring dstAddress,
       rstring questionName,
+	  uint16 questionType,
       uint8 responseCode,
 	  uint16 answerCount,
       list<rstring> answerData,
@@ -79,6 +84,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PBDNSAnalyticResultStre
 	  timestamp captureTime,
 	  rstring dstAddress,
 	  rstring questionName,
+	  uint16 questionType,
 	  uint8 responseCode,
 	  list<rstring> answerData,
 	  list<rstring> additionalData;
@@ -106,6 +112,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PBDNSAnalyticResultStre
       output 
 	  OutPB:
           questionName = DNS_QUESTION_NAME(),
+	      questionType = DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
 	      answerCount = DNS_ANSWER_COUNT(),
           answerData = DNS_ANSWER_DATA(),
@@ -121,12 +128,13 @@ composite TestDNSAnalytics ( input PacketStream ; output PBDNSAnalyticResultStre
           additionalTTLs = DNS_ADDITIONAL_TTLS();
       OutDPHP:
           questionName = DNS_QUESTION_NAME(),
+	      questionType = DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
           answerData = DNS_ANSWER_DATA(),
           additionalData = DNS_ADDITIONAL_DATA();
     }
-    () as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PBDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; } 
-    () as DPHPDNSResponseMessageSink = FileSink(DPHPDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.DPHPDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.LiveDNSMessageParserParallelAnalysis.PBDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as DPHPDNSResponseMessageSink = FileSink(DPHPDNSResponseMessageStream) { param file: "debug.LiveDNSMessageParserParallelAnalysis.DPHPDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; } 
 
 	// placeholder for 'predictive blacklisting' analytic
 	stream<PBDNSAnalyticResultType> PBDNSAnalyticResultStream = Custom(PBDNSResponseMessageStream) {} 

@@ -1,0 +1,105 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+composite LiveDNSMessageParserAnalysis {
+
+    param       
+	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+    
+    type 
+    
+    PacketType =
+        timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch 
+        rstring dstAddress,             // string representation of IP destination address
+        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
+
+    // input to 'predictive blacklisting' analytic
+    PBDNSResponseMessage_t = 
+      timestamp captureTime,
+      rstring dstAddress,
+      rstring questionName,
+	  uint16 questionType,
+      uint8 responseCode,
+	  uint16 answerCount,
+      list<rstring> answerData,
+      list<uint16> answerTypes,
+      list<uint32> answerTTLs,
+	  uint16 nameserverCount,
+      list<rstring> nameserverData,
+      list<uint16> nameserverTypes,
+      list<uint32> nameserverTTLs,
+	  uint16 additionalCount,
+      list<rstring> additionalData,
+      list<uint16> additionalTypes,
+      list<uint32> additionalTTLs;
+    
+    // input to 'domain profiling' and 'host profiling' analytics
+    DPHPDNSResponseMessage_t = 
+	  timestamp captureTime,
+	  rstring dstAddress,
+	  rstring questionName,
+	  uint16 questionType,
+	  uint8 responseCode,
+	  list<rstring> answerData,
+	  list<rstring> additionalData;
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketLiveSource() {
+        param
+			networkInterface: $networkInterface;
+            inputFilter: "udp port 53";
+		    promiscuous: true;
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
+            dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dnsMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.LiveDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+
+    ( stream<PBDNSResponseMessage_t> PBDNSResponseMessageStream as OutPB ;
+	  stream<DPHPDNSResponseMessage_t> DPHPDNSResponseMessageStream as OutDPHP ) = DNSMessageParser(PacketStream) {
+      param
+          messageAttribute: dnsMessage;
+          outputFilters: DNS_RESPONSE_FLAG() && !parseError(), 
+	                     DNS_RESPONSE_FLAG() && !parseError();
+      output 
+	  OutPB:
+          questionName = DNS_QUESTION_NAME(),
+	      questionType = DNS_QUESTION_TYPE(),
+          responseCode = DNS_RESPONSE_CODE(),
+	      answerCount = DNS_ANSWER_COUNT(),
+          answerData = DNS_ANSWER_DATA(),
+          answerTypes = DNS_ANSWER_TYPES(),
+          answerTTLs = DNS_ANSWER_TTLS(),
+	      nameserverCount = DNS_NAMESERVER_COUNT(),
+          nameserverData = DNS_NAMESERVER_DATA(),
+          nameserverTypes = DNS_NAMESERVER_TYPES(),
+          nameserverTTLs = DNS_NAMESERVER_TTLS(),
+	      additionalCount = DNS_ADDITIONAL_COUNT(),
+          additionalData = DNS_ADDITIONAL_DATA(),
+          additionalTypes = DNS_ADDITIONAL_TYPES(),
+          additionalTTLs = DNS_ADDITIONAL_TTLS();
+      OutDPHP:
+          questionName = DNS_QUESTION_NAME(),
+	      questionType = DNS_QUESTION_TYPE(),
+          responseCode = DNS_RESPONSE_CODE(),
+          answerData = DNS_ANSWER_DATA(),
+          additionalData = DNS_ADDITIONAL_DATA();
+    }
+    () as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.LiveDNSMessageParserAnalysis.PBDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as DPHPDNSResponseMessageSink = FileSink(DPHPDNSResponseMessageStream) { param file: "debug.LiveDNSMessageParserAnalysis.DPHPDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+
+	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+}
+
