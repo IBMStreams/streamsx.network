@@ -80,7 +80,6 @@ executable=$buildDirectory/bin/standalone.exe
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $executable || die "sorry, could not set execution capabilities for application '$composite', $?"
 
 step "executing standalone application '$namespace::$composite' ..."
-#sudo gdb --args 
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

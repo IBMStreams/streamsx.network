@@ -37,6 +37,8 @@ $here/teardownCapabilities.sh
 step "making Streams domain '$domain' ..."
 $streamtool mkdomain -d $domain || die "sorry, could not make Streams domain '$domain', $?"
 $streamtool genkey -d $domain || die "sorry, could not generate keys for Streams domain '$domain', $?"
+
+step "registering Streams domain as a Linux system service ..."
 sudo STREAMS_INSTALL=$STREAMS_INSTALL $streamtool registerdomainhost -d $domain --application --management --zkconnect $zkconnect || die "sorry, could not register Streams domain '$domain', $?"
 
 step "starting Streams domain '$domain' ..."
