@@ -45,7 +45,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eth0
+networkInterface=eno1
 timeoutInterval=10.0
 )
 

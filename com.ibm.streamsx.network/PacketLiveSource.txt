@@ -95,12 +95,14 @@ The PacketLiveSource operator requires these Linux capabilities:
     CAP_NET_ADMIN+eip
 
 Streams applications that are built in standalone mode should be compiled with
-the '--static-link' option and then granted these permissions like this:
+the '--static-link' option and then granted these capabilities, like this:
 
     sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
 
-Streams applications that are built in standalone mode should be compiled with
-the '--static-link' option and then ...
+Streams applications that are built in distributed mode should be compiled with
+the '--static-link' option and then must be submitted to a Streams instance and
+domain that have been registered as a Linux system service. The Streams runtime
+will then grant capabilities to the submitted application.
 
 
 _____Dependencies_____
