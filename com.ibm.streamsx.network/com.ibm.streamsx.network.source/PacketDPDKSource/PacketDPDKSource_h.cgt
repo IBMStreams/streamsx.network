@@ -1,0 +1,143 @@
+/*********************************************************************
+ * Copyright (C) 2015, International Business Machines Corporation
+ * All Rights Reserved
+ ********************************************************************/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <string.h>
+#include <set> 
+#include <iomanip> 
+
+#include <linux/if_ether.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/ether.h>
+#include <netinet/ip.h>
+#include <netinet/udp.h>
+#include <netinet/tcp.h>
+
+#include <netinet/ip6.h>
+#include <arpa/inet.h>
+#include <net/ethernet.h>
+
+#include <sched.h>
+#include "streams_source.h"
+#include "packetParserFunctions.h"
+#include <SPL/Runtime/Common/Metric.h>
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
+
+#include "NetworkHeaderParser.h"
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR {
+    public:
+        MY_OPERATOR();
+        virtual ~MY_OPERATOR(); 
+
+        // Notify port readiness
+        void allPortsReady(); 
+
+        // Notify pending shutdown
+        void prepareToShutdown(); 
+
+        // Processing for source and threaded operators   
+        void process(uint32_t idx);
+
+        // Tuple processing for mutating ports 
+        void process(Tuple & tuple, uint32_t port);
+
+        // Tuple processing for non-mutating ports
+        void process(Tuple const & tuple, uint32_t port);
+
+        // Punctuation processing
+        void process(Punctuation const & punct, uint32_t port);
+
+        // Method called out of the DPDK callback interface as each packet
+        // arrives for processing.
+        void packetProcess(uint8_t *packet,
+                uint32_t packetLen,
+                uint64_t tscTimestamp);
+
+    private:
+        // ----------- input and output tuples ----------
+        <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { 
+  	     print "OPort$i\Type outTuple$i;"; } %> ;
+      
+        // ----------- operator state variables ----------
+        uint64_t packetCounter;
+        uint64_t octetCounter;
+        struct port_stats stats; 
+        double now, then, metricsInterval;
+        int32_t processorAffinity;
+
+        uint16_t lcore, nicPort, nicQueue;
+
+        uint64_t tscHz; 
+        uint64_t tscMicrosecondAdjust; 
+        uint64_t timestampMicroseconds;
+
+	uint8_t *packetPtr;
+	uint32_t packetLen; 
+
+        // This method is called during the start up of the first of the 
+        // operator's threads.  It calls into the DPDK libraries, where 
+        // the thread spins waiting for packets to arrive.  As each packet 
+        // enters the system, this thread calls back into the dpdkCallback 
+        // method of this object for processing.
+        void processDpdkLoop();
+
+        // This method is called during the start up of the second of the 
+        // operator's threads.  It sits in a loop pulling stats from 
+        // the DPDK libraries.
+        void metricsThread();
+
+	// ----------- network header parser ----------
+	NetworkHeaderParser headers;
+	
+	// ----------- assignment functions for output attributes ----------
+	uint64_t packetsReceived() { return stats.received; }
+	uint64_t packetsDropped() { return stats.dropped; }
+	uint64_t packetsDroppedByInterface() { return 0; }
+	uint64_t packetsProcessed() { return packetCounter; }
+	uint64_t octetsProcessed() { return octetCounter; }
+	SPL::uint32 CAPTURE_SECONDS() { return 0; }
+	SPL::uint32 CAPTURE_MICROSECONDS() { return timestampMicroseconds; }
+
+	SPL::uint32 PACKET_LENGTH() { return packetLen; }
+	SPL::blob PACKET_DATA() { return SPL::blob((const unsigned char*)packetPtr, packetLen); }
+	SPL::uint32 PAYLOAD_LENGTH() { return headers.payloadLength; }
+	SPL::blob PAYLOAD_DATA() { return headers.payload ? SPL::blob((const unsigned char*)headers.payload, headers.payloadLength) : SPL::blob(); }
+	SPL::list<SPL::uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
+	SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+	SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
+	SPL::uint8 IP_VERSION() { return headers.ipv4Header ? headers.ipv4Header->version : ( headers.ipv6Header ? headers.ipv6Header->ip6_vfc>>4 : 0 ); }
+	SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
+	SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
+	SPL::uint32 IPV4_DST_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->daddr) : 0; }
+
+	SPL::list<SPL::uint8> IPV6_SRC_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
+	SPL::list<SPL::uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
+	SPL::uint16 IP_SRC_PORT() { return UDP_SRC_PORT() + TCP_SRC_PORT(); }
+	SPL::uint16 IP_DST_PORT() { return UDP_DST_PORT() + TCP_DST_PORT(); }
+	SPL::uint16 UDP_SRC_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->source) : 0; }
+	SPL::uint16 UDP_DST_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->dest) : 0; }
+	SPL::uint16 TCP_SRC_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->source) : 0; }
+	SPL::uint16 TCP_DST_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->dest) : 0; }
+	SPL::uint32 TCP_SEQUENCE() { return headers.tcpHeader ? ntohl(headers.tcpHeader->seq) : 0; }
+	SPL::uint32 TCP_ACKNOWLEDGEMENT() { return headers.tcpHeader ? ntohl(headers.tcpHeader->ack_seq) : 0; }
+	SPL::boolean TCP_FLAGS_URGENT() { return headers.tcpHeader ? headers.tcpHeader->urg : false; }
+	SPL::boolean TCP_FLAGS_ACK() { return headers.tcpHeader ? headers.tcpHeader->ack : false; }
+	SPL::boolean TCP_FLAGS_PUSH() { return headers.tcpHeader ? headers.tcpHeader->psh : false; }
+	SPL::boolean TCP_FLAGS_RESET() { return headers.tcpHeader ? headers.tcpHeader->rst : false; }
+	SPL::boolean TCP_FLAGS_SYN() { return headers.tcpHeader ? headers.tcpHeader->syn : false; }
+	SPL::boolean TCP_FLAGS_FIN() { return headers.tcpHeader ? headers.tcpHeader->fin : false; }
+	SPL::uint16 TCP_WINDOW() { return headers.tcpHeader ? ntohs(headers.tcpHeader->window) : 0; }
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

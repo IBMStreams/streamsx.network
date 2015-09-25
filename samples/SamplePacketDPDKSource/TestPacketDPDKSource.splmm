@@ -1,0 +1,76 @@
+/*********************************************************************
+ * Copyright (C) 2015, International Business Machines Corporation
+ * All Rights Reserved
+ *********************************************************************/
+
+use com.ibm.streamsx.network.source::*;
+
+<%
+	# Example to set the number of NIC interfaces
+	use integer;
+	my $numNics = 1;
+	print STDERR "Building the application for $numNics NIC interfaces.\n";
+%>
+
+/* Simple example application which configures the DPDP source and 
+ * sends the packet data to a file.
+ *
+ * Parameters:
+ *   pmdDriver: Absolute path to the DPDK PMD drivers on the system.
+ *              Note that only the first instance of the PacketDPDKSource
+ *              must set this parm.  All others are ignored.
+ *   coreMask : Hex bit mask listing the cores used for DPDK polling loops.
+ *              The low order bit corresponds to the master lcore and all
+ *              other bits indicate cores that will be assigned to 
+ *              ports/queues.
+ *              Note that only the first instance of the PacketDPDKSource
+ *              must set this parm.  All others are ignored.
+ *   lcore    : Logical core number on which this operator will run.
+ *   nicPort  : NIC port that sources packets for this operator instance.
+ *   nicQueue : NIC queue that sources packets for this operator instance.
+ *   Promiscuous : Enable promisicuous mode in the NIC. 
+ *   metricsInterval : Rate at which metrics are pulled out of the NIC stack. 
+ */
+
+type PacketData = uint64 timestampMicroseconds,
+     blob   packet,
+     uint64 length;
+
+public composite TestPacketDPDKSource {   
+	graph   
+        // One extract per NIC port/queue -- e.g. 4 NICs each with
+	// a single queue require 4 instances.  Note that the pmdDriver
+	// and coreMask parameters should be constant for all instances.
+        <% for(my $i=0; $i<($numNics); ++$i) { %>
+        (stream<PacketData>  PacketStream_<%=$i%> )
+                       = PacketDPDKSource() {
+            param
+		pmdDriver: "/home/engebret/apps/network/dpdk-2.0.0/build/lib/librte_pmd_e1000.so";
+                coreMask: "0x3";
+                lcore   : <%=$i+1%>;
+                nicPort : <%=$i%>;
+                nicQueue: 0;
+                promiscuous: true;
+                metricsInterval: 1.0;
+            output 
+                PacketStream_<%=$i%>:
+                    timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
+                    packet = PACKET_DATA(),
+                    length = (uint64) PACKET_LENGTH();
+        } 
+
+        () as FS_PacketData_<%=$i%> = FileSink( PacketStream_<%=$i%> ) {
+            param
+                file : "PacketStream"+(rstring)<%=$i%>+".out";
+        }
+
+        <%
+        }
+        %>
+
+	config
+	    placement : partitionColocation('SinglePE');
+	    tracing   : trace;
+}
+
+
