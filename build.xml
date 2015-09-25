@@ -12,9 +12,10 @@
 	<property environment="env" />
 	<property name="streams.install" value="${env.STREAMS_INSTALL}" />
 	<property name="toolkit" location="com.ibm.streamsx.network" />
+	<property name="tkname" value="com.ibm.streamsx.network" />
 	<property name="tmp" location="tmp" />
 
-	<target name="all" depends="toolkit" />
+	<target name="all" depends="toolkit, samples" />
 
 	<target name="setcommitversion">
 		<!-- Create the time stamp -->
@@ -125,15 +126,35 @@
 	</target>
 
 	<!-- Targets to build releases -->
-	<target name="release" depends="clean, all, setcommitversion">		
+	<target name="release" depends="clean, cleansamples, all, setcommitversion">		
 		<mkdir dir="${tmp}" />
 		<property name="releasefilename" value="${tmp}/streamx.network.toolkits-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}.tgz" />
-		<tar compression="gzip" longfile="gnu"
-             destfile="${releasefilename}"
-    	     basedir="${basedir}"
-             includes="${tkinfo.info:identity.info:name}/**"
-             excludes="**/.gitignore **/.settings/** **/.settings **/.project **/.classpath"
-    	/>		
+		<tar compression="gzip" longfile="gnu" destfile="${releasefilename}">
+			<tarfileset dir="${tkname}/.." filemode="775">
+				<include name="${tkname}/impl/bin/*.pl" />
+			</tarfileset>
+			<tarfileset dir="${tkname}/.." filemode="664">
+				<include name="${tkname}/impl/bin/*.pm" />
+			</tarfileset>
+			<tarfileset dir="${tkname}/.." >
+				<include name="${tkname}/**" />
+				<exclude name="${tkname}/impl/bin/*.pl" />
+				<exclude name="${tkname}/impl/bin/*.pm" />
+				<exclude name="${tkname}/.gitignore" />
+				<exclude name="${tkname}/.settings/**" />
+				<exclude name="${tkname}/.settings" />
+				<exclude name="${tkname}/.project" />
+				<exclude name="${tkname}/.classpath" />
+			</tarfileset>
+<!--			<tarfileset dir="samples/.." filemode="755">
+				<include name="samples/autotestAll.sh" />
+			</tarfileset>
+			<tarfileset dir="samples/..">
+				<include name="samples/**" />
+				<exclude name="samples/autotestAll.sh" />
+			</tarfileset> 
+-->
+		</tar>
 		<checksum file="${releasefilename}" />
 		<checksum algorithm="sha1" file="${releasefilename}" />
 	</target>
