@@ -84,7 +84,7 @@ int streams_source_init(const char *pmdDriver, const char *coreMask,
     pthread_mutex_unlock(&mutexInit); 
     initComplete = 1;
 
-    lcore_conf_[0].num_rx_queue = 0;
+    lcore_conf_[0].num_rx_queue = 0; // TODO make a param
     lcore_conf_[lcore].num_rx_queue = 1;
     lcore_conf_[lcore].rx_queue_list[nicQueue].port_id = nicPort;
     lcore_conf_[lcore].rx_queue_list[nicQueue].queue_id = nicQueue; // TODO redundant
