@@ -50,7 +50,6 @@
 
 	<target name="clean" description="clean up">
 		<ant dir="${toolkit}" target="clean" />
-		<delete dir="${tmp}" />
 	</target>
 
 	<target name="toolkit" description="Build any code and index the toolkit.">
@@ -126,9 +125,11 @@
 	</target>
 
 	<!-- Targets to build releases -->
-	<target name="release" depends="clean, cleansamples, all, setcommitversion">		
+	<target name="release" depends="clean, cleansamples, all, setcommitversion">
+		<delete dir="${tmp}" />		
 		<mkdir dir="${tmp}" />
-		<property name="releasefilename" value="${tmp}/streamx.network.toolkits-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}.tgz" />
+		<property name="releasefilename" value="${tmp}/com.ibm.streamsx.network-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}.tgz" />
+		<property name="samplesfilename" value="${tmp}/com.ibm.streamsx.network-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}-samples.tgz" />
 		<tar compression="gzip" longfile="gnu" destfile="${releasefilename}">
 			<tarfileset dir="${tkname}/.." filemode="775">
 				<include name="${tkname}/impl/bin/*.pl" />
@@ -146,16 +147,37 @@
 				<exclude name="${tkname}/.project" />
 				<exclude name="${tkname}/.classpath" />
 			</tarfileset>
-<!--			<tarfileset dir="samples/.." filemode="755">
-				<include name="samples/autotestAll.sh" />
-			</tarfileset>
-			<tarfileset dir="samples/..">
-				<include name="samples/**" />
-				<exclude name="samples/autotestAll.sh" />
-			</tarfileset> 
--->
 		</tar>
 		<checksum file="${releasefilename}" />
 		<checksum algorithm="sha1" file="${releasefilename}" />
+
+		<tar compression="gzip" longfile="gnu" destfile="${samplesfilename}">
+	        <tarfileset dir="samples/.." filemode="755">
+    	     	<include name="samples/autotestAll.sh" />
+            </tarfileset>
+            <tarfileset dir="samples/..">
+                <include name="samples/**" />
+                <exclude name="samples/autotestAll.sh" />
+            </tarfileset> 
+		</tar>
+	</target>
+
+	<target name="release-src" depends="clean, cleansamples">
+		<mkdir dir="${tmp}" />
+		<property name="srcfilename" value="${tmp}/com.ibm.streamsx.network-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}-src.tgz" />
+		<tar compression="gzip" longfile="gnu" destfile="${srcfilename}">
+            <tarfileset dir="${tkname}/.." filemode="775">
+                <include name="${tkname}/impl/bin/*.pl" />
+            </tarfileset>
+            <tarfileset dir="${tkname}/.." filemode="664">
+                <include name="${tkname}/impl/bin/*.pm" />
+            </tarfileset>
+            <tarfileset dir="${tkname}/.." >
+                <include name="${tkname}/**" />
+                <exclude name="${tkname}/impl/bin/*.pl" />
+                <exclude name="${tkname}/impl/bin/*.pm" />
+                <exclude name="${tkname}/.gitignore" />
+            </tarfileset>
+		</tar>
 	</target>
 </project>
