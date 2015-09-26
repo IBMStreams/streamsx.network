@@ -40,7 +40,8 @@ $streamtool mkdomain -d $domain || die "sorry, could not make Streams domain '$d
 $streamtool genkey -d $domain || die "sorry, could not generate keys for Streams domain '$domain', $?"
 
 step "setting dynamic service ports for Streams domain '$domain' ..."
-$streamtool setdomainproperty -d $domain jmx.port=0 sws.port=0 || die "sorry, could not set properties for Streams domain '$domain', $?"
+$streamtool setdomainproperty -d $domain jmx.port=0 jmx.startTimeout=300 || die "sorry, could not set JMX properties for Streams domain '$domain', $?"
+$streamtool setdomainproperty -d $domain sws.port=0 sws.startTimeout=300 || die "sorry, could not set SWS properties for Streams domain '$domain', $?"
 
 step "starting Streams domain '$domain' ..."
 $streamtool startdomain -d $domain || die "sorry, could not start Streams domain '$domain', $?"

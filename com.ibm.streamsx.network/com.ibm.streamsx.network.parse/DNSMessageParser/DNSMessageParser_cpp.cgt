@@ -44,7 +44,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 
 // calls to SPL functions within expressions are generated with these
 // namespaces, which must be mapped to the operator's namespace so they
-// will invoke the functions defined in the xxx_h.cgt file
+// will invoke the functions defined in the DNSMessageParser_h.cgt file
 
 #define common_result_functions MY_OPERATOR
 #define DNSMessageParser_result_functions MY_OPERATOR
@@ -120,7 +120,6 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 		 {
 		   outTuple<%=$i%>.clear();
 		   outTuple<%=$i%>.assignFrom(iport$0, false);
-		   <% ####### OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
 		   <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
 		   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSMessageParser");
 		   submit(outTuple<%=$i%>, <%=$i%>);

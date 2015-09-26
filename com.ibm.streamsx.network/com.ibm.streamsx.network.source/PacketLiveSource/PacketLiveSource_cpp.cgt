@@ -3,7 +3,7 @@
 ## All Rights Reserved
 
 ### for valid values of 'networkInterface' parameter, type '/sbin/ifconfig' on deployment machine
-### for valid values of 'inputFilter' and 'outputFilters' parameters, see http://www.tcpdump.org/manpages/pcap-filter.7.html or http://linux.die.net/man/7/pcap-filter
+### for valid values of 'inputFilter' and parameter, see http://www.tcpdump.org/manpages/pcap-filter.7.html or http://linux.die.net/man/7/pcap-filter
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require OutputAssignmentGenerator;
@@ -30,8 +30,18 @@ my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParamet
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
 my $timeout = $model->getParameterByName("timeout") ? $model->getParameterByName("timeout")->getValueAt(0)->getCppExpression() : 0;
 my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : undef;
-my @outputFilterList = $model->getParameterByName("outputFilters") ? @{ $model->getParameterByName("outputFilters")->getValues() } : ();
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) { 
+  foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+	my $expression = $value->getCppExpression();
+	push @outputFilterList, $expression;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+  }
+}
 
 # basic safety checks
 SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
@@ -44,11 +54,11 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 <%SPL::CodeGen::implementationPrologue($model);%>
 
 
-// calls to output assignment functions within expressions are generated with
-// an explicit namespace matching the operator tempate name, so it must be
-// equated to the operator's namespace
+// calls to SPL functions within expressions are generated with this
+// namespace, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the PacketLiveSource_h.cgt file
 
-#define PacketLiveSource MY_OPERATOR
+#define common_result_functions MY_OPERATOR
 
 
 
@@ -67,7 +77,6 @@ MY_OPERATOR::MY_OPERATOR()
   processorAffinity = <%=$processorAffinity%>;
   timeout = <%=$timeout%>;
   inputFilter = <%= $inputFilter ? $inputFilter : '""' %>;
-  <% foreach my $outputFilter (@outputFilterList) { bless $outputFilter,"SPL::Operator::Instance::Expression"; print "outputFilters.push_back(" . $outputFilter->getCppExpression() . "); "; } %> ;
   metricsInterval = <%=$metricsInterval%>;
 
   // initialize operator state variables
@@ -179,23 +188,6 @@ MY_OPERATOR::MY_OPERATOR()
 	for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "PacketLiveSource"); }
   } 
 	
-  // if output filters have been specified and they haven't been compiled yet, do that now
-  if ( outputFilterPrograms.size() != outputFilters.size() ) {
-
-	// allocate space for output filter programs
-	struct bpf_program bpfProgram;
-	outputFilterPrograms.assign(outputFilters.size(), bpfProgram);
-
-	// compile output filter programs for each output port
-	for (int i = 0; i<outputFilters.size(); i++) {
-	  SPLLOG(L_INFO, "filtering packets on output port " << i << " with '" << outputFilters[i] << "'", "PacketLiveSource");
-	  int rc = pcap_compile(pcapDescriptor, &outputFilterPrograms[i], outputFilters[i].c_str(), 0, ipMask);
-	  if (rc) THROW (SPLRuntimeOperator, "error compiling output filter '" << outputFilters[i] << "', rc=" << rc << ", " << pcap_geterr(pcapDescriptor));
-	  struct bpf_insn* instruction = outputFilterPrograms[i].bf_insns;
-	  for (int j = 0; j<outputFilterPrograms[i].bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "PacketLiveSource"); }
-	}
-  }
-
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketLiveSource");
 }
 
@@ -298,7 +290,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-	<% if (scalar(@outputFilterList)) { print "if (bpf_filter(outputFilterPrograms[$i].bf_insns, (const u_char*)buffer, header->len, header->caplen))"; } %> 
+	  <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
 		 {
 		   outTuple<%=$i%>.clear();
 		   <% OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;

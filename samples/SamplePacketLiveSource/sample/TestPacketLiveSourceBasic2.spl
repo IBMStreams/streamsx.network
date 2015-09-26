@@ -40,7 +40,6 @@ composite TestPacketLiveSourceBasic2 {
 		uint32 packetLength,			// original length of packet (not necessarily all captured)
 		uint64 packetsReceived,			// number of packets received by network interface in this interval
 		uint64 packetsDropped,			// number of packets dropped in this interval
-		uint64 packetsDroppedByInterface, // number of packets dropped by network interface in this interval
 		uint64 packetsProcessed,		// number of packets emitted by operator in this interval
 		uint64 octetsProcessed;			// number of bytes emitted by operator in this interval
 
@@ -80,7 +79,6 @@ composite TestPacketLiveSourceBasic2 {
 			packetLength = PACKET_LENGTH(),
 		    packetsReceived = packetsReceived(),
 		    packetsDropped = packetsDropped(),
-		    packetsDroppedByInterface = packetsDroppedByInterface(),
 			packetsProcessed = packetsProcessed(),
 			octetsProcessed = octetsProcessed();
 	}

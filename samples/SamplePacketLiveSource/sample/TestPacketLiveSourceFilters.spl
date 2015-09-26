@@ -43,14 +43,6 @@ composite TestPacketLiveSourceFilters {
 	  uint32 httpLength,				// length of HTTP data in packet (possibly truncated))
 	  blob httpData;					// HTTP data, excluding network headers (possibly truncated)
 
-	PingPacketType =
-	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
-	  rstring ipSourceAddress,			// IP source address 
-	  rstring ipDestinationAddress,		// IP destination address 
-	  uint32 pingLength,				// length of Ping message in packet (possibly truncated))
-	  blob pingMessage;					// Ping message, excluding network headers (possibly truncated)
-
 	AllPacketType =
 		uint64 packetNumber,			// sequence number of packet, as emitted by operator
 		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
@@ -69,17 +61,15 @@ composite TestPacketLiveSourceFilters {
 	( stream<DHCPPacketType> DHCPPacketStream as DHCPOut ; 
 	  stream<DNSPacketType> DNSPacketStream as DNSOut ;
 	  stream<HTTPPacketType> HTTPPacketStream as HTTPOut ;
-	  stream<PingPacketType> PingPacketStream as PingOut ;
 	  stream<AllPacketType> AllPacketStream as AllOut ) = PacketLiveSource() {
 	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			networkInterface: $networkInterface;
-		    inputFilter:   "udp or icmp or tcp";            // process only UDP and ICMP payloads
-		    outputFilters: "udp port 67 or udp port 68",    // output port 0 emits only DHCP payloads
-                           "udp port 53",                   // output port 1 emits only DNS payloads
-                           "tcp port 80",                   // output port 2 emits only HTTP payloads
-                           "icmp[icmptype] = icmp-echo or icmp[icmptype] = icmp-echoreply", // output port 3 emits only Ping payloads
-                           "";                              // output port 4 emits all packets processed
+		    inputFilter:   "udp or tcp";            // process only UDP and TCP packets
+		    outputFilters: UDP_PORT(67uh) || UDP_PORT(68uh),  // output port 0 emits only DHCP payloads
+                           UDP_PORT(53uh),                    // output port 1 emits only DNS payloads
+                           TCP_PORT(80uh),                    // output port 2 emits only HTTP payloads
+                           true;                              // output port 3 emits all packets processed
 		output 
 		DHCPOut:
 			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
@@ -104,13 +94,6 @@ composite TestPacketLiveSourceFilters {
 			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()) + ":" + (rstring)TCP_DST_PORT(),
 			httpLength = PAYLOAD_LENGTH(),
 			httpData = PAYLOAD_DATA(); 
-		PingOut:
-			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			packetNumber = packetsProcessed() - 1ul,
-			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
-			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			pingLength = PAYLOAD_LENGTH(),
-			pingMessage = PAYLOAD_DATA(); 
 		AllOut:
 			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
 			packetNumber = packetsProcessed() - 1ul,
@@ -127,7 +110,6 @@ composite TestPacketLiveSourceFilters {
 	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 	() as HTTPPacketSink = FileSink(HTTPPacketStream) { param file: "debug.TestPacketFileSourceFilters.HTTPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as PingPacketSink = FileSink(PingPacketStream) { param file: "debug.TestPacketFileSourceFilters.PingPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 	() as AllPacketSink = FileSink(AllPacketStream) { param file: "debug.TestPacketFileSourceFilters.AllPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }

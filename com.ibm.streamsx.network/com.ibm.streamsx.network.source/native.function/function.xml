@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+
+  <function:functionSet>
+    <function:headerFileName></function:headerFileName>
+    <function:cppNamespaceName>common_result_functions</function:cppNamespaceName>
+    <function:functions>
+
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint64 packetsReceived()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint64 packetsDropped()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint64 packetsProcessed()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint64 octetsProcessed()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 CAPTURE_SECONDS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 CAPTURE_MICROSECONDS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 PACKET_LENGTH()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public blob PACKET_DATA()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 PAYLOAD_LENGTH()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public blob PAYLOAD_DATA()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public list&lt;uint8>[6] ETHER_SRC_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public list&lt;uint8>[6] ETHER_DST_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 ETHER_PROTOCOL()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint8 IP_VERSION()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint8 IP_PROTOCOL()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 IPV4_SRC_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 IPV4_DST_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public list&lt;uint8>[16] IPV6_SRC_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public list&lt;uint8>[16] IPV6_DST_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 IP_SRC_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 IP_DST_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean UDP_PORT(uint16)</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 UDP_SRC_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 UDP_DST_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean TCP_PORT(uint16)</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 TCP_SRC_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 TCP_DST_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 TCP_SEQUENCE()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 TCP_ACKNOWLEDGEMENT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean TCP_FLAGS_URGENT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean TCP_FLAGS_ACK()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean TCP_FLAGS_PUSH()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean TCP_FLAGS_RESET()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean TCP_FLAGS_SYN()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public boolean TCP_FLAGS_FIN()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 TCP_WINDOW()</function:prototype>
+          </function:function>
+
+    </function:functions>
+  </function:functionSet>
+
+</function:functionModel>

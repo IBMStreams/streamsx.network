@@ -65,7 +65,6 @@ private:
   double timeout;
   double metricsInterval;
   std::string inputFilter;
-  std::vector<std::string> outputFilters;
 
   // ----------- input and output tuples ----------
 
@@ -75,15 +74,14 @@ private:
 
   uint64_t packetCounter;
   uint64_t octetCounter;
-  struct pcap_stat pcapStatistics;
   double now, then;
-  struct bpf_program inputFilterProgram;
-  std::vector<struct bpf_program> outputFilterPrograms;
 
   // ----------- libpcap-specific variables ----------
 
   pcap_t* pcapDescriptor;
   const struct pcap_pkthdr* pcapHeader;
+  struct pcap_stat pcapStatistics;
+  struct bpf_program inputFilterProgram;
 
   // ----------- network header parser ----------
 
@@ -94,8 +92,6 @@ private:
   uint64_t packetsReceived() { return pcapStatistics.ps_recv; }  
 
   uint64_t packetsDropped() { return pcapStatistics.ps_drop; }  
-
-  uint64_t packetsDroppedByInterface() { return pcapStatistics.ps_ifdrop; }  
 
   uint64_t packetsProcessed() { return packetCounter; }  
 
@@ -135,9 +131,13 @@ private:
   
   SPL::uint16 IP_DST_PORT() { return UDP_DST_PORT() + TCP_DST_PORT(); }
   
+  SPL::boolean UDP_PORT(SPL::uint16 port) { return headers.udpHeader ? ( ntohs(headers.udpHeader->source)==port || ntohs(headers.udpHeader->dest)==port ) : false; }
+
   SPL::uint16 UDP_SRC_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->source) : 0; }
   
   SPL::uint16 UDP_DST_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->dest) : 0; }
+
+  SPL::boolean TCP_PORT(SPL::uint16 port) { return headers.tcpHeader ? ( ntohs(headers.tcpHeader->source)==port || ntohs(headers.tcpHeader->dest)==port ) : false; }
 
   SPL::uint16 TCP_SRC_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->source) : 0; }
 

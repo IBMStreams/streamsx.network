@@ -251,16 +251,11 @@ _____Parameters_____
       The default value of the 'inputFilter' parameter is an empty string, which
       causes all packets read from the PCAP file to be processed.
 
-   outputFilters -- This optional parameter takes a list of expressions of type
-      'rstring' that specify which input packets should be emitted by the
-      corresponding output port. The number of expressions in the list must
-      match the number of output ports.  The values of the strings must be
-      valid PCAP filter expressions, as defined here:
-
-          http://www.tcpdump.org/manpages/pcap-filter.7.html
-          http://linux.die.net/man/7/pcap-filter
-
-      The default value of the 'outputFilters' parameter is an empty list, which
+   outputFilters -- This optional parameter takes a list of SPL expressions that
+      specify which packets should be emitted by the corresponding output
+      port. The number of expressions in the list must match the number of
+      output ports, and each expression must evaluate to a boolean value.  The
+      default value of the 'outputFilters' parameter is an empty list, which
       causes all packets processed to be emitted by all output ports.
 
    initDelay -- This optional parameter takes an expression of type 'float64'
@@ -317,11 +312,6 @@ the following functions, which are specific to this operator:
       Linux command prompt:
 
           uname -r
-
-   uint64 packetsDroppedByInterface() -- This function assigns total number of
-      packets dropped by the network interface adapter or its kernel driver, as
-      counted by 'libpcap'.  The value may be zero if the counter is not
-      implemented by the adapter or driver.
 
    uint64 packetsProcessed() -- This function assigns the total number of packets
       that have been processed so far. When an input filter is specified, this value
@@ -405,9 +395,17 @@ the following functions, which are specific to this operator:
   uint16 UDP_SRC_PORT() -- This function returns the source port field from
       the UDP header of the packet, if it has one, or zero if not.
   
+  boolean UDP_PORT(uint16 port) -- This function returns 'true' if the packet is
+      a UDP packet and its source or destination port field matches the
+      specified port number, or else it returns 'false'.
+  
   uint16 UDP_DST_PORT() -- This function returns the destination port field from
       the UDP header of the packet, if it has one, or zero if not.
 
+  boolean TCP_PORT(uint16 port) -- This function returns 'true' if the packet is
+      a TCP packet and its source or destination port field matches the
+      specified port number, or else it returns 'false'.
+  
   uint16 TCP_SRC_PORT() -- This function returns the source port field from
       the TCP header of the packet, if it has one, or zero if not.
 
