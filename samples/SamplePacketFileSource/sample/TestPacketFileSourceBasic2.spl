@@ -13,6 +13,7 @@ composite TestPacketFileSourceBasic2 {
 
 	param		
 	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
 	
 	type 
 	
@@ -45,6 +46,7 @@ composite TestPacketFileSourceBasic2 {
 	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			pcapFilename: $pcapFilename;
+		    metricsInterval: $metricsInterval;
 		output 
 		OutPackets:
 			packetNumber = packetsProcessed() - 1ul,

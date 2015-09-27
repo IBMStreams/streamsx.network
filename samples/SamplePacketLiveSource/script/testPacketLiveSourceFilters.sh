@@ -48,6 +48,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 networkInterface=eno1
+metricsInterval=1.0
 timeoutInterval=10.0
 )
 

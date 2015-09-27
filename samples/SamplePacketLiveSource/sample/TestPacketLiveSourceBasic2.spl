@@ -14,7 +14,6 @@ composite TestPacketLiveSourceBasic2 {
 	param		
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
-    expression<float64> $statisticsInterval: (float64)getSubmissionTimeValue("statisticsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 	
 	type 

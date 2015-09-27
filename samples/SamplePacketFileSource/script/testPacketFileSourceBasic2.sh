@@ -47,6 +47,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
+metricsInterval=1.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

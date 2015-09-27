@@ -14,6 +14,7 @@ composite TestPacketLiveSourceFull {
 
 	param		
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 
 	
@@ -75,7 +76,7 @@ composite TestPacketLiveSourceFull {
 	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			networkInterface: $networkInterface;
-		    metricsInterval: 1.0;
+		    metricsInterval: $metricsInterval;
 		output Out:
 	    	packetsReceived = packetsReceived(),
 	    	packetsDropped = packetsDropped(),

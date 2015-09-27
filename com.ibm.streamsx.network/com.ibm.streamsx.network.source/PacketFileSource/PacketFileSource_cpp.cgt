@@ -85,6 +85,7 @@ MY_OPERATOR::MY_OPERATOR()
   now = then = 0;
   packetCounter = packetCounterNow = packetCounterThen = 0;
   octetCounter = octetCounterNow = octetCounterThen = 0;
+  pcapDescriptor = NULL;
   metricsUpdate = false;
   done = false;
 
@@ -300,6 +301,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
   // close the PCAP file before returning
   pcap_close(pcapDescriptor);
+  pcapDescriptor = NULL;
 
   SPLLOG(L_INFO, "closing PCAP file '" << filename << "'", "PacketFileSource");
 }
@@ -365,10 +367,10 @@ void MY_OPERATOR::metricsThread()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metricsThread()", "PacketFileSource");
 
-	// expose the operator's statistics in these metrics
-	OperatorMetrics& opm = getContext().getMetrics();
-	Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
-	Metric* totalOctetsProcessed = &opm.getCustomMetricByName("nOctetsProcessedCurrent");
+  // expose the operator's statistics in these metrics
+  OperatorMetrics& opm = getContext().getMetrics();
+  Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
+  Metric* totalOctetsProcessed = &opm.getCustomMetricByName("nOctetsProcessedCurrent");
 
   // get metrics periodically and send them to the runtime
   while (!getPE().getShutdownRequested()) {
