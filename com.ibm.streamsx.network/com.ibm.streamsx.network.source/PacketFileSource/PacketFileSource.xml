@@ -3,6 +3,20 @@
   <cppOperatorModel>
     <context>
       <description></description>
+
+      <metrics>
+        <metric>
+          <name>nPacketsProcessedCurrent</name>
+          <description>Number of packets procesed by this operator.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nOctetsProcessedCurrent</name>
+          <description>Number of packet bytesd processed by this operator.</description>
+          <kind>Counter</kind>
+        </metric>
+      </metrics>
+
       <libraryDependencies>
         <library>
           <cmn:description>'libpcap' version determined dynamically at compile time</cmn:description>

@@ -81,9 +81,11 @@ MY_OPERATOR::MY_OPERATOR()
   metricsInterval = <%=$metricsInterval%>;
 
   // initialize operator state variables
-  packetCounter = 0; 
-  octetCounter = 0; 
-  startTimeInNanoseconds = SPL::Functions::Time::getCPUCounterInNanoSeconds();
+  startTimeInNanoseconds = SPL::Functions::Time::getCPUCounterInNanoSeconds(); 
+  now = then = 0;
+  packetCounter = packetCounterNow = packetCounterThen = 0;
+  octetCounter = octetCounterNow = octetCounterThen = 0;
+  metricsUpdate = false;
   done = false;
 
 #if defined(lib_pcap_pcap_h)
@@ -291,6 +293,9 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 			 submit(outTuple<%=$i%>, <%=$i%>);
 		   }
 		   <% } %> ;
+
+	// reset the 'metrics updated' flag, in case one of the output ports references it
+	metricsUpdate = false;
   }
 
   // close the PCAP file before returning
@@ -360,24 +365,41 @@ void MY_OPERATOR::metricsThread()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metricsThread()", "PacketFileSource");
 
-  // get metrics periodically and emit a tuple whenever they change
-  then = SPL::Functions::Time::getTimestampInSecs();
+	// expose the operator's statistics in these metrics
+	OperatorMetrics& opm = getContext().getMetrics();
+	Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
+	Metric* totalOctetsProcessed = &opm.getCustomMetricByName("nOctetsProcessedCurrent");
+
+  // get metrics periodically and send them to the runtime
   while (!getPE().getShutdownRequested()) {
 
 	// wait until the next interval, or the 'file' thread finishes, or the PE is shutting down
-	now = SPL::Functions::Time::getTimestampInSecs();
-	const double secondsToWait = then + metricsInterval - now;
+	const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
 	if (secondsToWait>0) {
-	  SPLLOG(L_DEBUG, "next metrics interval in " << secondsToWait << " seconds", "PacketFileSource");
+	  SPLLOG(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "PacketLiveSource");
 	  getPE().blockUntilShutdownRequest(secondsToWait);
-	  now = SPL::Functions::Time::getTimestampInSecs();
 	} else {
-	  SPLLOG(L_DEBUG, "missed metrics interval by " << -secondsToWait << " seconds", "PacketFileSource");
+		SPLLOG(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "PacketLiveSource");
 	}
 
-	// remember when these metrics were reported for next time
+	// store the previous interval's metrics for difference calculations
 	then = now;
+	packetCounterThen = packetCounterNow;
+	octetCounterThen = octetCounterNow;
+	
+	// store the current interval's metrics
+	now = SPL::Functions::Time::getTimestampInSecs();
+	packetCounterNow = packetCounter;
+	octetCounterNow = octetCounter;
+	// ??? SPLLOG(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now)  << " processed=" << packetCounterNow, "PacketLiveSource");
 
+	// send the operator's metrics to the runtime
+	totalPacketsProcessed->setValue(packetCounterNow);
+	totalOctetsProcessed->setValue(octetCounterNow); 
+	
+	// updated metrics will be available to the next output tuple emitted
+	metricsUpdate = true;
+	
 	if (done) break;
   }
 

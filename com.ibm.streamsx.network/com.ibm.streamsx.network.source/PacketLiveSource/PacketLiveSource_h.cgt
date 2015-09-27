@@ -20,6 +20,7 @@
 #include <arpa/inet.h>
 
 #include <streams_boost/filesystem.hpp>
+#include <streams_boost/lexical_cast.hpp>
 
 #include <SPL/Runtime/Common/Metric.h>
 #include <SPL/Runtime/Operator/OperatorMetrics.h>
@@ -72,16 +73,17 @@ private:
 
   // ----------- operator state variables ----------
 
-  uint64_t packetCounter;
-  uint64_t octetCounter;
   double now, then;
+  uint64_t packetCounter, packetCounterNow, packetCounterThen;
+  uint64_t octetCounter, octetCounterNow, octetCounterThen;
+  bool metricsUpdate;
 
   // ----------- libpcap-specific variables ----------
 
   pcap_t* pcapDescriptor;
   const struct pcap_pkthdr* pcapHeader;
-  struct pcap_stat pcapStatistics;
   struct bpf_program inputFilterProgram;
+  struct pcap_stat pcapStatisticsNow, pcapStatisticsThen;
 
   // ----------- network header parser ----------
 
@@ -89,13 +91,25 @@ private:
 
   // ----------- assignment functions for output attributes ----------
 
-  uint64_t packetsReceived() { return pcapStatistics.ps_recv; }  
+  SPL::uint64 packetsReceived() { return pcapStatisticsNow.ps_recv; }  
 
-  uint64_t packetsDropped() { return pcapStatistics.ps_drop; }  
+  SPL::uint64 packetsDropped() { return pcapStatisticsNow.ps_drop; }  
 
-  uint64_t packetsProcessed() { return packetCounter; }  
+  SPL::uint64 packetsProcessed() { return packetCounter; }  
 
-  uint64_t octetsProcessed() { return octetCounter; }  
+  SPL::uint64 octetsProcessed() { return octetCounter; }  
+
+  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }  
+
+  SPL::uint64 metricsIntervalPacketsReceived() { return then ? pcapStatisticsNow.ps_recv - pcapStatisticsThen.ps_recv : 0; }  
+
+  SPL::uint64 metricsIntervalPacketsDropped() { return then ? pcapStatisticsNow.ps_drop - pcapStatisticsThen.ps_drop : 0; }  
+
+  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }  
+
+  SPL::uint64 metricsIntervalOctetsProcessed() { return then ? octetCounterNow - octetCounterThen : 0; }  
+
+  SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
   SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
 

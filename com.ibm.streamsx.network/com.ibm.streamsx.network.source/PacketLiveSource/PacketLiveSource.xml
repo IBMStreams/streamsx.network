@@ -16,11 +16,6 @@
           <kind>Counter</kind>
         </metric>
         <metric>
-          <name>nPacketsDroppedByInterfaceCurrent</name>
-          <description>Number of packets dropped in current session by the network interface or its driver.</description>
-          <kind>Counter</kind>
-        </metric>
-        <metric>
           <name>nPacketsProcessedCurrent</name>
           <description>Number of packets procesed by this operator.</description>
           <kind>Counter</kind>

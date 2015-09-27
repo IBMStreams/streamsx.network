@@ -13,26 +13,39 @@ composite LiveDNSMessageParserParallelAnalysis {
 
     param       
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
     expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
     
     type 
     
+	// packet output from PacketLiveSource operator
     PacketType =
         timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch 
         rstring dstAddress,             // string representation of IPv4 destination address
 	    uint64 partitionKey,			// combination of addresses and ports, for downstream @parallel annotation
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
+	// metrics output from PacketLiveSource operator
+	MetricsType = 
+		float64 metricsTime,			// time that metrics were produced, in seconds since Unix epoch 
+	    float64 averagePacketsReceived,	// average number of packets received during last metrics interval
+	    float64 averagePacketsDropped,	// average number of packets dropped during last metrics interval
+	    float64 averagePacketsProcessed,// average number of packets processed during last metrics interval
+	    float64 averageOctetsProcessed;	// average number of octets processed during last metrics interval
+
     graph
 
-    stream<PacketType> PacketStream as Out = PacketLiveSource() {
+    ( stream<PacketType> PacketStream as PacketsOut ;
+	  stream<MetricsType> MetricsStream as MetricsOut ) = PacketLiveSource() {
         param
 			networkInterface: $networkInterface;
-            inputFilter: "udp port 53";
 		    promiscuous: true;
-            metricsInterval: 0.0;
-        output Out:
+            metricsInterval: $metricsInterval;
+            inputFilter: "udp port 53";
+		    outputFilters: true, metricsUpdated();
+        output 
+		PacketsOut:
             captureTime = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
             dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
 		    partitionKey = hashCode(IPV4_SRC_ADDRESS()) + 
@@ -42,8 +55,15 @@ composite LiveDNSMessageParserParallelAnalysis {
 		                   hashCode(IP_SRC_PORT()) + 
 		                   hashCode(IP_DST_PORT()),
             dnsMessage = PAYLOAD_DATA();
+		MetricsOut:
+		    metricsTime = getTimestampInSecs(),
+	        averagePacketsReceived = (float64)metricsIntervalPacketsReceived() / metricsIntervalElapsed(),
+	        averagePacketsDropped = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed(),
+	        averagePacketsProcessed = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
+	        averageOctetsProcessed = (float64)metricsIntervalOctetsProcessed() / metricsIntervalElapsed();
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.LiveDNSMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LiveDNSMessageParserParallelAnalysis.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
 
 	@parallel(width=$parallelChannels, partitionBy=[{port=PacketStream, attributes=[partitionKey]}])
 	( stream<LiveDNSAnalytics.PBDNSAnalyticResultType> PBDNSAnalyticResultStream ;

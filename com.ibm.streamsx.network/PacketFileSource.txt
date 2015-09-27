@@ -253,6 +253,26 @@ following functions, which are specific to this operator:
       bytes of packet data that have been processed so far. When an input filter
       is specified, this value includes only the packets that pass the filter.
 
+  boolean metricsUpdated() -- This function returns 'true' for the first output
+      tuple produced during each metrics interval, and 'false' for all
+      subsequent output tuples during the same interval.
+
+  float64 metricsIntervalElapsed() -- This function assigns the elapsed time
+      since the last metrics interval, in seconds, with a resolution of at least
+      microseconds.
+
+  uint64 metricsIntervalPacketsReceived() -- This function always returns zero.
+
+  uint64 metricsIntervalPacketsDropped() -- This function always returns zero.
+
+  uint64 metricsIntervalPacketsProcessed() -- This function assigns the number
+      of packets that were processed during the last metrics interval. This
+      value remains unchanged during the current interval.
+
+  uint64 metricsIntervalOctetsProcessed() -- This function assigns the number of
+      bytes that were processed during the last metrics interval. This value
+      remains unchanged during the current interval.
+
    uint32 CAPTURE_SECONDS() -- This function assigns the time when the packet was
       originally captured (not the time when it was read from the PCAP file) to an
       output attribute.  The value is represented as seconds since the beginning
@@ -388,7 +408,16 @@ the thread and terminates the operator.
 _____Metrics_____
 
 
-The PacketFileSource operator has no Streams metrics.
+The PacketFileSource operator provides these Streams metrics when it is executed
+in Distributed mode application:
+
+  * nPacketsProcessedCurrent: number of packets processed by the operator.  When
+    an input filter is specified, this includes only packets that pass the
+    filter.
+
+  * nOctetsProcessedCurrent: number of bytes of packet data processed by the
+    operator.  When an input filter is specified, this includes only packets
+    that pass the filter.
 
 
 _____Exceptions_____

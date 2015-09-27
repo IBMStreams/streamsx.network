@@ -20,6 +20,10 @@ composite TestPacketFileSourceFull {
 	PacketType =
 	    uint64 packetsProcessed, 			// total number of packets processed by operator, so far
 	    uint64 octetsProcessed,				// total number of octets of packet data processed by operator, so far
+	    float64 metricsIntervalElapsed,			// elapsed time since last metrics interval, in seconds
+	    uint64 metricsIntervalPacketsProcessed,	// number of packets processed since last metrics interval
+	    uint64 metricsIntervalOctetsProcessed,	// number of octets processed since last metrics interval
+	    boolean metricsUpdated,					// true if metrics have been updated since previous output tuple
 		uint32 CAPTURE_SECONDS,				// time that packet was captured, in seconds since Unix epoch 
 		uint32 CAPTURE_MICROSECONDS,		// time since CAPTURE_SECONDS, in microseconds
 		list<uint8>[6] ETHER_SRC_ADDRESS,	// ethernet source address, or empty list if 'raw IP' PCAP recording
@@ -67,6 +71,10 @@ composite TestPacketFileSourceFull {
 		output Out:
 			packetsProcessed = packetsProcessed(),
 			octetsProcessed = octetsProcessed(),
+	        metricsIntervalElapsed = metricsIntervalElapsed(),				
+	        metricsIntervalPacketsProcessed = metricsIntervalPacketsProcessed(),	
+	        metricsIntervalOctetsProcessed = metricsIntervalOctetsProcessed(),	
+	        metricsUpdated = metricsUpdated(),					
 		    CAPTURE_SECONDS = CAPTURE_SECONDS(),	
 		    CAPTURE_MICROSECONDS = CAPTURE_MICROSECONDS(),	
 			ETHER_SRC_ADDRESS = ETHER_SRC_ADDRESS(),

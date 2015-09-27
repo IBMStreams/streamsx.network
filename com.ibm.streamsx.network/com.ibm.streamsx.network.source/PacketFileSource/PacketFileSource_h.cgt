@@ -22,6 +22,10 @@ my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegio
 #include <pcap-bpf.h>
 
 #include <streams_boost/filesystem.hpp>
+#include <streams_boost/lexical_cast.hpp>
+
+#include <SPL/Runtime/Common/Metric.h>
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
 
 #include "parse/NetworkHeaderParser.h"
 
@@ -74,10 +78,11 @@ public:
 
   // ----------- operator state variables ----------
 
-  uint64_t packetCounter;
-  uint64_t octetCounter;
   uint64_t startTimeInNanoseconds;
   double now, then;
+  uint64_t packetCounter, packetCounterNow, packetCounterThen;
+  uint64_t octetCounter, octetCounterNow, octetCounterThen;
+  bool metricsUpdate;
   boolean done;
 
   // ----------- libpcap-specific variables ----------
@@ -102,6 +107,18 @@ public:
   SPL::uint64 packetsProcessed() { return packetCounter; }  
 
   SPL::uint64 octetsProcessed() { return octetCounter; }  
+
+  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }  
+
+  SPL::uint64 metricsIntervalPacketsReceived() { return 0; }
+
+  SPL::uint64 metricsIntervalPacketsDropped() { return 0; }
+
+  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }  
+
+  SPL::uint64 metricsIntervalOctetsProcessed() { return then ? octetCounterNow - octetCounterThen : 0; }  
+
+  SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
   SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
 
