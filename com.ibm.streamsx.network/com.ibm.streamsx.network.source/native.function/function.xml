@@ -3,7 +3,7 @@
 
   <function:functionSet>
     <function:headerFileName></function:headerFileName>
-    <function:cppNamespaceName>common_result_functions</function:cppNamespaceName>
+    <function:cppNamespaceName>PacketLiveSource_result_functions</function:cppNamespaceName>
     <function:functions>
 
           <function:function>
@@ -14,20 +14,6 @@
             <function:description></function:description>
             <function:prototype>public uint64 packetsDropped()</function:prototype>
           </function:function>
-          <function:function>
-            <function:description></function:description>
-            <function:prototype>public uint64 packetsProcessed()</function:prototype>
-          </function:function>
-          <function:function>
-            <function:description></function:description>
-            <function:prototype>public uint64 octetsProcessed()</function:prototype>
-          </function:function>
-
-
-          <function:function>
-            <function:description></function:description>
-            <function:prototype>public float64 metricsIntervalElapsed()</function:prototype>
-          </function:function>
 
           <function:function>
             <function:description></function:description>
@@ -37,6 +23,28 @@
           <function:function>
             <function:description></function:description>
             <function:prototype>public uint64 metricsIntervalPacketsDropped()</function:prototype>
+          </function:function>
+
+    </function:functions>
+  </function:functionSet>
+
+  <function:functionSet>
+    <function:headerFileName></function:headerFileName>
+    <function:cppNamespaceName>common_result_functions</function:cppNamespaceName>
+    <function:functions>
+
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint64 packetsProcessed()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint64 octetsProcessed()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public float64 metricsIntervalElapsed()</function:prototype>
           </function:function>
 
           <function:function>
@@ -53,7 +61,6 @@
             <function:description></function:description>
             <function:prototype>public boolean metricsUpdated()</function:prototype>
           </function:function>
-
 
           <function:function>
             <function:description></function:description>

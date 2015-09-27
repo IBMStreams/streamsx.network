@@ -100,19 +100,11 @@ public:
 
   // ----------- assignment functions for output attributes ----------
 
-  SPL::uint64 packetsReceived() { return 0; }  
-
-  SPL::uint64 packetsDropped() { return 0; }  
-
   SPL::uint64 packetsProcessed() { return packetCounter; }  
 
   SPL::uint64 octetsProcessed() { return octetCounter; }  
 
   SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }  
-
-  SPL::uint64 metricsIntervalPacketsReceived() { return 0; }
-
-  SPL::uint64 metricsIntervalPacketsDropped() { return 0; }
 
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }  
 

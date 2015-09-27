@@ -54,10 +54,11 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 <%SPL::CodeGen::implementationPrologue($model);%>
 
 
-// calls to SPL functions within expressions are generated with this
-// namespace, which must be mapped to the operator's namespace so they
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
 // will invoke the functions defined in the PacketLiveSource_h.cgt file
 
+#define PacketLiveSource_result_functions MY_OPERATOR
 #define common_result_functions MY_OPERATOR
 
 

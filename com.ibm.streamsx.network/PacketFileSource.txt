@@ -241,10 +241,6 @@ with explicit assignment expressions, or implicitly by copy from input tuples
 (when an input port is specified).  Assignment expressions may use any of the
 following functions, which are specific to this operator:
 
-   uint64 packetsReceived() -- This function always assigns zero.
-
-   uint64 packetsDropped() -- This function always assigns zero.
-
    uint64 packetsProcessed() -- This function assigns the total number of input
       packets that have been processed so far. When an input filter is
       specified, this value includes only the packets that pass the filter.
@@ -260,10 +256,6 @@ following functions, which are specific to this operator:
   float64 metricsIntervalElapsed() -- This function assigns the elapsed time
       since the last metrics interval, in seconds, with a resolution of at least
       microseconds.
-
-  uint64 metricsIntervalPacketsReceived() -- This function always returns zero.
-
-  uint64 metricsIntervalPacketsDropped() -- This function always returns zero.
 
   uint64 metricsIntervalPacketsProcessed() -- This function assigns the number
       of packets that were processed during the last metrics interval. This
