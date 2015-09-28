@@ -49,6 +49,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 networkInterface=ens6f3
+inputFilter="udp port 53"
 metricsInterval=1.0
 timeoutInterval=10.0
 )
@@ -77,7 +78,7 @@ step "configuration for standalone application '$namespace.$composite' ..."
 echo -e "\ntrace level: $traceLevel"
 
 step "building standalone application '$namespace.$composite' ..."
-sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
+sc "${compilerOptionsList[@]}" -- "${compileTimeParameterList[@]}" || die "Sorry, could not build '$composite', $?" 
 
 step "unbundling standalone application '$namespace.$composite' ..."
 bundle=$buildDirectory/$namespace.$composite.sab
@@ -90,6 +91,6 @@ standalone=$unbundleDirectory/$composite/bin/standalone
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
 
 step "executing standalone application '$namespace.$composite' ..."
-$standalone -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+$standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
 
 exit 0

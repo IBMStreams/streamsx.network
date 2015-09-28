@@ -13,6 +13,7 @@ composite LiveDNSMessageParserParallelAnalysis {
 
     param       
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+	expression<rstring> $inputFilter: getSubmissionTimeValue("inputFilter", "udp port 53");
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
     expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
@@ -42,7 +43,7 @@ composite LiveDNSMessageParserParallelAnalysis {
 			networkInterface: $networkInterface;
 		    promiscuous: true;
             metricsInterval: $metricsInterval;
-            inputFilter: "udp port 53";
+            inputFilter: $inputFilter;
 		    outputFilters: true, metricsUpdated();
         output 
 		PacketsOut:
