@@ -52,6 +52,7 @@ networkInterface=ens6f3
 "inputFilter=udp port 53"
 metricsInterval=1.0
 timeoutInterval=10.0
+errorStream=true
 parallelChannels=3
 )
 
