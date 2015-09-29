@@ -93,8 +93,7 @@ class NetworkHeaderParser {
 		// (note that field tests are not in natural order so the 'if' will fail faster in the usual case)
 		if ( length>=sizeof(struct JMirrorHeaders) ) {
 			struct JMirrorHeaders& jmirror = *(struct JMirrorHeaders*)buffer;
-			if ( ntohs(jmirror.udpHeader.source)==jmirrorPort && 
-				 ntohs(jmirror.udpHeader.dest)==jmirrorPort &&
+			if ( ntohs(jmirror.udpHeader.dest)==jmirrorPort &&
 				 jmirror.ipHeader.ip_v==4 && 
 				 jmirror.ipHeader.ip_hl==5 && 
 				 jmirror.ipHeader.ip_p==IPPROTO_UDP ) {

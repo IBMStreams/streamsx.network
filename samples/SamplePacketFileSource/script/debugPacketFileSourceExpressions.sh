@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestDNSMessageParserParallelAnalysis
+composite=TestPacketFileSourceExpressions
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -47,9 +47,6 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
-#pcapFilename=$HOME/data.haifa/dns_tunneling_long.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_hour.pcap
-parallelChannels=3
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -80,7 +77,7 @@ sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, co
 
 step "executing standalone application '$namespace.$composite' ..."
 executable=$buildDirectory/bin/$namespace.$composite
-$executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+$here/debugthis.sh $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0
 
