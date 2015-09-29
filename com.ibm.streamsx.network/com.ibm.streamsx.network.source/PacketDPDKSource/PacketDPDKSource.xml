@@ -212,26 +212,6 @@
 	</cmn:managedLibrary>
 	</library>
 
-	<library>
-	<cmn:description>
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:lib>json</cmn:lib>
-	<cmn:libPath>/usr/lib64</cmn:libPath>
-	<cmn:includePath>/usr/include/json</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
-
-	<library>
-	<cmn:description>
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:lib>json-c</cmn:lib>
-	<cmn:libPath>/usr/lib64</cmn:libPath>
-	<cmn:includePath>/usr/include/json-c</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
-
 	</libraryDependencies>
 	<providesSingleThreadedContext>Always</providesSingleThreadedContext>
       <allowCustomLogic>true</allowCustomLogic>
