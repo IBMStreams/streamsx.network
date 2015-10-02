@@ -70,43 +70,54 @@ class DHCPMessageParser {
 
   // These functions convert DHCP options into various SPL types
 
-  SPL::boolean dhcpOptionAsBoolean(const int index) { 
-	return dhcpOptions[index] && dhcpOptions[index]->length==1 ? dhcpOptions[index]->data[0]!=0 : false; }
+  SPL::boolean dhcpOptionAsBoolean(const uint8_t index) { 
+	if ( !dhcpOptions[index] ) return false;
+	if ( dhcpOptions[index]->length!=1 ) { error = "option length not 1"; return false; }
+	return dhcpOptions[index]->data[0]!=0; }
 
-  SPL::rstring dhcpOptionAsString(const int index) { 
-	return dhcpOptions[index] && dhcpOptions[index]->length>0 ? SPL::rstring((char*)dhcpOptions[index]->data, (char*)dhcpOptions[index]->data + dhcpOptions[index]->length) : SPL::rstring(); }
+  SPL::rstring dhcpOptionAsString(const uint8_t index) { 
+	if ( !dhcpOptions[index] ) return SPL::rstring();
+	return SPL::rstring((char*)dhcpOptions[index]->data, (char*)dhcpOptions[index]->data + dhcpOptions[index]->length); }
 
-  SPL::uint8 dhcpOptionAsUint8(const int index) { 
-	return dhcpOptions[index] && dhcpOptions[index]->length==1 ? dhcpOptions[index]->data[0] : 0; }
+  SPL::uint8 dhcpOptionAsUint8(const uint8_t index) { 
+	if ( !dhcpOptions[index] ) return 0;
+	if ( dhcpOptions[index]->length!=1 ) { error = "option length not 1"; return 0; }
+	return dhcpOptions[index]->data[0]; }
 
-  SPL::uint16 dhcpOptionAsUint16(const int index) { 
-	if ( !dhcpOptions[index] || dhcpOptions[index]->length != 2 ) return 0;
+  SPL::uint16 dhcpOptionAsUint16(const uint8_t index) { 
+	if ( !dhcpOptions[index] ) return 0;
+	if ( dhcpOptions[index]->length != 2 ) { error = "option length not 2"; return 0; }
 	uint16_t* value = (uint16_t*)dhcpOptions[index]->data;
 	return ntohs(*value); }
 
-  SPL::int32 dhcpOptionAsInt32(const int index) { 
-	if ( !dhcpOptions[index] || dhcpOptions[index]->length != 4 ) return 0;
+  SPL::int32 dhcpOptionAsInt32(const uint8_t index) { 
+	if ( !dhcpOptions[index] ) return 0;
+	if ( dhcpOptions[index]->length != 4 ) { error = "option length not 4"; return 0; }
 	int32_t* p = (int32_t*)dhcpOptions[index]->data;
 	return ntohl(*p); }
 
-  SPL::uint32 dhcpOptionAsUint32(const int index) { 
-	if ( !dhcpOptions[index] || dhcpOptions[index]->length != 4 ) return 0;
+  SPL::uint32 dhcpOptionAsUint32(const uint8_t index) { 
+	if ( !dhcpOptions[index] ) return 0;
+	if ( dhcpOptions[index]->length != 4 ) { error = "option length not 4"; return 0; }
 	uint32_t* p = (uint32_t*)dhcpOptions[index]->data;
 	return ntohl(*p); }
 
-  SPL::list<SPL::uint8> dhcpOptionAsListUint8(const int index) { 
-	return dhcpOptions[index] && dhcpOptions[index]->length>0 ? SPL::list<SPL::uint8>(dhcpOptions[index]->data, dhcpOptions[index]->data + dhcpOptions[index]->length) : SPL::list<SPL::uint8>(); }
+  SPL::list<SPL::uint8> dhcpOptionAsListUint8(const uint8_t index) { 
+	if ( !dhcpOptions[index] ) return SPL::list<SPL::uint8>();
+	return SPL::list<SPL::uint8>(dhcpOptions[index]->data, dhcpOptions[index]->data + dhcpOptions[index]->length); }
 
-  SPL::list<SPL::uint16> dhcpOptionAsListUint16(int index) { 
+  SPL::list<SPL::uint16> dhcpOptionAsListUint16(uint8_t index) { 
 	SPL::list<SPL::uint16> values;
-	if ( !dhcpOptions[index] || dhcpOptions[index]->length % 2 != 0 ) return values;
+	if ( !dhcpOptions[index] ) return values;
+	if ( dhcpOptions[index]->length % 2 != 0 ) { error = "option length not multiple of 2"; return values; }
 	for (uint16_t* p = (uint16_t*)dhcpOptions[index]->data; (uint8_t*)p < dhcpOptions[index]->data + dhcpOptions[index]->length; p++) {
 	  values.add(ntohs(*p)); }
 	return values; }
 
-  SPL::list<SPL::uint32> dhcpOptionAsListUint32(const int index) { 
+  SPL::list<SPL::uint32> dhcpOptionAsListUint32(const uint8_t index) { 
 	SPL::list<SPL::uint32> values;
-	if ( !dhcpOptions[index] || dhcpOptions[index]->length % 4 != 0 ) return values;
+	if ( !dhcpOptions[index] ) return values;
+	if ( dhcpOptions[index]->length % 4 != 0 ) { error = "option length not multiple of 4"; return values; }
 	for (uint32_t* p = (uint32_t*)dhcpOptions[index]->data; (uint8_t*)p < dhcpOptions[index]->data + dhcpOptions[index]->length; p++) {
 	  values.add(ntohl(*p)); }
 	return values; }

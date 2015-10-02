@@ -24,7 +24,7 @@ composite TestDNSMessageParserFull {
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     DNSMessageType = 
-      float64 captureTime,              // time that packet was captured, in seconds since Unix epoch 
+      rstring captureTime,              // time that packet was captured, in seconds since Unix epoch 
       rstring ipSourceAddress,          // IP source address
       rstring ipDestinationAddress,     // IP destination address
       boolean parseError,
@@ -71,7 +71,7 @@ composite TestDNSMessageParserFull {
 	// error output from DNSMessageParser operator
 	DNSErrorType = 
 	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-      float64 captureTime,          	// time that packet was captured, in seconds since Unix epoch 
+      rstring captureTime,          	// time that packet was captured, in seconds since Unix epoch 
       rstring ipSourceAddress,        	// binary representation of IP source address
       rstring ipDestinationAddress,     // IP destination address
       rstring parseErrorDescription,
@@ -104,6 +104,7 @@ composite TestDNSMessageParserFull {
           messageAttribute: dnsMessage;
 	      outputFilters: true, parseError();
       output OutMessage:
+	      captureTime = formatEpochTime(captureTime),
           parseError = parseError(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
@@ -145,6 +146,7 @@ composite TestDNSMessageParserFull {
           DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
           DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA();
 	  OutError:
+	      captureTime = formatEpochTime(captureTime),
 	      parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
 	      dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());

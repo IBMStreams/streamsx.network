@@ -36,327 +36,327 @@
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint8 OPCODE()</function:prototype>
+        <function:prototype>public uint8 DHCP_OPCODE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint8 CLIENT_HARDWARE_TYPE()</function:prototype>
+        <function:prototype>public uint8 DHCP_CLIENT_HARDWARE_TYPE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint8> CLIENT_HARDWARE_ADDRESS()</function:prototype>
+        <function:prototype>public list&lt;uint8> DHCP_CLIENT_HARDWARE_ADDRESS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint8 HOP_COUNT()</function:prototype>
+        <function:prototype>public uint8 DHCP_HOP_COUNT()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 TRANSACTION_IDENTIFIER()</function:prototype>
+        <function:prototype>public uint32 DHCP_TRANSACTION_IDENTIFIER()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint16 SECONDS()</function:prototype>
+        <function:prototype>public uint16 DHCP_SECONDS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint16 FLAGS()</function:prototype>
+        <function:prototype>public uint16 DHCP_FLAGS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 CLIENT_ADDRESS()</function:prototype>
+        <function:prototype>public uint32 DHCP_CLIENT_ADDRESS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 YOUR_ADDRESS()</function:prototype>
+        <function:prototype>public uint32 DHCP_YOUR_ADDRESS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 DHCP_SERVER()</function:prototype>
+        <function:prototype>public uint32 DHCP_SERVER_NEXT()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 RELAY_AGENT()</function:prototype>
+        <function:prototype>public uint32 DHCP_RELAY_AGENT()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring SERVER_HOSTNAME()</function:prototype>
+        <function:prototype>public rstring DHCP_SERVER_HOSTNAME()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring BOOTFILE_NAME()</function:prototype>
+        <function:prototype>public rstring DHCP_BOOTFILE_NAME()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 SUBNET_MASK()</function:prototype>
+        <function:prototype>public uint32 DHCP_SUBNET_MASK()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public int32 TIME_OFFSET()</function:prototype>
+        <function:prototype>public int32 DHCP_TIME_OFFSET()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> ROUTERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_ROUTERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> TIME_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_TIME_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NAME_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NAME_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> DNS_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_DNS_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> LOG_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_LOG_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> COOKIE_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_COOKIE_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> LPR_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_LPR_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> IMPRESS_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_IMPRESS_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> RESOURCE_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_RESOURCE_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring HOST_NAME()</function:prototype>
+        <function:prototype>public rstring DHCP_HOST_NAME()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint16 BOOT_FILE_SIZE()</function:prototype>
+        <function:prototype>public uint16 DHCP_BOOT_FILE_SIZE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring MERIT_DUMP_FILE()</function:prototype>
+        <function:prototype>public rstring DHCP_MERIT_DUMP_FILE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring DOMAIN_NAME()</function:prototype>
+        <function:prototype>public rstring DHCP_DOMAIN_NAME()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 SWAP_SERVER()</function:prototype>
+        <function:prototype>public uint32 DHCP_SWAP_SERVER()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring ROOT_PATH()</function:prototype>
+        <function:prototype>public rstring DHCP_ROOT_PATH()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring EXTENSIONS_PATH()</function:prototype>
+        <function:prototype>public rstring DHCP_EXTENSIONS_PATH()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean IP_FORWARDING()</function:prototype>
+        <function:prototype>public boolean DHCP_IP_FORWARDING()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean NONLOCAL_SOURCE_ROUTING()</function:prototype>
+        <function:prototype>public boolean DHCP_NONLOCAL_SOURCE_ROUTING()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NONLOCAL_SOURCE_FILTERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NONLOCAL_SOURCE_FILTERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint16 MAXIMUM_REASSEMBLY_SIZE()</function:prototype>
+        <function:prototype>public uint16 DHCP_MAXIMUM_REASSEMBLY_SIZE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint8 IP_DEFAULT_TTL()</function:prototype>
+        <function:prototype>public uint8 DHCP_IP_DEFAULT_TTL()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 MTU_AGING_TIMEOUT()</function:prototype>
+        <function:prototype>public uint32 DHCP_MTU_AGING_TIMEOUT()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint16> MTU_PLATEAU_TABLE()</function:prototype>
+        <function:prototype>public list&lt;uint16> DHCP_MTU_PLATEAU_TABLE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint16 INTERFACE_MTU()</function:prototype>
+        <function:prototype>public uint16 DHCP_INTERFACE_MTU()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean ALL_SUBNETS_LOCAL()</function:prototype>
+        <function:prototype>public boolean DHCP_ALL_SUBNETS_LOCAL()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 BROADCAST_ADDRESS()</function:prototype>
+        <function:prototype>public uint32 DHCP_BROADCAST_ADDRESS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean PERFORM_MASK_DISCOVERY()</function:prototype>
+        <function:prototype>public boolean DHCP_PERFORM_MASK_DISCOVERY()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean MASK_SUPPLIER()</function:prototype>
+        <function:prototype>public boolean DHCP_MASK_SUPPLIER()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean PERFORM_ROUTER_DISCOVERY()</function:prototype>
+        <function:prototype>public boolean DHCP_PERFORM_ROUTER_DISCOVERY()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 ROUTER_SOLICITATION_ADDRESS()</function:prototype>
+        <function:prototype>public uint32 DHCP_ROUTER_SOLICITATION_ADDRESS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> STATIC_ROUTES()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_STATIC_ROUTES()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean TRAILER_ENCAPSULATION()</function:prototype>
+        <function:prototype>public boolean DHCP_TRAILER_ENCAPSULATION()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 ARP_CACHE_TIMEOUT()</function:prototype>
+        <function:prototype>public uint32 DHCP_ARP_CACHE_TIMEOUT()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean ETHERNET_ENCAPSULATION()</function:prototype>
+        <function:prototype>public boolean DHCP_ETHERNET_ENCAPSULATION()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint8 TCP_DEFUALT_TTL()</function:prototype>
+        <function:prototype>public uint8 DHCP_TCP_DEFUALT_TTL()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 TCP_KEEPALIVE_INTERVAL()</function:prototype>
+        <function:prototype>public uint32 DHCP_TCP_KEEPALIVE_INTERVAL()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public boolean TCP_KEEPALIVE_GARBAGE()</function:prototype>
+        <function:prototype>public boolean DHCP_TCP_KEEPALIVE_GARBAGE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring NIS_DOMAIN()</function:prototype>
+        <function:prototype>public rstring DHCP_NIS_DOMAIN()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NIS_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NIS_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NTP_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NTP_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint8> VENDOR_INFORMATION()</function:prototype>
+        <function:prototype>public list&lt;uint8> DHCP_VENDOR_INFORMATION()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NETBIOS_NAME_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NETBIOS_NAME_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NETBIOS_NBDD_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NETBIOS_NBDD_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint8 NETBIOS_NODE_TYPE()</function:prototype>
+        <function:prototype>public uint8 DHCP_NETBIOS_NODE_TYPE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring NETBIOS_SCOPE()</function:prototype>
+        <function:prototype>public rstring DHCP_NETBIOS_SCOPE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> XWINDOW_FONT_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_XWINDOW_FONT_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> XWINDOW_DISPLAY_MANAGERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_XWINDOW_DISPLAY_MANAGERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 REQUESTED_ADDRESS()</function:prototype>
+        <function:prototype>public uint32 DHCP_REQUESTED_ADDRESS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 ADDRESS_LEASE_TIME()</function:prototype>
+        <function:prototype>public uint32 DHCP_ADDRESS_LEASE_TIME()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint8 OPTION_OVERLOAD_FLAGS()</function:prototype>
+        <function:prototype>public uint8 DHCP_OPTION_OVERLOAD_FLAGS()</function:prototype>
       </function:function>
 
       <function:function>
@@ -366,97 +366,97 @@
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 SERVER_ADDRESS()</function:prototype>
+        <function:prototype>public uint32 DHCP_SERVER_ADDRESS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint8> PARAMETER_REQUESTS()</function:prototype>
+        <function:prototype>public list&lt;uint8> DHCP_PARAMETER_REQUESTS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring ERROR_MESSAGE()</function:prototype>
+        <function:prototype>public rstring DHCP_ERROR_MESSAGE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint16 MAXIMUM_DHCP_MESSAGE_SIZE()</function:prototype>
+        <function:prototype>public uint16 DHCP_MAXIMUM_MESSAGE_SIZE()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 RENEWAL_TIME()</function:prototype>
+        <function:prototype>public uint32 DHCP_RENEWAL_TIME()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public uint32 REBINDING_TIME()</function:prototype>
+        <function:prototype>public uint32 DHCP_REBINDING_TIME()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint8> VENDOR_IDENTIFIER()</function:prototype>
+        <function:prototype>public list&lt;uint8> DHCP_VENDOR_IDENTIFIER()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint8> CLIENT_IDENTIFIER()</function:prototype>
+        <function:prototype>public list&lt;uint8> DHCP_CLIENT_IDENTIFIER()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public rstring NISPLUS_DOMAIN()</function:prototype>
+        <function:prototype>public rstring DHCP_NISPLUS_DOMAIN()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NISPLUS_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NISPLUS_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> MOBILE_IP_HOME_AGENTS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_MOBILE_IP_HOME_AGENTS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> SMTP_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_SMTP_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> POP3_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_POP3_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> NNTP_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_NNTP_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> WWW_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_WWW_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> FINGER_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_FINGER_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> IRC_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_IRC_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> STREETTALK_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_STREETTALK_SERVERS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description></function:description>
-        <function:prototype>public list&lt;uint32> STDA_SERVERS()</function:prototype>
+        <function:prototype>public list&lt;uint32> DHCP_STDA_SERVERS()</function:prototype>
       </function:function>
 
     </function:functions>

@@ -26,14 +26,6 @@ use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
 
 
-list<rstring> convertIPV4AddressListToStringList(list<uint32> addresses) {
-  mutable list<rstring> strings = [];
-  for (uint32 address in addresses) { appendM(strings, convertIPV4AddressNumericToString(address)); } 
-  return strings;
-}
-
-
-
 composite TestDHCPMessageParserFull {
 
     param       
@@ -43,13 +35,13 @@ composite TestDHCPMessageParserFull {
     
     PacketType =
 	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        uint32 captureTime,            // time that packet was captured, in seconds since Unix epoch 
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         blob dhcpMessage;                // the DHCP message from a packet, excluding all network headers
 
     DHCPMessageType = 
-        float64 captureTime,              // time that packet was captured, in seconds since Unix epoch 
+        rstring captureTime,              // time that packet was captured, in seconds since Unix epoch 
         rstring ipSourceAddress,          // IP source address
         rstring ipDestinationAddress,     // IP destination address
         boolean parseError,
@@ -61,16 +53,16 @@ composite TestDHCPMessageParserFull {
 	    rstring CLIENT_HARDWARE_ADDRESS, // header: client hardware address
 	    uint8 HOP_COUNT, // header: number of relay agents separating client and server
 	    uint32 TRANSACTION_IDENTIFIER, // header: request correlator, chosen by client, returned by server
-	    uint16 SECONDS, // header: elapsed time, in seconds, since client began request
+	    rstring SECONDS, // header: elapsed time, in seconds, since client began request
 	    uint16 FLAGS, // header: broadcast request
 	    rstring CLIENT_ADDRESS, // header: address of client requesting renewal of lease, as an IPv4 address
 	    rstring YOUR_ADDRESS, // header: address leased to client by server, as an IPv4 address
-	    rstring DHCP_SERVER, // header: address of next server to use, as an IPv4 address
+	    rstring DHCP_SERVER_NEXT, // header: address of next server to use, as an IPv4 address
 	    rstring RELAY_AGENT, // header: IPv4 address of relay agent, as an IPv4 address
 	    rstring SERVER_HOSTNAME, // header or option 66: name of DHCP server, or empty
 	    rstring BOOTFILE_NAME, // header or option 67: boot file pathname, or empty
 	    rstring SUBNET_MASK, // option 1: the subnet mask of the client, as an IPv4 address 
-	    int32 TIME_OFFSET, // option 2: time offset of client's subnet, relative to GMT/UTC, in seconds
+	    rstring TIME_OFFSET, // option 2: time offset of client's subnet, relative to GMT/UTC, in seconds
 	    list<rstring> ROUTERS, // option 3: list of routers on client's subnet, as IPv4 addresses
 	    list<rstring> TIME_SERVERS, // option 4: list of time servers, as IPv4 addresses
 	    list<rstring> NAME_SERVERS, // option 5: list of name servers, as IPv4 addresses
@@ -92,7 +84,7 @@ composite TestDHCPMessageParserFull {
 	    list<rstring> NONLOCAL_SOURCE_FILTERS, // option 21: list of address/mask pairs for filtering source packets
 	    uint16 MAXIMUM_REASSEMBLY_SIZE, // option 22: maximum size of reassembled packets
 	    uint8 IP_DEFAULT_TTL, // option 23: default IP time-to-live for outgoing packets
-	    uint32 MTU_AGING_TIMEOUT, // option 24: time to use when aging path MTU values, in seconds
+	    rstring MTU_AGING_TIMEOUT, // option 24: time to use when aging path MTU values, in seconds
 	    list<uint16> MTU_PLATEAU_TABLE, // option 25: list of MTU sizes for path discovery
 	    uint16 INTERFACE_MTU, // option 26: MTU size to use on this interface
 	    boolean ALL_SUBNETS_LOCAL, // option 27: all subnets use the same MTU size if 'true'
@@ -103,10 +95,10 @@ composite TestDHCPMessageParserFull {
 	    rstring ROUTER_SOLICITATION_ADDRESS, // option 32: address to which router solicitations should be sent
 	    list<rstring> STATIC_ROUTES, // option 33: list of address pairs for routing table, as IPv4 addresses
 	    boolean TRAILER_ENCAPSULATION, // option 34: client should negotiate trailers if 'true'
-	    uint32 ARP_CACHE_TIMEOUT, // option 35: timeout for ARP cache entries, in seconds
+	    rstring ARP_CACHE_TIMEOUT, // option 35: timeout for ARP cache entries, in seconds
 	    boolean ETHERNET_ENCAPSULATION, // option 36: client should use ethernet encapsulation if 'true'
 	    uint8 TCP_DEFUALT_TTL, // option 37: default TCP time-to-live for outgoing segments
-	    uint32 TCP_KEEPALIVE_INTERVAL, // option 38: time the client should wait before sending TCP keepalive messages, in seconds
+	    rstring TCP_KEEPALIVE_INTERVAL, // option 38: time the client should wait before sending TCP keepalive messages, in seconds
 	    boolean TCP_KEEPALIVE_GARBAGE, // option 39: client should send a byte of garbage with TCP keepalive messages if 'true'
 	    rstring NIS_DOMAIN, // option 40: name of client's NIS domain
 	    list<rstring> NIS_SERVERS, // option 41: list of NIS servers, as IPv4 addresses
@@ -119,15 +111,15 @@ composite TestDHCPMessageParserFull {
 	    list<rstring> XWINDOW_FONT_SERVERS, // option 48: list of X-Windows font servers, as IPv4 addresses
 	    list<rstring> XWINDOW_DISPLAY_MANAGERS, // option 49: list of X-Windows display managers, as IPv4 addresses
 	    rstring REQUESTED_ADDRESS, // option 50: client's requested address, as an IPv4 address
-	    uint32 ADDRESS_LEASE_TIME, // option 51: address lease time, in seconds
+	    rstring ADDRESS_LEASE_TIME, // option 51: address lease time, in seconds
 	    uint8 OPTION_OVERLOAD_FLAGS, // option 52: flags indicate that SERVER_HOSTNAME and/or BOOTFILE_NAME contain options
 	    rstring DHCP_MESSAGE_TYPE, // option 53: type of this DHCP message
 	    rstring SERVER_ADDRESS, // option 54: address of DHCP server, as IPv4 address
-	    list<uint8> PARAMETER_REQUESTS, // option 55: list of requested DHCP parameters, as a list of option codes
+	    list<uint8> PARAMETER_REQUESTS, // option 55: list of requested DHCP parameters, specified as option codes
 	    rstring ERROR_MESSAGE, // option 56: error message from server, if request failed
 	    uint16 MAXIMUM_DHCP_MESSAGE_SIZE, // option 57: maximum size of DHCP message
-	    uint32 RENEWAL_TIME, // option 58: time from address lease to renewal, in seconds
-	    uint32 REBINDING_TIME, // option 59: time from address lease to rebinding, in seconds
+	    rstring RENEWAL_TIME, // option 58: time from address lease to renewal, in seconds
+	    rstring REBINDING_TIME, // option 59: time from address lease to rebinding, in seconds
 	    list<uint8> VENDOR_IDENTIFIER, // option 60: vendor-specific information
 	    list<uint8> CLIENT_IDENTIFIER, // option 61: client-specific information
 	    rstring NISPLUS_DOMAIN, // option 64: name of client's NIS+ domain
@@ -147,11 +139,11 @@ composite TestDHCPMessageParserFull {
 	// error output from DHCPMessageParser operator
 	DHCPErrorType = 
 	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-        float64 captureTime,          	// time that packet was captured, in seconds since Unix epoch 
+        rstring captureTime,          	// time that packet was captured, in seconds since Unix epoch 
         rstring ipSourceAddress,        	// binary representation of IP source address
         rstring ipDestinationAddress,     // IP destination address
-        rstring parseErrorDescription,
-        uint32 parseErrorOffset,
+        rstring parserError,
+	    rstring dhcpError,
 	    rstring dhcpMessage;
 
     graph
@@ -163,7 +155,7 @@ composite TestDHCPMessageParserFull {
             metricsInterval: 0.0;
         output Out:
 		    packetNumber = packetsProcessed(),
-            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+            captureTime = CAPTURE_SECONDS(),	
             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dhcpMessage = PAYLOAD_DATA();
@@ -174,104 +166,105 @@ composite TestDHCPMessageParserFull {
 	  stream<DHCPErrorType> DHCPErrorStream as OutError ) = DHCPMessageParser(PacketStream) {
         logic state: { 
 		  map<uint8,rstring> dhcpTypes = { 1: "DHCPDISCOVER", 2: "DHCPOFFER", 3: "DHCPREQUEST", 4: "DHCPDECLINE", 5: "DHCPACK", 6: "DHCPNAK", 7: "DHCPRELEASE", 8: "DHCPINFORM" };
-//        map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; 
 		} 
       param
           messageAttribute: dhcpMessage;
-	      outputFilters: true, parseError();
+	      outputFilters: true, parseError() || length(DHCP_ERROR_MESSAGE())>0;
       output OutMessage:
+		  captureTime = formatEpochDateTime(captureTime),
           parseError = parseError(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
           messagesProcessed = messagesProcessed(),
-          OPCODE = OPCODE(),
-          CLIENT_HARDWARE_TYPE = CLIENT_HARDWARE_TYPE(),
-          CLIENT_HARDWARE_ADDRESS = convertMACAddressNumericToString((list<uint8>[6])CLIENT_HARDWARE_ADDRESS()),
-          HOP_COUNT = HOP_COUNT(),
-          TRANSACTION_IDENTIFIER = TRANSACTION_IDENTIFIER(),
-          SECONDS = SECONDS(),
-          FLAGS = FLAGS(),
-          CLIENT_ADDRESS = convertIPV4AddressNumericToString(CLIENT_ADDRESS()),
-          YOUR_ADDRESS = convertIPV4AddressNumericToString(YOUR_ADDRESS()),
-          DHCP_SERVER = convertIPV4AddressNumericToString(DHCP_SERVER()),
-          RELAY_AGENT = convertIPV4AddressNumericToString(RELAY_AGENT()),
-          SERVER_HOSTNAME = SERVER_HOSTNAME(),
-          BOOTFILE_NAME = BOOTFILE_NAME(),
-          SUBNET_MASK = convertIPV4AddressNumericToString(SUBNET_MASK()),
-          TIME_OFFSET = TIME_OFFSET(),
-          ROUTERS = convertIPV4AddressListToStringList(ROUTERS()),
-          TIME_SERVERS = convertIPV4AddressListToStringList(TIME_SERVERS()),
-          NAME_SERVERS = convertIPV4AddressListToStringList(NAME_SERVERS()),
-          DNS_SERVERS = convertIPV4AddressListToStringList(DNS_SERVERS()),
-          LOG_SERVERS = convertIPV4AddressListToStringList(LOG_SERVERS()),
-          COOKIE_SERVERS = convertIPV4AddressListToStringList(COOKIE_SERVERS()),
-          LPR_SERVERS = convertIPV4AddressListToStringList(LPR_SERVERS()),
-          IMPRESS_SERVERS = convertIPV4AddressListToStringList(IMPRESS_SERVERS()),
-          RESOURCE_SERVERS = convertIPV4AddressListToStringList(RESOURCE_SERVERS()),
-          HOST_NAME = HOST_NAME(),
-          BOOT_FILE_SIZE = BOOT_FILE_SIZE(),
-          MERIT_DUMP_FILE = MERIT_DUMP_FILE(),
-          DOMAIN_NAME = DOMAIN_NAME(),
-          SWAP_SERVER = convertIPV4AddressNumericToString(SWAP_SERVER()),
-          ROOT_PATH = ROOT_PATH(),
-          EXTENSIONS_PATH = EXTENSIONS_PATH(),
-          IP_FORWARDING = IP_FORWARDING(),
-          NONLOCAL_SOURCE_ROUTING = NONLOCAL_SOURCE_ROUTING(),
-          NONLOCAL_SOURCE_FILTERS = convertIPV4AddressListToStringList(NONLOCAL_SOURCE_FILTERS()),
-          MAXIMUM_REASSEMBLY_SIZE = MAXIMUM_REASSEMBLY_SIZE(),
-          IP_DEFAULT_TTL = IP_DEFAULT_TTL(),
-          MTU_AGING_TIMEOUT = MTU_AGING_TIMEOUT(),
-          MTU_PLATEAU_TABLE = MTU_PLATEAU_TABLE(),
-          INTERFACE_MTU = INTERFACE_MTU(),
-          ALL_SUBNETS_LOCAL = ALL_SUBNETS_LOCAL(),
-          BROADCAST_ADDRESS = convertIPV4AddressNumericToString(BROADCAST_ADDRESS()),
-          PERFORM_MASK_DISCOVERY = PERFORM_MASK_DISCOVERY(),
-          MASK_SUPPLIER = MASK_SUPPLIER(),
-          PERFORM_ROUTER_DISCOVERY = PERFORM_ROUTER_DISCOVERY(),
-          ROUTER_SOLICITATION_ADDRESS = convertIPV4AddressNumericToString(ROUTER_SOLICITATION_ADDRESS()),
-          STATIC_ROUTES = convertIPV4AddressListToStringList(STATIC_ROUTES()),
-          TRAILER_ENCAPSULATION = TRAILER_ENCAPSULATION(),
-          ARP_CACHE_TIMEOUT = ARP_CACHE_TIMEOUT(),
-          ETHERNET_ENCAPSULATION = ETHERNET_ENCAPSULATION(),
-          TCP_DEFUALT_TTL = TCP_DEFUALT_TTL(),
-          TCP_KEEPALIVE_INTERVAL = TCP_KEEPALIVE_INTERVAL(),
-          TCP_KEEPALIVE_GARBAGE = TCP_KEEPALIVE_GARBAGE(),
-          NIS_DOMAIN = NIS_DOMAIN(),
-          NIS_SERVERS = convertIPV4AddressListToStringList(NIS_SERVERS()),
-          NTP_SERVERS = convertIPV4AddressListToStringList(NTP_SERVERS()),
-          VENDOR_INFORMATION = VENDOR_INFORMATION(),
-          NETBIOS_NAME_SERVERS = convertIPV4AddressListToStringList(NETBIOS_NAME_SERVERS()),
-          NETBIOS_NBDD_SERVERS = convertIPV4AddressListToStringList(NETBIOS_NBDD_SERVERS()),
-          NETBIOS_NODE_TYPE = NETBIOS_NODE_TYPE(),
-          NETBIOS_SCOPE = NETBIOS_SCOPE(),
-          XWINDOW_FONT_SERVERS = convertIPV4AddressListToStringList(XWINDOW_FONT_SERVERS()),
-          XWINDOW_DISPLAY_MANAGERS = convertIPV4AddressListToStringList(XWINDOW_DISPLAY_MANAGERS()),
-          REQUESTED_ADDRESS = convertIPV4AddressNumericToString(REQUESTED_ADDRESS()),
-          ADDRESS_LEASE_TIME = ADDRESS_LEASE_TIME(),
-          OPTION_OVERLOAD_FLAGS = OPTION_OVERLOAD_FLAGS(),
+          OPCODE = DHCP_OPCODE(),
+          CLIENT_HARDWARE_TYPE = DHCP_CLIENT_HARDWARE_TYPE(),
+          CLIENT_HARDWARE_ADDRESS = convertMACAddressNumericToString((list<uint8>[6])DHCP_CLIENT_HARDWARE_ADDRESS()),
+          HOP_COUNT = DHCP_HOP_COUNT(),
+          TRANSACTION_IDENTIFIER = DHCP_TRANSACTION_IDENTIFIER(),
+          SECONDS = formatElapsedTime((uint32)DHCP_SECONDS()),
+          FLAGS = DHCP_FLAGS(),
+          CLIENT_ADDRESS = convertIPV4AddressNumericToString(DHCP_CLIENT_ADDRESS()),
+          YOUR_ADDRESS = convertIPV4AddressNumericToString(DHCP_YOUR_ADDRESS()),
+          DHCP_SERVER_NEXT = convertIPV4AddressNumericToString(DHCP_SERVER_NEXT()),
+          RELAY_AGENT = convertIPV4AddressNumericToString(DHCP_RELAY_AGENT()),
+          SERVER_HOSTNAME = DHCP_SERVER_HOSTNAME(),
+          BOOTFILE_NAME = DHCP_BOOTFILE_NAME(),
+          SUBNET_MASK = convertIPV4AddressNumericToString(DHCP_SUBNET_MASK()),
+          TIME_OFFSET = (DHCP_TIME_OFFSET()<0 ? "- " : "+ ") + formatElapsedTime((uint32)abs(DHCP_TIME_OFFSET())), 
+          ROUTERS = convertIPV4AddressListToStringList(DHCP_ROUTERS()),
+          TIME_SERVERS = convertIPV4AddressListToStringList(DHCP_TIME_SERVERS()),
+          NAME_SERVERS = convertIPV4AddressListToStringList(DHCP_NAME_SERVERS()),
+          DNS_SERVERS = convertIPV4AddressListToStringList(DHCP_DNS_SERVERS()),
+          LOG_SERVERS = convertIPV4AddressListToStringList(DHCP_LOG_SERVERS()),
+          COOKIE_SERVERS = convertIPV4AddressListToStringList(DHCP_COOKIE_SERVERS()),
+          LPR_SERVERS = convertIPV4AddressListToStringList(DHCP_LPR_SERVERS()),
+          IMPRESS_SERVERS = convertIPV4AddressListToStringList(DHCP_IMPRESS_SERVERS()),
+          RESOURCE_SERVERS = convertIPV4AddressListToStringList(DHCP_RESOURCE_SERVERS()),
+          HOST_NAME = DHCP_HOST_NAME(),
+          BOOT_FILE_SIZE = DHCP_BOOT_FILE_SIZE(),
+          MERIT_DUMP_FILE = DHCP_MERIT_DUMP_FILE(),
+          DOMAIN_NAME = DHCP_DOMAIN_NAME(),
+          SWAP_SERVER = convertIPV4AddressNumericToString(DHCP_SWAP_SERVER()),
+          ROOT_PATH = DHCP_ROOT_PATH(),
+          EXTENSIONS_PATH = DHCP_EXTENSIONS_PATH(),
+          IP_FORWARDING = DHCP_IP_FORWARDING(),
+          NONLOCAL_SOURCE_ROUTING = DHCP_NONLOCAL_SOURCE_ROUTING(),
+          NONLOCAL_SOURCE_FILTERS = convertIPV4AddressListToStringList(DHCP_NONLOCAL_SOURCE_FILTERS()),
+          MAXIMUM_REASSEMBLY_SIZE = DHCP_MAXIMUM_REASSEMBLY_SIZE(),
+          IP_DEFAULT_TTL = DHCP_IP_DEFAULT_TTL(),
+          MTU_AGING_TIMEOUT = formatElapsedTime(DHCP_MTU_AGING_TIMEOUT()),
+          MTU_PLATEAU_TABLE = DHCP_MTU_PLATEAU_TABLE(),
+          INTERFACE_MTU = DHCP_INTERFACE_MTU(),
+          ALL_SUBNETS_LOCAL = DHCP_ALL_SUBNETS_LOCAL(),
+          BROADCAST_ADDRESS = convertIPV4AddressNumericToString(DHCP_BROADCAST_ADDRESS()),
+          PERFORM_MASK_DISCOVERY = DHCP_PERFORM_MASK_DISCOVERY(),
+          MASK_SUPPLIER = DHCP_MASK_SUPPLIER(),
+          PERFORM_ROUTER_DISCOVERY = DHCP_PERFORM_ROUTER_DISCOVERY(),
+          ROUTER_SOLICITATION_ADDRESS = convertIPV4AddressNumericToString(DHCP_ROUTER_SOLICITATION_ADDRESS()),
+          STATIC_ROUTES = convertIPV4AddressListToStringList(DHCP_STATIC_ROUTES()),
+          TRAILER_ENCAPSULATION = DHCP_TRAILER_ENCAPSULATION(),
+          ARP_CACHE_TIMEOUT = formatElapsedTime(DHCP_ARP_CACHE_TIMEOUT()),
+          ETHERNET_ENCAPSULATION = DHCP_ETHERNET_ENCAPSULATION(),
+          TCP_DEFUALT_TTL = DHCP_TCP_DEFUALT_TTL(),
+          TCP_KEEPALIVE_INTERVAL = formatElapsedTime(DHCP_TCP_KEEPALIVE_INTERVAL()),
+          TCP_KEEPALIVE_GARBAGE = DHCP_TCP_KEEPALIVE_GARBAGE(),
+          NIS_DOMAIN = DHCP_NIS_DOMAIN(),
+          NIS_SERVERS = convertIPV4AddressListToStringList(DHCP_NIS_SERVERS()),
+          NTP_SERVERS = convertIPV4AddressListToStringList(DHCP_NTP_SERVERS()),
+          VENDOR_INFORMATION = DHCP_VENDOR_INFORMATION(),
+          NETBIOS_NAME_SERVERS = convertIPV4AddressListToStringList(DHCP_NETBIOS_NAME_SERVERS()),
+          NETBIOS_NBDD_SERVERS = convertIPV4AddressListToStringList(DHCP_NETBIOS_NBDD_SERVERS()),
+          NETBIOS_NODE_TYPE = DHCP_NETBIOS_NODE_TYPE(),
+          NETBIOS_SCOPE = DHCP_NETBIOS_SCOPE(),
+          XWINDOW_FONT_SERVERS = convertIPV4AddressListToStringList(DHCP_XWINDOW_FONT_SERVERS()),
+          XWINDOW_DISPLAY_MANAGERS = convertIPV4AddressListToStringList(DHCP_XWINDOW_DISPLAY_MANAGERS()),
+          REQUESTED_ADDRESS = convertIPV4AddressNumericToString(DHCP_REQUESTED_ADDRESS()),
+          ADDRESS_LEASE_TIME = formatElapsedTime(DHCP_ADDRESS_LEASE_TIME()),
+          OPTION_OVERLOAD_FLAGS = DHCP_OPTION_OVERLOAD_FLAGS(),
           DHCP_MESSAGE_TYPE = DHCP_MESSAGE_TYPE() in dhcpTypes ? dhcpTypes[DHCP_MESSAGE_TYPE()] : (rstring)DHCP_MESSAGE_TYPE(),
-          SERVER_ADDRESS = convertIPV4AddressNumericToString(SERVER_ADDRESS()),
-          PARAMETER_REQUESTS = PARAMETER_REQUESTS(),
-          ERROR_MESSAGE = ERROR_MESSAGE(),
-          MAXIMUM_DHCP_MESSAGE_SIZE = MAXIMUM_DHCP_MESSAGE_SIZE(),
-          RENEWAL_TIME = RENEWAL_TIME(),
-          REBINDING_TIME = REBINDING_TIME(),
-          VENDOR_IDENTIFIER = VENDOR_IDENTIFIER(),
-          CLIENT_IDENTIFIER = CLIENT_IDENTIFIER(),
-          NISPLUS_DOMAIN = NISPLUS_DOMAIN(),
-          NISPLUS_SERVERS = convertIPV4AddressListToStringList(NISPLUS_SERVERS()),
-          MOBILE_IP_HOME_AGENTS = convertIPV4AddressListToStringList(MOBILE_IP_HOME_AGENTS()),
-          SMTP_SERVERS = convertIPV4AddressListToStringList(SMTP_SERVERS()),
-          POP3_SERVERS = convertIPV4AddressListToStringList(POP3_SERVERS()),
-          NNTP_SERVERS = convertIPV4AddressListToStringList(NNTP_SERVERS()),
-          WWW_SERVERS = convertIPV4AddressListToStringList(WWW_SERVERS()),
-          FINGER_SERVERS = convertIPV4AddressListToStringList(FINGER_SERVERS()),
-          IRC_SERVERS = convertIPV4AddressListToStringList(IRC_SERVERS()),
-          STREETTALK_SERVERS = convertIPV4AddressListToStringList(STREETTALK_SERVERS()),
-          STDA_SERVERS = convertIPV4AddressListToStringList(STDA_SERVERS());
+          SERVER_ADDRESS = convertIPV4AddressNumericToString(DHCP_SERVER_ADDRESS()),
+          PARAMETER_REQUESTS = DHCP_PARAMETER_REQUESTS(),
+          ERROR_MESSAGE = DHCP_ERROR_MESSAGE(),
+          MAXIMUM_DHCP_MESSAGE_SIZE = DHCP_MAXIMUM_MESSAGE_SIZE(),
+          RENEWAL_TIME = formatElapsedTime(DHCP_RENEWAL_TIME()),
+          REBINDING_TIME = formatElapsedTime(DHCP_REBINDING_TIME()),
+          VENDOR_IDENTIFIER = DHCP_VENDOR_IDENTIFIER(),
+          CLIENT_IDENTIFIER = DHCP_CLIENT_IDENTIFIER(),
+          NISPLUS_DOMAIN = DHCP_NISPLUS_DOMAIN(),
+          NISPLUS_SERVERS = convertIPV4AddressListToStringList(DHCP_NISPLUS_SERVERS()),
+          MOBILE_IP_HOME_AGENTS = convertIPV4AddressListToStringList(DHCP_MOBILE_IP_HOME_AGENTS()),
+          SMTP_SERVERS = convertIPV4AddressListToStringList(DHCP_SMTP_SERVERS()),
+          POP3_SERVERS = convertIPV4AddressListToStringList(DHCP_POP3_SERVERS()),
+          NNTP_SERVERS = convertIPV4AddressListToStringList(DHCP_NNTP_SERVERS()),
+          WWW_SERVERS = convertIPV4AddressListToStringList(DHCP_WWW_SERVERS()),
+          FINGER_SERVERS = convertIPV4AddressListToStringList(DHCP_FINGER_SERVERS()),
+          IRC_SERVERS = convertIPV4AddressListToStringList(DHCP_IRC_SERVERS()),
+          STREETTALK_SERVERS = convertIPV4AddressListToStringList(DHCP_STREETTALK_SERVERS()),
+          STDA_SERVERS = convertIPV4AddressListToStringList(DHCP_STDA_SERVERS());
 	  OutError:
-	      parseErrorDescription = parseErrorDescription(),
-          parseErrorOffset = parseErrorOffset(),
+		  captureTime = formatEpochDateTime(captureTime),
+	      parserError = parseErrorDescription(),
+	      dhcpError = DHCP_ERROR_MESSAGE(),
 	      dhcpMessage = substring((rstring)dhcpMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dhcpMessage, 2*(int32)parseErrorOffset(), 2*size(dhcpMessage)-2*(int32)parseErrorOffset());
     }
     () as DHCPMessageSink = FileSink(DHCPMessageStream) { param file: "debug.TestDHCPMessageParserFull.DHCPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }   

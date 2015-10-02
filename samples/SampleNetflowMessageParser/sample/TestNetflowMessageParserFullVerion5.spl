@@ -25,15 +25,15 @@ composite TestNetflowMessageParserFullVersion5 {
         blob netflowMessage;            // the Netflow message from a packet, excluding all network headers
 
     NetflowMessageType = 
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch 
         boolean parseError,
         rstring parseErrorDescription,
         uint32 parseErrorOffset,
         uint64 messagesProcessed,
 	    uint16 NETFLOW_VERSION, // header: Netflow version 
 	    uint16 NETFLOW_COUNT, // header: number of records (including templates, options, and flows)
-	    float64 NETFLOW_SYSTEM_UPTIME, // header: time since source was booted, in milliseconds converted to seconds
-	    float64 NETFLOW_UNIX_SECONDS, // header: time since beginning of Unix epoch, in seconds
+	    rstring NETFLOW_SYSTEM_UPTIME, // header: time since source was booted, in milliseconds
+	    rstring NETFLOW_UNIX_SECONDS, // header: time since beginning of Unix epoch, in seconds
 	    uint32 NETFLOW_SEQUENCE_NUMBER, // header: sequence number of this message
         uint64 NETFLOW_IN_BYTES, // flow: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
         uint64 NETFLOW_IN_PKTS, // flow: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
@@ -51,8 +51,8 @@ composite TestNetflowMessageParserFullVersion5 {
         rstring NETFLOW_IPV4_NEXT_HOP, // flow: IPv4 address of next-hop router
         uint32 NETFLOW_SRC_AS, // flow: Source BGP autonomous system number where N could be 2 or 4
         uint32 NETFLOW_DST_AS, // flow: Destination BGP autonomous system number where N could be 2 or 4
-        float64 NETFLOW_LAST_SWITCHED, // flow: System uptime at which the last packet of this flow was switched, in milliseconds
-        float64 NETFLOW_FIRST_SWITCHED, // flow: System uptime at which the first packet of this flow was switched, in milliseconds
+        rstring NETFLOW_LAST_SWITCHED, // flow: System uptime at which the last packet of this flow was switched, in milliseconds
+        rstring NETFLOW_FIRST_SWITCHED, // flow: System uptime at which the first packet of this flow was switched, in milliseconds
         uint64 NETFLOW_OUT_BYTES, // flow: Outgoing counter with length N x 8 bits for the number of bytes associated with an IP Flow
         uint64 NETFLOW_OUT_PKTS, // flow: Outgoing counter with length N x 8 bits for the number of packets associated with an IP Flow.
         uint32 NETFLOW_SAMPLING_INTERVAL, // flow: When using sampled NetFlow, the rate at which packets are sampled i.e.: a value of 100 indicates that one of every 100 packets is sampled
@@ -78,14 +78,15 @@ composite TestNetflowMessageParserFullVersion5 {
           messageAttribute: netflowMessage;
 	      sourceAttribute: netflowSource;
       output Out:
+	    captureTime = formatEpochTime(captureTime),
         parseError = parseError(),
         parseErrorDescription = parseErrorDescription(),
         parseErrorOffset = parseErrorOffset(),
         messagesProcessed = messagesProcessed(),
 	    NETFLOW_VERSION = NETFLOW_VERSION(), // header: Netflow version 
 	    NETFLOW_COUNT = NETFLOW_COUNT(), // header: number of records (including templates, options, and flows)
-	    NETFLOW_SYSTEM_UPTIME = (float64)NETFLOW_SYSTEM_UPTIME()/1000.0, // header: time since source was booted, in milliseonds, converted to seconds
-	    NETFLOW_UNIX_SECONDS = (float64)NETFLOW_UNIX_SECONDS() + (float64)NETFLOW_UNIX_NANOSECONDS()/1000000000.0, // header: time since beginning of Unix epoch, in seconds
+	    NETFLOW_SYSTEM_UPTIME = formatElapsedTime((float64)NETFLOW_SYSTEM_UPTIME()/1000.0, 3u), // header: time since source was booted, in milliseonds, converted to seconds
+	    NETFLOW_UNIX_SECONDS = formatEpochTime((float64)NETFLOW_UNIX_SECONDS() + (float64)NETFLOW_UNIX_NANOSECONDS()/1000000000.0), // header: time since beginning of Unix epoch, in seconds
 	    NETFLOW_SEQUENCE_NUMBER = NETFLOW_SEQUENCE_NUMBER(), // header: sequence number of this message
         NETFLOW_IN_BYTES = NETFLOW_IN_BYTES(), // flow: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
         NETFLOW_IN_PKTS = NETFLOW_IN_PKTS(), // flow: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
@@ -103,8 +104,8 @@ composite TestNetflowMessageParserFullVersion5 {
         NETFLOW_IPV4_NEXT_HOP = convertIPV4AddressNumericToString(NETFLOW_IPV4_NEXT_HOP()), // flow: IPv4 address of next-hop router
         NETFLOW_SRC_AS = NETFLOW_SRC_AS(), // flow: Source BGP autonomous system number where N could be 2 or 4
         NETFLOW_DST_AS = NETFLOW_DST_AS(), // flow: Destination BGP autonomous system number where N could be 2 or 4
-        NETFLOW_LAST_SWITCHED = (float64)NETFLOW_LAST_SWITCHED()/1000.0, // flow: System uptime at which the last packet of this flow was switched
-        NETFLOW_FIRST_SWITCHED = (float64)NETFLOW_FIRST_SWITCHED()/1000.0, // flow: System uptime at which the first packet of this flow was switched
+        NETFLOW_LAST_SWITCHED = formatElapsedTime((float64)NETFLOW_LAST_SWITCHED()/1000.0, 3u), // flow: System uptime at which the last packet of this flow was switched
+        NETFLOW_FIRST_SWITCHED = formatElapsedTime((float64)NETFLOW_FIRST_SWITCHED()/1000.0, 3u), // flow: System uptime at which the first packet of this flow was switched
         NETFLOW_OUT_BYTES = NETFLOW_OUT_BYTES(), // flow: Outgoing counter with length N x 8 bits for the number of bytes associated with an IP Flow
         NETFLOW_OUT_PKTS = NETFLOW_OUT_PKTS(), // flow: Outgoing counter with length N x 8 bits for the number of packets associated with an IP Flow.
         NETFLOW_SAMPLING_INTERVAL = NETFLOW_SAMPLING_INTERVAL(), // flow: When using sampled NetFlow, the rate at which packets are sampled i.e.: a value of 100 indicates that one of every 100 packets is sampled

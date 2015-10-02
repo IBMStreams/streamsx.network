@@ -23,7 +23,7 @@ composite TestDNSMessageParserBasic {
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     DNSMessageType = 
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch 
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         boolean isResponse,
@@ -58,6 +58,7 @@ composite TestDNSMessageParserBasic {
       param
           messageAttribute: dnsMessage;
       output Out:
+	  	  captureTime = formatEpochTime(captureTime),
           isResponse = DNS_RESPONSE_FLAG(),
           responseCode = DNS_RESPONSE_CODE() in dnsResponseCodes ? dnsResponseCodes[DNS_RESPONSE_CODE()] : (rstring)DNS_RESPONSE_CODE(),
           questionName = DNS_QUESTION_NAME(),

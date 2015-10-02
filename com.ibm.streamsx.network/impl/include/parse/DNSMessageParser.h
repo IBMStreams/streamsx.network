@@ -480,10 +480,11 @@ class DNSMessageParser {
 	if ( ( nameserverRecordCount = copyResourceRecords(nameserverRecords, nameserverCount, true ) ) < nameserverCount)  return;
 	if ( ( additionalRecordCount = copyResourceRecords(additionalRecords, additionalCount, true ) ) < additionalCount)  return;
 
-	// copy the CNAME and A/AAAA/TXT 'answer' records into separate arrays
+	// copy the CNAME and A/AAAA 'answer' records into separate arrays
 	for (int i=0; i<answerRecordCount; i++) {
 	  switch(answerRecords[i].type) {
 	  case 1:  // type A record   
+	  case 12: // type PTR record
 	  case 28: // type AAAA record
 		addressRecords[addressRecordCount++] = answerRecords[i]; break;
 	  case 5:  // type CNAME record

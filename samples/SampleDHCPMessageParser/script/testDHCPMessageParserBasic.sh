@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestDNSMessageParserFull
+composite=TestDHCPMessageParserBasic
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -46,9 +46,9 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_second.pcap
-#pcapFilename=$HOME/data.haifa/dns_tunneling_long_errors.pcap
+#capFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
+#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_minute.pcap
+pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_hour.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

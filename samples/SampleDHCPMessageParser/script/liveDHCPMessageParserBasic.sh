@@ -9,17 +9,28 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestDNSMessageParserFull
+composite=LiveDHCPMessageParserBasic
 
+self=$( basename $0 .sh )
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 toolkitDirectory=$( cd $here/../../.. ; pwd )
 
 buildDirectory=$projectDirectory/output/build/$composite
 
+unbundleDirectory=$projectDirectory/output/unbundle/$composite
+
 dataDirectory=$projectDirectory/data
 
 libpcapDirectory=$HOME/libpcap-1.7.4
+
+leasePort=12345
+
+leaseWindowOptions=(
+-title "$self: DHCP leases"
+-geometry 120x20
++sb
+)
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
@@ -46,9 +57,10 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_second.pcap
-#pcapFilename=$HOME/data.haifa/dns_tunneling_long_errors.pcap
+networkInterface=ens6f3
+metricsInterval=1.0
+timeoutInterval=60.0
+leasePort=$leasePort
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -77,9 +89,21 @@ echo -e "\ntrace level: $traceLevel"
 step "building standalone application '$namespace.$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
+step "unbundling standalone application '$namespace.$composite' ..."
+bundle=$buildDirectory/$namespace.$composite.sab
+[ -f $bundle ] || die "sorry, bundle '$bundle' not found"
+spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
+
+step "setting capabilities for standalone application '$namespace.$composite' ..."
+standalone=$unbundleDirectory/$composite/bin/standalone
+[ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
+sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+
+step "opening window for TCP stream from standalone application '$namespace.$composite' ..."
+( xterm "${leaseWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $leasePort && break ; sleep 1 ; done " ) &
+
 step "executing standalone application '$namespace.$composite' ..."
-executable=$buildDirectory/bin/$namespace.$composite
-$executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+$standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
 
 exit 0
 
