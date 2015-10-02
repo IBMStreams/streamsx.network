@@ -5,13 +5,6 @@
 
 use com.ibm.streamsx.network.source::*;
 
-<%
-	# Example to set the number of NIC interfaces
-	use integer;
-	my $numNics = 1;
-	print STDERR "Building the application for $numNics NIC interfaces.\n";
-%>
-
 /* Simple example application which configures the DPDP source and 
  * sends the packet data to a file.
  *
@@ -38,36 +31,52 @@ type PacketData = uint64 timestampMicroseconds,
 
 public composite TestPacketDPDKSource {   
 	graph   
-        // One extract per NIC port/queue -- e.g. 4 NICs each with
+        // One instance per NIC port/queue -- e.g. 4 NICs each with
 	// a single queue require 4 instances.  Note that the pmdDriver
 	// and coreMask parameters should be constant for all instances.
-        <% for(my $i=0; $i<($numNics); ++$i) { %>
-        (stream<PacketData>  PacketStream_<%=$i%> )
-                       = PacketDPDKSource() {
+        (stream<PacketData>  PacketStream_0 ) = PacketDPDKSource() {
             param
-		pmdDriver: "/home/engebret/apps/network/dpdk-2.0.0/build/lib/librte_pmd_e1000.so";
-                coreMask: "0x3";
-                lcore   : <%=$i+1%>;
-                nicPort : <%=$i%>;
+		// pmdDriver: "/home/engebret/apps/network/dpdk-2.0.0/build/lib/librte_pmd_e1000.so";
+		pmdDriver: " ";
+                coreMask: "0x7";
+                lcore   : 1;
+                nicPort : 1;
                 nicQueue: 0;
                 promiscuous: true;
                 metricsInterval: 1.0;
             output 
-                PacketStream_<%=$i%>:
+                PacketStream_0:
                     timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
                     packet = PACKET_DATA(),
                     length = (uint64) PACKET_LENGTH();
         } 
 
-        () as FS_PacketData_<%=$i%> = FileSink( PacketStream_<%=$i%> ) {
+        () as FS_PacketData_0 = FileSink( PacketStream_0 ) {
             param
-                file : "PacketStream"+(rstring)<%=$i%>+".out";
+                file : "PacketStream0.out";
         }
 
-        <%
-        }
-        %>
+        (stream<PacketData>  PacketStream_1 ) = PacketDPDKSource() {
+            param
+		// pmdDriver: "/home/engebret/apps/network/dpdk-2.0.0/build/lib/librte_pmd_e1000.so";
+		pmdDriver: " ";
+                coreMask: "0x7";
+                lcore   : 1;
+                nicPort : 3;
+                nicQueue: 0;
+                promiscuous: true;
+                metricsInterval: 1.0;
+            output 
+                PacketStream_1:
+                    timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
+                    packet = PACKET_DATA(),
+                    length = (uint64) PACKET_LENGTH();
+        } 
 
+        () as FS_PacketData_1 = FileSink( PacketStream_1 ) {
+            param
+                file : "PacketStream1.out";
+        }
 	config
 	    placement : partitionColocation('SinglePE');
 	    tracing   : trace;

@@ -195,31 +195,20 @@
 	</library>
 
 	<library>
+	<cmn:description>
+	</cmn:description>
+	<cmn:managedLibrary>
+	<cmn:libPath>../../impl/lib/source</cmn:libPath>
+	<cmn:includePath>../../impl/include/source</cmn:includePath>
+	</cmn:managedLibrary>
+	</library>
+
+	<library>
 	<cmn:description>streams_source interface to dkdp</cmn:description>
 	<cmn:managedLibrary>
 	<cmn:lib>streams_source</cmn:lib>
-	<cmn:libPath>../../impl/lib</cmn:libPath>
+	<cmn:libPath>../../impl/src/source/dpdk/build/lib</cmn:libPath>
 	<cmn:includePath>../../impl/src/source/dpdk</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
-
-	<library>
-	<cmn:description>
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:lib>json</cmn:lib>
-	<cmn:libPath>/usr/lib64</cmn:libPath>
-	<cmn:includePath>/usr/include/json</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
-
-	<library>
-	<cmn:description>
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:lib>json-c</cmn:lib>
-	<cmn:libPath>/usr/lib64</cmn:libPath>
-	<cmn:includePath>/usr/include/json-c</cmn:includePath>
 	</cmn:managedLibrary>
 	</library>
 
