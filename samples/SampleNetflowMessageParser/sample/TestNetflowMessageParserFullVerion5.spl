@@ -78,7 +78,7 @@ composite TestNetflowMessageParserFullVersion5 {
           messageAttribute: netflowMessage;
 	      sourceAttribute: netflowSource;
       output Out:
-	    captureTime = formatEpochTime(captureTime),
+	    captureTime = formatEpochDateTime(captureTime),
         parseError = parseError(),
         parseErrorDescription = parseErrorDescription(),
         parseErrorOffset = parseErrorOffset(),

@@ -104,7 +104,7 @@ composite TestDNSMessageParserFull {
           messageAttribute: dnsMessage;
 	      outputFilters: true, parseError();
       output OutMessage:
-	      captureTime = formatEpochTime(captureTime),
+	      captureTime = formatEpochDateTime(captureTime),
           parseError = parseError(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),

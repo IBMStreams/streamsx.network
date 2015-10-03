@@ -35,8 +35,13 @@ configured. Malformed DNS messages may produce incomplete output tuples. Parsing
 errors are logged in the operator's PE log; applications can filter or label
 malformed DNS messages with output assignment functions.
 
-This operator is part of the network toolkit. The toolkit includes several
-sample applications that illustrate how to use the operator.
+The DNSMessageParser operator is part of the network toolkit. To use it in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.parse::*;
+
+The network toolkit includes several sample applications that illustrate how to
+use the operator.
 
 
 _____Input Ports_____
