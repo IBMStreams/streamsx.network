@@ -13,6 +13,7 @@ composite LiveDNSMessageParserBasic {
 
     param       
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+	expression<rstring> $inputFilter: getSubmissionTimeValue("inputFilter", "udp port 53");
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
     expression<uint32> $lookupPort: (uint32)getSubmissionTimeValue("lookupPort", "23456" );
@@ -51,7 +52,7 @@ composite LiveDNSMessageParserBasic {
         param
 			networkInterface: $networkInterface;
             metricsInterval: $metricsInterval;
-            inputFilter: "udp port 53";
+            inputFilter: $inputFilter;
 		    promiscuous: true;
 		    outputFilters: true, metricsUpdated();
         output 

@@ -9,8 +9,9 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketLiveSourceBasic1
+composite=LiveDNSMessageParserParallelAnalysis
 
+self=$( basename $0 .sh )
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 toolkitDirectory=$( cd $here/../../.. ; pwd )
@@ -28,6 +29,7 @@ instance=CapabilitiesInstance
 
 toolkitList=(
 $toolkitDirectory/com.ibm.streamsx.network
+$toolkitDirectory/samples/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -49,8 +51,12 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eno1
-timeoutInterval=30
+-P networkInterface=ens6f3
+-P "inputFilter=udp port 53"
+-P metricsInterval=1.0
+-P timeoutInterval=30.0
+-P errorStream=true
+-P parallelChannels=3
 )
 
 tracing=info # ... one of ... off, error, warn, info, debug, trace
@@ -88,8 +94,7 @@ sudo chmod o+r -R /tmp/Streams-$domain/logs/$HOSTNAME/instances
 
 step "submitting distributed application '$namespace.$composite' ..."
 bundle=$buildDirectory/$namespace.$composite.sab
-parameters=$( printf ' --P %s' ${submitParameterList[*]} )
-streamtool submitjob -i $instance -d $domain --config tracing=$tracing $parameters $bundle || die "sorry, could not submit application '$composite', $?"
+streamtool submitjob -i $instance -d $domain --config tracing=$tracing "${submitParameterList[@]}" $bundle || die "sorry, could not submit application '$composite', $?"
 
 step "waiting while application runs ..."
 sleep 25
@@ -99,9 +104,6 @@ streamtool getlog -i $instance -d $domain --includeapps --file $logDirectory/$co
 
 step "cancelling distributed application '$namespace.$composite' ..."
 jobs=$( streamtool lspes -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
-#streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} --trace trace || die "sorry, could not cancel application, $!"
 streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
 
 exit 0
-
-
