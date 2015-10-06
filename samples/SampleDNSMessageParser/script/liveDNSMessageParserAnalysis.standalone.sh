@@ -9,15 +9,16 @@
 #set -o pipefail
 
 namespace=sample
-composite=LiveDNSMessageParserParallelAnalysis
+composite=LiveDNSMessageParserAnalysis
 
+self=$( basename $0 .sh )
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 toolkitDirectory=$( cd $here/../../.. ; pwd )
 
-buildDirectory=$projectDirectory/output/build/$composite
+buildDirectory=$projectDirectory/output/build/$composite.standalone
 
-unbundleDirectory=$projectDirectory/output/unbundle/$composite
+unbundleDirectory=$projectDirectory/output/unbundle/$composite.standalone
 
 dataDirectory=$projectDirectory/data
 
@@ -53,7 +54,6 @@ networkInterface=ens6f3
 metricsInterval=1.0
 timeoutInterval=10.0
 errorStream=true
-parallelChannels=3
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -88,7 +88,7 @@ bundle=$buildDirectory/$namespace.$composite.sab
 spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
 
 step "setting capabilities for standalone application '$namespace.$composite' ..."
-standalone=$unbundleDirectory/$composite/bin/standalone
+standalone=$unbundleDirectory/$composite.standalone/bin/standalone
 [ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
 
@@ -96,4 +96,3 @@ step "executing standalone application '$namespace.$composite' ..."
 $standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
 
 exit 0
-

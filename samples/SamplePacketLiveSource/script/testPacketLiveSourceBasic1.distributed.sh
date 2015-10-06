@@ -50,7 +50,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 networkInterface=eno1
-timeoutInterval=30.0
+timeoutInterval=30
 )
 
 tracing=info # ... one of ... off, error, warn, info, debug, trace
@@ -83,13 +83,16 @@ echo -e "\ntracing: $tracing"
 step "building distributed application '$namespace.$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
+step "granting read permission for instance '$instance' log directory to user '$USER' ..."
+sudo chmod o+r -R /tmp/Streams-$domain/logs/$HOSTNAME/instances
+
 step "submitting distributed application '$namespace.$composite' ..."
 bundle=$buildDirectory/$namespace.$composite.sab
 parameters=$( printf ' --P %s' ${submitParameterList[*]} )
 streamtool submitjob -i $instance -d $domain --config tracing=$tracing $parameters $bundle || die "sorry, could not submit application '$composite', $?"
 
 step "waiting while application runs ..."
-sleep 15
+sleep 25
 
 step "getting logs for instance $instance ..."
 streamtool getlog -i $instance -d $domain --includeapps --file $logDirectory/$composite.distributed.logs.tar.gz || die "sorry, could not get logs, $!"

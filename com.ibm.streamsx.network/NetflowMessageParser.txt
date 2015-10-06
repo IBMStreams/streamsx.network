@@ -45,8 +45,13 @@ messages may produce incomplete output tuples. Parsing errors are logged in the
 operator's PE log; applications can filter or label malformed Netflow messages
 with output assignment functions.
 
-This operator is part of the network toolkit. The toolkit includes several
-sample applications that illustrate how to use the operator.
+The NetflowMessageParser operator is part of the network toolkit. To use it in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.parse::*;
+
+The network toolkit includes several sample applications that illustrate how to
+use the operator.
 
 
 _____Input Ports_____
@@ -121,9 +126,9 @@ attributes with the result functions described below.
 All attributes of all output ports must be assigned values, either with explicit
 assignment expressions, or implicitly by copy from input tuples.
 
-Output attribute assignments are SPL expressions. They may use any of the
-built-in SPL functions, and any of the following functions, which are specific
-to this operator. 
+Output filters and attribute assignments are SPL expressions. They may use any
+of the built-in SPL functions, and any of the following functions, which are
+specific to this operator.
 
 For Netflow version 5 messages, there are result functions for each field in the
 message header and flow records.  For Netflow version 9 messages, there are
@@ -473,8 +478,8 @@ corresponding field, if present:
 _____Threads_____
 
 
-The PacketFileOperator runs on the thread of the upstream operator that sends input 
-tuples to it. It does not start any threads of its own.
+The NetflowMessageParser runs on the thread of the upstream operator that sends
+input tuples to it. It does not start any threads of its own.
 
 
 _____Metrics_____
@@ -491,8 +496,8 @@ situations:
 
    -- No output ports are specified.
 
-   -- The 'outputFilters' parameter is specified, and the number of expressions specified
-      does not match the number of output ports specified.
+   -- The 'outputFilters' parameter is specified, and the number of expressions
+      specified does not match the number of output ports specified.
 
 
 _____Examples_____

@@ -10,10 +10,8 @@ Network Toolkit: MAC Address functions
 _____Description_____
 
 
-The InfoSphere Streams 'network' toolkit includes functions that transform
-ethernet MAC addresses between string and six-byte binary presentations.  The
-toolkit also includes sample applications that illustrate how to use these
-functions.
+The InfoSphere Streams network toolkit includes functions that transform
+ethernet MAC addresses between string and six-byte binary presentations.  
 
 The toolkit includes these MAC address functions:
 
@@ -30,6 +28,14 @@ The functions use these representations of ethernet MAC addresses:
   * The string representation of a MAC address is passed as an SPL string (that
     is, an 'rstring' type) of hexadecimal characters separated by colons. For
     example, '98:5a:eb:cb:37:db'.
+
+The MAC address functions are part of the network toolkit. To use them in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.mac::*;
+
+The network toolkit includes several sample applications that illustrate how to
+use the functions.
 
 Notes:
 

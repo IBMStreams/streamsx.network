@@ -19,6 +19,7 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 $here/SamplePacketFileSource/script/autotest.sh
 $here/SamplePacketLiveSource/script/autotest.sh
+$here/SampleDHCPMessageParser/script/autotest.sh
 $here/SampleDNSMessageParser/script/autotest.sh
 $here/SampleNetflowMessageParser/script/autotest.sh
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ASCII"?>
-<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+<function:functionModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
   <function:functionSet>
     <function:headerFileName>IPv4AddressFunctions.h</function:headerFileName>
     <function:cppNamespaceName>com::ibm::streamsx::network::ipv4</function:cppNamespaceName>
@@ -37,5 +37,13 @@
         <function:prototype cppName="convertIPV4AddressNumericToHostname">public rstring convertIPV4AddressNumericToHostname(uint32 ip4AddressNumeric)</function:prototype>
       </function:function>
     </function:functions>
+    <function:dependencies>
+      <function:library>
+        <common:description/>
+        <common:managedLibrary>
+          <common:includePath>../../impl/include</common:includePath>
+        </common:managedLibrary>
+      </function:library>
+    </function:dependencies>
   </function:functionSet>
 </function:functionModel>

@@ -73,8 +73,13 @@ by Juniper Networks 'mirror encapsulation', as described here:
 
     http://wiki.wireshark.org/jmirror
 
-This operator is part of the network toolkit. The toolkit includes several
-sample applications that illustrate how to use the operator.
+The PacketFileSource operator is part of the network toolkit. To use it in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.source::*;
+
+The network toolkit includes several sample applications that illustrate how to
+use the operator.
 
 
 _____Dependencies_____
