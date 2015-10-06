@@ -12,12 +12,76 @@
         <function:description>This function converts a string representation of an IPv6 address into a sixteen-byte binary representation. If the string does not represent a valid IPv6 address, zero is returned.</function:description>
         <function:prototype cppName="convertIPV6AddressStringToNumeric">public list&lt;uint8>[16] convertIPV6AddressStringToNumeric(rstring ipv6AddressString)</function:prototype>
       </function:function>
+      <function:function>
+        <function:description>Returns `true` if the *value* parameter contains a valid IPv6 address. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isIPV6Address(rstring value)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *ip1* and *ip2* are valid IPv6 addresses and *ip1* address is equal to *ip2* address. Otherwise returns `false`. </function:description>
+        <function:prototype>public boolean isEqualTo(rstring ip1, rstring ip2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv6 address was provided and the IP address is a link-local address (RFC3513). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isLinkLocal(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv6 address was provided and the IP address is a loopback address (RFC3513). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isLoopback(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv6 address was provided and the IP address is a multicast address (RFC3513). Otherwise returns `false`.</function:description>
+        <function:prototype cppName="">public boolean isMulticast(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description sampleUri="">Returns `true` if a valid IPv6 address was provided and the IP address is a unspecified (RFC3513). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isUnspecified(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv6 address was provided and the IP address is a site-local address (RFC3513). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isSiteLocal(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv6 address was provided and the IP address is an &quot;IPv4-mapped IPv6 address&quot; (RFC3513). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isV4Mapped(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv6 address was provided and the IP address is an &quot;IPv4-compatible IPv6 address&quot; (RFC3513). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isV4Compatible(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *startIP*, *endIP* and *ip* are valid IPv6 addresses and *ip* falls within the range from *startIP* (inclusive) to *endIP* (exclusive). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isInIPRange(rstring startIP, rstring endIP, rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *ip1* and *ip2* are valid IPv6 addresses and *ip1* address is greater than *ip2* address. Otherwise returns `false`. </function:description>
+        <function:prototype>public boolean isGreaterThan(rstring ip1, rstring ip2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *ip1* and *ip2* are valid IPv6 addresses and *ip1* address is less than *ip2* address. Otherwise returns `false`. </function:description>
+        <function:prototype>public boolean isLessThan(rstring ip1, rstring ip2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Return `true` if *ip* address is in the network provided by the *networkCIDR* argument. The *networkCIDR* argument must be a valid IPv6 network in CIDR format and the *ip* argument must be a valid IPv6 address. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isInNetwork(rstring networkCIDR, rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Return `true` if *ip* address is in at least one of the networks provided by the *networkList* argument. Each of the networks in the list must be a valid IPv6 network in CIDR format format and the *ip* argument must be a valid IPv6 address. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isInNetworkList(list&lt;rstring> networkList, rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if the *networkCIDR* argument contains a valid IPv6 network address in CIDR format (i.e. 2001:db8::/32). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isIPV6CIDRNotation(rstring networkCIDR)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Compacts a valid IPv6 address (RFC3513). The *ip* argument must be a valid IPv6 address, otherwise an empty string is returned. </function:description>
+        <function:prototype>public rstring compactIPV6(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Expands a valid IPv6 address (RFC3513). The *ip* argument must be a valid IPv6 address, otherwise an empty string is returned. </function:description>
+        <function:prototype>public rstring expandIPV6(rstring ip)</function:prototype>
+      </function:function>
     </function:functions>
     <function:dependencies>
-      <function:library>
-        <common:description/>
-        <common:managedLibrary/>
-      </function:library>
       <function:library>
         <common:description/>
         <common:managedLibrary>
