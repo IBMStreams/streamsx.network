@@ -20,6 +20,41 @@ The toolkit includes these IP version 6 address functions in the namespace
 
     list<uint8>[16] convertIPV6AddressStringToNumeric(rstring ip6AddressString)
 
+	boolean isIPV6Address(rstring value)
+	
+	boolean isEqualTo(rstring ip1, rstring ip2)
+	
+	boolean isLinkLocal(rstring ip)
+	
+	boolean isLoopback(rstring ip)
+	
+	boolean isMulticast(rstring ip)
+	
+	boolean isUnspecified(rstring ip)
+	
+	boolean isSiteLocal(rstring ip)
+	
+	boolean isV4Mapped(rstring ip)
+	
+	boolean isV4Compatible(rstring ip)
+	
+	boolean isInIPRange(rstring startIP, rstring endIP, rstring ip)
+	
+	boolean isGreaterThan(rstring ip1, rstring ip2)
+	
+	boolean isLessThan(rstring ip1, rstring ip2)
+	
+	boolean isInNetwork(rstring networkCIDR, rstring ip)
+	
+	boolean isInNetworkList(list&lt;rstring> networkList, rstring ip)
+	
+	boolean isIPV6CIDRNotation(rstring networkCIDR)
+	
+	rstring compactIPV6(rstring ip)
+	
+	string expandIPV6(rstring ip)	
+	
+
 The functions use these representations of IP version 6 addresses:
 
   * The sixteen-byte binary representation of an IP version 6 address is a list
