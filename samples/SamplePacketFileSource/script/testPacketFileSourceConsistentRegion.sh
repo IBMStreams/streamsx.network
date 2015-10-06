@@ -21,10 +21,9 @@ dataDirectory=$projectDirectory/data
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
-checkpointDirectory=$HOME/checkpoint
-
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
+domain=ConsistentDomain
 instance=ConsistentInstance
 
 toolkitList=(
@@ -70,7 +69,7 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
-step "configuration for distributed application '$namespace::$composite' ..."
+step "configuration for distributed application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
 ( IFS=$'\n' ; echo -e "\nStreams compiler options:\n${compilerOptionsList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
@@ -78,20 +77,20 @@ step "configuration for distributed application '$namespace::$composite' ..."
 echo -e "\ninstance: $instance"
 echo -e "\ntracing: $tracing"
 
-step "building distributed application '$namespace::$composite' ..."
-sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
+step "building distributed application '$namespace.$composite' ..."
+sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
-step "submitting distributed application '$namespace::$composite' ..."
+step "submitting distributed application '$namespace.$composite' ..."
 bundle=$buildDirectory/$namespace.$composite.sab
 parameters=$( printf ' --P %s' ${submitParameterList[*]} )
-streamtool submitjob --instance-id $instance --config tracing=$tracing $parameters $bundle || die "sorry, could not submit application '$composite', $?"
+streamtool submitjob -i $instance -d $domain --config tracing=$tracing $parameters $bundle || die "sorry, could not submit application '$composite', $?"
 
 step "waiting while application runs ..."
 sleep 5
 
-step "cancelling distributed application '$namespace::$composite' ..."
-jobs=$( streamtool lspes --instance-id $instance | grep $namespace::$composite | gawk '{ print $1 }' )
-streamtool canceljob --instance-id $instance --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
+step "cancelling distributed application '$namespace.$composite' ..."
+jobs=$( streamtool lspes -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
+streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
 
 exit 0
 

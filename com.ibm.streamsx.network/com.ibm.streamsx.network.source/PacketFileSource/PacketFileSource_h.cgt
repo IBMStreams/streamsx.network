@@ -22,6 +22,10 @@ my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegio
 #include <pcap-bpf.h>
 
 #include <streams_boost/filesystem.hpp>
+#include <streams_boost/lexical_cast.hpp>
+
+#include <SPL/Runtime/Common/Metric.h>
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
 
 #include "parse/NetworkHeaderParser.h"
 
@@ -66,7 +70,6 @@ public:
   int32_t processorAffinity;
   double metricsInterval;
   std::string inputFilter;
-  std::vector<std::string> outputFilters;
 
   // ----------- input and output tuples ----------
 
@@ -75,12 +78,11 @@ public:
 
   // ----------- operator state variables ----------
 
-  uint64_t packetCounter;
-  uint64_t octetCounter;
   uint64_t startTimeInNanoseconds;
   double now, then;
-  struct bpf_program inputFilterProgram;
-  std::vector<struct bpf_program> outputFilterPrograms;
+  uint64_t packetCounter, packetCounterNow, packetCounterThen;
+  uint64_t octetCounter, octetCounterNow, octetCounterThen;
+  bool metricsUpdate;
   boolean done;
 
   // ----------- libpcap-specific variables ----------
@@ -88,6 +90,7 @@ public:
   pcap_t* pcapDescriptor;
   struct pcap_pkthdr* pcapHeader;
   const u_char* pcapBuffer;
+  struct bpf_program inputFilterProgram;
 
   // ----------- packet header parser ----------
 
@@ -100,6 +103,14 @@ public:
   SPL::uint64 packetsProcessed() { return packetCounter; }  
 
   SPL::uint64 octetsProcessed() { return octetCounter; }  
+
+  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }  
+
+  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }  
+
+  SPL::uint64 metricsIntervalOctetsProcessed() { return then ? octetCounterNow - octetCounterThen : 0; }  
+
+  SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
   SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
 
@@ -135,9 +146,13 @@ public:
   
   SPL::uint16 IP_DST_PORT() { return UDP_DST_PORT() + TCP_DST_PORT(); }
   
+  SPL::boolean UDP_PORT(SPL::uint16 port) { return headers.udpHeader ? ( ntohs(headers.udpHeader->source)==port || ntohs(headers.udpHeader->dest)==port ) : false; }
+
   SPL::uint16 UDP_SRC_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->source) : 0; }
   
   SPL::uint16 UDP_DST_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->dest) : 0; }
+
+  SPL::boolean TCP_PORT(SPL::uint16 port) { return headers.tcpHeader ? ( ntohs(headers.tcpHeader->source)==port || ntohs(headers.tcpHeader->dest)==port ) : false; }
 
   SPL::uint16 TCP_SRC_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->source) : 0; }
 

@@ -73,8 +73,13 @@ by Juniper Networks 'mirror encapsulation', as described here:
 
     http://wiki.wireshark.org/jmirror
 
-This operator is part of the network toolkit. The toolkit includes several
-sample applications that illustrate how to use the operator.
+The PacketFileSource operator is part of the network toolkit. To use it in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.source::*;
+
+The network toolkit includes several sample applications that illustrate how to
+use the operator.
 
 
 _____Dependencies_____
@@ -191,16 +196,11 @@ _____Parameters_____
       The default value of the 'inputFilter' parameter is an empty string, which
       causes all packets read from the PCAP file to be processed.
 
-   outputFilters -- This optional parameter takes a list of expressions of type
-      'rstring' that specify which input packets should be emitted by the
-      corresponding output port. The number of expressions in the list must
-      match the number of output ports.  The values of the strings must be
-      valid PCAP filter expressions, as defined here:
-
-          http://www.tcpdump.org/manpages/pcap-filter.7.html
-          http://linux.die.net/man/7/pcap-filter
-
-      The default value of the 'outputFilters' parameter is an empty list, which
+   outputFilters -- This optional parameter takes a list of SPL expressions that
+      specify which packets should be emitted by the corresponding output
+      port. The number of expressions in the list must match the number of
+      output ports, and each expression must evaluate to a boolean value.  The
+      default value of the 'outputFilters' parameter is an empty list, which
       causes all packets processed to be emitted by all output ports.
 
    initDelay -- This optional parameter takes an expression of type 'float64'
@@ -253,6 +253,22 @@ following functions, which are specific to this operator:
    uint64 octetsProcessed() -- This function assigns the total number of input
       bytes of packet data that have been processed so far. When an input filter
       is specified, this value includes only the packets that pass the filter.
+
+  boolean metricsUpdated() -- This function returns 'true' for the first output
+      tuple produced during each metrics interval, and 'false' for all
+      subsequent output tuples during the same interval.
+
+  float64 metricsIntervalElapsed() -- This function assigns the elapsed time
+      since the last metrics interval, in seconds, with a resolution of at least
+      microseconds.
+
+  uint64 metricsIntervalPacketsProcessed() -- This function assigns the number
+      of packets that were processed during the last metrics interval. This
+      value remains unchanged during the current interval.
+
+  uint64 metricsIntervalOctetsProcessed() -- This function assigns the number of
+      bytes that were processed during the last metrics interval. This value
+      remains unchanged during the current interval.
 
    uint32 CAPTURE_SECONDS() -- This function assigns the time when the packet was
       originally captured (not the time when it was read from the PCAP file) to an
@@ -328,9 +344,17 @@ following functions, which are specific to this operator:
   uint16 UDP_SRC_PORT() -- This function returns the source port field from
       the UDP header of the packet, if it has one, or zero if not.
   
+  boolean UDP_PORT(uint16 port) -- This function returns 'true' if the packet is
+      a UDP packet and its source or destination port field matches the
+      specified port number, or else it returns 'false'.
+  
   uint16 UDP_DST_PORT() -- This function returns the destination port field from
       the UDP header of the packet, if it has one, or zero if not.
 
+  boolean TCP_PORT(uint16 port) -- This function returns 'true' if the packet is
+      a TCP packet and its source or destination port field matches the
+      specified port number, or else it returns 'false'.
+  
   uint16 TCP_SRC_PORT() -- This function returns the source port field from
       the TCP header of the packet, if it has one, or zero if not.
 
@@ -381,7 +405,16 @@ the thread and terminates the operator.
 _____Metrics_____
 
 
-The PacketFileSource operator has no Streams metrics.
+The PacketFileSource operator provides these Streams metrics when it is executed
+in Distributed mode application:
+
+  * nPacketsProcessedCurrent: number of packets processed by the operator.  When
+    an input filter is specified, this includes only packets that pass the
+    filter.
+
+  * nOctetsProcessedCurrent: number of bytes of packet data processed by the
+    operator.  When an input filter is specified, this includes only packets
+    that pass the filter.
 
 
 _____Exceptions_____

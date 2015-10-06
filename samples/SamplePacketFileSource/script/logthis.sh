@@ -15,6 +15,8 @@ logDirectory=$projectDirectory/log
 
 ################################################################################
 
+[ -n "$1" ] || die "sorry, no argument specified"
+[ -x $1 ] || die "sorry, '$1' is not executable"
 [ -d $logDirectory ] || mkdir -p $logDirectory || die "sorry, could not create directory '$logDirectory', $?"
 
 name=$( basename $1 .sh )

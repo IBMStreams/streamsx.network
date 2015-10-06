@@ -47,6 +47,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
+metricsInterval=1.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -65,19 +66,18 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
-step "configuration for standalone application '$namespace::$composite' ..."
+step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
 ( IFS=$'\n' ; echo -e "\nStreams compiler options:\n${compilerOptionsList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite submission-time parameters:\n${submitParameterList[*]}" )
 echo -e "\ntrace level: $traceLevel"
 
-step "building standalone application '$namespace::$composite' ..."
-sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
+step "building standalone application '$namespace.$composite' ..."
+sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
-step "executing standalone application '$namespace::$composite' ..."
-executable=$buildDirectory/bin/standalone.exe
-#gdb --args 
+step "executing standalone application '$namespace.$composite' ..."
+executable=$buildDirectory/bin/$namespace.$composite
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

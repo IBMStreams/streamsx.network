@@ -1,0 +1,117 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+
+composite TestDHCPMessageParserBasic {
+
+    param       
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    
+    type 
+    
+    PacketType =
+	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
+        uint32 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring ipSourceAddress,        // IP source address
+        rstring ipDestinationAddress,   // IP destination address
+        blob dhcpMessage;               // the DHCP message from a packet, excluding all network headers
+
+    DHCPMessageType = 
+	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring ipSourceAddress,        // IP source address
+        rstring ipDestinationAddress,   // IP destination address
+        uint64 messagesProcessed,
+	    rstring dhcpMessageType, // option 53: type of this DHCP message
+	    rstring dhcpServer, // header: address of DHCP server, as an IPv4 address
+	    rstring dhcpServerError, // option 56: error message from server, if request failed
+	    rstring clientMACAddress, // header: client hardware address
+	    rstring clientIPAddress, // header: address of client requesting renewal of lease, as an IPv4 address
+	    rstring leaseDuration, // option 51: address lease time, in seconds
+	    rstring leasedAddress, // header: address leased to client by server, as an IPv4 address
+	    rstring leasedAddressSubnetMask, // option 1: the subnet mask of the client, as an IPv4 address 
+	    list<rstring> subnetRouters, // option 3: list of routers on client's subnet, as IPv4 addresses
+	    list<rstring> staticRoutes, // option 33: list of address pairs for routing table, as IPv4 addresses
+	    list<rstring> dnsServers, // option 6: list of DNS servers, as IPv4 addresses
+	    rstring hostname, // option 12: hostname of the client 
+	    rstring domainName, // option 15: domain name client should use with DNS
+	    uint32 requestIdentifier, // header: request correlator, chosen by client, returned by server
+	    rstring requestedAddress, // option 50: client's requested address, as an IPv4 address
+	    list<uint8> requestedParameters, // option 55: list of requested DHCP parameters, specified as option codes
+        rstring parseError;
+
+	// error output from DHCPMessageParser operator
+	DHCPErrorType = 
+	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
+        rstring captureTime,          	// time that packet was captured, in seconds since Unix epoch 
+        rstring ipSourceAddress,        // binary representation of IP source address
+        rstring ipDestinationAddress,   // IP destination address
+        rstring parserError,
+	    rstring dhcpError, 				// option 56: error message from server, if request failed
+	    rstring dhcpMessage;
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 67 or udp port 68";
+            metricsInterval: 0.0;
+        output Out:
+		    packetNumber = packetsProcessed(),
+            captureTime = CAPTURE_SECONDS(),	
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dhcpMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDHCPMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+
+    ( stream<DHCPMessageType> DHCPMessageStream as OutMessage ;
+	  stream<DHCPErrorType> DHCPErrorStream as OutError ) = DHCPMessageParser(PacketStream) {
+        logic state: { 
+		  map<uint8,rstring> dhcpTypes = { 1: "DHCPDISCOVER", 2: "DHCPOFFER", 3: "DHCPREQUEST", 4: "DHCPDECLINE", 5: "DHCPACK", 6: "DHCPNAK", 7: "DHCPRELEASE", 8: "DHCPINFORM" };
+		} 
+      param
+          messageAttribute: dhcpMessage;
+	      outputFilters: true, parseError();
+      output OutMessage:
+		  captureTime = formatEpochDateTime(captureTime),
+          messagesProcessed = messagesProcessed(),
+          dhcpMessageType = DHCP_MESSAGE_TYPE() in dhcpTypes ? dhcpTypes[DHCP_MESSAGE_TYPE()] : (rstring)DHCP_MESSAGE_TYPE(),
+          dhcpServer = convertIPV4AddressNumericToString(DHCP_SERVER_ADDRESS()),
+          dhcpServerError = DHCP_ERROR_MESSAGE(),
+          clientMACAddress = convertMACAddressNumericToString((list<uint8>[6])DHCP_CLIENT_HARDWARE_ADDRESS()),
+          clientIPAddress = convertIPV4AddressNumericToString(DHCP_CLIENT_ADDRESS()),
+          leaseDuration = formatElapsedTime(DHCP_ADDRESS_LEASE_TIME()),
+          leasedAddress = convertIPV4AddressNumericToString(DHCP_YOUR_ADDRESS()),
+          leasedAddressSubnetMask = convertIPV4AddressNumericToString(DHCP_SUBNET_MASK()),
+          subnetRouters = convertIPV4AddressListToStringList(DHCP_ROUTERS()),
+          staticRoutes = convertIPV4AddressListToStringList(DHCP_STATIC_ROUTES()),
+          dnsServers = convertIPV4AddressListToStringList(DHCP_DNS_SERVERS()),
+          hostname = DHCP_HOST_NAME(),
+          domainName = DHCP_DOMAIN_NAME(),
+          requestIdentifier = DHCP_TRANSACTION_IDENTIFIER(),
+          requestedAddress = convertIPV4AddressNumericToString(DHCP_REQUESTED_ADDRESS()),
+          requestedParameters = DHCP_PARAMETER_REQUESTS(),
+          parseError = parseErrorDescription();
+	  OutError:
+		  captureTime = formatEpochDateTime(captureTime),
+	      parserError = parseErrorDescription(),
+          dhcpError = DHCP_ERROR_MESSAGE(),
+	      dhcpMessage = substring((rstring)dhcpMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dhcpMessage, 2*(int32)parseErrorOffset(), 2*size(dhcpMessage)-2*(int32)parseErrorOffset());
+    }
+    () as DHCPMessageSink = FileSink(DHCPMessageStream) { param file: "debug.TestDHCPMessageParserBasic.DHCPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    () as DHCPErrorSink = FileSink(DHCPErrorStream) { param file: "debug.TestDHCPMessageParserBasic.DHCPErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+
+
+}
+

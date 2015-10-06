@@ -3,7 +3,7 @@
 ## All Rights Reserved
 
 ### for valid values of 'networkInterface' parameter, type '/sbin/ifconfig' on deployment machine
-### for valid values of 'inputFilter' and 'outputFilters' parameters, see http://www.tcpdump.org/manpages/pcap-filter.7.html or http://linux.die.net/man/7/pcap-filter
+### for valid values of 'inputFilter' and parameter, see http://www.tcpdump.org/manpages/pcap-filter.7.html or http://linux.die.net/man/7/pcap-filter
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require OutputAssignmentGenerator;
@@ -30,8 +30,18 @@ my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParamet
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
 my $timeout = $model->getParameterByName("timeout") ? $model->getParameterByName("timeout")->getValueAt(0)->getCppExpression() : 0;
 my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : undef;
-my @outputFilterList = $model->getParameterByName("outputFilters") ? @{ $model->getParameterByName("outputFilters")->getValues() } : ();
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) { 
+  foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+	my $expression = $value->getCppExpression();
+	push @outputFilterList, $expression;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+  }
+}
 
 # basic safety checks
 SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
@@ -44,11 +54,12 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 <%SPL::CodeGen::implementationPrologue($model);%>
 
 
-// calls to output assignment functions within expressions are generated with
-// an explicit namespace matching the operator tempate name, so it must be
-// equated to the operator's namespace
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the PacketLiveSource_h.cgt file
 
-#define PacketLiveSource MY_OPERATOR
+#define PacketLiveSource_result_functions MY_OPERATOR
+#define common_result_functions MY_OPERATOR
 
 
 
@@ -67,12 +78,14 @@ MY_OPERATOR::MY_OPERATOR()
   processorAffinity = <%=$processorAffinity%>;
   timeout = <%=$timeout%>;
   inputFilter = <%= $inputFilter ? $inputFilter : '""' %>;
-  <% foreach my $outputFilter (@outputFilterList) { bless $outputFilter,"SPL::Operator::Instance::Expression"; print "outputFilters.push_back(" . $outputFilter->getCppExpression() . "); "; } %> ;
   metricsInterval = <%=$metricsInterval%>;
 
   // initialize operator state variables
-  packetCounter = 0;
-  octetCounter = 0;
+  now = then = 0;
+  packetCounter = packetCounterNow = packetCounterThen = 0;
+  octetCounter = octetCounterNow = octetCounterThen = 0;
+  pcapStatisticsNow = pcapStatisticsThen = (const struct pcap_stat){0};
+  metricsUpdate = false;
 
 #if defined(lib_pcap_pcap_h)
 
@@ -179,23 +192,6 @@ MY_OPERATOR::MY_OPERATOR()
 	for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "PacketLiveSource"); }
   } 
 	
-  // if output filters have been specified and they haven't been compiled yet, do that now
-  if ( outputFilterPrograms.size() != outputFilters.size() ) {
-
-	// allocate space for output filter programs
-	struct bpf_program bpfProgram;
-	outputFilterPrograms.assign(outputFilters.size(), bpfProgram);
-
-	// compile output filter programs for each output port
-	for (int i = 0; i<outputFilters.size(); i++) {
-	  SPLLOG(L_INFO, "filtering packets on output port " << i << " with '" << outputFilters[i] << "'", "PacketLiveSource");
-	  int rc = pcap_compile(pcapDescriptor, &outputFilterPrograms[i], outputFilters[i].c_str(), 0, ipMask);
-	  if (rc) THROW (SPLRuntimeOperator, "error compiling output filter '" << outputFilters[i] << "', rc=" << rc << ", " << pcap_geterr(pcapDescriptor));
-	  struct bpf_insn* instruction = outputFilterPrograms[i].bf_insns;
-	  for (int j = 0; j<outputFilterPrograms[i].bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "PacketLiveSource"); }
-	}
-  }
-
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketLiveSource");
 }
 
@@ -244,8 +240,8 @@ void MY_OPERATOR::process(uint32_t idx)
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
     
   switch (idx) {
-  case 0: if (metricsInterval>0) metricsThread(); break;
-  case 1: pcapThread(); break;
+  case 0: pcapThread(); break;
+  case 1: if (metricsInterval>0) metricsThread(); break;
   default: break; }
          
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
@@ -298,7 +294,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-	<% if (scalar(@outputFilterList)) { print "if (bpf_filter(outputFilterPrograms[$i].bf_insns, (const u_char*)buffer, header->len, header->caplen))"; } %> 
+	  <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
 		 {
 		   outTuple<%=$i%>.clear();
 		   <% OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
@@ -306,6 +302,9 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 		   submit(outTuple<%=$i%>, <%=$i%>);
 		 }
 		 <% } %> ;
+
+  // reset the 'metrics updated' flag, in case one of the output ports references it
+  metricsUpdate = false;
 }	
 
 
@@ -341,10 +340,6 @@ void MY_OPERATOR::pcapThread()
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> pcapThread() for " << networkInterface, "PacketLiveSource");
 }
 	
-	
-
-
-
 
 
   // This method executes on a separate thread, calling into libpcap periodically
@@ -358,40 +353,43 @@ void MY_OPERATOR::pcapThread()
 	OperatorMetrics& opm = getContext().getMetrics();
 	Metric* totalPacketsReceived = &opm.getCustomMetricByName("nPacketsReceivedCurrent");
 	Metric* totalPacketsDropped = &opm.getCustomMetricByName("nPacketsDroppedCurrent");
-	Metric* totalPacketsDroppedByInterface = &opm.getCustomMetricByName("nPacketsDroppedByInterfaceCurrent");
 	Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
 	Metric* totalOctetsProcessed = &opm.getCustomMetricByName("nOctetsProcessedCurrent");
 
-	// keep the operator's  statistics in these variables
-	pcapStatistics  = (const struct pcap_stat){0};
-
-	// get statistics periodically and emit a tuple whenever they change
-	double previousStatisticsTime = SPL::Functions::Time::getTimestampInSecs();
+	// get statistics periodically and send them to the runtime
 	while (!getPE().getShutdownRequested()) {
 
 	  // wait until the next interval or the PE is shutting down
-	  now = SPL::Functions::Time::getTimestampInSecs();
-	  const double secondsToWait = then + metricsInterval - now;
+	  const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
 	  if (secondsToWait>0) {
-		SPLLOG(L_DEBUG, "next statistics interval in " << secondsToWait << " seconds", "PacketLiveSource");
+		SPLLOG(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "PacketLiveSource");
 		getPE().blockUntilShutdownRequest(secondsToWait);
-		now = SPL::Functions::Time::getTimestampInSecs();
 	  } else {
-		SPLLOG(L_DEBUG, "missed statistics interval by " << -secondsToWait << " seconds", "PacketLiveSource");
+		SPLLOG(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "PacketLiveSource");
 	  }
 
-	  // get recieved and dropped statistics from 'libpcap'
-	  pcap_stats(pcapDescriptor, &pcapStatistics);
-
-	  // expose the operator's statistics as metrics
-	  totalPacketsReceived->setValue(pcapStatistics.ps_recv);
-	  totalPacketsDropped->setValue(pcapStatistics.ps_drop);
-	  totalPacketsDroppedByInterface->setValue(pcapStatistics.ps_ifdrop);
-	  totalPacketsProcessed->setValue(packetCounter);
-	  totalOctetsProcessed->setValue(octetCounter); 
-	  
-	  // save the current time for the next interval
+	  // store the previous interval's metrics for difference calculations
 	  then = now;
+	  packetCounterThen = packetCounterNow;
+	  octetCounterThen = octetCounterNow;
+	  pcapStatisticsThen.ps_recv = pcapStatisticsNow.ps_recv;
+	  pcapStatisticsThen.ps_drop = pcapStatisticsNow.ps_drop;
+
+	  // get the current interval's counters from 'libpcap' 
+	  now = SPL::Functions::Time::getTimestampInSecs();
+	  pcap_stats(pcapDescriptor, &pcapStatisticsNow);
+	  packetCounterNow = packetCounter;
+	  octetCounterNow = octetCounter;
+	  // ??? SPLLOG(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now) << " received=" << pcapStatisticsNow.ps_recv << " processed=" << packetCounterNow, "PacketLiveSource");
+
+	  // send the operator's metrics to the runtime
+	  totalPacketsReceived->setValue(pcapStatisticsNow.ps_recv);
+	  totalPacketsDropped->setValue(pcapStatisticsNow.ps_drop);
+	  totalPacketsProcessed->setValue(packetCounterNow);
+	  totalOctetsProcessed->setValue(octetCounterNow); 
+	  
+	  // updated metrics will be available to the next output tuple emitted
+	  metricsUpdate = true;
 	}
 
 	SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread() for " << networkInterface, "PacketLiveSource");

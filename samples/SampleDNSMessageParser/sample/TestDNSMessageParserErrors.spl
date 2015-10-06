@@ -25,7 +25,7 @@ composite TestDNSMessageParserErrors {
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
     
     DNSErrorMessageType = 
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch 
         uint64  packetNumber,
         uint32  packetLength,
         rstring ipSourceAddress,        // IP source address
@@ -70,6 +70,7 @@ composite TestDNSMessageParserErrors {
           outputFilters:  parseError();
       output 
       Out:
+	      captureTime = formatEpochTime(captureTime),
           questionName = DNS_QUESTION_NAME(),
           questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
           answerNames = DNS_ANSWER_NAMES(),
