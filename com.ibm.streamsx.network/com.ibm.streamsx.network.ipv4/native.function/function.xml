@@ -36,12 +36,92 @@
         <function:description>This function converts a four-byte binary representation of an IPv4 address into a hostname. If no hostname can be found for the address, an empty string is returned.</function:description>
         <function:prototype cppName="convertIPV4AddressNumericToHostname">public rstring convertIPV4AddressNumericToHostname(uint32 ip4AddressNumeric)</function:prototype>
       </function:function>
+      <function:function>
+        <function:description sampleUri="">Returns a list of all IP addresses in the network. The *networkCIDR* argument must be in CIDR format (i.e. 0.0.0.0/24), otherwise an empty list will be returned.</function:description>
+        <function:prototype>public list&lt;rstring> getAllAddressesInNetwork(rstring networkCIDR)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv4 address was provided and the IP address is not a reserved address. Also returns `true` if the IP address is a &quot;6to4 Relay Anycast&quot; address, since these can be globally routed (RFC6890). In all other cases, will return `false`.</function:description>
+        <function:prototype>public boolean isGlobal(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *ip1* and *ip2* are valid IPv4 addresses and *ip1* address is greater than *ip2* address. Otherwise returns `false`. </function:description>
+        <function:prototype>public boolean isGreaterThan(rstring ip1, rstring ip2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a the *networkCIDR* argument contains a valid network address in CIDR format (i.e. 0.0.0.0/24). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isIPV4CIDRNotation(rstring networkCIDR)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *ip1* and *ip2* are valid IPv4 addresses and *ip1* address is equal to *ip2* address. Otherwise returns `false`. </function:description>
+        <function:prototype>public boolean isEqualTo(rstring ip1, rstring ip2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *startIP*, *endIP* and *ip* are valid IPv4 addresses and *ip* falls within the range from *startIP* (inclusive) to *endIP* (exclusive). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isInIPRange(rstring startIP, rstring endIP, rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Return `true` if *ip* address is in the network provided by the *networkCIDR* argument. The *networkCIDR* argument must be a valid network in CIDR format and the *ip* argument must be a valid IPv4 address. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isInNetwork(rstring networkCIDR, rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Return `true` if *ip* address is in the network provided by the *networkCIDR* argument. The *networkCIDR* argument must be a valid network in CIDR format and the *ip* argument must be a valid IPv4 address. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isInNetwork(rstring networkCIDR, uint32 ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Return `true` if *ip* address is in at least one of the networks provided by the *networkList* argument. Each of the networks in the list must be a valid network in CIDR format format and the *ip* argument must be a valid IPv4 address. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isInNetworkList(list&lt;rstring> networkList, rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *ip1* and *ip2* are valid IPv4 addresses and *ip1* address is less than *ip2* address. Otherwise returns `false`. </function:description>
+        <function:prototype>public boolean isLessThan(rstring ip1, rstring ip2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv4 address was provided and the IP address is a link local address (RFC3927). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isLinkLocal(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description sampleUri="">Returns `true` if a valid IPv4 address was provided and the IP address is a loopback address (RFC6890). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isLoopback(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv4 address was provided and the IP address is a multicast address (RFC5771). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isMulticast(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if *networkCIDR1* and *networkCIDR2* are valid networks in CIDR format and the networks overlap. The networks are considered to be overlapping if at least one IP address is common between the two networks. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv4 address was provided and the IP address is a private address (RFC1918). Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isPrivate(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if a valid IPv4 address was provided and the IP address is a reserved address (RFC1918). An IP address is considered to be reserved if it falls within within one of the special-use address ranges as defined by RFC6890. Otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isReserved(rstring ip)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description sampleUri="">Returns the number of IP addresses between *ipStart* (inclusive) and *ipEnd* (exclusive). Both *ipStart* and *ipEnd* must be valid IPv4 addresses, otherwise a value of `0` is returned.</function:description>
+        <function:prototype>public uint32 numAddressesInIPRange(rstring startIP, rstring endIP)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns the number of IP addresses contained within the network range. The *networkCIDR* argument must be a valid network in CIDR format, otherwise a value of `0` is returned. </function:description>
+        <function:prototype>public uint32 numAddressesInNetwork(rstring networkCIDR)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `-1` if *ip1* is less than *ip2*. Returns `0` if *ip1* is equal to *ip2*. Returns `1` if *ip1* is greater than *ip2*. Both *ip1* and *ip2* must be valid IPv4 addresses, otherwise returns a value of `-2`.</function:description>
+        <function:prototype>public int32 compare(rstring ip1, rstring ip2)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>Returns `true` if the *value* parameter contains a valid IPv4 address in dotted-decimal notation (i.e 0.0.0.0), otherwise returns `false`.</function:description>
+        <function:prototype>public boolean isIPV4Address(rstring value)</function:prototype>
+      </function:function>
     </function:functions>
     <function:dependencies>
       <function:library>
         <common:description/>
         <common:managedLibrary>
-          <common:includePath>../../impl/include</common:includePath>
+          <common:includePath>../../impl/include/</common:includePath>
         </common:managedLibrary>
       </function:library>
     </function:dependencies>
