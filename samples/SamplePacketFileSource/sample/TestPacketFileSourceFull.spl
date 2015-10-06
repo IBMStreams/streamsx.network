@@ -20,6 +20,10 @@ composite TestPacketFileSourceFull {
 	PacketType =
 	    uint64 packetsProcessed, 			// total number of packets processed by operator, so far
 	    uint64 octetsProcessed,				// total number of octets of packet data processed by operator, so far
+	    float64 metricsIntervalElapsed,			// elapsed time since last metrics interval, in seconds
+	    uint64 metricsIntervalPacketsProcessed,	// number of packets processed since last metrics interval
+	    uint64 metricsIntervalOctetsProcessed,	// number of octets processed since last metrics interval
+	    boolean metricsUpdated,					// true if metrics have been updated since previous output tuple
 		uint32 CAPTURE_SECONDS,				// time that packet was captured, in seconds since Unix epoch 
 		uint32 CAPTURE_MICROSECONDS,		// time since CAPTURE_SECONDS, in microseconds
 		list<uint8>[6] ETHER_SRC_ADDRESS,	// ethernet source address, or empty list if 'raw IP' PCAP recording
@@ -39,8 +43,10 @@ composite TestPacketFileSourceFull {
 		rstring IPV6_DST_ADDRESS_AS_STRING,	// string representation of IPv6 destination address
 		uint16 IP_SRC_PORT,					// IP source port, or zero if not UDP or TCP packet
 		uint16 IP_DST_PORT,					// IP destination port, or zero if not UDP or TCP packet
+		boolean UDP_PORT_53,				// UDP source or destination port is '53' if true, else false
 		uint16 UDP_SRC_PORT,				// UDP source port, or zero if not UDP packet
 		uint16 UDP_DST_PORT,				// UDP destination port, or zero if not UDP packet
+		boolean TCP_PORT_80,				// TCP source or destination port is '80' if true, else false
 		uint16 TCP_SRC_PORT,				// TCP source port, or zero if not TCP packet
 		uint16 TCP_DST_PORT,				// TCP destination port, or zero if not TCP packet
 		uint32 TCP_SEQUENCE,				// TCP sequence number, or zero if not TCP packet
@@ -65,6 +71,10 @@ composite TestPacketFileSourceFull {
 		output Out:
 			packetsProcessed = packetsProcessed(),
 			octetsProcessed = octetsProcessed(),
+	        metricsIntervalElapsed = metricsIntervalElapsed(),				
+	        metricsIntervalPacketsProcessed = metricsIntervalPacketsProcessed(),	
+	        metricsIntervalOctetsProcessed = metricsIntervalOctetsProcessed(),	
+	        metricsUpdated = metricsUpdated(),					
 		    CAPTURE_SECONDS = CAPTURE_SECONDS(),	
 		    CAPTURE_MICROSECONDS = CAPTURE_MICROSECONDS(),	
 			ETHER_SRC_ADDRESS = ETHER_SRC_ADDRESS(),
@@ -84,8 +94,10 @@ composite TestPacketFileSourceFull {
 			IPV6_DST_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(IPV6_DST_ADDRESS()),
 			IP_SRC_PORT = IP_SRC_PORT(),
 			IP_DST_PORT = IP_DST_PORT(),
+			UDP_PORT_53 = UDP_PORT(53uh),
 			UDP_SRC_PORT = UDP_SRC_PORT(),
 			UDP_DST_PORT = UDP_DST_PORT(),
+			TCP_PORT_80 = TCP_PORT(80uh),
 			TCP_SRC_PORT = TCP_SRC_PORT(),
 			TCP_DST_PORT = TCP_DST_PORT(),
 			TCP_SEQUENCE = TCP_SEQUENCE(),

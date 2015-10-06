@@ -45,7 +45,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 
 // calls to SPL functions within expressions are generated with these
 // namespaces, which must be mapped to the operator's namespace so they
-// will invoke the functions defined in the xxx_h.cgt file
+// will invoke the functions defined in the NetflowMessageParser_h.cgt file
 
 #define common_result_functions MY_OPERATOR
 #define NetflowMessageParser_result_functions MY_OPERATOR

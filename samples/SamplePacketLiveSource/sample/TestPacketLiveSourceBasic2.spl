@@ -14,7 +14,6 @@ composite TestPacketLiveSourceBasic2 {
 	param		
 	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
-    expression<float64> $statisticsInterval: (float64)getSubmissionTimeValue("statisticsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 	
 	type 
@@ -33,28 +32,25 @@ composite TestPacketLiveSourceBasic2 {
 		blob packetData,				// contents of packet captured, including network headers (possibly truncated)
 		blob payloadData;				// contents of packet payload, following all network headers
 
-	CounterType = 
-		float64 counterTime,			// time that counters were produced, in seconds since Unix epoch 
-	    uint64 counterSequenceCounter, 	// sequential counter for counters
+	MetricsType = 
+		float64 metricsTime,			// time that metrics were produced, in seconds since Unix epoch 
+	    boolean metricsUpdated,			// true if metrics have been updated since previous output tuple
 		uint64 packetNumber,			// sequence number of packet, as emitted by operator
-		uint32 packetLength,			// original length of packet (not necessarily all captured)
 		uint64 packetsReceived,			// number of packets received by network interface in this interval
 		uint64 packetsDropped,			// number of packets dropped in this interval
-		uint64 packetsDroppedByInterface, // number of packets dropped by network interface in this interval
 		uint64 packetsProcessed,		// number of packets emitted by operator in this interval
-		uint64 octetsProcessed;			// number of bytes emitted by operator in this interval
+		uint64 octetsProcessed,			// number of bytes emitted by operator in this interval
+	    float64 intervalElapsed,		// elapsed time since last metrics interval, in seconds
+	    uint64 intervalPacketsReceived,	// number of packets received since last metrics interval
+	    uint64 intervalPacketsDropped,	// number of packets dropped since last metrics interval
+	    uint64 intervalPacketsProcessed,// number of packets processed since last metrics interval
+	    uint64 intervalOctetsProcessed;	// number of octets processed since last metrics interval
 
-	StatisticsType = 
-		float64 statisticsTime,			// time that statistics were produced, in seconds since Unix epoch 
-	    float64 averagePacketsRecieved, // average packets received per second during this counter interval
-	    float64 averagePacketsDropped,  // average packets dropped per second during this counter interval
-	    float64 averagePacketsProcessed,// average packets processed per second during this counter interval
-	    float64 averageOctetsProcessed; // average octets of packet data processed per second during this counter interval
 
 	graph
 
 	( stream<PacketType> PacketStream as OutPackets ;
-	  stream<CounterType> CounterStream as OutCounters ) = PacketLiveSource() {
+	  stream<MetricsType> MetricsStream as OutMetrics ) = PacketLiveSource() {
 	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
 		param
 			networkInterface: $networkInterface;
@@ -73,34 +69,23 @@ composite TestPacketLiveSourceBasic2 {
 			payloadLength = PAYLOAD_LENGTH(),
 			packetData = PACKET_DATA(),
 			payloadData = PAYLOAD_DATA();
-		OutCounters:
-			counterTime = getTimestampInSecs(),
-		    counterSequenceCounter = (uint64)( ( (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0 ) / $statisticsInterval),
+		OutMetrics:
+			metricsTime = getTimestampInSecs(),
+	        metricsUpdated = metricsUpdated(),					
 			packetNumber = packetsProcessed() - 1ul,
-			packetLength = PACKET_LENGTH(),
 		    packetsReceived = packetsReceived(),
 		    packetsDropped = packetsDropped(),
-		    packetsDroppedByInterface = packetsDroppedByInterface(),
 			packetsProcessed = packetsProcessed(),
-			octetsProcessed = octetsProcessed();
+			octetsProcessed = octetsProcessed(),
+		    intervalElapsed = metricsIntervalElapsed(),
+	        intervalPacketsReceived = metricsIntervalPacketsReceived(),	
+	        intervalPacketsDropped = metricsIntervalPacketsDropped(),	
+	        intervalPacketsProcessed = metricsIntervalPacketsProcessed(),	
+	        intervalOctetsProcessed = metricsIntervalOctetsProcessed();
+
 	}
 	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketLiveSourceBasic2.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as CounterSink = FileSink(CounterStream) { param file: "debug.TestPacketLiveSourceBasic2.CounterStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-
-	stream<CounterType> SequentialCounterStream = Filter(CounterStream as In) {
-	  param filter: counterSequenceCounter != In[1].counterSequenceCounter; }
-
-	stream<StatisticsType> StatisticsStream as Out = Functor(SequentialCounterStream as In) {
-	  output Out:
-	    statisticsTime = counterTime,
-	    averagePacketsRecieved = (float64)(packetsReceived - In[1].packetsReceived) / (counterTime - In[1].counterTime),
-	    averagePacketsDropped = (float64)(packetsDropped - In[1].packetsDropped) / (counterTime - In[1].counterTime),
-	    averagePacketsProcessed = (float64)(packetsProcessed - In[1].packetsProcessed) / (counterTime - In[1].counterTime),
-	    averageOctetsProcessed = (float64)(octetsProcessed - In[1].octetsProcessed) / (counterTime - In[1].counterTime); }
-	() as StatisticsSink = FileSink(StatisticsStream) { param file: "debug.TestPacketLiveSourceBasic2.StatisticsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-
-
-
+	() as MetricsSink = FileSink(MetricsStream) { param file: "debug.TestPacketLiveSourceBasic2.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
 
 
 	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }

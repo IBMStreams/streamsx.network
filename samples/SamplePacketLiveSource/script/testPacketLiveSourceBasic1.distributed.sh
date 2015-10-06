@@ -50,7 +50,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 networkInterface=eno1
-timeoutInterval=30.0
+timeoutInterval=30
 )
 
 tracing=info # ... one of ... off, error, warn, info, debug, trace
@@ -71,7 +71,7 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
 [ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
-step "configuration for distributed application '$namespace::$composite' ..."
+step "configuration for distributed application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
 ( IFS=$'\n' ; echo -e "\nStreams compiler options:\n${compilerOptionsList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
@@ -80,22 +80,26 @@ echo -e "\ndomain: $domain"
 echo -e "\ninstance: $instance"
 echo -e "\ntracing: $tracing"
 
-step "building distributed application '$namespace::$composite' ..."
-sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
+step "building distributed application '$namespace.$composite' ..."
+sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
-step "submitting distributed application '$namespace::$composite' ..."
+step "granting read permission for instance '$instance' log directory to user '$USER' ..."
+sudo chmod o+r -R /tmp/Streams-$domain/logs/$HOSTNAME/instances
+
+step "submitting distributed application '$namespace.$composite' ..."
 bundle=$buildDirectory/$namespace.$composite.sab
 parameters=$( printf ' --P %s' ${submitParameterList[*]} )
 streamtool submitjob -i $instance -d $domain --config tracing=$tracing $parameters $bundle || die "sorry, could not submit application '$composite', $?"
 
 step "waiting while application runs ..."
-sleep 15
+sleep 25
 
 step "getting logs for instance $instance ..."
 streamtool getlog -i $instance -d $domain --includeapps --file $logDirectory/$composite.distributed.logs.tar.gz || die "sorry, could not get logs, $!"
 
-step "cancelling distributed application '$namespace::$composite' ..."
+step "cancelling distributed application '$namespace.$composite' ..."
 jobs=$( streamtool lspes -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
+#streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} --trace trace || die "sorry, could not cancel application, $!"
 streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
 
 exit 0

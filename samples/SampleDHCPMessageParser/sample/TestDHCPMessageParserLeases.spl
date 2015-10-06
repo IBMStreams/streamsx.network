@@ -1,0 +1,98 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+
+composite TestDHCPMessageParserLeases {
+
+    param       
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    
+    type 
+    
+    PacketType =
+	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
+        uint32 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        rstring ipSourceAddress,        // IP source address
+        rstring ipDestinationAddress,   // IP destination address
+        blob dhcpMessage;               // the DHCP message from a packet, excluding all network headers
+
+    DHCPInformType = 
+	    rstring clientMACAddress, // header: client hardware address
+	    rstring clientIPAddress, // header: address of client requesting renewal of lease, as an IPv4 address
+	    rstring hostname, // option 12: hostname of the client 
+	    rstring domainName, // option 15: domain name client should use with DNS
+	    list<rstring> subnetRouters, // option 3: list of routers on client's subnet, as IPv4 addresses
+	    list<rstring> staticRoutes, // option 33: list of address pairs for routing table, as IPv4 addresses
+	    list<rstring> dnsServers, // option 6: list of DNS servers, as IPv4 addresses
+	    rstring dhcpServer; // header: address of DHCP server, as an IPv4 address
+
+    DHCPLeaseType = 
+	    rstring clientMACAddress, // header: client hardware address
+	    rstring hostname, // option 12: hostname of the client 
+	    rstring domainName, // option 15: domain name client should use with DNS
+	    rstring leasedAddress, // header: address leased to client by server, as an IPv4 address
+	    rstring leasedAddressSubnetMask, // option 1: the subnet mask of the client, as an IPv4 address 
+        rstring leaseStartTime, // time that lease was granted, in seconds since Unix epoch 
+        rstring leaseEndTime, // time that lease will expire, in seconds since Unix epoch 
+	    rstring leaseDuration, // option 51: address lease time, in seconds
+	    rstring dhcpServer; // header: address of DHCP server, as an IPv4 address
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 67 or udp port 68";
+            metricsInterval: 0.0;
+        output Out:
+		    packetNumber = packetsProcessed(),
+            captureTime = CAPTURE_SECONDS(),	
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dhcpMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDHCPMessageParserLeases.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+
+    ( stream<DHCPInformType> DHCPInformStream as OutInform ;
+	  stream<DHCPLeaseType> DHCPLeaseStream as OutLease ) = DHCPMessageParser(PacketStream) {
+      param
+          messageAttribute: dhcpMessage;
+	      outputFilters: 
+	          DHCP_MESSAGE_TYPE()==5ub && DHCP_ADDRESS_LEASE_TIME()==0u && length(DHCP_ERROR_MESSAGE())==0 && !parseError(),
+	          DHCP_MESSAGE_TYPE()==5ub && DHCP_ADDRESS_LEASE_TIME()>0u && length(DHCP_ERROR_MESSAGE())==0 && !parseError();
+      output 
+	  OutInform:
+          clientMACAddress = convertMACAddressNumericToString((list<uint8>[6])DHCP_CLIENT_HARDWARE_ADDRESS()),
+          clientIPAddress = convertIPV4AddressNumericToString(DHCP_CLIENT_ADDRESS()),
+          hostname = DHCP_HOST_NAME(),
+          domainName = DHCP_DOMAIN_NAME(),
+          subnetRouters = convertIPV4AddressListToStringList(DHCP_ROUTERS()),
+          staticRoutes = convertIPV4AddressListToStringList(DHCP_STATIC_ROUTES()),
+          dnsServers = convertIPV4AddressListToStringList(DHCP_DNS_SERVERS()),
+          dhcpServer = convertIPV4AddressNumericToString(DHCP_SERVER_ADDRESS());
+	  OutLease:
+          clientMACAddress = convertMACAddressNumericToString((list<uint8>[6])DHCP_CLIENT_HARDWARE_ADDRESS()),
+          hostname = DHCP_HOST_NAME(),
+          domainName = DHCP_DOMAIN_NAME(),
+          leasedAddress = convertIPV4AddressNumericToString(DHCP_YOUR_ADDRESS()),
+          leasedAddressSubnetMask = convertIPV4AddressNumericToString(DHCP_SUBNET_MASK()),
+	      leaseStartTime = formatEpochDateTime(captureTime),
+	      leaseEndTime = formatEpochDateTime(captureTime + DHCP_ADDRESS_LEASE_TIME()),
+	      leaseDuration = formatElapsedTime(DHCP_ADDRESS_LEASE_TIME()),
+          dhcpServer = convertIPV4AddressNumericToString(DHCP_SERVER_ADDRESS());
+    }
+    () as DHCPInformSink = FileSink(DHCPInformStream) { param file: "debug.TestDHCPMessageParserLeases.DHCPInformStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    () as DHCPLeaseSink = FileSink(DHCPLeaseStream) { param file: "debug.TestDHCPMessageParserLeases.DHCPLeaseStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+
+
+}
+

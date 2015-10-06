@@ -10,9 +10,8 @@ Network Toolkit: IPv4 Address functions
 _____Description_____
 
 
-The 'network nacket' toolkit includes functions that transform IP version 4
-addresses between string and four-byte binary representations. The toolkit also
-includes sample applications that illustrate how to use these functions.
+The InfoSphere Streams network toolkit includes functions that transform IP
+version 4 addresses between string and four-byte binary representations.
 
 The toolkit includes these IP version 4 address functions in the
 'com.ibm.streamsx.network.ipv4' namespace:
@@ -47,6 +46,14 @@ The functions use these representations of IP version 4 addresses:
     is, an SPL string of decimal characters separated by periods, followed by a
     slash and an integer indicting the number of mask bits. For example,
     '74.89.138.0/24'.
+
+The IPv4 address functions are part of the network toolkit. To use them in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.ipv4::*;
+
+The network toolkit includes several sample applications that illustrate how to
+use the functions.
 
 Notes:
 

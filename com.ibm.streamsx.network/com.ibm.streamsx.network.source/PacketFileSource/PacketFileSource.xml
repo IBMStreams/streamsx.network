@@ -3,146 +3,20 @@
   <cppOperatorModel>
     <context>
       <description></description>
-      <customOutputFunctions>
-        <customOutputFunction>
-          <name>packet output functions</name>
 
-          <function>
-            <description></description>
-            <prototype>uint64 packetsProcessed()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint64 octetsProcessed()</prototype>
-          </function>
+      <metrics>
+        <metric>
+          <name>nPacketsProcessedCurrent</name>
+          <description>Number of packets procesed by this operator.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nOctetsProcessedCurrent</name>
+          <description>Number of packet bytesd processed by this operator.</description>
+          <kind>Counter</kind>
+        </metric>
+      </metrics>
 
-          <function>
-            <description></description>
-            <prototype>uint32 CAPTURE_SECONDS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 CAPTURE_MICROSECONDS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 PACKET_LENGTH()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>blob PACKET_DATA()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 PAYLOAD_LENGTH()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>blob PAYLOAD_DATA()</prototype>
-          </function>
-
-          <function>
-            <description></description>
-            <prototype>list&lt;uint8>[6] ETHER_SRC_ADDRESS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint8>[6] ETHER_DST_ADDRESS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 ETHER_PROTOCOL()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint8 IP_VERSION()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint8 IP_PROTOCOL()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 IPV4_SRC_ADDRESS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 IPV4_DST_ADDRESS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint8>[16] IPV6_SRC_ADDRESS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>list&lt;uint8>[16] IPV6_DST_ADDRESS()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 IP_SRC_PORT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 IP_DST_PORT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 UDP_SRC_PORT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 UDP_DST_PORT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 TCP_SRC_PORT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 TCP_DST_PORT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 TCP_SEQUENCE()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint32 TCP_ACKNOWLEDGEMENT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean TCP_FLAGS_URGENT()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean TCP_FLAGS_ACK()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean TCP_FLAGS_PUSH()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean TCP_FLAGS_RESET()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean TCP_FLAGS_SYN()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>boolean TCP_FLAGS_FIN()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>uint16 TCP_WINDOW()</prototype>
-          </function>
-          <function>
-            <description></description>
-            <prototype>&lt;any T> T copy()</prototype>
-          </function>
-        </customOutputFunction>
-      </customOutputFunctions>
       <libraryDependencies>
         <library>
           <cmn:description>'libpcap' version determined dynamically at compile time</cmn:description>
@@ -183,11 +57,11 @@
       </parameter>
       <parameter>
         <name>outputFilters</name>
-        <description/>
+        <description></description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
-        <type>rstring</type>
+        <type>boolean</type>
         <cardinality>-1</cardinality>
       </parameter>
       <parameter>
@@ -223,7 +97,7 @@
     <inputPorts>
       <inputPortSet>
         <description></description>
-        <windowingDescription/>
+        <windowingDescription></windowingDescription>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
         <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
@@ -233,15 +107,11 @@
     </inputPorts>
     <outputPorts>
       <outputPortOpenSet>
-        <description/>
+        <description></description>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>false</autoAssignment>
         <completeAssignment>false</completeAssignment>
         <rewriteAllowed>true</rewriteAllowed>
-        <outputFunctions>
-          <default>copy</default>
-          <type>packet output functions</type>
-        </outputFunctions>
         <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <tupleMutationAllowed>false</tupleMutationAllowed>
