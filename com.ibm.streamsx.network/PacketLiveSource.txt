@@ -507,6 +507,27 @@ the following functions, which are specific to this operator:
   uint16 TCP_WINDOW() -- This function returns the window size field from
       the TCP header of the packet, if it has one, or zero if not.
 
+  uint32 JMIRROR_SRC_ADDRESS() -- This function returns the source address field
+      from the 'jmirror' header of the packet, if it has one, or zero if not.
+
+  uint32 JMIRROR_DST_ADDRESS() -- This function returns the destination address
+      field from the 'jmirror' header of the packet, if it has one, or zero if not.
+
+  uint16 JMIRROR_SRC_PORT() -- This function returns the source port field from
+      the 'jmirror' header of the packet, if it has one, or zero if not.
+  
+  uint16 JMIRROR_DST_PORT() -- This function returns the destination port field
+      from the 'jmirror' header of the packet (that is, 30030), if it has one,
+      or zero if not.
+
+  uint32 JMIRROR_INTERCEPT_ID() -- This function returns the interception
+      identifier field from the 'jmirror' header of the packet, if it has one,
+      or zero if not.
+
+  uint32 JMIRROR_SESSION_ID() -- This function returns the session identifier
+      field from the 'jmirror' header of the packet, if it has one, or zero if
+      not.
+
 
 _____Threads_____
 
