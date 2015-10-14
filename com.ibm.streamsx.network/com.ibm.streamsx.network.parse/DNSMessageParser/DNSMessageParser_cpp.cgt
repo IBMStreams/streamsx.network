@@ -134,6 +134,9 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DNSMessageParser");
+
+  forwardWindowPunctuation(punct); 
+
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 }
 
