@@ -191,6 +191,30 @@
             <function:description></function:description>
             <function:prototype>public uint16 TCP_WINDOW()</function:prototype>
           </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 JMIRROR_SRC_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 JMIRROR_DST_ADDRESS()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 JMIRROR_SRC_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint16 JMIRROR_DST_PORT()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 JMIRROR_INTERCEPT_ID()</function:prototype>
+          </function:function>
+          <function:function>
+            <function:description></function:description>
+            <function:prototype>public uint32 JMIRROR_SESSION_ID()</function:prototype>
+          </function:function>
 
     </function:functions>
   </function:functionSet>

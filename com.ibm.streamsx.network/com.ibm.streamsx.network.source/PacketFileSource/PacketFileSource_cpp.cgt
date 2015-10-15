@@ -303,6 +303,12 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
   pcap_close(pcapDescriptor);
   pcapDescriptor = NULL;
 
+  // submit punctuation mark to each output port
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+	SPLLOG(L_TRACE, "submitting punctuation to output port <%=$i%>", "PacketFileSource");
+	submit(SPL::Punctuation::WindowMarker, <%=$i%>);
+	<% } %> ;
+
   SPLLOG(L_INFO, "closing PCAP file '" << filename << "'", "PacketFileSource");
 }
 

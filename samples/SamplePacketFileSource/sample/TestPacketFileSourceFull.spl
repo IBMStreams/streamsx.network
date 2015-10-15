@@ -58,6 +58,12 @@ composite TestPacketFileSourceFull {
 		boolean TCP_FLAGS_SYN,				// TCP synchronize flag, or false if not TCP packet
 		boolean TCP_FLAGS_FIN,				// TCP final flag, or false if not TCP packet
 		uint16 TCP_WINDOW,					// TCP window size, or zero if not TCP packet
+		rstring JMIRROR_SRC_ADDRESS_AS_STRING,	// 'jmirror' source address, or zero if not 'jmirror' packet
+		rstring JMIRROR_DST_ADDRESS_AS_STRING,	// 'jmirror' destination address, or zero if 'jmirror' packet
+		uint16 JMIRROR_SRC_PORT,			// 'jmirror' source port, or zero if not 'jmirror' packet
+		uint16 JMIRROR_DST_PORT,			// 'jmirror' destination port, or zero if 'jmirror' packet
+		uint32 JMIRROR_INTERCEPT_ID,		// 'jmirror' intercept ID, or zero if not 'jmirror' packet
+		uint32 JMIRROR_SESSION_ID,			// 'jmirror' session ID, or zero if not 'jmirror' packet
 		uint32 PACKET_LENGTH,				// original length of packet (not necessarily all captured)
 		uint32 PAYLOAD_LENGTH,				// length of packet payload, following all network headers
 		blob PACKET_DATA,					// contents of packet captured, including network headers (not necessarily complete)
@@ -109,6 +115,12 @@ composite TestPacketFileSourceFull {
 			TCP_FLAGS_SYN = TCP_FLAGS_SYN(),
 			TCP_FLAGS_FIN = TCP_FLAGS_FIN(),
 			TCP_WINDOW = TCP_WINDOW(),
+		    JMIRROR_SRC_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(JMIRROR_SRC_ADDRESS()),
+		    JMIRROR_DST_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(JMIRROR_DST_ADDRESS()),
+		    JMIRROR_SRC_PORT = JMIRROR_SRC_PORT(),
+		    JMIRROR_DST_PORT = JMIRROR_DST_PORT(),
+		    JMIRROR_INTERCEPT_ID = JMIRROR_INTERCEPT_ID(),
+		    JMIRROR_SESSION_ID = JMIRROR_SESSION_ID(),
 			PACKET_LENGTH = PACKET_LENGTH(),
 			PAYLOAD_LENGTH = PAYLOAD_LENGTH(),
 			PACKET_DATA = PACKET_DATA(),

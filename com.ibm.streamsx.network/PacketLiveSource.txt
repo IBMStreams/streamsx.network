@@ -78,19 +78,9 @@ use the operator.
 _____Capabilities_____
 
 
-Network interfaces normally ignore packets that are not addressed to them.
-However, when 'promiscious' mode is enabled on a network interface, it can
-capture all network packets on its ethernet segment, even those that are not
-addressed to it.  This is sometimes referred to as "network sniffing".  Modern
-ethernet switches normally send network interfaces only packets that are
-addressed to them; 'promiscious' mode is useful only when a switch has been
-specifically configured to send packets that are not addressed to a network
-interface.
-
-The PacketLiveSource operator may enable 'promiscuous' mode in a ethernet
-interface if its 'promiscous' parameter is set to 'true', or the value of its
-'inputFilter' parameter requires it.  If so, the operator will require
-special Linux capabilities to execute. Linux capabilities are described here:
+The PacketLiveSource operator requires special Linux capabilities to receive
+'raw' network packets from an ethernet interface. Linux capabilities are
+described here:
 
     http://linux.die.net/man/7/capabilities
 
@@ -99,15 +89,58 @@ The PacketLiveSource operator requires these Linux capabilities:
     CAP_NET_RAW+eip 
     CAP_NET_ADMIN+eip
 
-Streams applications that are built in standalone mode should be compiled with
-the '--static-link' option and then granted these capabilities, like this:
+For 'standalone' Streams applications (that is, SPL source files compiled with a
+'standalone' configuration), the user must grant these capabilities to the
+program before executing it. This requires 'root' privileges. To do this:
 
-    sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
+  * the SPL source must be compiled with the '--static-link' option
 
-Streams applications that are built in distributed mode should be compiled with
-the '--static-link' option and then must be submitted to a Streams instance and
-domain that have been registered as a Linux system service. The Streams runtime
-will then grant capabilities to the submitted application.
+  * the 'application bundle' must be unpacked with the 'spl-app-info' command
+
+  * Linux capabilities must be granted to the program with this command:
+
+        sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
+
+For 'distributed' Streams applications, (that is, SPL source files compiled with
+a 'distributed' configuration), the Streams runtime must grant these privileges to
+the program before executing it. This requires 'root' privileges.  To do this:
+
+  * the Streams runtime must be installed as 'root'
+
+  * the Streams domain must be registered as a Linux system service
+
+  * the Streams instance must have the 'instance.canSetPeOSCapabilities' property
+
+  * the SPL source must be compiled with the '--static-link' option
+
+For more information about using Linux capabilities with Streams applications,
+see:
+
+    http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.install.doc/doc/ibminfospherestreams-install-programs-packages.html?lang=en
+
+    http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.cfg.doc/doc/creating-enterprise-domain.html?lang=en
+
+    http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.cfg.doc/doc/ibminfospherestreams-user-security-run-authority.html?lang=en
+
+The sample applications included in the toolkit have scripts that illustrate all
+of the steps needed to build and run applications containing the
+PacketLiveSource operator in both 'standalone' and 'distributed' mode.
+
+
+____Promiscuous Mode____
+
+
+Network interfaces normally ignore packets that are not addressed to them.
+However, when 'promiscious' mode is enabled on a network interface, it can
+capture all network packets on its ethernet segment, even those that are not
+addressed to it.  This is sometimes referred to as "network sniffing".  Modern
+ethernet switches normally send network interfaces only packets that are
+addressed to them; 'promiscious' mode is useful only when a switch has been
+specifically configured to send packets to a network interface that are not
+addressed to it. This is sometimes referred to as "mirroring".
+
+The PacketLiveSource operator will enable 'promiscuous' mode in a ethernet
+interface when its 'promiscous' parameter is set to 'true'.
 
 
 _____Dependencies_____
@@ -473,6 +506,27 @@ the following functions, which are specific to this operator:
 
   uint16 TCP_WINDOW() -- This function returns the window size field from
       the TCP header of the packet, if it has one, or zero if not.
+
+  uint32 JMIRROR_SRC_ADDRESS() -- This function returns the source address field
+      from the 'jmirror' header of the packet, if it has one, or zero if not.
+
+  uint32 JMIRROR_DST_ADDRESS() -- This function returns the destination address
+      field from the 'jmirror' header of the packet, if it has one, or zero if not.
+
+  uint16 JMIRROR_SRC_PORT() -- This function returns the source port field from
+      the 'jmirror' header of the packet, if it has one, or zero if not.
+  
+  uint16 JMIRROR_DST_PORT() -- This function returns the destination port field
+      from the 'jmirror' header of the packet (that is, 30030), if it has one,
+      or zero if not.
+
+  uint32 JMIRROR_INTERCEPT_ID() -- This function returns the interception
+      identifier field from the 'jmirror' header of the packet, if it has one,
+      or zero if not.
+
+  uint32 JMIRROR_SESSION_ID() -- This function returns the session identifier
+      field from the 'jmirror' header of the packet, if it has one, or zero if
+      not.
 
 
 _____Threads_____

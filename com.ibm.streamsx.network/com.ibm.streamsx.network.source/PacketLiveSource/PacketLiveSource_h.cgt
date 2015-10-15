@@ -175,6 +175,18 @@ private:
 
   SPL::uint16 TCP_WINDOW() { return headers.tcpHeader ? ntohs(headers.tcpHeader->window) : 0; }
 
+  SPL::uint32 JMIRROR_SRC_ADDRESS() { return headers.jmirrorHeader ? ntohl(headers.jmirrorHeader->ipHeader.saddr) : 0; }
+
+  SPL::uint32 JMIRROR_DST_ADDRESS() { return headers.jmirrorHeader ? ntohl(headers.jmirrorHeader->ipHeader.daddr) : 0; }
+
+  SPL::uint16 JMIRROR_SRC_PORT() { return headers.jmirrorHeader ? ntohs(headers.jmirrorHeader->udpHeader.source) : 0; }
+  
+  SPL::uint16 JMIRROR_DST_PORT() { return headers.jmirrorHeader ? ntohs(headers.jmirrorHeader->udpHeader.dest) : 0; }
+
+  SPL::uint32 JMIRROR_INTERCEPT_ID() { return headers.jmirrorHeader ? ntohl(headers.jmirrorHeader->jmirrorHeader.interceptIdentifier) : 0; }
+
+  SPL::uint32 JMIRROR_SESSION_ID() { return headers.jmirrorHeader ? ntohl(headers.jmirrorHeader->jmirrorHeader.sessionIdentifier) : 0; }
+
   // ------------------------------------------------------------------------------------------
 
 }; 

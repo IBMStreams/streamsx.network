@@ -25,12 +25,12 @@ class NetworkHeaderParser {
 	// structure of Juniper Networks 'jmirror' headers
 
 	struct JMirrorHeader {
-		uint32_t interceptionIdentifier;       
+		uint32_t interceptIdentifier;       
 		uint32_t sessionIdentifier;
 	} __attribute__((packed)) ;
 
 	struct JMirrorHeaders {
-		struct ip ipHeader;
+		struct iphdr ipHeader;
 		struct udphdr udpHeader;
 		struct JMirrorHeader jmirrorHeader;
 	} __attribute__((packed)) ;
@@ -50,11 +50,14 @@ class NetworkHeaderParser {
 	// of the packet's network headers and payload data in these variables, if
 	// present, or NULL and zero, if absent.
 
+	struct JMirrorHeaders* jmirrorHeader; int jmirrorHeaderLength;
+
 	struct ethhdr*  etherHeader; int etherHeaderLength;
 	struct iphdr*   ipv4Header;  int ipv4HeaderLength;
 	struct ip6_hdr* ipv6Header;  int ipv6HeaderLength;
 	struct udphdr*  udpHeader;   int udpHeaderLength;
 	struct tcphdr*  tcpHeader;   int tcpHeaderLength;
+
 	char*           payload;     int payloadLength;
 
 
@@ -73,6 +76,7 @@ class NetworkHeaderParser {
 		packetLength = length;
 
 		// clear network header pointers and lengths to be returned
+		jmirrorHeader = NULL; jmirrorHeaderLength = 0;
 		etherHeader = NULL; etherHeaderLength = 0;
 		ipv4Header = NULL; ipv4HeaderLength = 0;
 		ipv6Header = NULL; ipv6HeaderLength = 0;
@@ -92,13 +96,15 @@ class NetworkHeaderParser {
 		// if the buffer contains a Juniper Networks mirror packet, step over the 'jmirror' headers
 		// (note that field tests are not in natural order so the 'if' will fail faster in the usual case)
 		if ( length>=sizeof(struct JMirrorHeaders) ) {
-			struct JMirrorHeaders& jmirror = *(struct JMirrorHeaders*)buffer;
-			if ( ntohs(jmirror.udpHeader.dest)==jmirrorPort &&
-				 jmirror.ipHeader.ip_v==4 && 
-				 jmirror.ipHeader.ip_hl==5 && 
-				 jmirror.ipHeader.ip_p==IPPROTO_UDP ) {
-				buffer += sizeof(struct JMirrorHeaders);
-				length -= sizeof(struct JMirrorHeaders);
+			struct JMirrorHeaders* jmirror = (struct JMirrorHeaders*)buffer;
+			if ( ntohs(jmirror->udpHeader.dest)==jmirrorPort &&
+				 jmirror->ipHeader.version==4 && 
+				 jmirror->ipHeader.ihl==5 && 
+				 jmirror->ipHeader.protocol==IPPROTO_UDP ) {
+			  jmirrorHeader = jmirror;
+			  jmirrorHeaderLength = sizeof(struct JMirrorHeaders);
+			  buffer += sizeof(struct JMirrorHeaders);
+			  length -= sizeof(struct JMirrorHeaders);
 			}
 		}
 
