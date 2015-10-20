@@ -35,7 +35,7 @@ Netflow version 9 messages and the fields they contain are described here:
 
     https://www.ietf.org/rfc/rfc3954.txt
     http://www.iana.org/assignments/ipfix/ipfix.xhtml
-    http://www.cisco.com/en/US/technologies/tk648/tk362/technologies_white_paper09186a00800a3db9.html 
+    http://www.cisco.com/en/US/technologies/tk648/tk362/technologies_white_paper09186a00800a3db9.html
 
 
 Each input tuple processed by the NetflowMessageParser operator may produce
@@ -108,6 +108,23 @@ _____Parameters_____
       default value of the 'outputFilters' parameter is an empty list, which
       causes all Netflow messages processed to be emitted by all output ports.
 
+   processorAffinity -- This optional parameter takes an expression of type
+      'uint32' that specifies which processor core the operator's thread will
+      run on.  The maximum value is 'P-1', where P is the number of processors
+      on the machine where the operator will run.  
+
+      Where the operator runs on a thread of its own, this parameter applies to
+      the operator's thread.  This is the situation when the operator's input
+      port is configured as a threaded input port, and when the operator has an
+      @parallel annotation.
+
+      Where the operator runs on the thread of an upstream operator, this
+      parameter affects the thread of the operator that sends tuples to it. This
+      is the situation when the operator is fused with an upstream operator.
+
+      The default is to dispatch the operator's thread on any available
+      processor.
+
 
 _____Windowing_____
 
@@ -157,7 +174,7 @@ These functions return values that indicate parsing errors:
 These functions return the values of header fields in Netflow messages, so they
 return the same value for all output tuples produced from the same Netflow message:
 
-    uint16 NETFLOW_VERSION() -- Netflow version, either '5' or '9'. 
+    uint16 NETFLOW_VERSION() -- Netflow version, either '5' or '9'.
 
     uint16 NETFLOW_COUNT() -- Number of records in this message, including
         templates, options, and flows.
@@ -382,10 +399,10 @@ corresponding field, if present:
     uint8 NETFLOW_DST_TOS() -- IP 'type of service' of this flow, as detected by
         outgoing interface of router (field 55 in Netflow version 9), or zero if
         not available.
-  
+
     list<uint8> NETFLOW_MAC_SRC_ADDR_IN() -- Incoming MAC source address (field
         56 in Netflow version 9), or an empty list if not available.
-	
+
     list<uint8> NETFLOW_MAC_DST_ADDR_OUT() -- Outgoing MAC destination address
         (field 57 in Netflow version 9), or an empty list if not available.
 

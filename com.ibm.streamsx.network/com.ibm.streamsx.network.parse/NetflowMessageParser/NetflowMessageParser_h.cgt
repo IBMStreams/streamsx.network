@@ -9,22 +9,26 @@
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
-class MY_OPERATOR : public MY_BASE_OPERATOR 
+class MY_OPERATOR : public MY_BASE_OPERATOR
 {
 public:
 
   // ----------- standard operator methods ----------
 
   MY_OPERATOR();
-  virtual ~MY_OPERATOR(); 
-  void allPortsReady(); 
-  void prepareToShutdown(); 
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
   void process(uint32_t idx);
   void process(Tuple & tuple, uint32_t port);
   void process(Tuple const & tuple, uint32_t port);
   void process(Punctuation const & punct, uint32_t port);
 
 private:
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  int32_t processorAffinity;
 
   // ----------- output tuples ----------
 
@@ -33,7 +37,7 @@ private:
   // ----------- operator state variables ----------
 
   uint64_t tupleCounter;
-  
+
   // ----------- Netflow message parser ----------
 
   NetflowMessageParser parser;
@@ -48,7 +52,7 @@ private:
 
   SPL::uint64 messagesProcessed() { return tupleCounter; }
 
-  SPL::uint16 NETFLOW_VERSION() { return parser.netflow9Header ? ntohs(parser.netflow9Header->version) : parser.netflow5Header ? ntohs(parser.netflow5Header->version) : 0; } // header: Netflow version 
+  SPL::uint16 NETFLOW_VERSION() { return parser.netflow9Header ? ntohs(parser.netflow9Header->version) : parser.netflow5Header ? ntohs(parser.netflow5Header->version) : 0; } // header: Netflow version
 
   SPL::uint16 NETFLOW_COUNT() { return parser.netflow9Header ? ntohs(parser.netflow9Header->count) : parser.netflow5Header ? ntohs(parser.netflow5Header->count) : 0; } // header: number of records (including templates, options, and flows)
 
@@ -173,9 +177,9 @@ private:
   SPL::uint16 NETFLOW_IPV4_IDENT() { return parser.netflow9FieldAsInteger(54); } // field 54: The IP v4 identification field
 
   SPL::uint8 NETFLOW_DST_TOS() { return parser.netflow9FieldAsInteger(55); } // field 55: Type of Service byte setting when exiting outgoing interface
-  
+
   SPL::list<SPL::uint8> NETFLOW_MAC_SRC_ADDR_IN() { return parser.netflow9FieldAsByteList(56); } // field 56: Incoming source MAC address
-	
+
   SPL::list<SPL::uint8> NETFLOW_MAC_DST_ADDR_OUT() { return parser.netflow9FieldAsByteList(57); } // field 57: Outgoing destination MAC address
 
   SPL::uint16 NETFLOW_SRC_VLAN() { return parser.netflow9FieldAsInteger(58); } // field 58: Virtual LAN identifier associated with ingress interface
@@ -230,7 +234,6 @@ private:
 
   SPL::uint32 NETFLOW_REPLICATION_FACTOR() { return parser.netflow9FieldAsInteger(99); } // field 99: Multicast replication factor.
 
-}; 
+};
 
 <%SPL::CodeGen::headerEpilogue($model);%>
-

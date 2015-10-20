@@ -3,74 +3,74 @@ namespace sample;
 use com.ibm.streamsx.network.ipv4::*;
 
 composite IPv4FunctionTest {
-	graph
-		() as IPv4FunctionTester = Custom() {
-			logic
-				onProcess:
-				{
-					doAssert(isIPV4Address("1.1.1.1"), "isIPV4Address(1.1.1.1)");
-					doAssert(!isIPV4Address("abc"), "!isIPV4Address(abc)");
-					doAssert(!isIPV4Address("2001::12:2"), "!isIPV4Address(2001::12:2)");					
-				
-					doAssert(isIPV4CIDRNotation("1.1.1.1/30"), "isIPV4CIDRNotation(1.1.1.1/30)");
-					doAssert(!isIPV4CIDRNotation("1.2.2.2/45"), "!isIPV4CIDRNotation(1.2.2.2/45)");
-					doAssert(!isIPV4CIDRNotation("2001::12:2"), "!isIPV4CIDRNotation(2001::12:2)");
-				
-					doAssert(convertIPV4AddressStringToNumeric("0.0.0.1") == 1u, "convertIPV4AddressStringToNumeric(0.0.0.1)");
-					doAssert(convertIPV4AddressStringToNumeric("192.0.2.235") == 3221226219u, "convertIPV4AddressStringToNumeric(192.0.2.235)");
+    graph
+        () as IPv4FunctionTester = Custom() {
+            logic
+                onProcess:
+                {
+                    doAssert(isIPV4Address("1.1.1.1"), "isIPV4Address(1.1.1.1)");
+                    doAssert(!isIPV4Address("abc"), "!isIPV4Address(abc)");
+                    doAssert(!isIPV4Address("2001::12:2"), "!isIPV4Address(2001::12:2)");
 
-					doAssert(convertIPV4AddressNumericToString(1u) == "0.0.0.1", "convertIPV4AddressNumericToString(1u)");
-					doAssert(convertIPV4AddressNumericToString(3221226219u) == "192.0.2.235", "convertIPV4AddressNumericToString(3221226219u)");
+                    doAssert(isIPV4CIDRNotation("1.1.1.1/30"), "isIPV4CIDRNotation(1.1.1.1/30)");
+                    doAssert(!isIPV4CIDRNotation("1.2.2.2/45"), "!isIPV4CIDRNotation(1.2.2.2/45)");
+                    doAssert(!isIPV4CIDRNotation("2001::12:2"), "!isIPV4CIDRNotation(2001::12:2)");
 
-					doAssert(size(getAllAddressesInNetwork("192.0.2.0/28")) == 16, "getAllAddressesInNetwork(192.0.2.0/28)");
-					doAssert(getAllAddressesInNetwork("192.0.2.0/32")[0] == "192.0.2.0", "getAllAddressesInNetwork(192.0.2.0/32)");
-					
-					doAssert(isInNetwork("192.168.0.0/30", "192.168.0.1"), "isInNetwork(\"192.168.0.0/30\", \"192.168.0.1\")");
-					doAssert(!isInNetwork("192.168.0.0/30", "192.168.0.10"), "!isInNetwork(\"192.168.0.0/30\", \"192.168.0.10\")");
-					
-					doAssert(isInNetworkList(["192.168.0.0/30", "192.1.1.1/30", "172.1.1.1/30"],"172.1.1.3"), "isInNetworkList([...], 172.1.1.3");
-					doAssert(!isInNetworkList(["192.168.0.0/30", "192.1.1.1/30", "172.1.1.1/30"],"142.1.1.3"), "!isInNetworkList([...],142.1.1.3)");
+                    doAssert(convertIPV4AddressStringToNumeric("0.0.0.1") == 1u, "convertIPV4AddressStringToNumeric(0.0.0.1)");
+                    doAssert(convertIPV4AddressStringToNumeric("192.0.2.235") == 3221226219u, "convertIPV4AddressStringToNumeric(192.0.2.235)");
 
-					doAssert(isReserved("192.168.0.1"), "isReserved(192.168.0.1)");
-					doAssert(!isReserved("142.1.1.1"), "!isReserved(142.1.1.1)");
+                    doAssert(convertIPV4AddressNumericToString(1u) == "0.0.0.1", "convertIPV4AddressNumericToString(1u)");
+                    doAssert(convertIPV4AddressNumericToString(3221226219u) == "192.0.2.235", "convertIPV4AddressNumericToString(3221226219u)");
 
-					doAssert(isGlobal("9.26.43.249"), "isGlobal(9.26.43.249)");
-					doAssert(!isGlobal("192.168.0.1"), "!isGlobal(192.168.0.1)");
+                    doAssert(size(getAllAddressesInNetwork("192.0.2.0/28")) == 16, "getAllAddressesInNetwork(192.0.2.0/28)");
+                    doAssert(getAllAddressesInNetwork("192.0.2.0/32")[0] == "192.0.2.0", "getAllAddressesInNetwork(192.0.2.0/32)");
 
-					doAssert(isGreaterThan("199.0.0.0", "198.0.0.0"), "isGreaterThan(199.0.0.0, 198.0.0.0)");
-					doAssert(!isGreaterThan("192.0.0.0", "198.0.0.0"), "!isGreaterThan(192.0.0.0, 198.0.0.0)");
-									
-					doAssert(isLessThan("197.0.0.0", "198.0.0.0"), "isLessThan(197.0.0.0, 198.0.0.0)");
-					doAssert(!isLessThan("199.0.0.0", "198.0.0.0"), "!isLessThan(199.0.0.0, 198.0.0.0)");
-					
-					doAssert(isEqualTo("199.0.0.0", "199.0.0.0"), "isEqualTo(199.0.0.0, 199.0.0.0)");
-					doAssert(!isEqualTo("192.0.0.0", "198.0.0.0"), "!isEqualTo(192.0.0.0, 198.0.0.0)");
-					
-					doAssert(compare("1.0.0.0", "199.0.0.1") < 0, "compare(1.0.0.0, 199.0.0.1) < 0");
-					doAssert(compare("199.0.0.0", "199.0.0.0") == 0, "compare(199.0.0.0, 199.0.0.0) == 0");
-					doAssert(compare("199.0.0.1", "2.0.0.0") > 0, "compare(199.0.0.1, 2.0.0.0) > 0");
+                    doAssert(isInNetwork("192.168.0.0/30", "192.168.0.1"), "isInNetwork(\"192.168.0.0/30\", \"192.168.0.1\")");
+                    doAssert(!isInNetwork("192.168.0.0/30", "192.168.0.10"), "!isInNetwork(\"192.168.0.0/30\", \"192.168.0.10\")");
 
-					doAssert(isMulticast("224.0.0.2"), "isMulticast(224.0.0.2)");
-					doAssert(!isMulticast("152.11.122.11"), "!isMulticast(152.11.122.11)");
+                    doAssert(isInNetworkList(["192.168.0.0/30", "192.1.1.1/30", "172.1.1.1/30"],"172.1.1.3"), "isInNetworkList([...], 172.1.1.3");
+                    doAssert(!isInNetworkList(["192.168.0.0/30", "192.1.1.1/30", "172.1.1.1/30"],"142.1.1.3"), "!isInNetworkList([...],142.1.1.3)");
 
-					doAssert(isInIPRange("192.168.0.0", "192.168.0.10", "192.168.0.4"), "isInIPRange(192.168.0.0, 192.168.0.10, 192.168.0.4)");
-					doAssert(!isInIPRange("192.168.0.0", "192.168.0.10", "192.168.0.15"), "!isInIPRange(192.168.0.0, 192.168.0.10, 192.168.0.15)");
-					
-					doAssert(isPrivate("192.168.0.1"), "isPrivate(192.168.0.1)");
-					doAssert(!isPrivate("142.1.1.1"), "!isPrivate(142.1.1.1)");
-					
-					doAssert(isLoopback("127.0.100.100"), "!isLoopback(127.0.100.100)");
-					doAssert(!isLoopback("128.0.0.0"), "!isLoopback(128.0.0.0)");
-					
-					doAssert(isLinkLocal("169.254.0.100"), "!isLinkLocal(169.254.0.100)");
-					doAssert(!isLinkLocal("142.1.1.1"), "!isLinkLocal(142.1.1.1)");
-					
-					doAssert(numAddressesInNetwork("192.168.0.0/28") == 16u, "numAddressesInNetwork(192.168.0.0/28)");
-					doAssert(numAddressesInIPRange("192.168.0.0", "192.168.100.0") == 25600u, "numAddressesInIPRange(192.168.0.0, 192.168.100.0) == 25600");
+                    doAssert(isReserved("192.168.0.1"), "isReserved(192.168.0.1)");
+                    doAssert(!isReserved("142.1.1.1"), "!isReserved(142.1.1.1)");
 
-					doAssert(isNetworkOverlap("192.168.0.0/25", "192.168.0.10/30"), "isNetworkOverlap(192.168.0.0/25, 192.168.0.10/30)");
-					doAssert(!isNetworkOverlap("192.168.0.0/31", "192.168.0.100/30"), "!isNetworkOverlap(192.168.0.0/31, 192.168.0.100/30)");
-												
-				}		
-		}
+                    doAssert(isGlobal("9.26.43.249"), "isGlobal(9.26.43.249)");
+                    doAssert(!isGlobal("192.168.0.1"), "!isGlobal(192.168.0.1)");
+
+                    doAssert(isGreaterThan("199.0.0.0", "198.0.0.0"), "isGreaterThan(199.0.0.0, 198.0.0.0)");
+                    doAssert(!isGreaterThan("192.0.0.0", "198.0.0.0"), "!isGreaterThan(192.0.0.0, 198.0.0.0)");
+
+                    doAssert(isLessThan("197.0.0.0", "198.0.0.0"), "isLessThan(197.0.0.0, 198.0.0.0)");
+                    doAssert(!isLessThan("199.0.0.0", "198.0.0.0"), "!isLessThan(199.0.0.0, 198.0.0.0)");
+
+                    doAssert(isEqualTo("199.0.0.0", "199.0.0.0"), "isEqualTo(199.0.0.0, 199.0.0.0)");
+                    doAssert(!isEqualTo("192.0.0.0", "198.0.0.0"), "!isEqualTo(192.0.0.0, 198.0.0.0)");
+
+                    doAssert(compare("1.0.0.0", "199.0.0.1") < 0, "compare(1.0.0.0, 199.0.0.1) < 0");
+                    doAssert(compare("199.0.0.0", "199.0.0.0") == 0, "compare(199.0.0.0, 199.0.0.0) == 0");
+                    doAssert(compare("199.0.0.1", "2.0.0.0") > 0, "compare(199.0.0.1, 2.0.0.0) > 0");
+
+                    doAssert(isMulticast("224.0.0.2"), "isMulticast(224.0.0.2)");
+                    doAssert(!isMulticast("152.11.122.11"), "!isMulticast(152.11.122.11)");
+
+                    doAssert(isInIPRange("192.168.0.0", "192.168.0.10", "192.168.0.4"), "isInIPRange(192.168.0.0, 192.168.0.10, 192.168.0.4)");
+                    doAssert(!isInIPRange("192.168.0.0", "192.168.0.10", "192.168.0.15"), "!isInIPRange(192.168.0.0, 192.168.0.10, 192.168.0.15)");
+
+                    doAssert(isPrivate("192.168.0.1"), "isPrivate(192.168.0.1)");
+                    doAssert(!isPrivate("142.1.1.1"), "!isPrivate(142.1.1.1)");
+
+                    doAssert(isLoopback("127.0.100.100"), "!isLoopback(127.0.100.100)");
+                    doAssert(!isLoopback("128.0.0.0"), "!isLoopback(128.0.0.0)");
+
+                    doAssert(isLinkLocal("169.254.0.100"), "!isLinkLocal(169.254.0.100)");
+                    doAssert(!isLinkLocal("142.1.1.1"), "!isLinkLocal(142.1.1.1)");
+
+                    doAssert(numAddressesInNetwork("192.168.0.0/28") == 16u, "numAddressesInNetwork(192.168.0.0/28)");
+                    doAssert(numAddressesInIPRange("192.168.0.0", "192.168.100.0") == 25600u, "numAddressesInIPRange(192.168.0.0, 192.168.100.0) == 25600");
+
+                    doAssert(isNetworkOverlap("192.168.0.0/25", "192.168.0.10/30"), "isNetworkOverlap(192.168.0.0/25, 192.168.0.10/30)");
+                    doAssert(!isNetworkOverlap("192.168.0.0/31", "192.168.0.100/30"), "!isNetworkOverlap(192.168.0.0/31, 192.168.0.100/30)");
+
+                }
+        }
 }

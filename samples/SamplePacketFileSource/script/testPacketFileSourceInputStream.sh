@@ -47,6 +47,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapDirectory=$toolkitDirectory/samples/SampleNetworkToolkitData
+processorAffinity=3
 timeoutInterval=5.0
 )
 

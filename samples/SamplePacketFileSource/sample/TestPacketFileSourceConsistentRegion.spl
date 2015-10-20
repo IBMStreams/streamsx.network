@@ -9,33 +9,32 @@ use com.ibm.streamsx.network.source::*;
 
 composite TestPacketFileSourceConsistentRegion {
 
-	param		
-	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap.pcap" );
-	
-	type 
-	
-	FullPacketType =
-		uint64 packetNumber,		// sequence number of packet, as emitted by operator
-		float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
-		uint32 packetLength,		// original length of packet (not necessarily all captured)
-		blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap.pcap" );
+
+    type
+
+    FullPacketType =
+        uint64 packetNumber,        // sequence number of packet, as emitted by operator
+        float64 captureTime,        // time that packet was captured, in seconds since Unix epoch
+        uint32 packetLength,        // original length of packet (not necessarily all captured)
+        blob packetData;            // contents of packet captured, including network headers (not necessarily complete)
 
 
-	graph
+    graph
 
-	@consistent(trigger=operatorDriven)
-	stream<FullPacketType> FullPacketStream as Out = PacketFileSource() {
-		param
-			pcapFilename: $pcapFilename;
-		output Out:
-			packetNumber = packetsProcessed() - 1ul,
-			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
-			packetLength = PACKET_LENGTH(),
-			packetData = PACKET_DATA(); 
-	}
-	() as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceConsistentRegion.FullPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+    @consistent(trigger=operatorDriven)
+    stream<FullPacketType> FullPacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+        output Out:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            packetLength = PACKET_LENGTH(),
+            packetData = PACKET_DATA();
+    }
+    () as FullPacketSink = FileSink(FullPacketStream) { param file: "debug.TestPacketFileSourceConsistentRegion.FullPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-	() as JCP = JobControlPlane() {}
+    () as JCP = JobControlPlane() {}
 
 }
-

@@ -64,7 +64,7 @@ can be consumed by the DHCPMessageParser operator.
 _____Output Ports_____
 
 
-The DHCPMessageParser operator has one or more output ports: 
+The DHCPMessageParser operator has one or more output ports:
 
   * Each output port may produce tuples containing DHCP message fields, as
     specified by output attribute assignments (see the Assignments section
@@ -91,6 +91,23 @@ _____Parameters_____
       default value of the 'outputFilters' parameter is an empty list, which
       causes all DHCP messages processed to be emitted by all output ports.
 
+   processorAffinity -- This optional parameter takes an expression of type
+      'uint32' that specifies which processor core the operator's thread will
+      run on.  The maximum value is 'P-1', where P is the number of processors
+      on the machine where the operator will run.  
+
+      Where the operator runs on a thread of its own, this parameter applies to
+      the operator's thread.  This is the situation when the operator's input
+      port is configured as a threaded input port, and when the operator has an
+      @parallel annotation.
+
+      Where the operator runs on the thread of an upstream operator, this
+      parameter affects the thread of the operator that sends tuples to it. This
+      is the situation when the operator is fused with an upstream operator.
+
+      The default is to dispatch the operator's thread on any available
+      processor.
+
 
 _____Windowing_____
 
@@ -101,9 +118,10 @@ The DHCPMessageParser operator does not accept any window congfiguration.
 _____Results____
 
 
-The DHCPMessageParser operator provides the results of parsing input DHCP messages
-through output functions that can be used in output attribute assignment functions,
-and optionally in expressions in the 'outputFilters' parameter.
+The DHCPMessageParser operator provides the results of parsing input DHCP
+messages through output functions that can be used in output attribute
+assignment functions, and optionally in expressions in the 'outputFilters'
+parameter.
 
 All attributes of all output ports must be assigned values, either with explicit
 assignment expressions, or implicitly by copy from input tuples.
@@ -154,8 +172,8 @@ specific to this operator:
         leased to the client by the DHCP server, if the message is an
         acknowledgement granting a lease, or zero if not.
 
-    uint32 DHCP_SERVER_NEXT() -- This result function returns the IPv4 address the next 
-        DHCP server to use, if any, or zero if not.              ................?????????????? was DHCP_SERVER() ...................
+    uint32 DHCP_SERVER_NEXT() -- This result function returns the IPv4 address the next
+        DHCP server to use, if any, or zero if not.
 
     uint32 DHCP_RELAY_AGENT() -- This result function returns the IPv4 address
         of the relay agent between the client and DHCP server, if there is one,

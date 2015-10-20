@@ -11,20 +11,20 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestDNSMessageParserFull {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
-    
-    type 
-    
+
+    type
+
     PacketType =
-	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
-    DNSMessageType = 
-      rstring captureTime,              // time that packet was captured, in seconds since Unix epoch 
+    DNSMessageType =
+      rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
       rstring ipSourceAddress,          // IP source address
       rstring ipDestinationAddress,     // IP destination address
       boolean parseError,
@@ -68,15 +68,15 @@ composite TestDNSMessageParserFull {
       list<uint32> DNS_ADDITIONAL_TTLS,
       list<rstring> DNS_ADDITIONAL_DATA;
 
-	// error output from DNSMessageParser operator
-	DNSErrorType = 
-	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-      rstring captureTime,          	// time that packet was captured, in seconds since Unix epoch 
-      rstring ipSourceAddress,        	// binary representation of IP source address
+    // error output from DNSMessageParser operator
+    DNSErrorType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
+      rstring ipSourceAddress,          // binary representation of IP source address
       rstring ipDestinationAddress,     // IP destination address
       rstring parseErrorDescription,
       uint32 parseErrorOffset,
-	  rstring dnsMessage;
+      rstring dnsMessage;
 
     graph
 
@@ -86,25 +86,25 @@ composite TestDNSMessageParserFull {
             inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
-		    packetNumber = packetsProcessed(),
-            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+            packetNumber = packetsProcessed(),
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dnsMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     ( stream<DNSMessageType> DNSMessageStream as OutMessage ;
-	  stream<DNSErrorType> DNSErrorStream as OutError ) = DNSMessageParser(PacketStream) {
-      logic state: { 
+      stream<DNSErrorType> DNSErrorStream as OutError ) = DNSMessageParser(PacketStream) {
+      logic state: {
         map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
-        map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; 
-      } 
+        map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" };
+      }
       param
           messageAttribute: dnsMessage;
-	      outputFilters: true, parseError();
+          outputFilters: true, parseError();
       output OutMessage:
-	      captureTime = formatEpochDateTime(captureTime),
+          captureTime = formatEpochDateTime(captureTime),
           parseError = parseError(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
@@ -145,15 +145,14 @@ composite TestDNSMessageParserFull {
           DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
           DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
           DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA();
-	  OutError:
-	      captureTime = formatEpochTime(captureTime),
-	      parseErrorDescription = parseErrorDescription(),
+      OutError:
+          captureTime = formatEpochTime(captureTime),
+          parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
-	      dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
+          dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
     }
-    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserFull.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
-    () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSMessageParserFull.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserFull.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSMessageParserFull.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 
 }
-

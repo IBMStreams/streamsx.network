@@ -109,7 +109,7 @@ To build libpcap from source code, open a 'terminal' window and type this at a
 command prompt:
 
     cd .../directory
-    tar -xvf .../libpcap-X.Y.Z.tar.gz 
+    tar -xvf .../libpcap-X.Y.Z.tar.gz
     cd .../directory/libpcap-X.Y.Z
     ./configure
     make
@@ -133,7 +133,7 @@ This operator has been tested with these versions of 'libpcap':
     libpcap 1.5.3, included in RHEL/CentOS 7.1
     libpcap 1.6.1
     libpcap 1.6.2
-	libpcap 1.7.4
+    libpcap 1.7.4
 
 This operator is implemented in C/C++, and calls the library 'libpcap' via the
 functions defined in the header file <pcap.h>.  These functions are documented
@@ -145,7 +145,7 @@ in the manual page 'pcap', for example here:
 _____Input Ports_____
 
 
-The PacketFileSource operator has one optional input port:  
+The PacketFileSource operator has one optional input port:
 
     When the PacketFileSource operator is configured without an input port, a
     parameter specifies the pathname of a single input PCAP file for the
@@ -162,7 +162,7 @@ the 'inputFilter' parameter below.)
 _____Output Ports_____
 
 
-The PacketFileSource operator has one or more output ports: 
+The PacketFileSource operator has one or more output ports:
 
   * Each output port may produce tuples containing packets, payloads, or network
     header fields, as specified by output attribute assignments (see the
@@ -207,21 +207,29 @@ _____Parameters_____
    initDelay -- This optional parameter takes an expression of type 'float64'
       that specifies the number of seconds the operator will wait before it
       begins to produce tuples.  This parameter is allowed only when the
-      'pcapFilename' parameter is also specified.  
+      'pcapFilename' parameter is also specified.
 
       The default value of the 'initDelay' parameter is '0.0'.
 
    processorAffinity -- This optional parameter takes an expression of type
-      'unit32' that specifies which processor core the operator's thread will
+      'uint32' that specifies which processor core the operator's thread will
       run on.  The maximum value is 'P-1', where P is the number of processors
-      on the machine where the operator will run.  If this parameter is
-      specified, then the operator's thread will be dispatched only on the
-      specified processor.  This parameter is allowed only if the 'pcapFilename'
-      parameter is also specified.  If instead the operator is configured with
-      an input port, then the operator runs on the thread of the upstream
-      operator, and is dispatched according to that thread's processor affinity.
+      on the machine where the operator will run.  
 
-      The default is to dispatch the operator's thread on any available processor.
+      Where the operator runs on a thread of its own, this parameter applies to
+      the operator's thread.  This is the situation when the operator does not
+      have an input port (and the 'pcapFilename' parameter is specified). This
+      is also the case when the operator has an input port, and it is configured
+      as a threaded input port, and when the operator has an @parallel
+      annotation.
+
+      Where the operator runs on the thread of an upstream operator, this
+      parameter affects the thread of the operator that sends tuples to it. This
+      is the situation when the operator has an input port, and is fused with
+      its upstream operator.
+
+      The default is to dispatch the operator's thread on any available
+      processor.
 
    metricsInterval -- This optional parameter takes an expression of type
       'float64' that specifies the interval, in seconds, for sending operator
@@ -317,7 +325,7 @@ following functions, which are specific to this operator:
       header of the packet, if it has one, or zero if not.  For example, a value
       of 4 means the header is in IPv4 format, and 6 means the header is in IPv6
       format.
-  
+
   uint8 IP_PROTOCOL() -- This function returns the protocol field from the IP
       header of the packet, if it has one, or zero if not.  For example, a value
       of 0x01==1 means the packet contains an ICMP header, a value of 0x6==6
@@ -338,24 +346,24 @@ following functions, which are specific to this operator:
 
   uint16 IP_SRC_PORT() -- This function returns the source port field from
       the UDP or TCP header of the packet, if it has one, or zero if not.
-  
+
   uint16 IP_DST_PORT() -- This function returns the destination port field from
       the UDP or TCP header of the packet, if it has one, or zero if not.
-  
+
   uint16 UDP_SRC_PORT() -- This function returns the source port field from
       the UDP header of the packet, if it has one, or zero if not.
-  
+
   boolean UDP_PORT(uint16 port) -- This function returns 'true' if the packet is
       a UDP packet and its source or destination port field matches the
       specified port number, or else it returns 'false'.
-  
+
   uint16 UDP_DST_PORT() -- This function returns the destination port field from
       the UDP header of the packet, if it has one, or zero if not.
 
   boolean TCP_PORT(uint16 port) -- This function returns 'true' if the packet is
       a TCP packet and its source or destination port field matches the
       specified port number, or else it returns 'false'.
-  
+
   uint16 TCP_SRC_PORT() -- This function returns the source port field from
       the TCP header of the packet, if it has one, or zero if not.
 
@@ -398,7 +406,7 @@ following functions, which are specific to this operator:
 
   uint16 JMIRROR_SRC_PORT() -- This function returns the source port field from
       the 'jmirror' header of the packet, if it has one, or zero if not.
-  
+
   uint16 JMIRROR_DST_PORT() -- This function returns the destination port field
       from the 'jmirror' header of the packet (that is, 30030), if it has one,
       or zero if not.

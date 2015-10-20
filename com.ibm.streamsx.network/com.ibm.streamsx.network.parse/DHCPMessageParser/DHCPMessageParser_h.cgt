@@ -9,22 +9,26 @@
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
-class MY_OPERATOR : public MY_BASE_OPERATOR 
+class MY_OPERATOR : public MY_BASE_OPERATOR
 {
 public:
 
   // ----------- standard operator methods ----------
 
   MY_OPERATOR();
-  virtual ~MY_OPERATOR(); 
-  void allPortsReady(); 
-  void prepareToShutdown(); 
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
   void process(uint32_t idx);
   void process(Tuple & tuple, uint32_t port);
   void process(Tuple const & tuple, uint32_t port);
   void process(Punctuation const & punct, uint32_t port);
 
 private:
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  int32_t processorAffinity;
 
   // ----------- output tuples ----------
 
@@ -33,7 +37,7 @@ private:
   // ----------- operator state variables ----------
 
   uint64_t tupleCounter;
-  
+
   // ----------- DHCP message parser ----------
 
   DHCPMessageParser parser;
@@ -48,7 +52,7 @@ private:
 
   SPL::uint64 messagesProcessed() { return tupleCounter; }
 
-  SPL::uint8 DHCP_OPCODE() { return parser.dhcpHeader ? parser.dhcpHeader->op : 0; } 
+  SPL::uint8 DHCP_OPCODE() { return parser.dhcpHeader ? parser.dhcpHeader->op : 0; }
 
   SPL::uint8 DHCP_CLIENT_HARDWARE_TYPE() { return parser.dhcpHeader ? parser.dhcpHeader->htype : 0; }
 
@@ -218,7 +222,6 @@ private:
 
   SPL::list<SPL::uint32> DHCP_STDA_SERVERS() { return parser.dhcpOptionAsListUint32(76); }
 
-}; 
+};
 
 <%SPL::CodeGen::headerEpilogue($model);%>
-

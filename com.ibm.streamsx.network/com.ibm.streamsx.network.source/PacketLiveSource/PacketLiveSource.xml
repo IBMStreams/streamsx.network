@@ -59,7 +59,7 @@
       <parameter>
         <name>networkInterface</name>
         <description>
-	</description>
+    </description>
         <optional>false</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
@@ -69,7 +69,7 @@
       <parameter>
         <name>maximumLength</name>
         <description>
-	</description>
+    </description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
@@ -97,7 +97,7 @@
       <parameter>
         <name>promiscuous</name>
         <description>
-	</description>
+    </description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
@@ -107,7 +107,7 @@
       <parameter>
         <name>initDelay</name>
         <description>
-	</description>
+    </description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
@@ -125,7 +125,7 @@
       </parameter>
       <parameter>
         <name>processorAffinity</name>
-        <description>assign the operator's thread to a particular processor core ...</description>
+        <description></description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>

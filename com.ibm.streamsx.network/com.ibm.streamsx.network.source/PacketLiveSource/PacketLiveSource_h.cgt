@@ -30,16 +30,16 @@
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
-class MY_OPERATOR : public MY_BASE_OPERATOR 
+class MY_OPERATOR : public MY_BASE_OPERATOR
 {
 public:
 
   // ----------- standard operator methods ----------
 
   MY_OPERATOR();
-  virtual ~MY_OPERATOR(); 
-  void allPortsReady(); 
-  void prepareToShutdown(); 
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
   void process(uint32_t idx);
   void process(Tuple & tuple, uint32_t port);
   void process(Tuple const & tuple, uint32_t port);
@@ -47,15 +47,15 @@ public:
 
   // ----------- additional operator methods ----------
 
-  void metricsThread(); 
+  void metricsThread();
   void pcapThread();
-  void processPCAPbuffer(const struct pcap_pkthdr* header, const u_char* buffer); 
+  void processPCAPbuffer(const struct pcap_pkthdr* header, const u_char* buffer);
 
 
 private:
 
   // ----------- operator parameters (constant after constructor executes) ----------
- 
+
   std::string networkInterface;
   std::string timestampType;
   double initDelay;
@@ -91,23 +91,23 @@ private:
 
   // ----------- assignment functions for output attributes ----------
 
-  SPL::uint64 packetsReceived() { return pcapStatisticsNow.ps_recv; }  
+  SPL::uint64 packetsReceived() { return pcapStatisticsNow.ps_recv; }
 
-  SPL::uint64 packetsDropped() { return pcapStatisticsNow.ps_drop; }  
+  SPL::uint64 packetsDropped() { return pcapStatisticsNow.ps_drop; }
 
-  SPL::uint64 packetsProcessed() { return packetCounter; }  
+  SPL::uint64 packetsProcessed() { return packetCounter; }
 
-  SPL::uint64 octetsProcessed() { return octetCounter; }  
+  SPL::uint64 octetsProcessed() { return octetCounter; }
 
-  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }  
+  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
 
-  SPL::uint64 metricsIntervalPacketsReceived() { return then ? pcapStatisticsNow.ps_recv - pcapStatisticsThen.ps_recv : 0; }  
+  SPL::uint64 metricsIntervalPacketsReceived() { return then ? pcapStatisticsNow.ps_recv - pcapStatisticsThen.ps_recv : 0; }
 
-  SPL::uint64 metricsIntervalPacketsDropped() { return then ? pcapStatisticsNow.ps_drop - pcapStatisticsThen.ps_drop : 0; }  
+  SPL::uint64 metricsIntervalPacketsDropped() { return then ? pcapStatisticsNow.ps_drop - pcapStatisticsThen.ps_drop : 0; }
 
-  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }  
+  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
 
-  SPL::uint64 metricsIntervalOctetsProcessed() { return then ? octetCounterNow - octetCounterThen : 0; }  
+  SPL::uint64 metricsIntervalOctetsProcessed() { return then ? octetCounterNow - octetCounterThen : 0; }
 
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
@@ -115,7 +115,7 @@ private:
 
   SPL::uint32 CAPTURE_MICROSECONDS() { return pcapHeader->ts.tv_usec; }
 
-  SPL::uint32 PACKET_LENGTH() { return pcapHeader->len; } 
+  SPL::uint32 PACKET_LENGTH() { return pcapHeader->len; }
 
   SPL::blob PACKET_DATA() { return SPL::blob((const unsigned char*)headers.packetBuffer, headers.packetLength); }
 
@@ -128,11 +128,11 @@ private:
   SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
 
   SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
-  
+
   SPL::uint8 IP_VERSION() { return headers.ipv4Header ? headers.ipv4Header->version : ( headers.ipv6Header ? headers.ipv6Header->ip6_vfc>>4 : 0 ); }
-  
+
   SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
-  
+
   SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
 
   SPL::uint32 IPV4_DST_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->daddr) : 0; }
@@ -142,13 +142,13 @@ private:
   SPL::list<SPL::uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
 
   SPL::uint16 IP_SRC_PORT() { return UDP_SRC_PORT() + TCP_SRC_PORT(); }
-  
+
   SPL::uint16 IP_DST_PORT() { return UDP_DST_PORT() + TCP_DST_PORT(); }
-  
+
   SPL::boolean UDP_PORT(SPL::uint16 port) { return headers.udpHeader ? ( ntohs(headers.udpHeader->source)==port || ntohs(headers.udpHeader->dest)==port ) : false; }
 
   SPL::uint16 UDP_SRC_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->source) : 0; }
-  
+
   SPL::uint16 UDP_DST_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->dest) : 0; }
 
   SPL::boolean TCP_PORT(SPL::uint16 port) { return headers.tcpHeader ? ( ntohs(headers.tcpHeader->source)==port || ntohs(headers.tcpHeader->dest)==port ) : false; }
@@ -180,7 +180,7 @@ private:
   SPL::uint32 JMIRROR_DST_ADDRESS() { return headers.jmirrorHeader ? ntohl(headers.jmirrorHeader->ipHeader.daddr) : 0; }
 
   SPL::uint16 JMIRROR_SRC_PORT() { return headers.jmirrorHeader ? ntohs(headers.jmirrorHeader->udpHeader.source) : 0; }
-  
+
   SPL::uint16 JMIRROR_DST_PORT() { return headers.jmirrorHeader ? ntohs(headers.jmirrorHeader->udpHeader.dest) : 0; }
 
   SPL::uint32 JMIRROR_INTERCEPT_ID() { return headers.jmirrorHeader ? ntohl(headers.jmirrorHeader->jmirrorHeader.interceptIdentifier) : 0; }
@@ -189,7 +189,6 @@ private:
 
   // ------------------------------------------------------------------------------------------
 
-}; 
+};
 
 <%SPL::CodeGen::headerEpilogue($model);%>
-

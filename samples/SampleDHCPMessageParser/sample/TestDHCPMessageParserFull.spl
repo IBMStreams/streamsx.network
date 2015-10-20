@@ -3,21 +3,6 @@
 ** All Rights Reserved
 */
 
-/*
-
-
-https://tools.ietf.org/html/rfc2131
-https://tools.ietf.org/html/rfc2132
-
-
-
-
-*/
-
-
-
-
-
 namespace sample;
 
 use com.ibm.streamsx.network.mac::*;
@@ -28,123 +13,123 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestDHCPMessageParserFull {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
-    
-    type 
-    
+
+    type
+
     PacketType =
-	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
-        uint32 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        uint32 captureTime,            // time that packet was captured, in seconds since Unix epoch
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         blob dhcpMessage;                // the DHCP message from a packet, excluding all network headers
 
-    DHCPMessageType = 
-        rstring captureTime,              // time that packet was captured, in seconds since Unix epoch 
+    DHCPMessageType =
+        rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
         rstring ipSourceAddress,          // IP source address
         rstring ipDestinationAddress,     // IP destination address
         boolean parseError,
         rstring parseErrorDescription,
         uint32 parseErrorOffset,
         uint64 messagesProcessed,
-	    uint8 OPCODE, // header: message type, '1' for request, '2' for reply
-	    uint8 CLIENT_HARDWARE_TYPE, // header: client hardware address type 
-	    rstring CLIENT_HARDWARE_ADDRESS, // header: client hardware address
-	    uint8 HOP_COUNT, // header: number of relay agents separating client and server
-	    uint32 TRANSACTION_IDENTIFIER, // header: request correlator, chosen by client, returned by server
-	    rstring SECONDS, // header: elapsed time, in seconds, since client began request
-	    uint16 FLAGS, // header: broadcast request
-	    rstring CLIENT_ADDRESS, // header: address of client requesting renewal of lease, as an IPv4 address
-	    rstring YOUR_ADDRESS, // header: address leased to client by server, as an IPv4 address
-	    rstring DHCP_SERVER_NEXT, // header: address of next server to use, as an IPv4 address
-	    rstring RELAY_AGENT, // header: IPv4 address of relay agent, as an IPv4 address
-	    rstring SERVER_HOSTNAME, // header or option 66: name of DHCP server, or empty
-	    rstring BOOTFILE_NAME, // header or option 67: boot file pathname, or empty
-	    rstring SUBNET_MASK, // option 1: the subnet mask of the client, as an IPv4 address 
-	    rstring TIME_OFFSET, // option 2: time offset of client's subnet, relative to GMT/UTC, in seconds
-	    list<rstring> ROUTERS, // option 3: list of routers on client's subnet, as IPv4 addresses
-	    list<rstring> TIME_SERVERS, // option 4: list of time servers, as IPv4 addresses
-	    list<rstring> NAME_SERVERS, // option 5: list of name servers, as IPv4 addresses
-	    list<rstring> DNS_SERVERS, // option 6: list of DNS servers, as IPv4 addresses
-	    list<rstring> LOG_SERVERS, // option 7: list of log servers, as IPv4 addresses
-	    list<rstring> COOKIE_SERVERS, // option 8: list of cookie servers, as IPv4 addresses
-	    list<rstring> LPR_SERVERS, // option 9: list of print servers, as IPv4 addresses
-	    list<rstring> IMPRESS_SERVERS, // option 10: list of Impress servers, as IPv4 addresses
-	    list<rstring> RESOURCE_SERVERS, // option 11: list of resource location servers, as IPv4 addresses
-	    rstring HOST_NAME, // option 12: hostname of the client 
-	    uint16 BOOT_FILE_SIZE, // option 13: size of boot file, in 512 byte blocks
-	    rstring MERIT_DUMP_FILE, // option 14: pathname of file for client's core dump image 
-	    rstring DOMAIN_NAME, // option 15: domain name client should use with DNS
-	    rstring SWAP_SERVER, // option 16: client's swap server, as an IPv4 address
-	    rstring ROOT_PATH, // option 17: pathname of client's root disk
-	    rstring EXTENSIONS_PATH, // option 18: BOOTP extensions
-	    boolean IP_FORWARDING, // option 19: client should forward IP packets if 'true'
-	    boolean NONLOCAL_SOURCE_ROUTING, // option 20: client should forward IP packets with non-local source routing if 'true'
-	    list<rstring> NONLOCAL_SOURCE_FILTERS, // option 21: list of address/mask pairs for filtering source packets
-	    uint16 MAXIMUM_REASSEMBLY_SIZE, // option 22: maximum size of reassembled packets
-	    uint8 IP_DEFAULT_TTL, // option 23: default IP time-to-live for outgoing packets
-	    rstring MTU_AGING_TIMEOUT, // option 24: time to use when aging path MTU values, in seconds
-	    list<uint16> MTU_PLATEAU_TABLE, // option 25: list of MTU sizes for path discovery
-	    uint16 INTERFACE_MTU, // option 26: MTU size to use on this interface
-	    boolean ALL_SUBNETS_LOCAL, // option 27: all subnets use the same MTU size if 'true'
-	    rstring BROADCAST_ADDRESS, // option 28: address to use when broadcasting on subnet, as an IPv4 address
-	    boolean PERFORM_MASK_DISCOVERY, // option 29: client should perform subnet mask discovery when 'true'
-	    boolean MASK_SUPPLIER, // option 30: client should respond to subnet mask discovery when 'true'
-	    boolean PERFORM_ROUTER_DISCOVERY, // option 31: client should solicit routers when 'true'
-	    rstring ROUTER_SOLICITATION_ADDRESS, // option 32: address to which router solicitations should be sent
-	    list<rstring> STATIC_ROUTES, // option 33: list of address pairs for routing table, as IPv4 addresses
-	    boolean TRAILER_ENCAPSULATION, // option 34: client should negotiate trailers if 'true'
-	    rstring ARP_CACHE_TIMEOUT, // option 35: timeout for ARP cache entries, in seconds
-	    boolean ETHERNET_ENCAPSULATION, // option 36: client should use ethernet encapsulation if 'true'
-	    uint8 TCP_DEFUALT_TTL, // option 37: default TCP time-to-live for outgoing segments
-	    rstring TCP_KEEPALIVE_INTERVAL, // option 38: time the client should wait before sending TCP keepalive messages, in seconds
-	    boolean TCP_KEEPALIVE_GARBAGE, // option 39: client should send a byte of garbage with TCP keepalive messages if 'true'
-	    rstring NIS_DOMAIN, // option 40: name of client's NIS domain
-	    list<rstring> NIS_SERVERS, // option 41: list of NIS servers, as IPv4 addresses
-	    list<rstring> NTP_SERVERS, // option 42: list of NTP servers, as IPv4 addresses
-	    list<uint8> VENDOR_INFORMATION, // option 43: vendor-specific information
-	    list<rstring> NETBIOS_NAME_SERVERS, // option 44: list of NetBIOS-over-TCP name servers, as IPv4 addresses
-	    list<rstring> NETBIOS_NBDD_SERVERS, // option 45: list of NetBIOS-over-TCP NBDD servers, as IPv4 addresses
-	    uint8 NETBIOS_NODE_TYPE, // option 46: type of NetBIOS-over-TCP node
-	    rstring NETBIOS_SCOPE, // option 47: client's NetBIOS-over-TCP scope parameter
-	    list<rstring> XWINDOW_FONT_SERVERS, // option 48: list of X-Windows font servers, as IPv4 addresses
-	    list<rstring> XWINDOW_DISPLAY_MANAGERS, // option 49: list of X-Windows display managers, as IPv4 addresses
-	    rstring REQUESTED_ADDRESS, // option 50: client's requested address, as an IPv4 address
-	    rstring ADDRESS_LEASE_TIME, // option 51: address lease time, in seconds
-	    uint8 OPTION_OVERLOAD_FLAGS, // option 52: flags indicate that SERVER_HOSTNAME and/or BOOTFILE_NAME contain options
-	    rstring DHCP_MESSAGE_TYPE, // option 53: type of this DHCP message
-	    rstring SERVER_ADDRESS, // option 54: address of DHCP server, as IPv4 address
-	    list<uint8> PARAMETER_REQUESTS, // option 55: list of requested DHCP parameters, specified as option codes
-	    rstring ERROR_MESSAGE, // option 56: error message from server, if request failed
-	    uint16 MAXIMUM_DHCP_MESSAGE_SIZE, // option 57: maximum size of DHCP message
-	    rstring RENEWAL_TIME, // option 58: time from address lease to renewal, in seconds
-	    rstring REBINDING_TIME, // option 59: time from address lease to rebinding, in seconds
-	    list<uint8> VENDOR_IDENTIFIER, // option 60: vendor-specific information
-	    list<uint8> CLIENT_IDENTIFIER, // option 61: client-specific information
-	    rstring NISPLUS_DOMAIN, // option 64: name of client's NIS+ domain
-	    list<rstring> NISPLUS_SERVERS, // option 65: list of NIS+ servers, as IPv4 addresses
-	    //????rstring TFTP_SERVER_NAME, // option 66: used when SERVER_HOSTNAME field is used for options
-	    //????rstring BOOTFILE_NAME, // option 67: used when BOOTFILE_NAME field is used for options
-	    list<rstring> MOBILE_IP_HOME_AGENTS, // option 68: list of mobile IP home agents, as IPv4 addresses
-	    list<rstring> SMTP_SERVERS, // option 69: list of SMTP servers, as IPv4 addresses
-	    list<rstring> POP3_SERVERS, // option 70: list of POP3 servers, as IPv4 addresses
-	    list<rstring> NNTP_SERVERS, // option 71: list of NNTP servers, as IPv4 addresses
-	    list<rstring> WWW_SERVERS, // option 72: list of WWW servers, as IPv4 addresses
-	    list<rstring> FINGER_SERVERS, // option 73: list of Finger servers, as IPv4 addresses
-	    list<rstring> IRC_SERVERS, // option 74: list of IRC servers, as IPv4 addresses
-	    list<rstring> STREETTALK_SERVERS, // option 75: list of StreetTalk servers, as IPv4 addresses
-	    list<rstring> STDA_SERVERS; // option 76: list of StreetTalk Directory Assistance servers, as IPv4 addresses
+        uint8 OPCODE, // header: message type, '1' for request, '2' for reply
+        uint8 CLIENT_HARDWARE_TYPE, // header: client hardware address type
+        rstring CLIENT_HARDWARE_ADDRESS, // header: client hardware address
+        uint8 HOP_COUNT, // header: number of relay agents separating client and server
+        uint32 TRANSACTION_IDENTIFIER, // header: request correlator, chosen by client, returned by server
+        rstring SECONDS, // header: elapsed time, in seconds, since client began request
+        uint16 FLAGS, // header: broadcast request
+        rstring CLIENT_ADDRESS, // header: address of client requesting renewal of lease, as an IPv4 address
+        rstring YOUR_ADDRESS, // header: address leased to client by server, as an IPv4 address
+        rstring DHCP_SERVER_NEXT, // header: address of next server to use, as an IPv4 address
+        rstring RELAY_AGENT, // header: IPv4 address of relay agent, as an IPv4 address
+        rstring SERVER_HOSTNAME, // header or option 66: name of DHCP server, or empty
+        rstring BOOTFILE_NAME, // header or option 67: boot file pathname, or empty
+        rstring SUBNET_MASK, // option 1: the subnet mask of the client, as an IPv4 address
+        rstring TIME_OFFSET, // option 2: time offset of client's subnet, relative to GMT/UTC, in seconds
+        list<rstring> ROUTERS, // option 3: list of routers on client's subnet, as IPv4 addresses
+        list<rstring> TIME_SERVERS, // option 4: list of time servers, as IPv4 addresses
+        list<rstring> NAME_SERVERS, // option 5: list of name servers, as IPv4 addresses
+        list<rstring> DNS_SERVERS, // option 6: list of DNS servers, as IPv4 addresses
+        list<rstring> LOG_SERVERS, // option 7: list of log servers, as IPv4 addresses
+        list<rstring> COOKIE_SERVERS, // option 8: list of cookie servers, as IPv4 addresses
+        list<rstring> LPR_SERVERS, // option 9: list of print servers, as IPv4 addresses
+        list<rstring> IMPRESS_SERVERS, // option 10: list of Impress servers, as IPv4 addresses
+        list<rstring> RESOURCE_SERVERS, // option 11: list of resource location servers, as IPv4 addresses
+        rstring HOST_NAME, // option 12: hostname of the client
+        uint16 BOOT_FILE_SIZE, // option 13: size of boot file, in 512 byte blocks
+        rstring MERIT_DUMP_FILE, // option 14: pathname of file for client's core dump image
+        rstring DOMAIN_NAME, // option 15: domain name client should use with DNS
+        rstring SWAP_SERVER, // option 16: client's swap server, as an IPv4 address
+        rstring ROOT_PATH, // option 17: pathname of client's root disk
+        rstring EXTENSIONS_PATH, // option 18: BOOTP extensions
+        boolean IP_FORWARDING, // option 19: client should forward IP packets if 'true'
+        boolean NONLOCAL_SOURCE_ROUTING, // option 20: client should forward IP packets with non-local source routing if 'true'
+        list<rstring> NONLOCAL_SOURCE_FILTERS, // option 21: list of address/mask pairs for filtering source packets
+        uint16 MAXIMUM_REASSEMBLY_SIZE, // option 22: maximum size of reassembled packets
+        uint8 IP_DEFAULT_TTL, // option 23: default IP time-to-live for outgoing packets
+        rstring MTU_AGING_TIMEOUT, // option 24: time to use when aging path MTU values, in seconds
+        list<uint16> MTU_PLATEAU_TABLE, // option 25: list of MTU sizes for path discovery
+        uint16 INTERFACE_MTU, // option 26: MTU size to use on this interface
+        boolean ALL_SUBNETS_LOCAL, // option 27: all subnets use the same MTU size if 'true'
+        rstring BROADCAST_ADDRESS, // option 28: address to use when broadcasting on subnet, as an IPv4 address
+        boolean PERFORM_MASK_DISCOVERY, // option 29: client should perform subnet mask discovery when 'true'
+        boolean MASK_SUPPLIER, // option 30: client should respond to subnet mask discovery when 'true'
+        boolean PERFORM_ROUTER_DISCOVERY, // option 31: client should solicit routers when 'true'
+        rstring ROUTER_SOLICITATION_ADDRESS, // option 32: address to which router solicitations should be sent
+        list<rstring> STATIC_ROUTES, // option 33: list of address pairs for routing table, as IPv4 addresses
+        boolean TRAILER_ENCAPSULATION, // option 34: client should negotiate trailers if 'true'
+        rstring ARP_CACHE_TIMEOUT, // option 35: timeout for ARP cache entries, in seconds
+        boolean ETHERNET_ENCAPSULATION, // option 36: client should use ethernet encapsulation if 'true'
+        uint8 TCP_DEFUALT_TTL, // option 37: default TCP time-to-live for outgoing segments
+        rstring TCP_KEEPALIVE_INTERVAL, // option 38: time the client should wait before sending TCP keepalive messages, in seconds
+        boolean TCP_KEEPALIVE_GARBAGE, // option 39: client should send a byte of garbage with TCP keepalive messages if 'true'
+        rstring NIS_DOMAIN, // option 40: name of client's NIS domain
+        list<rstring> NIS_SERVERS, // option 41: list of NIS servers, as IPv4 addresses
+        list<rstring> NTP_SERVERS, // option 42: list of NTP servers, as IPv4 addresses
+        list<uint8> VENDOR_INFORMATION, // option 43: vendor-specific information
+        list<rstring> NETBIOS_NAME_SERVERS, // option 44: list of NetBIOS-over-TCP name servers, as IPv4 addresses
+        list<rstring> NETBIOS_NBDD_SERVERS, // option 45: list of NetBIOS-over-TCP NBDD servers, as IPv4 addresses
+        uint8 NETBIOS_NODE_TYPE, // option 46: type of NetBIOS-over-TCP node
+        rstring NETBIOS_SCOPE, // option 47: client's NetBIOS-over-TCP scope parameter
+        list<rstring> XWINDOW_FONT_SERVERS, // option 48: list of X-Windows font servers, as IPv4 addresses
+        list<rstring> XWINDOW_DISPLAY_MANAGERS, // option 49: list of X-Windows display managers, as IPv4 addresses
+        rstring REQUESTED_ADDRESS, // option 50: client's requested address, as an IPv4 address
+        rstring ADDRESS_LEASE_TIME, // option 51: address lease time, in seconds
+        uint8 OPTION_OVERLOAD_FLAGS, // option 52: flags indicate that SERVER_HOSTNAME and/or BOOTFILE_NAME contain options
+        rstring DHCP_MESSAGE_TYPE, // option 53: type of this DHCP message
+        rstring SERVER_ADDRESS, // option 54: address of DHCP server, as IPv4 address
+        list<uint8> PARAMETER_REQUESTS, // option 55: list of requested DHCP parameters, specified as option codes
+        rstring ERROR_MESSAGE, // option 56: error message from server, if request failed
+        uint16 MAXIMUM_DHCP_MESSAGE_SIZE, // option 57: maximum size of DHCP message
+        rstring RENEWAL_TIME, // option 58: time from address lease to renewal, in seconds
+        rstring REBINDING_TIME, // option 59: time from address lease to rebinding, in seconds
+        list<uint8> VENDOR_IDENTIFIER, // option 60: vendor-specific information
+        list<uint8> CLIENT_IDENTIFIER, // option 61: client-specific information
+        rstring NISPLUS_DOMAIN, // option 64: name of client's NIS+ domain
+        list<rstring> NISPLUS_SERVERS, // option 65: list of NIS+ servers, as IPv4 addresses
+        //????rstring TFTP_SERVER_NAME, // option 66: used when SERVER_HOSTNAME field is used for options
+        //????rstring BOOTFILE_NAME, // option 67: used when BOOTFILE_NAME field is used for options
+        list<rstring> MOBILE_IP_HOME_AGENTS, // option 68: list of mobile IP home agents, as IPv4 addresses
+        list<rstring> SMTP_SERVERS, // option 69: list of SMTP servers, as IPv4 addresses
+        list<rstring> POP3_SERVERS, // option 70: list of POP3 servers, as IPv4 addresses
+        list<rstring> NNTP_SERVERS, // option 71: list of NNTP servers, as IPv4 addresses
+        list<rstring> WWW_SERVERS, // option 72: list of WWW servers, as IPv4 addresses
+        list<rstring> FINGER_SERVERS, // option 73: list of Finger servers, as IPv4 addresses
+        list<rstring> IRC_SERVERS, // option 74: list of IRC servers, as IPv4 addresses
+        list<rstring> STREETTALK_SERVERS, // option 75: list of StreetTalk servers, as IPv4 addresses
+        list<rstring> STDA_SERVERS; // option 76: list of StreetTalk Directory Assistance servers, as IPv4 addresses
 
-	// error output from DHCPMessageParser operator
-	DHCPErrorType = 
-	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-        rstring captureTime,          	// time that packet was captured, in seconds since Unix epoch 
-        rstring ipSourceAddress,        	// binary representation of IP source address
+    // error output from DHCPMessageParser operator
+    DHCPErrorType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
+        rstring ipSourceAddress,            // binary representation of IP source address
         rstring ipDestinationAddress,     // IP destination address
         rstring parserError,
-	    rstring dhcpError,
-	    rstring dhcpMessage;
+        rstring dhcpError,
+        rstring dhcpMessage;
 
     graph
 
@@ -154,24 +139,24 @@ composite TestDHCPMessageParserFull {
             inputFilter: "udp port 67 or udp port 68";
             metricsInterval: 0.0;
         output Out:
-		    packetNumber = packetsProcessed(),
-            captureTime = CAPTURE_SECONDS(),	
+            packetNumber = packetsProcessed(),
+            captureTime = CAPTURE_SECONDS(),
             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dhcpMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDHCPMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDHCPMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     ( stream<DHCPMessageType> DHCPMessageStream as OutMessage ;
-	  stream<DHCPErrorType> DHCPErrorStream as OutError ) = DHCPMessageParser(PacketStream) {
-        logic state: { 
-		  map<uint8,rstring> dhcpTypes = { 1: "DHCPDISCOVER", 2: "DHCPOFFER", 3: "DHCPREQUEST", 4: "DHCPDECLINE", 5: "DHCPACK", 6: "DHCPNAK", 7: "DHCPRELEASE", 8: "DHCPINFORM" };
-		} 
+      stream<DHCPErrorType> DHCPErrorStream as OutError ) = DHCPMessageParser(PacketStream) {
+        logic state: {
+          map<uint8,rstring> dhcpTypes = { 1: "DHCPDISCOVER", 2: "DHCPOFFER", 3: "DHCPREQUEST", 4: "DHCPDECLINE", 5: "DHCPACK", 6: "DHCPNAK", 7: "DHCPRELEASE", 8: "DHCPINFORM" };
+        }
       param
           messageAttribute: dhcpMessage;
-	      outputFilters: true, parseError() || length(DHCP_ERROR_MESSAGE())>0;
+          outputFilters: true, parseError() || length(DHCP_ERROR_MESSAGE())>0;
       output OutMessage:
-		  captureTime = formatEpochDateTime(captureTime),
+          captureTime = formatEpochDateTime(captureTime),
           parseError = parseError(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
@@ -190,7 +175,7 @@ composite TestDHCPMessageParserFull {
           SERVER_HOSTNAME = DHCP_SERVER_HOSTNAME(),
           BOOTFILE_NAME = DHCP_BOOTFILE_NAME(),
           SUBNET_MASK = convertIPV4AddressNumericToString(DHCP_SUBNET_MASK()),
-          TIME_OFFSET = (DHCP_TIME_OFFSET()<0 ? "- " : "+ ") + formatElapsedTime((uint32)abs(DHCP_TIME_OFFSET())), 
+          TIME_OFFSET = (DHCP_TIME_OFFSET()<0 ? "- " : "+ ") + formatElapsedTime((uint32)abs(DHCP_TIME_OFFSET())),
           ROUTERS = convertIPV4AddressListToStringList(DHCP_ROUTERS()),
           TIME_SERVERS = convertIPV4AddressListToStringList(DHCP_TIME_SERVERS()),
           NAME_SERVERS = convertIPV4AddressListToStringList(DHCP_NAME_SERVERS()),
@@ -261,15 +246,14 @@ composite TestDHCPMessageParserFull {
           IRC_SERVERS = convertIPV4AddressListToStringList(DHCP_IRC_SERVERS()),
           STREETTALK_SERVERS = convertIPV4AddressListToStringList(DHCP_STREETTALK_SERVERS()),
           STDA_SERVERS = convertIPV4AddressListToStringList(DHCP_STDA_SERVERS());
-	  OutError:
-		  captureTime = formatEpochDateTime(captureTime),
-	      parserError = parseErrorDescription(),
-	      dhcpError = DHCP_ERROR_MESSAGE(),
-	      dhcpMessage = substring((rstring)dhcpMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dhcpMessage, 2*(int32)parseErrorOffset(), 2*size(dhcpMessage)-2*(int32)parseErrorOffset());
+      OutError:
+          captureTime = formatEpochDateTime(captureTime),
+          parserError = parseErrorDescription(),
+          dhcpError = DHCP_ERROR_MESSAGE(),
+          dhcpMessage = substring((rstring)dhcpMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dhcpMessage, 2*(int32)parseErrorOffset(), 2*size(dhcpMessage)-2*(int32)parseErrorOffset());
     }
-    () as DHCPMessageSink = FileSink(DHCPMessageStream) { param file: "debug.TestDHCPMessageParserFull.DHCPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
-    () as DHCPErrorSink = FileSink(DHCPErrorStream) { param file: "debug.TestDHCPMessageParserFull.DHCPErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as DHCPMessageSink = FileSink(DHCPMessageStream) { param file: "debug.TestDHCPMessageParserFull.DHCPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DHCPErrorSink = FileSink(DHCPErrorStream) { param file: "debug.TestDHCPMessageParserFull.DHCPErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 
 }
-

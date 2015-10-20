@@ -46,8 +46,8 @@ The toolkit also includes these functions that format 'elasped time' values
 defaults to '6' if not specified), with leading zeros omitted (for example,
 "11h 59m 8s" or "2.128s"):
 
-    rstring formatElapsedTime(float64 seconds, uint32 precision) 
-    rstring formatElapsedTime(float64 seconds) 
+    rstring formatElapsedTime(float64 seconds, uint32 precision)
+    rstring formatElapsedTime(float64 seconds)
 
 The date&time formatting functions are part of the network toolkit. To use them
 in an application, include this statement in the SPL source file:

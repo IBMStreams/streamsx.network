@@ -86,7 +86,7 @@ described here:
 
 The PacketLiveSource operator requires these Linux capabilities:
 
-    CAP_NET_RAW+eip 
+    CAP_NET_RAW+eip
     CAP_NET_ADMIN+eip
 
 For 'standalone' Streams applications (that is, SPL source files compiled with a
@@ -170,7 +170,7 @@ To build libpcap from source code, open a 'terminal' window and type this at a
 command prompt:
 
     cd .../directory
-    tar -xvf .../libpcap-X.Y.Z.tar.gz 
+    tar -xvf .../libpcap-X.Y.Z.tar.gz
     cd .../directory/libpcap-X.Y.Z
     ./configure
     make
@@ -194,7 +194,7 @@ This operator has been tested with these versions of 'libpcap':
     libpcap 1.5.3, included in RHEL/CentOS 7.1
     libpcap 1.6.1
     libpcap 1.6.2
-	libpcap 1.7.4
+    libpcap 1.7.4
 
 This operator is implemented in C/C++, and calls the library 'libpcap' via the
 functions defined in the header file <pcap.h>.  These functions are documented
@@ -206,13 +206,13 @@ in the manual page 'pcap', for example here:
 _____Input Ports_____
 
 
-The PacketLiveSource operator has no input ports.  
+The PacketLiveSource operator has no input ports.
 
 
 _____Output Ports_____
 
 
-The PacketLiveSource operator has one or more output ports: 
+The PacketLiveSource operator has one or more output ports:
 
   * Each output port may produce tuples containing packets, payloads, or network
     header fields, as specified by output attribute assignments (see the
@@ -268,7 +268,7 @@ _____Parameters_____
       specifies a timeout for the 'libpcap' interface.  If this value is
       specified, the operator will call the 'libpcap' interface again whenever
       it times out, until the PE containing the operator receives a shutdown
-      signal.  
+      signal.
 
       The default is no timeout.  This may cause the thread that runs the
       'libpcap' interface to hang on shutdown until another packet is received.
@@ -299,19 +299,16 @@ _____Parameters_____
    initDelay -- This optional parameter takes an expression of type 'float64'
       that specifies the number of seconds the operator will wait before it
       begins to produce tuples.  This parameter is allowed only when the
-      'pcapFilename' parameter is also specified.  
+      'pcapFilename' parameter is also specified.
 
       The default value of the 'initDelay' parameter is '0.0'.
 
    processorAffinity -- This optional parameter takes an expression of type
-      'unit32' that specifies which processor core the operator's thread will
+      'uint32' that specifies which processor core the operator's thread will
       run on.  The maximum value is 'P-1', where P is the number of processors
       on the machine where the operator will run.  If this parameter is
       specified, then the operator's thread will be dispatched only on the
-      specified processor.  This parameter is allowed only if the 'pcapFilename'
-      parameter is also specified.  If instead the operator is configured with
-      an input port, then the operator runs on the thread of the upstream
-      operator, and is dispatched according to that thread's processor affinity.
+      specified processor.  
 
       The default is to dispatch the operator's thread on any available processor.
 
@@ -434,7 +431,7 @@ the following functions, which are specific to this operator:
       header of the packet, if it has one, or zero if not.  For example, a value
       of 4 means the header is in IPv4 format, and 6 means the header is in IPv6
       format.
-  
+
   uint8 IP_PROTOCOL() -- This function returns the protocol field from the IP
       header of the packet, if it has one, or zero if not.  For example, a value
       of 0x01==1 means the packet contains an ICMP header, a value of 0x6==6
@@ -455,24 +452,24 @@ the following functions, which are specific to this operator:
 
   uint16 IP_SRC_PORT() -- This function returns the source port field from
       the UDP or TCP header of the packet, if it has one, or zero if not.
-  
+
   uint16 IP_DST_PORT() -- This function returns the destination port field from
       the UDP or TCP header of the packet, if it has one, or zero if not.
-  
+
   uint16 UDP_SRC_PORT() -- This function returns the source port field from
       the UDP header of the packet, if it has one, or zero if not.
-  
+
   boolean UDP_PORT(uint16 port) -- This function returns 'true' if the packet is
       a UDP packet and its source or destination port field matches the
       specified port number, or else it returns 'false'.
-  
+
   uint16 UDP_DST_PORT() -- This function returns the destination port field from
       the UDP header of the packet, if it has one, or zero if not.
 
   boolean TCP_PORT(uint16 port) -- This function returns 'true' if the packet is
       a TCP packet and its source or destination port field matches the
       specified port number, or else it returns 'false'.
-  
+
   uint16 TCP_SRC_PORT() -- This function returns the source port field from
       the TCP header of the packet, if it has one, or zero if not.
 
@@ -515,7 +512,7 @@ the following functions, which are specific to this operator:
 
   uint16 JMIRROR_SRC_PORT() -- This function returns the source port field from
       the 'jmirror' header of the packet, if it has one, or zero if not.
-  
+
   uint16 JMIRROR_DST_PORT() -- This function returns the destination port field
       from the 'jmirror' header of the packet (that is, 30030), if it has one,
       or zero if not.
@@ -589,7 +586,7 @@ parameters by entering these commands at a Linux prompt:
 
     /sbin/sysctl net.core
     /sbin/sysctl net.ipv4
-  
+
 For example, these are typical default values for Linux configuration parameters
 in RHEL/CentOS 5 and 6:
 
@@ -606,9 +603,9 @@ in RHEL/CentOS 5 and 6:
 You can change the current values of Linux configuration parameters by executing
 these commands at a Linux prompt.  For example:
 
-    # allow packet buffers to increase up to 64MB 
+    # allow packet buffers to increase up to 64MB
     sudo /sbin/sysctl -w net.core.rmem_max=67108864
-    sudo /sbin/sysctl -w net.core.wmem_max=67108864 
+    sudo /sbin/sysctl -w net.core.wmem_max=67108864
 
     # increase the length of the processor input queue to 50,000
     sudo /sbin/sysctl -w net.core.netdev_max_backlog=50000

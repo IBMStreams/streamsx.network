@@ -9,7 +9,7 @@ use feature "switch";
 
 sub help() {
 
-    print " 
+    print "
 
 This script is called by the Streams compiler (that is, the 'sc' command) when
 it compiles a PacketLiveSource or PacketFileSource operator.  The compiler
@@ -56,9 +56,7 @@ for ($request) {
     when (/^includePath/) { print STDOUT ($includePath ? $includePath : "") . "\n"; }
     when (/^libPath/) { print STDOUT ($libPath ? $libPath : "") . "\n"; }
     when (/^lib/) { print STDOUT "pcap\n"; }
-    default { print STDERR "sorry, unrecognized request '$request'\n"; exit 1; } 
+    default { print STDERR "sorry, unrecognized request '$request'\n"; exit 1; }
 }
 
 exit 0;
-
-

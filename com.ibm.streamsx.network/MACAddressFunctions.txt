@@ -11,7 +11,7 @@ _____Description_____
 
 
 The InfoSphere Streams network toolkit includes functions that transform
-ethernet MAC addresses between string and six-byte binary presentations.  
+ethernet MAC addresses between string and six-byte binary presentations.
 
 The toolkit includes these MAC address functions:
 

@@ -10,33 +10,32 @@ use com.ibm.streamsx.network.source::*;
 
 composite TestPacketFileSourceMinimalB {
 
-	param		
-	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
-	
-	type 
-	
-	PacketType =
-		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
-	    rstring ipv4SourceAddress,		// IP source address, or zero if not IP packet
-	    rstring ipv4DestinationAddress,	// IP destination address, or zero if not IP packet
-		blob dnsPacket;					// DNS packet, including all network headers
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
 
-	graph
+    type
 
-	stream<PacketType> PacketStream as OutPackets = PacketFileSource() {
-		param
-			pcapFilename: $pcapFilename;
-		    inputFilter: "udp port 53";
-		    metricsInterval: 0.0;
-		output OutPackets:
-			captureTime =(float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			ipv4SourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
-			ipv4DestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			dnsPacket = PACKET_DATA();
-	}
-	//() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalB.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+    PacketType =
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        rstring ipv4SourceAddress,      // IP source address, or zero if not IP packet
+        rstring ipv4DestinationAddress, // IP destination address, or zero if not IP packet
+        blob dnsPacket;                 // DNS packet, including all network headers
 
-	stream<PacketType> FilteredPacketStream = Filter(PacketStream) { param filter: true; }
+    graph
+
+    stream<PacketType> PacketStream as OutPackets = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 53";
+            metricsInterval: 0.0;
+        output OutPackets:
+            captureTime =(float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipv4SourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipv4DestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dnsPacket = PACKET_DATA();
+    }
+    //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalB.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+    stream<PacketType> FilteredPacketStream = Filter(PacketStream) { param filter: true; }
 
 }
-

@@ -43,6 +43,15 @@
         <type>boolean</type>
         <cardinality>-1</cardinality>
       </parameter>
+      <parameter>
+        <name>processorAffinity</name>
+        <description></description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
     </parameters>
     <inputPorts>
       <inputPortSet>

@@ -32,44 +32,44 @@ The toolkit includes these IP version 4 address functions in the
 
     uint32  convertHostnameToIPV4AddressNumeric(rstring hostname)
 
-	list<rstring> getAllAddressesInNetwork(rstring networkCIDR)
-	
-	boolean isGreaterThan(rstring ip1, rstring ip2)
-	
-	boolean isIPV4CIDRNotation(rstring networkCIDR)
-	
-	boolean isEqualTo(rstring ip1, rstring ip2)
-	
-	boolean isInIPRange(rstring startIP, rstring endIP, rstring ip)
-	
-	boolean isInNetwork(rstring networkCIDR, rstring ip)
-	
-	boolean isInNetwork(rstring networkCIDR, uint32 ip)
-	
-	boolean isInNetworkList(list&lt;rstring> networkList, rstring ip)
-	
-	boolean isLessThan(rstring ip1, rstring ip2)
-	
-	boolean isLinkLocal(rstring ip)
-	
-	boolean isLoopback(rstring ip)
-	
-	boolean isMulticast(rstring ip)
-	
-	boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)
-	
-	boolean isPrivate(rstring ip)
-	
-	boolean isReserved(rstring ip)
-	
-	uint32 numAddressesInIPRange(rstring startIP, rstring endIP)
-	
-	uint32 numAddressesInNetwork(rstring networkCIDR)
-	
-	int32 compare(rstring ip1, rstring ip2)
-	
-	boolean isIPV4Address(rstring value)
-	
+    list<rstring> getAllAddressesInNetwork(rstring networkCIDR)
+
+    boolean isGreaterThan(rstring ip1, rstring ip2)
+
+    boolean isIPV4CIDRNotation(rstring networkCIDR)
+
+    boolean isEqualTo(rstring ip1, rstring ip2)
+
+    boolean isInIPRange(rstring startIP, rstring endIP, rstring ip)
+
+    boolean isInNetwork(rstring networkCIDR, rstring ip)
+
+    boolean isInNetwork(rstring networkCIDR, uint32 ip)
+
+    boolean isInNetworkList(list&lt;rstring> networkList, rstring ip)
+
+    boolean isLessThan(rstring ip1, rstring ip2)
+
+    boolean isLinkLocal(rstring ip)
+
+    boolean isLoopback(rstring ip)
+
+    boolean isMulticast(rstring ip)
+
+    boolean isNetworkOverlap(rstring networkCIDR1, rstring networkCIDR2)
+
+    boolean isPrivate(rstring ip)
+
+    boolean isReserved(rstring ip)
+
+    uint32 numAddressesInIPRange(rstring startIP, rstring endIP)
+
+    uint32 numAddressesInNetwork(rstring networkCIDR)
+
+    int32 compare(rstring ip1, rstring ip2)
+
+    boolean isIPV4Address(rstring value)
+
 
 The functions use these representations of IP version 4 addresses:
 

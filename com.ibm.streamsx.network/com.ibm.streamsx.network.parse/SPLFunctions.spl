@@ -14,7 +14,7 @@ namespace com.ibm.streamsx.network.parse;
 // used directly with other patterns and precisions.
 
 public rstring formatEpoch(uint32 seconds, rstring format) {
-  timestamp ts = createTimestamp((int64)seconds, 0u); 
+  timestamp ts = createTimestamp((int64)seconds, 0u);
   mutable Sys.tm tm = {};
   time(ts, tm);
   return strftime(tm, format); }
@@ -54,7 +54,7 @@ public rstring formatEpochTime(timestamp seconds) { return formatEpochTime((uint
 // omitted. The precision for float64 values defaults to microseconds if not
 // specified.
 
-public rstring formatElapsedTime(uint32 seconds) { 
+public rstring formatElapsedTime(uint32 seconds) {
   uint32 days = seconds / (24u*60u*60u);
   uint32 hours = ( seconds % (24u*60u*60u) ) / (60u*60u);
   uint32 minutes = ( seconds % (60u*60u) ) / (60u);
@@ -64,7 +64,7 @@ public rstring formatElapsedTime(uint32 seconds) {
          ( ( days>0u || hours>0u || minutes>0u ) ? (rstring)minutes+"m " : "" ) +
          (rstring)sseconds+"s"; }
 
-public rstring formatElapsedTime(float64 seconds, uint32 precision) { 
+public rstring formatElapsedTime(float64 seconds, uint32 precision) {
   rstring dhms = formatElapsedTime((uint32)seconds);
   if (precision==0u) return dhms;
   return substring(dhms,0,length(dhms)-1) + substring(formatNumber(fmod(seconds, 1.0), 0u, precision, false), 1, (int32)precision+1) + "s"; }
@@ -74,5 +74,3 @@ public rstring formatElapsedTime(float64 seconds) { return formatElapsedTime(sec
 
 //???rstring substr(rstring s, int32 i) { return substring(s, i, length(s)-i); }
 //???rstring substr(rstring s, int32 i, int32 l) { return substring(s, i, min(l, length(s)-i)); }
-
-

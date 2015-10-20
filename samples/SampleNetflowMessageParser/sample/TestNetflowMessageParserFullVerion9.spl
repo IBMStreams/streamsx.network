@@ -13,28 +13,28 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestNetflowMessageParserFullVersion9 {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow9_new.pcap" );
-    
-    type 
-    
+
+    type
+
     PacketType =
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
-        uint32 netflowSource,        	// IP source address of Netflow message
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint32 netflowSource,           // IP source address of Netflow message
         blob netflowMessage;            // the Netflow message from a packet, excluding all network headers
 
-    NetflowMessageType = 
-        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch 
+    NetflowMessageType =
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
         boolean parseError,
         rstring parseErrorDescription,
         uint32 parseErrorOffset,
         uint64 messagesProcessed,
-	    uint16 NETFLOW_VERSION, // header: Netflow version 
-	    uint16 NETFLOW_COUNT, // header: number of records (including templates, options, and flows)
-	    rstring NETFLOW_SYSTEM_UPTIME, // header: time since source was booted, in milliseconds, converted to seconds
-	    rstring NETFLOW_UNIX_SECONDS, // header: time since beginning of Unix epoch, in seconds
-	    uint32 NETFLOW_SEQUENCE_NUMBER, // header: sequence number of this message
-	    uint32 NETFLOW_SOURCE_ID, // header: identifier of source of this message
+        uint16 NETFLOW_VERSION, // header: Netflow version
+        uint16 NETFLOW_COUNT, // header: number of records (including templates, options, and flows)
+        rstring NETFLOW_SYSTEM_UPTIME, // header: time since source was booted, in milliseconds, converted to seconds
+        rstring NETFLOW_UNIX_SECONDS, // header: time since beginning of Unix epoch, in seconds
+        uint32 NETFLOW_SEQUENCE_NUMBER, // header: sequence number of this message
+        uint32 NETFLOW_SOURCE_ID, // header: identifier of source of this message
         uint64 NETFLOW_IN_BYTES, // field 1: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
         uint64 NETFLOW_IN_PKTS, // field 2: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
         uint64 NETFLOW_FLOWS, // field 3: Number of flows that were aggregated; default for N is 4
@@ -89,7 +89,7 @@ composite TestNetflowMessageParserFullVersion9 {
         uint16 NETFLOW_IPV4_IDENT, // field 54: The IP v4 identification field
         uint8 NETFLOW_DST_TOS, // field 55: Type of Service byte setting when exiting outgoing interface
         rstring NETFLOW_MAC_SRC_ADDR_IN, // field 56: Incoming source MAC address
-	    rstring NETFLOW_MAC_DST_ADDR_OUT, // field 57: Outgoing destination MAC address
+        rstring NETFLOW_MAC_DST_ADDR_OUT, // field 57: Outgoing destination MAC address
         uint16 NETFLOW_SRC_VLAN, // field 58: Virtual LAN identifier associated with ingress interface
         uint16 NETFLOW_DST_VLAN, // field 59: Virtual LAN identifier associated with egress interface
         uint8 NETFLOW_IP_PROTOCOL_VERSION, // field 60: Internet Protocol Version Set to 4 for IPv4, set to 6 for IPv6. If not present in the template, then version 4 is assumed.
@@ -125,40 +125,40 @@ composite TestNetflowMessageParserFullVersion9 {
         rstring NETFLOW_APPLICATION_NAME, // field 96: Name associated with a classification.
         uint8 NETFLOW_POST_IP_DSCP, // field 98: The value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.
         uint32 NETFLOW_REPLICATION_FACTOR, // field 99: Multicast replication factor.
-	    uint32 NETFLOW_FIELD_8_AS_INTEGER,
-	    list<uint8> NETFLOW_FIELD_8_AS_BYTE_LIST,
-	    rstring NETFLOW_FIELD_82_AS_STRING;
+        uint32 NETFLOW_FIELD_8_AS_INTEGER,
+        list<uint8> NETFLOW_FIELD_8_AS_BYTE_LIST,
+        rstring NETFLOW_FIELD_82_AS_STRING;
 
     graph
 
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-	        inputFilter: "udp port 2055";
+            inputFilter: "udp port 2055";
             metricsInterval: 0.0;
         output Out:
-            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
             netflowSource = IPV4_SRC_ADDRESS(),
             netflowMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserFullVersion9.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserFullVersion9.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     stream<NetflowMessageType> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
       param
           messageAttribute: netflowMessage;
-	      sourceAttribute: netflowSource;
+          sourceAttribute: netflowSource;
       output Out:
-	    captureTime = formatEpochDateTime(captureTime),
+        captureTime = formatEpochDateTime(captureTime),
         parseError = parseError(),
         parseErrorDescription = parseErrorDescription(),
         parseErrorOffset = parseErrorOffset(),
         messagesProcessed = messagesProcessed(),
-	    NETFLOW_VERSION = NETFLOW_VERSION(), // header: Netflow version 
-	    NETFLOW_COUNT = NETFLOW_COUNT(), // header: number of records (including templates, options, and flows)
-	    NETFLOW_SYSTEM_UPTIME = formatElapsedTime((float64)NETFLOW_SYSTEM_UPTIME()/1000.0, 3u), // header: time since source was booted, in milliseonds, converted to seconds
-	    NETFLOW_UNIX_SECONDS = formatEpochTime(NETFLOW_UNIX_SECONDS()), // header: time since beginning of Unix epoch, in seconds
-	    NETFLOW_SEQUENCE_NUMBER = NETFLOW_SEQUENCE_NUMBER(), // header: sequence number of this message
-	    NETFLOW_SOURCE_ID = NETFLOW_SOURCE_ID(), // header: identifier of source of this message
+        NETFLOW_VERSION = NETFLOW_VERSION(), // header: Netflow version
+        NETFLOW_COUNT = NETFLOW_COUNT(), // header: number of records (including templates, options, and flows)
+        NETFLOW_SYSTEM_UPTIME = formatElapsedTime((float64)NETFLOW_SYSTEM_UPTIME()/1000.0, 3u), // header: time since source was booted, in milliseonds, converted to seconds
+        NETFLOW_UNIX_SECONDS = formatEpochTime(NETFLOW_UNIX_SECONDS()), // header: time since beginning of Unix epoch, in seconds
+        NETFLOW_SEQUENCE_NUMBER = NETFLOW_SEQUENCE_NUMBER(), // header: sequence number of this message
+        NETFLOW_SOURCE_ID = NETFLOW_SOURCE_ID(), // header: identifier of source of this message
         NETFLOW_IN_BYTES = NETFLOW_IN_BYTES(), // field 1: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.
         NETFLOW_IN_PKTS = NETFLOW_IN_PKTS(), // field 2: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow
         NETFLOW_FLOWS = NETFLOW_FLOWS(), // field 3: Number of flows that were aggregated; default for N is 4
@@ -213,7 +213,7 @@ composite TestNetflowMessageParserFullVersion9 {
         NETFLOW_IPV4_IDENT = NETFLOW_IPV4_IDENT(), // field 54: The IP v4 identification field
         NETFLOW_DST_TOS = NETFLOW_DST_TOS(), // field 55: Type of Service byte setting when exiting outgoing interface
         NETFLOW_MAC_SRC_ADDR_IN = convertMACAddressNumericToString(NETFLOW_MAC_SRC_ADDR_IN()), // field 56: Incoming source MAC address
-	    NETFLOW_MAC_DST_ADDR_OUT = convertMACAddressNumericToString(NETFLOW_MAC_DST_ADDR_OUT()), // field 57: Outgoing destination MAC address
+        NETFLOW_MAC_DST_ADDR_OUT = convertMACAddressNumericToString(NETFLOW_MAC_DST_ADDR_OUT()), // field 57: Outgoing destination MAC address
         NETFLOW_SRC_VLAN = NETFLOW_SRC_VLAN(), // field 58: Virtual LAN identifier associated with ingress interface
         NETFLOW_DST_VLAN = NETFLOW_DST_VLAN(), // field 59: Virtual LAN identifier associated with egress interface
         NETFLOW_IP_PROTOCOL_VERSION = NETFLOW_IP_PROTOCOL_VERSION(), // field 60: Internet Protocol Version Set to 4 for IPv4, set to 6 for IPv6. If not present in the template, then version 4 is assumed.
@@ -249,14 +249,13 @@ composite TestNetflowMessageParserFullVersion9 {
         NETFLOW_APPLICATION_NAME = NETFLOW_APPLICATION_NAME(), // field 96: Name associated with a classification.
         NETFLOW_POST_IP_DSCP = NETFLOW_POST_IP_DSCP(), // field 98: The value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.
         NETFLOW_REPLICATION_FACTOR = NETFLOW_REPLICATION_FACTOR(), // field 99: Multicast replication factor.
-	    NETFLOW_FIELD_8_AS_INTEGER = (uint32)NETFLOW_FIELD_AS_INTEGER(8),
-	    NETFLOW_FIELD_8_AS_BYTE_LIST = NETFLOW_FIELD_AS_BYTE_LIST(8),
-	    NETFLOW_FIELD_82_AS_STRING = NETFLOW_FIELD_AS_STRING(82);
+        NETFLOW_FIELD_8_AS_INTEGER = (uint32)NETFLOW_FIELD_AS_INTEGER(8),
+        NETFLOW_FIELD_8_AS_BYTE_LIST = NETFLOW_FIELD_AS_BYTE_LIST(8),
+        NETFLOW_FIELD_82_AS_STRING = NETFLOW_FIELD_AS_STRING(82);
 
 
     }
-    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserFullVersion9.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserFullVersion9.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 
 }
-

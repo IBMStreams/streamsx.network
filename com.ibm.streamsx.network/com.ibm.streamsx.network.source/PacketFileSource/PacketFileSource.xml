@@ -75,9 +75,7 @@
       </parameter>
       <parameter>
         <name>processorAffinity</name>
-        <description>assign the operator's thread (if it has one) to a particular processor
-        core ... if operator has an input port, the operator
-        runs on the upstream thread, and this parameter is ignored ...</description>
+        <description></description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
