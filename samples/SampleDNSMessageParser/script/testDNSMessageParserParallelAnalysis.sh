@@ -47,8 +47,8 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
-ingestProcessorAffinity=3
-parseProcessorAffinities=4
+ingesterProcessorAffinity=3
+parserProcessorAffinities=4,6,8
 #pcapFilename=$HOME/data.haifa/dns_tunneling_long.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_hour.pcap
 parallelChannels=3

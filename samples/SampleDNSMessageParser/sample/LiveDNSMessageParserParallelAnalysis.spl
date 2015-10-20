@@ -13,8 +13,8 @@ composite LiveDNSMessageParserParallelAnalysis {
 
     param
     expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
-    expression<uint32> $ingestProcessorAffinity: (uint32)getSubmissionTimeValue("ingestProcessorAffinity", "1");
-    expression<uint32> $parseProcessorAffinities: (uint32)getSubmissionTimeValue("parseProcessorAffinities", "2");
+    expression<uint32> $ingesterProcessorAffinity: (uint32)getSubmissionTimeValue("ingesterProcessorAffinity", "1");
+    expression<list<uint32>> $parserProcessorAffinities: (list<uint32>)getSubmissionTimeListValue("parserProcessorAffinities");
     expression<rstring> $inputFilter: getSubmissionTimeValue("inputFilter", "udp port 53");
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
@@ -45,7 +45,7 @@ composite LiveDNSMessageParserParallelAnalysis {
       stream<MetricsType> MetricsStream as MetricsOut ) = PacketLiveSource() {
         param
             networkInterface: $networkInterface;
-            processorAffinity: $ingestProcessorAffinity;
+            processorAffinity: $ingesterProcessorAffinity;
             promiscuous: true;
             metricsInterval: $metricsInterval;
             inputFilter: $inputFilter;
@@ -77,7 +77,7 @@ composite LiveDNSMessageParserParallelAnalysis {
       stream<LiveDNSAnalytics.DomainProfilingResultType> DomainProfilingResultStream ;
       stream<LiveDNSAnalytics.HostProfilingResultType> HostProfilingResultStream ) = LiveDNSAnalytics(PacketStream) {
       param
-          parseProcessorAffinities: $parseProcessorAffinities;
+          parserProcessorAffinities: $parserProcessorAffinities;
           errorStream: $errorStream;
     }
 
@@ -89,7 +89,7 @@ composite LiveDNSMessageParserParallelAnalysis {
 composite LiveDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingResultStream, DomainProfilingResultStream, HostProfilingResultStream ) {
 
   param
-    expression<uint32> $parseProcessorAffinities;
+    expression<list<uint32>> $parserProcessorAffinities;
     expression<boolean> $errorStream;
 
   type
@@ -153,7 +153,7 @@ composite LiveDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingR
         map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
       }
       param
-          processorAffinity: $parseProcessorAffinities + (uint32)getChannel();
+          processorAffinity: $parserProcessorAffinities[getChannel()];
           messageAttribute: dnsMessage;
           outputFilters: DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError(), // for FullDNSResponseMessageStream
                          DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError(), // for ShortDNSResponseMessageStream

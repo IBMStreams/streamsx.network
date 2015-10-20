@@ -13,8 +13,8 @@ composite TestDNSMessageParserParallelAnalysis {
 
     param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
-    expression<uint32> $ingestProcessorAffinity: (uint32)getSubmissionTimeValue("ingestProcessorAffinity", "1");
-    expression<uint32> $parseProcessorAffinities: (uint32)getSubmissionTimeValue("parseProcessorAffinities", "2");
+    expression<uint32> $ingesterProcessorAffinity: (uint32)getSubmissionTimeValue("ingesterProcessorAffinity", "1");
+    expression<list<uint32>> $parserProcessorAffinities: (list<uint32>)getSubmissionTimeListValue("parserProcessorAffinities");
     expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
 
     type
@@ -30,7 +30,7 @@ composite TestDNSMessageParserParallelAnalysis {
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-            processorAffinity: $ingestProcessorAffinity;
+            processorAffinity: $ingesterProcessorAffinity;
             inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
@@ -51,7 +51,7 @@ composite TestDNSMessageParserParallelAnalysis {
       stream<TestDNSAnalytics.DomainProfilingResultType> DomainProfilingResultStream ;
       stream<TestDNSAnalytics.HostProfilingResultType> HostProfilingResultStream ) = TestDNSAnalytics(PacketStream) {
       param
-          parseProcessorAffinities: $parseProcessorAffinities;
+          parserProcessorAffinities: $parserProcessorAffinities;
     }
 }
 
@@ -60,7 +60,7 @@ composite TestDNSMessageParserParallelAnalysis {
 composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingResultStream, DomainProfilingResultStream, HostProfilingResultStream ) {
 
   param
-    expression<uint32> $parseProcessorAffinities;
+    expression<list<uint32>> $parserProcessorAffinities;
 
   type
 
@@ -112,7 +112,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingR
         map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
       }
       param
-          processorAffinity: $parseProcessorAffinities + (uint32)getChannel();
+          processorAffinity: $parserProcessorAffinities[getChannel()];
           messageAttribute: dnsMessage;
           outputFilters: DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError(),
                          DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError();

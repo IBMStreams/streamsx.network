@@ -52,8 +52,8 @@ compileTimeParameterList=(
 
 submitParameterList=(
 -P networkInterface=ens6f3
--P ingestProcessorAffinity=3
--P parseProcessorAffinities=4
+-P ingesterProcessorAffinity=3
+-P parserProcessorAffinities=4,6,8
 -P "inputFilter=udp port 53"
 -P metricsInterval=1.0
 -P timeoutInterval=30.0
