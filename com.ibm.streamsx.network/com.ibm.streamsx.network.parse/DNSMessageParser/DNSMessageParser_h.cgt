@@ -92,7 +92,6 @@ private:
 
   SPL::rstring DNS_ANSWER_CANONICAL() { return parser.canonicalRecordCount>0 ? parser.convertResourceDataToString(parser.canonicalRecords[0]) : ""; }
 
-  //???SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.addressRecords[0].name) : ""; }
   SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertResourceDataToString(parser.addressRecords[0]) : ""; }
 
   SPL::list<rstring> DNS_ANSWER_ADDRESSES() { return parser.convertResourceDataToStringList(parser.addressRecords, parser.addressRecordCount); }
