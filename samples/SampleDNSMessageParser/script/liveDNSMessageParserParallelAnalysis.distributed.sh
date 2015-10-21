@@ -24,6 +24,9 @@ libpcapDirectory=$HOME/libpcap-1.7.4
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
+ingestProcessor=2
+parseProcessors=( 4 6 8 )
+
 domain=CapabilitiesDomain
 instance=CapabilitiesInstance
 
@@ -52,13 +55,13 @@ compileTimeParameterList=(
 
 submitParameterList=(
 -P networkInterface=ens6f3
--P ingesterProcessorAffinity=3
--P parserProcessorAffinities=4,6,8
 -P "inputFilter=udp port 53"
 -P metricsInterval=1.0
 -P timeoutInterval=30.0
 -P errorStream=true
--P parallelChannels=3
+-P ingesterProcessorAffinity=$ingestProcessor
+-P parserProcessorAffinities=$( IFS="," ; echo "${parseProcessors[*]}" )
+-P parallelChannels=${#parseProcessors[@]}
 )
 
 tracing=info # ... one of ... off, error, warn, info, debug, trace
@@ -69,6 +72,9 @@ die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }
 step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
+
+(( $ingestProcessor < $coreCount )) || die "sorry, not enough cores for 'ingest processor' value"
+for parseProcessor in "${parseProcessors[@]}" ; do (( $parseProcessor < $coreCount )) || die "sorry, not enough cores for 'parse processor' value" ; done
 
 [ -d $logDirectory ] || mkdir -p $logDirectory || echo "sorry, could not create directory '$logDirectory', $?"
 
