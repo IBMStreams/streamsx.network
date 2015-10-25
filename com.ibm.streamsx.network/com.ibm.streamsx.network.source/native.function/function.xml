@@ -7,21 +7,41 @@
     <function:functions>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of packets received from the network interface
+since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+
+            </function:description>
             <function:prototype>public uint64 packetsReceived()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of packets dropped by the network interface
+since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+
+            </function:description>
             <function:prototype>public uint64 packetsDropped()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of packets received from the network interface 
+during the most recent metrics interval, if there is one, or zero if not.
+
+            </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsReceived()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of packets dropped by the network interface
+during the most recent metrics interval, if there is one, or zero if not.
+
+            </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsDropped()</function:prototype>
           </function:function>
 
@@ -34,185 +54,422 @@
     <function:functions>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of network packets processed by the operator since it started,
+including the current packet, but excluding any packets that were ignored by the input filter,
+if the `inputFilter` parameter was specified.
+
+            </function:description>
             <function:prototype>public uint64 packetsProcessed()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of bytes of network data processed by the operator since it started,
+including the current packet, excluding any packets that were ignored by the input filter,
+if the `inputFilter` parameter was specified.
+
+            </function:description>
             <function:prototype>public uint64 octetsProcessed()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the duration of the most recent metrics interval,
+in seconds with a resolution of at least microseconds,
+if there is one, or zero if not. 
+
+            </function:description>
             <function:prototype>public float64 metricsIntervalElapsed()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of network packets processed by the operator during the most recent
+metrics interval,
+excluding any packets that were ignored by the input filter,
+if the `inputFilter` parameter was specified.
+
+            </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsProcessed()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of bytes of network data processed by the operator during the most recent
+metrics interval,
+excluding any packets that were ignored by the input filter,
+if the `inputFilter` parameter was specified.
+
+            </function:description>
             <function:prototype>public uint64 metricsIntervalOctetsProcessed()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` for the first tuple produced after a new metrics interval begins,
+and returns `false` for all subsequent tuples produced in the same metrics interval.
+
+            </function:description>
             <function:prototype>public boolean metricsUpdated()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of seconds since the beginning of the Unix epoch
+(midnight on January 1st, 1970 in Greenwich, England) until the current packet was captured,
+according to the system clock on the machine that captured it.
+
+            </function:description>
             <function:prototype>public uint32 CAPTURE_SECONDS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of microseconds since the value of the CAPTURE_SECONDS() function
+until the current packet was captured,
+according to the system clock on the machine that captured it.
+
+            </function:description>
             <function:prototype>public uint32 CAPTURE_MICROSECONDS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of bytes of network data in the current packet,
+including all network headers.
+Note that this value may be larger than the length of the
+binary data returned by the `PACKET_DATA()` function
+if the packet was truncated when it was captured.
+
+            </function:description>
             <function:prototype>public uint32 PACKET_LENGTH()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the network data in the current packet,
+including all network headers.
+Note that the data may have been truncated when the packet was captured.
+
+            </function:description>
             <function:prototype>public blob PACKET_DATA()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the number of bytes of payload data in the current packet,
+excluding all network headers.
+Note that this value may be larger than the length of the binary data returned by
+the `PAYLOAD_DATA()` function if the
+packet was truncated when it was captured.
+
+            </function:description>
             <function:prototype>public uint32 PAYLOAD_LENGTH()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the payload data in the current packet,
+excluding all network headers.
+Note that the data may have been truncated when the packet was captured.
+
+            </function:description>
             <function:prototype>public blob PAYLOAD_DATA()</function:prototype>
           </function:function>
 
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the ethernet source address of the current packet.
+
+            </function:description>
             <function:prototype>public list&lt;uint8>[6] ETHER_SRC_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the ethernet destination address of the current packet.
+
+            </function:description>
             <function:prototype>public list&lt;uint8>[6] ETHER_DST_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the ethernet protocol (that is, the EtherType) of the
+current packet, for example, '2048' for IP version 4, or '34,525' for IP version 6.
+
+            </function:description>
             <function:prototype>public uint16 ETHER_PROTOCOL()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the IP version of the current packet
+('4' for IP version 4, or '6' for IP version 6), 
+if the ethernet packet contains an IP packet, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint8 IP_VERSION()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the IP protocol of the current packet,
+for example, '6' for TCP, or '17' for UDP,
+or zero if the ethernet packet does not contain an IP packet.
+
+            </function:description>
             <function:prototype>public uint8 IP_PROTOCOL()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the IP version 4 source address of the current packet,
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint32 IPV4_SRC_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the IP version 4 destination address of the current packet,
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint32 IPV4_DST_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the IP version 6 source address of the current packet,
+if it has one, or an empty list otherwise.
+
+            </function:description>
             <function:prototype>public list&lt;uint8>[16] IPV6_SRC_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the IP version 6 destination address of the current packet,
+if it has one, or an empty list otherwise.
+
+            </function:description>
             <function:prototype>public list&lt;uint8>[16] IPV6_DST_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the TCP or UDP source port number of the current packet, 
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint16 IP_SRC_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the TCP or UDP destination port number of the current packet, 
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint16 IP_DST_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a UDP source or destination port,
+or `false` if not.
+
+            </function:description>
             <function:prototype>public boolean UDP_PORT(uint16)</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the UDP source port number of the current packet, 
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint16 UDP_SRC_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the UDP destination port number of the current packet, 
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint16 UDP_DST_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a TCP source or destination port,
+or `false` if not.
+
+            </function:description>
             <function:prototype>public boolean TCP_PORT(uint16)</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the TCP source port number of the current packet, 
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint16 TCP_SRC_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the TCP destination port number of the current packet, 
+if it has one, or zero otherwise.
+
+            </function:description>
             <function:prototype>public uint16 TCP_DST_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the TCP sequence number in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint32 TCP_SEQUENCE()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the TCP acknowledgement number in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint32 TCP_ACKNOWLEDGEMENT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a TCP 'urgent' flag and its set, 
+or `false` otherwise.
+
+            </function:description>
             <function:prototype>public boolean TCP_FLAGS_URGENT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a TCP 'ack' flag and its set, 
+or `false` otherwise.
+
+            </function:description>
             <function:prototype>public boolean TCP_FLAGS_ACK()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a TCP 'push' flag and its set, 
+or `false` otherwise.
+
+            </function:description>
             <function:prototype>public boolean TCP_FLAGS_PUSH()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a TCP 'reset' flag and its set, 
+or `false` otherwise.
+
+            </function:description>
             <function:prototype>public boolean TCP_FLAGS_RESET()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a TCP 'syn' flag and its set, 
+or `false` otherwise.
+
+            </function:description>
             <function:prototype>public boolean TCP_FLAGS_SYN()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns `true` if the current packet has a TCP 'fin' flag and its set, 
+or `false` otherwise.
+
+            </function:description>
             <function:prototype>public boolean TCP_FLAGS_FIN()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the TCP window size in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint16 TCP_WINDOW()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the 'jmirror' source address in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint32 JMIRROR_SRC_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the 'jmirror' destination address in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint32 JMIRROR_DST_ADDRESS()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the 'jmirror' source port in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint16 JMIRROR_SRC_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the 'jmirror' dstination port in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint16 JMIRROR_DST_PORT()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the 'jmirror' intercept identifier in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint32 JMIRROR_INTERCEPT_ID()</function:prototype>
           </function:function>
           <function:function>
-            <function:description></function:description>
+            <function:description>
+
+This function returns the value of the 'jmirror' session identifier in the current packet, 
+if it has one, or zero if otherwise.
+
+            </function:description>
             <function:prototype>public uint32 JMIRROR_SESSION_ID()</function:prototype>
           </function:function>
 

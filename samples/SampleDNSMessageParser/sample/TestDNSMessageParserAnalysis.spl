@@ -27,6 +27,7 @@ composite TestDNSMessageParserAnalysis {
       timestamp captureTime,
       rstring dstAddress,
       rstring questionName,
+      rstring questionType,
       uint8 responseCode,
       uint16 answerCount,
       list<rstring> answerNames,
@@ -66,11 +67,12 @@ composite TestDNSMessageParserAnalysis {
             dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dnsMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     ( stream<FullDNSResponseMessage_t> FullDNSResponseMessageStream as OutFull ;
       stream<ShortDNSResponseMessage_t> ShortDNSResponseMessageStream as OutShort ) = DNSMessageParser(PacketStream) {
       logic state: {
+        map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
         map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
       }
       param
@@ -80,6 +82,7 @@ composite TestDNSMessageParserAnalysis {
       output
       OutFull:
           questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
           answerCount = DNS_ANSWER_COUNT(),
           answerNames = DNS_ANSWER_NAMES(),

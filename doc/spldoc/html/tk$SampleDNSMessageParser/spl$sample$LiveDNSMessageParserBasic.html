@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File LiveDNSMessageParserBasic.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File LiveDNSMessageParserBasic.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">LiveDNSMessageParserBasic.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleDNSMessageParser.html">SampleDNSMessageParser 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; LiveDNSMessageParserBasic.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$LiveDNSMessageParserBasic.html#spldoc_compilationunit__composite_operator__LiveDNSMessageParserBasic">LiveDNSMessageParserBasic</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__LiveDNSMessageParserBasic"><h2 class="title sectiontitle splpart">public composite LiveDNSMessageParserBasic</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">networkInterface</strong>
+</li>
+
+<li class="sli"><strong class="ph b">inputFilter</strong>
+</li>
+
+<li class="sli"><strong class="ph b">metricsInterval</strong>
+</li>
+
+<li class="sli"><strong class="ph b">timeoutInterval</strong>
+</li>
+
+<li class="sli"><strong class="ph b">lookupPort</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleDNSMessageParser/op$sample$LiveDNSMessageParserBasic.svg" width="337" height="177"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite LiveDNSMessageParserBasic {
+ 
+     param
+     expression&lt;rstring&gt; $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+     expression&lt;rstring&gt; $inputFilter: getSubmissionTimeValue("inputFilter", "udp port 53");
+     expression&lt;float64&gt; $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
+     expression&lt;float64&gt; $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+     expression&lt;uint32&gt; $lookupPort: (uint32)getSubmissionTimeValue("lookupPort", "23456" );
+ 
+     type
+ 
+     // packet output from PacketLiveSource operator
+     PacketType =
+         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+         rstring ipSourceAddress,        // IP source address
+         rstring ipDestinationAddress,   // IP destination address
+         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
+ 
+     // metrics output from PacketLiveSource operator
+     MetricsType =
+         float64 metricsTime,            // time that metrics were produced, in seconds since Unix epoch
+         float64 averagePacketsReceived,     // average number of packets received during last metrics interval
+         float64 averagePacketsDropped,  // average number of packets dropped during last metrics interval
+         float64 averagePacketsProcessed,// average number of packets processed during last metrics interval
+         float64 averageOctetsProcessed;     // average number of octets processed during last metrics interval
+ 
+     DNSResponseMessageType =
+         rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
+         rstring ipSourceAddress,        // IP source address
+         rstring ipDestinationAddress,   // IP destination address
+         rstring questionName,
+         rstring questionType,
+         rstring answerAddress,
+         list&lt;rstring&gt; answerNames,
+         list&lt;rstring&gt; answerData;
+ 
+     graph
+ 
+    ( stream&lt;PacketType&gt; PacketStream as PacketsOut ;
+       stream&lt;MetricsType&gt; MetricsStream as MetricsOut ) = PacketLiveSource() {
+         param
+             networkInterface: $networkInterface;
+             metricsInterval: $metricsInterval;
+             inputFilter: $inputFilter;
+             promiscuous: true;
+             outputFilters: true, metricsUpdated();
+         output
+         PacketsOut:
+             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+             dnsMessage = PAYLOAD_DATA();
+         MetricsOut:
+             metricsTime = getTimestampInSecs(),
+             averagePacketsReceived = (float64)metricsIntervalPacketsReceived() / metricsIntervalElapsed(),
+             averagePacketsDropped = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed(),
+             averagePacketsProcessed = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
+             averageOctetsProcessed = (float64)metricsIntervalOctetsProcessed() / metricsIntervalElapsed();
+     }
+     //() as PacketSink = FileSink(PacketStream) { param file: "debug.LiveDNSMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LiveDNSMessageParserBasic.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     ( stream&lt;DNSResponseMessageType&gt; DNSResponseMessageStream as OutMessage ;
+       stream&lt;rstring lookup&gt; DNSLookupStream as OutLookup ) = DNSMessageParser(PacketStream) {
+       logic state: {
+         map&lt;uint16,rstring&gt; dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+         map&lt;uint16,rstring&gt; dnsLookupTypes = { 1: "A", 12: "PTR", 28: "AAAA" };
+         map&lt;uint8,rstring&gt; dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" };
+       }
+       param
+           messageAttribute: dnsMessage;
+           outputFilters: DNS_RESPONSE_FLAG() &amp;&amp; DNS_RESPONSE_CODE()==0ub &amp;&amp; !parseError(),
+                          DNS_RESPONSE_FLAG() &amp;&amp; DNS_RESPONSE_CODE()==0ub &amp;&amp; DNS_QUESTION_TYPE() in dnsLookupTypes &amp;&amp; length(DNS_ANSWER_ADDRESS())&gt;0 &amp;&amp; !parseError();
+       output
+       OutMessage:
+           captureTime = formatEpochTime(captureTime),
+           questionName = DNS_QUESTION_NAME(),
+           questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
+           answerAddress = DNS_ANSWER_ADDRESS(),
+           answerNames = DNS_ANSWER_NAMES(),
+           answerData = DNS_ANSWER_DATA();
+       OutLookup:
+           lookup = formatEpochTime(captureTime, 3u) +
+                  " IP address " + ipDestinationAddress +
+                  " looked up '" + DNS_QUESTION_NAME() + "'" +
+                  " and found '" + DNS_ANSWER_ADDRESS() + "'";
+     }
+     () as DNSMessageSink = FileSink(DNSResponseMessageStream) { param file: "debug.LiveDNSMessageParserBasic.DNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     () as DNSLookupSink = TCPSink(DNSLookupStream) {
+       param
+       port: $lookupPort;
+       role: server;
+       format: line;
+       flush: 1u; }
+ 
+     () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Operator IPASNEnricher"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_operator"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Operator IPASNEnricher</title>
+</head>
+<body id="spldoc_operator">
+
+
+<h1 class="title topictitle1">Operator <tt class="ph tt">IPASNEnricher</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.4.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.enrichment.html">com.ibm.streamsx.network.enrichment</a> &gt; IPASNEnricher</p>
+
+</div>
+
+<div class="section">
+
+<p class="p">This operator enriches IPv4 and IPv6 addresses with ASN data. Only the MaxMind© GeoLite ASN database is supported. 
+</p>
+
+<p class="p">In order to use this operator, you must download the MaxMind© GeoLite ASN database files in CSV format from the <a class="xref" href="http://dev.maxmind.com/geoip/legacy/geolite/">MaxMind©</a> website.  These files can then be loaded directly into the operator using the <strong class="ph b">asnIPv4File</strong> and <strong class="ph b">asnIPv6File</strong> parameters. To dynamically update the operator whenever a new version of the database is downloaded, a DirectoryScan operator can be connected to the control input port (input port 1) of this operator. Whenever a new version of the database files are downloaded into the directory being scanned, the DirectoryScan operator will submit the file paths to the IPASNEnricher operator.  The operator will parse the database files and update it's internal tables.
+</p>
+
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.enrichment$IPASNEnricher.svg" width="672" height="112"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Ports</dt>
+
+  <dd class="dd">This operator has 2 input ports and 1 output port.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Windowing</dt>
+
+  <dd class="dd">This operator does not accept any windowing configurations.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Parameters</dt>
+
+  <dd class="dd">This operator supports 3 parameters.
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__inputIPAttr">inputIPAttr</a>, <a class="xref" href="#spldoc_operator__parameter__asnIPv4File">asnIPv4File</a>, <a class="xref" href="#spldoc_operator__parameter__asnIPv6File">asnIPv6File</a>
+
+</p>
+</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Metrics</dt>
+
+  <dd class="dd">This operator does not report any metrics.</dd>
+
+ 
+</dl>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Properties</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Implementation</dt>
+
+  <dd class="dd">C++</dd>
+
+ 
+ 
+  <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__providessinglethreadedexecutioncontext">Threading</a></dt>
+
+  <dd class="dd"><tt class="ph tt">Never</tt> - Operator never provides a single threaded execution context.</dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set">Input Ports</a></strong></p>
+<dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0)</dt>
+
+   <dd class="dd">
+<p class="p">Ingests tuples containing IP addresses. The <tt class="ph tt">inputIPAttr</tt> parameter specifies the attribute containing the IP addresses.
+</p>
+
+   <dl class="dl">
+    
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__optional">Optional</a>: false
+     </li>
+
+   </ul>
+
+   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__controlport">ControlPort</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__windowingmode">WindowingMode</a>: NonWindowed
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__windowpunctuationinputmode">WindowPunctuationInputMode</a>: Oblivious
+     </li>
+
+   </ul>
+
+      </dd>
+    
+   </dl>
+
+   <p class="p"/>
+   </dd>
+
+  
+  
+   <dt class="dt dlterm">Ports (1)</dt>
+
+   <dd class="dd">
+<p class="p">Control port that ingests a file path pointing to a MaxMind ASN database CSV file. The operator determines whether the database contains IPv4 or IPv6 information based on the name of the file. The expected file names are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> For IPv4: "GeoIPASNum2.csv"</li>
+
+<li class="li"> For IPv6: "GeoIPASNum2v6.csv"</li>
+
+</ul>
+
+</div>
+
+<p class="p">This control port can be used to dynamically update the operator's internal ASN database. Each time a tuple is received containing a path to one of  the files listed above, the operator will update it's internal table with the data in the file.
+</p>
+
+<p class="p">This input port expected a tuple containing a single attribute of type <tt class="ph tt">rstring</tt>.
+</p>
+
+   <dl class="dl">
+    
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__optional">Optional</a>: true
+     </li>
+
+   </ul>
+
+   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__controlport">ControlPort</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__windowingmode">WindowingMode</a>: NonWindowed
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__windowpunctuationinputmode">WindowPunctuationInputMode</a>: Oblivious
+     </li>
+
+   </ul>
+
+      </dd>
+    
+   </dl>
+
+   <p class="p"/>
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set">Output Ports</a></strong></p>
+<dl class="dl">
+  
+     <dt class="dt dlterm">Assignments</dt>
+
+     <dd class="dd">This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+
+  
+</dl>
+
+<dl class="dl">
+      <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__customoutputfunctions">Output Functions</a></dt>
+
+    <dd class="dd">
+      <dl class="dl">
+      
+        <dt class="dt dlterm">EnrichFunctions</dt>
+
+        <dd class="dd">
+          <dl class="dl">
+            <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+            
+              <dt class="dt dlterm">
+                <tt class="ph tt">   &lt;any T&gt; T AsIs()</tt>              </dt>
+
+            <dd class="dd">
+
+<p class="p">The default function for output attributes. By default, this function assigns the output attribute to the value of the input attribute with the same name.
+</p>
+              <p class="p"/>
+
+            </dd>
+
+                        
+              <dt class="dt dlterm">
+                <tt class="ph tt">   &lt;any T&gt; T getASNInfo()</tt>              </dt>
+
+            <dd class="dd">
+
+<p class="p">Returns the ASN record associated with the input IP address(es). 
+</p>
+
+<p class="p">The return type of this function depends on the type of input attribute specified by the <strong class="ph b">inputIPAttr</strong> parameter.
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> If the input attribute has type <tt class="ph tt">rstring</tt>, then the return type of this function is <tt class="ph tt">rstring</tt>. </li>
+
+<li class="li"> If the input attribute has type <tt class="ph tt">list&lt;rstring&gt;</tt>, then the return type of this function is <tt class="ph tt">list&lt;rstring&gt;</tt>.</li>
+
+</ul>
+
+</div>
+              <p class="p"/>
+
+            </dd>
+
+                        
+              <dt class="dt dlterm">
+                <tt class="ph tt">   &lt;any T&gt; T getASNumber()</tt>              </dt>
+
+            <dd class="dd">
+
+<div class="p">Returns the 32-bit ASN number associated with the input IP address(es). For example, if the ASN record associated with the input IP is "AS26062 IBM", 
+<pre class="pre codeblock">
+        then the function will return "26062".
+</pre>
+
+
+</div>
+
+<p class="p">The return type of this function depends on the type of input attribute specified by the <strong class="ph b">inputIPAttr</strong> parameter.
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> If the input attribute has type <tt class="ph tt">rstring</tt>, then the return type of this function is <tt class="ph tt">uint32</tt>. </li>
+
+<li class="li"> If the input attribute has type <tt class="ph tt">list&lt;rstring&gt;</tt>, then the return type of this function is <tt class="ph tt">list&lt;uint32&gt;</tt>.</li>
+
+</ul>
+
+</div>
+              <p class="p"/>
+
+            </dd>
+
+                      </dl>
+        </dd>
+
+      
+      </dl>
+
+    </dd>
+
+  </dl>
+
+ <dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0)</dt>
+
+   <dd class="dd">
+
+<p class="p">Submits a tuple for each input tuple received on input port 0. Custom output functions are used to specify which attribute should contain the enrichment data.  The output tuple attributes whose assignments are not specified are assigned from input attributes.
+</p>
+
+    <p class="p"/>
+
+    <dl class="dl">
+     
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__optional">Optional</a>: false
+     </li>
+
+   </ul>
+
+   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Generating
+     </li>
+
+   </ul>
+
+</dd>
+     
+    </dl>
+
+    <p class="p"/>
+
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
+
+<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__inputIPAttr"><!-- --></a><tt class="ph tt">inputIPAttr</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies the input attribute containing the IP address (or IP addresses). The attribute can contain either IPv4 or IPv6 addresses.  The supported data types for this attribute are <tt class="ph tt">rstring</tt> and <tt class="ph tt">list&lt;rstring&gt;</tt>. In the case where the input attributes refers to a type of <tt class="ph tt">list&lt;rstring&gt;</tt>, the list can contain a mixture of both IPv4 and IPv6 addresses.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__asnIPv4File"><!-- --></a><tt class="ph tt">asnIPv4File</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies the file path of the MaxMind IPv4 ASN database file. Only the CSV-version of the database is supported.  This parameter should not be used if input port 1 is defined.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__asnIPv6File"><!-- --></a><tt class="ph tt">asnIPv6File</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies the file path of the MaxMind IPv6 ASN database file. Only the CSV-version of the database is supported.  This parameter should not be used if input port 1 is defined.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

@@ -17,7 +17,7 @@ logDirectory=$projectDirectory/log
 
 scripts=(
 $here/setupCapabilities.sh
-$here/test*.sh
+$here/live*.sh
 $here/teardownCapabilities.sh
 )
 

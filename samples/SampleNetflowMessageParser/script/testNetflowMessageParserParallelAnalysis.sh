@@ -46,7 +46,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_new.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_netflow9_new.pcap
 parallelChannels=3
 )
 

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestPacketFileSourceFilters.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestPacketFileSourceFilters.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestPacketFileSourceFilters.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SamplePacketFileSource.html">SamplePacketFileSource 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestPacketFileSourceFilters.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestPacketFileSourceFilters.html#spldoc_compilationunit__composite_operator__TestPacketFileSourceFilters">TestPacketFileSourceFilters</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestPacketFileSourceFilters"><h2 class="title sectiontitle splpart">public composite TestPacketFileSourceFilters</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketFileSource/op$sample$TestPacketFileSourceFilters.svg" width="232" height="200"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestPacketFileSourceFilters {
+ 
+     param
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+ 
+     type
+ 
+     DHCPPacketType =
+       uint64 packetNumber,              // sequence number of packet, as emitted by operator
+       float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+       rstring etherSourceAddress,       // ethernet source address, or empty list if 'raw IP' PCAP recording
+       rstring etherDestinationAddress,  // ethernet destination address, or empty list if 'raw IP' PCAP recording
+       rstring ipSourceAddress,          // IP source address
+       rstring ipDestinationAddress,     // IP destination address
+       uint32 dhcpLength,                // length of DHCP message in packet (possibly truncated))
+       blob dhcpMessage;                 // DHCP message, excluding network headers (possibly truncated)
+ 
+     DNSPacketType =
+       uint64 packetNumber,              // sequence number of packet, as emitted by operator
+       float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+       rstring ipSourceAddress,          // IP source address
+       rstring ipDestinationAddress,     // IP destination address
+       uint32 dnsLength,                 // length of DNS message in packet (possibly truncated))
+       blob dnsMessage;                  // DNS message, excluding network headers (possibly truncated)
+ 
+     AllPacketType =
+         uint64 packetNumber,            // sequence number of packet, as emitted by operator
+         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+         uint8 ipVersion,                // IP version: 4 for IPv4, 6 for IPv6
+         rstring ipProtocol,             // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+         rstring ipSourceAddress,        // IP source address, or empty if not IP packet
+         uint16 ipSourcePort,            // IP source port, or zero if not UDP or TCP packet
+         rstring ipDestinationAddress,   // IP destination address, or empty if not IP packet
+         uint16 ipDestinationPort,       // IP destination port, or zero if not UDP or TCP packet
+         uint32 payloadLength,           // length of packet payload, following all network headers
+         uint32 packetLength,            // original length of packet (not necessarily all captured)
+         blob packetData;                // contents of packet captured, including network headers (possibly truncated)
+ 
+     graph
+ 
+     ( stream&lt;DHCPPacketType&gt; DHCPPacketStream as DHCPOut ;
+       stream&lt;DNSPacketType&gt; DNSPacketStream as DNSOut ;
+       stream&lt;AllPacketType&gt; AllPacketStream as AllOut ) = PacketFileSource() {
+         logic state: { map&lt;uint8,rstring&gt; ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
+         param
+             pcapFilename: $pcapFilename;
+             inputFilter:   "udp";                             // process only UDP packets
+             outputFilters: UDP_PORT(67uh) || UDP_PORT(68uh),  // output port 0 emits only DHCP payloads
+                            UDP_PORT(53uh),                    // output port 1 emits only DNS payloads
+                            true;                              // output port 2 emits all packets processed
+         output
+         DHCPOut:
+             packetNumber = packetsProcessed() - 1ul,
+             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
+             etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
+             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+             dhcpLength = PAYLOAD_LENGTH(),
+             dhcpMessage = PAYLOAD_DATA();
+         DNSOut:
+             packetNumber = packetsProcessed() - 1ul,
+             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+             dnsLength = PAYLOAD_LENGTH(),
+             dnsMessage = PAYLOAD_DATA();
+         AllOut:
+             packetNumber = packetsProcessed() - 1ul,
+             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             ipVersion = IP_VERSION(),
+             ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
+             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+             ipSourcePort = IP_SRC_PORT(),
+             ipDestinationPort = IP_DST_PORT(),
+             payloadLength = PAYLOAD_LENGTH(),
+             packetLength = PACKET_LENGTH(),
+             packetData = PACKET_DATA();
+     }
+     () as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as AllPacketSink = FileSink(AllPacketStream) { param file: "debug.TestPacketFileSourceFilters.AllPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

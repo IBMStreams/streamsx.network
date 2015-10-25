@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestPacketFileSourceExpressions.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestPacketFileSourceExpressions.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestPacketFileSourceExpressions.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SamplePacketFileSource.html">SamplePacketFileSource 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestPacketFileSourceExpressions.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestPacketFileSourceExpressions.html#spldoc_compilationunit__composite_operator__TestPacketFileSourceExpressions">TestPacketFileSourceExpressions</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestPacketFileSourceExpressions"><h2 class="title sectiontitle splpart">public composite TestPacketFileSourceExpressions</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketFileSource/op$sample$TestPacketFileSourceExpressions.svg" width="232" height="109"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestPacketFileSourceExpressions {
+ 
+     param
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+ 
+     type
+ 
+     PacketType =
+         uint32 captureTimeAsSeconds,        // time that packet was captured, in seconds since Unix epoch
+         uint64 captureTimeAsMilliseconds,   // time that packet was captured, in milliseconds since Unix epoch
+         uint64 captureTimeAsMicroseconds,   // time that packet was captured, in microseconds since Unix epoch
+         float64 captureTimeAsFloat,         // time that packet was captured, in seconds and fractional microseconds since Unix epoch
+         timestamp captureTimeAsTimestamp,   // time that packet was captured, in seconds and nanoseconds since Unix epoch
+         uint64 partitionKey,                // combination of addresses and ports, for downstream @parallel annotations
+         int8 packetNumberModulo13,          // sequence number of packet modulo 13, as signed 8-bit integer
+         int32 packetLength,                 // length of packet (not necessarily all captured)
+         int32 packetCaptureLength,          // length of captured packet (possibly less than packetLength())
+         int32 packetHeaderLength,           // length of network headers in packet
+         int32 packetPayloadLength;          // length of payload following network headers
+ 
+     graph
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource() {
+         param
+             pcapFilename: $pcapFilename;
+         output Out:
+             captureTimeAsSeconds = CAPTURE_SECONDS(),
+             captureTimeAsMilliseconds = (uint64)CAPTURE_SECONDS() * 1000ul + (uint64)CAPTURE_MICROSECONDS() / 1000ul,
+             captureTimeAsMicroseconds = (uint64)CAPTURE_SECONDS() * 1000000ul + (uint64)CAPTURE_MICROSECONDS(),
+             captureTimeAsFloat = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             captureTimeAsTimestamp = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
+             partitionKey = hashCode(IPV4_SRC_ADDRESS()) + hashCode(IPV4_DST_ADDRESS()) + hashCode(IPV6_SRC_ADDRESS()) + hashCode(IPV6_DST_ADDRESS()) + hashCode(IP_SRC_PORT()) + hashCode(IP_DST_PORT()),
+             packetNumberModulo13 = (int8)((packetsProcessed()-(uint64)1) % (uint64)13),
+             packetLength = (int32)PACKET_LENGTH(),
+             packetCaptureLength = size(PACKET_DATA()),
+             packetHeaderLength = size(PACKET_DATA()) - (int32)PAYLOAD_LENGTH(),
+             packetPayloadLength = (int32)PAYLOAD_LENGTH();
+     }
+     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceExpressions.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

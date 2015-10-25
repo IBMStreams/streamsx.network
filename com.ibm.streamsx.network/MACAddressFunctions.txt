@@ -7,43 +7,7 @@ Network Toolkit: MAC Address functions
 --------------------------------------
 
 
-_____Description_____
+see ../spldoc/html/index.html
 
-
-The InfoSphere Streams network toolkit includes functions that transform
-ethernet MAC addresses between string and six-byte binary presentations.
-
-The toolkit includes these MAC address functions:
-
-    rstring convertMACAddressNumericToString(list<uint8>[6] macAddressNumeric)
-
-    list<uint8>[6] convertMACAddressStringToNumeric(rstring macAddressString)
-
-The functions use these representations of ethernet MAC addresses:
-
-  * The six-byte binary representation of a MAC address is an SPL list
-    of six unsigned eight-bit integers (that is, a 'list<unit8>[6]' type), with
-    bytes in network order.  For example, [ 152, 90, 235, 203, 55, 219 ].
-
-  * The string representation of a MAC address is passed as an SPL string (that
-    is, an 'rstring' type) of hexadecimal characters separated by colons. For
-    example, '98:5a:eb:cb:37:db'.
-
-The MAC address functions are part of the network toolkit. To use them in an
-application, include this statement in the SPL source file:
-
-    use com.ibm.streamsx.network.mac::*;
-
-The network toolkit includes several sample applications that illustrate how to
-use the functions.
-
-Notes:
-
-  * If a string argument passed to convertMACAddressStringToNumeric() does not
-    contain a valid ethernet MAC address, a list of six zeroes is returned.
-
-For more information about ethernet MAC addresses, see:
-
-    https://en.wikipedia.org/wiki/MAC_address
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

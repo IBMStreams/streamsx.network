@@ -69,6 +69,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingR
       timestamp captureTime,
       rstring dstAddress,
       rstring questionName,
+      rstring questionType,
       uint8 responseCode,
       uint16 answerCount,
       list<rstring> answerNames,
@@ -91,6 +92,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingR
       timestamp captureTime,
       rstring dstAddress,
       rstring questionName,
+      rstring questionType,
       uint8 responseCode,
       list<rstring> answerData,
       list<rstring> additionalData;
@@ -112,6 +114,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingR
     ( stream<FullDNSResponseMessage_t> FullDNSResponseMessageStream as OutFull ;
       stream<ShortDNSResponseMessage_t> ShortDNSResponseMessageStream as OutShort ) = DNSMessageParser(PacketStream) {
       logic state: {
+        map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
         map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
       }
       param
@@ -122,6 +125,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingR
       output
       OutFull:
           questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
           answerCount = DNS_ANSWER_COUNT(),
           answerNames = DNS_ANSWER_NAMES(),
@@ -140,6 +144,7 @@ composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingR
           additionalTTLs = DNS_ADDITIONAL_TTLS();
       OutShort:
           questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
           answerData = DNS_ANSWER_DATA(),
           additionalData = DNS_ADDITIONAL_DATA();

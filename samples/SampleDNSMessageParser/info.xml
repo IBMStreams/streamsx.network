@@ -3,8 +3,8 @@
  xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
  <info:identity>
    <info:name>SampleDNSMessageParser</info:name>
-   <info:description></info:description>
-   <info:version>1.0.0</info:version>
+   <info:description>Sample applications that illustrate use of the DNSMessageParser operator.</info:description>
+   <info:version>2.0.0</info:version>
    <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
  </info:identity>
  <info:dependencies>

@@ -1,0 +1,2002 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Functions: com.ibm.streamsx.network 2.4.0"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_index"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Functions: com.ibm.streamsx.network 2.4.0</title>
+</head>
+<body id="spldoc_index">
+
+
+<h1 class="title topictitle1">Functions: com.ibm.streamsx.network 2.4.0</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.4.0</a> &gt; Functions</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Functions</h2>
+  
+<dl class="dl">
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__CAPTURE_MICROSECONDS">CAPTURE_MICROSECONDS()</a></dt>
+
+  <dd class="dd">This function returns the number of microseconds since the value of the CAPTURE_SECONDS() function until the current packet was captured, according to the system clock on the machine that captured it.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__CAPTURE_SECONDS">CAPTURE_SECONDS()</a></dt>
+
+  <dd class="dd">This function returns the number of seconds since the beginning of the Unix epoch (midnight on January 1st, 1970 in Greenwich, England) until the current packet was captured, according to the system clock on the machine that captured it.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ADDRESS_LEASE_TIME">DHCP_ADDRESS_LEASE_TIME()</a></dt>
+
+  <dd class="dd">This parser result function returns the duration of the address lease, in seconds, if DHCP option 51 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ALL_SUBNETS_LOCAL">DHCP_ALL_SUBNETS_LOCAL()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> if all subnets use the same MTU size, if DHCP option 27 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ARP_CACHE_TIMEOUT">DHCP_ARP_CACHE_TIMEOUT()</a></dt>
+
+  <dd class="dd">This parser result function returns the timeout for ARP cache entries, in seconds, if DHCP option 35 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_BOOTFILE_NAME">DHCP_BOOTFILE_NAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the pathname of a boot file the client can use, if there is one, or an empty string otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_BOOT_FILE_SIZE">DHCP_BOOT_FILE_SIZE()</a></dt>
+
+  <dd class="dd">This parser result function returns the size of boot file in 512 byte blocks, if DHCP option 13 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_BROADCAST_ADDRESS">DHCP_BROADCAST_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address to use when broadcasting on subnet, if DHCP option 28 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_CLIENT_ADDRESS">DHCP_CLIENT_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the DHCP client's IP version 4 address when it requests renewal of its lease.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_CLIENT_HARDWARE_ADDRESS">DHCP_CLIENT_HARDWARE_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the DHCP client's network hardware address, for example, the MAC address of its ethernet adapter.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_CLIENT_HARDWARE_TYPE">DHCP_CLIENT_HARDWARE_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the client's hardware address type, for example, '1' for ethernet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_CLIENT_IDENTIFIER">DHCP_CLIENT_IDENTIFIER()</a></dt>
+
+  <dd class="dd">This parser result function returns client-specific information, if DHCP option 61 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_COOKIE_SERVERS">DHCP_COOKIE_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of cookie servers, represented as IP version 4 addresses, if DHCP option 8 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_DNS_SERVERS">DHCP_DNS_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of DNS servers, represented as IP version 4 addresses, if DHCP option 6 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_DOMAIN_NAME">DHCP_DOMAIN_NAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the domain name the client should use with DNS, if DHCP option 15 is included in the message, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ERROR_MESSAGE">DHCP_ERROR_MESSAGE()</a></dt>
+
+  <dd class="dd">This parser result function returns an error message from server, if request failed, if DHCP option 56 is included in the message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ETHERNET_ENCAPSULATION">DHCP_ETHERNET_ENCAPSULATION()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> when the client should use ethernet encapsulation, if DHCP option 36 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_EXTENSIONS_PATH">DHCP_EXTENSIONS_PATH()</a></dt>
+
+  <dd class="dd">This parser result function returns BOOTP extensions, if DHCP option 18 is included in the message, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_FINGER_SERVERS">DHCP_FINGER_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of Finger servers, represented as IP version 4 addresses, if DHCP option 73 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_FLAGS">DHCP_FLAGS()</a></dt>
+
+  <dd class="dd">This parser result function returns the DHCP broadcast flag.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_HOP_COUNT">DHCP_HOP_COUNT()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of relay agents separating the DHCP client and server.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_HOST_NAME">DHCP_HOST_NAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the hostname of the client, if DHCP option 12 is included in the message, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_IMPRESS_SERVERS">DHCP_IMPRESS_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of Impress servers, represented as IP version 4 addresses, if DHCP option 10 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_INTERFACE_MTU">DHCP_INTERFACE_MTU()</a></dt>
+
+  <dd class="dd">This parser result function returns the MTU size to use on this interface, if DHCP option 26 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_IP_DEFAULT_TTL">DHCP_IP_DEFAULT_TTL()</a></dt>
+
+  <dd class="dd">This parser result function returns the default IP time-to-live for outgoing packets, if DHCP option 23 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_IP_FORWARDING">DHCP_IP_FORWARDING()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> if the client should forward IP packets, if DHCP option 19 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_IRC_SERVERS">DHCP_IRC_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of IRC servers, represented as IP version 4 addresses, if DHCP option 74 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_LOG_SERVERS">DHCP_LOG_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of log servers, represented as IP version 4 addresses, if DHCP option 7 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_LPR_SERVERS">DHCP_LPR_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of print servers, represented as IP version 4 addresses, if DHCP option 9 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MASK_SUPPLIER">DHCP_MASK_SUPPLIER()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> when client should respond to subnet mask discovery, if DHCP option 30 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MAXIMUM_MESSAGE_SIZE">DHCP_MAXIMUM_MESSAGE_SIZE()</a></dt>
+
+  <dd class="dd">This parser result function returns the maximum size of DHCP message, if DHCP option 57 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MAXIMUM_REASSEMBLY_SIZE">DHCP_MAXIMUM_REASSEMBLY_SIZE()</a></dt>
+
+  <dd class="dd">This parser result function returns the maximum size of reassembled packets, if DHCP option 22 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MERIT_DUMP_FILE">DHCP_MERIT_DUMP_FILE()</a></dt>
+
+  <dd class="dd">This parser result function returns the pathname of a file for client's core dump image, if DHCP option 14 is included in the message, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MESSAGE_TYPE">DHCP_MESSAGE_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the type of this DHCP message, if DHCP option 53 is included in the message, or zero if not, for example:  '1' for Discover,  '2' for Offer,  '3' for Request,  '4' for Decline,  '5' for Positive Acknowledge,  '6' for Negative Acknowledge,  '7' for Release, or '8' for Inform.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MOBILE_IP_HOME_AGENTS">DHCP_MOBILE_IP_HOME_AGENTS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of mobile IP home agents, represented as IP version 4 addresses, if DHCP option 68 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MTU_AGING_TIMEOUT">DHCP_MTU_AGING_TIMEOUT()</a></dt>
+
+  <dd class="dd">This parser result function returns the time to use when aging path MTU values, in seconds, if DHCP option 24 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MTU_PLATEAU_TABLE">DHCP_MTU_PLATEAU_TABLE()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of MTU sizes for path discovery, if DHCP option 25 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NAME_SERVERS">DHCP_NAME_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of name servers (not DNS servers, see next option), represented as IP version 4 addresses, if DHCP option 5 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NETBIOS_NAME_SERVERS">DHCP_NETBIOS_NAME_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of NetBIOS-over-TCP name servers, represented as IP version 4 addresses, if DHCP option 44 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NETBIOS_NBDD_SERVERS">DHCP_NETBIOS_NBDD_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of NetBIOS-over-TCP NBDD servers, represented as IP version 4 addresses, if DHCP option 45 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NETBIOS_NODE_TYPE">DHCP_NETBIOS_NODE_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the type of NetBIOS-over-TCP node, if DHCP option 46 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NETBIOS_SCOPE">DHCP_NETBIOS_SCOPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the client's NetBIOS-over-TCP scope parameter, if DHCP option 47 is included in the message, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NISPLUS_DOMAIN">DHCP_NISPLUS_DOMAIN()</a></dt>
+
+  <dd class="dd">This parser result function returns the name of the client's NIS+ domain, if DHCP option 64 is included in the message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NISPLUS_SERVERS">DHCP_NISPLUS_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of NIS+ servers, represented as IP version 4 addresses, if DHCP option 65 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NIS_DOMAIN">DHCP_NIS_DOMAIN()</a></dt>
+
+  <dd class="dd">This parser result function returns the name of the client's NIS domain, if DHCP option 40 is included in the message, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NIS_SERVERS">DHCP_NIS_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of NIS servers, represented as IP version 4 addresses, if DHCP option 41 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NNTP_SERVERS">DHCP_NNTP_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of NNTP servers, represented as IP version 4 addresses, if DHCP option 71 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NONLOCAL_SOURCE_FILTERS">DHCP_NONLOCAL_SOURCE_FILTERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of IP version 4 address/mask pairs for filtering source packets, if DHCP option 21 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NONLOCAL_SOURCE_ROUTING">DHCP_NONLOCAL_SOURCE_ROUTING()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> if the client should forward IP packets with non-local source routing, if DHCP option 20 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_NTP_SERVERS">DHCP_NTP_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of NTP servers, represented as IP version 4 addresses, if DHCP option 42 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_OPCODE">DHCP_OPCODE()</a></dt>
+
+  <dd class="dd">This parser result function returns the DHCP message type ('1' for request, '2' for reply).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_OPTION_OVERLOAD_FLAGS">DHCP_OPTION_OVERLOAD_FLAGS()</a></dt>
+
+  <dd class="dd">This parser result function returns flags indicating whether the <tt class="ph tt">sname</tt> and <tt class="ph tt">file</tt> fields in the DHCP message header contain the server's host name and client's boot file name, or additional DHCP options, if DHCP option 52 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_PARAMETER_REQUESTS">DHCP_PARAMETER_REQUESTS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of requested DHCP parameters, expressed as option codes, if DHCP option 55 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_PERFORM_MASK_DISCOVERY">DHCP_PERFORM_MASK_DISCOVERY()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> when client should perform subnet mask discovery, if DHCP option 29 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_PERFORM_ROUTER_DISCOVERY">DHCP_PERFORM_ROUTER_DISCOVERY()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> when the client should solicit routers, if DHCP option 31 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_POP3_SERVERS">DHCP_POP3_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of POP3 servers, represented as IP version 4 addresses, if DHCP option 70 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_REBINDING_TIME">DHCP_REBINDING_TIME()</a></dt>
+
+  <dd class="dd">This parser result function returns the time from address lease to rebinding, in seconds, if DHCP option 59 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_RELAY_AGENT">DHCP_RELAY_AGENT()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of the relay agent between the DHCP client and server, if there is one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_RENEWAL_TIME">DHCP_RENEWAL_TIME()</a></dt>
+
+  <dd class="dd">This parser result function returns then time from address lease to renewal, in seconds, if DHCP option 58 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_REQUESTED_ADDRESS">DHCP_REQUESTED_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the client's requested address, as an IP version 4 address, if DHCP option 50 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_RESOURCE_SERVERS">DHCP_RESOURCE_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of resource location servers, represented as IP version 4 addresses, if DHCP option 11 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ROOT_PATH">DHCP_ROOT_PATH()</a></dt>
+
+  <dd class="dd">This parser result function returns the pathname of the client's root disk (for diskless workstations), if DHCP option 17 is included in the message, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ROUTERS">DHCP_ROUTERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of routers on client's subnet, represented as IP version 4 addresses, if DHCP option 3 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ROUTER_SOLICITATION_ADDRESS">DHCP_ROUTER_SOLICITATION_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address to which router solicitations should be sent, if DHCP option 32 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_SECONDS">DHCP_SECONDS()</a></dt>
+
+  <dd class="dd">This parser result function returns the elased time, in seconds, between the request and the response.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_SERVER_ADDRESS">DHCP_SERVER_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of DHCP server, if DHCP option 54 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_SERVER_HOSTNAME">DHCP_SERVER_HOSTNAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the name of the DHCP server, if it has one, or an empty string otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_SERVER_NEXT">DHCP_SERVER_NEXT()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of the next DHCP server to use.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_SMTP_SERVERS">DHCP_SMTP_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of SMTP servers, represented as IP version 4 addresses, if DHCP option 69 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_STATIC_ROUTES">DHCP_STATIC_ROUTES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of IP version 4 address pairs for the client's static routing table, if DHCP option 33 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_STDA_SERVERS">DHCP_STDA_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of StreetTalk Directory Assistance servers, represented as IP version 4 addresses, if DHCP option 76 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_STREETTALK_SERVERS">DHCP_STREETTALK_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of StreetTalk servers, represented as IP version 4 addresses, if DHCP option 75 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_SUBNET_MASK">DHCP_SUBNET_MASK()</a></dt>
+
+  <dd class="dd">This parser result function returns the mask of the client's subnet, represented as an IP version 4 address, if DHCP option 1 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_SWAP_SERVER">DHCP_SWAP_SERVER()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of the client's swap server, if DHCP option 16 is included in the message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_TCP_DEFUALT_TTL">DHCP_TCP_DEFUALT_TTL()</a></dt>
+
+  <dd class="dd">This parser result function returns the default TCP time-to-live for outgoing segments, if DHCP option 37 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_TCP_KEEPALIVE_GARBAGE">DHCP_TCP_KEEPALIVE_GARBAGE()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> when the client should send a byte of garbage with TCP keepalive messages, if DHCP option 39 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_TCP_KEEPALIVE_INTERVAL">DHCP_TCP_KEEPALIVE_INTERVAL()</a></dt>
+
+  <dd class="dd">This parser result function returns the time the client should wait before sending TCP keepalive messages, in seconds, if DHCP option 38 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_TIME_OFFSET">DHCP_TIME_OFFSET()</a></dt>
+
+  <dd class="dd">This parser result function returns the time offset of the client's subnet, relative to GMT/UTC, in seconds, if DHCP option 2 is included in the message, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_TIME_SERVERS">DHCP_TIME_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of time servers, represented as IP version 4 addresses, if DHCP option 4 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_TRAILER_ENCAPSULATION">DHCP_TRAILER_ENCAPSULATION()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> when the client should negotiate trailers, if DHCP option 34 is included in the message, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_TRANSACTION_IDENTIFIER">DHCP_TRANSACTION_IDENTIFIER()</a></dt>
+
+  <dd class="dd">This parser result function returns the request correlator chosen by the DHCP client in its request and returned to it by server in its response.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_VENDOR_IDENTIFIER">DHCP_VENDOR_IDENTIFIER()</a></dt>
+
+  <dd class="dd">This parser result function returns vendor-specific information, if DHCP option 60 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_VENDOR_INFORMATION">DHCP_VENDOR_INFORMATION()</a></dt>
+
+  <dd class="dd">This parser result function returns vendor-specific information, if DHCP option 43 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_WWW_SERVERS">DHCP_WWW_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of WWW servers, represented as IP version 4 addresses, if DHCP option 72 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_XWINDOW_DISPLAY_MANAGERS">DHCP_XWINDOW_DISPLAY_MANAGERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of X-Windows display managers, represented as IP version 4 addresses, if DHCP option 49 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_XWINDOW_FONT_SERVERS">DHCP_XWINDOW_FONT_SERVERS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of X-Windows font servers, represented as IP version 4 addresses, if DHCP option 48 is included in the message, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_YOUR_ADDRESS">DHCP_YOUR_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address leased to the client by the DHCP server, if the message is an acknowledgement granting a lease, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_CLASSES">DNS_ADDITIONAL_CLASSES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_COUNT">DNS_ADDITIONAL_COUNT()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of 'additional' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_DATA">DNS_ADDITIONAL_DATA()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_NAMES">DNS_ADDITIONAL_NAMES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'name' fields in the 'additional' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TTLS">DNS_ADDITIONAL_TTLS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TYPES">DNS_ADDITIONAL_TYPES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_ADDRESS">DNS_ANSWER_ADDRESS()</a></dt>
+
+  <dd class="dd">This parser result function returns the 'data' field of the first 'answer' resource record with a 'type' value of '1' (meaning, the answer is an IP version 4 address from a type 'A' record) or '28' (meaning, the answer is an IP version 6 address from a type 'AAAA' record), if there is one, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_ADDRESSES">DNS_ANSWER_ADDRESSES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'data' fields in the 'answer' resource records that have a 'type' value of  '1' or '28' (meaning, those answers are IP addresses from type 'A' or 'AAAA' records).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_CANONICAL">DNS_ANSWER_CANONICAL()</a></dt>
+
+  <dd class="dd">This parser result function returns the 'data' field of the first 'answer' resource record  with a 'type' value of '5' (meaning, the answer is a canonical domain name from a type 'CNAME' record), if there is one, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_CLASSES">DNS_ANSWER_CLASSES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'class' fields in the 'answer' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_COUNT">DNS_ANSWER_COUNT()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of 'answer' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_DATA">DNS_ANSWER_DATA()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'data' fields in the 'answer' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_NAMES">DNS_ANSWER_NAMES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'name' fields in the 'answer' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_TTLS">DNS_ANSWER_TTLS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'time to live' fields in the 'answer' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_TYPES">DNS_ANSWER_TYPES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'type' fields in the 'answer' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_AUTHORITATIVE_FLAG">DNS_AUTHORITATIVE_FLAG()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> if the 'authoritative' flag is set in the current message,  or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_IDENTIFIER">DNS_IDENTIFIER()</a></dt>
+
+  <dd class="dd">This parser result function returns the DNS client's request correlator in the current message, and returned by the server in its response.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_CLASSES">DNS_NAMESERVER_CLASSES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_COUNT">DNS_NAMESERVER_COUNT()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_DATA">DNS_NAMESERVER_DATA()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_NAMES">DNS_NAMESERVER_NAMES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'name' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_TTLS">DNS_NAMESERVER_TTLS()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_TYPES">DNS_NAMESERVER_TYPES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_OPCODE">DNS_OPCODE()</a></dt>
+
+  <dd class="dd">This parser result function returns the operation code requested by the DNS client in the current message, for example,  '1' for standard queries,  '2' for inverse queries, or '3' for server status requests.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_CLASS">DNS_QUESTION_CLASS()</a></dt>
+
+  <dd class="dd">This parser result function returns the 'class' field of the first 'question' resource record in the current message, for example, '1' for Internet adddresses ('IN' records),</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_CLASSES">DNS_QUESTION_CLASSES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'class' fields in the 'question' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_COUNT">DNS_QUESTION_COUNT()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of 'question' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_NAME">DNS_QUESTION_NAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the 'name' field of the first 'question' resource record in the current message, if there is one, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_NAMES">DNS_QUESTION_NAMES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'name' fields in the 'question' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_TYPE">DNS_QUESTION_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the 'type' field of the first 'question' resource record in the current message, for example:  '1' for IP version 4 address to domain name lookup ('A' records), '5' for domain name to canonical domain name lookup ('CNAME' records), '12' for domain name to IP address lookup ('TXT' records), or '28' for IP version 6 address to domain name lookup ('AAAA' records).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_TYPES">DNS_QUESTION_TYPES()</a></dt>
+
+  <dd class="dd">This parser result function returns a list of the 'type' fields in the 'question' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_RESPONSE_CODE">DNS_RESPONSE_CODE()</a></dt>
+
+  <dd class="dd">This parser result function returns the response code from the DNS server in the current message, for example,  '0' for OK,  '1' for Format Error,  '2' for Server Failure,  '3' for Name Error,  '4' for not implemented, or '5' for Server Refused.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_RESPONSE_FLAG">DNS_RESPONSE_FLAG()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> if the current message is a response sent by a DNS server, or <tt class="ph tt">false</tt> if it is a request sent by a DNS client.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_TRUNCATION_FLAG">DNS_TRUNCATION_FLAG()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> if the 'truncation' flag is set in the current message,  or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_DST_ADDRESS">ETHER_DST_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the ethernet destination address of the current packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_PROTOCOL">ETHER_PROTOCOL()</a></dt>
+
+  <dd class="dd">This function returns the ethernet protocol (that is, the EtherType) of the current packet, for example, '2048' for IP version 4, or '34,525' for IP version 6.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_SRC_ADDRESS">ETHER_SRC_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the ethernet source address of the current packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IPV4_DST_ADDRESS">IPV4_DST_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the IP version 4 destination address of the current packet, if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IPV4_SRC_ADDRESS">IPV4_SRC_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the IP version 4 source address of the current packet, if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IPV6_DST_ADDRESS">IPV6_DST_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the IP version 6 destination address of the current packet, if it has one, or an empty list otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IPV6_SRC_ADDRESS">IPV6_SRC_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the IP version 6 source address of the current packet, if it has one, or an empty list otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_DST_PORT">IP_DST_PORT()</a></dt>
+
+  <dd class="dd">This function returns the TCP or UDP destination port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_PROTOCOL">IP_PROTOCOL()</a></dt>
+
+  <dd class="dd">This function returns the IP protocol of the current packet, for example, '6' for TCP, or '17' for UDP, or zero if the ethernet packet does not contain an IP packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_SRC_PORT">IP_SRC_PORT()</a></dt>
+
+  <dd class="dd">This function returns the TCP or UDP source port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_VERSION">IP_VERSION()</a></dt>
+
+  <dd class="dd">This function returns the IP version of the current packet ('4' for IP version 4, or '6' for IP version 6),  if the ethernet packet contains an IP packet, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__JMIRROR_DST_ADDRESS">JMIRROR_DST_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the value of the 'jmirror' destination address in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__JMIRROR_DST_PORT">JMIRROR_DST_PORT()</a></dt>
+
+  <dd class="dd">This function returns the value of the 'jmirror' dstination port in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__JMIRROR_INTERCEPT_ID">JMIRROR_INTERCEPT_ID()</a></dt>
+
+  <dd class="dd">This function returns the value of the 'jmirror' intercept identifier in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__JMIRROR_SESSION_ID">JMIRROR_SESSION_ID()</a></dt>
+
+  <dd class="dd">This function returns the value of the 'jmirror' session identifier in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__JMIRROR_SRC_ADDRESS">JMIRROR_SRC_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the value of the 'jmirror' source address in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__JMIRROR_SRC_PORT">JMIRROR_SRC_PORT()</a></dt>
+
+  <dd class="dd">This function returns the value of the 'jmirror' source port in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_APPLICATION_DESCRIPTION">NETFLOW_APPLICATION_DESCRIPTION()</a></dt>
+
+  <dd class="dd">This parser result function returns the application description.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_APPLICATION_NAME">NETFLOW_APPLICATION_NAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the name associated with a classification.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_APPLICATION_TAG">NETFLOW_APPLICATION_TAG()</a></dt>
+
+  <dd class="dd">This parser result function returns 8 bits of engine ID, followed by <em class="ph i">n</em> bits of classification.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_BGP_IPV4_NEXT_HOP">NETFLOW_BGP_IPV4_NEXT_HOP()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of the next router in the BGP domain.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_BPG_IPV6_NEXT_HOP">NETFLOW_BPG_IPV6_NEXT_HOP()</a></dt>
+
+  <dd class="dd">This parser result function returns the next router in the BGP domain.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_COUNT">NETFLOW_COUNT()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of Netflow records in the current message, including templates, options, and flows.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_DIRECTION">NETFLOW_DIRECTION()</a></dt>
+
+  <dd class="dd">This parser result function returns the direction of the flow, '0' for ingress, '1' for egress.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_DST_AS">NETFLOW_DST_AS()</a></dt>
+
+  <dd class="dd">This parser result function returns the BGP autonomous system number of the destination endpoint of the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_DST_MASK">NETFLOW_DST_MASK()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of significant bits in the  IP version 4 address of the destination endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_DST_PORT">NETFLOW_DST_PORT()</a></dt>
+
+  <dd class="dd">This parser result function returns the TCP or UDP port number of the destination endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_DST_TOS">NETFLOW_DST_TOS()</a></dt>
+
+  <dd class="dd">This parser result function returns the 'type of service' byte setting for the flow when exiting the outgoing interface.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_DST_TRAFFIC_INDEX">NETFLOW_DST_TRAFFIC_INDEX()</a></dt>
+
+  <dd class="dd">This parser result function returns BGP policy accounting destination traffic index.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_DST_VLAN">NETFLOW_DST_VLAN()</a></dt>
+
+  <dd class="dd">This parser result function returns the virtual LAN identifier associated with the egress interface.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_ENGINE_ID">NETFLOW_ENGINE_ID()</a></dt>
+
+  <dd class="dd">This parser result function returns the identifier of the switching engine in the router.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_ENGINE_TYPE">NETFLOW_ENGINE_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the type code of the switching engine in the router.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FIELD_AS_BYTE_LIST.int32">NETFLOW_FIELD_AS_BYTE_LIST(int32)</a></dt>
+
+  <dd class="dd">This parser result function returns the value of the specified Netflow version 9 field in the current flow record,  if present,  represented as list of unsigned bytes, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FIELD_AS_INTEGER.int32">NETFLOW_FIELD_AS_INTEGER(int32)</a></dt>
+
+  <dd class="dd">This parser result function returns the value of the specified Netflow version 9 field in the current flow record,  if present, represented as an unsigned integer, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FIELD_AS_STRING.int32">NETFLOW_FIELD_AS_STRING(int32)</a></dt>
+
+  <dd class="dd">This parser result function returns the value of the specified Netflow version 9 field in the current flow record,  if present,  represented as a string, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FIRST_SWITCHED">NETFLOW_FIRST_SWITCHED()</a></dt>
+
+  <dd class="dd">This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the first packet of the current flow, that is, the time that the first packet in this flow passed through the router, relative to when the router was booted, in milliseconds.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FLOWS">NETFLOW_FLOWS()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of flows that were aggregated for the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FLOW_ACTIVE_TIMEOUT">NETFLOW_FLOW_ACTIVE_TIMEOUT()</a></dt>
+
+  <dd class="dd">This parser result function returns the timeout value, in seconds, for active flow entries in the Netflow cache.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FLOW_INACTIVE_TIMEOUT">NETFLOW_FLOW_INACTIVE_TIMEOUT()</a></dt>
+
+  <dd class="dd">This parser result function returns the timeout value, in seconds, for inactive flow entries in the Netflow cache.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FLOW_SAMPLER_ID">NETFLOW_FLOW_SAMPLER_ID()</a></dt>
+
+  <dd class="dd">This parser result function returns the identifier shown in "show flow-sampler".</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FLOW_SAMPLER_MODE">NETFLOW_FLOW_SAMPLER_MODE()</a></dt>
+
+  <dd class="dd">This parser result function returns the sampling mode, when Netflow is sampled, For Netflow version 9, this is field 49.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL">NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL()</a></dt>
+
+  <dd class="dd">This parser result function returns the packet sampling interval, when Netflow is sampled.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FORWARDING_STATUS">NETFLOW_FORWARDING_STATUS()</a></dt>
+
+  <dd class="dd">This parser result function returns the forwarding status, with the 2 left bits giving the status and the 6 remaining bits giving the reason code.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_FRAGMENT_OFFSET">NETFLOW_FRAGMENT_OFFSET()</a></dt>
+
+  <dd class="dd">This parser result function returns the fragment offset value from fragmented IP packets.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_ICMP_TYPE">NETFLOW_ICMP_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the ICMP packet type.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IF_DESC">NETFLOW_IF_DESC()</a></dt>
+
+  <dd class="dd">This parser result function returns the router's interface description.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IF_NAME">NETFLOW_IF_NAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the router's interface name.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_INPUT_INTERFACE">NETFLOW_INPUT_INTERFACE()</a></dt>
+
+  <dd class="dd">This parser result function returns the interface index where the current flow entered the router, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IN_BYTES">NETFLOW_IN_BYTES()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of bytes that entered the router for the current flow record,  if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IN_PERMANENT_BYTES">NETFLOW_IN_PERMANENT_BYTES()</a></dt>
+
+  <dd class="dd">This parser result function returns the running byte counter for a permanent flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IN_PERMANENT_PKTS">NETFLOW_IN_PERMANENT_PKTS()</a></dt>
+
+  <dd class="dd">This parser result function returns the running packet counter for a permanent flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IN_PKTS">NETFLOW_IN_PKTS()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of packets that entered the router for the current flow record,  if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV4_DST_ADDR">NETFLOW_IPV4_DST_ADDR()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of the destination endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV4_DST_PREFIX">NETFLOW_IPV4_DST_PREFIX()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 destination address prefix (specific for Cisco Catalyst architecture).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV4_IDENT">NETFLOW_IPV4_IDENT()</a></dt>
+
+  <dd class="dd">This parser result function returns The IP version 4 identification field of the flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV4_NEXT_HOP">NETFLOW_IPV4_NEXT_HOP()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of the next router towards the destination endpoint of the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV4_SRC_ADDR">NETFLOW_IPV4_SRC_ADDR()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 address of the source endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV4_SRC_PREFIX">NETFLOW_IPV4_SRC_PREFIX()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 4 source address prefix (specific for Cisco Catalyst architecture).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV6_DST_ADDR">NETFLOW_IPV6_DST_ADDR()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 6 address of the destination endpoint of the current flow record, if available, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV6_DST_MASK">NETFLOW_IPV6_DST_MASK()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of significant bits in the  IP version 6 address of the source endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV6_FLOW_LABEL">NETFLOW_IPV6_FLOW_LABEL()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 6 flow label.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV6_NEXT_HOP">NETFLOW_IPV6_NEXT_HOP()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 6 address of the next-hop router.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV6_OPTION_HEADERS">NETFLOW_IPV6_OPTION_HEADERS()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 6 option headers found in the flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV6_SRC_ADDR">NETFLOW_IPV6_SRC_ADDR()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version 6 address of the source endpoint of the current flow record, if available, or an empty list if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IPV6_SRC_MASK">NETFLOW_IPV6_SRC_MASK()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of significant bits in the  IP version 6 address of the source endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_IP_PROTOCOL_VERSION">NETFLOW_IP_PROTOCOL_VERSION()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP version for the flow, either '4' or '6'.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_LAST_SWITCHED">NETFLOW_LAST_SWITCHED()</a></dt>
+
+  <dd class="dd">This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the last packet of the current flow, that is, the time that the last packet in this flow passed through the router, relative to when the router was booted, in milliseconds.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MAC_DST_ADDR_IN">NETFLOW_MAC_DST_ADDR_IN()</a></dt>
+
+  <dd class="dd">This parser result function returns the incoming destination MAC address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MAC_DST_ADDR_OUT">NETFLOW_MAC_DST_ADDR_OUT()</a></dt>
+
+  <dd class="dd">This parser result function returns the incoming destination MAC address for the flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MAC_SRC_ADDR_IN">NETFLOW_MAC_SRC_ADDR_IN()</a></dt>
+
+  <dd class="dd">This parser result function returns the incoming source MAC address for the flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MAC_SRC_ADDR_OUT">NETFLOW_MAC_SRC_ADDR_OUT()</a></dt>
+
+  <dd class="dd">This parser result function returns the outgoing source MAC address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MAX_PKT_LNGTH">NETFLOW_MAX_PKT_LNGTH()</a></dt>
+
+  <dd class="dd">This parser result function returns the maximum packet length for the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MAX_TTL">NETFLOW_MAX_TTL()</a></dt>
+
+  <dd class="dd">This parser result function returns the maximum 'time to live' for incoming packets of the flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MIN_PKT_LNGTH">NETFLOW_MIN_PKT_LNGTH()</a></dt>
+
+  <dd class="dd">This parser result function returns the minimum packet length for the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MIN_TTL">NETFLOW_MIN_TTL()</a></dt>
+
+  <dd class="dd">This parser result function returns the minimum 'time to live' for incoming packets of the flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MPLS_LABEL.int32">NETFLOW_MPLS_LABEL(int32)</a></dt>
+
+  <dd class="dd">This parser result function returns the MPLS label at the specified position in the stack, where the position is specified with an argument between 1 and 10.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MPLS_PAL_RD">NETFLOW_MPLS_PAL_RD()</a></dt>
+
+  <dd class="dd">This parser result function returns the MPLS PAL Route Distinguisher.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MPLS_PREFIX_LEN">NETFLOW_MPLS_PREFIX_LEN()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of consecutive bits in the MPLS prefix length.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR">NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR()</a></dt>
+
+  <dd class="dd">This parser result function returns the Forwarding Equivalent Class corresponding to the MPLS Top Label.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MPLS_TOP_LABEL_TYPE">NETFLOW_MPLS_TOP_LABEL_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the MPLS top label type, '0' for  UNKNOWN, '1' for TE-MIDPT, '2' for ATOM, '3' for VPN '4' for BGP, '5' for LDP.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MUL_DST_BYTES">NETFLOW_MUL_DST_BYTES()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of outgoing multicast bytes in the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MUL_DST_PKTS">NETFLOW_MUL_DST_PKTS()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of outgoing multicast packets in the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_MUL_IGMP_TYPE">NETFLOW_MUL_IGMP_TYPE()</a></dt>
+
+  <dd class="dd">This parser result function returns the IGMP packet type.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_OUTPUT_INTERFACE">NETFLOW_OUTPUT_INTERFACE()</a></dt>
+
+  <dd class="dd">This parser result function returns the interface index where the current flow left the router, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_OUT_BYTES">NETFLOW_OUT_BYTES()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of bytes that left the router for the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_OUT_PKTS">NETFLOW_OUT_PKTS()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of packets that left the router for the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_POST_IP_DSCP">NETFLOW_POST_IP_DSCP()</a></dt>
+
+  <dd class="dd">This parser result function returns the value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_PROTOCOL">NETFLOW_PROTOCOL()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP protocol number for the current flow record,  if available, for example, '17' for UDP, or '6' for TCP, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_REPLICATION_FACTOR">NETFLOW_REPLICATION_FACTOR()</a></dt>
+
+  <dd class="dd">This parser result function returns the multicast replication factor.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SAMPLER_NAME">NETFLOW_SAMPLER_NAME()</a></dt>
+
+  <dd class="dd">This parser result function returns the name of the flow sampler, when Netflow is sampled.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SAMPLING_ALGORITHM">NETFLOW_SAMPLING_ALGORITHM()</a></dt>
+
+  <dd class="dd">This parser result function returns the sampling algorithm, when Netflow is sampled, with  '1' for deterministic sampling, and '2' for random sampling.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SAMPLING_INTERVAL">NETFLOW_SAMPLING_INTERVAL()</a></dt>
+
+  <dd class="dd">This parser result function returns the sampling rate, when Netflow is sampled, for example, a value of 100 indicates that one of every 100 packets is sampled.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SEQUENCE_NUMBER">NETFLOW_SEQUENCE_NUMBER()</a></dt>
+
+  <dd class="dd">This parser result function returns the sequence number assigned to the current message by the router.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SOURCE_ID">NETFLOW_SOURCE_ID()</a></dt>
+
+  <dd class="dd">This parser result function returns the port identifier of the router.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SRC_AS">NETFLOW_SRC_AS()</a></dt>
+
+  <dd class="dd">This parser result function returns the BGP autonomous system number of the source endpoint of the current flow.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SRC_MASK">NETFLOW_SRC_MASK()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of significant bits in the  IP version 4 address of the source endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SRC_PORT">NETFLOW_SRC_PORT()</a></dt>
+
+  <dd class="dd">This parser result function returns the TCP or UDP port number of the source endpoint of the current flow record, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SRC_TOS">NETFLOW_SRC_TOS()</a></dt>
+
+  <dd class="dd">This parser result function returns the IP 'type of service' byte for the current flow record on entering the router, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SRC_TRAFFIC_INDEX">NETFLOW_SRC_TRAFFIC_INDEX()</a></dt>
+
+  <dd class="dd">This parser result function returns BGP policy accounting source traffic index.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SRC_VLAN">NETFLOW_SRC_VLAN()</a></dt>
+
+  <dd class="dd">This parser result function returns the virtual LAN identifier associated with the ingress interface.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_SYSTEM_UPTIME">NETFLOW_SYSTEM_UPTIME()</a></dt>
+
+  <dd class="dd">This parser result function returns the elapsed time from when the router started until the current message was sent, in milliseconds.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_TCP_FLAGS">NETFLOW_TCP_FLAGS()</a></dt>
+
+  <dd class="dd">This parser result function returns the cumulative value of all TCP flags in the current flow record,  that is, the logical 'or' of the TCP flags in all packets in the flow, if available, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_TOTAL_BYTES_EXP">NETFLOW_TOTAL_BYTES_EXP()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of bytes exported by the Observation Domain.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_TOTAL_FLOWS_EXP">NETFLOW_TOTAL_FLOWS_EXP()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of flows exported by the Observation Domain.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_TOTAL_PKTS_EXP">NETFLOW_TOTAL_PKTS_EXP()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of packets exported by the Observation Domain.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_UNIX_NANOSECONDS">NETFLOW_UNIX_NANOSECONDS()</a></dt>
+
+  <dd class="dd">This parser result function returns the fractional part of NETFLOW_UNIX_SECONDS(), in nanoseconds, for Netflow version 5 messages only.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_UNIX_SECONDS">NETFLOW_UNIX_SECONDS()</a></dt>
+
+  <dd class="dd">This parser result function returns the time that the current message was sent, in seconds, according to the router's clock, relative to the beginning of the Unix epoch  (at midnight on the first of January in Greenwich, England).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__NETFLOW_VERSION">NETFLOW_VERSION()</a></dt>
+
+  <dd class="dd">This parser result function returns the Netflow version of the current message, either '5' or '9.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PACKET_DATA">PACKET_DATA()</a></dt>
+
+  <dd class="dd">This function returns the network data in the current packet, including all network headers.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PACKET_LENGTH">PACKET_LENGTH()</a></dt>
+
+  <dd class="dd">This function returns the number of bytes of network data in the current packet, including all network headers.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_DATA">PAYLOAD_DATA()</a></dt>
+
+  <dd class="dd">This function returns the payload data in the current packet, excluding all network headers.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_LENGTH">PAYLOAD_LENGTH()</a></dt>
+
+  <dd class="dd">This function returns the number of bytes of payload data in the current packet, excluding all network headers.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_ACKNOWLEDGEMENT">TCP_ACKNOWLEDGEMENT()</a></dt>
+
+  <dd class="dd">This function returns the value of the TCP acknowledgement number in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_DST_PORT">TCP_DST_PORT()</a></dt>
+
+  <dd class="dd">This function returns the TCP destination port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_FLAGS_ACK">TCP_FLAGS_ACK()</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a TCP 'ack' flag and its set,  or <tt class="ph tt">false</tt> otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_FLAGS_FIN">TCP_FLAGS_FIN()</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a TCP 'fin' flag and its set,  or <tt class="ph tt">false</tt> otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_FLAGS_PUSH">TCP_FLAGS_PUSH()</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a TCP 'push' flag and its set,  or <tt class="ph tt">false</tt> otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_FLAGS_RESET">TCP_FLAGS_RESET()</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a TCP 'reset' flag and its set,  or <tt class="ph tt">false</tt> otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_FLAGS_SYN">TCP_FLAGS_SYN()</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a TCP 'syn' flag and its set,  or <tt class="ph tt">false</tt> otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_FLAGS_URGENT">TCP_FLAGS_URGENT()</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a TCP 'urgent' flag and its set,  or <tt class="ph tt">false</tt> otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_PORT.uint16">TCP_PORT(uint16)</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a TCP source or destination port, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_SEQUENCE">TCP_SEQUENCE()</a></dt>
+
+  <dd class="dd">This function returns the value of the TCP sequence number in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_SRC_PORT">TCP_SRC_PORT()</a></dt>
+
+  <dd class="dd">This function returns the TCP source port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_WINDOW">TCP_WINDOW()</a></dt>
+
+  <dd class="dd">This function returns the value of the TCP window size in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__UDP_DST_PORT">UDP_DST_PORT()</a></dt>
+
+  <dd class="dd">This function returns the UDP destination port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__UDP_PORT.uint16">UDP_PORT(uint16)</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a UDP source or destination port, or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__UDP_SRC_PORT">UDP_SRC_PORT()</a></dt>
+
+  <dd class="dd">This function returns the UDP source port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__compactIPV6.rstring">compactIPV6(rstring)</a></dt>
+
+  <dd class="dd">Compacts a valid IPv6 address (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__compare.rstring.rstring">compare(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">-1</tt> if <em class="ph i">ip1</em> is less than <em class="ph i">ip2</em>.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertHostnameToIPV4AddressNumeric.rstring">convertHostnameToIPV4AddressNumeric(rstring)</a></dt>
+
+  <dd class="dd">This function converts a hostname into a binary IPv4 address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertHostnameToIPV4AddressString.rstring">convertHostnameToIPV4AddressString(rstring)</a></dt>
+
+  <dd class="dd">This function converts a hostname into a string representation of an IPv4 address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertIPV4AddressNumericToHostname.uint32">convertIPV4AddressNumericToHostname(uint32)</a></dt>
+
+  <dd class="dd">This function converts a four-byte binary representation of an IPv4 address into a hostname.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertIPV4AddressNumericToString.uint32">convertIPV4AddressNumericToString(uint32)</a></dt>
+
+  <dd class="dd">This function converts a four-byte binary representation of an IPv4 address into a string representation.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertIPV4AddressNumericToSubnet.uint32.int32">convertIPV4AddressNumericToSubnet(uint32, int32)</a></dt>
+
+  <dd class="dd">This function converts a four-byte binary representation of an IPv4 address into a four-byte binary subnet address, using the specified number of mask bits.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertIPV4AddressStringToHostname.rstring">convertIPV4AddressStringToHostname(rstring)</a></dt>
+
+  <dd class="dd">This function converts a string containing an IPv4 address into a domain name, if the address has one.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertIPV4AddressStringToNumeric.rstring">convertIPV4AddressStringToNumeric(rstring)</a></dt>
+
+  <dd class="dd">This function converts a string representation of an IPv4 address to a four-byte binary representation.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__convertIPV4AddressStringToSubnet.rstring.int32">convertIPV4AddressStringToSubnet(rstring, int32)</a></dt>
+
+  <dd class="dd">This function converts a string representing an IPv4 address into a string representation of the subnet address, using the specified number of mask bits.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__convertIPV6AddressNumericToString.list:.:uint8:.::..:16:..:">convertIPV6AddressNumericToString(list&lt;uint8&gt;[16])</a></dt>
+
+  <dd class="dd">This function converts a sixteen-byte binary representation of an IPv6 address into a string representation.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__convertIPV6AddressStringToNumeric.rstring">convertIPV6AddressStringToNumeric(rstring)</a></dt>
+
+  <dd class="dd">This function converts a string representation of an IPv6 address into a sixteen-byte binary representation.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.mac.html#spldoc_functions__convertMACAddressNumericToString.list:.:uint8:.::..:6:..:">convertMACAddressNumericToString(list&lt;uint8&gt;[6])</a></dt>
+
+  <dd class="dd">This function converts an ethernet MAC address from a six-byte binary value to a string representation.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.mac.html#spldoc_functions__convertMACAddressStringToNumeric.rstring">convertMACAddressStringToNumeric(rstring)</a></dt>
+
+  <dd class="dd">This function converts an ethernet MAC address from a string representation to a six-byte binary value.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__expandIPV6.rstring">expandIPV6(rstring)</a></dt>
+
+  <dd class="dd">Expands a valid IPv6 address (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatElapsedTime.float64">formatElapsedTime(float64)</a></dt>
+
+  <dd class="dd">This function formats a value representing elapsed time, in seconds including a fractional part,  as a string representation of that time in the form 'DDDDd HHh MMm SS.FFFFFFs', with leading zeros omitted.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatElapsedTime.float64.uint32">formatElapsedTime(float64, uint32)</a></dt>
+
+  <dd class="dd">This function formats a value representing elapsed time, in seconds including a fractional part,  as a string representation of that time in the form 'DDDDd HHh MMm SS.FFFFFFs', with leading zeros omitted.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatElapsedTime.uint32">formatElapsedTime(uint32)</a></dt>
+
+  <dd class="dd">This function formats an integer representing elapsed time, in seconds, as a string representation of that time in the form 'DDDDd HHh MMm SSs', with leading zeros omitted.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpoch.uint32.rstring">formatEpoch(uint32, rstring)</a></dt>
+
+  <dd class="dd">This function formats an integer representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string, according to an 'strftime' format pattern.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochDateTime.float64">formatEpochDateTime(float64)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a value representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochDateTime.float64.uint32">formatEpochDateTime(float64, uint32)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a value representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochDateTime.timestamp">formatEpochDateTime(timestamp)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a timestamp representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochDateTime.timestamp.uint32">formatEpochDateTime(timestamp, uint32)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a timestamp representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochDateTime.uint32">formatEpochDateTime(uint32)</a></dt>
+
+  <dd class="dd">This function formats an integer representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochTime.float64">formatEpochTime(float64)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a value representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochTime.float64.uint32">formatEpochTime(float64, uint32)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a value representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochTime.timestamp">formatEpochTime(timestamp)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a timestamp representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochTime.timestamp.uint32">formatEpochTime(timestamp, uint32)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a timestamp representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatEpochTime.uint32">formatEpochTime(uint32)</a></dt>
+
+  <dd class="dd">This function formats an integer representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string in the form 'HH:MM:SS' in the local time zone.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatSubseconds.float64.uint32">formatSubseconds(float64, uint32)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of a value representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string,  with the specified precision for the fractional part.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="spl$com.ibm.streamsx.network.parse$TimeFormattingFunctions.html#spldoc_compilationunit__function__formatSubseconds.timestamp.uint32">formatSubseconds(timestamp, uint32)</a></dt>
+
+  <dd class="dd">This function formats the integer and fractional parts of  a timestamp representing 'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in Greenwich, England) as a string, with the specified precision for the fractional part.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__getAllAddressesInNetwork.rstring">getAllAddressesInNetwork(rstring)</a></dt>
+
+  <dd class="dd">Returns a list of all IP addresses in the network.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isEqualTo.rstring.rstring">isEqualTo(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv4 addresses and <em class="ph i">ip1</em> address is equal to <em class="ph i">ip2</em> address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isEqualTo.rstring.rstring">isEqualTo(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv6 addresses and <em class="ph i">ip1</em> address is equal to <em class="ph i">ip2</em> address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isGlobal.rstring">isGlobal(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv4 address was provided and the IP address is not a reserved address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isGreaterThan.rstring.rstring">isGreaterThan(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv4 addresses and <em class="ph i">ip1</em> address is greater than <em class="ph i">ip2</em> address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isGreaterThan.rstring.rstring">isGreaterThan(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv6 addresses and <em class="ph i">ip1</em> address is greater than <em class="ph i">ip2</em> address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isIPV4Address.rstring">isIPV4Address(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if the <em class="ph i">value</em> parameter contains a valid IPv4 address in dotted-decimal notation (i.e 0.0.0.0), otherwise returns <tt class="ph tt">false</tt>.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isIPV4CIDRNotation.rstring">isIPV4CIDRNotation(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a the <em class="ph i">networkCIDR</em> argument contains a valid network address in CIDR format (i.e.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isIPV6Address.rstring">isIPV6Address(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if the <em class="ph i">value</em> parameter contains a valid IPv6 address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isIPV6CIDRNotation.rstring">isIPV6CIDRNotation(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if the <em class="ph i">networkCIDR</em> argument contains a valid IPv6 network address in CIDR format (i.e.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isInIPRange.rstring.rstring.rstring">isInIPRange(rstring, rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">startIP</em>, <em class="ph i">endIP</em> and <em class="ph i">ip</em> are valid IPv4 addresses and <em class="ph i">ip</em> falls within the range from <em class="ph i">startIP</em> (inclusive) to <em class="ph i">endIP</em> (exclusive).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isInIPRange.rstring.rstring.rstring">isInIPRange(rstring, rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">startIP</em>, <em class="ph i">endIP</em> and <em class="ph i">ip</em> are valid IPv6 addresses and <em class="ph i">ip</em> falls within the range from <em class="ph i">startIP</em> (inclusive) to <em class="ph i">endIP</em> (exclusive).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isInNetwork.rstring.rstring">isInNetwork(rstring, rstring)</a></dt>
+
+  <dd class="dd">Return <tt class="ph tt">true</tt> if <em class="ph i">ip</em> address is in the network provided by the <em class="ph i">networkCIDR</em> argument.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isInNetwork.rstring.rstring">isInNetwork(rstring, rstring)</a></dt>
+
+  <dd class="dd">Return <tt class="ph tt">true</tt> if <em class="ph i">ip</em> address is in the network provided by the <em class="ph i">networkCIDR</em> argument.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isInNetwork.rstring.uint32">isInNetwork(rstring, uint32)</a></dt>
+
+  <dd class="dd">Return <tt class="ph tt">true</tt> if <em class="ph i">ip</em> address is in the network provided by the <em class="ph i">networkCIDR</em> argument.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isInNetworkList.list:.:rstring:.:.rstring">isInNetworkList(list&lt;rstring&gt;, rstring)</a></dt>
+
+  <dd class="dd">Return <tt class="ph tt">true</tt> if <em class="ph i">ip</em> address is in at least one of the networks provided by the <em class="ph i">networkList</em> argument.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isInNetworkList.list:.:rstring:.:.rstring">isInNetworkList(list&lt;rstring&gt;, rstring)</a></dt>
+
+  <dd class="dd">Return <tt class="ph tt">true</tt> if <em class="ph i">ip</em> address is in at least one of the networks provided by the <em class="ph i">networkList</em> argument.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isLessThan.rstring.rstring">isLessThan(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv4 addresses and <em class="ph i">ip1</em> address is less than <em class="ph i">ip2</em> address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isLessThan.rstring.rstring">isLessThan(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv6 addresses and <em class="ph i">ip1</em> address is less than <em class="ph i">ip2</em> address.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isLinkLocal.rstring">isLinkLocal(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv4 address was provided and the IP address is a link local address (RFC3927).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isLinkLocal.rstring">isLinkLocal(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a link-local address (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isLoopback.rstring">isLoopback(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv4 address was provided and the IP address is a loopback address (RFC6890).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isLoopback.rstring">isLoopback(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a loopback address (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isMulticast.rstring">isMulticast(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv4 address was provided and the IP address is a multicast address (RFC5771).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isMulticast.rstring">isMulticast(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a multicast address (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isNetworkOverlap.rstring.rstring">isNetworkOverlap(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if <em class="ph i">networkCIDR1</em> and <em class="ph i">networkCIDR2</em> are valid networks in CIDR format and the networks overlap.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isPrivate.rstring">isPrivate(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv4 address was provided and the IP address is a private address (RFC1918).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__isReserved.rstring">isReserved(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv4 address was provided and the IP address is a reserved address (RFC1918).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isSiteLocal.rstring">isSiteLocal(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a site-local address (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isUnspecified.rstring">isUnspecified(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a unspecified (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isV4Compatible.rstring">isV4Compatible(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is an "IPv4-compatible IPv6 address" (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv6.html#spldoc_functions__isV4Mapped.rstring">isV4Mapped(rstring)</a></dt>
+
+  <dd class="dd">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is an "IPv4-mapped IPv6 address" (RFC3513).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__messagesProcessed">messagesProcessed()</a></dt>
+
+  <dd class="dd">This parser result function returns the number of messages processed by the operator since it started, including the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalElapsed">metricsIntervalElapsed()</a></dt>
+
+  <dd class="dd">This function returns the duration of the most recent metrics interval, in seconds with a resolution of at least microseconds, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalOctetsProcessed">metricsIntervalOctetsProcessed()</a></dt>
+
+  <dd class="dd">This function returns the number of bytes of network data processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsDropped">metricsIntervalPacketsDropped()</a></dt>
+
+  <dd class="dd">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsProcessed">metricsIntervalPacketsProcessed()</a></dt>
+
+  <dd class="dd">This function returns the number of network packets processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsReceived">metricsIntervalPacketsReceived()</a></dt>
+
+  <dd class="dd">This function returns the number of packets received from the network interface  during the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsUpdated">metricsUpdated()</a></dt>
+
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> for the first tuple produced after a new metrics interval begins, and returns <tt class="ph tt">false</tt> for all subsequent tuples produced in the same metrics interval.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__numAddressesInIPRange.rstring.rstring">numAddressesInIPRange(rstring, rstring)</a></dt>
+
+  <dd class="dd">Returns the number of IP addresses between <em class="ph i">ipStart</em> (inclusive) and <em class="ph i">ipEnd</em> (exclusive).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__numAddressesInNetwork.rstring">numAddressesInNetwork(rstring)</a></dt>
+
+  <dd class="dd">Returns the number of IP addresses contained within the network range.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__octetsProcessed">octetsProcessed()</a></dt>
+
+  <dd class="dd">This function returns the number of bytes of network data processed by the operator since it started, including the current packet, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsDropped">packetsDropped()</a></dt>
+
+  <dd class="dd">This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsProcessed">packetsProcessed()</a></dt>
+
+  <dd class="dd">This function returns the number of network packets processed by the operator since it started, including the current packet, but excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsReceived">packetsReceived()</a></dt>
+
+  <dd class="dd">This function returns the number of packets received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__parseError">parseError()</a></dt>
+
+  <dd class="dd">This parser result function returns <tt class="ph tt">true</tt> if an encoding error was detected while decoding the current packet, or <tt class="ph tt">false</tt> otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__parseErrorDescription">parseErrorDescription()</a></dt>
+
+  <dd class="dd">This parser result function returns a description of an encoding error found while decoding the current packet, or an empty string if no enoding errors were found.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__parseErrorOffset">parseErrorOffset()</a></dt>
+
+  <dd class="dd">This parser result function returns the offset from the beginning of the message to the encoding error found, or zero if no encoding errors were found.</dd>
+
+
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

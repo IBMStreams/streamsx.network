@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="C++ Native Functions: com.ibm.streamsx.network.ipv6"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_functions"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>C++ Native Functions: com.ibm.streamsx.network.ipv6</title>
+</head>
+<body id="spldoc_functions">
+
+
+<h1 class="title topictitle1">C++ Native Functions: <tt class="ph tt">com.ibm.streamsx.network.ipv6</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.4.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.ipv6.html">com.ibm.streamsx.network.ipv6</a> &gt; C++ Native Functions</p>
+
+</div>
+
+<div class="section">
+This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd"> IPv6AddressFunctions.h  </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> com::ibm::streamsx::network::ipv6  </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__dependencies"><strong class="ph b">Dependencies</strong></a>  </dt>
+
+  <dd class="dd">
+    <dl class="dl">
+      
+         <dt class="dt dlterm">         </dt>
+
+          <dd class="dd"/>
+      <dd class="dd"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__dependencies__managedlibrary_includePath">Include paths</a>: <tt class="ph tt">../../impl/include</tt>      </dd>
+
+      
+ </dl>
+</dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__compactIPV6.rstring"><tt class="ph tt">      public rstring compactIPV6(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Compacts a valid IPv6 address (RFC3513). The <em class="ph i">ip</em> argument must be a valid IPv6 address, otherwise an empty string is returned. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__convertIPV6AddressNumericToString.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring convertIPV6AddressNumericToString(list &lt;uint8&gt;[16] ipv6AddressNumeric)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function converts a sixteen-byte binary representation of an IPv6 address into a string representation.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__convertIPV6AddressStringToNumeric.rstring"><tt class="ph tt">      public list&lt;uint8&gt;[16] convertIPV6AddressStringToNumeric(rstring ipv6AddressString)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function converts a string representation of an IPv6 address into a sixteen-byte binary representation. If the string does not represent a valid IPv6 address, zero is returned.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__expandIPV6.rstring"><tt class="ph tt">      public rstring expandIPV6(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Expands a valid IPv6 address (RFC3513). The <em class="ph i">ip</em> argument must be a valid IPv6 address, otherwise an empty string is returned. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isEqualTo.rstring.rstring"><tt class="ph tt">      public boolean isEqualTo(rstring ip1, rstring ip2)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv6 addresses and <em class="ph i">ip1</em> address is equal to <em class="ph i">ip2</em> address. Otherwise returns <tt class="ph tt">false</tt>. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isGreaterThan.rstring.rstring"><tt class="ph tt">      public boolean isGreaterThan(rstring ip1, rstring ip2)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv6 addresses and <em class="ph i">ip1</em> address is greater than <em class="ph i">ip2</em> address. Otherwise returns <tt class="ph tt">false</tt>. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isIPV6Address.rstring"><tt class="ph tt">      public boolean isIPV6Address(rstring value)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if the <em class="ph i">value</em> parameter contains a valid IPv6 address. Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isIPV6CIDRNotation.rstring"><tt class="ph tt">      public boolean isIPV6CIDRNotation(rstring networkCIDR)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if the <em class="ph i">networkCIDR</em> argument contains a valid IPv6 network address in CIDR format (i.e. 2001:db8::/32). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isInIPRange.rstring.rstring.rstring"><tt class="ph tt">      public boolean isInIPRange(rstring startIP, rstring endIP, rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if <em class="ph i">startIP</em>, <em class="ph i">endIP</em> and <em class="ph i">ip</em> are valid IPv6 addresses and <em class="ph i">ip</em> falls within the range from <em class="ph i">startIP</em> (inclusive) to <em class="ph i">endIP</em> (exclusive). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isInNetwork.rstring.rstring"><tt class="ph tt">      public boolean isInNetwork(rstring networkCIDR, rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Return <tt class="ph tt">true</tt> if <em class="ph i">ip</em> address is in the network provided by the <em class="ph i">networkCIDR</em> argument. The <em class="ph i">networkCIDR</em> argument must be a valid IPv6 network in CIDR format and the <em class="ph i">ip</em> argument must be a valid IPv6 address. Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isInNetworkList.list:.:rstring:.:.rstring"><tt class="ph tt">      public boolean isInNetworkList(list&lt;rstring&gt; networkList, rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Return <tt class="ph tt">true</tt> if <em class="ph i">ip</em> address is in at least one of the networks provided by the <em class="ph i">networkList</em> argument. Each of the networks in the list must be a valid IPv6 network in CIDR format format and the <em class="ph i">ip</em> argument must be a valid IPv6 address. Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isLessThan.rstring.rstring"><tt class="ph tt">      public boolean isLessThan(rstring ip1, rstring ip2)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if <em class="ph i">ip1</em> and <em class="ph i">ip2</em> are valid IPv6 addresses and <em class="ph i">ip1</em> address is less than <em class="ph i">ip2</em> address. Otherwise returns <tt class="ph tt">false</tt>. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isLinkLocal.rstring"><tt class="ph tt">      public boolean isLinkLocal(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a link-local address (RFC3513). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isLoopback.rstring"><tt class="ph tt">      public boolean isLoopback(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a loopback address (RFC3513). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isMulticast.rstring"><tt class="ph tt">      public boolean isMulticast(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a multicast address (RFC3513). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isSiteLocal.rstring"><tt class="ph tt">      public boolean isSiteLocal(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a site-local address (RFC3513). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isUnspecified.rstring"><tt class="ph tt">      public boolean isUnspecified(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is a unspecified (RFC3513). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isV4Compatible.rstring"><tt class="ph tt">      public boolean isV4Compatible(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is an "IPv4-compatible IPv6 address" (RFC3513). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__isV4Mapped.rstring"><tt class="ph tt">      public boolean isV4Mapped(rstring ip)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns <tt class="ph tt">true</tt> if a valid IPv6 address was provided and the IP address is an "IPv4-mapped IPv6 address" (RFC3513). Otherwise returns <tt class="ph tt">false</tt>.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
