@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestIPv6AddressFunctions.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestIPv6AddressFunctions.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestIPv6AddressFunctions.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleAddressFunctions.html">SampleAddressFunctions 1.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestIPv6AddressFunctions.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestIPv6AddressFunctions.html#spldoc_compilationunit__composite_operator__TestIPv6AddressFunctions">TestIPv6AddressFunctions</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestIPv6AddressFunctions"><h2 class="title sectiontitle splpart">public composite TestIPv6AddressFunctions</h2>
+  
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleAddressFunctions/op$sample$TestIPv6AddressFunctions.svg" width="118" height="109"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestIPv6AddressFunctions {
+     graph
+         () as TestIPv6AddressFunctionsStream = Custom() {
+             logic
+                 onProcess:
+                 {
+                     doAssert(isIPV6Address("2001::12:2"),"isIPv6Address(2001::12:2)");
+                     doAssert(isIPV6Address("::FFFF:129.144.52.38"), "isIPv6Address(::FFFF:129.144.52.38)");
+                     doAssert(!isIPV6Address("127.0.0.0"), "!isIPv6Address(127.0.0.0)");
+                     doAssert(!isIPV6Address("abc"), "!isIPv6Address(abc)");
+ 
+                     doAssert(isLoopback("::1"), "isLoopback(::1)");
+                     doAssert(!isLoopback("::2"), "!isLoopback(::2)");
+ 
+                     doAssert(isLinkLocal("fe80::1"), "isLinkLocal(fe80::1)");
+                     doAssert(isLinkLocal("fea0::1"), "isLinkLocal(fea0::1)");
+                     doAssert(!isLinkLocal("fe10::1"), "!isLinkLocal(fe10::1)");
+ 
+                     doAssert(isEqualTo("::1", "::1"), "isEqualTo(::1, ::1)");
+                     doAssert(isEqualTo("::1", "0:0:0::1"), "isEqualTo(::1, 0:0:0::1)");
+                     doAssert(!isEqualTo("::1", "0:0:0::1:0"), "!isEqualTo(::1, 0:0:0::1:0)");
+                     doAssert(!isEqualTo("::1", "0:0:0:0:1:0::"), "!isEqualTo(::1, 0:0:0:0:1:0::)");
+ 
+                     doAssert(isMulticast("ff00::1"), "isMulticast(ff00::1)");
+                     doAssert(isMulticast("ff11::1"), "isMulticast(ff11::1)");
+                     doAssert(!isMulticast("fe10::1"), "!isMulticast(fe10::1)");
+ 
+                     doAssert(isUnspecified("::"), "isUnspecified(::)");
+                     doAssert(isUnspecified("0:0::0"), "isUnspecified(0:0::0)");
+                     doAssert(!isUnspecified("fe10::1"), "!isUnspecified(fe10::1)");
+ 
+                     doAssert(isSiteLocal("fec0::1"), "isSiteLocal(fec0::1)");
+                     doAssert(isSiteLocal("fed0::1"), "isSiteLocal(fed0::1)");
+                     doAssert(!isSiteLocal("fe10::1"), "!isSiteLocal(fe10::1)");
+ 
+                     doAssert(isV4Mapped("::ffff:127.0.0.1"), "isV4Mapped(::ffff:127.0.0.1)");
+                     doAssert(isV4Mapped("::ffff:0100:0100"), "isV4Mapped(::ffff:0100:0100)");
+                     doAssert(!isV4Mapped("::ffff:fffe:10.10.10.10"), "isV4Mapped(::ffff:fffe:10.10.10.10)");
+ 
+                     doAssert(isV4Compatible("::127.0.0.1"), "isV4Compatible(::127.0.0.1)");
+                     doAssert(isV4Compatible("::0100:0100"), "isV4Compatible(::0100:0100)");
+                     doAssert(!isV4Compatible("::10:10:10:10"), "!isV4Compatible(::10:10:10:10)");
+ 
+                     doAssert(isGreaterThan("::127.0.0.1", "::127.0.0.0"), "isGreaterThan(::127.0.0.1, ::127.0.0.0)");
+                     doAssert(isGreaterThan("ffd0:0:0:1000::", "ffd0:0:0:0::1000"), "isGreaterThan(ffd0:0:0:1000::, ffd0:0:0:0::1000)");
+                     doAssert(!isGreaterThan("ffc0:0::1", "ffe0:0::1"), "!isGreaterThan(ffc0:0::1, ffe0:0::1)");
+ 
+                     doAssert(isLessThan("::127.0.0.0", "::127.0.0.1"), "isLessThan(::127.0.0.0, ::127.0.0.1)");
+                     doAssert(isLessThan("ffd0:0:0::1000", "ffd0:0:0:0:1000::"), "isLessThan(ffd0:0:0::1000, ffd0:0:0:0:1000::)");
+                     doAssert(!isLessThan("fff0:0::1", "ffe0:0::1"), "isLessThan(fff0:0::1, ffe0:0::1)");
+ 
+                     doAssert(isInIPRange("::127.0.0.0", "::127.0.0.255", "::127.0.0.4"), "isInIPRange(::127.0.0.0, ::127.0.0.255, ::127.0.0.4)");
+                     doAssert(isInIPRange("ffd0:0:0::1000", "ffd0:0:0::1100", "ffd0::1050"), "isInIPRange(ffd0:0:0::1000, ffd0:0:0::1100, ffd0::1050)");
+                     doAssert(!isInIPRange("::1", "::100", "0:0:0:0::400"), "!isInIPRange(::1, ::100, 0:0:0:0::400)");
+ 
+                     doAssert(isInNetwork("::127.0.0.0/120", "::127.0.0.8"), "isInNetwork(::127.0.0.0/120, ::127.0.0.8)");
+                     doAssert(isInNetwork("ffd0:1111:2222::/20", "ffd0:1122:3232::"), "isInNetwork(ffd0:1111:2222::/20, ffd0:1122:3232::)");
+                     doAssert(!isInNetwork("ffd0:1111:2222::/20", "ffe0:1122:3232::"), "!isInNetwork(ffd0:1111:2222::/20, ffe0:1122:3232::)");
+ 
+                     list&lt;rstring&gt; networkList = ["::127.0.0.0/120", "ffd0:1111:2222::/20", "ffd0:0:0:1::/35", "aaaa::/16"];
+                     doAssert(isInNetworkList(networkList, "::127.0.0.1"), "isInNetworkList(networkList, ::127.0.0.1)");
+                     doAssert(isInNetworkList(networkList, "aaaa::11"), "isInNetworkList(networkList, aaaa::11)");
+                     doAssert(!isInNetworkList(networkList, "effe:0:12:3:3d::"), "!isInNetworkList(networkList, effe:0:12:3:3d::)");
+ 
+                     doAssert(compactIPV6("ffff:ffff:0000:0000:0000:0000:1111:1222") == "ffff:ffff::1111:1222", "compactIPv6(ffff:ffff:0000:0000:0000:0000:1111:1222)");
+                     doAssert(compactIPV6("ffff:ffff:0000:0000:0000::1.1.1.1") == "ffff:ffff::101:101", "compactIPv6(ffff:ffff:0000:0000:0000::1.1.1.1)");
+                     doAssert(compactIPV6("0fff:00ff:0000:0000:1111:0000:0000:0000") == "fff:ff:0:0:1111::", "compactIPv6(0fff:00ff:0000:0000:1111:0000:0000:0000)");
+ 
+                     doAssert(expandIPV6("ffff:ffff::1111:1222") == "ffff:ffff:0000:0000:0000:0000:1111:1222", "expandIPv6(ffff:ffff::1111:1222)");
+                     doAssert(expandIPV6("ff:ffff::1.1.1.1") == "00ff:ffff:0000:0000:0000:0000:0101:0101", "expandIPv6(ff:ffff::1.1.1.1)");
+                     doAssert(expandIPV6("fff:ff:0:0:1111::") == "0fff:00ff:0000:0000:1111:0000:0000:0000", "expandIPv6(fff:ff:0:0:1111::)");
+ 
+ 
+                 }
+         }
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

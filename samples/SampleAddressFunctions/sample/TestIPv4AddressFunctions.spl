@@ -2,9 +2,9 @@ namespace sample;
 
 use com.ibm.streamsx.network.ipv4::*;
 
-composite IPv4FunctionTest {
+composite TestIPv4AddressFunctions {
     graph
-        () as IPv4FunctionTester = Custom() {
+        () as TestIPv4AddressFunctionsStream = Custom() {
             logic
                 onProcess:
                 {

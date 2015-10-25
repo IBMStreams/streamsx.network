@@ -2,9 +2,9 @@ namespace sample;
 
 use com.ibm.streamsx.network.ipv6::*;
 
-composite IPv6FunctionTest {
+composite TestIPv6AddressFunctions {
     graph
-        () as IPv6FunctionTester = Custom() {
+        () as TestIPv6AddressFunctionsStream = Custom() {
             logic
                 onProcess:
                 {
