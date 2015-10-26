@@ -5,8 +5,13 @@
       <description>
 
 DNSMessageParser is an operator for the IBM InfoSphere Streams product that
-parses individual fields of DNS messages received in input tuples, and assigns
-their values to specified output attributes.  
+parses individual fields of DNS messages received in input tuples, 
+and emits tuples containing message data.  
+The operator may be configured with one or more output ports,
+and each port may be configured to emit different tuples,
+as specified by output filters.
+The tuples contain individual fields from the input message, as
+specified by output attribute assignments.  
 
 The DNSMessageParser operator expects only DNS messages in its input tuples,
 without any of the headers that precede them in network packets.  The
@@ -15,7 +20,7 @@ DNS messages with the [PAYLOAD_DATA()] output attribute assignment function.
 
 The DNSMessageParser operator consumes input tuples containing DNS messages,
 parses individual fields in the messages, 
-selects flows to emit as output tuples with filter expressions,
+selects messages to emit as output tuples with filter expressions,
 and assigns values to them with output attribute assignment expressions.
 
 Output filters and attribute assignments are SPL expressions. They may use any

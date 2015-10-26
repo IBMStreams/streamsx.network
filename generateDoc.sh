@@ -9,8 +9,6 @@
 #set -o pipefail
 
 here=$( cd ${0%/*} ; pwd )
-root=$( cd ${0%/*}/.. ; pwd )
-
 
 ################### functions used in this script #############################
 
@@ -19,20 +17,20 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
-toolkits=( $( find $root -name "info.xml" -exec dirname {} \; ) )
-
-step "remaking tookits ..."
-for toolkit in ${toolkits[*]} ; do 
-    echo "$toolkit ..."
-    spl-make-toolkit --verbose-model-errors --directory $toolkit || die "sorry, could not remake toolkit '$toolkit'"
+step "updating toolkit metadata files ..."
+directories=( $( find $here -name "info.xml" -exec dirname {} \; ) )
+for directory in ${directories[*]} ; do 
+    echo "$directory ..."
+    spl-make-toolkit --verbose-model-errors --directory $directory || die "sorry, could not update metadata files in directory '$directory'"
 done
 
 step "generating documentation ..."
+samples=( $( find $here/samples -name "info.xml" -exec dirname {} \; ) )
 spl-make-doc \
 --check-tags \
 --include-all \
---output-directory $root/doc/spldoc \
---toolkit-path $( IFS=":" ; echo "${toolkits[*]}" ) \
+--output-directory $here/doc/spldoc \
+--toolkit-path $( IFS=":" ; echo "${directories[*]}" ) \
 || die "sorry, could not generate documentation"
 
 exit 0

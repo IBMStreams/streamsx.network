@@ -5,8 +5,13 @@
       <description>
 
 NetflowMessageParser is an operator for the IBM InfoSphere Streams product that 
-parses individual fields of Netflow messages received in input tuples, and assigns
-their values to specified output attributes.  
+parses individual fields of Netflow messages received in input tuples, 
+and emits tuples containing message data.  
+The operator may be configured with one or more output ports,
+and each port may be configured to emit different tuples,
+as specified by output filters.
+The tuples contain individual fields from the input message, as
+specified by output attribute assignments.  
 
 The NetflowMessageParser operator expects only Netflow messages in its input tuples,
 without any of the headers that precede them in network packets.  The

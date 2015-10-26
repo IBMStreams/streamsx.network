@@ -7,19 +7,31 @@
 PacketLiveSource is an operator for the IBM InfoSphere Streams product that
 captures live network packets from an ethernet interface,
 parses their network headers, and emits
-tuples containing packet data. The tuples may contain the entire packet, the
+tuples containing packet data. 
+The operator may be configured with one or more output ports,
+and each port may be configured to emit different tuples,
+as specified by output filters.
+The tuples may contain the entire packet, the
 payload portion of the packet, or individual fields from the network headers, as
-specified by output attribute assignments.  The operator may produce zero, one,
-or more tuples from each packet it processes, depending upon optional input and
-output filters.
+specified by output attribute assignments.  
 
-The PacketLiveSource operator reads complete ethernet packets, starting with the
-ethernet header, including all protocol-specific headers and the packet payload.
-The PacketLiveSource operator can parse fields from the ethernet, IPv4, IPv6,
-UDP, and TCP headers of the input packet, and can assign the values of
-individual fields to output attributes, as specified by the output assignment
-expressions containing
-[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].
+The PacketLiveSource operator 
+reads raw network packets from an ethernet adapter,
+selects packets to process with input filters,
+parses individual fields in the packet's network headers, 
+selects messages to emit as output tuples with output filter expressions,
+and assigns values to them with output attribute assignment expressions.
+
+Input filters are PCAP filter expressions, as described here:
+
+* [http://www.tcpdump.org/manpages/pcap-filter.7.html]
+* [http://linux.die.net/man/7/pcap-filter]
+
+Output filters and attribute assignments are SPL expressions. They may use any
+of the built-in SPL functions, and any of these functions, which are specific to
+the PacketFileSource operator: 
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
 
 The PacketLiveSource operator steps quietly over 'jmirror' headers prepended to packets
 by Juniper Networks 'mirror encapsulation'.
