@@ -45,7 +45,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns_only_errors.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns_only_errors.pcap
 #pcapFilename=/home/streams4/data.haifa/dns_tunneling_long.pcap
 )
 

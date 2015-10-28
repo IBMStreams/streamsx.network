@@ -46,8 +46,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_dns+dhcp.pcap
-#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_jmirror_dns_only.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
+#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_jmirror_dns_only.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

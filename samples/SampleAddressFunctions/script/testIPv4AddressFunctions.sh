@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketLiveSourceBasic2
+composite=TestIPv4AddressFunctions
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -17,11 +17,7 @@ toolkitDirectory=$( cd $here/../../.. ; pwd )
 
 buildDirectory=$projectDirectory/output/build/$composite
 
-unbundleDirectory=$projectDirectory/output/unbundle/$composite
-
 dataDirectory=$projectDirectory/data
-
-libpcapDirectory=$HOME/libpcap-1.7.4
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
@@ -47,9 +43,6 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eno1
-metricsInterval=1.0
-timeoutInterval=10.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -65,8 +58,6 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
 step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
@@ -78,17 +69,10 @@ echo -e "\ntrace level: $traceLevel"
 step "building standalone application '$namespace.$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
-step "unbundling standalone application '$namespace.$composite' ..."
-bundle=$buildDirectory/$namespace.$composite.sab
-[ -f $bundle ] || die "sorry, bundle '$bundle' not found"
-spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
-
-step "setting capabilities for standalone application '$namespace.$composite' ..."
-standalone=$unbundleDirectory/$composite/bin/standalone
-[ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
-sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
-
 step "executing standalone application '$namespace.$composite' ..."
-$standalone -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+executable=$buildDirectory/bin/$namespace.$composite
+$executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0
+
+

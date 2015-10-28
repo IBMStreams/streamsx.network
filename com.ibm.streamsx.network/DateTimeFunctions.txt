@@ -7,66 +7,7 @@ Network Toolkit: date&time formatting functions
 -----------------------------------------------
 
 
-_____Description_____
+see ../spldoc/html/index.html
 
-
-The InfoSphere Streams network toolkit includes functions that format numeric
-date&time values as string representations.
-
-The toolkit includes these functions that format 'Unix epoch' values (that is,
-seconds since midnight on January 1st, 1970 in Greenwich, England) as strings of
-the form "YYYY-MM-DD HH:MM:SS.UUUUUU" (where the precision of the subsecond
-portion defaults to '6' if not specified) in the local time zone (for example,
-"2015-09-23 10:51:50.738094" or "2015-09-23 10:51:50.738"):
-
-    rstring formatEpochDateTime(uint32 seconds)
-
-    rstring formatEpochDateTime(float64 seconds, uint32 precision)
-    rstring formatEpochDateTime(float64 seconds)
-
-    rstring formatEpochDateTime(timestamp seconds, uint32 precision)
-    rstring formatEpochDateTime(timestamp seconds)
-
-The toolkit also includes these functions that format 'Unix epoch' values as
-strings of the form "HHH:MM:SS.UUUUUU" (where the precision of the subsecond
-portion defaults to '6' if not specified) in the local time zone (for example,
-"10:51:50.738094" or "10:51:50.738"):
-
-    rstring formatEpochTime(uint32 seconds)
-
-    rstring formatEpochTime(float64 seconds, uint32 precision)
-    rstring formatEpochTime(float64 seconds)
-
-    rstring formatEpochTime(timestamp seconds, uint32 precision)
-    rstring formatEpochTime(timestamp seconds)
-
-The toolkit also includes these functions that format 'elasped time' values
-(that is, seconds since some arbitrary point in time) as strings of the form
-"DDDDd HHh MMm SS.UUUUUUs" (where the precision of the subsecond portion
-defaults to '6' if not specified), with leading zeros omitted (for example,
-"11h 59m 8s" or "2.128s"):
-
-    rstring formatElapsedTime(float64 seconds, uint32 precision) 
-    rstring formatElapsedTime(float64 seconds) 
-
-The date&time formatting functions are part of the network toolkit. To use them
-in an application, include this statement in the SPL source file:
-
-    use com.ibm.streamsx.network.parse::*;
-
-The network toolkit includes several sample applications that illustrate how to
-use the functions.
-
-Notes:
-
-  * A 'float64 seconds' argument may have a meaningful precision of
-    microseconds, if it is set from a source that provides that resolution.
-
-  * A 'timestamp seconds' argument may have a meaningful precision of
-    nanoseconds, if it is set from a source that provides that resolution.
-
-  * A 'uint32 seconds' argument may have a meaningless value after January 18th,
-    2038, if it is set from a source that uses an 'int32' type. See
-    https://en.wikipedia.org/wiki/Year_2038_problem for detals.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

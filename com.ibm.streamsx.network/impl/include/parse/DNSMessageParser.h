@@ -25,53 +25,53 @@ class DNSMessageParser {
 
 
  private:
-	
+
   // These structures define the variable-size format of DNS resource records,
   // as encoded in DNS network packets, according to RFC 1035 (see
   // https://www.ietf.org/rfc/rfc1035.txt)
-	
+
   static const uint16_t EDNS0_TYPE = 41;
   struct DNSResourceRecord {
-	uint8_t name[0];
-	uint16_t type;
-	uint16_t classs;
-	uint32_t ttl;
-	uint16_t rdlength;
-	uint8_t rdata[0];
+    uint8_t name[0];
+    uint16_t type;
+    uint16_t classs;
+    uint32_t ttl;
+    uint16_t rdlength;
+    uint8_t rdata[0];
   } __attribute__((packed)) ;
 
   struct DNSHeader {
-	uint16_t identifier;
+    uint16_t identifier;
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint8_t recursionDesiredFlag:1;
-	uint8_t truncatedFlag:1;
-	uint8_t authoritativeFlag:1;
-	uint8_t opcodeField:4;
-	uint8_t responseFlag:1;
-	uint8_t responseCode:4;
-	uint8_t nonauthenticatedFlag:1;
-	uint8_t authenticatedFlag:1;
-	uint8_t reserved:1;
-	uint8_t recursionAvailableFlag:1;
+    uint8_t recursionDesiredFlag:1;
+    uint8_t truncatedFlag:1;
+    uint8_t authoritativeFlag:1;
+    uint8_t opcodeField:4;
+    uint8_t responseFlag:1;
+    uint8_t responseCode:4;
+    uint8_t nonauthenticatedFlag:1;
+    uint8_t authenticatedFlag:1;
+    uint8_t reserved:1;
+    uint8_t recursionAvailableFlag:1;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-	uint8_t responseFlag:1;
-	uint8_t opcodeField:4;
-	uint8_t authoritativeFlag:1;
-	uint8_t truncatedFlag:1;
-	uint8_t recursionDesiredFlag:1;
-	uint8_t recursionAvailableFlag:1;
-	uint8_t reserved:1;
-	uint8_t authenticatedFlag:1;
-	uint8_t nonauthenticatedFlag:1;
-	uint8_t responseCode:4;
+    uint8_t responseFlag:1;
+    uint8_t opcodeField:4;
+    uint8_t authoritativeFlag:1;
+    uint8_t truncatedFlag:1;
+    uint8_t recursionDesiredFlag:1;
+    uint8_t recursionAvailableFlag:1;
+    uint8_t reserved:1;
+    uint8_t authenticatedFlag:1;
+    uint8_t nonauthenticatedFlag:1;
+    uint8_t responseCode:4;
 #else
-# error	"sorry, __BYTE_ORDER not setm check <bits/endian.h>"
+# error "sorry, __BYTE_ORDER not setm check <bits/endian.h>"
 #endif
-	uint16_t questionCount;
-	uint16_t answerCount;
-	uint16_t nameserverCount;
-	uint16_t additionalCount;
-	struct DNSResourceRecord rrFields[0]; // see 'struct DNSResourceRecord'
+    uint16_t questionCount;
+    uint16_t answerCount;
+    uint16_t nameserverCount;
+    uint16_t additionalCount;
+    struct DNSResourceRecord rrFields[0]; // see 'struct DNSResourceRecord'
   } __attribute__((packed)) ;
 
 
@@ -82,12 +82,12 @@ class DNSMessageParser {
   // variables below().
 
   struct Record {
-	uint8_t* name;
-	uint16_t type;
-	uint16_t classs;
-	uint32_t ttl;
-	uint16_t rdlength;
-	uint8_t* rdata;
+    uint8_t* name;
+    uint16_t type;
+    uint16_t classs;
+    uint32_t ttl;
+    uint16_t rdlength;
+    uint8_t* rdata;
   };
 
 
@@ -102,49 +102,49 @@ class DNSMessageParser {
 
   bool skipDNSEncodedName() {
 
-	// don't proceed if we've already found an encoding error in this DNS message
-	if (error) return false;
+    // don't proceed if we've already found an encoding error in this DNS message
+    if (error) return false;
 
-	// step through the labels in this DNS name, skipping over each one     
-	for (int32_t i = 0; i<253; i++) {
+    // step through the labels in this DNS name, skipping over each one
+    for (int32_t i = 0; i<253; i++) {
 
-	  // get the length and compression flag from the first byte in the next label
-	  const uint8_t flags = *dnsPointer & 0xC0;
-	  const uint8_t length = *dnsPointer & 0x3F;
+      // get the length and compression flag from the first byte in the next label
+      const uint8_t flags = *dnsPointer & 0xC0;
+      const uint8_t length = *dnsPointer & 0x3F;
 
-	  // handle compressed and uncompressed labels differently
-	  uint16_t offset;
-	  switch (flags) {
+      // handle compressed and uncompressed labels differently
+      uint16_t offset;
+      switch (flags) {
 
-		// for uncompressed labels, step over the label length byte and text, and then
-		// continue with the next label
-	  case 0x00:
-		if (dnsPointer+1+length>dnsEnd) { error = "label overruns packet"; return false; }
-		if (length==0) { dnsPointer++; return true; }
-		dnsPointer += 1+length;
-		break;
+        // for uncompressed labels, step over the label length byte and text, and then
+        // continue with the next label
+      case 0x00:
+        if (dnsPointer+1+length>dnsEnd) { error = "label overruns packet"; return false; }
+        if (length==0) { dnsPointer++; return true; }
+        dnsPointer += 1+length;
+        break;
 
-		// for compressed labels, step over the offset and return, since compressed
-		// labels are always the last in DNS name
-	  case 0xC0:
-		if (dnsPointer+2>dnsEnd) { error = "label compression length overruns packet"; return false; }
-		offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FF;
-		if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; return false; }
-		if (offset==dnsPointer-dnsStart) { error = "label compression offset loop"; return false; }
-		if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; return false; }
-		dnsPointer += 2;
-		return true;
-		break;
+        // for compressed labels, step over the offset and return, since compressed
+        // labels are always the last in DNS name
+      case 0xC0:
+        if (dnsPointer+2>dnsEnd) { error = "label compression length overruns packet"; return false; }
+        offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FF;
+        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; return false; }
+        if (offset==dnsPointer-dnsStart) { error = "label compression offset loop"; return false; }
+        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; return false; }
+        dnsPointer += 2;
+        return true;
+        break;
 
-		// no DNS label should have other high-order bit settings in its length byte
-	  default:
-		error = "label flags invalid"; return false;
-	  }
-	}
-	
-	// no DNS name can have have this many labels in it
-	error = "label limit exceeded"; 
-	return false;
+        // no DNS label should have other high-order bit settings in its length byte
+      default:
+        error = "label flags invalid"; return false;
+      }
+    }
+
+    // no DNS name can have have this many labels in it
+    error = "label limit exceeded";
+    return false;
   }
 
   // This function parses one variable-size DNS resource record located at
@@ -158,40 +158,40 @@ class DNSMessageParser {
 
   bool copyResourceRecord(struct Record& record, const bool fullResource) {
 
-	// don't proceed if we've already found an encoding error in this DNS message
-	if (error) return false;
+    // don't proceed if we've already found an encoding error in this DNS message
+    if (error) return false;
 
-	// don't proceed if we've reached the end of the DNS message
-	if (dnsPointer>=dnsEnd) { error = "resource record missing"; return false; }
+    // don't proceed if we've reached the end of the DNS message
+    if (dnsPointer>=dnsEnd) { error = "resource record missing"; return false; }
 
-	// copy the address of this resource's name into the fixed-size structure, and
-	// then step over it
-	record.name = dnsPointer;
-	if (!skipDNSEncodedName()) return false;
+    // copy the address of this resource's name into the fixed-size structure, and
+    // then step over it
+    record.name = dnsPointer;
+    if (!skipDNSEncodedName()) return false;
 
-	// check for truncated resource record
-	if (!fullResource && dnsPointer+4>dnsEnd) { error = "question resource record truncated"; return false; }
-	if (fullResource && dnsPointer+sizeof(DNSResourceRecord)>dnsEnd) { error = "resource record truncated"; return false; }
+    // check for truncated resource record
+    if (!fullResource && dnsPointer+4>dnsEnd) { error = "question resource record truncated"; return false; }
+    if (fullResource && dnsPointer+sizeof(DNSResourceRecord)>dnsEnd) { error = "resource record truncated"; return false; }
 
-	// copy the type and class of this resource into the fixed-size structure
-	struct DNSResourceRecord* rr = (struct DNSResourceRecord*)dnsPointer;
-	record.type = ntohs(rr->type);
-	record.classs = ntohs(rr->classs);
+    // copy the type and class of this resource into the fixed-size structure
+    struct DNSResourceRecord* rr = (struct DNSResourceRecord*)dnsPointer;
+    record.type = ntohs(rr->type);
+    record.classs = ntohs(rr->classs);
 
-	// if this is a question resource, that's all there is
-	if (!fullResource) { dnsPointer += 4; return true; }
+    // if this is a question resource, that's all there is
+    if (!fullResource) { dnsPointer += 4; return true; }
 
-	// copy remaining resource fields to fixed-size structure
-	record.ttl = ntohl(rr->ttl);
-	record.rdlength = ntohs(rr->rdlength);
-	record.rdata = rr->rdata;
-	
-	// check for truncated resource record
-	if (record.rdata+record.rdlength>dnsEnd) { error = "resource record data truncated"; return false; }
+    // copy remaining resource fields to fixed-size structure
+    record.ttl = ntohl(rr->ttl);
+    record.rdlength = ntohs(rr->rdlength);
+    record.rdata = rr->rdata;
 
-	// step over the remainder of this resource record
-	dnsPointer += sizeof(struct DNSResourceRecord) + record.rdlength;
-	return true;
+    // check for truncated resource record
+    if (record.rdata+record.rdlength>dnsEnd) { error = "resource record data truncated"; return false; }
+
+    // step over the remainder of this resource record
+    dnsPointer += sizeof(struct DNSResourceRecord) + record.rdlength;
+    return true;
   }
 
   // This function parses a sequence of 'resourceCount' variable-size DNS
@@ -208,8 +208,8 @@ class DNSMessageParser {
 
   int copyResourceRecords(struct Record records[], const uint16_t resourceCount, const bool fullResources) {
 
-	for (int i=0; i<resourceCount; i++) { if (!copyResourceRecord(records[i], fullResources)) return i; }
-	return resourceCount;
+    for (int i=0; i<resourceCount; i++) { if (!copyResourceRecord(records[i], fullResources)) return i; }
+    return resourceCount;
   }
 
 
@@ -277,51 +277,51 @@ class DNSMessageParser {
 
   SPL::rstring convertDNSEncodedNameToString(uint8_t* q) {
 
-	// step through the labels in this DNS name, reconstructing the name as we go 
-	SPL::rstring name;
-	for (int32_t i = 0; i<253; i++) {
+    // step through the labels in this DNS name, reconstructing the name as we go
+    SPL::rstring name;
+    for (int32_t i = 0; i<253; i++) {
 
-	  // no DNS name can be this long
-	  if (name.length()>253) { error = "label overruns packet"; return name; }
+      // no DNS name can be this long
+      if (name.length()>253) { error = "label overruns packet"; return name; }
 
-	  // get the length and compression flag from the first byte in the next label
-	  const uint8_t flags = *q & 0xC0;
-	  const uint8_t length = *q & 0x3F;
+      // get the length and compression flag from the first byte in the next label
+      const uint8_t flags = *q & 0xC0;
+      const uint8_t length = *q & 0x3F;
 
-	  // handle compressed and uncompressed labels differently
-	  uint16_t offset;
-	  switch (flags) {
+      // handle compressed and uncompressed labels differently
+      uint16_t offset;
+      switch (flags) {
 
-		// for uncompressed labels, append the text of the label to the string, 
-		// then step over the label length byte and text, and continue with the next label
-	  case 0x00:
-		if (q+1+length>dnsEnd) { error = "label overruns packet"; return name; }
-		if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
-		name.append((char*)q+1, length);
-		name.append(1, '.');
-		q += 1+length;
-		break;
+        // for uncompressed labels, append the text of the label to the string,
+        // then step over the label length byte and text, and continue with the next label
+      case 0x00:
+        if (q+1+length>dnsEnd) { error = "label overruns packet"; return name; }
+        if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
+        name.append((char*)q+1, length);
+        name.append(1, '.');
+        q += 1+length;
+        break;
 
-		// for compressed labels, get the offset from the beginning of the DNS message 
-		// to the next label, and continue decoding from there
-	  case 0xC0:
-		if (q+2>dnsEnd) { error = "label compression length overruns packet"; return name; }
-		offset = ntohs(*((uint16_t*)q)) & 0x03FF;
-		if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; return name; }
-		if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; return name; }
-		if (offset==q-dnsStart) { error = " label compression offset loop"; return name; }
-		q = dnsStart+offset;
-		break; 
+        // for compressed labels, get the offset from the beginning of the DNS message
+        // to the next label, and continue decoding from there
+      case 0xC0:
+        if (q+2>dnsEnd) { error = "label compression length overruns packet"; return name; }
+        offset = ntohs(*((uint16_t*)q)) & 0x03FF;
+        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; return name; }
+        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; return name; }
+        if (offset==q-dnsStart) { error = " label compression offset loop"; return name; }
+        q = dnsStart+offset;
+        break;
 
-		// no DNS label should have other high-order bit settings in its length byte
-	  default:
-		error = "label flags invalid"; return name;
-	  }
-	}
+        // no DNS label should have other high-order bit settings in its length byte
+      default:
+        error = "label flags invalid"; return name;
+      }
+    }
 
-	// no DNS name can have have this many labels in it
-	error = "label limit exceeded"; 
-	return name;
+    // no DNS name can have have this many labels in it
+    error = "label limit exceeded";
+    return name;
   }
 
 
@@ -332,21 +332,21 @@ class DNSMessageParser {
   // problem, and the list returned will be incomplete.
 
   SPL::list<SPL::rstring> convertResourceNamesToStringList(const struct Record records[], const uint16_t count) {
-   
-	SPL::list<SPL::rstring> strings;
-	for (int i=0; i<count; i++) strings.add(convertDNSEncodedNameToString(records[i].name));
-	return strings;
+
+    SPL::list<SPL::rstring> strings;
+    for (int i=0; i<count; i++) strings.add(convertDNSEncodedNameToString(records[i].name));
+    return strings;
   }
 
 
-  // This function converts the DNS types in the array of 'count' fixed-size records 
-  // at 'records' into an SPL list of integers. 
+  // This function converts the DNS types in the array of 'count' fixed-size records
+  // at 'records' into an SPL list of integers.
 
   SPL::list<SPL::uint16> convertResourceTypesToIntegerList(const struct Record records[], const uint16_t count) {
 
-	SPL::list<SPL::uint16> integers;
-	for (int i=0; i<count; i++) integers.add(records[i].type); 
-	return integers;
+    SPL::list<SPL::uint16> integers;
+    for (int i=0; i<count; i++) integers.add(records[i].type);
+    return integers;
   }
 
 
@@ -355,9 +355,9 @@ class DNSMessageParser {
 
   SPL::list<SPL::uint16> convertResourceClassesToIntegerList(const struct Record records[], const uint16_t count) {
 
-	SPL::list<SPL::uint16> integers;
-	for (int i=0; i<count; i++) integers.add(records[i].type!=EDNS0_TYPE ? records[i].classs : 0); 
-	return integers;
+    SPL::list<SPL::uint16> integers;
+    for (int i=0; i<count; i++) integers.add(records[i].type!=EDNS0_TYPE ? records[i].classs : 0);
+    return integers;
   }
 
 
@@ -366,9 +366,9 @@ class DNSMessageParser {
 
   SPL::list<SPL::uint32> convertResourceTTLsToIntegerList(const struct Record records[], const uint16_t count) {
 
-	SPL::list<SPL::uint32> integers;
-	for (int i=0; i<count; i++) integers.add(records[i].type!=EDNS0_TYPE ? records[i].ttl : 0);
-	return integers;
+    SPL::list<SPL::uint32> integers;
+    for (int i=0; i<count; i++) integers.add(records[i].type!=EDNS0_TYPE ? records[i].ttl : 0);
+    return integers;
   }
 
 
@@ -380,38 +380,38 @@ class DNSMessageParser {
 
   SPL::rstring convertResourceDataToString(const struct Record& record) {
 
-	char buffer4[INET_ADDRSTRLEN];
-	char buffer6[INET6_ADDRSTRLEN];
-	switch(record.type) {
-	    /* A */          case   1: return SPL::rstring(inet_ntop(AF_INET, record.rdata, buffer4, sizeof(buffer4))); break;
-		/* NS */         case   2:
-		/* CNAME */      case   5:
-		/* SOA */        case   6:
-		/* PTR */        case  12: return convertDNSEncodedNameToString(record.rdata); break;
-		/* MX */         case  15: return convertDNSEncodedNameToString(record.rdata + 2); break;
-		/* TXT */        case  16: return SPL::rstring((char*)record.rdata, record.rdlength); break;
-		/* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
-		/* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
-		/* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
-		/* AAAA */       case  28: return SPL::rstring(inet_ntop(AF_INET6, record.rdata, buffer6, sizeof(buffer6))); break;
-		/* SRV */        case  33: return SPL::rstring("[SRV data]"); break;
-		/* EDNS0 */      case  41: return SPL::rstring("[EDNS0 data]"); break;
-		/* SSHFP */      case  44: return SPL::rstring("[SSHFP data]"); break;
-		/* IPSECKEY */   case  45: return SPL::rstring("[IPSECKEY data]"); break;
-		/* RRSIG */      case  46: return SPL::rstring("[RRSIG data]"); break;
-		/* NSEC */       case  47: return SPL::rstring("[NSEC data]"); break;
-		/* DNSKEY */     case  48: return SPL::rstring("[DNSKEY data]"); break;
-		/* NSEC3 */      case  50: return SPL::rstring("[NSEC3 data]"); break;
-		/* NSEC3PARAM */ case  51: return SPL::rstring("[NSEC3PARAM data]"); break;
-		/* TLSA */       case  52: return SPL::rstring("[TLSA data]"); break;
-		/* CDNSKEY */    case  60: return SPL::rstring("[CDNSKEY data]"); break;
-		/* TKEY */       case 249: return SPL::rstring("[TKEY data]"); break;
-		/* TSIG */       case 250: return SPL::rstring("[TSIG data]"); break;
-                    	 default:  break;
-	}
+    char buffer4[INET_ADDRSTRLEN];
+    char buffer6[INET6_ADDRSTRLEN];
+    switch(record.type) {
+        /* A */          case   1: return SPL::rstring(inet_ntop(AF_INET, record.rdata, buffer4, sizeof(buffer4))); break;
+        /* NS */         case   2:
+        /* CNAME */      case   5:
+        /* SOA */        case   6:
+        /* PTR */        case  12: return convertDNSEncodedNameToString(record.rdata); break;
+        /* MX */         case  15: return convertDNSEncodedNameToString(record.rdata + 2); break;
+        /* TXT */        case  16: return SPL::rstring((char*)record.rdata, record.rdlength); break;
+        /* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
+        /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
+        /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
+        /* AAAA */       case  28: return SPL::rstring(inet_ntop(AF_INET6, record.rdata, buffer6, sizeof(buffer6))); break;
+        /* SRV */        case  33: return SPL::rstring("[SRV data]"); break;
+        /* EDNS0 */      case  41: return SPL::rstring("[EDNS0 data]"); break;
+        /* SSHFP */      case  44: return SPL::rstring("[SSHFP data]"); break;
+        /* IPSECKEY */   case  45: return SPL::rstring("[IPSECKEY data]"); break;
+        /* RRSIG */      case  46: return SPL::rstring("[RRSIG data]"); break;
+        /* NSEC */       case  47: return SPL::rstring("[NSEC data]"); break;
+        /* DNSKEY */     case  48: return SPL::rstring("[DNSKEY data]"); break;
+        /* NSEC3 */      case  50: return SPL::rstring("[NSEC3 data]"); break;
+        /* NSEC3PARAM */ case  51: return SPL::rstring("[NSEC3PARAM data]"); break;
+        /* TLSA */       case  52: return SPL::rstring("[TLSA data]"); break;
+        /* CDNSKEY */    case  60: return SPL::rstring("[CDNSKEY data]"); break;
+        /* TKEY */       case 249: return SPL::rstring("[TKEY data]"); break;
+        /* TSIG */       case 250: return SPL::rstring("[TSIG data]"); break;
+                         default:  break;
+    }
 
-	error = "unexpected resource type"; 
-	return SPL::rstring();
+    error = "unexpected resource type";
+    return SPL::rstring();
   }
 
 
@@ -420,9 +420,9 @@ class DNSMessageParser {
 
   SPL::list<SPL::rstring> convertResourceDataToStringList(const struct Record records[], const uint16_t count) {
 
-	SPL::list<SPL::rstring> strings;
-	for (int i=0; i<count; i++) strings.add(convertResourceDataToString(records[i])); 
-	return strings;
+    SPL::list<SPL::rstring> strings;
+    for (int i=0; i<count; i++) strings.add(convertResourceDataToString(records[i]));
+    return strings;
   }
 
 
@@ -434,64 +434,64 @@ class DNSMessageParser {
 
   void parseDNSMessage(char* buffer, int length) {
 
-	// clear return fields
-	dnsHeader = NULL;
-	dnsStart = NULL;
-	dnsEnd = NULL;
-	error = NULL;
-	dnsPointer = NULL;
+    // clear return fields
+    dnsHeader = NULL;
+    dnsStart = NULL;
+    dnsEnd = NULL;
+    error = NULL;
+    dnsPointer = NULL;
 
-	questionCount = 0;
-	answerCount = 0;
-	nameserverCount = 0;
-	additionalCount = 0;
-	canonicalCount = 0; 
-	addressCount = 0; 
+    questionCount = 0;
+    answerCount = 0;
+    nameserverCount = 0;
+    additionalCount = 0;
+    canonicalCount = 0;
+    addressCount = 0;
 
-	questionRecordCount = 0;
-	answerRecordCount = 0;
-	nameserverRecordCount = 0;
-	additionalRecordCount = 0;
-	canonicalRecordCount = 0; 
-	addressRecordCount = 0; 
+    questionRecordCount = 0;
+    answerRecordCount = 0;
+    nameserverRecordCount = 0;
+    additionalRecordCount = 0;
+    canonicalRecordCount = 0;
+    addressRecordCount = 0;
 
-	// basic safety checks
-	if ( length < sizeof(struct DNSHeader) ) { error = "message too short"; return; }
-	if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS || 
-		 ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS || 
-		 ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS || 
-		 ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = "counts too large"; return; }
-	
-	// store pointers to the DNS message in the buffer
-	dnsHeader = (struct DNSHeader*)buffer;
-	dnsStart = (uint8_t*)buffer;
-	dnsEnd = (uint8_t*)buffer + length;
-	dnsPointer = (uint8_t*)dnsHeader->rrFields;
+    // basic safety checks
+    if ( length < sizeof(struct DNSHeader) ) { error = "message too short"; return; }
+    if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS ||
+         ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS ||
+         ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS ||
+         ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = "counts too large"; return; }
 
-	// save the DNS header's resource record counts
-	questionCount = ntohs(dnsHeader->questionCount);
-	answerCount = ntohs(dnsHeader->answerCount);
-	nameserverCount = ntohs(dnsHeader->nameserverCount);
-	additionalCount = ntohs(dnsHeader->additionalCount);
+    // store pointers to the DNS message in the buffer
+    dnsHeader = (struct DNSHeader*)buffer;
+    dnsStart = (uint8_t*)buffer;
+    dnsEnd = (uint8_t*)buffer + length;
+    dnsPointer = (uint8_t*)dnsHeader->rrFields;
 
-	// parse the variable-size DNS resource records and copy them into fixed-size Record structures
-	if ( ( questionRecordCount   = copyResourceRecords(questionRecords,   questionCount,   false) ) < questionCount)    return;
-	if ( ( answerRecordCount     = copyResourceRecords(answerRecords,     answerCount,     true ) ) < answerCount)      return;
-	if ( ( nameserverRecordCount = copyResourceRecords(nameserverRecords, nameserverCount, true ) ) < nameserverCount)  return;
-	if ( ( additionalRecordCount = copyResourceRecords(additionalRecords, additionalCount, true ) ) < additionalCount)  return;
+    // save the DNS header's resource record counts
+    questionCount = ntohs(dnsHeader->questionCount);
+    answerCount = ntohs(dnsHeader->answerCount);
+    nameserverCount = ntohs(dnsHeader->nameserverCount);
+    additionalCount = ntohs(dnsHeader->additionalCount);
 
-	// copy the CNAME and A/AAAA 'answer' records into separate arrays
-	for (int i=0; i<answerRecordCount; i++) {
-	  switch(answerRecords[i].type) {
-	  case 1:  // type A record   
-	  case 12: // type PTR record
-	  case 28: // type AAAA record
-		addressRecords[addressRecordCount++] = answerRecords[i]; break;
-	  case 5:  // type CNAME record
-		canonicalRecords[canonicalRecordCount++] = answerRecords[i]; break;
-	  default: break;
-	  }
-	}
+    // parse the variable-size DNS resource records and copy them into fixed-size Record structures
+    if ( ( questionRecordCount   = copyResourceRecords(questionRecords,   questionCount,   false) ) < questionCount)    return;
+    if ( ( answerRecordCount     = copyResourceRecords(answerRecords,     answerCount,     true ) ) < answerCount)      return;
+    if ( ( nameserverRecordCount = copyResourceRecords(nameserverRecords, nameserverCount, true ) ) < nameserverCount)  return;
+    if ( ( additionalRecordCount = copyResourceRecords(additionalRecords, additionalCount, true ) ) < additionalCount)  return;
+
+    // copy the CNAME and A/AAAA 'answer' records into separate arrays
+    for (int i=0; i<answerRecordCount; i++) {
+      switch(answerRecords[i].type) {
+      case 1:  // type A record
+      case 12: // type PTR record
+      case 28: // type AAAA record
+        addressRecords[addressRecordCount++] = answerRecords[i]; break;
+      case 5:  // type CNAME record
+        canonicalRecords[canonicalRecordCount++] = answerRecords[i]; break;
+      default: break;
+      }
+    }
   }
 
 };

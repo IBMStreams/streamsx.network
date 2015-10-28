@@ -9,22 +9,26 @@
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
-class MY_OPERATOR : public MY_BASE_OPERATOR 
+class MY_OPERATOR : public MY_BASE_OPERATOR
 {
 public:
 
   // ----------- standard operator methods ----------
 
   MY_OPERATOR();
-  virtual ~MY_OPERATOR(); 
-  void allPortsReady(); 
-  void prepareToShutdown(); 
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
   void process(uint32_t idx);
   void process(Tuple & tuple, uint32_t port);
   void process(Tuple const & tuple, uint32_t port);
   void process(Punctuation const & punct, uint32_t port);
 
 private:
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  int32_t processorAffinity;
 
   // ----------- output tuples ----------
 
@@ -33,7 +37,7 @@ private:
   // ----------- operator state variables ----------
 
   uint64_t tupleCounter;
-  
+
   // ----------- DNS message parser ----------
 
   DNSMessageParser parser;
@@ -88,7 +92,6 @@ private:
 
   SPL::rstring DNS_ANSWER_CANONICAL() { return parser.canonicalRecordCount>0 ? parser.convertResourceDataToString(parser.canonicalRecords[0]) : ""; }
 
-  //???SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.addressRecords[0].name) : ""; }
   SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertResourceDataToString(parser.addressRecords[0]) : ""; }
 
   SPL::list<rstring> DNS_ANSWER_ADDRESSES() { return parser.convertResourceDataToStringList(parser.addressRecords, parser.addressRecordCount); }
@@ -117,7 +120,6 @@ private:
 
   SPL::list<rstring> DNS_ADDITIONAL_DATA() { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount); }
 
-}; 
+};
 
 <%SPL::CodeGen::headerEpilogue($model);%>
-

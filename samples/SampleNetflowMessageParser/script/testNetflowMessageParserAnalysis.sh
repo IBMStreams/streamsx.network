@@ -46,7 +46,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow9_new.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_netflow9_new.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

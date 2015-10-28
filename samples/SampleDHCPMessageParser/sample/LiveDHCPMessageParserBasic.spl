@@ -13,104 +13,104 @@ use com.ibm.streamsx.network.parse::*;
 
 composite LiveDHCPMessageParserBasic {
 
-    param       
-	expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    param
+    expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
     expression<uint32> $leasePort: (uint32)getSubmissionTimeValue("leasePort", "12345" );
-    
-    type 
-    
-	// packet output from PacketLiveSource operator
+
+    type
+
+    // packet output from PacketLiveSource operator
     PacketType =
-	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
-        uint32 captureTime,             // time that packet was captured, in seconds since Unix epoch 
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        uint32 captureTime,             // time that packet was captured, in seconds since Unix epoch
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         blob dhcpMessage;               // the DHCP message from a packet, excluding all network headers
 
-	// metrics output from PacketLiveSource operator
-	MetricsType = 
-		float64 metricsTime,			// time that metrics were produced, in seconds since Unix epoch 
-	    float64 averagePacketsReceived,	// average number of packets received during last metrics interval
-	    float64 averagePacketsDropped,	// average number of packets dropped during last metrics interval
-	    float64 averagePacketsProcessed,// average number of packets processed during last metrics interval
-	    float64 averageOctetsProcessed;	// average number of octets processed during last metrics interval
+    // metrics output from PacketLiveSource operator
+    MetricsType =
+        float64 metricsTime,            // time that metrics were produced, in seconds since Unix epoch
+        float64 averagePacketsReceived, // average number of packets received during last metrics interval
+        float64 averagePacketsDropped,  // average number of packets dropped during last metrics interval
+        float64 averagePacketsProcessed,// average number of packets processed during last metrics interval
+        float64 averageOctetsProcessed; // average number of octets processed during last metrics interval
 
-	// DHCP message output from DHCPMessageParser operator
-    DHCPMessageType = 
-	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
-        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch 
+    // DHCP message output from DHCPMessageParser operator
+    DHCPMessageType =
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         uint64 messagesProcessed,
-	    rstring dhcpMessageType, // option 53: type of this DHCP message
-	    rstring dhcpServer, // header: address of DHCP server, as an IPv4 address
-	    rstring dhcpServerError, // option 56: error message from server, if request failed
-	    rstring clientMACAddress, // header: client hardware address
-	    rstring clientIPAddress, // header: address of client requesting renewal of lease, as an IPv4 address
-	    rstring leaseDuration, // option 51: address lease time, in seconds
-	    rstring leasedAddress, // header: address leased to client by server, as an IPv4 address
-	    rstring leasedAddressSubnetMask, // option 1: the subnet mask of the client, as an IPv4 address 
-	    list<rstring> subnetRouters, // option 3: list of routers on client's subnet, as IPv4 addresses
-	    list<rstring> staticRoutes, // option 33: list of address pairs for routing table, as IPv4 addresses
-	    list<rstring> dnsServers, // option 6: list of DNS servers, as IPv4 addresses
-	    rstring hostname, // option 12: hostname of the client 
-	    rstring domainName, // option 15: domain name client should use with DNS
-	    uint32 requestIdentifier, // header: request correlator, chosen by client, returned by server
-	    rstring requestedAddress, // option 50: client's requested address, as an IPv4 address
-	    list<uint8> requestedParameters, // option 55: list of requested DHCP parameters, specified as option codes
+        rstring dhcpMessageType, // option 53: type of this DHCP message
+        rstring dhcpServer, // header: address of DHCP server, as an IPv4 address
+        rstring dhcpServerError, // option 56: error message from server, if request failed
+        rstring clientMACAddress, // header: client hardware address
+        rstring clientIPAddress, // header: address of client requesting renewal of lease, as an IPv4 address
+        rstring leaseDuration, // option 51: address lease time, in seconds
+        rstring leasedAddress, // header: address leased to client by server, as an IPv4 address
+        rstring leasedAddressSubnetMask, // option 1: the subnet mask of the client, as an IPv4 address
+        list<rstring> subnetRouters, // option 3: list of routers on client's subnet, as IPv4 addresses
+        list<rstring> staticRoutes, // option 33: list of address pairs for routing table, as IPv4 addresses
+        list<rstring> dnsServers, // option 6: list of DNS servers, as IPv4 addresses
+        rstring hostname, // option 12: hostname of the client
+        rstring domainName, // option 15: domain name client should use with DNS
+        uint32 requestIdentifier, // header: request correlator, chosen by client, returned by server
+        rstring requestedAddress, // option 50: client's requested address, as an IPv4 address
+        list<uint8> requestedParameters, // option 55: list of requested DHCP parameters, specified as option codes
         rstring parseError;
 
-	// error output from DHCPMessageParser operator
-	DHCPErrorType = 
-	    uint64 packetNumber,			// sequence number of packet, as emitted by operator
-        rstring captureTime,          	// time that packet was captured, in seconds since Unix epoch 
+    // error output from DHCPMessageParser operator
+    DHCPErrorType =
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
         rstring ipSourceAddress,        // binary representation of IP source address
         rstring ipDestinationAddress,   // IP destination address
         rstring parserError,
-	    rstring dhcpError, 				// option 56: error message from server, if request failed
-	    rstring dhcpMessage;
+        rstring dhcpError,              // option 56: error message from server, if request failed
+        rstring dhcpMessage;
 
     graph
 
     ( stream<PacketType> PacketStream as PacketsOut ;
-	  stream<MetricsType> MetricsStream as MetricsOut ) = PacketLiveSource() {
+      stream<MetricsType> MetricsStream as MetricsOut ) = PacketLiveSource() {
         param
-			networkInterface: $networkInterface;
+            networkInterface: $networkInterface;
             metricsInterval: $metricsInterval;
             inputFilter: "udp port 67 or udp port 68";
-		    promiscuous: true;
-		    outputFilters: true, metricsUpdated();
-        output 
-		PacketsOut:
+            promiscuous: true;
+            outputFilters: true, metricsUpdated();
+        output
+        PacketsOut:
             packetNumber = packetsProcessed(),
             captureTime = CAPTURE_SECONDS(),
             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dhcpMessage = PAYLOAD_DATA();
-		MetricsOut:
-		    metricsTime = getTimestampInSecs(),
-	        averagePacketsReceived = (float64)metricsIntervalPacketsReceived() / metricsIntervalElapsed(),
-	        averagePacketsDropped = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed(),
-	        averagePacketsProcessed = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
-	        averageOctetsProcessed = (float64)metricsIntervalOctetsProcessed() / metricsIntervalElapsed();
+        MetricsOut:
+            metricsTime = getTimestampInSecs(),
+            averagePacketsReceived = (float64)metricsIntervalPacketsReceived() / metricsIntervalElapsed(),
+            averagePacketsDropped = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed(),
+            averagePacketsProcessed = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
+            averageOctetsProcessed = (float64)metricsIntervalOctetsProcessed() / metricsIntervalElapsed();
     }
-    //() as PacketSink = FileSink(PacketStream) { param file: "debug.LiveDHCPMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
-    () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LiveDHCPMessageParserBasic.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    //() as PacketSink = FileSink(PacketStream) { param file: "debug.LiveDHCPMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LiveDHCPMessageParserBasic.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     ( stream<DHCPMessageType> DHCPMessageStream as OutMessage ;
-	  stream<rstring lease> DHCPLeaseStream as OutLease ;
-	  stream<DHCPErrorType> DHCPErrorStream as OutError ) = DHCPMessageParser(PacketStream) {
-        logic state: { 
-		  map<uint8,rstring> dhcpTypes = { 1: "DHCPDISCOVER", 2: "DHCPOFFER", 3: "DHCPREQUEST", 4: "DHCPDECLINE", 5: "DHCPACK", 6: "DHCPNAK", 7: "DHCPRELEASE", 8: "DHCPINFORM" };
-		} 
+      stream<rstring lease> DHCPLeaseStream as OutLease ;
+      stream<DHCPErrorType> DHCPErrorStream as OutError ) = DHCPMessageParser(PacketStream) {
+        logic state: {
+          map<uint8,rstring> dhcpTypes = { 1: "DHCPDISCOVER", 2: "DHCPOFFER", 3: "DHCPREQUEST", 4: "DHCPDECLINE", 5: "DHCPACK", 6: "DHCPNAK", 7: "DHCPRELEASE", 8: "DHCPINFORM" };
+        }
       param
           messageAttribute: dhcpMessage;
-	      outputFilters: true, DHCP_MESSAGE_TYPE()==5ub && DHCP_ADDRESS_LEASE_TIME()!=0u && DHCP_YOUR_ADDRESS()!=0u, parseError();
-      output 
-	  OutMessage:
-		  captureTime = formatEpochDateTime(captureTime),
+          outputFilters: true, DHCP_MESSAGE_TYPE()==5ub && DHCP_ADDRESS_LEASE_TIME()!=0u && DHCP_YOUR_ADDRESS()!=0u, parseError();
+      output
+      OutMessage:
+          captureTime = formatEpochDateTime(captureTime),
           messagesProcessed = messagesProcessed(),
           dhcpMessageType = DHCP_MESSAGE_TYPE() in dhcpTypes ? dhcpTypes[DHCP_MESSAGE_TYPE()] : (rstring)DHCP_MESSAGE_TYPE(),
           dhcpServer = convertIPV4AddressNumericToString(DHCP_SERVER_ADDRESS()),
@@ -129,30 +129,29 @@ composite LiveDHCPMessageParserBasic {
           requestedAddress = convertIPV4AddressNumericToString(DHCP_REQUESTED_ADDRESS()),
           requestedParameters = DHCP_PARAMETER_REQUESTS(),
           parseError = parseErrorDescription();
- 	  OutLease:
-		  lease = formatEpochTime(captureTime) + 
-		         " IP address " + convertIPV4AddressNumericToString(DHCP_YOUR_ADDRESS()) + 
-		         " leased to '" + DHCP_HOST_NAME() + "'" + 
-		         " with MAC address " + convertMACAddressNumericToString((list<uint8>[6])DHCP_CLIENT_HARDWARE_ADDRESS()) + 
-		         " for " + formatElapsedTime(DHCP_ADDRESS_LEASE_TIME());
-	  OutError:
-		  captureTime = formatEpochDateTime(captureTime),
-	      parserError = parseErrorDescription(),
+      OutLease:
+          lease = formatEpochTime(captureTime) +
+                 " IP address " + convertIPV4AddressNumericToString(DHCP_YOUR_ADDRESS()) +
+                 " leased to '" + DHCP_HOST_NAME() + "'" +
+                 " with MAC address " + convertMACAddressNumericToString((list<uint8>[6])DHCP_CLIENT_HARDWARE_ADDRESS()) +
+                 " for " + formatElapsedTime(DHCP_ADDRESS_LEASE_TIME());
+      OutError:
+          captureTime = formatEpochDateTime(captureTime),
+          parserError = parseErrorDescription(),
           dhcpError = DHCP_ERROR_MESSAGE(),
-	      dhcpMessage = substring((rstring)dhcpMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dhcpMessage, 2*(int32)parseErrorOffset(), 2*size(dhcpMessage)-2*(int32)parseErrorOffset());
+          dhcpMessage = substring((rstring)dhcpMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dhcpMessage, 2*(int32)parseErrorOffset(), 2*size(dhcpMessage)-2*(int32)parseErrorOffset());
     }
-    () as DHCPMessageSink = FileSink(DHCPMessageStream) { param file: "debug.LiveDHCPMessageParserBasic.DHCPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
-    () as DHCPErrorSink = FileSink(DHCPErrorStream) { param file: "debug.LiveDHCPMessageParserBasic.DHCPErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as DHCPMessageSink = FileSink(DHCPMessageStream) { param file: "debug.LiveDHCPMessageParserBasic.DHCPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DHCPErrorSink = FileSink(DHCPErrorStream) { param file: "debug.LiveDHCPMessageParserBasic.DHCPErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 
-	() as DHCPLeaseSink = TCPSink(DHCPLeaseStream) {
-	  param
-	  port: $leasePort;
-	  role: server;
-	  format: line;
-	  flush: 1u; }
-	  
-	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+    () as DHCPLeaseSink = TCPSink(DHCPLeaseStream) {
+      param
+      port: $leasePort;
+      role: server;
+      format: line;
+      flush: 1u; }
+
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 
 }
-

@@ -1,0 +1,16 @@
+namespace sample;
+
+stateful void doAssert(boolean condition, rstring id)
+{
+    printString("[" + id + "]...");
+
+    if(condition == false)
+    {
+        printStringLn("FAIL");
+        abort();
+    }
+    else
+    {
+        printStringLn("pass");
+    }
+}

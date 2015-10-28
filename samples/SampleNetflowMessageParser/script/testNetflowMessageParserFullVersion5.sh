@@ -46,7 +46,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/sample_netflow5_port9500.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_netflow5_port9500.pcap
 netflowPort=9500
 #pcapFilename=$HOME/data.simpleweb.org/netflow183.pcap
 )

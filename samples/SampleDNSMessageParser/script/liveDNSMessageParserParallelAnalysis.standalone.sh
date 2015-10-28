@@ -26,6 +26,9 @@ libpcapDirectory=$HOME/libpcap-1.7.4
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
+ingestProcessor=2
+parseProcessors=( 4 6 8 )
+
 toolkitList=(
 $toolkitDirectory/com.ibm.streamsx.network
 $toolkitDirectory/samples/SampleNetworkToolkitData
@@ -54,7 +57,9 @@ networkInterface=ens6f3
 metricsInterval=1.0
 timeoutInterval=10.0
 errorStream=true
-parallelChannels=3
+ingesterProcessorAffinity=$ingestProcessor
+parserProcessorAffinities=$( IFS="," ; echo "${parseProcessors[*]}" )
+parallelChannels=${#parseProcessors[@]}
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -65,6 +70,9 @@ die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }
 step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
+
+(( $ingestProcessor < $coreCount )) || die "sorry, not enough cores for 'ingest processor' value"
+for parseProcessor in "${parseProcessors[@]}" ; do (( $parseProcessor < $coreCount )) || die "sorry, not enough cores for 'parse processor' value" ; done
 
 cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 

@@ -14,6 +14,6 @@ use com.ibm.streamsx.network.ipv4::*;
 
 list<rstring> convertIPV4AddressListToStringList(list<uint32> addresses) {
   mutable list<rstring> strings = [];
-  for (uint32 address in addresses) { appendM(strings, convertIPV4AddressNumericToString(address)); } 
+  for (uint32 address in addresses) { appendM(strings, convertIPV4AddressNumericToString(address)); }
   return strings;
 }

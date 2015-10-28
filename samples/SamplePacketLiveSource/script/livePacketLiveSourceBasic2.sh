@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketLiveSourceFull
+composite=LivePacketLiveSourceBasic2
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -48,6 +48,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 networkInterface=eno1
+processorAffinity=3
 metricsInterval=1.0
 timeoutInterval=10.0
 )

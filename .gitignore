@@ -28,4 +28,5 @@ StreamsLogs*.tgz
 **/#*#
 
 # ignore directories
-tmp
+/tmp/
+/doc/

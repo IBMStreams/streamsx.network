@@ -17,20 +17,19 @@
 
 namespace com { namespace ibm { namespace streamsx { namespace network { namespace mac {
 
-	  // This function converts an ethernet MAC address from a six-byte binary value to a string representation.
-	  static SPL::rstring convertMACAddressNumericToString(SPL::blist<SPL::uint8,6> macAddressNumeric) {
-	    return std::string(ether_ntoa((struct ether_addr*)macAddressNumeric.begin()));
-	  }
+      // This function converts an ethernet MAC address from a six-byte binary value to a string representation.
+      static SPL::rstring convertMACAddressNumericToString(SPL::blist<SPL::uint8,6> macAddressNumeric) {
+        return std::string(ether_ntoa((struct ether_addr*)macAddressNumeric.begin()));
+      }
 
-	  // This function converts an ethernet MAC address from a string representation to a six-byte binary value.
-	  static SPL::blist<SPL::uint8,6> convertMACAddressStringToNumeric(SPL::rstring macAddressString) {
-	    struct ether_addr* etherAddress;
-	    etherAddress = ether_aton(macAddressString.c_str());
-	    return SPL::blist<SPL::uint8,6>(&etherAddress->ether_addr_octet[0], &etherAddress->ether_addr_octet[6]);
-	  }
+      // This function converts an ethernet MAC address from a string representation to a six-byte binary value.
+      static SPL::blist<SPL::uint8,6> convertMACAddressStringToNumeric(SPL::rstring macAddressString) {
+        struct ether_addr* etherAddress;
+        etherAddress = ether_aton(macAddressString.c_str());
+        return SPL::blist<SPL::uint8,6>(&etherAddress->ether_addr_octet[0], &etherAddress->ether_addr_octet[6]);
+      }
 
 
-} } } } } 
+} } } } }
 
 #endif /* MAC_ADDRESS_FUNCTIONS_H_ */
-

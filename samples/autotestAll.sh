@@ -17,10 +17,13 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
-$here/SamplePacketFileSource/script/autotest.sh
-$here/SamplePacketLiveSource/script/autotest.sh
-$here/SampleDHCPMessageParser/script/autotest.sh
-$here/SampleDNSMessageParser/script/autotest.sh
-$here/SampleNetflowMessageParser/script/autotest.sh
+scripts=( $( find $here -name "autotest.sh" ) )
+
+step "executing all sample applications ..."
+for script in ${scripts[*]} ; do 
+    echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n$script\n"
+    $script || die "sorry, '$script' failed"
+done
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nDone."
 
 exit 0

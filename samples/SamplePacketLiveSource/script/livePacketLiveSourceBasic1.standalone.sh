@@ -9,15 +9,15 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketLiveSourceExpressions
+composite=LivePacketLiveSourceBasic1
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 toolkitDirectory=$( cd $here/../../.. ; pwd )
 
-buildDirectory=$projectDirectory/output/build/$composite
+buildDirectory=$projectDirectory/output/build/$composite.standalone
 
-unbundleDirectory=$projectDirectory/output/unbundle/$composite
+unbundleDirectory=$projectDirectory/output/unbundle/$composite.standalone
 
 dataDirectory=$projectDirectory/data
 
@@ -83,7 +83,7 @@ bundle=$buildDirectory/$namespace.$composite.sab
 spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
 
 step "setting capabilities for standalone application '$namespace.$composite' ..."
-standalone=$unbundleDirectory/$composite/bin/standalone
+standalone=$unbundleDirectory/$composite.standalone/bin/standalone
 [ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
 
@@ -91,3 +91,5 @@ step "executing standalone application '$namespace.$composite' ..."
 $standalone -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0
+
+

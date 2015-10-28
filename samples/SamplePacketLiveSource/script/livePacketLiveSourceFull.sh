@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketLiveSourceFilters
+composite=LivePacketLiveSourceFull
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
