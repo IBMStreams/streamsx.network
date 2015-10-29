@@ -125,7 +125,7 @@
 	</target>
 
 	<!-- Targets to build releases -->
-	<target name="release" depends="clean, cleansamples, all, setcommitversion">
+	<target name="release" depends="clean, cleansamples, all, spldoc, setcommitversion">
 		<delete dir="${tmp}" />		
 		<mkdir dir="${tmp}" />
 		<property name="releasefilename" value="${tmp}/com.ibm.streamsx.network-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}.tgz" />
