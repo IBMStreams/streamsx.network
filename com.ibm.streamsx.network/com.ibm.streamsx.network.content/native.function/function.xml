@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+  <function:functionSet>
+    <function:headerFileName></function:headerFileName>
+    <function:cppNamespaceName>PacketContentAssembler_result_functions</function:cppNamespaceName>
+    <function:functions>
+
+      <function:function>
+        <function:description>
+
+          This result function returns a string containing the name of the event
+          that caused the output tuple to be produced.  The value is one of ...
+
+        </function:description>
+        <function:prototype>public rstring EVENT()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns `true` if a new flow has started,
+	  or `false` otherwise.
+
+        </function:description>
+        <function:prototype>public boolean EVENT_FLOW_START()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns `true` if a flow is encrypted using the TLS protocol,
+	  or `false` otherwise.	  
+
+        </function:description>
+        <function:prototype>public boolean EVENT_FLOW_TLS()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns `true` if data for a flow has been received,
+	  or `false` otherwise.
+
+        </function:description>
+        <function:prototype>public boolean EVENT_FLOW_DATA()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns `true` if a flow has ended,
+	  or `false` otherwise.
+
+        </function:description>
+        <function:prototype>public boolean EVENT_FLOW_END()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns `true` if a request headers for a flow have been received,
+	  or `false` otherwise.
+
+        </function:description>
+        <function:prototype>public boolean EVENT_REQUEST()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns `true` if a response headers for a flow have been received,
+	  or `false` otherwise.
+
+
+        </function:description>
+        <function:prototype>public boolean EVENT_RESPONSE()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns `true` if data for a file within a flow has been received,
+	  or `false` otherwise.
+
+        </function:description>
+        <function:prototype>public boolean EVENT_FILE_DATA()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the ethernet MAC address of the source endpoint of a flow.
+	  
+        </function:description>
+        <function:prototype>public list&lt;uint8>[6] FLOW_ETHER_SRC_ADDRESS()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the ethernet MAC address of the destination endpoint of a flow.
+
+        </function:description>
+        <function:prototype>public list&lt;uint8>[6] FLOW_ETHER_DST_ADDRESS()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the IP version 4 address of the source endpoint of a flow.
+
+        </function:description>
+        <function:prototype>public uint32 FLOW_IPV4_SRC_ADDRESS()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the IP version 4 address of the destination endpoint of a flow.
+
+        </function:description>
+        <function:prototype>public uint32 FLOW_IPV4_DST_ADDRESS()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the UDP or TCP port number of the source endpoint of a flow,
+	  if the flow's IP protocol is UDP or TCP, or zero otherwise.
+
+        </function:description>
+        <function:prototype>public uint16 FLOW_SRC_PORT()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the UDP or TCP port number of the destination endpoint of a flow,
+	  if the flow's IP protocol is UDP or TCP, or zero otherwise.
+
+        </function:description>
+        <function:prototype>public uint16 FLOW_DST_PORT()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns a unique numeric identifier for each flow detected
+	  by the operator.  The same value is assigned for all events related to a
+	  particular flow, and is not used again after that flow's 'FlowEnd' event.
+
+        </function:description>
+        <function:prototype>public uint64 FLOW_ID()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the application protocol, if the operator can determine it,
+	  or an empty string if not. Its values are described in the file
+	  'protocols.csv' in the toolkit'.
+ 
+        </function:description>
+        <function:prototype>public rstring FLOW_PROTOCOL()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns an integer from 1 to 3 indicating the
+	  operator's confidence in its identification of the application protocol
+	  (see the `FLOW_PROTOCOL()` result function),
+	  from 'low' to 'high', respectively.
+	  
+        </function:description>
+        <function:prototype>public uint8 FLOW_PROTOCOL_CONFIDENCE()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns a small value, usually between 0
+	  and 7, indicating the nesting depth at which the application protocol (see the `FLOW_PROTOCOL()` result function) was identified.
+
+        </function:description>
+        <function:prototype>public uint8 FLOW_PROTOCOL_DEPTH()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the time when the flow started,
+	  in seconds, relative to the beginning of the Unix epoch
+	  (midnight on January 1st, 1970 in Greenwich, England),
+	  with a precision of microseconds.
+	  
+        </function:description>
+        <function:prototype>public float64 FLOW_START_TIME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+
+	  This result function returns the time of the current event,
+	  in seconds, relative to the beginning of the Unix epoch
+	  (midnight on January 1st, 1970 in Greenwich, England),
+	  with a precision of microseconds.
+	  
+        </function:description>
+        <function:prototype>public float64 FLOW_EVENT_TIME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+
+	  This result function returns the time when the flow ended,
+	  in seconds, relative to the beginning of the Unix epoch
+	  (midnight on January 1st, 1970 in Greenwich, England),
+	  with a precision of microseconds.
+	  
+        </function:description>
+        <function:prototype>public float64 FLOW_END_TIME()</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description>
+
+	  This result function returns the elapsed time of the flow
+	  in seconds, 
+	  with a precision of microseconds.
+	  
+        </function:description>
+        <function:prototype>public float64 FLOW_ELAPSED_TIME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the value of the IP protocol field from the
+flow's IP headers,
+if it is an IP flow, or zero otherwise.
+For example, a value of '6' indicates that the flow uses
+the TCP protocol, and a value of '17' indicates that the flow uses the UDP
+protocol.
+        </function:description>
+        <function:prototype>public uint8 FLOW_IP_PROTOCOL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns "SrcToDst" or
+"DstToSrc", where source and destination refer to the *_ADDRESS_*() functions
+described below, or "" if the operator cannot determine a direction.
+        </function:description>
+        <function:prototype>public rstring FLOW_DIRECTION()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a sequence number for the `FlowData`
+events within a particular flow, starting at zero for each new flow, as
+identified by the `FLOW_ID()` function.
+        </function:description>
+        <function:prototype>public uint64 FLOW_DATA_COUNTER()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the total number of packets 
+sent by the source endpoint of the flow to the destination endpoint,
+for the `FlowEnd` event only. The function returns zero for all other events in the flow.
+        </function:description>
+        <function:prototype>public uint64 FLOW_SRC_PACKETS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the total number of packets 
+sent by the destinatikon endpoint of the flow to the source endpoint,
+for the `FlowEnd` event only. The function returns zero for all other events in the flow.
+        </function:description>
+        <function:prototype>public uint64 FLOW_DST_PACKETS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the total number of bytes 
+sent by the source endpoint of the flow to the destination endpoint,
+for the `FlowEnd` event only. The function returns zero for all other events in the flow.
+        </function:description>
+        <function:prototype>public uint64 FLOW_SRC_BYTES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the total number of bytes 
+sent by the destination endpoint of the flow to the source endpoint,
+for the `FlowEnd` event only. The function returns zero for all other events in the flow.
+        </function:description>
+        <function:prototype>public uint64 FLOW_DST_BYTES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the reason a flow ended.  The value
+is valid only for tuples emitted due to 'FlowEnd' events; an empty string is returned for all other
+events.  The function may assign 'normal', 'clientAbort', 'serverAbort',
+'shutdown', 'dataLoss', 'resources', or else '?' if the operator cannot
+determine why the flow ended.
+        </function:description>
+        <function:prototype>public rstring FLOW_DISCONNECT_REASON()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint64 FLOW_DATA_LENGTH()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public blob FLOW_DATA_BINARY()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_DATA_STRING()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns an integer representing a request/response
+pair within a flow, when the operator can identify a transaction, or else zero
+if not.
+        </function:description>
+        <function:prototype>public uint32 FLOW_TRANSACTION_ID()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_METHOD()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_RAW()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_NORMALIZED()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_SCHEME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_AUTHORITY()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_USERNAME()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_PATH()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_QUERY()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FLOW_REQUEST_URI_FRAGMENT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public list&lt;rstring> FLOW_REQUEST_HEADERS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public list&lt;rstring> FLOW_RESPONSE_HEADERS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint32 FLOW_RESPONSE_STATUS_CODE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint64 FILE_ID()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint64 FILE_ID_PARENT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FILE_FORMAT()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FILE_CONTENT_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FILE_CONTENT_CHARSET()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint64 FILE_CONTENT_LENGTH()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint64 FILE_DATA_CHUNK_LENGTH()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint64 FILE_DATA_CHUNK_LENGTH_SUM()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public uint64 FILE_DATA_CHUNK_ID()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public boolean FILE_DATA_CHUNK_INITIAL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public boolean FILE_DATA_CHUNK_FINAL()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public blob FILE_DATA_CHUNK_BINARY()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns
+        </function:description>
+        <function:prototype>public rstring FILE_DATA_CHUNK_STRING()</function:prototype>
+      </function:function>
+
+
+
+
+
+
+
+
+      <function:function>
+        <function:description>
+          This result function returns the number of flows that are open at the
+time the tuple is produced.
+        </function:description>
+        <function:prototype>public uint64 OPEN_FLOWS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the number of files within flows that are open at the
+time the tuple is produced.
+        </function:description>
+        <function:prototype>public uint64 OPEN_FILES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the maximum number of flows that
+were ever open simultaneously, since the operator started.
+        </function:description>
+        <function:prototype>public uint64 OPEN_FLOWS_HIGH_WATER_MARK()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the maximum number of files within flows that
+were ever open simultaneously, since the operator started.
+        </function:description>
+        <function:prototype>public uint64 OPEN_FILES_HIGH_WATER_MARK()</function:prototype>
+      </function:function>
+
+
+
+
+      <function:function>
+        <function:description>
+          This result function returns the type of TLS message found, if the flow is
+encrypted with the 'transport-layer security' protocol, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring TLS_RECORD_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the direction this TLS message is going, if the flow is
+encrypted with the 'transport-layer security' protocol, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring TLS_RECORD_DIRECTION()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the length of this TLS message, if the flow is
+encrypted with the 'transport-layer security' protocol, or '0' if not.
+        </function:description>
+        <function:prototype>public uint32 TLS_RECORD_LENGTH()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the offset of this TLS message, if the flow is
+encrypted with the 'transport-layer security' protocol, or '0' if not.
+        </function:description>
+        <function:prototype>public uint32 TLS_RECORD_OFFSET()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function indicates whether or not more TLS messages are coming, if the flow is
+encrypted with the 'transport-layer security' protocol, or `false` if not.
+        </function:description>
+        <function:prototype>public boolean TLS_RECORD_MORE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the version of the TLS protocol being used, if the flow is
+encrypted with the 'transport-layer security' protocol, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring TLS_VERSION()</function:prototype>
+      </function:function>
+
+
+
+      <function:function>
+        <function:description>
+          This result function returns characteristics of protocols found within
+another protocol.  The TUNNEL_TYPE() function may assign "6IN4", "4IN6", "GRE",
+or "IP" if a tunnel is detected, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring TUNNEL_TYPE()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 4 address
+of the innermost source endpoint within the tunnel.
+        </function:description>
+        <function:prototype>public uint32 TUNNEL_IPV4_SRC_ADDRESS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 4 address
+of the innermost destination endpoint within the tunnel.
+        </function:description>
+        <function:prototype>public uint32 TUNNEL_IPV4_DST_ADDRESS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 6 address
+of the innermost source endpoint within the tunnel.
+        </function:description>
+        <function:prototype>public list&lt;uint8>[16] TUNNEL_IPV6_SRC_ADDRESS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 6 address
+of the innermost destination endpoint within the tunnel.
+        </function:description>
+        <function:prototype>public list&lt;uint8>[16] TUNNEL_IPV6_DST_ADDRESS()</function:prototype>
+      </function:function>
+
+
+
+
+
+    </function:functions>
+  </function:functionSet>
+</function:functionModel>

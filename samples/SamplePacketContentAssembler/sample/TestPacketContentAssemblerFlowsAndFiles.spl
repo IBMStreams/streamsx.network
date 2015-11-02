@@ -1,0 +1,224 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+
+namespace sample;
+
+use spl.file::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+use com.ibm.streamsx.network.content::*;
+use com.ibm.streamsx.network.datetimeformat::*;
+
+rstring asciiOnly(rstring data) {
+
+  for (int32 i in range(length(data))) {
+    uint8 c = (uint8)toCharacterCode(substring(data,i,1));
+    if (c==0x09u || c==0x0Au || c==0x0Du || ( c>=0x20u && c<=0x7Eu ) ) continue;
+    return substring(data,0,i) + "...[" + (rstring)(length(data)-i) + " bytes of binary data]...";
+  }
+
+  return data;
+}
+
+
+composite TestPacketContentAssemblerFlowsAndFiles {
+	
+  param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./firewallcontent_sample.pcap");
+    //expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./smtp_sample_with_attachment.pcap");
+
+	type 
+
+	PacketType =
+		float64 captureTime,	// time that packet was captured, in seconds since Unix epoch 
+		blob rawPacket ;		// contents of packet captured, including all headers
+	
+	FlowDataType =
+		rstring flowEventTime,
+		rstring ipSource,
+		rstring ipDestination,
+      boolean tlsEvent,
+      rstring flowDirection,
+		uint64 flowID, 
+        uint32 transactionID,
+        rstring flowProtocol,
+
+	  rstring tlsRecordType,
+	  rstring tlsRecordDirection,
+	  uint32 tlsRecordLength,
+	  uint32 tlsRecordOffset,
+	  boolean tlsRecordMore, 
+
+      uint64 flowDataCounter,
+      rstring flowData
+      ;
+
+	FileDataType =
+		rstring flowEventTime,
+		rstring ipSource,
+		rstring ipDestination,
+      rstring flowDirection,
+		uint64 flowID, 
+        uint32 transactionID,
+		uint64 fileID, 
+        rstring flowProtocol
+      ;
+		
+	CategorizedFileDataType =
+		float64 packetTime, // from PACKET_TIME(),
+		uint64 flowID, // from FLOW_ID(),		
+		rstring ipSrcAddress, // from IP_SRC_ADDRESS(),
+		rstring ipDstAddress, // from IP_DST_ADDRESS(),
+		uint32 srcPort, // from SRC_PORT(),
+		uint32 dstPort, // from DST_PORT(),
+		uint64 fileID, // from FILE_ID()
+		uint64 fileDataCounter, // from FILE_DATA_COUNTER()
+		boolean fileDataFinal, // from FILE_DATA_FINAL()		
+		rstring fileExtension, // derived from 'headerContentType'
+		rstring headerContentType, // from HEADER_CONTENT_TYPE()
+		uint32 headerContentLength, // from HEADER_CONTENT_LENGTH()
+		blob data ; // from DATA()
+
+	graph 
+	
+	stream<PacketType> PacketStream as Out = PacketFileSource() {
+		param
+        pcapFilename: $pcapFilename;
+    //inputFilter: "tcp";
+        metricsInterval: 0.0;  
+		output Out:
+			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+			rawPacket = PACKET_DATA(); }
+	//() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.PacketStream.out" ; format: csv ; hasDelayField: true ; }	
+	
+	
+	( stream<FlowDataType> FlowDataStream as Flow ; 
+	  stream<FileDataType> FileDataStream as File ) = PacketContentAssembler(PacketStream) {
+		param
+		  timestampAttribute: captureTime;
+	      packetAttribute: rawPacket;
+          outputFilters: EVENT_FLOW_DATA() || EVENT_FLOW_TLS(), EVENT_FILE_DATA();
+		  pamTuning: "pam.content.consume.archives=on",
+                     "pam.content.docx.decompress=false", 
+		             "pam.content.pptx.decompress=false", 
+		             "pam.content.xlsx.decompress=false" ;
+		output 
+		Flow:
+		flowEventTime = formatEpochDateTime(FLOW_EVENT_TIME()),
+		ipSource = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()) + ":" + (rstring)FLOW_SRC_PORT(),
+		ipDestination = convertIPV4AddressNumericToString(FLOW_IPV4_DST_ADDRESS()) + ":" + (rstring)FLOW_DST_PORT(),
+        tlsEvent = EVENT_FLOW_TLS(),
+        flowDirection = FLOW_DIRECTION(),
+		flowID = FLOW_ID(),
+        transactionID = FLOW_TRANSACTION_ID(),
+        flowProtocol = FLOW_PROTOCOL(),
+		  tlsRecordType = TLS_RECORD_TYPE(),
+	    tlsRecordDirection = TLS_RECORD_DIRECTION(),
+	    tlsRecordLength = TLS_RECORD_LENGTH(),
+	    tlsRecordOffset = TLS_RECORD_OFFSET(),
+	    tlsRecordMore = TLS_RECORD_MORE(),
+        flowDataCounter = FLOW_DATA_COUNTER(),
+        flowData = FLOW_DATA_STRING();
+		File:
+		flowEventTime = formatEpochDateTime(FLOW_EVENT_TIME()),
+		ipSource = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()) + ":" + (rstring)FLOW_SRC_PORT(),
+		ipDestination = convertIPV4AddressNumericToString(FLOW_IPV4_DST_ADDRESS()) + ":" + (rstring)FLOW_DST_PORT(),
+        flowDirection = FLOW_DIRECTION(),
+		flowID = FLOW_ID(),
+        transactionID = FLOW_TRANSACTION_ID(),
+		fileID = FILE_ID(),
+        flowProtocol = FLOW_PROTOCOL();
+	}  
+	//() as FlowDataSink = FileSink(FlowDataStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FlowDataStream.out" ; format: txt ; hasDelayField: true ; }	
+	//() as FileDataSink = FileSink(FileDataStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FileDataStream.out" ; format: txt ; hasDelayField: true ; }	
+
+
+ 	() as FlowDataStore = Custom(FlowDataStream as In) {
+		logic state: {
+			map<rstring,rstring> directionFlags = {
+				"?" : "????????",
+				"" : "--------",
+				"SrcToDst" : ">>>>>>>>",
+				"DstToSrc" : "<<<<<<<<" }; }
+		onTuple In: {
+		        rstring extension = flowProtocol!="" ? flowProtocol : (tlsEvent ? "tls" : "unknown");
+			rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + (rstring)flowID + "." + extension;
+			rstring filemode = flowDataCounter==1lu ? "w" : "a";
+			mutable int32 error = 0;
+			uint64 handle = fopen(filename, filemode, error);
+			assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+			if (tlsEvent) {
+			  fwriteString("TLS " + tlsRecordType + " " + tlsRecordDirection + " (bytes " + (rstring)tlsRecordOffset + " to " + (rstring)(tlsRecordOffset+(uint32)length(flowData)) + (tlsRecordMore ? ", more..." : "") + ")\n", handle, error);
+			  assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+			} else {
+			  fwriteString("\n" + flowEventTime + " -- " + ipSource + " " + directionFlags[flowDirection] + " " + ipDestination + " (" + (rstring)length(flowData) + " bytes of " + flowProtocol + ")\n", handle, error);
+			  assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+			  fwriteString(asciiOnly(flowData) + "\n", handle, error);
+			  assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+			}
+			fclose(handle, error);
+			assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error)); } } 
+/*
+
+	stream<CategorizedFileDataType> CategorizedFileDataStream as Out = Functor(FileDataStream as In) {
+ 		logic state: {
+ 			mutable rstring extension = "";
+			map<rstring,rstring> mimetypeToExtension = {
+				"audio/mpeg"      : "mp3",
+				"audio/x-aac"     : "aac",
+				"image/gif"       : "gif",
+				"image/jpeg"      : "jpeg",
+				"image/png"       : "png",
+				"text/plain"      : "txt",
+				"text/html"       : "html",
+				"text/css"        : "css",
+				"text/javascript" : "js",
+				"text/json"       : "json",
+				"video/quicktime" : "mov",
+				"video/x-flv"     : "flv",
+			        "application/rss+xml" : "xml",
+			        "application/x-www-form-urlencoded" : "url",
+			        "application/octet-stream" : "octets" };  }
+ 		onTuple In: { 
+		  list<rstring> tokens = tokenize(headerContentType, "; ", false);
+		  rstring mimeType = size(tokens)>0 ? lower(tokens[0]) : headerContentType;
+		  extension = (mimeType in mimetypeToExtension) ? mimetypeToExtension[lower(mimeType)] : "unknown"; 
+		  if (extension=="unknown") log(Sys.info, "no file extension found for ContentType header \'" + headerContentType + "\'"); 
+		}
+ 		output Out: fileExtension = extension; }
+
+
+ 	stream<CategorizedFileDataType> ReassembledFileDataStream as Out = Custom(CategorizedFileDataStream as In) {
+		logic state: {
+			mutable map<uint64,blob> accumulators = {}; }
+		onTuple In: { 
+			if (fileID in accumulators) { appendM(accumulators[fileID], (list<uint8>)data); } else { insertM(accumulators, fileID, data); }
+			if (fileDataFinal) {
+				data = accumulators[fileID];
+				submit(In, Out);
+				removeM(accumulators, fileID);	
+			} } }
+	//() as ReassembledImageSink = FileSink(ReassembledImageStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.ReassembledImageStream.out" ; format: txt ; hasDelayField: true ; }	
+	
+	
+ 	() as ReassembledFileDataStore = Custom(ReassembledFileDataStream as In) {
+		logic 
+		onTuple In: { 
+			rstring filename = "debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + (rstring)flowID + "__file_" + (rstring)fileID + "." + fileExtension;
+			mutable int32 error = 0;
+			uint64 handle = fopen(filename, "w", error);
+			assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+			fwriteblob(data, handle, error);
+			assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+			fclose(handle, error);
+			assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error));
+		} }
+*/
+
+}

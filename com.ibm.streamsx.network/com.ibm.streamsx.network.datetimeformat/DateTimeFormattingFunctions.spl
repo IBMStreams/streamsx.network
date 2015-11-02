@@ -3,7 +3,7 @@
 ** All Rights Reserved
 */
 
-namespace com.ibm.streamsx.network.parse;
+namespace com.ibm.streamsx.network.datetimeformat;
 
 /**
 This function formats an integer representing 'Unix epoch' time (that is, seconds since

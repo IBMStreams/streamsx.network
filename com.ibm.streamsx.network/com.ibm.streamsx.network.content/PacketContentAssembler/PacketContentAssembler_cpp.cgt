@@ -1,0 +1,1426 @@
+<%
+
+# Copyright (C) 2011, 2015  International Business Machines Corporation
+# All Rights Reserved
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort = $model->getInputPortAt(0);
+my @outputPortList = @{ $model->getOutputPorts() };
+
+# get C++ expressions for getting the values of this operator's required parameters
+
+my $packetAttribute = $model->getParameterByName("packetAttribute")->getValueAt(0)->getCppExpression();
+my $timestampAttribute = $model->getParameterByName("timestampAttribute")->getValueAt(0)->getCppExpression();
+
+# get C++ expressions for getting the values of this operator's optional parameters
+
+my $fileDataChunkSize = $model->getParameterByName("fileDataChunkSize") ? $model->getParameterByName("fileDataChunkSize")->getValueAt(0)->getCppExpression() : 4096;
+my $maximumFilesPerFlow = $model->getParameterByName("maximumFilesPerFlow") ? $model->getParameterByName("maximumFilesPerFlow")->getValueAt(0)->getCppExpression() : 0 ;
+my $pamLibrary = $model->getParameterByName("pamLibrary") ? $model->getParameterByName("pamLibrary")->getValueAt(0)->getCppExpression() : "iss-pam1.so" ;
+
+# get string arrays for optional parameters that have lists of values
+
+my @pamTuning = ();
+my $pamTuningModel = $model->getParameterByName("pamTuning");
+my $pamTuningCount = $pamTuningModel ? $pamTuningModel->getNumberOfValues() : 0;
+for (my $i=0; $i<$pamTuningCount; $i++) { push @pamTuning, $pamTuningModel->getValueAt($i)->getCppExpression(); }
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) {
+  foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+    my $expression = $value->getCppExpression();
+    push @outputFilterList, $expression;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::PacketContentAssembler_result_functions::") != -1;
+  }
+}
+
+# basic safety checks on parameters
+SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+
+# create a hash of result functions called by output filters and attribute assigments
+
+my %resultFunctions = ();
+my @ff = join(' ',@outputFilterList) =~ m/::PacketContentAssembler_result_functions::([a-zA-Z_0-9]+)\(/g;
+foreach my $f (@ff) { $resultFunctions{$f} = 1; }
+for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { 
+  my $aa = SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i));
+  my @ff = $aa =~ m/::PacketContentAssembler_result_functions::([a-zA-Z_0-9]+)\(/g;
+  foreach my $f (@ff) { $resultFunctions{$f} = 1; }
+}
+
+# print diagnostic comments in source file
+
+print "// operator parameter 'packetAttribute': $packetAttribute\n";
+print "// operator parameter 'timestampAttribute': $timestampAttribute\n";
+print "// operator parameter 'pamLibrary': $pamLibrary\n";
+print "// operator parameter 'fileDataChunkSize': $fileDataChunkSize\n";
+foreach my $p (@pamTuning) { print "// operator parameter 'pamTuning': $p\n"; }
+foreach my $f (sort keys %resultFunctions) { print "// assembler result function $f()\n"; }
+#foreach my $f (sort keys %resultFunctions) { print STDERR "********** this operator calls assembler result function $f() **********\n"; }
+
+%>
+
+
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the PacketContentAssembler_h.cgt file
+
+#define PacketContentAssembler_result_functions MY_OPERATOR
+
+
+
+
+// this class converts XPF event codes into descriptive strings
+
+class XPFEventNames {
+private:
+  std::vector<const char*> eventNames;
+public:
+  XPFEventNames()  {
+    eventNames.resize(1000, "?");
+    eventNames[XPF_MSG_TCP_TRANSPORT_DATA] = "TCP_TRANSPORT_DATA";
+    eventNames[XPF_MSG_UDP_TRANSPORT_DATA] = "UDP_TRANSPORT_DATA";
+    eventNames[XPF_MSG_ICMP_TRANSPORT_DATA] = "ICMP_TRANSPORT_DATA";
+    eventNames[XPF_MSG_TCP_CONN_START] = "TCP_CONN_START";
+    eventNames[XPF_MSG_UDP_CONN_START] = "UDP_CONN_START";
+    eventNames[XPF_MSG_ICMP_CONN_START] = "ICMP_CONN_START";
+    eventNames[XPF_MSG_TCP_CONN_OPENED] = "TCP_CONN_OPENED";
+    eventNames[XPF_MSG_UDP_CONN_OPENED] = "UDP_CONN_OPENED";
+    eventNames[XPF_MSG_ICMP_CONN_OPENED] = "ICMP_CONN_OPENED";
+    eventNames[XPF_MSG_TCP_CONN_UPDATE] = "TCP_CONN_UPDATE";
+    eventNames[XPF_MSG_UDP_CONN_UPDATE] = "UDP_CONN_UPDATE";
+    eventNames[XPF_MSG_ICMP_CONN_UPDATE] = "ICMP_CONN_UPDATE";
+    eventNames[XPF_MSG_TCP_CONN_CLOSED] = "TCP_CONN_CLOSED";
+    eventNames[XPF_MSG_UDP_CONN_CLOSED] = "UDP_CONN_CLOSED";
+    eventNames[XPF_MSG_ICMP_CONN_CLOSED] = "ICMP_CONN_CLOSED";
+    eventNames[XPF_MSG_APPL_IDENTIFIED] = "APPL_IDENTIFIED";
+    eventNames[XPF_MSG_APPL_IDENTIFIED2] = "APPL_IDENTIFIED2";
+    eventNames[XPF_MSG_URI_HTTP_GET_RAW] = "URI_HTTP_GET_RAW";
+    eventNames[XPF_MSG_URI_HTTP_POST_RAW] = "URI_HTTP_POST_RAW";
+    eventNames[XPF_MSG_URI_HTTP_GET_COOKED] = "URI_HTTP_GET_COOKED";
+    eventNames[XPF_MSG_URI_HTTP_POST_COOKED] = "URI_HTTP_POST_COOKED";
+    eventNames[XPF_MSG_URI_SIP_REGISTER_RAW] = "URI_SIP_REGISTER_RAW";
+    eventNames[XPF_MSG_APPL_HEADER] = "APPL_HEADER";
+    eventNames[XPF_MSG_APPL_DNS_RESPONSE] = "APPL_DNS_RESPONSE";
+    eventNames[XPF_MSG_FILE_START] = "FILE_START";
+    eventNames[XPF_MSG_FILE_DATA] = "FILE_DATA";
+    eventNames[XPF_MSG_FILE_END] = "FILE_END";
+    eventNames[XPF_MSG_TLS_HANDSHAKE] = "TLS_HANDSHAKE";
+    eventNames[XPF_MSG_TLS_ALERT] = "TLS_ALERT";
+    eventNames[XPF_MSG_TLS_CHANGE_CIPHER] = "TLS_CHANGE_CIPHER";
+    eventNames[XPF_MSG_TLS_HEARTBEAT] = "TLS_HEARTBEAT";
+    eventNames[XPF_MSG_TLS_APPLICATION_DATA] = "TLS_APPLICATION_DATA";
+    eventNames[XPF_MSG_TLS_TUNNEL_ID] = "TLS_TUNNEL_ID";
+    eventNames[XPF_MSG_PROTOCOL_TERMINAL] = "PROTOCOL_TERMINAL";
+    eventNames[XPF_MSG_UDP_STATUS] = "UDP_STATUS";
+    eventNames[XPF_MSG_TCP_STATUS] = "TCP_STATUS";
+    eventNames[XPF_MSG_CONN_TAGGED] = "CONN_TAGGED";
+    eventNames[XPF_MSG_TCP_PARAMS] = "TCP_PARAMS";
+    eventNames[XPF_MSG_HTTP_PROXY] = "HTTP_PROXY";
+    eventNames[XPF_MSG_HTTP_XFORWARDEDFOR] = "HTTP_XFORWARDEDFOR";
+    eventNames[XPF_MSG_HTTP_RESPONSE] = "HTTP_RESPONSE";
+    eventNames[XPF_MSG_LAST] = "LAST"; }
+  const char* event2name(uint32_t event) { return eventNames[event]; }
+};
+static XPFEventNames xpfEventNames;
+
+
+
+
+// these functions are used by PAM to allocate and free memory
+
+static void* allocatePage(uint32 size) {
+    void *buff = mmap(0, size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0);
+    return (buff == MAP_FAILED ? NULL : buff);
+}
+
+static int32 freePage(void* addr, uint32 size) {
+    return (int32) munmap(addr, size);
+}
+
+
+#if 0
+static std::string getMACAddressAsString(const unsigned char* address) {
+  return std::string(ether_ntoa((struct ether_addr*)address));
+}
+
+static std::string getIPAddressAsString(const struct pam2XpfInetAddr& address) {
+  uint32_t networkOrderAddress;
+  char ipv4Address[INET_ADDRSTRLEN];
+  char ipv6Address[INET6_ADDRSTRLEN];
+  switch(address.type) {
+    case XPF_ADDRESS_IPv4:
+      networkOrderAddress = htonl(address.ip.v4);
+      return std::string(inet_ntop(AF_INET, &networkOrderAddress, ipv4Address, sizeof(ipv4Address)));
+    case XPF_ADDRESS_IPv6:
+      return std::string(inet_ntop(AF_INET6, &address.ip.v6, ipv6Address, sizeof(ipv6Address)));
+    default:
+      return std::string("?");
+  }
+}
+#endif
+
+
+
+static uint32 getIPV4Address(const struct pam2XpfInetAddr& address) {
+
+  switch(address.type) {
+    case XPF_ADDRESS_IPv4: return address.ip.v4;
+    case XPF_ADDRESS_IPv6: return 0;
+    default: return 0;
+  }
+}
+
+
+static SPL::blist<SPL::uint8, 16> getIPV6Address(const struct pam2XpfInetAddr& address) {
+    
+  switch(address.type) {
+    case XPF_ADDRESS_IPv4: return SPL::blist<SPL::uint8,16>();
+    case XPF_ADDRESS_IPv6: return SPL::blist<SPL::uint8,16>(address.ip.v6, address.ip.v6+16);
+    default: return SPL::blist<SPL::uint8,16>();
+  }
+}
+
+
+
+static std::string itos(int32 i) {
+  std::stringstream s;
+  s << i;
+  return s.str();
+}
+
+
+
+static void configurationErrorCallback(const char *module,
+                            int eventId,
+                            const char *tuneName,
+                            const char *tuneSuffix,
+                            const char *tuneValue,
+                            const char *errorString,
+                            const char *failureReason,
+                            void *userData) {
+  //MY_OPERATOR* self = reinterpret_cast<MY_OPERATOR*>(userData);
+
+  SPLLOG(L_ERROR, "PAM configuration error" <<
+           ": module=" << module << 
+           ", event=" << eventId << 
+           ", tuneName=" << tuneName << 
+           ", tuneSuffix=" << tuneSuffix <<
+           ", tuneValue=" << tuneValue << 
+           ", errorString=" << errorString << 
+           ", failureReason=" << failureReason,
+           "PacketContentAssembler");
+}
+
+
+
+// first three fields of every PAM event message structure are the same
+struct EventPrefix { 
+       enum pam2XpfMessageIds msgId; 
+       uint16 msgLen; 
+       SPL::uint8 msgVer; };
+
+
+ 
+// handle a callback from PAM library
+static void xpfCallback(const pam2XpfHeader* eventHeader,
+                              void* userData,
+                              void* connectionData,
+                              void* assemblerData) {
+  MY_OPERATOR* self = reinterpret_cast<MY_OPERATOR*>(userData);
+  self->processEvent(eventHeader, connectionData, assemblerData);
+}
+
+
+
+// process a callback from PAM library
+void MY_OPERATOR::processEvent(const pam2XpfHeader* eventHeader, void* connectionData, void* assemblerData) {
+
+  // basic sanity checks on XPF event header
+  if (!eventHeader) THROW(SPLRuntimeOperator, "processEvent failed, event header missing");
+  // ??? if (eventHeader->version != XPF_VERSION_RELEASE) THROW(SPLRuntimeOperator, "processEvent failed, event version mis-match, eventHeader->version=" << (int)eventHeader->version << ", XPF_VERSION_RELEASE=" << XPF_VERSION_RELEASE);
+  if (eventHeader->version != XPF_VERSION_2) THROW(SPLRuntimeOperator, "processEvent failed, event version mis-match, eventHeader->version=" << (int)eventHeader->version << ", XPF_VERSION_2=" << XPF_VERSION_2);
+  if (eventHeader->hdrLen != sizeof(pam2XpfHeader)) THROW(SPLRuntimeOperator, "processEvent failed, event header size mis-match, eventHeader->hdrLen=" << ((int32)eventHeader->hdrLen) << " vs. sizeof(pam2XpfHeader)=" << sizeof(pam2XpfHeader) );
+
+  // store the time of this event
+  eventTime = (double)(eventHeader->secs) + ((double)(eventHeader->usecs))/1000000.0;
+
+  // process each event in the XPF event message
+  int32_t messageSize = eventHeader->payloadLen - sizeof(pam2XpfHeader);
+  EventPrefix* eventPointer = (EventPrefix*)( (char*)eventHeader + sizeof(pam2XpfHeader) );
+  for (; messageSize>0; messageSize -= eventPointer->msgLen, eventPointer = (EventPrefix*)( (char*)eventPointer + eventPointer->msgLen ) ) {
+
+    // basic sanity checks
+    if (eventPointer->msgLen < messageSize) THROW(SPLRuntimeOperator, "processEvent failed, event body truncated");
+
+    SPLLOG(L_TRACE, "XPF event callback" <<  
+           ": event=" << xpfEventNames.event2name(eventPointer->msgId) <<
+           ", frame=" << eventHeader->frameId <<
+           ", flowid=" << eventHeader->flowId <<
+           ", protocol=" << pam2XpfGetProtocolName(pamInstanceHandle, eventHeader->protocolType) <<
+           ", direction=" << eventHeader->flowDirection <<
+           ", size=" << eventHeader->payloadLen,
+           "PacketContentAssembler");
+
+    // clear state pointers used by result functions
+    flowState = NULL;
+    fileState = NULL;
+
+    // call the appropriate processing function for the event's data structure
+    switch(eventPointer->msgId) {
+    case XPF_MSG_TCP_CONN_START:
+    case XPF_MSG_UDP_CONN_START:
+    case XPF_MSG_ICMP_CONN_START:
+    case XPF_MSG_TCP_CONN_OPENED:
+    case XPF_MSG_UDP_CONN_OPENED:
+    case XPF_MSG_ICMP_CONN_OPENED:
+      processConnectionOpenedEvent(*eventHeader, *(pam2XpfConnectionOpened*)eventPointer); 
+      break;
+    case XPF_MSG_TCP_CONN_UPDATE:
+    case XPF_MSG_UDP_CONN_UPDATE:
+    case XPF_MSG_ICMP_CONN_UPDATE:
+      processConnectionUpdateEvent(*eventHeader, *(pam2XpfConnectionUpdate*)eventPointer); 
+      break;
+    case XPF_MSG_TCP_CONN_CLOSED:
+    case XPF_MSG_UDP_CONN_CLOSED:
+    case XPF_MSG_ICMP_CONN_CLOSED:
+      processConnectionClosedEvent(*eventHeader, *(pam2XpfConnectionClosed*)eventPointer); 
+      break;
+    case XPF_MSG_TCP_TRANSPORT_DATA:
+    case XPF_MSG_UDP_TRANSPORT_DATA:
+    case XPF_MSG_ICMP_TRANSPORT_DATA:
+      processTransportDataEvent(*eventHeader, *(pam2XpfTransportData*)eventPointer); 
+      break;
+    case XPF_MSG_PROTOCOL_TERMINAL:
+      processTerminalProtocolEvent(*eventHeader, *(pam2XpfTerminalProtocol*)eventPointer); 
+      break;
+    case XPF_MSG_APPL_IDENTIFIED:
+    case XPF_MSG_APPL_IDENTIFIED2:
+      processApplicationFoundEvent(*eventHeader, *(pam2XpfApplicationFound*)eventPointer); 
+      break;
+    case XPF_MSG_URI_HTTP_GET_RAW:
+    case XPF_MSG_URI_HTTP_POST_RAW:
+    case XPF_MSG_URI_HTTP_GET_COOKED:
+    case XPF_MSG_URI_HTTP_POST_COOKED:
+    case XPF_MSG_URI_SIP_REGISTER_RAW:
+      processApplicationURIEvent(*eventHeader, *(pam2XpfApplicationURI*)eventPointer); 
+      break;
+    case XPF_MSG_APPL_HEADER:
+      processApplicationHeaderEvent(*eventHeader, *(pam2XpfApplicationHeader*)eventPointer); 
+      break;
+    case XPF_MSG_HTTP_RESPONSE:
+      processHTTPResponseEvent(*eventHeader, *(pam2XpfHttpResponse*)eventPointer); 
+      break;
+    case XPF_MSG_FILE_START:
+      processFileStartEvent(*eventHeader, *(pam2XpfFileStart*)eventPointer); 
+      break;
+    case XPF_MSG_FILE_DATA:
+      processFileDataEvent(*eventHeader, *(pam2XpfFileData*)eventPointer); 
+      break;
+    case XPF_MSG_FILE_END:
+      processFileEndEvent(*eventHeader, *(pam2XpfFileEnd*)eventPointer); 
+      break;
+    case XPF_MSG_TLS_HANDSHAKE:
+    case XPF_MSG_TLS_ALERT:
+    case XPF_MSG_TLS_CHANGE_CIPHER:
+    case XPF_MSG_TLS_APPLICATION_DATA:
+    case XPF_MSG_TLS_HEARTBEAT:
+      processTLSProtocolEvent(*eventHeader, *(pam2XpfTlsRecord*)eventPointer); 
+      break;
+    case XPF_MSG_TCP_PARAMS:
+      processTCPParamsEvent(*eventHeader, *(pam2XpfTcpParams*)eventPointer); 
+      break;
+    case XPF_MSG_APPL_DNS_RESPONSE:
+      processDNSResponseEvent(*eventHeader, *(pam2XpfDnsResponse*)eventPointer); 
+      break;
+    case XPF_MSG_UDP_STATUS:
+    case XPF_MSG_TCP_STATUS:
+    case XPF_MSG_CONN_TAGGED:
+    case XPF_MSG_HTTP_PROXY:
+    case XPF_MSG_TLS_TUNNEL_ID:
+    case XPF_MSG_LAST:
+    case XPF_MSG_HTTP_XFORWARDEDFOR:
+      SPLLOG(L_DEBUG, "unsupported XPF event " << xpfEventNames.event2name(eventPointer->msgId) << " ignored", "PacketContentAssembler");
+      break;
+    }
+  }
+}
+
+
+
+
+
+void MY_OPERATOR::processConnectionOpenedEvent(const pam2XpfHeader& eventHeader, const pam2XpfConnectionOpened& eventPointer) {
+
+  // sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfConnectionOpened)) THROW(SPLRuntimeOperator, "processConnectionOpenedEvent failed, ConnectionOpened message size mis-match");
+
+  // choose a unique integer to correlate events for this flow
+  bool connectionStart = false;
+  uint64 flowID = eventHeader.flowId << 2;
+  uint8 ipProtocol; // one of UDP==17, TCP==6, ICMP==1
+  switch(eventPointer.msgId) {
+  case XPF_MSG_UDP_CONN_START:   connectionStart = true;
+  case XPF_MSG_UDP_CONN_OPENED:  ipProtocol = 17; flowID += 1; break;
+  case XPF_MSG_TCP_CONN_START:   connectionStart = true;
+  case XPF_MSG_TCP_CONN_OPENED:  ipProtocol = 6; flowID += 2; break;
+  case XPF_MSG_ICMP_CONN_START:  connectionStart = true;
+  case XPF_MSG_ICMP_CONN_OPENED: ipProtocol = 1; flowID += 3; break;
+  default: THROW(SPLRuntimeOperator, "this should never happen");
+  }
+
+  // find the FlowState structure for this flow, or create a new one 
+  bool flowStarted; 
+  if ( flowStates.count(flowID) ) {
+    if ( connectionStart ) THROW(SPLRuntimeOperator, "processConnectionOpenedEvent failed, flow started with duplicate flowID=" << flowID);
+    if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processConnectionOpenedEvent failed, found wrong FlowState structure");
+    flowStarted = true; 
+  } else {
+    flowStates[flowID] = new FlowState;
+    flowStarted = false;
+  }
+
+  // store the address of the file state structure
+  flowState = flowStates[flowID];
+  SPLLOG(L_TRACE, "processConnectionOpenedEvent() entered, flowID=" << flowID << ", connectionStart=" << connectionStart << ", flowStarted=" << flowStarted, "PacketContentAssembler");
+
+  // initialize flow state structure, if necessary
+  if (!flowStarted) {
+    flowState->FLOW_ID = flowID;
+    flowState->START_TIME = eventTime;
+    flowState->END_TIME = 0;
+    flowState->IP_PROTOCOL = ipProtocol;
+    flowState->FLOW_DATA_COUNTER = 0;
+    flowState->HTTP_STATUS_CODE = 0;
+    flowState->rrState = noRequestResponseState;
+  }
+
+  // copy fields from 'struct pam2XpfConnectionOpened' into flow state structure, but only as needed for output attributes
+  flowState->flowDirection = eventHeader.flowDirection;
+  <% # ;
+  print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION};
+  print("flowState->FLOW_PROTOCOL = pam2XpfGetProtocolName(pamInstanceHandle, eventHeader.protocolType);") if defined $resultFunctions{FLOW_PROTOCOL} || defined $resultFunctions{FILE_FORMAT};
+
+  print("flowState->ETHER_SRC_ADDRESS = SPL::blist<SPL::uint8,6>(eventPointer.srcMacAddr, eventPointer.srcMacAddr+6);") if defined $resultFunctions{FLOW_ETHER_SRC_ADDRESS};
+  print("flowState->ETHER_DST_ADDRESS = SPL::blist<SPL::uint8,6>(eventPointer.dstMacAddr, eventPointer.dstMacAddr+6);") if defined $resultFunctions{FLOW_ETHER_DST_ADDRESS};
+
+  print("flowState->IPV4_SRC_ADDRESS = getIPV4Address(eventPointer.srcIp);") if defined $resultFunctions{FLOW_IPV4_SRC_ADDRESS};
+  print("flowState->IPV4_DST_ADDRESS = getIPV4Address(eventPointer.dstIp);") if defined $resultFunctions{FLOW_IPV4_DST_ADDRESS};
+
+  print("flowState->IPV6_SRC_ADDRESS = getIPV6Address(eventPointer.srcIp);") if defined $resultFunctions{FLOW_IPV6_SRC_ADDRESS};
+  print("flowState->IPV6_DST_ADDRESS = getIPV6Address(eventPointer.dstIp);") if defined $resultFunctions{FLOW_IPV6_DST_ADDRESS};
+
+  print("flowState->SRC_PORT = eventPointer.srcPort;") if defined $resultFunctions{FLOW_SRC_PORT};
+  print("flowState->DST_PORT = eventPointer.dstPort;") if defined $resultFunctions{FLOW_DST_PORT};
+
+  print("flowState->TUNNEL_TYPE = xpfTunnelNames.type2name(eventPointer.tunnelType);") if defined $resultFunctions{TUNNEL_TYPE};
+
+  print("flowState->TUNNEL_IPV4_SRC_ADDRESS = eventPointer.tunnelType==PAM2XPF_TUNNEL_NONE ? 0 : getIPV4Address(eventPointer.tunnelSrcIp);") if defined $resultFunctions{TUNNEL_IPV4_SRC_ADDRESS};
+  print("flowState->TUNNEL_IPV4_DST_ADDRESS = eventPointer.tunnelType==PAM2XPF_TUNNEL_NONE ? 0 : getIPV4Address(eventPointer.tunnelDstIp);") if defined $resultFunctions{TUNNEL_IPV4_DST_ADDRESS};
+
+  print("flowState->TUNNEL_IPV6_SRC_ADDRESS = eventPointer.tunnelType==PAM2XPF_TUNNEL_NONE ? SPL::blist<SPL::uint8,16>() : getIPV6Address(eventPointer.tunnelSrcIp);") if defined $resultFunctions{TUNNEL_IPV6_SRC_ADDRESS};
+  print("flowState->TUNNEL_IPV6_DST_ADDRESS = eventPointer.tunnelType==PAM2XPF_TUNNEL_NONE ? SPL::blist<SPL::uint8,16>() : getIPV6Address(eventPointer.tunnelDstIp);") if defined $resultFunctions{TUNNEL_IPV6_DST_ADDRESS};
+  %> ;
+
+  // copy fields from event header
+  flowState->TRANSACTION_ID = eventHeader.transactionId;
+
+  // initialize fields to be copied from 'struct pam2XpfApplicationFound' into state structure
+  flowState->FLOW_PROTOCOL_CONFIDENCE = (enum pam2XpfConfidence)0;
+  flowState->FLOW_PROTOCOL_DEPTH = 0;
+
+  // initialize fields to be copied from 'struct pam2XpfConnectionClosed' into flow state structure
+  flowState->SRC_PACKETS = 0;
+  flowState->DST_PACKETS = 0;
+  flowState->SRC_BYTES = 0;
+  flowState->DST_BYTES = 0;
+  flowState->DISCONNECT_REASON = "";
+
+  // initialize fields to be copied from pam2XpfTlsRecord into flow state structure
+  flowState->TLS_RECORD_TYPE = "";
+  flowState->TLS_RECORD_DIRECTION = "";
+  flowState->TLS_RECORD_LENGTH = 0;
+  flowState->TLS_RECORD_OFFSET = 0;
+  flowState->TLS_RECORD_MORE = false;
+  flowState->TLS_VERSION = "";
+  
+  // emit a 'flow started' tuple
+  if (!flowStarted) submitOutputTuple(EventFlowStart);
+}
+
+
+
+
+
+void MY_OPERATOR::processConnectionUpdateEvent(const pam2XpfHeader& eventHeader, const pam2XpfConnectionUpdate& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfConnectionUpdate)) THROW(SPLRuntimeOperator, "processConnectionUpdateEvent failed, ConnectionUpdate message size mis-match");
+}
+
+
+
+void MY_OPERATOR::processConnectionClosedEvent(const pam2XpfHeader& eventHeader, const pam2XpfConnectionClosed& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfConnectionClosed)) THROW(SPLRuntimeOperator, "processConnectionClosedEvent, ConnectionClose message size mis-match");
+
+  // calculate the FlowState key for this flow
+  uint64 flowID = eventHeader.flowId << 2;
+  switch(eventPointer.msgId) {
+  case XPF_MSG_UDP_CONN_CLOSED: flowID += 1; break;
+  case XPF_MSG_TCP_CONN_CLOSED: flowID += 2; break;
+  case XPF_MSG_ICMP_CONN_CLOSED: flowID += 3; break;
+  default: THROW(SPLRuntimeOperator, "this should never happen");
+  }
+  SPLLOG(L_TRACE, "processConnectionClosedEvent entered, flowID=" << flowID, "PacketContentAssembler");
+
+  // get the FlowState structure for this flow
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processConnectionClosedEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // copy fields from event header
+  flowState->flowDirection = eventHeader.flowDirection;
+  flowState->TRANSACTION_ID = eventHeader.transactionId;
+  <% # ;
+  print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION};
+  print("flowState->FLOW_PROTOCOL = pam2XpfGetProtocolName(pamInstanceHandle, eventHeader.protocolType);") if defined $resultFunctions{FLOW_PROTOCOL} || defined $resultFunctions{FILE_FORMAT};
+  %> ;
+
+  // send a final RequestTuple or ResponseTuple, if necessary
+  switch (flowState->rrState) {
+  case receivingRequestHeaders: 
+    submitOutputTuple(EventRequest); 
+    break;
+  case receivingResponseHeaders: 
+    submitOutputTuple(EventResponse); 
+    break;
+  case noRequestResponseState: 
+  case receivingRequestBody: 
+  case receivingResponseBody: 
+    break;
+  }
+
+  // store fields from 'struct pam2XpfConnectionClosed' in flow state structure, but only if really needed
+  flowState->END_TIME = eventTime;
+  <% # ;
+  print("flowState->SRC_PACKETS = eventPointer.srcPackets;") if defined $resultFunctions{SRC_PACKETS};
+  print("flowState->DST_PACKETS = eventPointer.dstPackets;") if defined $resultFunctions{DST_PACKETS};
+  print("flowState->SRC_BYTES = eventPointer.srcBytes;") if defined $resultFunctions{SRC_BYTES};
+  print("flowState->DST_BYTES = eventPointer.dstBytes;") if defined $resultFunctions{DST_BYTES};
+  print("flowState->DISCONNECT_REASON = xpfReasonNames.reason2name(eventPointer.reason);") if defined $resultFunctions{DISCONNECT_REASON};
+  %> ;
+
+  // close any files left open in this flow
+  SPLLOG(L_TRACE, "flowID=" << flowID << " left " << flowState->activeFileIDs.size() << " files open", "PacketContentAssembler");
+  for ( std::tr1::unordered_map<uint64, int32>::iterator i=flowState->activeFileIDs.begin() ; i != flowState->activeFileIDs.end(); i++ ) {
+
+    const uint64 fileID = i->first;
+    SPLLOG(L_TRACE, "closing file left open when connection closed, flowID=" << flowID << ", fileID=" << fileID, "PacketContentAssembler");
+    if ( !fileStates.count(fileID) ) THROW(SPLRuntimeOperator, "processConnectionClosedEvent failed, flowID=" << flowID << " fileID=" << fileID << " not allocated");
+    fileState = fileStates[fileID];
+    if (!fileState) THROW(SPLRuntimeOperator, "processConnectionClosedEvent failed, flowID=" << flowID << " fileID=" << fileID << " is null");
+
+    // send any data remaining in the file's buffer downstream without a 'final' flag 
+    if (fileState->FILE_DATA_LENGTH) submitOutputTuple(EventFileData, fileState->FILE_DATA_BUFFER);
+
+    // free the old FileState structure and its buffers
+    freeFileState(fileID);
+    fileState = NULL;
+  }
+
+  // emit a FlowEnd tuple, if necessary
+  submitOutputTuple(EventFlowEnd);
+
+  // free the old FlowState structure for this flow and remove it from the hash table
+  delete flowState;
+  flowStates.erase(flowID);
+  flowState = NULL;
+}
+
+
+
+
+
+
+void MY_OPERATOR::processTransportDataEvent(const pam2XpfHeader& eventHeader, const pam2XpfTransportData& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfTransportData)) THROW(SPLRuntimeOperator, "processTransportDataEvent failed, TransportData message size mis-match");
+
+  // calculate the FlowState key for this flow
+  uint64 flowID = eventHeader.flowId << 2;
+  switch(eventPointer.msgId) {
+  case XPF_MSG_UDP_TRANSPORT_DATA: flowID += 1; break;
+  case XPF_MSG_TCP_TRANSPORT_DATA: flowID += 2; break;
+  case XPF_MSG_ICMP_TRANSPORT_DATA: flowID += 3; break;
+  default: THROW(SPLRuntimeOperator, "this should never happen");
+  }
+
+  // get the FlowState structure for this flow
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processTransportDataEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // copy fields from event header
+  flowState->flowDirection = eventHeader.flowDirection;
+  flowState->TRANSACTION_ID = eventHeader.transactionId;
+  <% # ;
+  print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION};
+  print("flowState->FLOW_PROTOCOL = pam2XpfGetProtocolName(pamInstanceHandle, eventHeader.protocolType);") if defined $resultFunctions{FLOW_PROTOCOL} || defined $resultFunctions{FILE_FORMAT};
+  %> ;
+
+  // count transport data events
+  flowState->FLOW_DATA_COUNTER++;
+
+  submitOutputTuple(EventFlowData, eventPointer.data, eventPointer.dataLen);
+}
+
+
+
+
+void MY_OPERATOR::processTerminalProtocolEvent(const pam2XpfHeader& eventHeader, const pam2XpfTerminalProtocol& eventPointer) {
+}
+
+
+
+void MY_OPERATOR::processApplicationFoundEvent(const pam2XpfHeader& eventHeader, const pam2XpfApplicationFound& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfApplicationFound)) THROW(SPLRuntimeOperator, "processApplicationFoundEvent failed, ApplicationFound message size mis-match");
+
+  // get the FlowState structure for this flow
+  uint64 flowID = (eventHeader.flowId << 2) + 2;
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processApplicationFoundEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // copy fields from event header
+  flowState->flowDirection = eventHeader.flowDirection;
+  flowState->TRANSACTION_ID = eventHeader.transactionId;
+  <% # ;
+  print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION};
+  print("flowState->FLOW_PROTOCOL = pam2XpfGetProtocolName(pamInstanceHandle, eventHeader.protocolType);") if defined $resultFunctions{FLOW_PROTOCOL} || defined $resultFunctions{FILE_FORMAT};
+  print("flowState->FLOW_PROTOCOL_CONFIDENCE = eventPointer.confidence;") if defined $resultFunctions{FLOW_PROTOCOL_CONFIDENCE}; 
+  print("flowState->FLOW_PROTOCOL_DEPTH = eventPointer.depth;") if defined $resultFunctions{FLOW_PROTOCOL_DEPTH}; 
+  %> ;
+}
+
+
+
+void MY_OPERATOR::processApplicationURIEvent(const pam2XpfHeader& eventHeader, const pam2XpfApplicationURI& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfApplicationURI)) THROW(SPLRuntimeOperator, "processApplicationURIEvent failed, ApplicationURI message size mis-match");
+
+  // get the FlowState structure for this flow
+  uint64 flowID = (eventHeader.flowId << 2) + 2;
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processApplicationURIEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // copy fields from event header
+  flowState->TRANSACTION_ID = eventHeader.transactionId;
+  <% # ;
+  print("flowState->FLOW_PROTOCOL = pam2XpfGetProtocolName(pamInstanceHandle, eventHeader.protocolType);") if defined $resultFunctions{FLOW_PROTOCOL} || defined $resultFunctions{FILE_FORMAT};
+  %> ;
+
+  // update state variables as appropriate for request vs. response messages
+  switch (flowState->rrState) {
+  case noRequestResponseState:
+    flowState->flowDirection = eventHeader.flowDirection;
+    <% print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION}; %> ;
+    flowState->rrState = receivingRequestHeaders;
+    break;
+  case receivingRequestHeaders:
+    flowState->flowDirection = eventHeader.flowDirection;
+    <% print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION}; %> ;
+    break;
+  case receivingRequestBody: 
+    break;
+  case receivingResponseHeaders:
+  case receivingResponseBody:
+    submitOutputTuple(EventResponse);
+    flowState->REQUEST_HEADERS.clear();
+    flowState->RESPONSE_HEADERS.clear();
+    flowState->rrState = receivingRequestHeaders;
+    break;
+  }
+
+  // store a state variable with the implied HTTP method, if needed for output attributes
+  switch(eventPointer.msgId) {
+  case XPF_MSG_URI_HTTP_GET_RAW: 
+  case XPF_MSG_URI_HTTP_GET_COOKED: 
+    flowState->URI_METHOD = "GET"; 
+    break;
+  case XPF_MSG_URI_HTTP_POST_RAW: 
+  case XPF_MSG_URI_HTTP_POST_COOKED: 
+    flowState->URI_METHOD = "POST"; 
+    break;
+  case XPF_MSG_URI_SIP_REGISTER_RAW: 
+    break;
+  default: 
+    THROW(SPLRuntimeOperator, "this should never happen");
+  }
+
+  // store the decomposed URI fields in the flow state structure, if needed for output attributes
+  <% # ;
+  print("flowState->URI_SCHEME = eventPointer.scheme && eventPointer.schemeLen ? SPL::rstring(eventPointer.scheme, eventPointer.schemeLen) : SPL::rstring();") if defined $resultFunctions{FLOW_REQUEST_URI_SCHEME}; 
+  print("flowState->URI_USERNAME = eventPointer.user && eventPointer.userLen ? SPL::rstring(eventPointer.user, eventPointer.userLen) : SPL::rstring();") if defined $resultFunctions{FLOW_REQUEST_URI_USERNAME}; 
+  print("flowState->URI_AUTHORITY = eventPointer.authority && eventPointer.authorityLen ? SPL::rstring(eventPointer.authority, eventPointer.authorityLen) : SPL::rstring();") if defined $resultFunctions{FLOW_REQUEST_URI_AUTHORITY}; 
+  #print("flowState->URI_PORT = 0;") # eventPointer.port, not implemented yet
+  print("flowState->URI_PORT = eventPointer.port ? *eventPointer.port : 0;") if defined $resultFunctions{FLOW_REQUEST_URI_PORT}; 
+  print("flowState->URI_PATH = eventPointer.hostPath && eventPointer.hostPathLen ? SPL::rstring(eventPointer.hostPath, eventPointer.hostPathLen) : SPL::rstring();") if defined $resultFunctions{FLOW_REQUEST_URI_PATH}; 
+  print("flowState->URI_QUERY = eventPointer.queryArg && eventPointer.queryArgLen ? SPL::rstring(eventPointer.queryArg, eventPointer.queryArgLen) : SPL::rstring();") if defined $resultFunctions{FLOW_REQUEST_URI_QUERY}; 
+  print("//flowState->URI_FRAGMENT = eventPointer.fragment && eventPointer.fragmentLen && eventPointer.fragmentLen!=0xFFFFFFFF ? SPL::rstring((const char*)eventPointer.fragment, eventPointer.fragmentLen) : SPL::rstring();") if defined $resultFunctions{FLOW_REQUEST_URI_FRAGMENT}; 
+  %> ;
+
+  <% if (defined $resultFunctions{FLOW_REQUEST_URI_RAW} || defined $resultFunctions{FLOW_REQUEST_URI_NORMALIZED}) { %>
+    // reassemble the URI, if needed for output attributes
+    SPL::rstring uri;
+    if (eventPointer.scheme && eventPointer.schemeLen) uri.append(eventPointer.scheme, eventPointer.schemeLen).append("://");
+    if (eventPointer.user && eventPointer.userLen) uri.append(eventPointer.user, eventPointer.userLen).append("@");
+    if (eventPointer.authority && eventPointer.authorityLen) uri.append(eventPointer.authority, eventPointer.authorityLen);
+    //if (eventPointer.port) uri.append(":").append(itos(*eventPointer.port)); // not implemented yet
+    if (eventPointer.hostPath && eventPointer.hostPathLen) uri.append(eventPointer.hostPath, eventPointer.hostPathLen);
+    if (eventPointer.queryArg && eventPointer.queryArgLen) uri.append("?").append(eventPointer.queryArg, eventPointer.queryArgLen);
+    //if (eventPointer.fragment && eventPointer.fragmentLen && eventPointer.fragmentLen!=0xFFFFFFFF) uri.append("#").append((const char*)eventPointer.fragment, eventPointer.fragmentLen); // not implemented yet
+
+    // store the URI as a state variable, if needed for output attributes
+    switch(eventPointer.msgId) {
+    case XPF_MSG_URI_HTTP_GET_RAW: flowState->URI_RAW = uri; break;
+    case XPF_MSG_URI_HTTP_POST_RAW: flowState->URI_RAW = uri; break;
+    case XPF_MSG_URI_HTTP_GET_COOKED: flowState->URI_NORMALIZED = uri; break;
+    case XPF_MSG_URI_HTTP_POST_COOKED: flowState->URI_NORMALIZED = uri; break;
+    case XPF_MSG_URI_SIP_REGISTER_RAW: break;
+    default: THROW(SPLRuntimeOperator, "this should never happen");
+    }
+    <% } %> ;
+}
+
+
+
+void MY_OPERATOR::processApplicationHeaderEvent(const pam2XpfHeader& eventHeader, const pam2XpfApplicationHeader& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfApplicationHeader)) THROW(SPLRuntimeOperator, "processApplicationHeaderEvent failed, ApplicationHeader message size mis-match");
+
+  // get the FlowState structure for this flow
+  uint64 flowID = (eventHeader.flowId << 2) + 2;
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processApplicationHeaderEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // copy fields from event header
+  flowState->TRANSACTION_ID = eventHeader.transactionId;
+  <% # ;
+  print("flowState->FLOW_PROTOCOL = pam2XpfGetProtocolName(pamInstanceHandle, eventHeader.protocolType);") if defined $resultFunctions{FLOW_PROTOCOL} || defined $resultFunctions{FILE_FORMAT};
+  %> ;
+
+  // update state variables as appropriate for request vs. response headers
+  switch (flowState->rrState) {
+  case noRequestResponseState:
+    flowState->flowDirection = eventHeader.flowDirection;
+    <% print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION}; %> ;
+    flowState->rrState = receivingRequestHeaders;
+    break;
+  case receivingRequestHeaders:
+    if (flowState->flowDirection != eventHeader.flowDirection) {
+      submitOutputTuple(EventRequest);
+      flowState->rrState = receivingResponseHeaders;
+    }
+    break;
+  case receivingRequestBody:
+    flowState->rrState = receivingResponseHeaders;
+    break;
+  case receivingResponseHeaders:
+    if (flowState->flowDirection == eventHeader.flowDirection) {
+      submitOutputTuple(EventResponse);
+      <% if ( defined $resultFunctions{FLOW_REQUEST_HEADERS} || defined $resultFunctions{FLOW_RESPONSE_HEADERS} ) { %> ;
+        flowState->REQUEST_HEADERS.clear();
+        flowState->RESPONSE_HEADERS.clear();
+        <% } %> ;
+      flowState->rrState = receivingRequestHeaders;
+    }
+    break;
+  case receivingResponseBody:
+    <% if ( defined $resultFunctions{FLOW_REQUEST_HEADERS} || defined $resultFunctions{FLOW_RESPONSE_HEADERS} ) { %> ;
+      flowState->REQUEST_HEADERS.clear();
+      flowState->RESPONSE_HEADERS.clear();
+      <% } %> ;
+    flowState->rrState = receivingRequestHeaders;
+    break;
+  }
+
+  // add this header's name&value to the appropriate list
+  <% if ( defined $resultFunctions{FLOW_REQUEST_HEADERS} || defined $resultFunctions{FLOW_RESPONSE_HEADERS} ) { %> ;
+  const SPL::rstring headerPair = SPL::rstring((const char*)eventPointer.name, eventPointer.nameLen).append(":").append(SPL::rstring((const char*)eventPointer.value, eventPointer.valueLen));
+  ( flowState->flowDirection==eventHeader.flowDirection ? flowState->REQUEST_HEADERS : flowState->RESPONSE_HEADERS ).add(headerPair);
+  <% } %> ;
+}
+
+
+
+
+void MY_OPERATOR::processHTTPResponseEvent(const pam2XpfHeader& eventHeader, const pam2XpfHttpResponse& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfHttpResponse)) THROW(SPLRuntimeOperator, "processHTTPResponseEvent failed, HTTPResponse message size mis-match");
+
+  // get the FlowState structure for this flow
+  uint64 flowID = (eventHeader.flowId << 2) + 2;
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processHTTPResponseEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // copy fields from event header
+  flowState->flowDirection = eventHeader.flowDirection;
+  flowState->TRANSACTION_ID = eventHeader.transactionId;
+  <% # ;
+  print("flowState->FLOW_DIRECTION = xpfDirectionNames.direction2name(eventHeader.flowDirection);") if defined $resultFunctions{FLOW_DIRECTION};
+  print("flowState->FLOW_PROTOCOL = pam2XpfGetProtocolName(pamInstanceHandle, eventHeader.protocolType);") if defined $resultFunctions{FLOW_PROTOCOL} || defined $resultFunctions{FILE_FORMAT};
+  %> ;
+
+  // save the HTTP response code, in case its needed for an output attribute
+  flowState->HTTP_STATUS_CODE = eventPointer.statusCode;
+}
+
+
+
+
+
+
+FileState* MY_OPERATOR::allocateFileState(const uint64 fileID) { // note that flowState must be set
+
+  // basic safety checks
+  if ( fileStates.count(fileID) ) THROW(SPLRuntimeOperator, "allocateFileState failed, fileID=" << fileID << " already allocated");
+  if ( flowState->activeFileIDs.count(fileID) ) THROW(SPLRuntimeOperator, "allocateFileState failed, fileID=" << fileID << " already in flowID=" << flowState->FLOW_ID);
+
+  // allocate (but do not initialize) a new FileState strucure
+  FileState* fileState = new FileState;
+  fileStates[fileID] = fileState;
+
+  // remember that this file is part of this flow
+  flowState->activeFileIDs[fileID] = 1;
+
+  // return the address of the new FileState structure
+  SPLLOG(L_TRACE, "allocated FileState for flowID=" << flowState->FLOW_ID << ", fileID=" << fileID, "PacketContentAssembler");
+  return fileState;
+}
+
+
+
+
+
+void MY_OPERATOR::freeFileState(const uint64 fileID) { // note that file's flowState may be gone
+		 											
+  // basic safety checks
+  if ( !fileStates.count(fileID) ) THROW(SPLRuntimeOperator, "freeFileState failed, fileID=" << fileID << " not allocated");
+  if ( fileStates[fileID]->FILE_ID != fileID ) THROW(SPLRuntimeOperator, "freeFileState failed, found wrong FileState structure");
+
+  // remove this file from its flow, if there is one
+  const uint64 flowID = fileState->FLOW_ID;
+  if ( flowStates.count(flowID) ) flowStates[flowID]->activeFileIDs.erase(fileID);
+
+  // free the old FileState structure and remove it from the hash table
+  delete fileStates[fileID];
+  fileStates.erase(fileID);		
+  SPLLOG(L_TRACE, "freed FileState for flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+}
+
+
+
+
+
+void MY_OPERATOR::processFileStartEvent(const pam2XpfHeader& eventHeader, const pam2XpfFileStart& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfFileStart)) THROW(SPLRuntimeOperator, "processFileStartEvent failed, FileStart message size mis-match");
+
+  // calculate the identifier of the flow containing the file, and find its FlowState structure
+  const uint64 flowID = (eventHeader.flowId << 2) + 2;
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processFileStartEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // get the identifier for the new file
+  const uint64 fileID = eventPointer.streamKey;
+  SPLLOG(L_TRACE, "processFileStartEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+
+  // if maximum number of open files is limited, check that limit before opening this file
+  if (maximumFilesPerFlow && flowState->activeFileIDs.size()>=maximumFilesPerFlow) { 
+    SPLLOG(L_TRACE, "flowID=" << flowID << " reached maximum open file limit of " << flowState->activeFileIDs.size(), "PacketContentAssembler"); 
+    return;
+  } 
+
+  // allocate a new FileState structure for this file
+  fileState = allocateFileState(fileID);
+
+  // initialize fields in FileState structure that will be needed for output attributes
+  fileState->FLOW_ID = flowID;
+  fileState->FILE_ID = fileID;
+  fileState->FILE_CONTENT_LENGTH = eventPointer.contentLen;
+  fileState->FILE_DATA_LENGTH = 0;
+  fileState->FILE_DATA_LENGTH_SUM = 0;
+  fileState->FILE_DATA_COUNTER = 0;
+  fileState->FILE_DATA_INITIAL = true;
+  fileState->FILE_DATA_FINAL = false;
+
+  <% # ;
+  print("fileState->FILE_ID_PARENT = eventPointer.streamKeyParent;") if defined $resultFunctions{FILE_ID_PARENT}; 
+  print("fileState->FILE_NAME = eventPointer.fileName && eventPointer.fileNameLen ? std::string(eventPointer.fileName, eventPointer.fileNameLen) : \"\";") if defined $resultFunctions{FILE_NAME}; 
+  print("fileState->FILE_CONTENT_TYPE = SPL::rstring(eventPointer.mimeType, eventPointer.mimeTypeLen);")  if defined $resultFunctions{FILE_CONTENT_TYPE};
+  print("fileState->FILE_CONTENT_CHARSET = SPL::rstring(eventPointer.mimeCharset, /* ??? eventPointer.mimeCharsetLen ??? */ 0 );") if defined $resultFunctions{FILE_CONTENT_CHARSET}; 
+  print("fileState->FILE_DATA_BUFFER.reserve(fileDataChunkSize);") if defined $resultFunctions{FILE_DATA_CHUNK_BINARY} || defined $resultFunctions{FILE_DATA_CHUNK_STRING};
+  %> ;
+
+  // send a RequestTuple or ResponseTuple, if necessary, and advance to the next state
+  switch (flowState->rrState) {
+  case noRequestResponseState: break;
+  case receivingRequestHeaders:
+    submitOutputTuple(EventRequest);
+    flowState->rrState = receivingRequestBody;
+    break;
+  case receivingRequestBody: break;
+  case receivingResponseHeaders:
+    submitOutputTuple(EventResponse);
+    flowState->rrState = receivingResponseBody;
+    break;
+  case receivingResponseBody: break;
+  }
+}
+
+
+
+
+void MY_OPERATOR::processFileDataEvent(const pam2XpfHeader& eventHeader, const pam2XpfFileData& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfFileData)) THROW(SPLRuntimeOperator, "processFileDataEvent failed, FileData message size mis-match");
+
+  // if there is no data in this event, ignore it
+  if (!(eventPointer.data && eventPointer.dataLen)) return;
+
+  // find FileState structure for this file, if there is one
+  const uint64_t fileID = eventPointer.streamKey;
+  if ( ! fileStates.count(fileID) ) return;
+  fileState = fileStates[fileID];
+  if ( fileState->FILE_ID != fileID ) THROW(SPLRuntimeOperator, "processFileDataEvent failed, found wrong FileState structure");
+
+  // find FlowState structure for this file's flow
+  const uint64 flowID = fileState->FLOW_ID;
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processFileDataEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+  SPLLOG(L_TRACE, "processFileDataEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+
+  // keep track of how much data we have accumulated for this file
+  fileState->FILE_DATA_LENGTH += eventPointer.dataLen;
+  fileState->FILE_DATA_LENGTH_SUM += eventPointer.dataLen;
+
+  <% if ( defined $resultFunctions{FILE_DATA_CHUNK_BINARY} || defined $resultFunctions{FILE_DATA_CHUNK_STRING} ) { %> 
+
+    // submit whatever file data is already in buffer if this fragment doesn't fit in it
+    if ( fileState->FILE_DATA_BUFFER.size() + eventPointer.dataLen > fileState->FILE_DATA_BUFFER.capacity() && !fileState->FILE_DATA_BUFFER.empty() ) {
+      SPLLOG(L_TRACE, "file " << fileState->FILE_ID << " buffer " << fileState->FILE_DATA_COUNTER << " submitted with " << fileState->FILE_DATA_BUFFER.size() << " bytes", "PacketContentAssembler");
+      submitOutputTuple(EventFileData, fileState->FILE_DATA_BUFFER);
+      fileState->FILE_DATA_BUFFER.clear();
+      fileState->FILE_DATA_COUNTER++;
+      fileState->FILE_DATA_LENGTH = 0; }
+
+    // submit this file data fragement by itself it it doesn't fit in empty buffer of maximum size
+    if ( fileState->FILE_DATA_BUFFER.size() + eventPointer.dataLen > fileState->FILE_DATA_BUFFER.capacity() ) {
+      SPLLOG(L_TRACE, "file " << fileState->FILE_ID << " fragment submitted with " << eventPointer.dataLen << " bytes", "PacketContentAssembler");
+      submitOutputTuple(EventFileData, eventPointer.data, eventPointer.dataLen);
+      fileState->FILE_DATA_COUNTER++;
+      return; }
+  
+    // append this file data fragement to the buffer
+    fileState->FILE_DATA_BUFFER.append(eventPointer.data, eventPointer.dataLen);
+
+    <% } %> ;
+}
+
+
+
+
+void MY_OPERATOR::processFileEndEvent(const pam2XpfHeader& eventHeader, const pam2XpfFileEnd& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfFileEnd)) THROW(SPLRuntimeOperator, "processFileEndEvent failed, FileEnd message size mis-match");
+
+  // find FileState structure for this file, if there is one
+  const uint64_t fileID = eventPointer.streamKey;
+  if ( ! fileStates.count(fileID) ) return;
+  fileState = fileStates[fileID];
+  if ( fileState->FILE_ID != fileID ) THROW(SPLRuntimeOperator, "processFileDataEvent failed, found wrong FileState structure");
+
+  // find FlowState structure for this file's flow, if there is one
+  const uint64 flowID = fileState->FLOW_ID;
+  if ( flowStates.count(flowID) && flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processFileEndEvent failed, found wrong FlowState structure");
+  SPLLOG(L_TRACE, "processFileEndEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+  
+  // if we have received any data at all for this file, send a chunk downstream
+  // (even if the chunk buffer is empty), to make sure downstream operators get
+  // a tuple with the 'final' flag set, even though the data may be truncated
+  if (flowState && fileState->FILE_DATA_LENGTH_SUM) {
+    fileState->FILE_DATA_FINAL = true;
+    submitOutputTuple(EventFileData, fileState->FILE_DATA_BUFFER);
+  }
+  
+  // free the old FileState structure and its buffers
+  freeFileState(fileID);
+  fileState = NULL;
+}
+
+
+
+
+
+ void MY_OPERATOR::processTLSProtocolEvent(const pam2XpfHeader& eventHeader, const pam2XpfTlsRecord& eventPointer) {
+
+  // basic sanity checks on XPF event
+  if (eventPointer.msgLen != sizeof(pam2XpfTlsRecord)) THROW(SPLRuntimeOperator, "processTLSProtocolEvent failed, TlsRecord message size mis-match");
+
+  SPLLOG(L_TRACE, "TLS " << 
+    tlsRecordNames.recordType2name(eventPointer.recordType) <<
+    ( eventPointer.isRequest ? " request" : " response" ) <<
+    ", recordLength=" << eventPointer.recordLen <<
+    ", recordOffset=" << eventPointer.recordOfs <<
+    ", bufferLength=" << eventPointer.bufferLen <<
+    ", moreFragments=" << (bool)eventPointer.moreFragments <<
+    ", version=" << (int)eventPointer.verMajor << "." << (int)eventPointer.verMinor 
+    , "PacketContentAssembler");
+  
+  // get the FlowState structure for this flow
+  uint64 flowID = (eventHeader.flowId << 2) + 2;
+  if ( ! flowStates.count(flowID) ) return;
+  if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processTLSProtocolEvent failed, found wrong FlowState structure");
+  flowState = flowStates[flowID];
+
+  // save TLS fields in flow state structure
+  flowState->TLS_RECORD_TYPE = tlsRecordNames.recordType2name(eventPointer.recordType);
+  flowState->TLS_RECORD_DIRECTION = eventPointer.isRequest ? "request" : "response";
+  flowState->TLS_RECORD_LENGTH =  eventPointer.recordLen;
+  flowState->TLS_RECORD_OFFSET = eventPointer.recordOfs;
+  flowState->TLS_RECORD_MORE = (bool)eventPointer.moreFragments;
+  char tlsVersion[100];
+  sprintf(tlsVersion, "%d.%d", eventPointer.verMajor, eventPointer.verMinor);
+  flowState->TLS_VERSION = tlsVersion;
+  submitOutputTuple(EventFlowTLS, eventPointer.recordContents, eventPointer.bufferLen);
+}
+      
+
+
+
+void MY_OPERATOR::processTCPParamsEvent(const pam2XpfHeader& eventHeader, const pam2XpfTcpParams& eventPointer) {
+}
+
+
+      
+
+void MY_OPERATOR::processDNSResponseEvent(const pam2XpfHeader& eventHeader, const pam2XpfDnsResponse& eventPointer) {
+}
+
+
+
+
+
+
+
+// submit a non-FileData output tuple
+void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data, const uint32_t length ) {
+
+  SPLLOG(L_TRACE, "entering submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
+
+  // store arguments for result functions
+  outputEvent = event;
+  THIS_DATA_POINTER = (uint8_t*)data;
+  THIS_DATA_LENGTH = length;
+
+  // address the current input tuple
+  IPort0Type const & iport$0 = *inTuple;
+  
+  // fill in and submit output tuples to output ports, as selected by output filters, if specified
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %>
+         {
+           outTuple<%=$i%>.clear();
+           outTuple<%=$i%>.assignFrom(iport$0, false);
+           <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
+           SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketContentAssembler");
+           submit(outTuple<%=$i%>, <%=$i%>);
+         }
+         <% } %> ;
+
+  THIS_DATA_POINTER = NULL; 
+  THIS_DATA_LENGTH = 0;
+  
+  SPLLOG(L_TRACE, "leaving submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
+}
+
+
+
+#if 0
+// submit a FileData tuple
+void MY_OPERATOR::submitOutputTupleFileData(const uint8_t* data,const uint32_t length ) {
+
+  SPLLOG(L_TRACE, "entering submitOutputTupleFileData() ...", "PacketContentAssembler");
+
+  // store arguments for result functions
+  outputEvent = EventFileData;
+  THIS_DATA_POINTER = (uint8_t*)data;
+  THIS_DATA_LENGTH = length;
+
+  // address the current input tuple
+  IPort0Type const & iport$0 = *inTuple;
+
+  // fill in and submit output tuples to output ports, as selected by output filters, if specified
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %>
+         {
+           outTuple<%=$i%>.clear();
+           outTuple<%=$i%>.assignFrom(iport$0, false);
+           <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
+           SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketContentAssembler");
+           submit(outTuple<%=$i%>, <%=$i%>);
+         }
+         <% } %> ;
+
+  // any subsequent data tuples for this file are not the first chunk
+  fileState->FILE_DATA_INITIAL = false; 
+  THIS_DATA_POINTER = NULL; 
+  THIS_DATA_LENGTH = 0;
+  
+  SPLLOG(L_TRACE, "leaving submitOutputTupleFileData() ...", "PacketContentAssembler");
+}
+#endif
+
+
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
+
+  // initialize operator parameters
+  fileDataChunkSize = <%=$fileDataChunkSize%>;
+  maximumFilesPerFlow = <%=$maximumFilesPerFlow%>;
+  pamLibrary = "<%=$pamLibrary%>"; 
+  <% foreach my $parameter (@pamTuning) { print "pamTuning.push_back($parameter); " } %> ;
+
+  // initialize operator state variables
+  packetNumber = 0;
+  flowHighWaterMark = 0;
+  fileHighWaterMark = 0;
+
+  // load the PAM library
+  SPLLOG(L_INFO, "loading '" << pamLibrary << "' library", "PacketContentAssembler");
+  pamLibraryHandle = dlopen(pamLibrary, RTLD_NOW);
+  if (!pamLibraryHandle) THROW(SPLRuntimeOperator, "dlopen(pamLibrary) failed, " << dlerror());
+
+  // get the addresses of the three functions exported by the PAM library
+  pam2GetFunction = reinterpret_cast<PFN_pam2GetFunction>(dlsym(pamLibraryHandle, "pam2GetFunction"));
+  if (!pam2GetFunction) THROW(SPLRuntimeOperator, "dlsym(pam2GetFunction) failed, " << dlerror());
+
+  pam2GetVersion = reinterpret_cast<PFN_pam2GetVersion>(dlsym(pamLibraryHandle, "pam2GetVersion"));
+  if (!pam2GetVersion) THROW(SPLRuntimeOperator, "dlsym(pam2GetVersion) failed, " << dlerror());
+
+  pam2CheckVersion = reinterpret_cast<PFN_pam2CheckVersion>(dlsym(pamLibraryHandle, "pam2CheckVersion"));
+  if (!pam2CheckVersion) THROW(SPLRuntimeOperator, "dlsym(pam2CheckVersion) failed, " << dlerror());
+
+  // make sure the "iss-pam1.so" file used at run-time matches the 'pam.h' file used at compile-time
+  if (!pam2CheckVersion(PAM2_MAJOR_VERSION, PAM2_MINOR_VERSION, PAM_BUILD_YEAR, PAM_BUILD_DAY)) THROW(SPLRuntimeOperator, "pam2CheckVersion() failed");
+
+  // get the addresses of the non-exported PAM functions used by this operator
+
+  pam2Initialize = reinterpret_cast<PFN_pam2Initialize>( pam2GetFunction(Function__pam2Initialize) );
+  if (!pam2Initialize) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2Initialize) failed");
+
+  pam2Finalize = reinterpret_cast<PFN_pam2Finalize>( pam2GetFunction(Function__pam2Finalize) );
+  if (!pam2Finalize) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2Finalize) failed");
+
+  pam2CreateAnalysisContext = reinterpret_cast<PFN_pam2CreateAnalysisContext>( pam2GetFunction(Function__pam2CreateAnalysisContext) );
+  if (!pam2CreateAnalysisContext) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2CreateAnalysisContext) failed");
+
+  pam2DestroyAnalysisContext = reinterpret_cast<PFN_pam2DestroyAnalysisContext>( pam2GetFunction(Function__pam2DestroyAnalysisContext) );
+  if (!pam2DestroyAnalysisContext) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2DestroyAnalysisContext) failed");
+
+  pam2CreateInstance = reinterpret_cast<PFN_pam2CreateInstance>( pam2GetFunction(Function__pam2CreateInstance) );
+  if (!pam2CreateInstance) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2CreateInstance) failed");
+
+  pam2DestroyInstance = reinterpret_cast<PFN_pam2DestroyInstance>( pam2GetFunction(Function__pam2DestroyInstance) );
+  if (!pam2DestroyInstance) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2DestroyInstance) failed");
+
+  pam2ConfigRetrieve = reinterpret_cast<PFN_pam2ConfigRetrieve>( pam2GetFunction(Function__pam2ConfigRetrieve) );
+  if (!pam2ConfigRetrieve) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2ConfigRetrieve) failed");
+
+  pam2ConfigDestroy = reinterpret_cast<PFN_pam2ConfigDestroy>( pam2GetFunction(Function__pam2ConfigDestroy) );
+  if (!pam2ConfigDestroy) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2ConfigDestroy) failed");
+
+  pam2ConfigSetParameter = reinterpret_cast<PFN_pam2ConfigSetParameter>( pam2GetFunction(Function__pam2ConfigSetParameter) );
+  if (!pam2ConfigSetParameter) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2ConfigSetParameter) failed");
+
+  pam2ConfigApply = reinterpret_cast<PFN_pam2ConfigApply>( pam2GetFunction(Function__pam2ConfigApply) );
+  if (!pam2ConfigApply) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2ConfigApply) failed");
+
+  pam2Analyze = reinterpret_cast<PFN_pam2Analyze>( pam2GetFunction(Function__pam2Analyze) );
+  if (!pam2Analyze) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2Analyze) failed");
+
+  pam2XpfGetProtocolName = reinterpret_cast<PFN_pam2XpfGetProtocolName>( pam2GetFunction(Function__pam2XpfGetProtocolName) );
+  if (!pam2XpfGetProtocolName) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2XpfGetProtocolName) failed");
+
+  pam2XpfGetProtocolType = reinterpret_cast<PFN_pam2XpfGetProtocolType>( pam2GetFunction(Function__pam2XpfGetProtocolType) );
+  if (!pam2XpfGetProtocolType) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2XpfGetProtocolType) failed");
+
+  pam2Housekeeping = reinterpret_cast<PFN_pam2Housekeeping>( pam2GetFunction(Function__pam2Housekeeping) );
+  if (!pam2Housekeeping) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2Housekeeping) failed");
+
+  pam2XpfInitialize = reinterpret_cast<PFN_pam2XpfInitialize>( pam2GetFunction(Function__pam2XpfInitialize) );
+  if (!pam2XpfInitialize) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2XpfInitialize) failed");
+
+  pam2XpfFinalize = reinterpret_cast<PFN_pam2XpfFinalize>( pam2GetFunction(Function__pam2XpfFinalize) );
+  if (!pam2XpfFinalize) THROW(SPLRuntimeOperator, "pam2GetFunction(pam2XpfFinalize) failed");
+
+  // display the PAM library version
+  const char* version = pam2GetVersion();
+  SPLLOG(L_INFO, "PAM library version is '" << version << "'", "PacketContentAssembler");
+
+  // initialize the PAM library 
+  const bool manageHeap = true;
+  const uint32_t  numProcessorHeaps = 1;
+  pam2Initialize(manageHeap, numProcessorHeaps, NULL, NULL, &allocatePage, &freePage, NULL);
+
+  // restrict the PAM library to one thread for now
+  const uint32_t threadCount = 1;
+  pamAnalysisContextHandle = pam2CreateAnalysisContext(threadCount);
+
+  // No IPS event reporting implementing yet
+  memset(&pamReportNotifications, 0, sizeof(pamReportNotifications));
+
+  // create an instance of PAM using version 2 of the API
+  const bool isPacketAnalyzer = true;
+  const char* pamInstanceName = "xpfshell"; // must be "xpfshell" or pam2ConfigSetParameter("pam.sensor.type.hint") fails 
+  pamInstanceHandle = pam2CreateInstance(pamAnalysisContextHandle, pamInstanceName, isPacketAnalyzer, pamReportNotifications, 0, static_cast<void*>(this));
+  if (!pamInstanceHandle) THROW(SPLRuntimeOperator, "pam2CreateInstance failed");
+
+  // set required PAM parameters
+  pamConfigHandle = pam2ConfigRetrieve(pamAnalysisContextHandle, &configurationErrorCallback, this);
+  if (!pamConfigHandle) THROW(SPLRuntimeOperator, "pam2ConfigRetrieve failed");
+
+  pam2ParameterStatus parameterStatus;
+  SPLLOG(L_INFO, "configuring PAM library with 'pam.sensor.type.hint=" << pamInstanceName << "'", "PacketContentAssembler");
+  parameterStatus = pam2ConfigSetParameter(pamConfigHandle, "pam.sensor.type.hint", pamInstanceName);
+  if (parameterStatus != PARM_STATUS_OK) THROW(SPLRuntimeOperator, "pam2ConfigSetParameter(pam.sensor.type.hint," << pamInstanceName << ") failed");
+
+  SPLLOG(L_INFO, "configuring PAM library with 'pam.debug.fragroute=false'", "PacketContentAssembler");
+  parameterStatus = pam2ConfigSetParameter(pamConfigHandle, "pam.debug.fragroute", "false");
+  if (parameterStatus != PARM_STATUS_OK) THROW(SPLRuntimeOperator, "pam2ConfigSetParameter(pam.debug.fragroute,false) failed");
+
+  // set additional PAM parameters
+  for (std::vector<std::string>::iterator i = pamTuning.begin() ; i != pamTuning.end(); ++i) {
+    std::string parameter = *i;
+    const size_t equals = parameter.find("=");
+    if (equals==std::string::npos) THROW(SPLRuntimeOperator, "pamTuning parameter '" << parameter << "' not of form 'name=value'");
+    const std::string name(parameter.substr(0,equals));
+    const std::string value(parameter.substr(equals+1));
+    SPLLOG(L_INFO, "configuring PAM library with '" << name << "=" << value << "'", "PacketContentAssembler");
+    parameterStatus = pam2ConfigSetParameter(pamConfigHandle, name.c_str(), value.c_str());
+    if (parameterStatus!=PARM_STATUS_OK) THROW(SPLRuntimeOperator, "pam2ConfigSetParameter(" << name << "," << value << ") failed");
+  }
+
+  // apply required and additional parameters to PAM instance
+  const bool configApplied = pam2ConfigApply(pamInstanceHandle, pamConfigHandle);
+  if (!configApplied) THROW(SPLRuntimeOperator, "pam2ConfigApply failed");
+
+  // initialize XPF layer of PAM
+  const bool xpfInitialized = pam2XpfInitialize(pamInstanceHandle, XPF_VERSION_RELEASE, &xpfCallback, this);
+  if (!xpfInitialized) THROW(SPLRuntimeOperator, "pam2XpfInitialize failed");
+
+  // log file data buffer size to be used
+  SPLLOG(L_INFO, "file data buffer size " << fileDataChunkSize << " bytes", "PacketContentAssembler");
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
+}
+
+
+
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() 
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "PacketContentAssembler");
+
+  // close the PAM libary 
+  pam2XpfFinalize(pamInstanceHandle);
+  pam2DestroyInstance(pamInstanceHandle);
+  pam2DestroyAnalysisContext(pamAnalysisContextHandle);
+  //pam2Finalize(); // fails if called more than once, when multiple operators are fused
+  dlclose(pamLibraryHandle);
+
+  // delete all of the FlowState and FileState structures that are currently allocated
+  uint32_t openFlows = 0;
+  uint32_t openFiles = 0;
+  for (std::tr1::unordered_map<uint64, struct FlowState*>::iterator i = flowStates.begin(); i!=flowStates.end(); ++i) {
+  
+    // address the FlowState structure for this flow
+    const uint64_t flowID = i->first;
+    struct FlowState* flowState = i->second;
+
+    // delete all FileState structures in this flow
+    if ( ! flowState->activeFileIDs.empty() ) SPLLOG(L_TRACE, "deleting " << flowState->activeFileIDs.size() << " open files of flow " << flowID, "PacketContentAssembler");
+    for (std::tr1::unordered_map<uint64, int32>::iterator j = flowState->activeFileIDs.begin(); j!=flowState->activeFileIDs.end(); ++j) {
+      const uint64_t fileID = j->first;
+      struct FileState* fileState = fileStates[fileID];
+      delete fileState;
+      fileStates.erase(fileID);
+      openFiles++;
+      SPLLOG(L_TRACE, "deleted FileState for flowID=" << flowID << ", fileID=" << fileID, "PacketContentAssembler");
+    }
+    flowState->activeFileIDs.clear();
+
+    // delete this FlowState structure
+    delete flowState;
+    openFlows++;
+    SPLLOG(L_TRACE, "deleted orphan flowID=" << flowID, "PacketContentAssembler");
+  }
+  flowStates.clear();
+
+  SPLLOG(L_INFO, "PacketContentAssembler at shutdown: " << openFlows << " open flows containing " << openFiles << " open files", "PacketContentAssembler");
+  SPLLOG(L_INFO, "PacketContentAssembler high water marks: " << flowHighWaterMark << " flows, " << fileHighWaterMark << " files", "PacketContentAssembler");
+  SPLLOG(L_INFO, "PacketContentAssembler orphans: " << fileStates.size() << " open files without flows", "PacketContentAssembler");
+  
+  // if any FileState structures are still allocated, delete them now
+  SPLLOG(L_TRACE, "deleting " << fileStates.size() << " orphaned files", "PacketContentAssembler");
+  for (std::tr1::unordered_map<uint64, struct FileState*>::iterator i = fileStates.begin(); i!=fileStates.end(); ++i) {
+    const uint64_t fileID = i->first;
+    struct FileState* fileState = i->second;
+    delete fileState;
+    SPLLOG(L_TRACE, "deleted orphaned file " << fileID << " left allocated by flow " << fileState->FLOW_ID, "PacketContentAssembler");
+  }
+  fileStates.clear();
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "PacketContentAssembler");
+}
+
+
+
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketContentAssembler");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketContentAssembler");
+}
+
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+}
+
+// Processing for source and threaded operators
+void MY_OPERATOR::process(uint32_t idx)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+}
+
+// Tuple processing for mutating ports
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+}
+
+
+
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+  SPL::AutoPortMutex am(processMutex, *this);
+
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+
+  // increment packet counter
+  if (!packetNumber) SPLLOG(L_INFO, "PacketContentAssembler processing started ...", "PacketContentAssembler"); 
+  packetNumber++;
+
+  // save address of input tuple, in case we need to copy input attributes to output tuples
+  inTuple = &tuple;
+
+  // get the length and address of the packet data from the input tuple
+  IPort0Type const & iport$0 = tuple;
+  const uint64_t length = <%=$packetAttribute%>.getSize();
+  const unsigned char* packet = <%=$packetAttribute%>.getData();
+
+  // get a timestamp for the packet from an input tuple
+  const double timestamp = <%=$timestampAttribute%>;
+  SPLLOG(L_TRACE, "processing packet, timestamp=" << timestamp << ", length=" << length, "PacketContentAssembler");
+
+  // fill in the PAM packet content structure
+  packetContent.originalSize = length;
+  packetContent.capturedSize = length;
+  packetContent.secs = (uint64_t)timestamp;
+  packetContent.usecs = (uint64_t)( (timestamp - (double)packetContent.secs) * 1000000.0 );
+  packetContent.frameData = (unsigned char*)packet;
+  packetContent.frameNumber = packetNumber;
+  packetContent.layer2Medium = TR_ETHERNET;
+  packetContent.flags = 0;
+  packetContent.adapterId = 0;
+
+  // clear the PAM packet analysis results structure
+  memset(&pamResults, 0, sizeof(pamResults));
+
+  // analyze the packet, possibly causing multiple XPF event callbacks
+  pam2Analyze(pamInstanceHandle, &packetContent, &pamResults);
+
+  // give PAM an opportunity to clean up after the analysis results have been used
+  pam2Housekeeping(pamInstanceHandle, (uint64_t)timestamp); 
+
+  // keep track of how many flows are open
+  if (flowHighWaterMark<flowStates.size()) {
+    flowHighWaterMark = flowStates.size();
+    SPLLOG(L_TRACE, "flow high water mark " << flowHighWaterMark, "PacketContentAssembler"); }		
+
+  // keep track of how many files are open
+  if (fileHighWaterMark<fileStates.size()) {
+    fileHighWaterMark = fileStates.size();
+    SPLLOG(L_TRACE, "file high water mark " << fileHighWaterMark, "PacketContentAssembler"); }		
+
+  //SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+}
+
+
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+
+  forwardWindowPunctuation(punct);
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+}
+
+
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

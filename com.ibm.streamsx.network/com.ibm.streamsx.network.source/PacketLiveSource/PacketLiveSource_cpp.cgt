@@ -1,9 +1,6 @@
 <%
-## Copyright (C) 2011, 2015  International Business Machines Corporation
-## All Rights Reserved
-
-### for valid values of 'networkInterface' parameter, type '/sbin/ifconfig' on deployment machine
-### for valid values of 'inputFilter' and parameter, see http://www.tcpdump.org/manpages/pcap-filter.7.html or http://linux.die.net/man/7/pcap-filter
+# Copyright (C) 2011, 2015  International Business Machines Corporation
+# All Rights Reserved
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require OutputAssignmentGenerator;
@@ -39,6 +36,7 @@ if ($outputFilterParameter) {
   foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
     my $expression = $value->getCppExpression();
     push @outputFilterList, $expression;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::PacketLiveSource _result_functions::") != -1;
     $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
   }
 }

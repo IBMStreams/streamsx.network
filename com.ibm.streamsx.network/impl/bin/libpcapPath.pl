@@ -21,8 +21,9 @@ passes one of these arguments to the script:
 
   lib -- The compiler requests the name of the library, which is 'pcap'.
 
-The script responds by writing either the requested path or an empty line to
-STDOUT, depending upon the presence or absence of these environment variables:
+The script responds by writing either the requested directory or an empty line
+to STDOUT, depending upon the presence or absence of these environment
+variables:
 
   STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH -- If this environment variable is
     present, the script will print its value to STDOUT and the operator will be
@@ -36,7 +37,8 @@ STDOUT, depending upon the presence or absence of these environment variables:
     with the version of 'libpcap.so' in that directory.  Otherwise, the script
     will print an empty line to STDOUT and the operator will be compiled with
     the system version of 'libpcap.so', most likely in either /usr/local/lib or
-    /usr/lib64.  "; }
+    /usr/lib64.  
+"; }
 
 #-------------------------------------------------------------------------------
 

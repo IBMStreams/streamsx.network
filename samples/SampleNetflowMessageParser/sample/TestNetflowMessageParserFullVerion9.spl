@@ -10,6 +10,7 @@ use com.ibm.streamsx.network.ipv6::*;
 use com.ibm.streamsx.network.mac::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
+use com.ibm.streamsx.network.datetimeformat::*;
 
 composite TestNetflowMessageParserFullVersion9 {
 

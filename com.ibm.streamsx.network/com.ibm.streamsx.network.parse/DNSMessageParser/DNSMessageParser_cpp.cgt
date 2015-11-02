@@ -1,10 +1,7 @@
 <%
 
-## Copyright (C) 2011, 2015  International Business Machines Corporation
-## All Rights Reserved
-
-unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
-require OutputAssignmentGenerator;
+# Copyright (C) 2011, 2015  International Business Machines Corporation
+# All Rights Reserved
 
 # These fragments of Perl code get strings from the operator's declaration
 # in the SPL source code for use in generating C/C++ code for the operator's

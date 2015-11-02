@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description></description>
+      <libraryDependencies>
+        <library>
+          <cmn:description></cmn:description>
+          <cmn:managedLibrary>
+            <cmn:command>../../impl/bin/libpamPath.pl</cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description></cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Never</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+
+      <parameter>
+        <name>packetAttribute</name>
+        <description>
+
+This required parameter specifies an input
+attribute of type 'blob' that contains an ethernet packet to be parsed
+by the operator.
+
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <type>blob</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>timestampAttribute</name>
+        <description>
+
+This required parameter specifies an input
+attribute of type 'float64' that contains the time, in seconds relative to the 
+begining of the Unix epoch (midnight on January 1st, 1970 in Greenwich, England) 
+when the packet was
+originally received from an ethernet adapter.
+
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>fileDataChunkSize</name>
+        <description>
+
+This optional parameter specifies a minimum size
+for 'chunks' of file data provided via the DATA() assembler result function.
+This parameter may improve
+performance by packing file data that arrives in fragments into
+fewer, but larger, tuples.  However, the value specified is not a
+maximum or minimum size: the operator may emit tuples with more file
+data (for example, when large packets are received) or less file data
+(for example, when the last chunk is small).  
+
+The default value is 4,096 bytes.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>maximumFilesPerFlow</name>
+        <description>
+
+This optional parameter limits the number of
+concurrent open files per flow.  If specified, further files in the flow
+will be ignored after the limit is reached, unless the flow closes some of
+the files it has opened, until the flow ends.  When this parameter is not
+specified, flows may open an unlimited number of files.  Note that each open
+file requires a buffer, whose size is specified by the `fileDataChunkSize`
+parameter, so the total amount of memory is unlimited.  Long-running flows
+that open many files without closing any of them may exhaust the available
+memory.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>pamLibrary</name>
+        <description>
+
+?????????????
+        
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Constant</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>pamTuning</name>
+        <description>
+
+This optional parameter is a comma-separated list of strings
+containing tuning values for the PAM library, specified as &quot;name=value&quot;.
+PAM tuning values are described in the file `tune.csv`
+(located in the same directory as the `pam.h` and `iss-pam1.so` files).
+The operator automatically applies these tuning values, in addition to those specified
+with this parameter:
+
+    pam.sensor.type.hint=xpfshell
+	pam.debug.fragroute=false
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>outputFilters</name>
+        <description>
+
+This optional parameter is a comma-separated list of boolean expressions ...
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+
+    </parameters>
+
+    <inputPorts>
+      <inputPortSet>
+        <description></description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+    </inputPorts>
+
+    <outputPorts>
+      <outputPortOpenSet>
+        <description></description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Preserving</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>0</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
+      </outputPortOpenSet>
+    </outputPorts>
+
+  </cppOperatorModel>
+</operatorModel>
