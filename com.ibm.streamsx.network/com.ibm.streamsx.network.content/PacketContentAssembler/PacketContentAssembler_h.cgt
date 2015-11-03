@@ -437,11 +437,11 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   SPL::rstring FLOW_DISCONNECT_REASON() { return flowState ? flowState->DISCONNECT_REASON : ""; }
 
-  SPL::uint64 FLOW_DATA_LENGTH() { return outputEvent==EventFlowData ? THIS_DATA_LENGTH : 0; }
+  SPL::uint64 FLOW_DATA_LENGTH() { return ( outputEvent==EventFlowData || outputEvent==EventFlowTLS ) ? THIS_DATA_LENGTH : 0; }
 
-  SPL::blob FLOW_DATA_BINARY() { return outputEvent==EventFlowData && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
+  SPL::blob FLOW_DATA_BINARY() { return ( outputEvent==EventFlowData || outputEvent==EventFlowTLS ) && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
 
-  SPL::rstring FLOW_DATA_STRING() { return outputEvent==EventFlowData && THIS_DATA_LENGTH ? SPL::rstring((char *)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
+  SPL::rstring FLOW_DATA_STRING() { return ( outputEvent==EventFlowData  || outputEvent==EventFlowTLS ) && THIS_DATA_LENGTH ? SPL::rstring((char *)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
 
   SPL::rstring FLOW_REQUEST_URI_METHOD() { return flowState ? flowState->URI_METHOD : ""; }
 

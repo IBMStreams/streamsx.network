@@ -528,9 +528,12 @@ void MY_OPERATOR::processConnectionClosedEvent(const pam2XpfHeader& eventHeader,
 
   // close any files left open in this flow
   SPLLOG(L_TRACE, "flowID=" << flowID << " left " << flowState->activeFileIDs.size() << " files open", "PacketContentAssembler");
-  for ( std::tr1::unordered_map<uint64, int32>::iterator i=flowState->activeFileIDs.begin() ; i != flowState->activeFileIDs.end(); i++ ) {
+  while ( ! flowState->activeFileIDs.empty() ) {
 
-    const uint64 fileID = i->first;
+    // find any one of the files left open by this flow
+    //???std::tr1::unordered_map<uint64, int32>::iterator i = flowState->activeFileIDs.begin();
+    //???const uint64 fileID = i->first;
+    const uint64 fileID = flowState->activeFileIDs.begin()->first;
     SPLLOG(L_TRACE, "closing file left open when connection closed, flowID=" << flowID << ", fileID=" << fileID, "PacketContentAssembler");
     if ( !fileStates.count(fileID) ) THROW(SPLRuntimeOperator, "processConnectionClosedEvent failed, flowID=" << flowID << " fileID=" << fileID << " not allocated");
     fileState = fileStates[fileID];

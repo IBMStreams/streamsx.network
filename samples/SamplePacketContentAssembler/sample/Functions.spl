@@ -1,0 +1,62 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+rstring trancateNonASCII(rstring data) {
+  for (int32 i in range(length(data))) {
+    uint32 c = toCharacterCode(substring(data,i,1));
+    if ( c==0x00000009u || c==0x0000000Au || c==0x0000000Du || ( c>=0x00000020u && c<=0x0000007Eu ) ) continue;
+    return substring(data,0,i) + "...[" + (rstring)(length(data)-i) + " bytes of binary data]...";
+  }
+  return data;
+}
+
+stateful 
+rstring mimetype2extension(rstring contentType) {
+  map<rstring,rstring> extensions = {
+    ""                                  : "",
+    "application/ecmascript"            : "js",
+    "application/gzip"                  : "gz",
+    "application/javascript"            : "js",
+    "application/json"                  : "json",
+    "application/pdf"                   : "pdf",
+    "application/rss+xml"               : "xml",
+    "application/x-gzip"                : "gz",
+    "application/x-javascript"          : "js",
+    "application/xml"                   : "xml",
+    "application/zip"                   : "zip",
+    "image/bmp"                         : "bmp",
+    "image/gif"                         : "gif",
+    "image/jpeg"                        : "jpeg",
+    "image/png"                         : "png",
+    "image/svg+xml"                     : "svg",
+    "text"                              : "txt",
+    "text/css"                          : "css",
+    "text/html"                         : "html",
+    "text/javascript"                   : "js",
+    "text/json"                         : "json",
+    "text/plain"                        : "txt",
+    "text/x-json"                       : "json",
+    "text/xml"                          : "xml" };
+
+  // separate the MIME type from whatever else is in the ContentType header
+  list<rstring> tokens = tokenize(contentType, "; ", false);
+  rstring mimeType = size(tokens)>0 ? lower(tokens[0]) : lower(contentType);
+
+  // return the extension for this MIME type, if there is one
+  if ( mimeType in extensions ) return extensions[mimeType];
+
+  // if there is no extension for this MIME type, log it and return an empty string
+  //???log(Sys.info, "no file extension found for ContentType '" + contentType + "'");
+  return ""; 
+}
+
+rstring leadingZeros(uint64 number, int32 width) {
+  mutable rstring string = (rstring)number;
+  int32 padding = width-length(string)>0 ? width-length(string) : 0;
+  return substring("0000000000000000000000000000000000000", 0, padding) + string;
+}
+

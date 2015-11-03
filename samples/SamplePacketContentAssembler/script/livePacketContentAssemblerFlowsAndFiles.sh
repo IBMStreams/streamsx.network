@@ -9,13 +9,15 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestPacketContentAssemblerFlowsAndFiles
+composite=LivePacketContentAssemblerFlowsAndFiles
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 toolkitDirectory=$( cd $here/../../.. ; pwd )
 
 buildDirectory=$projectDirectory/output/build/$composite
+
+unbundleDirectory=$projectDirectory/output/unbundle/$composite
 
 dataDirectory=$projectDirectory/data
 
@@ -48,8 +50,9 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_http+https.pcap
-pcapFilename=$HOME/data.yorktown/splanet02_firewall_one_minute.pcap
+networkInterface=eno1
+processorAffinity=3
+applicationTimeoutInterval=60.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -83,10 +86,18 @@ step "creating directory for files and flows ..."
 [ ! -d $dataDirectory/debug.$composite ] || rm -rf $dataDirectory/debug.$composite || die "sorry, could not delete old directory $dataDirectory/debug.$composite, $?"
 mkdir -p $dataDirectory/debug.$composite || die "sorry, could not create directory $dataDirectory/debug.$composite, $?"
 
+step "unbundling standalone application '$namespace.$composite' ..."
+bundle=$buildDirectory/$namespace.$composite.sab
+[ -f $bundle ] || die "sorry, bundle '$bundle' not found"
+spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
+
+step "setting capabilities for standalone application '$namespace.$composite' ..."
+standalone=$unbundleDirectory/$composite/bin/standalone
+[ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
+sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+
 step "executing standalone application '$namespace.$composite' ..."
-executable=$buildDirectory/bin/$namespace.$composite
-#$here/debugthis.sh ...
-$executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+$standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
 
 exit 0
 
