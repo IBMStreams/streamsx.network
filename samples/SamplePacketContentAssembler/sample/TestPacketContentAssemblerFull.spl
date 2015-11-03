@@ -9,7 +9,6 @@ use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.ipv6::*;
 use com.ibm.streamsx.network.mac::*;
 use com.ibm.streamsx.network.source::*;
-use com.ibm.streamsx.network.parse::*;
 use com.ibm.streamsx.network.content::*;
 use com.ibm.streamsx.network.datetimeformat::*;
 
@@ -19,13 +18,13 @@ composite TestPacketContentAssemblerFull {
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_http+https.pcap");
     expression<boolean> $consumeArchives: true;
     expression<boolean> $decompressOfficeDocuments: false;
-	
-  type 
+
+  type
 
   PacketType =
     float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
     blob rawPacket;                // ethernet packet, including all network headers
-	
+
   ContentType =
     float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
     rstring EVENT,
@@ -53,12 +52,12 @@ composite TestPacketContentAssemblerFull {
     rstring FLOW_ELAPSED_TIME,
     rstring FLOW_IP_PROTOCOL,
     rstring FLOW_DIRECTION,
-    uint64 FLOW_DATA_COUNTER,
     uint64 FLOW_SRC_PACKETS,
     uint64 FLOW_DST_PACKETS,
     uint64 FLOW_SRC_BYTES,
     uint64 FLOW_DST_BYTES,
     rstring FLOW_DISCONNECT_REASON,
+    uint64 FLOW_DATA_COUNTER,
     uint64 FLOW_DATA_LENGTH,
     //blob FLOW_DATA_BINARY,
     //rstring FLOW_DATA_STRING,
@@ -80,13 +79,13 @@ composite TestPacketContentAssemblerFull {
     rstring FILE_CONTENT_TYPE,
     rstring FILE_CONTENT_CHARSET,
     uint64 FILE_CONTENT_LENGTH,
-    uint64 FILE_DATA_CHUNK_ID,
-    boolean FILE_DATA_CHUNK_INITIAL,
-    boolean FILE_DATA_CHUNK_FINAL,
-    uint64 FILE_DATA_CHUNK_LENGTH,
-    uint64 FILE_DATA_CHUNK_LENGTH_SUM,
-    //blob FILE_DATA_CHUNK_BINARY,
-    //rstring FILE_DATA_CHUNK_STRING,
+    boolean FILE_CHUNK_INITIAL,
+    boolean FILE_CHUNK_FINAL,
+    uint64 FILE_CHUNK_COUNTER,
+    uint64 FILE_CHUNK_LENGTH,
+    uint64 FILE_CHUNK_LENGTH_SUM,
+    //blob FILE_CHUNK_BINARY,
+    //rstring FILE_CHUNK_STRING,
     uint64 OPEN_FLOWS,
     uint64 OPEN_FILES,
     uint64 OPEN_FLOWS_HIGH_WATER_MARK,
@@ -102,9 +101,9 @@ composite TestPacketContentAssemblerFull {
     rstring TUNNEL_IPV4_DST_ADDRESS,
     rstring TUNNEL_IPV6_SRC_ADDRESS,
     rstring TUNNEL_IPV6_DST_ADDRESS;
-		
-  graph 
-	
+
+  graph
+
   stream<PacketType> PacketStream as Out = PacketFileSource() {
   param
     pcapFilename: $pcapFilename;
@@ -115,7 +114,7 @@ composite TestPacketContentAssemblerFull {
   }
   //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketContentAssemblerFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-	
+
   stream<ContentType> ContentStream as Out = PacketContentAssembler(PacketStream) {
   logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
   param
@@ -124,8 +123,8 @@ composite TestPacketContentAssemblerFull {
     fileDataChunkSize: 4096u;
     pamTuning: "pam.content.consume.archives=" + ($consumeArchives ? "on" : "off"),
                "pam.content.docx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
-		       "pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
-		       "pam.content.xlsx.decompress=" + ($decompressOfficeDocuments ? "true" : "false");
+               "pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
+               "pam.content.xlsx.decompress=" + ($decompressOfficeDocuments ? "true" : "false");
   output Out:
     EVENT = EVENT(),
     EVENT_FLOW_START = EVENT_FLOW_START(),
@@ -152,12 +151,12 @@ composite TestPacketContentAssemblerFull {
     FLOW_ELAPSED_TIME = FLOW_ELAPSED_TIME()>0.0 ? formatElapsedTime(FLOW_ELAPSED_TIME()) : "",
     FLOW_IP_PROTOCOL = FLOW_IP_PROTOCOL() in ipProtocols ? ipProtocols[FLOW_IP_PROTOCOL()] : (rstring)FLOW_IP_PROTOCOL(),
     FLOW_DIRECTION = FLOW_DIRECTION(),
-    FLOW_DATA_COUNTER = FLOW_DATA_COUNTER(),
     FLOW_SRC_PACKETS = FLOW_SRC_PACKETS(),
     FLOW_DST_PACKETS = FLOW_DST_PACKETS(),
     FLOW_SRC_BYTES = FLOW_SRC_BYTES(),
     FLOW_DST_BYTES = FLOW_DST_BYTES(),
     FLOW_DISCONNECT_REASON = FLOW_DISCONNECT_REASON(),
+    FLOW_DATA_COUNTER = FLOW_DATA_COUNTER(),
     FLOW_DATA_LENGTH = FLOW_DATA_LENGTH(),
     //FLOW_DATA_BINARY = FLOW_DATA_BINARY(),
     //FLOW_DATA_STRING = FLOW_DATA_STRING(),
@@ -179,13 +178,13 @@ composite TestPacketContentAssemblerFull {
     FILE_CONTENT_TYPE = FILE_CONTENT_TYPE(),
     FILE_CONTENT_CHARSET = FILE_CONTENT_CHARSET(),
     FILE_CONTENT_LENGTH = FILE_CONTENT_LENGTH(),
-    FILE_DATA_CHUNK_ID = FILE_DATA_CHUNK_ID(),
-    FILE_DATA_CHUNK_INITIAL = FILE_DATA_CHUNK_INITIAL(),
-    FILE_DATA_CHUNK_FINAL = FILE_DATA_CHUNK_FINAL(),
-    FILE_DATA_CHUNK_LENGTH = FILE_DATA_CHUNK_LENGTH(),
-    FILE_DATA_CHUNK_LENGTH_SUM = FILE_DATA_CHUNK_LENGTH_SUM(),
-    //FILE_DATA_CHUNK_BINARY = FILE_DATA_CHUNK_BINARY(),
-    //FILE_DATA_CHUNK_STRING = FILE_DATA_CHUNK_STRING(),
+    FILE_CHUNK_INITIAL = FILE_CHUNK_INITIAL(),
+    FILE_CHUNK_FINAL = FILE_CHUNK_FINAL(),
+    FILE_CHUNK_COUNTER = FILE_CHUNK_COUNTER(),
+    FILE_CHUNK_LENGTH = FILE_CHUNK_LENGTH(),
+    FILE_CHUNK_LENGTH_SUM = FILE_CHUNK_LENGTH_SUM(),
+    //FILE_CHUNK_BINARY = FILE_CHUNK_BINARY(),
+    //FILE_CHUNK_STRING = FILE_CHUNK_STRING(),
     OPEN_FLOWS = OPEN_FLOWS(),
     OPEN_FILES = OPEN_FILES(),
     OPEN_FLOWS_HIGH_WATER_MARK = OPEN_FLOWS_HIGH_WATER_MARK(),
@@ -202,6 +201,6 @@ composite TestPacketContentAssemblerFull {
     TUNNEL_IPV6_SRC_ADDRESS = convertIPV6AddressNumericToString(TUNNEL_IPV6_SRC_ADDRESS()),
     TUNNEL_IPV6_DST_ADDRESS = convertIPV6AddressNumericToString(TUNNEL_IPV6_DST_ADDRESS());
   }
-  () as ContentSink = FileSink(ContentStream) { param file: "debug.TestPacketContentAssemblerFull.ContentStream.out" ; format: txt ; hasDelayField: true ; }	
+  () as ContentSink = FileSink(ContentStream) { param file: "debug.TestPacketContentAssemblerFull.ContentStream.out" ; format: txt ; hasDelayField: true ; }
 
 }

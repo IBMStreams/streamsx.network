@@ -32,7 +32,7 @@ if ($outputFilterParameter) {
   foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
     my $expression = $value->getCppExpression();
     push @outputFilterList, $expression;
-    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::PacketSource_result_functions::") != -1;
   }
 }
 
@@ -55,7 +55,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 // namespace, which must be mapped to the operator's namespace so they
 // will invoke the functions defined in the PacketFileSource_h.cgt file
 
-#define common_result_functions MY_OPERATOR
+#define PacketSource_result_functions MY_OPERATOR
 
 
 struct groupByThree : std::numpunct<char> {

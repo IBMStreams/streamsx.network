@@ -32,18 +32,18 @@
 
 
 
-<%SPL::CodeGen::headerPrologue($model);%>
+    <%SPL::CodeGen::headerPrologue($model);%>
 
 
 
 enum OutputEvent {
-  EventFlowStart, 
+  EventFlowStart,
   EventFlowTLS,
   EventFlowData,
-  EventFlowEnd, 
-  EventRequest, 
+  EventFlowEnd,
+  EventRequest,
   EventResponse,
-  EventFileData 
+  EventFileData
 };
 
 
@@ -59,9 +59,9 @@ enum RequestResponseState {
 
 // this class converts event codes into event names
 class OutputEventNames {
-private:
+ private:
   std::tr1::unordered_map<uint32, const char*> names;
-public:
+ public:
   OutputEventNames()  {
     names[EventFlowStart] = "FlowStart";
     names[EventFlowEnd] = "FlowEnd";
@@ -80,9 +80,9 @@ static OutputEventNames outputEventNames;
 
 // this class converts XPF direction codes into descriptive strings
 class XPFDirectionNames {
-private:
+ private:
   std::vector<const char*> directionNames;
-public:
+ public:
   XPFDirectionNames()  {
     directionNames.resize(10, "?");
     directionNames[XPF_FLOW_UNKNOWN] = "";
@@ -98,9 +98,9 @@ static XPFDirectionNames xpfDirectionNames;
 // this class converts XPF disconnect reason codes into descriptive strings
 
 class XPFReasonNames {
-private:
+ private:
   std::vector<const char*> reasonNames;
-public:
+ public:
   XPFReasonNames()  {
     reasonNames.resize(10, "?");
     reasonNames[XPF_REASON_NORMAL] = "normal";
@@ -110,7 +110,7 @@ public:
     reasonNames[XPF_REASON_DATA_LOSS] = "dataLoss";
     reasonNames[XPF_REASON_RESOURCES] = "resources"; };
   const char* reason2name(pam2XpfConnectionReason reason) { return reasonNames[reason]; }
-  };
+};
 static XPFReasonNames xpfReasonNames;
 
 
@@ -118,16 +118,16 @@ static XPFReasonNames xpfReasonNames;
 // this class converts XPF tunnel codes into descriptive strings
 
 class XPFTunnelNames {
-private:
+ private:
   std::vector<const char*> tunnelNames;
-public:
+ public:
   XPFTunnelNames()  {
     tunnelNames.resize(10, "?");
     tunnelNames[PAM2XPF_TUNNEL_NONE] = "";
     tunnelNames[PAM2XPF_TUNNEL_6IN4] = "6IN4";
     tunnelNames[PAM2XPF_TUNNEL_4IN6] = "4IN6";
     tunnelNames[PAM2XPF_TUNNEL_GRE] = "GRE";
-    tunnelNames[PAM2XPF_TUNNEL_IP] = "IP"; 
+    tunnelNames[PAM2XPF_TUNNEL_IP] = "IP";
     tunnelNames[PAM2XPF_TUNNEL_SSLTLS] = "SSL/TLS"; }
   const char* type2name(pam2XpfTunnelType type) { return tunnelNames[type]; }
 };
@@ -141,9 +141,9 @@ static XPFTunnelNames xpfTunnelNames;
 // this class converts TLS record types into descriptive strings
 
 class TLSRecordNames {
-private:
+ private:
   std::vector<const char*> recordNames;
-public:
+ public:
   TLSRecordNames()  {
     recordNames.resize(25, "?");
     recordNames[0] = "";
@@ -153,7 +153,7 @@ public:
     recordNames[23] = "Application";
     recordNames[24] = "Heartbeat"; };
   const char* recordType2name(int recordType) { return recordType<0 ? "" : recordNames[recordType]; }
-  };
+};
 static TLSRecordNames tlsRecordNames;
 
 
@@ -163,7 +163,7 @@ class FlowState {
  public:
   // fields from PAM struct pam2XpfHeader
   uint64 FLOW_ID; // really, 'flowID*4+i', where i is 1/2/3 according to FLOW_TYPE
-  uint32 TRANSACTION_ID; 
+  uint32 TRANSACTION_ID;
   double START_TIME;
   double END_TIME;
   uint32 IP_PROTOCOL; // one of UDP==17, TCP==6, ICMP==1
@@ -192,7 +192,7 @@ class FlowState {
   const char* DISCONNECT_REASON;
 
   // fields from PAM struct pam2XpfTransportData
-  uint64 FLOW_DATA_COUNTER; // starts at 1
+  uint64 FLOW_DATA_COUNTER; // starts at 0 for each flow
 
   // fields from PAM struct pam2XpfApplicationFound
   enum pam2XpfConfidence FLOW_PROTOCOL_CONFIDENCE;
@@ -216,7 +216,7 @@ class FlowState {
   // fields from PAM struct pam2XpfApplicationHeader
   pam2XpfFlowDirection flowDirection;
   const char* FLOW_DIRECTION;
-  SPL::list<SPL::rstring> REQUEST_HEADERS; 
+  SPL::list<SPL::rstring> REQUEST_HEADERS;
   SPL::list<SPL::rstring> RESPONSE_HEADERS;
   enum RequestResponseState rrState;
 
@@ -242,20 +242,19 @@ class FileState {
   SPL::rstring FILE_NAME;
   SPL::rstring FILE_CONTENT_TYPE; // from Content-Type header
   SPL::rstring FILE_CONTENT_CHARSET; // from Content-Type header
-  uint64 FILE_CONTENT_LENGTH; // from Content-Length header, not necessarily accurate 
-  uint64 FILE_DATA_COUNTER; // starts at 1
-  bool FILE_DATA_INITIAL; // true if this is the first chunk of data for this file, false otherwise
-  bool FILE_DATA_FINAL; // true if this is the last chunk of data for this file, false otherwise
-  uint64 FILE_DATA_LENGTH; // length of data that should be in FILE_DATA_BUFFER
-  uint64 FILE_DATA_LENGTH_SUM; // sum of all FILE_DATA_LENGTH values so far
-  std::basic_string<uint8_t> FILE_DATA_BUFFER;
+  uint64 FILE_CONTENT_LENGTH; // from Content-Length header, not necessarily accurate
+  uint64 FILE_CHUNK_COUNTER; // starts at 0 for each file
+  bool FILE_CHUNK_FINAL; // true if this is the last chunk of data for this file, false otherwise
+  uint64 FILE_CHUNK_LENGTH; // length of data that should be in FILE_CHUNK_BUFFER
+  uint64 FILE_CHUNK_LENGTH_SUM; // sum of all FILE_CHUNK_LENGTH values so far
+  std::basic_string<uint8_t> FILE_CHUNK_BUFFER;
 };
 
 
 
-class MY_OPERATOR : public MY_BASE_OPERATOR 
+class MY_OPERATOR : public MY_BASE_OPERATOR
 {
-public:
+ public:
 
   // ----------- standard operator methods ----------
 
@@ -315,7 +314,7 @@ public:
   OutputEvent outputEvent;
 
   // fields for result functions from PAM struct pam2XpfTransportData, pam2XpfTlsRecord, and pam2XpfFileData
-  uint8_t* THIS_DATA_POINTER; 
+  uint8_t* THIS_DATA_POINTER;
   uint32 THIS_DATA_LENGTH;
 
   std::tr1::unordered_map<uint64, struct FlowState*> flowStates; // indexed by XPF event 'flowID'
@@ -338,13 +337,6 @@ public:
   { submitOutputTuple(outputEvent, &buffer[0], buffer.size()); }
 
   void submitOutputTuple(const OutputEvent outputEvent, const uint8_t* data = NULL, const uint32_t length = 0 );
-
-#if 0
-  void submitOutputTupleFileData(std::basic_string<uint8_t> buffer)
-  { submitOutputTupleFileData(&buffer[0], buffer.size()); }
-
-  void submitOutputTupleFileData(const uint8_t* data, const uint32_t length);
-#endif 
 
   // ----------- handles for PAM objects -----------
 
@@ -445,11 +437,11 @@ public:
 
   SPL::rstring FLOW_DISCONNECT_REASON() { return flowState ? flowState->DISCONNECT_REASON : ""; }
 
-  SPL::uint64 FLOW_DATA_LENGTH() { return THIS_DATA_LENGTH; }
+  SPL::uint64 FLOW_DATA_LENGTH() { return outputEvent==EventFlowData ? THIS_DATA_LENGTH : 0; }
 
-  SPL::blob FLOW_DATA_BINARY() { return THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
+  SPL::blob FLOW_DATA_BINARY() { return outputEvent==EventFlowData && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
 
-  SPL::rstring FLOW_DATA_STRING() { return THIS_DATA_LENGTH ? SPL::rstring((char *)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
+  SPL::rstring FLOW_DATA_STRING() { return outputEvent==EventFlowData && THIS_DATA_LENGTH ? SPL::rstring((char *)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
 
   SPL::rstring FLOW_REQUEST_URI_METHOD() { return flowState ? flowState->URI_METHOD : ""; }
 
@@ -475,31 +467,31 @@ public:
 
   SPL::uint32 FLOW_RESPONSE_STATUS_CODE() { return flowState ? flowState->HTTP_STATUS_CODE : 0; }
 
-  SPL::uint64 FILE_ID() { return fileState ? fileState->FILE_ID : 0; }
+  SPL::uint64 FILE_ID() { return outputEvent==EventFileData && fileState ? fileState->FILE_ID : 0; }
 
-  SPL::uint64 FILE_ID_PARENT() { return fileState ? fileState->FILE_ID_PARENT : 0; }
+  SPL::uint64 FILE_ID_PARENT() { return outputEvent==EventFileData && fileState ? fileState->FILE_ID_PARENT : 0; }
 
-  SPL::rstring FILE_FORMAT() { return flowState ? flowState->FLOW_PROTOCOL : ""; }
+  SPL::rstring FILE_FORMAT() { return outputEvent==EventFileData && flowState ? flowState->FLOW_PROTOCOL : ""; }
 
-  SPL::rstring FILE_CONTENT_TYPE() { return fileState ? fileState->FILE_CONTENT_TYPE : ""; }
+  SPL::rstring FILE_CONTENT_TYPE() { return outputEvent==EventFileData && fileState ? fileState->FILE_CONTENT_TYPE : ""; }
 
-  SPL::rstring FILE_CONTENT_CHARSET() { return fileState ? fileState->FILE_CONTENT_CHARSET : ""; }
+  SPL::rstring FILE_CONTENT_CHARSET() { return outputEvent==EventFileData && fileState ? fileState->FILE_CONTENT_CHARSET : ""; }
 
-  SPL::uint64 FILE_CONTENT_LENGTH() { return fileState ? fileState->FILE_CONTENT_LENGTH : 0; }
+  SPL::uint64 FILE_CONTENT_LENGTH() { return outputEvent==EventFileData && fileState ? fileState->FILE_CONTENT_LENGTH : 0; }
 
-  SPL::uint64 FILE_DATA_CHUNK_ID() { return fileState ? fileState->FILE_DATA_COUNTER : 0; }
+  SPL::uint64 FILE_CHUNK_COUNTER() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_COUNTER : 0; }
 
-  SPL::boolean FILE_DATA_CHUNK_INITIAL() { return fileState ? fileState->FILE_DATA_INITIAL : false; }
+  SPL::boolean FILE_CHUNK_INITIAL() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_COUNTER==0 : false; }
 
-  SPL::boolean FILE_DATA_CHUNK_FINAL() { return fileState ? fileState->FILE_DATA_FINAL : false; }
+  SPL::boolean FILE_CHUNK_FINAL() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_FINAL : false; }
 
-  SPL::uint64 FILE_DATA_CHUNK_LENGTH() { return THIS_DATA_LENGTH; }
+  SPL::uint64 FILE_CHUNK_LENGTH() { return outputEvent==EventFileData ? THIS_DATA_LENGTH : 0; }
 
-  SPL::uint64 FILE_DATA_CHUNK_LENGTH_SUM() { return fileState ? fileState->FILE_DATA_LENGTH_SUM : 0; }
+  SPL::uint64 FILE_CHUNK_LENGTH_SUM() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_LENGTH_SUM : 0; }
 
-  SPL::blob FILE_DATA_CHUNK_BINARY() { return THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
+  SPL::blob FILE_CHUNK_BINARY() { return outputEvent==EventFileData && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
 
-  SPL::rstring FILE_DATA_CHUNK_STRING() { return THIS_DATA_LENGTH ? SPL::rstring((char*)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
+  SPL::rstring FILE_CHUNK_STRING() { return outputEvent==EventFileData && THIS_DATA_LENGTH ? SPL::rstring((char*)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
 
   SPL::uint64 OPEN_FLOWS() { return flowStates.size(); }
 
@@ -531,7 +523,6 @@ public:
 
   SPL::blist<SPL::uint8,16> TUNNEL_IPV6_DST_ADDRESS() { return flowState ? flowState->TUNNEL_IPV6_DST_ADDRESS : SPL::blist<SPL::uint8,16>(); }
 
-}; 
+};
 
 <%SPL::CodeGen::headerEpilogue($model);%>
-

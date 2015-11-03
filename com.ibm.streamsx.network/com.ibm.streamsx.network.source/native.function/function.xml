@@ -50,7 +50,7 @@ during the most recent metrics interval, if there is one, or zero if not.
 
   <function:functionSet>
     <function:headerFileName></function:headerFileName>
-    <function:cppNamespaceName>common_result_functions</function:cppNamespaceName>
+    <function:cppNamespaceName>PacketSource_result_functions</function:cppNamespaceName>
     <function:functions>
 
           <function:function>

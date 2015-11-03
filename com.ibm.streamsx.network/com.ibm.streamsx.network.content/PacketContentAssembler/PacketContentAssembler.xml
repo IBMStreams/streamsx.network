@@ -45,8 +45,8 @@ by the operator.
         <description>
 
 This required parameter specifies an input
-attribute of type 'float64' that contains the time, in seconds relative to the 
-begining of the Unix epoch (midnight on January 1st, 1970 in Greenwich, England) 
+attribute of type 'float64' that contains the time, in seconds relative to the
+begining of the Unix epoch (midnight on January 1st, 1970 in Greenwich, England)
 when the packet was
 originally received from an ethernet adapter.
 
@@ -69,9 +69,9 @@ performance by packing file data that arrives in fragments into
 fewer, but larger, tuples.  However, the value specified is not a
 maximum or minimum size: the operator may emit tuples with more file
 data (for example, when large packets are received) or less file data
-(for example, when the last chunk is small).  
+(for example, when the last chunk is small).
 
-The default value is 4,096 bytes.
+The default value is 100 kilobytes (102,400 bytes).
 
         </description>
         <optional>true</optional>
@@ -108,7 +108,7 @@ memory.
         <description>
 
 ?????????????
-        
+
         </description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
@@ -129,7 +129,7 @@ The operator automatically applies these tuning values, in addition to those spe
 with this parameter:
 
     pam.sensor.type.hint=xpfshell
-	pam.debug.fragroute=false
+    pam.debug.fragroute=false
 
         </description>
         <optional>true</optional>

@@ -1,0 +1,91 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+
+namespace sample;
+
+use spl.file::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.content::*;
+
+composite TestPacketContentAssemblerEvents {
+
+  param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./firewallcontent_sample.pcap");
+    //expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./smtp_sample_with_attachment.pcap");
+
+  type
+
+  PacketType =
+    float64 captureTime,    // time that packet was captured, in seconds since Unix epoch
+    blob rawPacket ;        // contents of packet captured, including all headers
+
+  EventType =
+    rstring ipSource,
+    rstring flowDirection,
+    rstring ipDestination,
+    rstring event,
+    uint64 flowID,
+    uint32 transactionID,
+    rstring flowProtocol,
+    int32 requestHeaderCount,
+    int32 responseHeaderCount,
+    uint64 flowDataCounter,
+    uint64 flowDataLength,
+    uint64 fileID,
+    rstring fileContentType,
+    rstring fileChunkPosition,
+    uint64 fileChunkCounter,
+    uint64 fileChunkLength,
+    uint64 fileChunkLengthBlob,
+    rstring flowURI;
+
+  graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+    param
+      pcapFilename: $pcapFilename;
+      metricsInterval: 0.0;
+    output Out:
+      captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+      rawPacket = PACKET_DATA(); }
+    //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketContentAssemblerEvents.PacketStream.out" ; format: csv ; hasDelayField: true ; }
+
+  stream<EventType> EventStream as Out = PacketContentAssembler(PacketStream) {
+    param
+    timestampAttribute: captureTime;
+    packetAttribute: rawPacket;
+    pamTuning: "pam.content.consume.archives=on",
+               "pam.content.docx.decompress=false",
+               "pam.content.pptx.decompress=false",
+               "pam.content.xlsx.decompress=false" ;
+    output Out:
+      ipSource = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()) + ":" + (rstring)FLOW_SRC_PORT(),
+      flowDirection = FLOW_DIRECTION(),
+      ipDestination = convertIPV4AddressNumericToString(FLOW_IPV4_DST_ADDRESS()) + ":" + (rstring)FLOW_DST_PORT(),
+      event = EVENT(),
+      flowID = FLOW_ID(),
+      transactionID = FLOW_TRANSACTION_ID(),
+      flowProtocol = FLOW_PROTOCOL(),
+      requestHeaderCount = size(FLOW_REQUEST_HEADERS()),
+      responseHeaderCount = size(FLOW_RESPONSE_HEADERS()),
+      flowDataCounter = FLOW_DATA_COUNTER(),
+      flowDataLength = FLOW_DATA_LENGTH(),
+      fileID = FILE_ID(),
+      fileContentType = FILE_CONTENT_TYPE(),
+      fileChunkPosition = !EVENT_FILE_DATA() ? "" : FILE_CHUNK_INITIAL() && FILE_CHUNK_FINAL() ? "only" : FILE_CHUNK_INITIAL() ? "first" : FILE_CHUNK_FINAL() ? "last" : "middle",
+      fileChunkCounter = FILE_CHUNK_COUNTER(),
+      fileChunkLength = FILE_CHUNK_LENGTH(),
+      fileChunkLengthBlob = blobSize(FILE_CHUNK_BINARY()),
+      flowURI = FLOW_REQUEST_URI_RAW();
+  }
+  () as EventSink = FileSink(EventStream) { param file: "debug.TestPacketContentAssemblerEvents.EventStream.out" ; format: txt ; hasDelayField: true ; }
+
+
+
+}

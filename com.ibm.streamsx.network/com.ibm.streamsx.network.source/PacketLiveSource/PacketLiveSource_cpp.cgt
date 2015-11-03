@@ -37,7 +37,7 @@ if ($outputFilterParameter) {
     my $expression = $value->getCppExpression();
     push @outputFilterList, $expression;
     $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::PacketLiveSource _result_functions::") != -1;
-    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::PacketSource_result_functions::") != -1;
   }
 }
 
@@ -57,7 +57,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 // will invoke the functions defined in the PacketLiveSource_h.cgt file
 
 #define PacketLiveSource_result_functions MY_OPERATOR
-#define common_result_functions MY_OPERATOR
+#define PacketSource_result_functions MY_OPERATOR
 
 
 
