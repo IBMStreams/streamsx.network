@@ -50,9 +50,9 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eno1
+networkInterface=ens6f1
 processorAffinity=3
-applicationTimeoutInterval=60.0
+applicationTimeout=60.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
