@@ -78,7 +78,7 @@ composite TestPacketContentAssemblerEvents {
       flowDataLength = FLOW_DATA_LENGTH(),
       fileID = FILE_ID(),
       fileContentType = FILE_CONTENT_TYPE(),
-      fileChunkPosition = !EVENT_FILE_DATA() ? "" : FILE_CHUNK_INITIAL() && FILE_CHUNK_FINAL() ? "only" : FILE_CHUNK_INITIAL() ? "first" : FILE_CHUNK_FINAL() ? "last" : "middle",
+      fileChunkPosition = !EVENT_FILE_CHUNK() ? "" : FILE_CHUNK_INITIAL() && FILE_CHUNK_FINAL() ? "only" : FILE_CHUNK_INITIAL() ? "first" : FILE_CHUNK_FINAL() ? "last" : "middle",
       fileChunkCounter = FILE_CHUNK_COUNTER(),
       fileChunkLength = FILE_CHUNK_LENGTH(),
       fileChunkLengthBlob = blobSize(FILE_CHUNK_BINARY()),

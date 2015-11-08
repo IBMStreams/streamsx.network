@@ -25,7 +25,7 @@ and assigns values to them with output attribute assignment expressions.
 
 Output filters and attribute assignments are SPL expressions. They may use any
 of the built-in SPL functions, and any of these functions, which are specific to
-the DHCPMessageParser operator: 
+the DNSMessageParser operator: 
 
 * [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DNS parser result functions]
 

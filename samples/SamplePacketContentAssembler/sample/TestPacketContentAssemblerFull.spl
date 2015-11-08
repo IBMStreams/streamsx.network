@@ -34,7 +34,7 @@ composite TestPacketContentAssemblerFull {
     boolean EVENT_FLOW_END,
     boolean EVENT_REQUEST,
     boolean EVENT_RESPONSE,
-    boolean EVENT_FILE_DATA,
+    boolean EVENT_FILE_CHUNK,
     rstring FLOW_ETHER_SRC_ADDRESS,
     rstring FLOW_ETHER_DST_ADDRESS,
     rstring FLOW_IPV4_SRC_ADDRESS,
@@ -120,7 +120,7 @@ composite TestPacketContentAssemblerFull {
   param
     timestampAttribute: captureTime;
     packetAttribute: rawPacket;
-    fileDataChunkSize: 4096u;
+    fileChunkSize: 4096u;
     pamTuning: "pam.content.consume.archives=" + ($consumeArchives ? "on" : "off"),
                "pam.content.docx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
                "pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
@@ -133,7 +133,7 @@ composite TestPacketContentAssemblerFull {
     EVENT_FLOW_END = EVENT_FLOW_END(),
     EVENT_REQUEST = EVENT_REQUEST(),
     EVENT_RESPONSE = EVENT_RESPONSE(),
-    EVENT_FILE_DATA = EVENT_FILE_DATA(),
+    EVENT_FILE_CHUNK = EVENT_FILE_CHUNK(),
     FLOW_ETHER_SRC_ADDRESS = convertMACAddressNumericToString(FLOW_ETHER_SRC_ADDRESS()),
     FLOW_ETHER_DST_ADDRESS = convertMACAddressNumericToString(FLOW_ETHER_DST_ADDRESS()),
     FLOW_IPV4_SRC_ADDRESS = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()),

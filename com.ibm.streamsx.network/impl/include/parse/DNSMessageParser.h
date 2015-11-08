@@ -426,6 +426,28 @@ class DNSMessageParser {
   }
 
 
+  // This function converts the DNS 'rdata' fields in the array of 'count'
+  // fixed-size records at 'records' into an SPL list of IP version 4 addresses.
+
+  SPL::list<SPL::uint32> convertResourceDataToIPv4AddressList(const struct Record records[], const uint16_t count) {
+
+    SPL::list<SPL::uint32> addresses;
+    for (int i=0; i<count; i++) if ( records[i].type==1 ) addresses.add( ntohl(*((SPL::uint32*)records[i].rdata)) );
+    return addresses;
+  }
+
+
+  // This function converts the DNS 'rdata' fields in the array of 'count'
+  // fixed-size records at 'records' into an SPL list of IP version 6 addresses.
+
+  SPL::list<SPL::list<SPL::uint8> > convertResourceDataToIPv6AddressList(const struct Record records[], const uint16_t count) {
+
+    SPL::list<SPL::list<SPL::uint8> > addresses;
+    for (int i=0; i<count; i++) if ( records[i].type==28 ) addresses.add( SPL::list<SPL::uint8>(records[0].rdata, records[0].rdata+16)  );
+    return addresses;
+  }
+
+
   // This function parses the DNS message in the specified buffer and stores the
   // resource records of each type in the arrays above. The individual fields in
   // the resource records can be extracted with the functions above. If an
@@ -484,7 +506,6 @@ class DNSMessageParser {
     for (int i=0; i<answerRecordCount; i++) {
       switch(answerRecords[i].type) {
       case 1:  // type A record
-      case 12: // type PTR record
       case 28: // type AAAA record
         addressRecords[addressRecordCount++] = answerRecords[i]; break;
       case 5:  // type CNAME record

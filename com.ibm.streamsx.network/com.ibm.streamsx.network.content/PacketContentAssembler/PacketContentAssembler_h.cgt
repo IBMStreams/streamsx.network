@@ -43,7 +43,7 @@ enum OutputEvent {
   EventFlowEnd,
   EventRequest,
   EventResponse,
-  EventFileData
+  EventFileChunk
 };
 
 
@@ -69,7 +69,7 @@ class OutputEventNames {
     names[EventFlowTLS] = "FlowTLS";
     names[EventRequest] = "Request";
     names[EventResponse] = "Response";
-    names[EventFileData] = "FileData";
+    names[EventFileChunk] = "FileChunk";
   }
   const char* event2name(enum OutputEvent event) { return names[event]; }
 };
@@ -288,7 +288,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   // ----------- operator parameters (constant after constructor executes) ----------
 
-  uint64_t fileDataChunkSize;
+  uint64_t fileChunkSize;
   uint32_t maximumFilesPerFlow;
   const char* pamLibrary;
   std::vector<std::string> pamTuning;
@@ -389,7 +389,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   SPL::boolean EVENT_RESPONSE() { return outputEvent==EventResponse; }
 
-  SPL::boolean EVENT_FILE_DATA() { return outputEvent==EventFileData; }
+  SPL::boolean EVENT_FILE_CHUNK() { return outputEvent==EventFileChunk; }
 
   SPL::blist<SPL::uint8,6> FLOW_ETHER_SRC_ADDRESS() { return flowState ? flowState->ETHER_SRC_ADDRESS : SPL::blist<SPL::uint8,6>(); }
 
@@ -467,31 +467,31 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   SPL::uint32 FLOW_RESPONSE_STATUS_CODE() { return flowState ? flowState->HTTP_STATUS_CODE : 0; }
 
-  SPL::uint64 FILE_ID() { return outputEvent==EventFileData && fileState ? fileState->FILE_ID : 0; }
+  SPL::uint64 FILE_ID() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_ID : 0; }
 
-  SPL::uint64 FILE_ID_PARENT() { return outputEvent==EventFileData && fileState ? fileState->FILE_ID_PARENT : 0; }
+  SPL::uint64 FILE_ID_PARENT() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_ID_PARENT : 0; }
 
-  SPL::rstring FILE_FORMAT() { return outputEvent==EventFileData && flowState ? flowState->FLOW_PROTOCOL : ""; }
+  SPL::rstring FILE_FORMAT() { return outputEvent==EventFileChunk && flowState ? flowState->FLOW_PROTOCOL : ""; }
 
-  SPL::rstring FILE_CONTENT_TYPE() { return outputEvent==EventFileData && fileState ? fileState->FILE_CONTENT_TYPE : ""; }
+  SPL::rstring FILE_CONTENT_TYPE() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CONTENT_TYPE : ""; }
 
-  SPL::rstring FILE_CONTENT_CHARSET() { return outputEvent==EventFileData && fileState ? fileState->FILE_CONTENT_CHARSET : ""; }
+  SPL::rstring FILE_CONTENT_CHARSET() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CONTENT_CHARSET : ""; }
 
-  SPL::uint64 FILE_CONTENT_LENGTH() { return outputEvent==EventFileData && fileState ? fileState->FILE_CONTENT_LENGTH : 0; }
+  SPL::uint64 FILE_CONTENT_LENGTH() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CONTENT_LENGTH : 0; }
 
-  SPL::uint64 FILE_CHUNK_COUNTER() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_COUNTER : 0; }
+  SPL::uint64 FILE_CHUNK_COUNTER() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_COUNTER : 0; }
 
-  SPL::boolean FILE_CHUNK_INITIAL() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_COUNTER==0 : false; }
+  SPL::boolean FILE_CHUNK_INITIAL() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_COUNTER==0 : false; }
 
-  SPL::boolean FILE_CHUNK_FINAL() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_FINAL : false; }
+  SPL::boolean FILE_CHUNK_FINAL() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_FINAL : false; }
 
-  SPL::uint64 FILE_CHUNK_LENGTH() { return outputEvent==EventFileData ? THIS_DATA_LENGTH : 0; }
+  SPL::uint64 FILE_CHUNK_LENGTH() { return outputEvent==EventFileChunk ? THIS_DATA_LENGTH : 0; }
 
-  SPL::uint64 FILE_CHUNK_LENGTH_SUM() { return outputEvent==EventFileData && fileState ? fileState->FILE_CHUNK_LENGTH_SUM : 0; }
+  SPL::uint64 FILE_CHUNK_LENGTH_SUM() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_LENGTH_SUM : 0; }
 
-  SPL::blob FILE_CHUNK_BINARY() { return outputEvent==EventFileData && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
+  SPL::blob FILE_CHUNK_BINARY() { return outputEvent==EventFileChunk && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
 
-  SPL::rstring FILE_CHUNK_STRING() { return outputEvent==EventFileData && THIS_DATA_LENGTH ? SPL::rstring((char*)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
+  SPL::rstring FILE_CHUNK_STRING() { return outputEvent==EventFileChunk && THIS_DATA_LENGTH ? SPL::rstring((char*)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
 
   SPL::uint64 OPEN_FLOWS() { return flowStates.size(); }
 

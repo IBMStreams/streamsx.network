@@ -1192,9 +1192,9 @@ This parser result function returns a list of the 'data' fields in the 'answer' 
       <function:function>
         <function:description>
 
-This parser result function returns the 'data' field of the first 'answer' resource record 
-with a 'type' value of '5' (meaning, the answer is a canonical domain name from a type 'CNAME' record),
-if there is one,
+This parser result function returns the 'data' field of the first 'answer' resource record,
+if there is one with
+a 'type' value of '5' (meaning, the answer is a canonical domain name from a type 'CNAME' record),
 or an empty string if not.
 
             </function:description>
@@ -1204,10 +1204,10 @@ or an empty string if not.
       <function:function>
         <function:description>
 
-This parser result function returns the 'data' field of the first 'answer' resource record
-with a 'type' value of '1' (meaning, the answer is an IP version 4 address from a type 'A' record)
-or '28' (meaning, the answer is an IP version 6 address from a type 'AAAA' record),
-if there is one,
+This parser result function returns the 'data' field of the first 'answer' resource record,
+if there is one with a 'type' value 
+of '1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),
+as a string value,
 or an empty string if not.
 
             </function:description>
@@ -1217,12 +1217,64 @@ or an empty string if not.
       <function:function>
         <function:description>
 
-This parser result function returns a list of the 'data' fields in the 'answer' resource records that have a 'type' value of 
-'1' or '28' (meaning, those answers are IP addresses from type 'A' or 'AAAA' records).
+This parser result function returns the 'data' field of the first 'answer' resource record, if 
+there is one with a
+'type' value of '1' (meaning, the answer is an IP version 4 address from a type 'A' record),
+as a binary value,
+or zero if not.
+
+            </function:description>
+        <function:prototype>public uint32 DNS_ANSWER_IPV4_ADDRESS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+
+This parser result function returns the 'data' field of the first 'answer' resource record, if 
+there is one with a 
+'type' value of '28' (meaning, the answer is an IP version 6 address from a type 'AAAA' record),
+as a binary value,
+or zero if not.
+
+            </function:description>
+        <function:prototype>public list&lt;uint8>[16] DNS_ANSWER_IPV6_ADDRESS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+
+This parser result function returns a list of the 'data' fields in the 'answer' resource records 
+that have a 'type' value of 
+'1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),
+as string values.
 
             </function:description>
         <function:prototype>public list&lt;rstring> DNS_ANSWER_ADDRESSES()</function:prototype>
       </function:function>
+
+
+      <function:function>
+        <function:description>
+
+This parser result function returns the 'data' fields of the 'answer' resource records that have 
+'type' values of '1' (meaning, the answers are IP version 4 addresses from type 'A' records),
+as a list of binary values.
+
+            </function:description>
+        <function:prototype>public list&lt;uint32> DNS_ANSWER_IPV4_ADDRESSES()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+
+This parser result function returns the 'data' fields of the 'answer' resource records that have 
+'type' values of '28' (meaning, the answers IP version 6 addresses from type 'AAAA' records),
+as a binary values.
+
+            </function:description>
+        <function:prototype>public list&lt;list&lt;uint8>[16]> DNS_ANSWER_IPV6_ADDRESSES()</function:prototype>
+      </function:function>
+
 
       <function:function>
         <function:description>

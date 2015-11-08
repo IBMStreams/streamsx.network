@@ -14,7 +14,7 @@ sub help() {
     print "
 
 This script is called by the Streams compiler (that is, the 'sc' command) when
-it compiles a PacketContentParser operator.  The compiler passes one of these
+it compiles a PacketContentAssembler operator.  The compiler passes one of these
 arguments to the script:
 
   includePath -- The compiler requests the directory path for the 'pam.h' file.

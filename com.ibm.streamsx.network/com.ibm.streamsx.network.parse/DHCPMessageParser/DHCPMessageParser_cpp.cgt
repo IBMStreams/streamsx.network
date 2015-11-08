@@ -3,6 +3,9 @@
 # Copyright (C) 2011, 2015  International Business Machines Corporation
 # All Rights Reserved
 
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
 # These fragments of Perl code get strings from the operator's declaration
 # in the SPL source code for use in generating C/C++ code for the operator's
 # implementation below
@@ -59,6 +62,11 @@ MY_OPERATOR::MY_OPERATOR()
   // initialize operator state variables
   tupleCounter = 0;
 
+  // clear the output tuples
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    outTuple<%=$i%>.clear();
+    <% } %> ;
+
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "DHCPMessageParser");
 }
 
@@ -102,6 +110,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
 
+  <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
   if (processorAffinity>-1) {
     SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "DHCPMessageParser");
@@ -112,6 +121,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
     if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
     processorAffinity = -1;
   }
+ <% } %> ;
 
   // increment tuple counter
   tupleCounter++;
@@ -130,15 +140,14 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %>
-         {
-           outTuple<%=$i%>.clear();
-           outTuple<%=$i%>.assignFrom(iport$0, false);
-           <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
-           SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DHCPMessageParser");
-           submit(outTuple<%=$i%>, <%=$i%>);
-         }
-         <% } %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> ;
+    { 
+      <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
+      <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+      SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DHCPMessageParser");
+      submit(outTuple<%=$i%>, <%=$i%>);
+    } 
+    <% } %> ;
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
 }

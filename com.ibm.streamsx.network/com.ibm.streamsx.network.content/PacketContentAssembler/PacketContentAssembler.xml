@@ -2,7 +2,147 @@
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-      <description></description>
+      <description>
+
+
+PacketContentAssembler is an operator for the IBM InfoSphere Streams product that
+reassembles application flows (such as such as SMTP, FTP, HTTP, and SIP)
+and files (such as GIF, JPEG, HTML, and and PDF)
+from raw network packets received in input tuples, 
+and emits tuples containing the reassembled content. 
+The operator may be configured with one or more output ports,
+and each port may be configured to emit different tuples,
+as specified by output filters.
+The tuples contain individual fields from flows and files, as
+specified by output attribute assignments.  
+
+The PacketContentAssembler operator expects raw ethernet packets in its input tuples,
+including all of their network headers.  The
+[PacketLiveSource] and [PacketFileSource] operators can produce tuples that contain
+DNS messages with the [PACKET_DATA()] output attribute assignment function.
+
+The PacketContentAssembler operator 
+consumes network packets from tuples received by its input port 
+and reassembles flows and files in internal buffers.
+It produces output tuples containing the results of its reassembly when
+one of the following events is detected:
+
+**FlowStart** The operator emits this event
+whenever it detects the beginning of a 'flow' of packets.  A
+'flow' is a sequence of related packets exchanged by a pair of network
+endpoints, as identified by their addresses and port numbers, which are available
+from result functions.  The flow is assigned a
+unique identifier, which will be
+used with all subsequent events related to the flow, allowing
+downstream operators to correlate tuples related to the flow.
+
+ **FlowEnd** The operator emits this event
+whenever it detects the end of a 'flow' of packets.  The
+number of packets and bytes exchanged between the endpoints are
+available from result functions. The flow's identifier will not be used again in any
+subsequent event.
+
+**FlowData** The operator emits this event  
+with the payload data from packets related to a flow, excluding
+the network headers, which is available from result functions.
+
+  **FlowTLS** The operator emits this event for flows that 
+are encrypted with 'transport layer security (TLS)'.
+The individual fields of the TLS headers and the encrypted data
+are available from result functions.
+Note that the toolkit does not have access to encryption
+certificates, and cannot decrypt flow data.
+
+**Request** The operator emits this event for flows that use a
+'request/response' protocol (for example, SMTP, HTTP, or FTP),
+after all request headers have been received. The URI and header values
+are availble from result functions.
+
+**Response** The operator emits this event for flows that use a
+'request/response' protocol (for example, SMTP, HTTP, or FTP),
+after all response headers have been received. The status and header values
+are availble from result functions.
+
+**FileChunk** The operator emits this event
+whenever it finds a chunk of transaction data in an application 'file' format, that is,
+a sequence of bytes in a format that could be stored
+in a host file, and produced or consumed by an application (for
+example, HTML, JPEG, or PDF).  The file is assigned a unique
+identifier, which is used in all subsequent chunks of the same file.
+Each chunk of the file is assigned a sequence number,
+and the first and last chunks are flagged, so that 
+a complete file can be reconstructed.
+The MIME type from the 'ContentType' header specifies the type of file.
+
+There is no necessary relationship between input tuples consumed and output tuples produced, that is,
+the operator may consume one or more input tuples without producing any output tuples, or,
+one input tuple consumed may produce one or more output tuples.
+
+Output filters are SPL expressions that specify which events should produce output tuples on which output ports;
+they must evaluate to a `boolean` value.
+Output attribute assignments are also SPL expressions that assign values to the attributes of output tuples;
+they must evaluate to the type of the attribute they assign to.
+Output filters and attribute assignments may use any
+of the built-in SPL functions, and any of these functions, which are specific to
+the PacketContentAssembler operator: 
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions]
+
+Output tuple attributes that are not assigned a value explicitly, but which match
+an input attribute in both name and type, will be copied automatically when the output tuple is produced.
+
+This operator is part of the network toolkit. To use it in an application,
+include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.content::*;
+
+# Dependencies
+
+The PacketContentAssembler depends upon the 'Packet Analysis Module (PAM)'
+library, developed by 
+the IBM Internet Security (ISS) X-Force team, 
+which is packaged separately from the toolkit.
+
+The PAM library must be downloaded and installed separately from the toolkit.
+When SPL applications containing the PacketContentAssembler operator are compiled,
+the location of the installed PAM library must be specified with the STREAMS_ADAPTERS_ISS_PAM_DIRECTORY
+environment variable. For example, before executing the `sc` command to compile such an application,
+set the environment variable like this:
+
+    export STREAMS_ADAPTERS_ISS_PAM_DIRECTORY=/home/username/com.ibm.iss.pam
+
+# Threads
+
+The PacketContentAssembler runs on the thread of the upstream operator that sends
+input tuples to it.
+
+# Exceptions
+
+The PacketContentAssembler operator will throw an exception and terminate in these
+situations:
+
+* No output ports are specified.
+
+* The `outputFilters` parameter is specified, and the number of expressions 
+specified does not match the number of output ports specified.
+
+# Sample Applications
+
+The network toolkit includes several
+[./tk$SamplePacketContentAssembler/tk$SamplePacketContentAssembler.html|sample applications]
+that illustrate how to use this operator.
+
+# References
+
+The result functions that can be used in boolean
+expressions for the `outputFilters` parameter
+and in output attribute assignment expressions are described here:
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions].  
+
+# Operator Diagram
+
+      </description>
       <libraryDependencies>
         <library>
           <cmn:description></cmn:description>
@@ -59,11 +199,11 @@ originally received from an ethernet adapter.
       </parameter>
 
       <parameter>
-        <name>fileDataChunkSize</name>
+        <name>fileChunkSize</name>
         <description>
 
 This optional parameter specifies a minimum size
-for 'chunks' of file data provided via the DATA() assembler result function.
+for 'chunks' of file data provided via the assembler result functions.
 This parameter may improve
 performance by packing file data that arrives in fragments into
 fewer, but larger, tuples.  However, the value specified is not a
@@ -90,7 +230,7 @@ concurrent open files per flow.  If specified, further files in the flow
 will be ignored after the limit is reached, unless the flow closes some of
 the files it has opened, until the flow ends.  When this parameter is not
 specified, flows may open an unlimited number of files.  Note that each open
-file requires a buffer, whose size is specified by the `fileDataChunkSize`
+file requires a buffer, whose size is specified by the `fileChunkSize`
 parameter, so the total amount of memory is unlimited.  Long-running flows
 that open many files without closing any of them may exhaust the available
 memory.
@@ -107,7 +247,12 @@ memory.
         <name>pamLibrary</name>
         <description>
 
-?????????????
+          This optional parameter is a pathname for the PAM library, a
+          Linux shared object library which implements the packet assembly engine.
+          If the pathname value specified is not absolute, then it is
+          relative to the directory specified by the STREAMS_ADAPTERS_ISS_PAM_DIRECTORY
+          environment variable at compile time.
+          The default value is 'iss-pam1.so'.
 
         </description>
         <optional>true</optional>
@@ -120,13 +265,15 @@ memory.
       <parameter>
         <name>pamTuning</name>
         <description>
+          
+          This optional parameter is a comma-separated list of strings
+          containing tuning values for the PAM library, specified as &quot;name=value&quot;.
+          PAM tuning values are described in the file `tune.csv` in
+          the directory specified by the STREAMS_ADAPTERS_ISS_PAM_DIRECTORY
+          environment variable.
 
-This optional parameter is a comma-separated list of strings
-containing tuning values for the PAM library, specified as &quot;name=value&quot;.
-PAM tuning values are described in the file `tune.csv`
-(located in the same directory as the `pam.h` and `iss-pam1.so` files).
-The operator automatically applies these tuning values, in addition to those specified
-with this parameter:
+          The operator automatically applies these tuning values, in addition to those specified
+          with this parameter:
 
     pam.sensor.type.hint=xpfshell
     pam.debug.fragroute=false
@@ -143,7 +290,15 @@ with this parameter:
         <name>outputFilters</name>
         <description>
 
-This optional parameter is a comma-separated list of boolean expressions ...
+This optional parameter takes a list of SPL expressions that specify which events
+should be emitted by the corresponding output port. The number of
+expressions in the list must match the number of output ports, and each
+expression must evaluate to a `boolean` value.  The output filter expressions may include any
+of the
+[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions].  
+
+The default value of the `outputFilters` parameter is an empty list, which
+causes all events to be emitted by all output ports.
 
         </description>
         <optional>true</optional>
@@ -157,7 +312,18 @@ This optional parameter is a comma-separated list of boolean expressions ...
 
     <inputPorts>
       <inputPortSet>
-        <description></description>
+        <description>
+
+The PacketContentAssembler operator requires one input port.  One input attribute must be
+of type `blob` and must contain a raw ethernet packet, including the network headers that
+proceed them in network packets, as specified by the required parameter
+`packetAttribute`.
+
+The [PACKET_DATA()] output assignment function of the [PacketLiveSource] and
+[PacketFileSource] operators produces attributes that
+can be consumed by the PacketContentAssembler operator.
+
+        </description>
         <windowingDescription></windowingDescription>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
@@ -169,7 +335,21 @@ This optional parameter is a comma-separated list of boolean expressions ...
 
     <outputPorts>
       <outputPortOpenSet>
-        <description></description>
+        <description>
+
+The PacketContentAssembler operator requires one or more output ports.
+
+Each output port will produce one output tuple for each event
+if the corresponding expression in the `outputFilters` parameter evaluates `true`,
+or if no `outputFilters` parameter is specified. 
+
+Output attributes can be assigned values with any SPL expression that evaluates
+to the proper type, and the expressions may include any of the 
+[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions].  
+Output attributes that match input attributes in name and
+type are copied automatically.
+
+        </description>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>false</autoAssignment>
         <completeAssignment>false</completeAssignment>

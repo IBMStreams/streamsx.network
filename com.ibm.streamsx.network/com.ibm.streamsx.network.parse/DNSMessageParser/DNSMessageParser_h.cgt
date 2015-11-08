@@ -94,7 +94,15 @@ private:
 
   SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertResourceDataToString(parser.addressRecords[0]) : ""; }
 
+  SPL::uint32 DNS_ANSWER_IPV4_ADDRESS() { return parser.addressRecordCount>0 && parser.addressRecords[0].type==1 ? ntohl(*((uint32*)parser.addressRecords[0].rdata)) : 0; }
+
+  SPL::list<SPL::uint8> DNS_ANSWER_IPV6_ADDRESS() { return parser.addressRecordCount>0 && parser.addressRecords[0].type==28 ? SPL::list<SPL::uint8>(parser.addressRecords[0].rdata,parser.addressRecords[0].rdata+16) : SPL::list<SPL::uint8>(); }
+
   SPL::list<rstring> DNS_ANSWER_ADDRESSES() { return parser.convertResourceDataToStringList(parser.addressRecords, parser.addressRecordCount); }
+
+  SPL::list<SPL::uint32> DNS_ANSWER_IPV4_ADDRESSES() { return parser.convertResourceDataToIPv4AddressList(parser.addressRecords, parser.addressRecordCount); }
+
+  SPL::list<SPL::list<SPL::uint8> > DNS_ANSWER_IPV6_ADDRESSES() { return parser.convertResourceDataToIPv6AddressList(parser.addressRecords, parser.addressRecordCount); }
 
   SPL::uint16 DNS_NAMESERVER_COUNT() { return parser.nameserverCount; }
 

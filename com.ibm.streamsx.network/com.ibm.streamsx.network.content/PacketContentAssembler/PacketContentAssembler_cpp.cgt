@@ -3,6 +3,9 @@
 # Copyright (C) 2011, 2015  International Business Machines Corporation
 # All Rights Reserved
 
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
 # These fragments of Perl code get strings from the operator's declaration
 # in the SPL source code for use in generating C/C++ code for the operator's
 # implementation below
@@ -21,7 +24,7 @@ my $timestampAttribute = $model->getParameterByName("timestampAttribute")->getVa
 
 # get C++ expressions for getting the values of this operator's optional parameters
 
-my $fileDataChunkSize = $model->getParameterByName("fileDataChunkSize") ? $model->getParameterByName("fileDataChunkSize")->getValueAt(0)->getCppExpression() : 100*1024;
+my $fileChunkSize = $model->getParameterByName("fileChunkSize") ? $model->getParameterByName("fileChunkSize")->getValueAt(0)->getCppExpression() : 100*1024;
 my $maximumFilesPerFlow = $model->getParameterByName("maximumFilesPerFlow") ? $model->getParameterByName("maximumFilesPerFlow")->getValueAt(0)->getCppExpression() : 0 ;
 my $pamLibrary = $model->getParameterByName("pamLibrary") ? $model->getParameterByName("pamLibrary")->getValueAt(0)->getCppExpression() : "iss-pam1.so" ;
 
@@ -64,7 +67,7 @@ for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) {
 print "// operator parameter 'packetAttribute': $packetAttribute\n";
 print "// operator parameter 'timestampAttribute': $timestampAttribute\n";
 print "// operator parameter 'pamLibrary': $pamLibrary\n";
-print "// operator parameter 'fileDataChunkSize': $fileDataChunkSize\n";
+print "// operator parameter 'fileChunkSize': $fileChunkSize\n";
 foreach my $p (@pamTuning) { print "// operator parameter 'pamTuning': $p\n"; }
 foreach my $f (sort keys %resultFunctions) { print "// assembler result function $f()\n"; }
 #foreach my $f (sort keys %resultFunctions) { print STDERR "********** this operator calls assembler result function $f() **********\n"; }
@@ -540,7 +543,7 @@ void MY_OPERATOR::processConnectionClosedEvent(const pam2XpfHeader& eventHeader,
     if (!fileState) THROW(SPLRuntimeOperator, "processConnectionClosedEvent failed, flowID=" << flowID << " fileID=" << fileID << " is null");
 
     // send any data remaining in the file's buffer downstream without a 'final' flag
-    if (fileState->FILE_CHUNK_LENGTH) submitOutputTuple(EventFileData, fileState->FILE_CHUNK_BUFFER);
+    if (fileState->FILE_CHUNK_LENGTH) submitOutputTuple(EventFileChunk, fileState->FILE_CHUNK_BUFFER);
 
     // free the old FileState structure and its buffers
     freeFileState(fileID);
@@ -889,7 +892,7 @@ void MY_OPERATOR::processFileStartEvent(const pam2XpfHeader& eventHeader, const 
   print("fileState->FILE_NAME = eventPointer.fileName && eventPointer.fileNameLen ? std::string(eventPointer.fileName, eventPointer.fileNameLen) : \"\";") if defined $resultFunctions{FILE_NAME};
   print("fileState->FILE_CONTENT_TYPE = SPL::rstring(eventPointer.mimeType, eventPointer.mimeTypeLen);")  if defined $resultFunctions{FILE_CONTENT_TYPE};
   print("fileState->FILE_CONTENT_CHARSET = SPL::rstring(eventPointer.mimeCharset, /* ??? eventPointer.mimeCharsetLen ??? */ 0 );") if defined $resultFunctions{FILE_CONTENT_CHARSET};
-  print("fileState->FILE_CHUNK_BUFFER.reserve(fileDataChunkSize);") if defined $resultFunctions{FILE_CHUNK_BINARY} || defined $resultFunctions{FILE_CHUNK_STRING};
+  print("fileState->FILE_CHUNK_BUFFER.reserve(fileChunkSize);") if defined $resultFunctions{FILE_CHUNK_BINARY} || defined $resultFunctions{FILE_CHUNK_STRING};
   %> ;
 
   // send a RequestTuple or ResponseTuple, if necessary, and advance to the next state
@@ -939,7 +942,7 @@ void MY_OPERATOR::processFileDataEvent(const pam2XpfHeader& eventHeader, const p
   // submit whatever file data is already in buffer if this fragment doesn't fit in it
   if ( fileState->FILE_CHUNK_BUFFER.size() + eventPointer.dataLen > fileState->FILE_CHUNK_BUFFER.capacity() && !fileState->FILE_CHUNK_BUFFER.empty() ) {
     SPLLOG(L_TRACE, "file " << fileState->FILE_ID << " buffer " << fileState->FILE_CHUNK_COUNTER << " submitted with " << fileState->FILE_CHUNK_BUFFER.size() << " bytes", "PacketContentAssembler");
-    submitOutputTuple(EventFileData, fileState->FILE_CHUNK_BUFFER);
+    submitOutputTuple(EventFileChunk, fileState->FILE_CHUNK_BUFFER);
     fileState->FILE_CHUNK_BUFFER.clear();
     fileState->FILE_CHUNK_LENGTH = 0;
     fileState->FILE_CHUNK_COUNTER++; }
@@ -947,7 +950,7 @@ void MY_OPERATOR::processFileDataEvent(const pam2XpfHeader& eventHeader, const p
   // submit this file data fragement by itself it it doesn't fit in empty buffer of maximum size
   if ( fileState->FILE_CHUNK_BUFFER.size() + eventPointer.dataLen > fileState->FILE_CHUNK_BUFFER.capacity() ) {
     SPLLOG(L_TRACE, "file " << fileState->FILE_ID << " fragment submitted with " << eventPointer.dataLen << " bytes", "PacketContentAssembler");
-    submitOutputTuple(EventFileData, eventPointer.data, eventPointer.dataLen);
+    submitOutputTuple(EventFileChunk, eventPointer.data, eventPointer.dataLen);
     fileState->FILE_CHUNK_COUNTER++;
     return; }
 
@@ -979,7 +982,7 @@ void MY_OPERATOR::processFileEndEvent(const pam2XpfHeader& eventHeader, const pa
   if (fileState->FILE_CHUNK_LENGTH_SUM) {
     if ( flowStates.count(flowID) && flowStates[flowID]->FLOW_ID==flowID ) flowState = flowStates[flowID];
     fileState->FILE_CHUNK_FINAL = true;
-    submitOutputTuple(EventFileData, fileState->FILE_CHUNK_BUFFER);
+    submitOutputTuple(EventFileChunk, fileState->FILE_CHUNK_BUFFER);
   }
 
   // free the old FileState structure and its buffers
@@ -1025,24 +1028,15 @@ void MY_OPERATOR::processFileEndEvent(const pam2XpfHeader& eventHeader, const pa
 }
 
 
-
-
 void MY_OPERATOR::processTCPParamsEvent(const pam2XpfHeader& eventHeader, const pam2XpfTcpParams& eventPointer) {
 }
-
-
 
 
 void MY_OPERATOR::processDNSResponseEvent(const pam2XpfHeader& eventHeader, const pam2XpfDnsResponse& eventPointer) {
 }
 
 
-
-
-
-
-
-// submit a non-FileData output tuple
+// submit an output tuple
 void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data, const uint32_t length ) {
 
   SPLLOG(L_TRACE, "entering submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
@@ -1057,15 +1051,14 @@ void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %>
-         {
-           outTuple<%=$i%>.clear();
-           outTuple<%=$i%>.assignFrom(iport$0, false);
-           <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
-           SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketContentAssembler");
-           submit(outTuple<%=$i%>, <%=$i%>);
-         }
-         <% } %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> ;
+    {
+      <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
+      <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+      SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketContentAssembler");
+      submit(outTuple<%=$i%>, <%=$i%>);
+    }
+    <% } %> ;
 
   THIS_DATA_POINTER = NULL;
   THIS_DATA_LENGTH = 0;
@@ -1082,7 +1075,7 @@ MY_OPERATOR::MY_OPERATOR()
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
 
   // initialize operator parameters
-  fileDataChunkSize = <%=$fileDataChunkSize%>;
+  fileChunkSize = <%=$fileChunkSize%>;
   maximumFilesPerFlow = <%=$maximumFilesPerFlow%>;
   pamLibrary = "<%=$pamLibrary%>";
   <% foreach my $parameter (@pamTuning) { print "pamTuning.push_back($parameter); " } %> ;
@@ -1091,6 +1084,11 @@ MY_OPERATOR::MY_OPERATOR()
   packetNumber = 0;
   flowHighWaterMark = 0;
   fileHighWaterMark = 0;
+
+  // clear the output tuples
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    outTuple<%=$i%>.clear();
+    <% } %> ;
 
   // load the PAM library
   SPLLOG(L_INFO, "loading '" << pamLibrary << "' library", "PacketContentAssembler");
@@ -1216,7 +1214,7 @@ MY_OPERATOR::MY_OPERATOR()
   if (!xpfInitialized) THROW(SPLRuntimeOperator, "pam2XpfInitialize failed");
 
   // log file data buffer size to be used
-  SPLLOG(L_INFO, "file data buffer size " << fileDataChunkSize << " bytes", "PacketContentAssembler");
+  SPLLOG(L_INFO, "file data buffer size " << fileChunkSize << " bytes", "PacketContentAssembler");
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
 }

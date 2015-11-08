@@ -68,7 +68,7 @@ composite TestPacketContentAssemblerFlowsAndFiles {
     timestampAttribute: captureTime;
     packetAttribute: rawPacket;
     outputFilters: ( EVENT_FLOW_DATA() && FLOW_PROTOCOL()!="unknown" && FLOW_PROTOCOL()!="" ) || EVENT_FLOW_TLS(), 
-                   EVENT_FILE_DATA() && mimetype2extension(FILE_CONTENT_TYPE())!="";
+                   EVENT_FILE_CHUNK() && mimetype2extension(FILE_CONTENT_TYPE())!="";
     pamTuning: 
       "pam.bodetect.autodecrypt=false",
       "pam.ca.aim.enabled=false",
