@@ -17,6 +17,7 @@
 #include <streams_boost/lexical_cast.hpp>
 
 #include "SPL/Runtime/Function/SPLFunctions.h"
+#include <SPL/Runtime/Utility/Mutex.h>
 
 struct dec_network_range {
     uint32_t network_start;
@@ -86,13 +87,33 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 
 
       // This function converts a four-byte binary representation of an IPv4
-      // address into a string representation.
+      // address in host byte order into a string representation.
 
       static SPL::rstring convertIPV4AddressNumericToString(SPL::uint32 ipv4AddressNumeric) {
-        uint32_t networkOrderAddress;
+
+        // save results in this cache so the conversion is only done once
+        static SPL::Mutex cacheMutex;
+        static SPL::map<SPL::uint32, SPL::rstring> cache;
+
+        // return the string saved in the cache, if this address has been converted before
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          const SPL::map<SPL::uint32, SPL::rstring>::iterator i = cache.find(ipv4AddressNumeric);
+          if (i != cache.end()) return i->second;
+        }
+
+        // convert binary representation of address to a tring
         char ipv4Address[INET_ADDRSTRLEN];
-        networkOrderAddress = htonl(ipv4AddressNumeric);
-        return std::string(inet_ntop(AF_INET, &networkOrderAddress, ipv4Address, sizeof(ipv4Address)));
+        const uint32_t networkOrderAddress = htonl(ipv4AddressNumeric);
+        const std::string ipv4AddressString(inet_ntop(AF_INET, &networkOrderAddress, ipv4Address, sizeof(ipv4Address)));
+
+        // save the conversion in the cache
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          cache.add(ipv4AddressNumeric, ipv4AddressString);
+        }
+
+        return ipv4AddressString;
       }
 
 
@@ -102,9 +123,30 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
       // IPv4 address, zero is returned.
 
       static SPL::uint32 convertIPV4AddressStringToNumeric(SPL::rstring ipv4AddressString) {
-        struct in_addr ipv4Address;
-        inet_pton(AF_INET, ipv4AddressString.c_str(), &ipv4Address);
-        return ntohl(ipv4Address.s_addr);
+
+        // save results in this cache so the conversion is only done once
+        static SPL::Mutex cacheMutex;
+        static SPL::map<SPL::rstring, SPL::uint32> cache;
+
+        // return the result saved in the cache, if this string has been converted before
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          const SPL::map<SPL::rstring, SPL::uint32>::iterator i = cache.find(ipv4AddressString);
+          if (i != cache.end()) return i->second;
+        }
+        
+        // convert the string to a numeric IPv4 address in host byte order
+        struct in_addr networkOrderAddress;
+        inet_pton(AF_INET, ipv4AddressString.c_str(), &networkOrderAddress);
+        const SPL::uint32 ipv4AddressNumeric = ntohl(networkOrderAddress.s_addr);
+
+        // save the conversion in the cache
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          cache.add(ipv4AddressString, ipv4AddressNumeric);
+        }
+
+        return ipv4AddressNumeric;
       }
 
 
@@ -119,14 +161,20 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
         // empty addresses are easy
         if (ipv4Address.empty() || maskbits<=0) return SPL::rstring("0.0.0.0");
 
-        // save all conversions in this cache so the network resolution is only done once
-        static SPL::map<SPL::rstring, SPL::rstring > mapping;
+        // save conversions in this cache so the network resolution is only done once
+        static SPL::Mutex cacheMutex;
+        static SPL::map<SPL::rstring, SPL::rstring> cache;
+
+        // construct a CIDR-style subnet string
         const SPL::rstring cidrAddress = ipv4Address + "/" + streams_boost::lexical_cast<std::string>(maskbits);
         SPLLOG(L_DEBUG, "converting " << cidrAddress << " ...", "convertIPV4AddressToSubnet");
 
-        // return the IPv4 address saved in the cache, if this address has been converted before
-        SPL::map<SPL::rstring, SPL::rstring >::iterator i = mapping.find(cidrAddress);
-        if (i != mapping.end()) return i->second;
+        // return the IPv4 subnet address saved in the cache, if this address has been converted before
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          SPL::map<SPL::rstring, SPL::rstring>::iterator i = cache.find(cidrAddress);
+          if (i != cache.end()) return i->second;
+        }
 
         // create the bitmask
         if (maskbits>32) maskbits = 32;
@@ -146,7 +194,10 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
         const SPL::rstring subnetAddress(inet_ntoa(address));
 
         // save the conversion in the cache
-        mapping.add(cidrAddress, subnetAddress);
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          cache.add(cidrAddress, subnetAddress);
+        }
         SPLLOG(L_DEBUG, "converted " << cidrAddress << " to subnet " << subnetAddress, "convertIPV4AddressToSubnet");
 
         // return the string representation of the subnet address
@@ -184,17 +235,24 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
       static SPL::rstring convertIPV4AddressStringToHostname(SPL::rstring ipv4Address) {
 
         // save all conversions in this cache so the network resolution is only done once
-        static SPL::map<SPL::rstring, SPL::rstring > mapping;
+        static SPL::Mutex cacheMutex;
+        static SPL::map<SPL::rstring, SPL::rstring> cache;
         //SPLLOG(L_DEBUG, "domain name lookup for '" << ipv4address << "' ...", "convertIPV4AddressToHostname");
 
         // return the hostname saved in the cache, if this IPv4 address has been converted before
-        SPL::map<SPL::rstring, SPL::rstring >::iterator i = mapping.find(ipv4Address);
-        if (i != mapping.end()) return i->second;
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          SPL::map<SPL::rstring, SPL::rstring>::iterator i = cache.find(ipv4Address);
+          if (i != cache.end()) return i->second;
+        }
 
         // otherwise, resolve the IPv4 address into a hostname with a domain name lookup
         const SPL::rstring hostname = convertTo(ipv4Address, 0);
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          cache.add(ipv4Address, hostname);
+        }
         //SPLLOG(L_DEBUG, "domain name found '" << ipv4address << "' --> '" << hostname  << "'...", "convertIPV4AddressToHostname");
-        mapping.add(ipv4Address, hostname);
 
         return hostname;
       }
@@ -208,11 +266,15 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
       static SPL::rstring convertIPV4AddressNumericToHostname(SPL::uint32 ipv4AddressNumeric) {
 
         // save all conversions in this cache so the network resolution is only done once
-        static SPL::map<SPL::uint32, SPL::rstring > mapping;
+        static SPL::Mutex cacheMutex;
+        static SPL::map<SPL::uint32, SPL::rstring> cache;
 
         // return the hostname saved in the cache, if this address has been converted before
-        SPL::map<SPL::uint32, SPL::rstring >::iterator i = mapping.find(ipv4AddressNumeric);
-        if (i != mapping.end()) return i->second;
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          SPL::map<SPL::uint32, SPL::rstring>::iterator i = cache.find(ipv4AddressNumeric);
+          if (i != cache.end()) return i->second;
+        }
 
         // store the IPv4 address in a socket structure
         const struct sockaddr_in sock = { AF_INET, 0, { htonl((uint32_t)ipv4AddressNumeric) } };
@@ -226,10 +288,14 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
         int rc = getnameinfo((const struct sockaddr*)(&sock), sizeof(sock), hbuf, sizeof(hbuf), sbuf, sizeof(sbuf), 0);
         if (rc) SPLLOG(L_ERROR, "getnameinfo(" << (uint32_t)ipv4AddressNumeric << ") failed, " << gai_strerror(rc), "convertIPV4AddressNumericToHostname");
         const SPL::rstring hostname = SPL::rstring(rc ? "" : hbuf);
-        SPLLOG(L_DEBUG, "domain name found '" << (uint32_t)ipv4AddressNumeric << "' --> '" << hostname  << "', cachesize=" << mapping.getSize(), "convertIPV4AddressNumericToHostname");
+        SPLLOG(L_DEBUG, "domain name found '" << (uint32_t)ipv4AddressNumeric << "' --> '" << hostname  << "', cachesize=" << cache.getSize(), "convertIPV4AddressNumericToHostname");
 
         // add the mapping to the cache and return the hostname
-        mapping.add(ipv4AddressNumeric, hostname);
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          cache.add(ipv4AddressNumeric, hostname);
+        }
+
         return hostname;
       }
 
@@ -242,17 +308,24 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
       static SPL::rstring convertHostnameToIPV4AddressString(SPL::rstring hostname) {
 
         // save all conversions in this cache so the network resolution is only done once
-        static SPL::map<SPL::rstring, SPL::rstring > mapping;
+        static SPL::Mutex cacheMutex;
+        static SPL::map<SPL::rstring, SPL::rstring> cache;
         //SPLLOG(L_DEBUG, "domain name lookup for '" << hostname << "' ...", "convertHostnameToIPV4Address");
 
         // return the IPv4 address saved in the cache, if this hostname has been converted before
-        SPL::map<SPL::rstring, SPL::rstring >::iterator i = mapping.find(hostname);
-        if (i != mapping.end()) return i->second;
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          SPL::map<SPL::rstring, SPL::rstring>::iterator i = cache.find(hostname);
+          if (i != cache.end()) return i->second;
+        }
 
         // otherwise, resolve the hostname into an IPv4 address with a domain name lookup
         const SPL::rstring ipv4address = convertTo(hostname, NI_NUMERICHOST);
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          cache.add(hostname, ipv4address);
+        }
         //SPLLOG(L_DEBUG, "domain name found '" << hostname << "' --> '" << ipv4address  << "'...", "convertHostnameToIPV4Address");
-        mapping.add(hostname, ipv4address);
 
         return ipv4address;
       }
@@ -265,12 +338,16 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
       static SPL::uint32 convertHostnameToIPV4AddressNumeric(SPL::rstring hostname) {
 
         // save all conversions in this cache so the network resolution is only done once
-        static SPL::map<SPL::rstring, SPL::uint32 > mapping;
+        static SPL::Mutex cacheMutex;
+        static SPL::map<SPL::rstring, SPL::uint32> cache;
         SPLLOG(L_DEBUG, "domain name lookup for '" << hostname << "' ...", "convertHostnameToIPV4AddressNumeric");
 
         // return the address saved in the cache, if this hostname has been converted before
-        SPL::map<SPL::rstring, SPL::uint32 >::iterator i = mapping.find(hostname);
-        if (i != mapping.end()) return i->second;
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          SPL::map<SPL::rstring, SPL::uint32>::iterator i = cache.find(hostname);
+          if (i != cache.end()) return i->second;
+        }
 
         // otherwise, resolve the hostname into a binary representation of
         // its IPv4 address with a domain name lookup
@@ -284,10 +361,14 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
         } else {
           SPLLOG(L_ERROR, "getaddrinfo(" << hostname << ") failed, " << gai_strerror(rc), "convertHostnameToIPV4AddressNumeric");
         }
-        SPLLOG(L_DEBUG, "domain name found '" << hostname << "' --> '" << ipv4AddressNumeric  << "', cachesize=" << mapping.getSize(), "convertHostnameToIPV4AddressNumeric");
+        SPLLOG(L_DEBUG, "domain name found '" << hostname << "' --> '" << ipv4AddressNumeric  << "', cachesize=" << cache.getSize(), "convertHostnameToIPV4AddressNumeric");
 
         // add the mapping to the cache and return the hostname
-        mapping.add(hostname, ipv4AddressNumeric);
+        {
+          SPL::AutoMutex m(cacheMutex); 
+          cache.add(hostname, ipv4AddressNumeric);
+        }
+
         return ipv4AddressNumeric;
       }
 

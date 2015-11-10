@@ -300,14 +300,14 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
     // fill in and submit output tuples to output ports, as selected by output filters, if specified
     <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-      <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %>
-           {
-             <% if ($inputPort) { CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); } %> ;
-             <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-             SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketFileSource");
-             submit(outTuple<%=$i%>, <%=$i%>);
-           }
-           <% } %> ;
+      <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> ;
+      {
+        <% if ($inputPort) { CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); } %> ;
+        <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+        SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketFileSource");
+        submit(outTuple<%=$i%>, <%=$i%>);
+      }
+      <% } %> ;
 
     // reset the 'metrics updated' flag, in case one of the output ports references it
     metricsUpdate = false;

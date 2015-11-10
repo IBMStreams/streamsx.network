@@ -15,7 +15,7 @@
 #include <string>
 
 #include <SPL/Runtime/Type/SPLType.h>
-
+#include <SPL/Runtime/Utility/Mutex.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 // This class parses DNS fields within a DNS message
@@ -372,6 +372,63 @@ class DNSMessageParser {
   }
 
 
+  // This function converts a binary IPv4 or IPv6 address into a string representation of the 
+  // address the first time its seen, and caches the result. Thereafter, the cached string is
+  // returned.
+
+  SPL::rstring convertIPAddressToString(const int addressFamily, const void *ipAddress) {
+
+    // these static variables cache the results of previous conversions
+    static SPL::Mutex ipv4Mutex;
+    static SPL::Mutex ipv6Mutex;
+    static SPL::map<uint32_t, SPL::rstring> ipv4Cache;
+    static SPL::map<SPL::list<SPL::uint8>, SPL::rstring> ipv6Cache;
+
+    // return the string representation of an IPv4 address, either by reusing a
+    // result cached during a previous call, or by converting and caching this one
+    if (addressFamily==AF_INET) {
+      SPL::AutoMutex m(ipv4Mutex); 
+
+      // reuse the result of a previous conversion, if there is one
+      const uint32_t ipv4Address = *(uint32_t*)ipAddress;
+      const SPL::map<uint32_t, SPL::rstring>::iterator i = ipv4Cache.find(ipv4Address);
+      //???if (i!=ipv4Cache.end()) printf("address cache hit on '%s'\n", (i->second).c_str());
+      if (i!=ipv4Cache.end()) return i->second;
+
+      // convert this address to a string, cache the result, and return it
+      char buffer[INET_ADDRSTRLEN];
+      const SPL::rstring ipv4String(inet_ntop(AF_INET, ipAddress, buffer, sizeof(buffer)));
+      ipv4Cache.add(ipv4Address, ipv4String);
+      //???printf("address cache miss on '%s'\n", ipv4String.c_str());
+      return ipv4String; }
+
+    // return the string representation of an IPv6 address, either by reusing a
+    // result cached during a previous call, or by converting and caching this one
+    else if (addressFamily==AF_INET6) {
+      SPL::AutoMutex m(ipv6Mutex); 
+
+      // reuse the result of a previous conversion, if there is one
+      const SPL::list<SPL::uint8> ipv6Address((uint8_t*)ipAddress, (uint8_t*)ipAddress+16);
+      const SPL::map<SPL::list<SPL::uint8>, SPL::rstring>::iterator i = ipv6Cache.find(ipv6Address);
+      //???if (i!=ipv6Cache.end()) printf("address cache hit on '%s'\n", (i->second).c_str());
+      if (i!=ipv6Cache.end()) return i->second;
+
+      // convert this address to a string, cache the result, and return it
+      char buffer[INET6_ADDRSTRLEN];
+      const SPL::rstring ipv6String(inet_ntop(AF_INET6, ipAddress, buffer, sizeof(buffer))); 
+      ipv6Cache.add(ipv6Address, ipv6String);
+      //???printf("address cache miss on '%s'\n", ipv6String.c_str());
+      return ipv6String; }
+
+    // this should never happen
+    else {
+      error = "invalid address family"; 
+      return std::string(); 
+    }
+  }
+
+
+
   // This function converts the DNS 'rdata' field in one fixed-size resource
   // record located at 'record' into an SPL string. The format of the converted
   // string depends upon the 'type' of the resource record. If the 'type' is not
@@ -380,10 +437,8 @@ class DNSMessageParser {
 
   SPL::rstring convertResourceDataToString(const struct Record& record) {
 
-    char buffer4[INET_ADDRSTRLEN];
-    char buffer6[INET6_ADDRSTRLEN];
     switch(record.type) {
-        /* A */          case   1: return SPL::rstring(inet_ntop(AF_INET, record.rdata, buffer4, sizeof(buffer4))); break;
+        /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); // ... was ... SPL::rstring(inet_ntop(AF_INET, record.rdata, buffer4, sizeof(buffer4))); break;
         /* NS */         case   2:
         /* CNAME */      case   5:
         /* SOA */        case   6:
@@ -393,7 +448,7 @@ class DNSMessageParser {
         /* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
         /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
-        /* AAAA */       case  28: return SPL::rstring(inet_ntop(AF_INET6, record.rdata, buffer6, sizeof(buffer6))); break;
+        /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); // ... was ...SPL::rstring(inet_ntop(AF_INET6, record.rdata, buffer6, sizeof(buffer6))); break;
         /* SRV */        case  33: return SPL::rstring("[SRV data]"); break;
         /* EDNS0 */      case  41: return SPL::rstring("[EDNS0 data]"); break;
         /* SSHFP */      case  44: return SPL::rstring("[SSHFP data]"); break;
