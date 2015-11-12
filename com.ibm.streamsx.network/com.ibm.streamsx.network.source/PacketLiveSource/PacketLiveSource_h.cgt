@@ -75,7 +75,7 @@ private:
 
   double now, then;
   uint64_t packetCounter, packetCounterNow, packetCounterThen;
-  uint64_t octetCounter, octetCounterNow, octetCounterThen;
+  uint64_t byteCounter, byteCounterNow, byteCounterThen;
   bool metricsUpdate;
 
   // ----------- libpcap-specific variables ----------
@@ -97,7 +97,7 @@ private:
 
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
-  SPL::uint64 octetsProcessed() { return octetCounter; }
+  SPL::uint64 bytesProcessed() { return byteCounter; }
 
   SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
 
@@ -107,7 +107,7 @@ private:
 
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
 
-  SPL::uint64 metricsIntervalOctetsProcessed() { return then ? octetCounterNow - octetCounterThen : 0; }
+  SPL::uint64 metricsIntervalBytesProcessed() { return then ? byteCounterNow - byteCounterThen : 0; }
 
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 

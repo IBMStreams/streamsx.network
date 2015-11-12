@@ -269,59 +269,57 @@ class DNSMessageParser {
   char const* error;
 
 
-  // This function decodes an encoded DNS name located at 'q'. If no problems
-  // are found, it returns an STL string containing the decoded name. If an
-  // encoding problem is found, the function returns an STL string that is empty
-  // or only partially decoded, and 'error' is set to a description of the
+  // This function decodes an encoded DNS name located at 'p'. If no problems
+  // are found, it returns an SPL::rstring containing the decoded name. If an
+  // encoding problem is found, the function returns an empty string, or perhaps
+  // a partially decoded DNS name, and 'error' is set to a description of the
   // problem.
 
-  SPL::rstring convertDNSEncodedNameToString(uint8_t* q) {
+  SPL::rstring convertDNSEncodedNameToString(uint8_t* p) { 
 
-    // step through the labels in this DNS name, reconstructing the name as we go
-    SPL::rstring name;
-    for (int32_t i = 0; i<253; i++) {
+    // step through the labels in the DNS name at 'p', reconstructing it as a
+    // character string in 'name'
+    char name[4096]; // ... was ... SPL::rstring name; 
+    int q = 0;
+    for (int32_t i = 0; i<255; i++) {
 
-      // no DNS name can be this long
-      if (name.length()>253) { error = "label overruns packet"; return name; }
+      // no DNS name can have this many labels or be this long
+      if (i>253) { error = "too many labels"; break; } 
+      if (q>253) { error = "label overruns packet"; break; } // ... was ... if (name.length()>253) ...
 
       // get the length and compression flag from the first byte in the next label
-      const uint8_t flags = *q & 0xC0;
-      const uint8_t length = *q & 0x3F;
+      const uint8_t flags = *p & 0xC0;
+      const uint8_t length = *p & 0x3F;
 
-      // handle compressed and uncompressed labels differently
-      uint16_t offset;
-      switch (flags) {
+      // for uncompressed labels, append the text of the label to the string,
+      // then step over the label length byte and text, and continue with the
+      // next label until one with zero length is found
+      if (flags==0x00) {
+        if (p+1+length>dnsEnd) { error = "label overruns packet"; break; }
+        if (length==0) { if (q>0) q--; break; } // ... was ... if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
+        strncpy(&name[q], (const char*)p+1, length); name[q+length] = '.'; // ... was ... name.append((char*)p+1, length).append(".");
+        p += length+1;
+        q += length+1;
+      }
 
-        // for uncompressed labels, append the text of the label to the string,
-        // then step over the label length byte and text, and continue with the next label
-      case 0x00:
-        if (q+1+length>dnsEnd) { error = "label overruns packet"; return name; }
-        if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
-        name.append((char*)q+1, length);
-        name.append(1, '.');
-        q += 1+length;
-        break;
+      // for compressed labels, get the offset from the beginning of the DNS message
+      // to the next label, and continue decoding from there
+      else if (flags==0xC0) { 
+        if (p+2>dnsEnd) { error = "label compression length overruns packet"; break; }
+        const uint16_t offset = ntohs(*((uint16_t*)p)) & 0x03FF;
+        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; break; }
+        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; break; }
+        if (offset==p-dnsStart) { error = "label compression offset loop"; break; }
+        p = dnsStart+offset;
+      }
 
-        // for compressed labels, get the offset from the beginning of the DNS message
-        // to the next label, and continue decoding from there
-      case 0xC0:
-        if (q+2>dnsEnd) { error = "label compression length overruns packet"; return name; }
-        offset = ntohs(*((uint16_t*)q)) & 0x03FF;
-        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; return name; }
-        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; return name; }
-        if (offset==q-dnsStart) { error = " label compression offset loop"; return name; }
-        q = dnsStart+offset;
-        break;
-
-        // no DNS label should have other high-order bit settings in its length byte
-      default:
-        error = "label flags invalid"; return name;
+      // no DNS label should have other high-order bit settings in its length byte
+      else {
+        error = "label flags invalid"; break;
       }
     }
 
-    // no DNS name can have have this many labels in it
-    error = "label limit exceeded";
-    return name;
+    return SPL::rstring(name, q); // ... was ... return name;
   }
 
 

@@ -81,7 +81,7 @@ MY_OPERATOR::MY_OPERATOR()
   // initialize operator state variables
   now = then = 0;
   packetCounter = packetCounterNow = packetCounterThen = 0;
-  octetCounter = octetCounterNow = octetCounterThen = 0;
+  byteCounter = byteCounterNow = byteCounterThen = 0;
   pcapStatisticsNow = pcapStatisticsThen = (const struct pcap_stat){0};
   metricsUpdate = false;
 
@@ -287,9 +287,9 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   // save pointers to the packet header for the output assignment functions
   pcapHeader = header;
 
-  // count the packets and octets processed so far
+  // count the packets and bytes processed so far
   packetCounter++;
-  octetCounter += header->len;
+  byteCounter += header->len;
 
   // parse the network headers in the packet
   headers.parseNetworkHeaders((char*)buffer, header->caplen);
@@ -297,7 +297,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
     {
       <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
       SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketLiveSource");
@@ -305,7 +305,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
     }
     <% } %> ;
 
-  // reset the 'metrics updated' flag, in case one of the output ports references it
+  // reset the 'metrics updated' flag, in case one of the output filters or assignments references it
   metricsUpdate = false;
 }
 
@@ -360,7 +360,7 @@ void MY_OPERATOR::pcapThread()
     Metric* totalPacketsReceived = &opm.getCustomMetricByName("nPacketsReceivedCurrent");
     Metric* totalPacketsDropped = &opm.getCustomMetricByName("nPacketsDroppedCurrent");
     Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
-    Metric* totalOctetsProcessed = &opm.getCustomMetricByName("nOctetsProcessedCurrent");
+    Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
 
     // get statistics periodically and send them to the runtime
     while (!getPE().getShutdownRequested()) {
@@ -377,7 +377,7 @@ void MY_OPERATOR::pcapThread()
       // store the previous interval's metrics for difference calculations
       then = now;
       packetCounterThen = packetCounterNow;
-      octetCounterThen = octetCounterNow;
+      byteCounterThen = byteCounterNow;
       pcapStatisticsThen.ps_recv = pcapStatisticsNow.ps_recv;
       pcapStatisticsThen.ps_drop = pcapStatisticsNow.ps_drop;
 
@@ -385,14 +385,14 @@ void MY_OPERATOR::pcapThread()
       now = SPL::Functions::Time::getTimestampInSecs();
       pcap_stats(pcapDescriptor, &pcapStatisticsNow);
       packetCounterNow = packetCounter;
-      octetCounterNow = octetCounter;
+      byteCounterNow = byteCounter;
       // ??? SPLLOG(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now) << " received=" << pcapStatisticsNow.ps_recv << " processed=" << packetCounterNow, "PacketLiveSource");
 
       // send the operator's metrics to the runtime
       totalPacketsReceived->setValue(pcapStatisticsNow.ps_recv);
       totalPacketsDropped->setValue(pcapStatisticsNow.ps_drop);
       totalPacketsProcessed->setValue(packetCounterNow);
-      totalOctetsProcessed->setValue(octetCounterNow);
+      totalBytesProcessed->setValue(byteCounterNow);
 
       // updated metrics will be available to the next output tuple emitted
       metricsUpdate = true;

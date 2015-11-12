@@ -71,7 +71,7 @@ including the current packet, excluding any packets that were ignored by the inp
 if the `inputFilter` parameter was specified.
 
             </function:description>
-            <function:prototype>public uint64 octetsProcessed()</function:prototype>
+            <function:prototype>public uint64 bytesProcessed()</function:prototype>
           </function:function>
 
           <function:function>
@@ -106,7 +106,7 @@ excluding any packets that were ignored by the input filter,
 if the `inputFilter` parameter was specified.
 
             </function:description>
-            <function:prototype>public uint64 metricsIntervalOctetsProcessed()</function:prototype>
+            <function:prototype>public uint64 metricsIntervalBytesProcessed()</function:prototype>
           </function:function>
 
           <function:function>

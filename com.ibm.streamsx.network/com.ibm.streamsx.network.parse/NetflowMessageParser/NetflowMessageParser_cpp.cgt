@@ -146,7 +146,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
       if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); break; }
       if ( parser.done ) { break; }
       <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-        <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> ;
+        <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
         {
           <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
           <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;

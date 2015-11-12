@@ -40,12 +40,12 @@ composite LivePacketLiveSourceBasic2 {
         uint64 packetsReceived,         // number of packets received by network interface in this interval
         uint64 packetsDropped,          // number of packets dropped in this interval
         uint64 packetsProcessed,        // number of packets emitted by operator in this interval
-        uint64 octetsProcessed,         // number of bytes emitted by operator in this interval
+        uint64 bytesProcessed,         // number of bytes emitted by operator in this interval
         float64 intervalElapsed,        // elapsed time since last metrics interval, in seconds
         uint64 intervalPacketsReceived, // number of packets received since last metrics interval
         uint64 intervalPacketsDropped,  // number of packets dropped since last metrics interval
         uint64 intervalPacketsProcessed,// number of packets processed since last metrics interval
-        uint64 intervalOctetsProcessed; // number of octets processed since last metrics interval
+        uint64 intervalBytesProcessed; // number of bytes processed since last metrics interval
 
 
     graph
@@ -78,12 +78,12 @@ composite LivePacketLiveSourceBasic2 {
             packetsReceived = packetsReceived(),
             packetsDropped = packetsDropped(),
             packetsProcessed = packetsProcessed(),
-            octetsProcessed = octetsProcessed(),
+            bytesProcessed = bytesProcessed(),
             intervalElapsed = metricsIntervalElapsed(),
             intervalPacketsReceived = metricsIntervalPacketsReceived(),
             intervalPacketsDropped = metricsIntervalPacketsDropped(),
             intervalPacketsProcessed = metricsIntervalPacketsProcessed(),
-            intervalOctetsProcessed = metricsIntervalOctetsProcessed();
+            intervalBytesProcessed = metricsIntervalBytesProcessed();
 
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.LivePacketLiveSourceBasic2.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }

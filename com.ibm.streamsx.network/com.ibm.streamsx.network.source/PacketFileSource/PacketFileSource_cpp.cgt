@@ -81,7 +81,7 @@ MY_OPERATOR::MY_OPERATOR()
   startTimeInNanoseconds = SPL::Functions::Time::getCPUCounterInNanoSeconds();
   now = then = 0;
   packetCounter = packetCounterNow = packetCounterThen = 0;
-  octetCounter = octetCounterNow = octetCounterThen = 0;
+  byteCounter = byteCounterNow = byteCounterThen = 0;
   pcapDescriptor = NULL;
   metricsUpdate = false;
   done = false;
@@ -134,15 +134,15 @@ void MY_OPERATOR::prepareToShutdown()
   std::stringstream formattingStream;
   formattingStream.imbue(std::locale(formattingStream.getloc(), new groupByThree));
 
-  // log packet and octet counters, average processing rates
+  // log packet and byte counters, average processing rates
   formattingStream.str("");
   formattingStream << "read " << packetCounter << " packets in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)packetCounter / elapsedSeconds) << " packets/second";
   SPLLOG(L_INFO, formattingStream.str(), "PacketFileSource");
   formattingStream.str("");
-  formattingStream << "read " << octetCounter << " octets in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)octetCounter / elapsedSeconds) << " octets/second";
+  formattingStream << "read " << byteCounter << " bytes in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)byteCounter / elapsedSeconds) << " bytes/second";
   SPLLOG(L_INFO, formattingStream.str(), "PacketFileSource");
   formattingStream.str("");
-  formattingStream << "read " << octetCounter*8 << " bits in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)octetCounter*8 / elapsedSeconds) << " bits/second";
+  formattingStream << "read " << byteCounter*8 << " bits in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)byteCounter*8 / elapsedSeconds) << " bits/second";
   SPLLOG(L_INFO, formattingStream.str(), "PacketFileSource");
 }
 
@@ -274,9 +274,9 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
     if (rc==-1) THROW (SPLRuntimeOperator, "error reading PCAP file, " << strerror(errno)); // something went wrong
     //if (rc==0) ... // got another packet to process
 
-    // count the packets and octets processed so far
+    // count the packets and bytes processed so far
     packetCounter++;
-    octetCounter += pcapHeader->len;
+    byteCounter += pcapHeader->len;
 
     // if the packet does not have an ethernet header, prepend an empty one
     if (!isRawIP) {
@@ -300,7 +300,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
     // fill in and submit output tuples to output ports, as selected by output filters, if specified
     <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-      <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> ;
+      <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
       {
         <% if ($inputPort) { CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); } %> ;
         <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
@@ -380,7 +380,7 @@ void MY_OPERATOR::metricsThread()
   // expose the operator's statistics in these metrics
   OperatorMetrics& opm = getContext().getMetrics();
   Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
-  Metric* totalOctetsProcessed = &opm.getCustomMetricByName("nOctetsProcessedCurrent");
+  Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
 
   // get metrics periodically and send them to the runtime
   while (!getPE().getShutdownRequested()) {
@@ -397,17 +397,17 @@ void MY_OPERATOR::metricsThread()
     // store the previous interval's metrics for difference calculations
     then = now;
     packetCounterThen = packetCounterNow;
-    octetCounterThen = octetCounterNow;
+    byteCounterThen = byteCounterNow;
 
     // store the current interval's metrics
     now = SPL::Functions::Time::getTimestampInSecs();
     packetCounterNow = packetCounter;
-    octetCounterNow = octetCounter;
+    byteCounterNow = byteCounter;
     // ??? SPLLOG(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now)  << " processed=" << packetCounterNow, "PacketLiveSource");
 
     // send the operator's metrics to the runtime
     totalPacketsProcessed->setValue(packetCounterNow);
-    totalOctetsProcessed->setValue(octetCounterNow);
+    totalBytesProcessed->setValue(byteCounterNow);
 
     // updated metrics will be available to the next output tuple emitted
     metricsUpdate = true;
