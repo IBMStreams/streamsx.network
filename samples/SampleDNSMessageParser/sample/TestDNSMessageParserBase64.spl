@@ -11,21 +11,21 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestDNSMessageParserBase64 {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns_only_txt_base64.pcap" );
-    
-    type 
-    
+
+    type
+
     PacketType =
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
-        uint64  packetNumber,			// tuple sequence number
+        timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch
+        uint64  packetNumber,           // tuple sequence number
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
-    DNSMessageType = 
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
-        uint64  packetNumber,			// tuple sequence number
+    DNSMessageType =
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint64  packetNumber,           // tuple sequence number
         rstring ipSourceAddress,        // IP source address
         rstring ipDestinationAddress,   // IP destination address
         rstring questionName,
@@ -40,45 +40,44 @@ composite TestDNSMessageParserBase64 {
             inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
-            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+            captureTime = createTimestamp((int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u),
             packetNumber = packetsProcessed(),
             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dnsMessage = PAYLOAD_DATA();
     }
-    // as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserBase64.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    // as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserBase64.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     stream<DNSMessageType> DNSMessageStream as Out = DNSMessageParser(PacketStream) {
       param
           messageAttribute: dnsMessage;
-	      outputFilters: DNS_QUESTION_TYPE()==16uh && 
-	                     DNS_RESPONSE_FLAG() && 
-	                     DNS_RESPONSE_CODE()==0ub && 
-	                     !isSPFAnswer(DNS_ANSWER_DATA()) &&
-	                     !isGoogleSiteVerificationAnswer(DNS_ANSWER_DATA()) &&
-	                     ( isBase64EncodedAnswer(DNS_ANSWER_NAMES()) || isBase64EncodedAnswer(DNS_ANSWER_DATA()) );
+          outputFilters: DNS_QUESTION_TYPE()==16uh &&
+                         DNS_RESPONSE_FLAG() &&
+                         DNS_RESPONSE_CODE()==0ub &&
+                         !isSPFAnswer(DNS_ANSWER_DATA()) &&
+                         !isGoogleSiteVerificationAnswer(DNS_ANSWER_DATA()) &&
+                         ( isBase64EncodedAnswer(DNS_ANSWER_NAMES()) || isBase64EncodedAnswer(DNS_ANSWER_DATA()) );
       output Out:
+          captureTime = formatEpochTime(captureTime),
           questionName = DNS_QUESTION_NAME(),
           answerNames = DNS_ANSWER_NAMES(),
           answerData = DNS_ANSWER_DATA();
     }
-    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserBase64.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserBase64.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 }
 
 boolean isSPFAnswer(list<rstring> answerList) {
-	for (rstring answer in answerList) { if (size(regexMatchPerl(answer, ".{1,3}v=spf1? ")) > 0 ) return true; }
-	return false;
+    for (rstring answer in answerList) { if (size(regexMatchPerl(answer, ".{1,3}v=spf1? ")) > 0 ) return true; }
+    return false;
 }
 
 boolean isGoogleSiteVerificationAnswer(list<rstring> answerList) {
-	for (rstring answer in answerList) { if (size(regexMatchPerl(answer, "^.google-site-verification")) > 0 ) return true; }
-	return false;
+    for (rstring answer in answerList) { if (size(regexMatchPerl(answer, "^.google-site-verification")) > 0 ) return true; }
+    return false;
 }
 
 boolean isBase64EncodedAnswer(list<rstring> answerList) {
-	for (rstring answer in answerList) { if ( size(regexMatchPerl(answer, "[a-zA-Z0-9/+]{24,}={0,2}")) > 0 ) return true; }
-	return false;
+    for (rstring answer in answerList) { if ( size(regexMatchPerl(answer, "[a-zA-Z0-9/+]{24,}={0,2}")) > 0 ) return true; }
+    return false;
 }
-
-

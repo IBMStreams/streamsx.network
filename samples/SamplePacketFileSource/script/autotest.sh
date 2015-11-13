@@ -16,9 +16,9 @@ dataDirectory=$projectDirectory/data
 logDirectory=$projectDirectory/log
 
 scripts=(
-$here/setupConsistentInstance.sh
+$here/setupConsistent.sh
 $here/test*.sh
-$here/teardownConsistentInstance.sh
+$here/teardownConsistent.sh
 )
 
 ################### functions used in this script #############################

@@ -17,18 +17,19 @@ my $myOperatorKind = $model->getContext()->getKind();
 my $inputPort = $model->getInputPortAt(0);
 my @outputPortList = @{ $model->getOutputPorts() };
 
-# get C++ expressions for getting the values of this operator's parameter
+# get C++ expressions for getting the values of this operator's parameters
 my $messageAttribute = $model->getParameterByName("messageAttribute")->getValueAt(0)->getCppExpression();
+my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
 my @outputFilterList;
-if ($outputFilterParameter) { 
+if ($outputFilterParameter) {
   foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
-	my $expression = $value->getCppExpression();
-	push @outputFilterList, $expression;
-	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
-	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::DNSMessageParser_result_functions::") != -1;
+    my $expression = $value->getCppExpression();
+    push @outputFilterList, $expression;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::DNSMessageParser_result_functions::") != -1;
   }
 }
 
@@ -44,7 +45,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 
 // calls to SPL functions within expressions are generated with these
 // namespaces, which must be mapped to the operator's namespace so they
-// will invoke the functions defined in the xxx_h.cgt file
+// will invoke the functions defined in the DNSMessageParser_h.cgt file
 
 #define common_result_functions MY_OPERATOR
 #define DNSMessageParser_result_functions MY_OPERATOR
@@ -55,40 +56,44 @@ MY_OPERATOR::MY_OPERATOR()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "DNSMessageParser");
 
+  // set operator parameters
+  processorAffinity = <%=$processorAffinity%>;
+
+  // initialize operator state variables
   tupleCounter = 0;
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "DNSMessageParser");
 }
 
 // Destructor
-MY_OPERATOR::~MY_OPERATOR() 
+MY_OPERATOR::~MY_OPERATOR()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "DNSMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "DNSMessageParser");
 }
 
 // Notify port readiness
-void MY_OPERATOR::allPortsReady() 
+void MY_OPERATOR::allPortsReady()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DNSMessageParser");
 }
- 
+
 // Notify pending shutdown
-void MY_OPERATOR::prepareToShutdown() 
+void MY_OPERATOR::prepareToShutdown()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DNSMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DNSMessageParser");
 }
 
-// Processing for source and threaded operators   
+// Processing for source and threaded operators
 void MY_OPERATOR::process(uint32_t idx)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DNSMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DNSMessageParser");
 }
 
-// Tuple processing for mutating ports 
+// Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DNSMessageParser");
@@ -100,6 +105,18 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 
+  // assign caller's thread to a particular processor core, if specified
+  if (processorAffinity>-1) {
+    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "DNSMessageParser");
+    cpu_set_t cpumask; // CPU affinity bit mask
+    CPU_ZERO(&cpumask);
+    CPU_SET(processorAffinity, &cpumask);
+    const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
+    if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
+    processorAffinity = -1;
+  }
+
+  // increment tuple counter
   tupleCounter++;
 
   // point at the input tuple
@@ -116,16 +133,15 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-	<% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
-		 {
-		   outTuple<%=$i%>.clear();
-		   outTuple<%=$i%>.assignFrom(iport$0, false);
-		   <% ####### OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
-		   <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
-		   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSMessageParser");
-		   submit(outTuple<%=$i%>, <%=$i%>);
-		 }
-		 <% } %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %>
+         {
+           outTuple<%=$i%>.clear();
+           outTuple<%=$i%>.assignFrom(iport$0, false);
+           <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
+           SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSMessageParser");
+           submit(outTuple<%=$i%>, <%=$i%>);
+         }
+         <% } %> ;
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 }
@@ -135,9 +151,11 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DNSMessageParser");
+
+  forwardWindowPunctuation(punct);
+
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 }
 
 
 <%SPL::CodeGen::implementationEpilogue($model);%>
-

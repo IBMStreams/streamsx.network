@@ -11,16 +11,18 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestDNSMessageParserParallelAnalysis {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    expression<uint32> $ingesterProcessorAffinity: (uint32)getSubmissionTimeValue("ingesterProcessorAffinity", "1");
+    expression<list<uint32>> $parserProcessorAffinities: (list<uint32>)getSubmissionTimeListValue("parserProcessorAffinities");
     expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
-    
-    type 
-    
+
+    type
+
     PacketType =
-        timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch 
+        timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch
         rstring dstAddress,             // string representation of IPv4 destination address
-	    uint64 partitionKey,			// combination of addresses and ports, for downstream @parallel annotation
+        uint64 partitionKey,            // combination of addresses and ports, for downstream @parallel annotation
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     graph
@@ -28,116 +30,135 @@ composite TestDNSMessageParserParallelAnalysis {
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
+            processorAffinity: $ingesterProcessorAffinity;
             inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
             captureTime = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
             dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-		    partitionKey = hashCode(IPV4_SRC_ADDRESS()) + 
-		                   hashCode(IPV4_DST_ADDRESS()) + 
-		                   hashCode(IPV6_SRC_ADDRESS()) + 
-		                   hashCode(IPV6_DST_ADDRESS()) + 
-		                   hashCode(IP_SRC_PORT()) + 
-		                   hashCode(IP_DST_PORT()),
+            partitionKey = hashCode(IPV4_SRC_ADDRESS()) +
+                           hashCode(IPV4_DST_ADDRESS()) +
+                           hashCode(IPV6_SRC_ADDRESS()) +
+                           hashCode(IPV6_DST_ADDRESS()) +
+                           hashCode(IP_SRC_PORT()) +
+                           hashCode(IP_DST_PORT()),
             dnsMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-	@parallel(width=$parallelChannels, partitionBy=[{port=PacketStream, attributes=[partitionKey]}])
-	( stream<DNSAnalytics.PBDNSAnalyticResultType> PBDNSAnalyticResultStream ;
-	  stream<DNSAnalytics.DPDNSAnalyticResultType> DPDNSAnalyticResultStream ;
-	  stream<DNSAnalytics.HPDNSAnalyticResultType> HPDNSAnalyticResultStream ) = DNSAnalytics(PacketStream) {} 
+    @parallel(width=$parallelChannels, partitionBy=[{port=PacketStream, attributes=[partitionKey]}])
+    ( stream<TestDNSAnalytics.PredictiveBlacklistingResultType> PredictiveBlacklistingResultStream ;
+      stream<TestDNSAnalytics.DomainProfilingResultType> DomainProfilingResultStream ;
+      stream<TestDNSAnalytics.HostProfilingResultType> HostProfilingResultStream ) = TestDNSAnalytics(PacketStream) {
+      param
+          parserProcessorAffinities: $parserProcessorAffinities;
+    }
 }
 
 
 
-composite DNSAnalytics ( input PacketStream ; output PBDNSAnalyticResultStream, DPDNSAnalyticResultStream, HPDNSAnalyticResultStream ) {
+composite TestDNSAnalytics ( input PacketStream ; output PredictiveBlacklistingResultStream, DomainProfilingResultStream, HostProfilingResultStream ) {
+
+  param
+    expression<list<uint32>> $parserProcessorAffinities;
 
   type
 
     // input to 'predictive blacklisting' analytic
-    PBDNSResponseMessage_t = 
+    FullDNSResponseMessage_t =
       timestamp captureTime,
       rstring dstAddress,
       rstring questionName,
+      rstring questionType,
       uint8 responseCode,
-	  uint16 answerCount,
+      uint16 answerCount,
+      list<rstring> answerNames,
       list<rstring> answerData,
       list<uint16> answerTypes,
       list<uint32> answerTTLs,
-	  uint16 nameserverCount,
+      uint16 nameserverCount,
+      list<rstring> nameserverNames,
       list<rstring> nameserverData,
       list<uint16> nameserverTypes,
       list<uint32> nameserverTTLs,
-	  uint16 additionalCount,
+      uint16 additionalCount,
+      list<rstring> additionalNames,
       list<rstring> additionalData,
       list<uint16> additionalTypes,
       list<uint32> additionalTTLs;
-  
+
     // input to 'domain profiling' and 'host profiling' analytics
-    DPHPDNSResponseMessage_t = 
-	  timestamp captureTime,
-	  rstring dstAddress,
-	  rstring questionName,
-	  uint8 responseCode,
-	  list<rstring> answerData,
-	  list<rstring> additionalData;
+    ShortDNSResponseMessage_t =
+      timestamp captureTime,
+      rstring dstAddress,
+      rstring questionName,
+      rstring questionType,
+      uint8 responseCode,
+      list<rstring> answerData,
+      list<rstring> additionalData;
 
     // output from 'predictive blacklisting' analytic
-    static PBDNSAnalyticResultType = 
-	  int32 result;
+    static PredictiveBlacklistingResultType =
+      int32 result;
 
     // output from 'domain profiling' analytic
-    static DPDNSAnalyticResultType = 
-	  int32 result;
+    static DomainProfilingResultType =
+      int32 result;
 
     // output from 'host profiling' analytic
-    static HPDNSAnalyticResultType = 
-	  int32 result;
+    static HostProfilingResultType =
+      int32 result;
 
   graph
-	
-    ( stream<PBDNSResponseMessage_t> PBDNSResponseMessageStream as OutPB ;
-	  stream<DPHPDNSResponseMessage_t> DPHPDNSResponseMessageStream as OutDPHP ) = DNSMessageParser(PacketStream) {
+
+    ( stream<FullDNSResponseMessage_t> FullDNSResponseMessageStream as OutFull ;
+      stream<ShortDNSResponseMessage_t> ShortDNSResponseMessageStream as OutShort ) = DNSMessageParser(PacketStream) {
+      logic state: {
+        map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+        map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
+      }
       param
+          processorAffinity: $parserProcessorAffinities[getChannel()];
           messageAttribute: dnsMessage;
-          outputFilters: DNS_RESPONSE_FLAG() && !parseError(), 
-	                     DNS_RESPONSE_FLAG() && !parseError();
-      output 
-	  OutPB:
+          outputFilters: DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError(),
+                         DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError();
+      output
+      OutFull:
           questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
-	      answerCount = DNS_ANSWER_COUNT(),
+          answerCount = DNS_ANSWER_COUNT(),
+          answerNames = DNS_ANSWER_NAMES(),
           answerData = DNS_ANSWER_DATA(),
           answerTypes = DNS_ANSWER_TYPES(),
           answerTTLs = DNS_ANSWER_TTLS(),
-	      nameserverCount = DNS_NAMESERVER_COUNT(),
+          nameserverCount = DNS_NAMESERVER_COUNT(),
+          nameserverNames = DNS_NAMESERVER_NAMES(),
           nameserverData = DNS_NAMESERVER_DATA(),
           nameserverTypes = DNS_NAMESERVER_TYPES(),
           nameserverTTLs = DNS_NAMESERVER_TTLS(),
-	      additionalCount = DNS_ADDITIONAL_COUNT(),
+          additionalCount = DNS_ADDITIONAL_COUNT(),
+          additionalNames = DNS_ADDITIONAL_NAMES(),
           additionalData = DNS_ADDITIONAL_DATA(),
           additionalTypes = DNS_ADDITIONAL_TYPES(),
           additionalTTLs = DNS_ADDITIONAL_TTLS();
-      OutDPHP:
+      OutShort:
           questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
           answerData = DNS_ANSWER_DATA(),
           additionalData = DNS_ADDITIONAL_DATA();
     }
-    () as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.PBDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; } 
-    () as DPHPDNSResponseMessageSink = FileSink(DPHPDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.DPHPDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as FullDNSResponseMessageSink = FileSink(FullDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.FullDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as ShortDNSResponseMessageSink = FileSink(ShortDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserParallelAnalysis.ShortDNSResponseMessageStream" + (rstring)getChannel() + ".out"; format: txt; hasDelayField: true; flush: 1u; }
 
-	// placeholder for 'predictive blacklisting' analytic
-	stream<PBDNSAnalyticResultType> PBDNSAnalyticResultStream = Custom(PBDNSResponseMessageStream) {} 
+    // placeholder for 'predictive blacklisting' analytic
+    stream<PredictiveBlacklistingResultType> PredictiveBlacklistingResultStream = Custom(FullDNSResponseMessageStream) {}
 
-	// placeholder for 'domain profiling' analytic
-	stream<DPDNSAnalyticResultType> DPDNSAnalyticResultStream = Custom(DPHPDNSResponseMessageStream) {} 
+    // placeholder for 'domain profiling' analytic
+    stream<DomainProfilingResultType> DomainProfilingResultStream = Custom(ShortDNSResponseMessageStream) {}
 
-	// placeholder for 'host profiling' analytic
-	stream<HPDNSAnalyticResultType> HPDNSAnalyticResultStream = Custom(DPHPDNSResponseMessageStream) {} 
+    // placeholder for 'host profiling' analytic
+    stream<HostProfilingResultType> HostProfilingResultStream = Custom(ShortDNSResponseMessageStream) {}
 
 }
-
-
-

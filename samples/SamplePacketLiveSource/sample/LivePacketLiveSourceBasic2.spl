@@ -1,0 +1,94 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+
+composite LivePacketLiveSourceBasic2 {
+
+    param
+    expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    expression<uint32> $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1" );
+    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+
+    type
+
+    PacketType =
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint8 ipVersion,                // IP version: 4 for IPv4, 6 for IPv6
+        rstring ipProtocol,             // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+        rstring ipSourceAddress,        // IP source address, or empty if not IP packet
+        uint16 ipSourcePort,            // IP source port, or zero if not UDP or TCP packet
+        rstring ipDestinationAddress,   // IP destination address, or empty if not IP packet
+        uint16 ipDestinationPort,       // IP destination port, or zero if not UDP or TCP packet
+        uint32 packetLength,            // original length of packet (not necessarily all captured)
+        uint32 payloadLength,           // length of packet payload, following all network headers
+        blob packetData,                // contents of packet captured, including network headers (possibly truncated)
+        blob payloadData;               // contents of packet payload, following all network headers
+
+    MetricsType =
+        float64 metricsTime,            // time that metrics were produced, in seconds since Unix epoch
+        boolean metricsUpdated,         // true if metrics have been updated since previous output tuple
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        uint64 packetsReceived,         // number of packets received by network interface in this interval
+        uint64 packetsDropped,          // number of packets dropped in this interval
+        uint64 packetsProcessed,        // number of packets emitted by operator in this interval
+        uint64 octetsProcessed,         // number of bytes emitted by operator in this interval
+        float64 intervalElapsed,        // elapsed time since last metrics interval, in seconds
+        uint64 intervalPacketsReceived, // number of packets received since last metrics interval
+        uint64 intervalPacketsDropped,  // number of packets dropped since last metrics interval
+        uint64 intervalPacketsProcessed,// number of packets processed since last metrics interval
+        uint64 intervalOctetsProcessed; // number of octets processed since last metrics interval
+
+
+    graph
+
+    ( stream<PacketType> PacketStream as OutPackets ;
+      stream<MetricsType> MetricsStream as OutMetrics ) = PacketLiveSource() {
+        logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
+        param
+            networkInterface: $networkInterface;
+            processorAffinity: $processorAffinity;
+            metricsInterval: $metricsInterval;
+        output
+        OutPackets:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipVersion = IP_VERSION(),
+            ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
+            ipSourceAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_SRC_ADDRESS()) : ""),
+            ipDestinationAddress = IP_VERSION()==4ub ? convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()) : ( IP_VERSION()==6ub ? convertIPV6AddressNumericToString(IPV6_DST_ADDRESS()) : ""),
+            ipSourcePort = IP_SRC_PORT(),
+            ipDestinationPort = IP_DST_PORT(),
+            packetLength = PACKET_LENGTH(),
+            payloadLength = PAYLOAD_LENGTH(),
+            packetData = PACKET_DATA(),
+            payloadData = PAYLOAD_DATA();
+        OutMetrics:
+            metricsTime = getTimestampInSecs(),
+            metricsUpdated = metricsUpdated(),
+            packetNumber = packetsProcessed() - 1ul,
+            packetsReceived = packetsReceived(),
+            packetsDropped = packetsDropped(),
+            packetsProcessed = packetsProcessed(),
+            octetsProcessed = octetsProcessed(),
+            intervalElapsed = metricsIntervalElapsed(),
+            intervalPacketsReceived = metricsIntervalPacketsReceived(),
+            intervalPacketsDropped = metricsIntervalPacketsDropped(),
+            intervalPacketsProcessed = metricsIntervalPacketsProcessed(),
+            intervalOctetsProcessed = metricsIntervalOctetsProcessed();
+
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.LivePacketLiveSourceBasic2.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LivePacketLiveSourceBasic2.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+}

@@ -1,0 +1,19 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+
+
+// This function converts a list of 'uint32' values representing IPv4 addresses
+// into a list of strings containing 'dotted decimal' representations of those
+// addresses.
+
+list<rstring> convertIPV4AddressListToStringList(list<uint32> addresses) {
+  mutable list<rstring> strings = [];
+  for (uint32 address in addresses) { appendM(strings, convertIPV4AddressNumericToString(address)); }
+  return strings;
+}

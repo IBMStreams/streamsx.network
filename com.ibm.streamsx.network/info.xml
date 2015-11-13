@@ -2,8 +2,8 @@
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
     <info:name>com.ibm.streamsx.network</info:name>
-    <info:description></info:description>
-    <info:version>2.0.0</info:version>
+    <info:description>Operators and functions for ingesting and parsing raw network data at the packet level.</info:description>
+    <info:version>2.5.0</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

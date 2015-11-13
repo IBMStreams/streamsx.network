@@ -1,0 +1,135 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+
+composite LivePacketLiveSourceFilters {
+
+    param
+    expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+
+    type
+
+    DHCPPacketType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+      rstring etherSourceAddress,       // ethernet source address, or empty list if 'raw IP' PCAP recording
+      rstring etherDestinationAddress,  // ethernet destination address, or empty list if 'raw IP' PCAP recording
+      rstring ipSourceAddress,          // IP source address
+      rstring ipDestinationAddress,     // IP destination address
+      uint32 dhcpLength,                // length of DHCP message in packet (possibly truncated))
+      blob dhcpMessage;                 // DHCP message, excluding network headers (possibly truncated)
+
+    DNSPacketType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+      rstring ipSourceAddress,          // IP source address
+      rstring ipDestinationAddress,     // IP destination address
+      uint32 dnsLength,                 // length of DNS message in packet (possibly truncated))
+      blob dnsMessage;                  // DNS message, excluding network headers (possibly truncated)
+
+    HTTPPacketType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+      rstring ipSourceAddress,          // IP source address and port
+      rstring ipDestinationAddress,     // IP destination address and port
+      uint32 httpLength,                // length of HTTP data in packet (possibly truncated))
+      blob httpData;                    // HTTP data, excluding network headers (possibly truncated)
+
+    MetricsType =
+        float64 metricsTime,            // time that metrics were produced, in seconds since Unix epoch
+        float64 averagePacketsReceived, // average number of packets received during last metrics interval
+        float64 averagePacketsDropped,  // average number of packets dropped during last metrics interval
+        float64 averagePacketsProcessed,// average number of packets processed during last metrics interval
+        float64 averageOctetsProcessed; // average number of octets processed during last metrics interval
+
+    AllPacketType =
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint8 ipVersion,                // IP version: 4 for IPv4, 6 for IPv6
+        rstring ipProtocol,             // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+        rstring ipSourceAddress,        // IP source address, or empty if not IP packet
+        uint16 ipSourcePort,            // IP source port, or zero if not UDP or TCP packet
+        rstring ipDestinationAddress,   // IP destination address, or empty if not IP packet
+        uint16 ipDestinationPort,       // IP destination port, or zero if not UDP or TCP packet
+        uint32 payloadLength,           // length of packet payload, following all network headers
+        uint32 packetLength,            // original length of packet (not necessarily all captured)
+        blob packetData;                // contents of packet captured, including network headers (possibly truncated)
+
+    graph
+
+    ( stream<DHCPPacketType> DHCPPacketStream as DHCPOut ;
+      stream<DNSPacketType> DNSPacketStream as DNSOut ;
+      stream<HTTPPacketType> HTTPPacketStream as HTTPOut ;
+      stream<MetricsType> MetricsStream as MetricsOut ;
+      stream<AllPacketType> AllPacketStream as AllOut ) = PacketLiveSource() {
+        logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
+        param
+            networkInterface: $networkInterface;
+            metricsInterval: $metricsInterval;
+            inputFilter:   "udp or tcp";            // process only UDP and TCP packets
+            outputFilters: UDP_PORT(67uh) || UDP_PORT(68uh),  // output port 0 emits only DHCP payloads
+                           UDP_PORT(53uh),                    // output port 1 emits only DNS payloads
+                           TCP_PORT(80uh),                    // output port 2 emits only HTTP payloads
+                           metricsUpdated(),                  // output port 3 emits only updated metrics
+                           true;                              // output port 4 emits all packets processed
+        output
+        DHCPOut:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            packetNumber = packetsProcessed() - 1ul,
+            etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
+            etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dhcpLength = PAYLOAD_LENGTH(),
+            dhcpMessage = PAYLOAD_DATA();
+        DNSOut:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            packetNumber = packetsProcessed() - 1ul,
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dnsLength = PAYLOAD_LENGTH(),
+            dnsMessage = PAYLOAD_DATA();
+        HTTPOut:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            packetNumber = packetsProcessed() - 1ul,
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()) + ":" + (rstring)TCP_SRC_PORT(),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()) + ":" + (rstring)TCP_DST_PORT(),
+            httpLength = PAYLOAD_LENGTH(),
+            httpData = PAYLOAD_DATA();
+        MetricsOut:
+            metricsTime = getTimestampInSecs(),
+            averagePacketsReceived = (float64)metricsIntervalPacketsReceived() / metricsIntervalElapsed(),
+            averagePacketsDropped = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed(),
+            averagePacketsProcessed = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
+            averageOctetsProcessed = (float64)metricsIntervalOctetsProcessed() / metricsIntervalElapsed();
+        AllOut:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            packetNumber = packetsProcessed() - 1ul,
+            ipVersion = IP_VERSION(),
+            ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            ipSourcePort = IP_SRC_PORT(),
+            ipDestinationPort = IP_DST_PORT(),
+            payloadLength = PAYLOAD_LENGTH(),
+            packetLength = PACKET_LENGTH(),
+            packetData = PACKET_DATA();
+    }
+    () as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.LivePacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.LivePacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as HTTPPacketSink = FileSink(HTTPPacketStream) { param file: "debug.LivePacketFileSourceFilters.HTTPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LivePacketFileSourceFilters.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as AllPacketSink = FileSink(AllPacketStream) { param file: "debug.LivePacketFileSourceFilters.AllPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+
+}
