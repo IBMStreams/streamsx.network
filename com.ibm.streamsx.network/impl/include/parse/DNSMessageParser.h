@@ -279,13 +279,13 @@ class DNSMessageParser {
 
     // step through the labels in the DNS name at 'p', reconstructing it as a
     // character string in 'name'
-    char name[4096]; // ... was ... SPL::rstring name; 
-    int q = 0;
+    char nameBuffer[4096]; // ... was ... SPL::rstring name; 
+    int nameLength = 0;
     for (int32_t i = 0; i<255; i++) {
 
       // no DNS name can have this many labels or be this long
       if (i>253) { error = "too many labels"; break; } 
-      if (q>253) { error = "label overruns packet"; break; } // ... was ... if (name.length()>253) ...
+      if (nameLength>253) { error = "label overruns packet"; break; } // ... was ... if (name.length()>253) ...
 
       // get the length and compression flag from the first byte in the next label
       const uint8_t flags = *p & 0xC0;
@@ -296,10 +296,10 @@ class DNSMessageParser {
       // next label until one with zero length is found
       if (flags==0x00) {
         if (p+1+length>dnsEnd) { error = "label overruns packet"; break; }
-        if (length==0) { if (q>0) q--; break; } // ... was ... if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
-        strncpy(&name[q], (const char*)p+1, length); name[q+length] = '.'; // ... was ... name.append((char*)p+1, length).append(".");
+        if (length==0) { if (nameLength>0) nameLength--; break; } // ... was ... if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
+        memcpy(&nameBuffer[nameLength], (const char*)p+1, length); nameBuffer[nameLength+length] = '.'; // ... was ... name.append((char*)p+1, length).append(".");
         p += length+1;
-        q += length+1;
+        nameLength += length+1;
       }
 
       // for compressed labels, get the offset from the beginning of the DNS message
@@ -319,7 +319,7 @@ class DNSMessageParser {
       }
     }
 
-    return SPL::rstring(name, q); // ... was ... return name;
+    return SPL::rstring(nameBuffer, nameLength); // ... was ... return name;
   }
 
 
