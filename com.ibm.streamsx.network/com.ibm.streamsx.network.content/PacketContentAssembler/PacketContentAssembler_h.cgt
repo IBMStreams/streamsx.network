@@ -301,12 +301,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
 
-  // ----------- operator mutex ----------
-
-  Mutex processMutex;
-
   // ----------- operator state variables ----------
 
+  Mutex processMutex;
   uint64_t packetNumber;
   TR_Frame packetContent;
   PSOM_Frame pamResults;

@@ -78,6 +78,7 @@ public:
 
   // ----------- operator state variables ----------
 
+  Mutex processMutex;
   uint64_t startTimeInNanoseconds;
   double now, then;
   uint64_t packetCounter, packetCounterNow, packetCounterThen;

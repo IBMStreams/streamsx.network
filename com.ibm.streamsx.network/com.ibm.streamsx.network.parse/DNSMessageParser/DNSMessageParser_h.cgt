@@ -36,6 +36,7 @@ private:
 
   // ----------- operator state variables ----------
 
+  Mutex processMutex;
   uint64_t tupleCounter;
 
   // ----------- DNS message parser ----------

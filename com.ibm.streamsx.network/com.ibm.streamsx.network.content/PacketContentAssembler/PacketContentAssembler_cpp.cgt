@@ -1316,7 +1316,7 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-  SPL::AutoPortMutex am(processMutex, *this);
+  SPL::AutoPortMutex automutex(processMutex, *this);
 
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
 

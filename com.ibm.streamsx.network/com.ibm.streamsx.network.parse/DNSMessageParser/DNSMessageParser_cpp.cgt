@@ -110,6 +110,8 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DNSMessageParser");
 
+  SPL::AutoPortMutex automutex(processMutex, *this);
+
   <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
   if (processorAffinity>-1) {
