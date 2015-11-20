@@ -14,7 +14,6 @@ rstring trancateNonASCII(rstring data) {
   return data;
 }
 
-stateful 
 rstring mimetype2extension(rstring contentType) {
   map<rstring,rstring> extensions = {
     ""                                  : "",

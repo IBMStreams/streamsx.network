@@ -98,6 +98,7 @@ step "setting capabilities for standalone application '$namespace.$composite' ..
 standalone=$unbundleDirectory/$composite/bin/standalone
 [ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
 
 step "opening window for TCP stream from standalone application '$namespace.$composite' ..."
 ( xterm "${leaseWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $leasePort && break ; sleep 1 ; done " ) &
