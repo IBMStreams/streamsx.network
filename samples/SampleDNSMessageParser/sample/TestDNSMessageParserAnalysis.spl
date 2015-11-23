@@ -11,49 +11,55 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestDNSMessageParserAnalysis {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
-    
-    type 
-    
+    expression<uint32> $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1");
+
+    type
+
     PacketType =
-        timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch 
+        timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch
         rstring dstAddress,             // string representation of IP destination address
         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
 
     // input to 'predictive blacklisting' analytic
-    PBDNSResponseMessage_t = 
+    FullDNSResponseMessage_t =
+      timestamp captureTime,
+      rstring dstAddress,
+      rstring questionName,
+      rstring questionType,
+      uint8 responseCode,
+      uint16 answerCount,
+      list<rstring> answerNames,
+      list<rstring> answerData,
+      list<uint16> answerTypes,
+      list<uint32> answerTTLs,
+      uint16 nameserverCount,
+      list<rstring> nameserverNames,
+      list<rstring> nameserverData,
+      list<uint16> nameserverTypes,
+      list<uint32> nameserverTTLs,
+      uint16 additionalCount,
+      list<rstring> additionalNames,
+      list<rstring> additionalData,
+      list<uint16> additionalTypes,
+      list<uint32> additionalTTLs;
+
+    // input to 'domain profiling' and 'host profiling' analytics
+    ShortDNSResponseMessage_t =
       timestamp captureTime,
       rstring dstAddress,
       rstring questionName,
       uint8 responseCode,
-	  uint16 answerCount,
       list<rstring> answerData,
-      list<uint16> answerTypes,
-      list<uint32> answerTTLs,
-	  uint16 nameserverCount,
-      list<rstring> nameserverData,
-      list<uint16> nameserverTypes,
-      list<uint32> nameserverTTLs,
-	  uint16 additionalCount,
-      list<rstring> additionalData,
-      list<uint16> additionalTypes,
-      list<uint32> additionalTTLs;
-    
-    // input to 'domain profiling' and 'host profiling' analytics
-    DPHPDNSResponseMessage_t = 
-	  timestamp captureTime,
-	  rstring dstAddress,
-	  rstring questionName,
-	  uint8 responseCode,
-	  list<rstring> answerData,
-	  list<rstring> additionalData;
+      list<rstring> additionalData;
 
     graph
 
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
+            processorAffinity: $processorAffinity;
             inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
@@ -61,38 +67,45 @@ composite TestDNSMessageParserAnalysis {
             dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dnsMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }   
+    //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-    ( stream<PBDNSResponseMessage_t> PBDNSResponseMessageStream as OutPB ;
-	  stream<DPHPDNSResponseMessage_t> DPHPDNSResponseMessageStream as OutDPHP ) = DNSMessageParser(PacketStream) {
+    ( stream<FullDNSResponseMessage_t> FullDNSResponseMessageStream as OutFull ;
+      stream<ShortDNSResponseMessage_t> ShortDNSResponseMessageStream as OutShort ) = DNSMessageParser(PacketStream) {
+      logic state: {
+        map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+        map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
+      }
       param
           messageAttribute: dnsMessage;
-          outputFilters: DNS_RESPONSE_FLAG() && !parseError(), 
-	                     DNS_RESPONSE_FLAG() && !parseError();
-      output 
-	  OutPB:
+          outputFilters: DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError(),
+                         DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError();
+      output
+      OutFull:
           questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
           responseCode = DNS_RESPONSE_CODE(),
-	      answerCount = DNS_ANSWER_COUNT(),
+          answerCount = DNS_ANSWER_COUNT(),
+          answerNames = DNS_ANSWER_NAMES(),
           answerData = DNS_ANSWER_DATA(),
           answerTypes = DNS_ANSWER_TYPES(),
           answerTTLs = DNS_ANSWER_TTLS(),
-	      nameserverCount = DNS_NAMESERVER_COUNT(),
+          nameserverCount = DNS_NAMESERVER_COUNT(),
+          nameserverNames = DNS_NAMESERVER_NAMES(),
           nameserverData = DNS_NAMESERVER_DATA(),
           nameserverTypes = DNS_NAMESERVER_TYPES(),
           nameserverTTLs = DNS_NAMESERVER_TTLS(),
-	      additionalCount = DNS_ADDITIONAL_COUNT(),
+          additionalCount = DNS_ADDITIONAL_COUNT(),
+          additionalNames = DNS_ADDITIONAL_NAMES(),
           additionalData = DNS_ADDITIONAL_DATA(),
           additionalTypes = DNS_ADDITIONAL_TYPES(),
           additionalTTLs = DNS_ADDITIONAL_TTLS();
-      OutDPHP:
+      OutShort:
           questionName = DNS_QUESTION_NAME(),
           responseCode = DNS_RESPONSE_CODE(),
           answerData = DNS_ANSWER_DATA(),
           additionalData = DNS_ADDITIONAL_DATA();
     }
-    () as PBDNSResponseMessageSink = FileSink(PBDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.PBDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
-    () as DPHPDNSResponseMessageSink = FileSink(DPHPDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.DPHPDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; } 
+    () as FullDNSResponseMessageSink = FileSink(FullDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.FullDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as ShortDNSResponseMessageSink = FileSink(ShortDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.ShortDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 }
-

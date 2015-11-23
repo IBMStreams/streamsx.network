@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+// *******************************************************************************
+// * Copyright (C)2015, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+-->
+<project name="com.ibm.streamsx.hdfs" basedir="." default="all">
+
+	<property environment="env" />
+	<property name="streams.install" value="${env.STREAMS_INSTALL}" />
+
+	<property name="java.src.dir" value="impl/java/src" />
+	<property name="spl-mt" value="${streams.install}/bin/spl-make-toolkit" />
+
+	<target name="all" depends="init, indexToolkit"/>
+	
+	<target name="init">
+		<mkdir dir="${java.src.dir}" />
+	</target>
+
+	<target name="clean">
+		<!-- toolkit clean -->
+		<exec executable="${spl-mt}"  failonerror="true">
+			<arg value="-c"/>
+			<arg value="-i"/>
+			<arg value="."/>
+    	</exec>
+	</target>
+	
+	<target name="indexToolkit">
+		<exec executable="${spl-mt}" failonerror="true">
+			<arg value="-i"/>
+			<arg value="."/>
+	    </exec>
+	</target>
+
+</project>

@@ -20,16 +20,17 @@ my @outputPortList = @{ $model->getOutputPorts() };
 # get C++ expressions for getting the values of this operator's parameter
 my $messageAttribute = $model->getParameterByName("messageAttribute")->getValueAt(0)->getCppExpression();
 my $sourceAttribute = $model->getParameterByName("sourceAttribute")->getValueAt(0)->getCppExpression();
+my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
 my @outputFilterList;
-if ($outputFilterParameter) { 
+if ($outputFilterParameter) {
   foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
-	my $expression = $value->getCppExpression();
-	push @outputFilterList, $expression;
-	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
-	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::NetflowMessageParser_result_functions::") != -1;
+    my $expression = $value->getCppExpression();
+    push @outputFilterList, $expression;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::NetflowMessageParser_result_functions::") != -1;
   }
 }
 
@@ -45,7 +46,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 
 // calls to SPL functions within expressions are generated with these
 // namespaces, which must be mapped to the operator's namespace so they
-// will invoke the functions defined in the xxx_h.cgt file
+// will invoke the functions defined in the NetflowMessageParser_h.cgt file
 
 #define common_result_functions MY_OPERATOR
 #define NetflowMessageParser_result_functions MY_OPERATOR
@@ -56,40 +57,44 @@ MY_OPERATOR::MY_OPERATOR()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
 
+  // set operator parameters
+  processorAffinity = <%=$processorAffinity%>;
+
+  // initialize operator state variables
   tupleCounter = 0;
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
 }
 
 // Destructor
-MY_OPERATOR::~MY_OPERATOR() 
+MY_OPERATOR::~MY_OPERATOR()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
 }
 
 // Notify port readiness
-void MY_OPERATOR::allPortsReady() 
+void MY_OPERATOR::allPortsReady()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
 }
- 
+
 // Notify pending shutdown
-void MY_OPERATOR::prepareToShutdown() 
+void MY_OPERATOR::prepareToShutdown()
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
 }
 
-// Processing for source and threaded operators   
+// Processing for source and threaded operators
 void MY_OPERATOR::process(uint32_t idx)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
 }
 
-// Tuple processing for mutating ports 
+// Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
@@ -101,6 +106,18 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 
+  // assign caller's thread to a particular processor core, if specified
+  if (processorAffinity>-1) {
+    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "NetflowMessageParser");
+    cpu_set_t cpumask; // CPU affinity bit mask
+    CPU_ZERO(&cpumask);
+    CPU_SET(processorAffinity, &cpumask);
+    const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
+    if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
+    processorAffinity = -1;
+  }
+
+  // increment tuple counter
   tupleCounter++;
 
   // point at the input tuple
@@ -112,25 +129,26 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   uint32_t source = <%=$sourceAttribute%>;
 
   // prepare the Netflow message for parsing
-  parser.prepareMessage(buffer, length, source);
-  if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser");  return; }
+  parser.prepareNetflowMessage(buffer, length, source);
+  if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser"); }
 
   // parse the flow records in the Netflow message, submitting output tuples to output ports, as selected by output filters, if specified
-  while(parser.nextFlow()) 
-	{
-	  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-		<% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
-			 {
-			   outTuple<%=$i%>.clear();
-			   outTuple<%=$i%>.assignFrom(iport$0, false);
-			   <% ####### OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
-			   <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
-			   SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "NetflowMessageParser");
-			   submit(outTuple<%=$i%>, <%=$i%>);
-			 }
-			 <% } %> ;
-	}
-  if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); return; }
+  while( !parser.error && !parser.done )
+    {
+      parser.nextFlowRecord();
+      if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); break; }
+      if ( parser.done ) { break; }
+      <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+        <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %>
+             {
+               outTuple<%=$i%>.clear();
+               outTuple<%=$i%>.assignFrom(iport$0, false);
+               <%=SPL::CodeGen::getOutputTupleCppAssignments("outTuple$i", $model->getOutputPortAt($i))%> ;
+               SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "NetflowMessageParser");
+               submit(outTuple<%=$i%>, <%=$i%>);
+             }
+             <% } %> ;
+    }
 
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 }
@@ -140,9 +158,11 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
   SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+
+  forwardWindowPunctuation(punct);
+
   SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 }
 
 
 <%SPL::CodeGen::implementationEpilogue($model);%>
-

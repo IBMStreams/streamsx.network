@@ -9,39 +9,41 @@ use com.ibm.streamsx.network.source::*;
 
 composite TestPacketFileSourceInputStream {
 
-	param		
-	expression<rstring> $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "data" );
+    param
+    expression<rstring> $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "data" );
+    expression<uint32> $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "1.0" );
-	
-	type 
-	
-	PacketType =
-	  uint64 packetNumber,		// sequence number of packet, as emitted by operator
-	  rstring filepath,         // implicitly copied from input tuple
-	  rstring filename,    		// explicitly extracted from input tuple's 'filepath' attribute
-	  float64 captureTime,		// time that packet was captured, in seconds since Unix epoch 
-	  uint32 packetLength,		// original length of packet (not necessarily all captured)
-	  blob packetData;			// contents of packet captured, including network headers (not necessarily complete)
 
-	graph
+    type
 
-	stream<rstring filepath> FilepathStream as Out = DirectoryScan() {
-	  param
-	      directory: $pcapDirectory; 
-	      pattern: "\\.pcap$"; 
-	output Out:
-	      filepath = FullPath(); }
+    PacketType =
+      uint64 packetNumber,      // sequence number of packet, as emitted by operator
+      rstring filepath,         // implicitly copied from input tuple
+      rstring filename,         // explicitly extracted from input tuple's 'filepath' attribute
+      float64 captureTime,      // time that packet was captured, in seconds since Unix epoch
+      uint32 packetLength,      // original length of packet (not necessarily all captured)
+      blob packetData;          // contents of packet captured, including network headers (not necessarily complete)
 
-	stream<PacketType> PacketStream as Out = PacketFileSource(FilepathStream) {
-		output Out:
-			packetNumber = packetsProcessed() - 1ul,
-		    filename = regexMatchPerl(filepath, "([^/]+)$")[0],
-			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			packetLength = PACKET_LENGTH(),
-			packetData = PACKET_DATA(); 
-	}
-	() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceInputStream.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+    graph
 
-	() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
-} 
+    stream<rstring filepath> FilepathStream as Out = DirectoryScan() {
+      param
+          directory: $pcapDirectory;
+          pattern: "\\.pcap$";
+    output Out:
+          filepath = FullPath(); }
 
+    stream<PacketType> PacketStream as Out = PacketFileSource(FilepathStream) {
+        param
+            processorAffinity: $processorAffinity;
+        output Out:
+            packetNumber = packetsProcessed() - 1ul,
+            filename = regexMatchPerl(filepath, "([^/]+)$")[0],
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            packetLength = PACKET_LENGTH(),
+            packetData = PACKET_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceInputStream.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+}

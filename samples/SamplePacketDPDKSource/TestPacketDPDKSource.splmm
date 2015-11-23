@@ -36,11 +36,11 @@ public composite TestPacketDPDKSource {
 	// and coreMask parameters should be constant for all instances.
         (stream<PacketData>  PacketStream_0 ) = PacketDPDKSource() {
             param
-		// pmdDriver: "/home/engebret/apps/network/dpdk-2.0.0/build/lib/librte_pmd_e1000.so";
-		pmdDriver: " ";
-                coreMask: "0x7";
+		pmdDriver: "/home/engebret/apps/network/dpdk-2.1.0/build/lib/librte_pmd_e1000.so";
+		// pmdDriver: " ";
+                coreMask: "0x3";
                 lcore   : 1;
-                nicPort : 1;
+                nicPort : 0;
                 nicQueue: 0;
                 promiscuous: true;
                 metricsInterval: 1.0;
@@ -55,14 +55,14 @@ public composite TestPacketDPDKSource {
             param
                 file : "PacketStream0.out";
         }
-
+/*
         (stream<PacketData>  PacketStream_1 ) = PacketDPDKSource() {
             param
 		// pmdDriver: "/home/engebret/apps/network/dpdk-2.0.0/build/lib/librte_pmd_e1000.so";
 		pmdDriver: " ";
                 coreMask: "0x7";
-                lcore   : 1;
-                nicPort : 3;
+                lcore   : 2;
+                nicPort : 1;
                 nicQueue: 0;
                 promiscuous: true;
                 metricsInterval: 1.0;
@@ -77,6 +77,7 @@ public composite TestPacketDPDKSource {
             param
                 file : "PacketStream1.out";
         }
+*/
 	config
 	    placement : partitionColocation('SinglePE');
 	    tracing   : trace;

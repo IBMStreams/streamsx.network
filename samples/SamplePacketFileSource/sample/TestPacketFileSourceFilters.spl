@@ -11,105 +11,86 @@ use com.ibm.streamsx.network.source::*;
 
 composite TestPacketFileSourceFilters {
 
-	param		
-	expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
-	
-	type 
-	
-	DHCPPacketType =
-	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
-	  rstring etherSourceAddress,		// ethernet source address, or empty list if 'raw IP' PCAP recording
-	  rstring etherDestinationAddress,	// ethernet destination address, or empty list if 'raw IP' PCAP recording
-	  rstring ipSourceAddress,			// IP source address
-	  rstring ipDestinationAddress,		// IP destination address
-	  uint32 dhcpLength,				// length of DHCP message in packet (possibly truncated))
-	  blob dhcpMessage;					// DHCP message, excluding network headers (possibly truncated)
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
 
-	DNSPacketType =
-	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
-	  rstring ipSourceAddress,			// IP source address
-	  rstring ipDestinationAddress,		// IP destination address
-	  uint32 dnsLength,					// length of DNS message in packet (possibly truncated))
-	  blob dnsMessage;					// DNS message, excluding network headers (possibly truncated)
+    type
 
-	PingPacketType =
-	  uint64 packetNumber,				// sequence number of packet, as emitted by operator
-	  float64 captureTime,				// time that packet was captured, in seconds since Unix epoch 
-	  rstring ipSourceAddress,			// IP source address
-	  rstring ipDestinationAddress,		// IP destination address
-	  uint32 pingLength,				// length of Ping message in packet (possibly truncated))
-	  blob pingMessage;					// Ping message, excluding network headers (possibly truncated)
+    DHCPPacketType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+      rstring etherSourceAddress,       // ethernet source address, or empty list if 'raw IP' PCAP recording
+      rstring etherDestinationAddress,  // ethernet destination address, or empty list if 'raw IP' PCAP recording
+      rstring ipSourceAddress,          // IP source address
+      rstring ipDestinationAddress,     // IP destination address
+      uint32 dhcpLength,                // length of DHCP message in packet (possibly truncated))
+      blob dhcpMessage;                 // DHCP message, excluding network headers (possibly truncated)
 
-	AllPacketType =
-		uint64 packetNumber,			// sequence number of packet, as emitted by operator
-		float64 captureTime,			// time that packet was captured, in seconds since Unix epoch 
-	    uint8 ipVersion,				// IP version: 4 for IPv4, 6 for IPv6
-	    rstring ipProtocol,				// IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
-	    rstring ipSourceAddress,		// IP source address, or empty if not IP packet
-	    uint16 ipSourcePort,			// IP source port, or zero if not UDP or TCP packet
-	    rstring ipDestinationAddress,	// IP destination address, or empty if not IP packet
-	    uint16 ipDestinationPort,		// IP destination port, or zero if not UDP or TCP packet
-		uint32 payloadLength,			// length of packet payload, following all network headers
-		uint32 packetLength,			// original length of packet (not necessarily all captured)
-		blob packetData;				// contents of packet captured, including network headers (possibly truncated)
+    DNSPacketType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+      rstring ipSourceAddress,          // IP source address
+      rstring ipDestinationAddress,     // IP destination address
+      uint32 dnsLength,                 // length of DNS message in packet (possibly truncated))
+      blob dnsMessage;                  // DNS message, excluding network headers (possibly truncated)
 
-	graph
+    AllPacketType =
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint8 ipVersion,                // IP version: 4 for IPv4, 6 for IPv6
+        rstring ipProtocol,             // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+        rstring ipSourceAddress,        // IP source address, or empty if not IP packet
+        uint16 ipSourcePort,            // IP source port, or zero if not UDP or TCP packet
+        rstring ipDestinationAddress,   // IP destination address, or empty if not IP packet
+        uint16 ipDestinationPort,       // IP destination port, or zero if not UDP or TCP packet
+        uint32 payloadLength,           // length of packet payload, following all network headers
+        uint32 packetLength,            // original length of packet (not necessarily all captured)
+        blob packetData;                // contents of packet captured, including network headers (possibly truncated)
 
-	( stream<DHCPPacketType> DHCPPacketStream as DHCPOut ; 
-	  stream<DNSPacketType> DNSPacketStream as DNSOut ;
-	  stream<PingPacketType> PingPacketStream as PingOut ;
-	  stream<AllPacketType> AllPacketStream as AllOut ) = PacketFileSource() {
-	    logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
-		param
-			pcapFilename: $pcapFilename;
-		    inputFilter:   "udp or icmp";                     // process only UDP and ICMP payloads
-		    outputFilters: "udp port 67 or udp port 68",      // output port 0 emits only DHCP payloads
-		                   "udp port 53",                     // output port 1 emits only DNS payloads
-		                   "icmp[icmptype] = icmp-echo or icmp[icmptype] = icmp-echoreply", // output port 2 emits only Ping payloads
-		                   "";                                // output port 3 emits all packets processed
-		output 
-		DHCPOut:
-			packetNumber = packetsProcessed() - 1ul,
-			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS_AS_BYTES()),
-			etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS_AS_BYTES()),
-			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
-			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			dhcpLength = PAYLOAD_LENGTH(),
-			dhcpMessage = PAYLOAD_DATA(); 
-		DNSOut:
-			packetNumber = packetsProcessed() - 1ul,
-			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
-			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			dnsLength = PAYLOAD_LENGTH(),
-			dnsMessage = PAYLOAD_DATA(); 
-		PingOut:
-			packetNumber = packetsProcessed() - 1ul,
-			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
-			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			pingLength = PAYLOAD_LENGTH(),
-			pingMessage = PAYLOAD_DATA(); 
-		AllOut:
-			packetNumber = packetsProcessed() - 1ul,
-			captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
-			ipVersion = IP_VERSION(),
-			ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
-			ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
-			ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-			ipSourcePort = IP_SRC_PORT(),
-			ipDestinationPort = IP_DST_PORT(),
-			payloadLength = PAYLOAD_LENGTH(),
-		    packetLength = PACKET_LENGTH(),
-			packetData = PACKET_DATA();
-	}
-	() as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as PingPacketSink = FileSink(PingPacketStream) { param file: "debug.TestPacketFileSourceFilters.PingPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
-	() as AllPacketSink = FileSink(AllPacketStream) { param file: "debug.TestPacketFileSourceFilters.AllPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }	
+    graph
+
+    ( stream<DHCPPacketType> DHCPPacketStream as DHCPOut ;
+      stream<DNSPacketType> DNSPacketStream as DNSOut ;
+      stream<AllPacketType> AllPacketStream as AllOut ) = PacketFileSource() {
+        logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter:   "udp";                             // process only UDP packets
+            outputFilters: UDP_PORT(67uh) || UDP_PORT(68uh),  // output port 0 emits only DHCP payloads
+                           UDP_PORT(53uh),                    // output port 1 emits only DNS payloads
+                           true;                              // output port 2 emits all packets processed
+        output
+        DHCPOut:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            etherSourceAddress = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
+            etherDestinationAddress = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dhcpLength = PAYLOAD_LENGTH(),
+            dhcpMessage = PAYLOAD_DATA();
+        DNSOut:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dnsLength = PAYLOAD_LENGTH(),
+            dnsMessage = PAYLOAD_DATA();
+        AllOut:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipVersion = IP_VERSION(),
+            ipProtocol = IP_PROTOCOL() in ipProtocols ? ipProtocols[IP_PROTOCOL()] : (rstring)IP_PROTOCOL(),
+            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            ipSourcePort = IP_SRC_PORT(),
+            ipDestinationPort = IP_DST_PORT(),
+            payloadLength = PAYLOAD_LENGTH(),
+            packetLength = PACKET_LENGTH(),
+            packetData = PACKET_DATA();
+    }
+    () as DHCPPacketSink = FileSink(DHCPPacketStream) { param file: "debug.TestPacketFileSourceFilters.DHCPPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestPacketFileSourceFilters.DNSPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as AllPacketSink = FileSink(AllPacketStream) { param file: "debug.TestPacketFileSourceFilters.AllPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 }
-

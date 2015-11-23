@@ -1,0 +1,80 @@
+namespace sample;
+
+use com.ibm.streamsx.network.ipv6::*;
+
+composite TestIPv6AddressFunctions {
+    graph
+        () as TestIPv6AddressFunctionsStream = Custom() {
+            logic
+                onProcess:
+                {
+                    doAssert(isIPV6Address("2001::12:2"),"isIPv6Address(2001::12:2)");
+                    doAssert(isIPV6Address("::FFFF:129.144.52.38"), "isIPv6Address(::FFFF:129.144.52.38)");
+                    doAssert(!isIPV6Address("127.0.0.0"), "!isIPv6Address(127.0.0.0)");
+                    doAssert(!isIPV6Address("abc"), "!isIPv6Address(abc)");
+
+                    doAssert(isLoopback("::1"), "isLoopback(::1)");
+                    doAssert(!isLoopback("::2"), "!isLoopback(::2)");
+
+                    doAssert(isLinkLocal("fe80::1"), "isLinkLocal(fe80::1)");
+                    doAssert(isLinkLocal("fea0::1"), "isLinkLocal(fea0::1)");
+                    doAssert(!isLinkLocal("fe10::1"), "!isLinkLocal(fe10::1)");
+
+                    doAssert(isEqualTo("::1", "::1"), "isEqualTo(::1, ::1)");
+                    doAssert(isEqualTo("::1", "0:0:0::1"), "isEqualTo(::1, 0:0:0::1)");
+                    doAssert(!isEqualTo("::1", "0:0:0::1:0"), "!isEqualTo(::1, 0:0:0::1:0)");
+                    doAssert(!isEqualTo("::1", "0:0:0:0:1:0::"), "!isEqualTo(::1, 0:0:0:0:1:0::)");
+
+                    doAssert(isMulticast("ff00::1"), "isMulticast(ff00::1)");
+                    doAssert(isMulticast("ff11::1"), "isMulticast(ff11::1)");
+                    doAssert(!isMulticast("fe10::1"), "!isMulticast(fe10::1)");
+
+                    doAssert(isUnspecified("::"), "isUnspecified(::)");
+                    doAssert(isUnspecified("0:0::0"), "isUnspecified(0:0::0)");
+                    doAssert(!isUnspecified("fe10::1"), "!isUnspecified(fe10::1)");
+
+                    doAssert(isSiteLocal("fec0::1"), "isSiteLocal(fec0::1)");
+                    doAssert(isSiteLocal("fed0::1"), "isSiteLocal(fed0::1)");
+                    doAssert(!isSiteLocal("fe10::1"), "!isSiteLocal(fe10::1)");
+
+                    doAssert(isV4Mapped("::ffff:127.0.0.1"), "isV4Mapped(::ffff:127.0.0.1)");
+                    doAssert(isV4Mapped("::ffff:0100:0100"), "isV4Mapped(::ffff:0100:0100)");
+                    doAssert(!isV4Mapped("::ffff:fffe:10.10.10.10"), "isV4Mapped(::ffff:fffe:10.10.10.10)");
+
+                    doAssert(isV4Compatible("::127.0.0.1"), "isV4Compatible(::127.0.0.1)");
+                    doAssert(isV4Compatible("::0100:0100"), "isV4Compatible(::0100:0100)");
+                    doAssert(!isV4Compatible("::10:10:10:10"), "!isV4Compatible(::10:10:10:10)");
+
+                    doAssert(isGreaterThan("::127.0.0.1", "::127.0.0.0"), "isGreaterThan(::127.0.0.1, ::127.0.0.0)");
+                    doAssert(isGreaterThan("ffd0:0:0:1000::", "ffd0:0:0:0::1000"), "isGreaterThan(ffd0:0:0:1000::, ffd0:0:0:0::1000)");
+                    doAssert(!isGreaterThan("ffc0:0::1", "ffe0:0::1"), "!isGreaterThan(ffc0:0::1, ffe0:0::1)");
+
+                    doAssert(isLessThan("::127.0.0.0", "::127.0.0.1"), "isLessThan(::127.0.0.0, ::127.0.0.1)");
+                    doAssert(isLessThan("ffd0:0:0::1000", "ffd0:0:0:0:1000::"), "isLessThan(ffd0:0:0::1000, ffd0:0:0:0:1000::)");
+                    doAssert(!isLessThan("fff0:0::1", "ffe0:0::1"), "isLessThan(fff0:0::1, ffe0:0::1)");
+
+                    doAssert(isInIPRange("::127.0.0.0", "::127.0.0.255", "::127.0.0.4"), "isInIPRange(::127.0.0.0, ::127.0.0.255, ::127.0.0.4)");
+                    doAssert(isInIPRange("ffd0:0:0::1000", "ffd0:0:0::1100", "ffd0::1050"), "isInIPRange(ffd0:0:0::1000, ffd0:0:0::1100, ffd0::1050)");
+                    doAssert(!isInIPRange("::1", "::100", "0:0:0:0::400"), "!isInIPRange(::1, ::100, 0:0:0:0::400)");
+
+                    doAssert(isInNetwork("::127.0.0.0/120", "::127.0.0.8"), "isInNetwork(::127.0.0.0/120, ::127.0.0.8)");
+                    doAssert(isInNetwork("ffd0:1111:2222::/20", "ffd0:1122:3232::"), "isInNetwork(ffd0:1111:2222::/20, ffd0:1122:3232::)");
+                    doAssert(!isInNetwork("ffd0:1111:2222::/20", "ffe0:1122:3232::"), "!isInNetwork(ffd0:1111:2222::/20, ffe0:1122:3232::)");
+
+                    list<rstring> networkList = ["::127.0.0.0/120", "ffd0:1111:2222::/20", "ffd0:0:0:1::/35", "aaaa::/16"];
+                    doAssert(isInNetworkList(networkList, "::127.0.0.1"), "isInNetworkList(networkList, ::127.0.0.1)");
+                    doAssert(isInNetworkList(networkList, "aaaa::11"), "isInNetworkList(networkList, aaaa::11)");
+                    doAssert(!isInNetworkList(networkList, "effe:0:12:3:3d::"), "!isInNetworkList(networkList, effe:0:12:3:3d::)");
+
+                    doAssert(compactIPV6("ffff:ffff:0000:0000:0000:0000:1111:1222") == "ffff:ffff::1111:1222", "compactIPv6(ffff:ffff:0000:0000:0000:0000:1111:1222)");
+                    doAssert(compactIPV6("ffff:ffff:0000:0000:0000::1.1.1.1") == "ffff:ffff::101:101", "compactIPv6(ffff:ffff:0000:0000:0000::1.1.1.1)");
+                    doAssert(compactIPV6("0fff:00ff:0000:0000:1111:0000:0000:0000") == "fff:ff:0:0:1111::", "compactIPv6(0fff:00ff:0000:0000:1111:0000:0000:0000)");
+
+                    doAssert(expandIPV6("ffff:ffff::1111:1222") == "ffff:ffff:0000:0000:0000:0000:1111:1222", "expandIPv6(ffff:ffff::1111:1222)");
+                    doAssert(expandIPV6("ff:ffff::1.1.1.1") == "00ff:ffff:0000:0000:0000:0000:0101:0101", "expandIPv6(ff:ffff::1.1.1.1)");
+                    doAssert(expandIPV6("fff:ff:0:0:1111::") == "0fff:00ff:0000:0000:1111:0000:0000:0000", "expandIPv6(fff:ff:0:0:1111::)");
+
+
+                }
+        }
+}

@@ -16,9 +16,9 @@ dataDirectory=$projectDirectory/data
 logDirectory=$projectDirectory/log
 
 scripts=(
-$here/setupCapabilitiesInstance.sh
-$here/test*.sh
-$here/teardownCapabilitiesInstance.sh
+$here/setupCapabilities.sh
+$here/live*.sh
+$here/teardownCapabilities.sh
 )
 
 ################### functions used in this script #############################

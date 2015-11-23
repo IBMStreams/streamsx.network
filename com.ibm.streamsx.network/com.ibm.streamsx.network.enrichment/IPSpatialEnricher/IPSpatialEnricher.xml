@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  
+Copyright (C)2015, International Business Machines Corporation and  
+others. All Rights Reserved. 
+-->
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>This operator enriches IPv4 and IPv6 addresses with geospatial data. Only the MaxMind© GeoIP2 (or GeoLite2) City database is supported. 
+      
+In order to use this operator, you must download the MaxMind© GeoIP2 (or GeoLite2) City database from the [http://dev.maxmind.com/geoip/|MaxMind©] website. 
+These files can then be loaded directly into the operator using the **blocksIPv4File**, **blocksIPv6File** and **locationFile** parameters. To dynamically update the operator whenever
+a new version of the database is downloaded, a DirectoryScan operator can be connected to the control input port (input port 1) of this operator. Whenever a new
+version of the database is downloaded and extracted into the directory being scanned, the DirectoryScan operator will submit the file paths to the IPSpatialEnricher operator. 
+The operator will parse the database files and update it's internal tables.</description>
+      <customLiterals>
+        <enumeration>
+          <name>Locale</name>
+          <value>de</value>
+          <value>en</value>
+          <value>es</value>
+          <value>fr</value>
+          <value>ja</value>
+          <value>pt_BR</value>
+          <value>ru</value>
+          <value>zh_CN</value>
+        </enumeration>
+      </customLiterals>
+      <customOutputFunctions>
+        <customOutputFunction>
+          <name>EnrichFunctions</name>
+          <function>
+            <description>The default function for output attributes. By default, this function assigns the output attribute to the value of the input attribute with the same name.</description>
+            <prototype>&lt;any T> T AsIs()</prototype>
+          </function>
+          <function>
+            <description>Returns the location data associated with the IP address(es). The base return type is com.ibm.streamsx.network.enrichment::IPLocation_t. 
+
+The return type of this function depends on the type of input attribute specified by the **inputIPAttr** parameter.
+
+  * If the input attribute has type `rstring`, then the return type of this function is `IPLocation_t`. 
+  * If the input attribute has type `list&lt;rstring>`, then the return type of this function is `list&lt;IPLocation_t>`.
+  * If the input attribute has type `list&lt;list&lt;rstring>>`, then the return type of this function is `list&lt;list&lt;IPLocation_t>>`.            
+            </description>
+            <prototype>&lt;any T> T getIPLocationData()</prototype>
+          </function>
+          <function>
+            <description>Returns the registered country data associated with the IP address(es). 
+
+The return type of this function depends on the type of input attribute specified by the **inputIPAttr** parameter.
+
+  * If the input attribute has type `rstring`, then the return type of this function is `IPLocation_t`. 
+  * If the input attribute has type `list&lt;rstring>`, then the return type of this function is `list&lt;IPLocation_t>`.
+  * If the input attribute has type `list&lt;list&lt;rstring>>`, then the return type of this function is `list&lt;list&lt;IPLocation_t>>`.
+  
+**Note**: The MaxMind© GeoIP2 database does not contain data for the latitude, longitude and postal_code information for registered country data.
+Therefore, the postal_code attribute will contain an empty string, and the latitude and longitude attributes will be populated with the value of `-999.99`.</description>
+            <prototype>&lt;any T> T getRegisteredCountryData()</prototype>
+          </function>
+          <function>
+            <description>Returns the represented country data associated with the IP address(es). 
+
+The return type of this function depends on the type of input attribute specified by the **inputIPAttr** parameter.
+
+  * If the input attribute has type `rstring`, then the return type of this function is `IPLocation_t`. 
+  * If the input attribute has type `list&lt;rstring>`, then the return type of this function is `list&lt;IPLocation_t>`.
+  * If the input attribute has type `list&lt;list&lt;rstring>>`, then the return type of this function is `list&lt;list&lt;IPLocation_t>>`.
+  
+**Note**: The MaxMind© GeoIP2 database does not contain data for the latitude, longitude and postal_code information for represented country data.
+Therefore, the postal_code attribute will contain an empty string, and the latitude and longitude attributes will be populated with the value of `-999.99`. </description>
+            <prototype>&lt;any T> T getRepresentedCountryData()</prototype>
+          </function>
+        </customOutputFunction>
+      </customOutputFunctions>
+      <providesSingleThreadedContext>Never</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>inputIPAttr</name>
+        <description>Specifies the input attribute containing the IP address (or IP addresses). The attribute can contain either IPv4 or IPv6 addresses. 
+The supported data types for this attribute are `rstring`, `list&lt;rstring>` and `list&lt;list&lt;rstring>>`. In the case where the input attributes refers to a type of `list&lt;rstring>` or `list&lt;list&lt;rstring>>`,
+the list can contain a mixture of both IPv4 and IPv6 addresses.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <cardinality>1</cardinality>
+        <portScope>
+          <port>0</port>
+        </portScope>
+      </parameter>
+      <parameter>
+        <name>blocksIPv4File</name>
+        <description>Specifies the file path of the MaxMind IPv4 GeoIP2 (or GeoLite2) &quot;blocks&quot; file. Only the CSV-version of the database is supported. 
+This parameter should not be used if input port 1 is defined.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>locationFile</name>
+        <description>Specifies the file path of the MaxMind GeoIP2 (or GeoLite2) &quot;locations&quot; file. Only the **English** CSV-version of the database is supported. 
+This parameter should not be used if input port 1 is defined.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>blocksIPv6File</name>
+        <description>Specifies the file path of the MaxMind IPv6 GeoIP2 (or GeoLite2) &quot;blocks&quot; file. Only the CSV-version of the database is supported. 
+This parameter should not be used if input port 1 is defined.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description>Ingests tuples containing IP addresses. The `inputIPAttr` parameter specifies the attribute containing the IP addresses.
+Both IPv4 and IPv6 addresses are supported.</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+      <inputPortSet>
+        <description>Control port that ingests a file path pointing to a MaxMind GeoIP2 (or GeoLite2) database CSV files. The operator determines whether the incoming file path refers 
+to a &quot;locations&quot; file, &quot;IPv4 blocks&quot; file or &quot;IPv6 blocks&quot; file based on the name of the file. The expected file names are:
+
+  * For the &quot;locations&quot; file: `GeoIP2-City-Locations-en.csv` or `GeoLite2-City-Locations-en.csv`
+  * For IPv4 &quot;blocks&quot; file: `GeoIP2-City-Blocks-IPv4.csv` or `GeoLite2-City-Blocks-IPv4.csv`
+  * For IPv6 &quot;blocks&quot; file: `GeoIP2-City-Blocks-IPv6.csv` or `GeoLite2-City-Blocks-IPv6.csv`
+
+This control port can be used to dynamically update the operator's internal database. Each time a tuple is received containing a path to one of 
+the files listed above, the operator will update it's internal table with the data in the file.
+
+This input port expects a tuple containing a single attribute of type `rstring`.</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>true</controlPort>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortSet>
+        <description>Submits a tuple for each input tuple received on input port 0. Custom output functions are used to specify which attribute should contain the enrichment data. 
+The output tuple attributes whose assignments are not specified are assigned from input attributes.</description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>true</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <outputFunctions>
+          <default>AsIs</default>
+          <type>EnrichFunctions</type>
+        </outputFunctions>
+        <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

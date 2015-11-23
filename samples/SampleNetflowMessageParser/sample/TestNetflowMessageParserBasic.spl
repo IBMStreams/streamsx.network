@@ -12,21 +12,22 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestNetflowMessageParserBasic {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow5_port9500.pcap" );
-    
-    type 
-    
+
+    type
+
     PacketType =
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
-        uint32 netflowSource,        	// IP source address of Netflow message
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint32 netflowSource,           // IP source address of Netflow message
         blob netflowMessage;            // the Netflow message from a packet, excluding all network headers
 
-    NetflowMessageType = 
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch 
+    NetflowMessageType =
+        rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
         uint64  messageNumber,
-	    float64 flowTime,             	// time of flow, according to Netflow source, relative to Unix epoch, in seconds
-	    float64 flowDuration,           // duration of this flow, in seconds
+        rstring flowStartTime,          // time flow started, according to Netflow source, relative to Unix epoch, in seconds
+        rstring flowEndTime,            // time flow ended, according to Netflow source, relative to Unix epoch, in seconds
+        rstring flowDuration,           // duration of this flow, in seconds
         uint64  flowOctets,             // number of bytes in this flow
         uint64  flowPackets,            // number of packets in this flow
         rstring ipProtocol,             // IP protocol byte
@@ -34,32 +35,34 @@ composite TestNetflowMessageParserBasic {
         uint16  ipSourcePort,           // TCP/UDP source port number
         rstring ipDestinationAddress,   // IP destination address
         uint16  ipDestinationPort,      // TCP/UDP destination port number
-        uint8   tcpFlags;             	// all the TCP flags seen for this flow
+        uint8   tcpFlags;               // all the TCP flags seen for this flow
 
     graph
 
     stream<PacketType> PacketStream as Out = PacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-	        inputFilter: "udp port 2055";
+            inputFilter: "udp port 2055";
             metricsInterval: 0.0;
         output Out:
-            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
             netflowSource = IPV4_SRC_ADDRESS(),
             netflowMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     stream<NetflowMessageType> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
-	  logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; } 
+      logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
       param
           messageAttribute: netflowMessage;
-	      sourceAttribute: netflowSource;
-	      outputFilters: !parseError();
+          sourceAttribute: netflowSource;
+          outputFilters: !parseError();
       output Out:
-	      messageNumber = messagesProcessed(),
-	      flowTime = (float64)NETFLOW_UNIX_SECONDS() + (float64)NETFLOW_UNIX_NANOSECONDS()/1000000000.0,
-	      flowDuration = ( (float64)NETFLOW_LAST_SWITCHED() - (float64)NETFLOW_FIRST_SWITCHED() ) / 1000.0,
+          captureTime = formatEpochTime(captureTime),
+          messageNumber = messagesProcessed(),
+          flowStartTime = formatEpochTime( captureTime - ( (float64)NETFLOW_SYSTEM_UPTIME() - (float64)NETFLOW_FIRST_SWITCHED() ) / 1000.0, 3u ),
+          flowEndTime = formatEpochTime( captureTime - ( (float64)NETFLOW_SYSTEM_UPTIME() - (float64)NETFLOW_LAST_SWITCHED() ) / 1000.0, 3u ),
+          flowDuration = formatElapsedTime( ( (float64)NETFLOW_LAST_SWITCHED() - (float64)NETFLOW_FIRST_SWITCHED() ) / 1000.0, 3u ),
           flowOctets = NETFLOW_IN_BYTES(), // flow: Incoming counter with length N x 8 bits for number of bytes associated with an IP Flow.,
           flowPackets = NETFLOW_IN_PKTS(), // flow: Incoming counter with length N x 8 bits for the number of packets associated with an IP Flow,
           ipProtocol = NETFLOW_PROTOCOL() in ipProtocols ? ipProtocols[NETFLOW_PROTOCOL()] : (rstring)NETFLOW_PROTOCOL(),
@@ -70,8 +73,7 @@ composite TestNetflowMessageParserBasic {
           tcpFlags = NETFLOW_TCP_FLAGS();
 
     }
-    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserBasic.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserBasic.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 
 }
-

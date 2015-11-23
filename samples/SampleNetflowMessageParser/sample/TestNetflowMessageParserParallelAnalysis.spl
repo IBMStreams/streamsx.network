@@ -11,29 +11,29 @@ use com.ibm.streamsx.network.parse::*;
 
 composite TestNetflowMessageParserParallelAnalysis {
 
-    param       
+    param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow9_new.pcap" );
     expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
-    
-    type 
-    
+
+    type
+
     PacketType =
-      float64 captureTime,  // time that packet was captured, relative to Unix epoch, in seconds, accurate to microseconds
+      int64 captureTime,    // time that packet was captured, relative to Unix epoch, in milliseconds, accurate to microseconds
       uint32 netflowSource, // IP source address of Netflow message
       blob netflowMessage;  // the Netflow message from a packet, excluding all network headers
 
-    netflow_t = 
-      uint64 endTime,       // time that flow ended, relative to Unix epoch, in milliseconds, according to capturing machine's clock
-      uint64 startTime,     // time that flow started, relative to Unix epoch, in milliseconds, according to capturing machine's clock  
-      uint8  protocol,      // IP protocol number of flow, usually 1 for "icmp", 6 for "tcp", or 17 for "udp" 
+    netflow_t =
+      int64 endTime,        // time that flow ended, relative to Unix epoch, in milliseconds, according to capturing machine's clock
+      int64 startTime,      // time that flow started, relative to Unix epoch, in milliseconds, according to capturing machine's clock
+      uint8  protocol,      // IP protocol number of flow, usually 1 for "icmp", 6 for "tcp", or 17 for "udp"
       uint32 srcAddress,    // IPv4 address of source of flow
       uint16 srcPort,       // UDP/TCP port of source of flow
       uint32 dstAddress,    // IPv4 address of destination of flow
       uint16 dstPort,       // UDP/TCP port of destination of flow
       uint64 packetCount,   // count of packets in flow
       uint64 byteCount,     // count of bytes in flow
-	  uint64 partitionKey;	// combination of addresses and ports, for downstream @parallel annotation
-        
+      uint64 partitionKey;  // combination of addresses and ports, for downstream @parallel annotation
+
     graph
 
     stream<PacketType> PacketStream as Out = PacketFileSource() {
@@ -42,11 +42,11 @@ composite TestNetflowMessageParserParallelAnalysis {
             inputFilter: "udp port 2055";
             metricsInterval: 0.0;
         output Out:
-            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,	
+            captureTime = (int64)CAPTURE_SECONDS() * 1000l + (int64)CAPTURE_MICROSECONDS() / 1000l,
             netflowSource = IPV4_SRC_ADDRESS(),
             netflowMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     stream<netflow_t> NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
       param
@@ -54,8 +54,8 @@ composite TestNetflowMessageParserParallelAnalysis {
           sourceAttribute: netflowSource;
           outputFilters: !parseError();
       output Out:
-          endTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_LAST_SWITCHED() ),
-          startTime = (uint64)(captureTime*1000.0) - (uint64)( NETFLOW_SYSTEM_UPTIME() - NETFLOW_FIRST_SWITCHED() ),
+          endTime = captureTime - ( (int64)NETFLOW_SYSTEM_UPTIME() - (int64)NETFLOW_LAST_SWITCHED() ),
+          startTime = captureTime - ( (int64)NETFLOW_SYSTEM_UPTIME() - (int64)NETFLOW_FIRST_SWITCHED() ),
           protocol = NETFLOW_PROTOCOL(),
           srcAddress = NETFLOW_IPV4_SRC_ADDR(),
           srcPort = NETFLOW_SRC_PORT(),
@@ -63,15 +63,15 @@ composite TestNetflowMessageParserParallelAnalysis {
           dstPort = NETFLOW_DST_PORT(),
           byteCount = NETFLOW_IN_BYTES(),
           packetCount = NETFLOW_IN_PKTS(),
-		  partitionKey = hashCode(NETFLOW_IPV4_SRC_ADDR()) + 
-		                 hashCode(NETFLOW_IPV4_DST_ADDR()) + 
-		                 hashCode(NETFLOW_SRC_PORT()) + 
-		                 hashCode(NETFLOW_DST_PORT());
+          partitionKey = hashCode(NETFLOW_IPV4_SRC_ADDR()) +
+                         hashCode(NETFLOW_IPV4_DST_ADDR()) +
+                         hashCode(NETFLOW_SRC_PORT()) +
+                         hashCode(NETFLOW_DST_PORT());
     }
-    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }  
+    () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-	@parallel(width=$parallelChannels, partitionBy=[{port=NetflowMessageStream, attributes=[partitionKey]}])
-	stream<NetflowAnalytic.NetflowAnalyticResultType> NetflowAnalyticResultStream = NetflowAnalytic(NetflowMessageStream) {} 
+    @parallel(width=$parallelChannels, partitionBy=[{port=NetflowMessageStream, attributes=[partitionKey]}])
+    stream<NetflowAnalytic.NetflowAnalyticResultType> NetflowAnalyticResultStream = NetflowAnalytic(NetflowMessageStream) {}
 
 }
 
@@ -83,12 +83,12 @@ composite NetflowAnalytic ( input NetflowMessageStream ; output NetflowAnalyticR
   type
 
     // output from Netflow analytic
-    static NetflowAnalyticResultType = 
-	  int32 result;
+    static NetflowAnalyticResultType =
+      int32 result;
 
   graph
-	
-	// placeholder for Netflow analytic
-	stream<NetflowAnalyticResultType> NetflowAnalyticResultStream = Custom(NetflowMessageStream) {} 
+
+    // placeholder for Netflow analytic
+    stream<NetflowAnalyticResultType> NetflowAnalyticResultStream = Custom(NetflowMessageStream) {}
 
 }
