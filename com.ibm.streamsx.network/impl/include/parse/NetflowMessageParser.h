@@ -6,6 +6,7 @@
 #ifndef NETFLOW_MESSAGE_PARSER_H_
 #define NETFLOW_MESSAGE_PARSER_H_
 
+#include <endian.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -482,9 +483,16 @@ class NetflowMessageParser {
     if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FLOW_FIELDS_MAXIMUM ) return 0;
 
     // get the length of the field and its offset within the flow record, according to the template
-    uint16_t offset =  templateState->flowFields[fieldType].offset;
-    uint16_t length =  templateState->flowFields[fieldType].length;
+    const uint16_t offset =  templateState->flowFields[fieldType].offset;
+    const uint16_t length =  templateState->flowFields[fieldType].length;
+    if (length==0 || length>8) return 0;
 
+    // get the value of the field from the flow record as an integer and return it
+    const uint64_t* __attribute__((__may_alias__)) p = reinterpret_cast<uint64_t*>(netflow9Flow->fields+offset);
+    return be64toh( *p ) >> (64-8*length) ; 
+
+
+#if 0
     // get the value of the field from the flow record as an integer and return it
     uint64_t value = 0;
     switch(length) {
@@ -498,7 +506,9 @@ class NetflowMessageParser {
     case 1: value = (value<<8) | netflow9Flow->fields[offset++]; break;
     default: break;
     }
+    if (xxx!=value) printf("oops, type=%d offset=%d length=%d value=%08lx xxx=%08lx\n",fieldType,offset,length,value,xxx);
     return value;
+#endif
   }
 
 
