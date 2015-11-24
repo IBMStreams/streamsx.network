@@ -275,6 +275,7 @@ class DNSMessageParser {
   // a partially decoded DNS name, and 'error' is set to a description of the
   // problem.
 
+  inline __attribute__((always_inline))
   SPL::rstring convertDNSEncodedNameToString(uint8_t* p) { 
 
     // step through the labels in the DNS name at 'p', reconstructing it as a
@@ -329,6 +330,7 @@ class DNSMessageParser {
   // found while decoding the DNS names, 'error' is set to a description of the
   // problem, and the list returned will be incomplete.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::rstring> convertResourceNamesToStringList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::rstring> strings;
@@ -340,6 +342,7 @@ class DNSMessageParser {
   // This function converts the DNS types in the array of 'count' fixed-size records
   // at 'records' into an SPL list of integers.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint16> convertResourceTypesToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint16> integers;
@@ -351,6 +354,7 @@ class DNSMessageParser {
   // This function converts the DNS classes in the array of 'count' fixed-size
   // records at 'records' into an SPL list of integers.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint16> convertResourceClassesToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint16> integers;
@@ -362,6 +366,7 @@ class DNSMessageParser {
   // This function converts the DNS 'ttl' fields in the array of 'count'
   // fixed-size records at 'records' into an SPL list of integers.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> convertResourceTTLsToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint32> integers;
@@ -374,6 +379,7 @@ class DNSMessageParser {
   // address the first time its seen, and caches the result. Thereafter, the cached string is
   // returned.
 
+  inline __attribute__((always_inline))
   SPL::rstring convertIPAddressToString(const int addressFamily, const void *ipAddress) {
 
     // these static variables cache the results of previous conversions
@@ -433,6 +439,7 @@ class DNSMessageParser {
   // recognized, an empty string is returned, and 'error' is set to a
   // description of the problem.
 
+  inline __attribute__((always_inline))
   SPL::rstring convertResourceDataToString(const struct Record& record) {
 
     switch(record.type) {
@@ -471,6 +478,7 @@ class DNSMessageParser {
   // This function converts the DNS 'rdata' fields in the array of 'count'
   // fixed-size records at 'records' into an SPL list of SPL strings.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::rstring> convertResourceDataToStringList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::rstring> strings;
@@ -482,6 +490,7 @@ class DNSMessageParser {
   // This function converts the DNS 'rdata' fields in the array of 'count'
   // fixed-size records at 'records' into an SPL list of IP version 4 addresses.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> convertResourceDataToIPv4AddressList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint32> addresses;
@@ -493,6 +502,7 @@ class DNSMessageParser {
   // This function converts the DNS 'rdata' fields in the array of 'count'
   // fixed-size records at 'records' into an SPL list of IP version 6 addresses.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::list<SPL::uint8> > convertResourceDataToIPv6AddressList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::list<SPL::uint8> > addresses;

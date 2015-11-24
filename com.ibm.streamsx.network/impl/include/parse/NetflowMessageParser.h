@@ -475,6 +475,7 @@ class NetflowMessageParser {
   // This function returns the value of the specified field in the current flow,
   // after converting it to an SPL integer.
 
+  inline __attribute__((always_inline))
   SPL::uint64 netflow9FieldAsInteger(const uint16_t fieldType) {
 
     // return zero if there is no such field in this flow
@@ -504,6 +505,7 @@ class NetflowMessageParser {
   // This function returns the value of the specified field in the current flow,
   // after converting it to an SPL string.
 
+  inline __attribute__((always_inline))
   SPL::rstring netflow9FieldAsString(const uint16_t fieldType) {
 
     // return zero if there is no such field in this flow
@@ -525,6 +527,7 @@ class NetflowMessageParser {
   // This function returns the value of the specified field in the current flow,
   // after converting it to an SPL byte list.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint8> netflow9FieldAsByteList(const uint16_t fieldType) {
 
     // return zero if this flow does not contain the specified field

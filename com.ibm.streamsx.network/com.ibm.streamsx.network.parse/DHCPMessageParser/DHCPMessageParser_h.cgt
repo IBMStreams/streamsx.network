@@ -45,182 +45,271 @@ private:
 
   // ----------- assignment functions for output attributes ----------
 
+  inline __attribute__((always_inline))
   SPL::boolean parseError() { return parser.error ? true : false; }
 
+  inline __attribute__((always_inline))
   SPL::rstring parseErrorDescription() { return parser.error ? parser.error : ""; }
 
+  inline __attribute__((always_inline))
   SPL::uint32 parseErrorOffset() { return parser.error ? ( parser.dhcpEnd - parser.dhcpStart ) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint64 messagesProcessed() { return tupleCounter; }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_OPCODE() { return parser.dhcpHeader ? parser.dhcpHeader->op : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_CLIENT_HARDWARE_TYPE() { return parser.dhcpHeader ? parser.dhcpHeader->htype : 0; }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint8> DHCP_CLIENT_HARDWARE_ADDRESS() { return ( parser.dhcpHeader && parser.dhcpHeader->hlen <= sizeof(parser.dhcpHeader->chaddr) ? SPL::list<SPL::uint8>(parser.dhcpHeader->chaddr, parser.dhcpHeader->chaddr + parser.dhcpHeader->hlen) : SPL::list<SPL::uint8>() ); }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_HOP_COUNT() { return parser.dhcpHeader ? parser.dhcpHeader->hops : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_TRANSACTION_IDENTIFIER() { return parser.dhcpHeader ? ntohl(parser.dhcpHeader->xid) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DHCP_SECONDS() { return parser.dhcpHeader ? ntohs(parser.dhcpHeader->secs) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DHCP_FLAGS() { return parser.dhcpHeader ? ntohs(parser.dhcpHeader->flags) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_CLIENT_ADDRESS() { return parser.dhcpHeader ? ntohl(parser.dhcpHeader->ciaddr) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_YOUR_ADDRESS() { return parser.dhcpHeader ? ntohl(parser.dhcpHeader->yiaddr) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_SERVER_NEXT() { return parser.dhcpHeader ? ntohl(parser.dhcpHeader->siaddr) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_RELAY_AGENT() { return parser.dhcpHeader ? ntohl(parser.dhcpHeader->giaddr) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_SERVER_HOSTNAME() { return SPL::rstring(parser.serverName); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_BOOTFILE_NAME() { return SPL::rstring(parser.bootfileName); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_SUBNET_MASK() { return parser.dhcpOptionAsUint32(1); }
 
+  inline __attribute__((always_inline))
   SPL::int32 DHCP_TIME_OFFSET() { return parser.dhcpOptionAsInt32(2); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_ROUTERS() { return parser.dhcpOptionAsListUint32(3); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_TIME_SERVERS() { return parser.dhcpOptionAsListUint32(4); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NAME_SERVERS() { return parser.dhcpOptionAsListUint32(5); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_DNS_SERVERS() { return parser.dhcpOptionAsListUint32(6); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_LOG_SERVERS() { return parser.dhcpOptionAsListUint32(7); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_COOKIE_SERVERS() { return parser.dhcpOptionAsListUint32(8); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_LPR_SERVERS() { return parser.dhcpOptionAsListUint32(9); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_IMPRESS_SERVERS() { return parser.dhcpOptionAsListUint32(10); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_RESOURCE_SERVERS() { return parser.dhcpOptionAsListUint32(11); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_HOST_NAME() { return parser.dhcpOptionAsString(12); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DHCP_BOOT_FILE_SIZE() { return parser.dhcpOptionAsUint16(13); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_MERIT_DUMP_FILE() { return parser.dhcpOptionAsString(14); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_DOMAIN_NAME() { return parser.dhcpOptionAsString(15); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_SWAP_SERVER() { return parser.dhcpOptionAsUint32(16); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_ROOT_PATH() { return parser.dhcpOptionAsString(17); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_EXTENSIONS_PATH() { return parser.dhcpOptionAsString(18); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_IP_FORWARDING() { return parser.dhcpOptionAsBoolean(19); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_NONLOCAL_SOURCE_ROUTING() { return parser.dhcpOptionAsBoolean(20); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NONLOCAL_SOURCE_FILTERS() { return parser.dhcpOptionAsListUint32(21); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DHCP_MAXIMUM_REASSEMBLY_SIZE() { return parser.dhcpOptionAsUint16(22); }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_IP_DEFAULT_TTL() { return parser.dhcpOptionAsUint8(23); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_MTU_AGING_TIMEOUT() { return parser.dhcpOptionAsUint32(24); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint16> DHCP_MTU_PLATEAU_TABLE() { return parser.dhcpOptionAsListUint16(25); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DHCP_INTERFACE_MTU() { return parser.dhcpOptionAsUint16(26); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_ALL_SUBNETS_LOCAL() { return parser.dhcpOptionAsBoolean(27); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_BROADCAST_ADDRESS() { return parser.dhcpOptionAsUint32(28); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_PERFORM_MASK_DISCOVERY() { return parser.dhcpOptionAsBoolean(29); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_MASK_SUPPLIER() { return parser.dhcpOptionAsBoolean(30); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_PERFORM_ROUTER_DISCOVERY() { return parser.dhcpOptionAsBoolean(31); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_ROUTER_SOLICITATION_ADDRESS() { return parser.dhcpOptionAsUint32(32); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_STATIC_ROUTES() { return parser.dhcpOptionAsListUint32(33); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_TRAILER_ENCAPSULATION() { return parser.dhcpOptionAsBoolean(34); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_ARP_CACHE_TIMEOUT() { return parser.dhcpOptionAsUint32(35); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_ETHERNET_ENCAPSULATION() { return parser.dhcpOptionAsBoolean(36); }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_TCP_DEFUALT_TTL() { return parser.dhcpOptionAsUint8(37); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_TCP_KEEPALIVE_INTERVAL() { return parser.dhcpOptionAsUint32(38); }
 
+  inline __attribute__((always_inline))
   SPL::boolean DHCP_TCP_KEEPALIVE_GARBAGE() { return parser.dhcpOptionAsBoolean(39); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_NIS_DOMAIN() { return parser.dhcpOptionAsString(40); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NIS_SERVERS() { return parser.dhcpOptionAsListUint32(41); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NTP_SERVERS() { return parser.dhcpOptionAsListUint32(42); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint8> DHCP_VENDOR_INFORMATION() { return parser.dhcpOptionAsListUint8(43); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NETBIOS_NAME_SERVERS() { return parser.dhcpOptionAsListUint32(44); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NETBIOS_NBDD_SERVERS() { return parser.dhcpOptionAsListUint32(45); }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_NETBIOS_NODE_TYPE() { return parser.dhcpOptionAsUint8(46); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_NETBIOS_SCOPE() { return parser.dhcpOptionAsString(47); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_XWINDOW_FONT_SERVERS() { return parser.dhcpOptionAsListUint32(48); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_XWINDOW_DISPLAY_MANAGERS() { return parser.dhcpOptionAsListUint32(49); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_REQUESTED_ADDRESS() { return parser.dhcpOptionAsUint32(50); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_ADDRESS_LEASE_TIME() { return parser.dhcpOptionAsUint32(51); }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_OPTION_OVERLOAD_FLAGS() { return parser.dhcpOptionAsUint8(52); }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DHCP_MESSAGE_TYPE() { return parser.dhcpOptionAsUint8(53); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_SERVER_ADDRESS() { return parser.dhcpOptionAsUint32(54); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint8> DHCP_PARAMETER_REQUESTS() { return parser.dhcpOptionAsListUint8(55); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_ERROR_MESSAGE() { return parser.dhcpOptionAsString(56); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DHCP_MAXIMUM_MESSAGE_SIZE() { return parser.dhcpOptionAsUint16(57); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_RENEWAL_TIME() { return parser.dhcpOptionAsUint32(58); }
 
+  inline __attribute__((always_inline))
   SPL::uint32 DHCP_REBINDING_TIME() { return parser.dhcpOptionAsUint32(59); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint8> DHCP_VENDOR_IDENTIFIER() { return parser.dhcpOptionAsListUint8(60); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint8> DHCP_CLIENT_IDENTIFIER() { return parser.dhcpOptionAsListUint8(61); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DHCP_NISPLUS_DOMAIN() { return parser.dhcpOptionAsString(64); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NISPLUS_SERVERS() { return parser.dhcpOptionAsListUint32(65); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_MOBILE_IP_HOME_AGENTS() { return parser.dhcpOptionAsListUint32(68); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_SMTP_SERVERS() { return parser.dhcpOptionAsListUint32(69); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_POP3_SERVERS() { return parser.dhcpOptionAsListUint32(70); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_NNTP_SERVERS() { return parser.dhcpOptionAsListUint32(71); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_WWW_SERVERS() { return parser.dhcpOptionAsListUint32(72); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_FINGER_SERVERS() { return parser.dhcpOptionAsListUint32(73); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_IRC_SERVERS() { return parser.dhcpOptionAsListUint32(74); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_STREETTALK_SERVERS() { return parser.dhcpOptionAsListUint32(75); }
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> DHCP_STDA_SERVERS() { return parser.dhcpOptionAsListUint32(76); }
 
 };
