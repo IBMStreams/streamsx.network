@@ -235,7 +235,7 @@
       <function:function>
         <function:description>
           This result function returns "SrcToDst" or
-          "DstToSrc", where source and destination refer to the FLOW_*_ADDRESS() functions, 
+          "DstToSrc", where source and destination refer to the FLOW_xxxx_ADDRESS() functions, 
           or "" if the operator cannot determine a direction.
         </function:description>
         <function:prototype>public rstring FLOW_DIRECTION()</function:prototype>

@@ -1,0 +1,593 @@
+<%
+
+## Copyright (C) 2015  International Business Machines Corporation
+## All Rights Reserved
+
+%>
+
+#include "parse/IPFIXMessageParser.h"
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR
+{
+public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+private:
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  int32_t processorAffinity;
+
+  // ----------- output tuples ----------
+
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+
+  // ----------- operator state variables ----------
+
+  Mutex processMutex;
+  uint64_t tupleCounter;
+
+  // ----------- IPFIX message parser ----------
+
+  IPFIXMessageParser parser;
+
+  // ----------- assignment functions for output attributes ----------
+
+  inline __attribute__((always_inline))
+  SPL::boolean parseError() { return parser.error ? true : false; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring parseErrorDescription() { return parser.error ? parser.error : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 parseErrorOffset() { return parser.errorOffset(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 messagesProcessed() { return tupleCounter; }
+
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_standardFieldAsInteger(SPL::int32 field) { return parser.ipfixStandardFieldAsInteger(field); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring IPFIX_standardFieldAsString(SPL::int32 field) { return parser.ipfixStandardFieldAsString(field); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint8> IPFIX_standardFieldAsByteList(SPL::int32 field) { return parser.ipfixStandardFieldAsByteList(field); }
+
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_enterpriseFieldAsInteger(SPL::int32 field) { return parser.ipfixEnterpriseFieldAsInteger(field); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring IPFIX_enterpriseFieldAsString(SPL::int32 field) { return parser.ipfixEnterpriseFieldAsString(field); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint8> IPFIX_enterpriseFieldAsByteList(SPL::int32 field) { return parser.ipfixEnterpriseFieldAsByteList(field); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_fieldEnterpriseIdentifier(SPL::int32 field) { return parser.ipfixEnterpriseIdentifier(field); }
+
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_octetDeltaCount() { return parser.ipfixStandardFieldAsInteger(1); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_packetDeltaCount() { return parser.ipfixStandardFieldAsInteger(2); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_protocolIdentifier() { return parser.ipfixStandardFieldAsInteger(4); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_ipClassOfService() { return parser.ipfixStandardFieldAsInteger(5); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_tcpControlBits() { return parser.ipfixStandardFieldAsInteger(6); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_sourceTransportPort() { return parser.ipfixStandardFieldAsInteger(7); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_sourceIPv4Address() { return parser.ipfixStandardFieldAsInteger(8); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_sourceIPv4PrefixLength() { return parser.ipfixStandardFieldAsInteger(9); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_ingressInterface() { return parser.ipfixStandardFieldAsInteger(10); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_destinationTransportPort() { return parser.ipfixStandardFieldAsInteger(11); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_destinationIPv4Address() { return parser.ipfixStandardFieldAsInteger(12); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_destinationIPv4PrefixLength() { return parser.ipfixStandardFieldAsInteger(13); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_egressInterface() { return parser.ipfixStandardFieldAsInteger(14); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_ipNextHopIPv4Address() { return parser.ipfixStandardFieldAsInteger(15); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_bgpSourceAsNumber() { return parser.ipfixStandardFieldAsInteger(16); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_bgpDestinationAsNumber() { return parser.ipfixStandardFieldAsInteger(17); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_bgpNextHopIPv4Address() { return parser.ipfixStandardFieldAsInteger(18); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postMCastPacketDeltaCount() { return parser.ipfixStandardFieldAsInteger(19); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postMCastOctetDeltaCount() { return parser.ipfixStandardFieldAsInteger(20); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowEndSysUpTime() { return parser.ipfixStandardFieldAsInteger(21); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowStartSysUpTime() { return parser.ipfixStandardFieldAsInteger(22); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postOctetDeltaCount() { return parser.ipfixStandardFieldAsInteger(23); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postPacketDeltaCount() { return parser.ipfixStandardFieldAsInteger(24); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_minimumIpTotalLength() { return parser.ipfixStandardFieldAsInteger(25); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_maximumIpTotalLength() { return parser.ipfixStandardFieldAsInteger(26); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_sourceIPv6Address() { return parser.ipfixStandardFieldAsByteList(27); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_destinationIPv6Address() { return parser.ipfixStandardFieldAsByteList(28); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_sourceIPv6PrefixLength() { return parser.ipfixStandardFieldAsInteger(29); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_destinationIPv6PrefixLength() { return parser.ipfixStandardFieldAsInteger(30); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowLabelIPv6() { return parser.ipfixStandardFieldAsInteger(31); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_icmpTypeCodeIPv4() { return parser.ipfixStandardFieldAsInteger(32); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_igmpType() { return parser.ipfixStandardFieldAsInteger(33); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_flowActiveTimeout() { return parser.ipfixStandardFieldAsInteger(36); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_flowIdleTimeout() { return parser.ipfixStandardFieldAsInteger(37); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_exportedOctetTotalCount() { return parser.ipfixStandardFieldAsInteger(40); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_exportedMessageTotalCount() { return parser.ipfixStandardFieldAsInteger(41); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_exportedFlowRecordTotalCount() { return parser.ipfixStandardFieldAsInteger(42); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_sourceIPv4Prefix() { return parser.ipfixStandardFieldAsInteger(44); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_destinationIPv4Prefix() { return parser.ipfixStandardFieldAsInteger(45); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_mplsTopLabelType() { return parser.ipfixStandardFieldAsInteger(46); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_mplsTopLabelIPv4Address() { return parser.ipfixStandardFieldAsInteger(47); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_minimumTTL() { return parser.ipfixStandardFieldAsInteger(52); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_maximumTTL() { return parser.ipfixStandardFieldAsInteger(53); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_fragmentIdentification() { return parser.ipfixStandardFieldAsInteger(54); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_postIpClassOfService() { return parser.ipfixStandardFieldAsInteger(55); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_sourceMacAddress() { return parser.ipfixStandardFieldAsByteList(56); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_postDestinationMacAddress() { return parser.ipfixStandardFieldAsByteList(57); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_vlanId() { return parser.ipfixStandardFieldAsInteger(58); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_postVlanId() { return parser.ipfixStandardFieldAsInteger(59); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_ipVersion() { return parser.ipfixStandardFieldAsInteger(60); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_flowDirection() { return parser.ipfixStandardFieldAsInteger(61); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_ipNextHopIPv6Address() { return parser.ipfixStandardFieldAsByteList(62); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_bgpNextHopIPv6Address() { return parser.ipfixStandardFieldAsByteList(63); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_ipv6ExtensionHeaders() { return parser.ipfixStandardFieldAsInteger(64); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsTopLabelStackSection() { return parser.ipfixStandardFieldAsByteList(70); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection2() { return parser.ipfixStandardFieldAsByteList(71); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection3() { return parser.ipfixStandardFieldAsByteList(72); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection4() { return parser.ipfixStandardFieldAsByteList(73); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection5() { return parser.ipfixStandardFieldAsByteList(74); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection6() { return parser.ipfixStandardFieldAsByteList(75); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection7() { return parser.ipfixStandardFieldAsByteList(76); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection8() { return parser.ipfixStandardFieldAsByteList(77); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection9() { return parser.ipfixStandardFieldAsByteList(78); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsLabelStackSection10() { return parser.ipfixStandardFieldAsByteList(79); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_destinationMacAddress() { return parser.ipfixStandardFieldAsByteList(80); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_postSourceMacAddress() { return parser.ipfixStandardFieldAsByteList(81); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_octetTotalCount() { return parser.ipfixStandardFieldAsInteger(85); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_packetTotalCount() { return parser.ipfixStandardFieldAsInteger(86); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_fragmentOffset() { return parser.ipfixStandardFieldAsInteger(88); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsVpnRouteDistinguisher() { return parser.ipfixStandardFieldAsByteList(90); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_bgpNextAdjacentAsNumber() { return parser.ipfixStandardFieldAsInteger(128); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_bgpPrevAdjacentAsNumber() { return parser.ipfixStandardFieldAsInteger(129); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_exporterIPv4Address() { return parser.ipfixStandardFieldAsInteger(130); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_exporterIPv6Address() { return parser.ipfixStandardFieldAsByteList(131); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_droppedOctetDeltaCount() { return parser.ipfixStandardFieldAsInteger(132); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_droppedPacketDeltaCount() { return parser.ipfixStandardFieldAsInteger(133); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_droppedOctetTotalCount() { return parser.ipfixStandardFieldAsInteger(134); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_droppedPacketTotalCount() { return parser.ipfixStandardFieldAsInteger(135); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_flowEndReason() { return parser.ipfixStandardFieldAsInteger(136); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_commonPropertiesId() { return parser.ipfixStandardFieldAsInteger(137); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_observationPointId() { return parser.ipfixStandardFieldAsInteger(138); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_icmpTypeCodeIPv6() { return parser.ipfixStandardFieldAsInteger(139); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_mplsTopLabelIPv6Address() { return parser.ipfixStandardFieldAsByteList(140); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_lineCardId() { return parser.ipfixStandardFieldAsInteger(141); }      
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_portId() { return parser.ipfixStandardFieldAsInteger(142); }      
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_meteringProcessId() { return parser.ipfixStandardFieldAsInteger(143); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_exportingProcessId() { return parser.ipfixStandardFieldAsInteger(144); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_templateId() { return parser.ipfixStandardFieldAsInteger(145); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_wlanChannelId() { return parser.ipfixStandardFieldAsInteger(146); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring IPFIX_wlanSSID() { return parser.ipfixStandardFieldAsString(147); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowId() { return parser.ipfixStandardFieldAsInteger(148); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_observationDomainId() { return parser.ipfixStandardFieldAsInteger(149); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowStartSeconds() { return parser.ipfixStandardFieldAsInteger(150); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowEndSeconds() { return parser.ipfixStandardFieldAsInteger(151); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowStartMilliseconds() { return parser.ipfixStandardFieldAsInteger(152); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowEndMilliseconds() { return parser.ipfixStandardFieldAsInteger(153); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowStartMicroseconds() { return parser.ipfixStandardFieldAsInteger(154); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowEndMicroseconds() { return parser.ipfixStandardFieldAsInteger(155); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowStartNanoseconds() { return parser.ipfixStandardFieldAsInteger(156); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowEndNanoseconds() { return parser.ipfixStandardFieldAsInteger(157); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowStartDeltaMicroseconds() { return parser.ipfixStandardFieldAsInteger(158); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowEndDeltaMicroseconds() { return parser.ipfixStandardFieldAsInteger(159); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_systemInitTimeMilliseconds() { return parser.ipfixStandardFieldAsInteger(160); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowDurationMilliseconds() { return parser.ipfixStandardFieldAsInteger(161); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_flowDurationMicroseconds() { return parser.ipfixStandardFieldAsInteger(162); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_observedFlowTotalCount() { return parser.ipfixStandardFieldAsInteger(163); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_ignoredPacketTotalCount() { return parser.ipfixStandardFieldAsInteger(164); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_ignoredOctetTotalCount() { return parser.ipfixStandardFieldAsInteger(165); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_notSentFlowTotalCount() { return parser.ipfixStandardFieldAsInteger(166); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_notSentPacketTotalCount() { return parser.ipfixStandardFieldAsInteger(167); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_notSentOctetTotalCount() { return parser.ipfixStandardFieldAsInteger(168); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_destinationIPv6Prefix() { return parser.ipfixStandardFieldAsByteList(169); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_sourceIPv6Prefix() { return parser.ipfixStandardFieldAsByteList(170); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postOctetTotalCount() { return parser.ipfixStandardFieldAsInteger(171); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postPacketTotalCount() { return parser.ipfixStandardFieldAsInteger(172); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_flowKeyIndicator() { return parser.ipfixStandardFieldAsInteger(173); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postMCastPacketTotalCount() { return parser.ipfixStandardFieldAsInteger(174); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_postMCastOctetTotalCount() { return parser.ipfixStandardFieldAsInteger(175); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_icmpTypeIPv4() { return parser.ipfixStandardFieldAsInteger(176); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_icmpCodeIPv4() { return parser.ipfixStandardFieldAsInteger(177); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_icmpTypeIPv6() { return parser.ipfixStandardFieldAsInteger(178); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_icmpCodeIPv6() { return parser.ipfixStandardFieldAsInteger(179); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_udpSourcePort() { return parser.ipfixStandardFieldAsInteger(180); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_udpDestinationPort() { return parser.ipfixStandardFieldAsInteger(181); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_tcpSourcePort() { return parser.ipfixStandardFieldAsInteger(182); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_tcpDestinationPort() { return parser.ipfixStandardFieldAsInteger(183); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_tcpSequenceNumber() { return parser.ipfixStandardFieldAsInteger(184); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_tcpAcknowledgementNumber() { return parser.ipfixStandardFieldAsInteger(185); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_tcpWindowSize() { return parser.ipfixStandardFieldAsInteger(186); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_tcpUrgentPointer() { return parser.ipfixStandardFieldAsInteger(187); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_tcpHeaderLength() { return parser.ipfixStandardFieldAsInteger(188); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_ipHeaderLength() { return parser.ipfixStandardFieldAsInteger(189); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_totalLengthIPv4() { return parser.ipfixStandardFieldAsInteger(190); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_payloadLengthIPv6() { return parser.ipfixStandardFieldAsInteger(191); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_ipTTL() { return parser.ipfixStandardFieldAsInteger(192); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_nextHeaderIPv6() { return parser.ipfixStandardFieldAsInteger(193); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_mplsPayloadLength() { return parser.ipfixStandardFieldAsInteger(194); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_ipDiffServCodePoint() { return parser.ipfixStandardFieldAsInteger(195); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_ipPrecedence() { return parser.ipfixStandardFieldAsInteger(196); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_fragmentFlags() { return parser.ipfixStandardFieldAsInteger(197); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_octetDeltaSumOfSquares() { return parser.ipfixStandardFieldAsInteger(198); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_octetTotalSumOfSquares() { return parser.ipfixStandardFieldAsInteger(199); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_mplsTopLabelTTL() { return parser.ipfixStandardFieldAsInteger(200); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_mplsLabelStackLength() { return parser.ipfixStandardFieldAsInteger(201); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_mplsLabelStackDepth() { return parser.ipfixStandardFieldAsInteger(202); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_mplsTopLabelExp() { return parser.ipfixStandardFieldAsInteger(203); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_ipPayloadLength() { return parser.ipfixStandardFieldAsInteger(204); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_udpMessageLength() { return parser.ipfixStandardFieldAsInteger(205); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_isMulticast() { return parser.ipfixStandardFieldAsInteger(206); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_ipv4IHL() { return parser.ipfixStandardFieldAsInteger(207); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_ipv4Options() { return parser.ipfixStandardFieldAsInteger(208); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_tcpOptions() { return parser.ipfixStandardFieldAsInteger(209); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_paddingOctets() { return parser.ipfixStandardFieldAsByteList(210); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_collectorIPv4Address() { return parser.ipfixStandardFieldAsInteger(211); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPFIX_collectorIPv6Address() { return parser.ipfixStandardFieldAsByteList(212); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_exportInterface() { return parser.ipfixStandardFieldAsInteger(213); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_exportProtocolVersion() { return parser.ipfixStandardFieldAsInteger(214); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_exportTransportProtocol() { return parser.ipfixStandardFieldAsInteger(215); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_collectorTransportPort() { return parser.ipfixStandardFieldAsInteger(216); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_exporterTransportPort() { return parser.ipfixStandardFieldAsInteger(217); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_tcpSynTotalCount() { return parser.ipfixStandardFieldAsInteger(218); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_tcpFinTotalCount() { return parser.ipfixStandardFieldAsInteger(219); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_tcpRstTotalCount() { return parser.ipfixStandardFieldAsInteger(220); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_tcpPshTotalCount() { return parser.ipfixStandardFieldAsInteger(221); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_tcpAckTotalCount() { return parser.ipfixStandardFieldAsInteger(222); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_tcpUrgTotalCount() { return parser.ipfixStandardFieldAsInteger(223); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 IPFIX_ipTotalLength() { return parser.ipfixStandardFieldAsInteger(224); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_postMplsTopLabelExp() { return parser.ipfixStandardFieldAsInteger(237); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_tcpWindowScale() { return parser.ipfixStandardFieldAsInteger(238); }
+
+};
+
+<%SPL::CodeGen::headerEpilogue($model);%>
