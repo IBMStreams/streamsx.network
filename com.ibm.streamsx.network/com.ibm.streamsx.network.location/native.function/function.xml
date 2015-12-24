@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+  <function:functionSet>
+    <function:headerFileName></function:headerFileName>
+    <function:cppNamespaceName>IPAddressLocation_result_functions</function:cppNamespaceName>
+    <function:functions>
+
+
+      <function:function>
+        <function:description>
+          This parser result function returns true 
+          if the location of the specified IP version 4 address was found, or false if not.
+        </function:description>
+        <function:prototype>public boolean locationFound(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP subnet address and mask, in CIDR notation, 
+          for the specified IP version 4 address,
+          if one was found, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubnet(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 4 subnet address 
+          for the specified IP version 4 address,
+          if one was found, or zero if not.
+        </function:description>
+        <function:prototype>public uint32 locationSubnetAddress(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 4 subnet mask
+          for the specified IP version 4 address,
+          if one was found, or zero if not.
+        </function:description>
+        <function:prototype>public uint32 locationSubnetMask(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the postal code 
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationPostalCode(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the latitude
+          for the specified IP version 4 address,
+          if its location was found, or zero if not.
+        </function:description>
+        <function:prototype>public float64 locationLatitude(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the longitude
+          for the specified IP version 4 address,
+          if its location was found, or zero if not.
+        </function:description>
+        <function:prototype>public float64 locationLongitude(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the continent name
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationContinentName(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the continent code
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationContinentCode(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the country name
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationCountryName(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the country code
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationCountryCode(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the first division name (typically a state or province)
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision1Name(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the first division code (typically a state or province)
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision1Code(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the second division name
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision2Name(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the second division code
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision2Code(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the city name
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationCityName(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the metro code 
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationMetroCode(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the continent time zone
+          for the specified IP version 4 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationTimezone(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+
+      <function:function>
+        <function:description>
+          This parser result function returns true 
+          if the location of the specified IP version 6 address was found, or false if not.
+        </function:description>
+        <function:prototype>public boolean locationFound(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP subnet address and mask, in CIDR notation, 
+          for the specified IP version 6 address,
+          if one was found, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubnet(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 6 subnet address 
+          for the specified IP version 6 address,
+          if one was found, or zero if not.
+        </function:description>
+        <function:prototype>public list&lt;uint8>[16] locationSubnetAddress(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the IP version 6 subnet mask
+          for the specified IP version 6 address,
+          if one was found, or zero if not.
+        </function:description>
+        <function:prototype>public list&lt;uint8>[16] locationSubnetMask(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the postal code 
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationPostalCode(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the latitude
+          for the specified IP version 6 address,
+          if its location was found, or zero if not.
+        </function:description>
+        <function:prototype>public float64 locationLatitude(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the longitude
+          for the specified IP version 6 address,
+          if its location was found, or zero if not.
+        </function:description>
+        <function:prototype>public float64 locationLongitude(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the continent name
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationContinentName(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the continent code
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationContinentCode(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the country name
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationCountryName(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the country code
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationCountryCode(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the first division name (typically a state or province)
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision1Name(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the first division code (typically a state or province)
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision1Code(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the second division name
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision2Name(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the second division code
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationSubdivision2Code(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the city name
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationCityName(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the metro code 
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationMetroCode(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the continent time zone
+          for the specified IP version 6 address,
+          if its location was found and it has one, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationTimezone(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+
+    </function:functions>
+  </function:functionSet>
+</function:functionModel>

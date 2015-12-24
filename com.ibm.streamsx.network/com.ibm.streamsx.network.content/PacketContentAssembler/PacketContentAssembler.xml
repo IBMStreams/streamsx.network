@@ -140,8 +140,6 @@ and in output attribute assignment expressions are described here:
 
 * [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions].  
 
-# Operator Diagram
-
       </description>
       <libraryDependencies>
         <library>

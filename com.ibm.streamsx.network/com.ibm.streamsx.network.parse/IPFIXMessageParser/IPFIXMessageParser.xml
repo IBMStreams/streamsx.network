@@ -65,8 +65,6 @@ and in output attribute assignment expressions are described here:
 
 * [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|IPFIX result functions].  
 
-# Operator Diagram
-
       </description>
       <libraryDependencies>
         <library>
