@@ -46,10 +46,11 @@ composite LivePacketLiveSourceFilters {
 
     MetricsType =
         float64 metricsTime,            // time that metrics were produced, in seconds since Unix epoch
+        boolean metricsUpdated,
         float64 averagePacketsReceived, // average number of packets received during last metrics interval
         float64 averagePacketsDropped,  // average number of packets dropped during last metrics interval
         float64 averagePacketsProcessed,// average number of packets processed during last metrics interval
-        float64 averageOctetsProcessed; // average number of octets processed during last metrics interval
+        float64 averageBytesProcessed; // average number of bytes processed during last metrics interval
 
     AllPacketType =
         uint64 packetNumber,            // sequence number of packet, as emitted by operator
@@ -74,12 +75,13 @@ composite LivePacketLiveSourceFilters {
         logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
         param
             networkInterface: $networkInterface;
+            promiscuous: true;
             metricsInterval: $metricsInterval;
             inputFilter:   "udp or tcp";            // process only UDP and TCP packets
             outputFilters: UDP_PORT(67uh) || UDP_PORT(68uh),  // output port 0 emits only DHCP payloads
                            UDP_PORT(53uh),                    // output port 1 emits only DNS payloads
                            TCP_PORT(80uh),                    // output port 2 emits only HTTP payloads
-                           metricsUpdated(),                  // output port 3 emits only updated metrics
+                           metricsUpdated(),                  // output port 3 emits only operator metrics
                            true;                              // output port 4 emits all packets processed
         output
         DHCPOut:
@@ -107,10 +109,11 @@ composite LivePacketLiveSourceFilters {
             httpData = PAYLOAD_DATA();
         MetricsOut:
             metricsTime = getTimestampInSecs(),
+            metricsUpdated = metricsUpdated(),
             averagePacketsReceived = (float64)metricsIntervalPacketsReceived() / metricsIntervalElapsed(),
             averagePacketsDropped = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed(),
             averagePacketsProcessed = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
-            averageOctetsProcessed = (float64)metricsIntervalOctetsProcessed() / metricsIntervalElapsed();
+            averageBytesProcessed = (float64)metricsIntervalBytesProcessed() / metricsIntervalElapsed();
         AllOut:
             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
             packetNumber = packetsProcessed() - 1ul,

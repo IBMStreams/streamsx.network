@@ -1,0 +1,238 @@
+<%
+
+# Copyright (C) 2015  International Business Machines Corporation
+# All Rights Reserved
+
+%>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdlib.h> 
+#include <iostream>
+#include <fstream> 
+#include <string>
+#include <tr1/unordered_map>
+#include <streams_boost/filesystem.hpp>
+#include <streams_boost/tokenizer.hpp>
+#include <streams_boost/regex.hpp> 
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+
+
+  // This function compares two IP version 6 addresses and returns a negative
+  // integer is the first is smaller, or zero if they are equal, or a positive
+  // integer is the first is larger. The function is used to sort and search a
+  // list of IP version 6 addresses.
+
+int compareIPv6Addresses(const SPL::blist<SPL::uint8,16>& a, const SPL::blist<SPL::uint8,16>& b) { return memcmp( a.getData(), b.getData(), a.getSize()<b.getSize() ? a.getSize() : b.getSize() ); }
+
+
+
+class MY_OPERATOR : public MY_BASE_OPERATOR
+{
+ public:
+  
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+  // ----------- this structure contains geographical locations ----------
+
+  struct CityLocation {
+    std::string continentCode;    // column 2
+    std::string continentName;    // column 3
+    std::string countryCode;      // column 4
+    std::string countryName;      // column 5
+    std::string subdivision1Code; // column 6 
+    std::string subdivision1Name; // column 7
+    std::string subdivision2Code; // column 8
+    std::string subdivision2Name; // column 9
+    std::string cityName;         // column 10
+    std::string metroCode;        // column 11
+    std::string timezone;         // column 12 
+  };
+  std::tr1::unordered_map<std::string, CityLocation*> cityLocations; // indexed by 'locationID'
+
+  // ----------- these structures contain IPv4 and IPv6 subnets ----------
+
+  struct IPSubnet {
+    uint32_t ipv4Address;
+    uint32_t ipv4Mask;
+    SPL::blist<SPL::uint8,16> ipv6Address;
+    SPL::blist<SPL::uint8,16> ipv6Mask;
+    rstring cidrAddress;
+    rstring postalCode;
+    double latitude;
+    double longitude;
+    CityLocation* location; 
+  };
+
+  struct IPv4Subnet {
+    IPSubnet subnet;
+    bool operator<(const IPv4Subnet& other) const { return subnet.ipv4Address < other.subnet.ipv4Address; }
+    bool operator<(const uint32_t other) const { return subnet.ipv4Address < other; }
+  };
+  std::vector<IPv4Subnet> ipv4Subnets; // sorted by 'subnet.ipv4Address'
+
+  struct IPv6Subnet {
+    IPSubnet subnet;
+    bool operator<(const IPv6Subnet& other) const { return compareIPv6Addresses(subnet.ipv6Address, other.subnet.ipv6Address)<0; }
+    bool operator<(const SPL::blist<SPL::uint8,16>& other) const { return compareIPv6Addresses(subnet.ipv6Address, other)<0; } 
+  };
+  std::vector<IPv6Subnet> ipv6Subnets; // sorted by 'subnet.ipv4Address'
+
+  // ----------- operator functions ----------
+
+  const char* parseIPv4cidrAddress(std::string cidrAddress, uint32_t& address, uint32_t& mask);
+  std::string formatIPv4cidrAddress(uint32_t address, uint32_t mask);
+
+  const char* parseIPv6cidrAddress(std::string token, SPL::blist<SPL::uint8,16>& address, SPL::blist<SPL::uint8,16>& mask);
+  std::string formatIPv6cidrAddress(SPL::blist<SPL::uint8,16>& address, SPL::blist<SPL::uint8,16>& mask);
+
+  SPL::blist<SPL::uint8,16> combineIPv6AddressAndMask(const SPL::blist<SPL::uint8,16>& address, const SPL::blist<SPL::uint8,16>& mask);
+
+  void loadCityLocations(std::string filename);
+
+  void loadIPv4Subnets(std::string filename);
+  IPSubnet* findIPv4Subnet(const uint32 address);
+
+  void loadIPv6Subnets(std::string filename);
+  IPSubnet* findIPv6Subnet(const SPL::blist<SPL::uint8,16>& address);
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  std::string geographyDirectory;
+  uint32_t ipAddressAttributesCount;
+
+  // ----------- output tuples ----------
+
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+
+  // ----------- operator state variables ----------
+
+  uint64_t tupleCounter;
+
+  // ----------- assignment functions for output attributes ----------
+
+
+  inline __attribute__((always_inline))
+    SPL::boolean locationFound(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return !!subnet; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubnet(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->cidrAddress : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::uint32 locationSubnetAddress(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->ipv4Address : 0; }
+
+  inline __attribute__((always_inline))
+    SPL::uint32 locationSubnetMask(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->ipv4Mask : 0; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationPostalCode(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->postalCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::float64 locationLatitude(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->latitude : 0.0; }
+
+  inline __attribute__((always_inline))
+    SPL::float64 locationLongitude(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->longitude : 0.0; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationContinentName(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->continentName : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationContinentCode(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->continentCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationCountryName(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->countryName : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationCountryCode(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->countryCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision1Name(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->subdivision1Name : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision1Code(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->subdivision1Code : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision2Name(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->subdivision2Name : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision2Code(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->subdivision2Code : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationCityName(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->cityName : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationMetroCode(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->metroCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationTimezone(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->timezone : ""; }
+
+
+  inline __attribute__((always_inline))
+    SPL::boolean locationFound(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return !!subnet; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubnet(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->cidrAddress : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::blist<SPL::uint8,16> locationSubnetAddress(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->ipv6Address : SPL::blist<SPL::uint8,16>(); }
+
+  inline __attribute__((always_inline))
+    SPL::blist<SPL::uint8,16> locationSubnetMask(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->ipv6Mask : SPL::blist<SPL::uint8,16>(); }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationPostalCode(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->postalCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::float64 locationLatitude(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->latitude : 0.0; }
+
+  inline __attribute__((always_inline))
+    SPL::float64 locationLongitude(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->longitude : 0.0; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationContinentName(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->continentName : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationContinentCode(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->continentCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationCountryName(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->countryName : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationCountryCode(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->countryCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision1Name(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->subdivision1Name : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision1Code(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->subdivision1Code : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision2Name(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->subdivision2Name : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationSubdivision2Code(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->subdivision2Code : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationCityName(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->cityName : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationMetroCode(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->metroCode : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationTimezone(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->timezone : ""; }
+
+};
+
+<%SPL::CodeGen::headerEpilogue($model);%>

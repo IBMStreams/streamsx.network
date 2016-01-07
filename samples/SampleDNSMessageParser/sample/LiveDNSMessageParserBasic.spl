@@ -8,6 +8,7 @@ namespace sample;
 use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
+use com.ibm.streamsx.network.datetimeformat::*;
 
 composite LiveDNSMessageParserBasic {
 
@@ -33,7 +34,7 @@ composite LiveDNSMessageParserBasic {
         float64 averagePacketsReceived,     // average number of packets received during last metrics interval
         float64 averagePacketsDropped,  // average number of packets dropped during last metrics interval
         float64 averagePacketsProcessed,// average number of packets processed during last metrics interval
-        float64 averageOctetsProcessed;     // average number of octets processed during last metrics interval
+        float64 averageBytesProcessed;     // average number of bytes processed during last metrics interval
 
     DNSResponseMessageType =
         rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
@@ -66,7 +67,7 @@ composite LiveDNSMessageParserBasic {
             averagePacketsReceived = (float64)metricsIntervalPacketsReceived() / metricsIntervalElapsed(),
             averagePacketsDropped = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed(),
             averagePacketsProcessed = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
-            averageOctetsProcessed = (float64)metricsIntervalOctetsProcessed() / metricsIntervalElapsed();
+            averageBytesProcessed = (float64)metricsIntervalBytesProcessed() / metricsIntervalElapsed();
     }
     //() as PacketSink = FileSink(PacketStream) { param file: "debug.LiveDNSMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
     () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LiveDNSMessageParserBasic.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }

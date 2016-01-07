@@ -15,7 +15,7 @@
 #include <string>
 
 #include <SPL/Runtime/Type/SPLType.h>
-
+#include <SPL/Runtime/Utility/Mutex.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 // This class parses DNS fields within a DNS message
@@ -269,59 +269,58 @@ class DNSMessageParser {
   char const* error;
 
 
-  // This function decodes an encoded DNS name located at 'q'. If no problems
-  // are found, it returns an STL string containing the decoded name. If an
-  // encoding problem is found, the function returns an STL string that is empty
-  // or only partially decoded, and 'error' is set to a description of the
+  // This function decodes an encoded DNS name located at 'p'. If no problems
+  // are found, it returns an SPL::rstring containing the decoded name. If an
+  // encoding problem is found, the function returns an empty string, or perhaps
+  // a partially decoded DNS name, and 'error' is set to a description of the
   // problem.
 
-  SPL::rstring convertDNSEncodedNameToString(uint8_t* q) {
+  inline __attribute__((always_inline))
+  SPL::rstring convertDNSEncodedNameToString(uint8_t* p) { 
 
-    // step through the labels in this DNS name, reconstructing the name as we go
-    SPL::rstring name;
-    for (int32_t i = 0; i<253; i++) {
+    // step through the labels in the DNS name at 'p', reconstructing it as a
+    // character string in 'name'
+    char nameBuffer[4096]; // ... was ... SPL::rstring name; 
+    int nameLength = 0;
+    for (int32_t i = 0; i<255; i++) {
 
-      // no DNS name can be this long
-      if (name.length()>253) { error = "label overruns packet"; return name; }
+      // no DNS name can have this many labels or be this long
+      if (i>253) { error = "too many labels"; break; } 
+      if (nameLength>253) { error = "label overruns packet"; break; } // ... was ... if (name.length()>253) ...
 
       // get the length and compression flag from the first byte in the next label
-      const uint8_t flags = *q & 0xC0;
-      const uint8_t length = *q & 0x3F;
+      const uint8_t flags = *p & 0xC0;
+      const uint8_t length = *p & 0x3F;
 
-      // handle compressed and uncompressed labels differently
-      uint16_t offset;
-      switch (flags) {
+      // for uncompressed labels, append the text of the label to the string,
+      // then step over the label length byte and text, and continue with the
+      // next label until one with zero length is found
+      if (flags==0x00) {
+        if (p+1+length>dnsEnd) { error = "label overruns packet"; break; }
+        if (length==0) { if (nameLength>0) nameLength--; break; } // ... was ... if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
+        memcpy(&nameBuffer[nameLength], (const char*)p+1, length); nameBuffer[nameLength+length] = '.'; // ... was ... name.append((char*)p+1, length).append(".");
+        p += length+1;
+        nameLength += length+1;
+      }
 
-        // for uncompressed labels, append the text of the label to the string,
-        // then step over the label length byte and text, and continue with the next label
-      case 0x00:
-        if (q+1+length>dnsEnd) { error = "label overruns packet"; return name; }
-        if (length==0) { if (name.length()) name.erase(name.length()-1); return name; }
-        name.append((char*)q+1, length);
-        name.append(1, '.');
-        q += 1+length;
-        break;
+      // for compressed labels, get the offset from the beginning of the DNS message
+      // to the next label, and continue decoding from there
+      else if (flags==0xC0) { 
+        if (p+2>dnsEnd) { error = "label compression length overruns packet"; break; }
+        const uint16_t offset = ntohs(*((uint16_t*)p)) & 0x03FF;
+        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; break; }
+        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; break; }
+        if (offset==p-dnsStart) { error = "label compression offset loop"; break; }
+        p = dnsStart+offset;
+      }
 
-        // for compressed labels, get the offset from the beginning of the DNS message
-        // to the next label, and continue decoding from there
-      case 0xC0:
-        if (q+2>dnsEnd) { error = "label compression length overruns packet"; return name; }
-        offset = ntohs(*((uint16_t*)q)) & 0x03FF;
-        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; return name; }
-        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; return name; }
-        if (offset==q-dnsStart) { error = " label compression offset loop"; return name; }
-        q = dnsStart+offset;
-        break;
-
-        // no DNS label should have other high-order bit settings in its length byte
-      default:
-        error = "label flags invalid"; return name;
+      // no DNS label should have other high-order bit settings in its length byte
+      else {
+        error = "label flags invalid"; break;
       }
     }
 
-    // no DNS name can have have this many labels in it
-    error = "label limit exceeded";
-    return name;
+    return SPL::rstring(nameBuffer, nameLength); // ... was ... return name;
   }
 
 
@@ -331,6 +330,7 @@ class DNSMessageParser {
   // found while decoding the DNS names, 'error' is set to a description of the
   // problem, and the list returned will be incomplete.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::rstring> convertResourceNamesToStringList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::rstring> strings;
@@ -342,6 +342,7 @@ class DNSMessageParser {
   // This function converts the DNS types in the array of 'count' fixed-size records
   // at 'records' into an SPL list of integers.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint16> convertResourceTypesToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint16> integers;
@@ -353,6 +354,7 @@ class DNSMessageParser {
   // This function converts the DNS classes in the array of 'count' fixed-size
   // records at 'records' into an SPL list of integers.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint16> convertResourceClassesToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint16> integers;
@@ -364,6 +366,7 @@ class DNSMessageParser {
   // This function converts the DNS 'ttl' fields in the array of 'count'
   // fixed-size records at 'records' into an SPL list of integers.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint32> convertResourceTTLsToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint32> integers;
@@ -372,18 +375,75 @@ class DNSMessageParser {
   }
 
 
+  // This function converts a binary IPv4 or IPv6 address into a string representation of the 
+  // address the first time its seen, and caches the result. Thereafter, the cached string is
+  // returned.
+
+  inline __attribute__((always_inline))
+  SPL::rstring convertIPAddressToString(const int addressFamily, const void *ipAddress) {
+
+    // these static variables cache the results of previous conversions
+    static SPL::Mutex ipv4Mutex;
+    static SPL::Mutex ipv6Mutex;
+    static SPL::map<uint32_t, SPL::rstring> ipv4Cache;
+    static SPL::map<SPL::list<SPL::uint8>, SPL::rstring> ipv6Cache;
+
+    // return the string representation of an IPv4 address, either by reusing a
+    // result cached during a previous call, or by converting and caching this one
+    if (addressFamily==AF_INET) {
+      SPL::AutoMutex m(ipv4Mutex); 
+
+      // reuse the result of a previous conversion, if there is one
+      const uint32_t ipv4Address = *(uint32_t*)ipAddress;
+      const SPL::map<uint32_t, SPL::rstring>::iterator i = ipv4Cache.find(ipv4Address);
+      //???if (i!=ipv4Cache.end()) printf("address cache hit on '%s'\n", (i->second).c_str());
+      if (i!=ipv4Cache.end()) return i->second;
+
+      // convert this address to a string, cache the result, and return it
+      char buffer[INET_ADDRSTRLEN];
+      const SPL::rstring ipv4String(inet_ntop(AF_INET, ipAddress, buffer, sizeof(buffer)));
+      ipv4Cache.add(ipv4Address, ipv4String);
+      //???printf("address cache miss on '%s'\n", ipv4String.c_str());
+      return ipv4String; }
+
+    // return the string representation of an IPv6 address, either by reusing a
+    // result cached during a previous call, or by converting and caching this one
+    else if (addressFamily==AF_INET6) {
+      SPL::AutoMutex m(ipv6Mutex); 
+
+      // reuse the result of a previous conversion, if there is one
+      const SPL::list<SPL::uint8> ipv6Address((uint8_t*)ipAddress, (uint8_t*)ipAddress+16);
+      const SPL::map<SPL::list<SPL::uint8>, SPL::rstring>::iterator i = ipv6Cache.find(ipv6Address);
+      //???if (i!=ipv6Cache.end()) printf("address cache hit on '%s'\n", (i->second).c_str());
+      if (i!=ipv6Cache.end()) return i->second;
+
+      // convert this address to a string, cache the result, and return it
+      char buffer[INET6_ADDRSTRLEN];
+      const SPL::rstring ipv6String(inet_ntop(AF_INET6, ipAddress, buffer, sizeof(buffer))); 
+      ipv6Cache.add(ipv6Address, ipv6String);
+      //???printf("address cache miss on '%s'\n", ipv6String.c_str());
+      return ipv6String; }
+
+    // this should never happen
+    else {
+      error = "invalid address family"; 
+      return std::string(); 
+    }
+  }
+
+
+
   // This function converts the DNS 'rdata' field in one fixed-size resource
   // record located at 'record' into an SPL string. The format of the converted
   // string depends upon the 'type' of the resource record. If the 'type' is not
   // recognized, an empty string is returned, and 'error' is set to a
   // description of the problem.
 
+  inline __attribute__((always_inline))
   SPL::rstring convertResourceDataToString(const struct Record& record) {
 
-    char buffer4[INET_ADDRSTRLEN];
-    char buffer6[INET6_ADDRSTRLEN];
     switch(record.type) {
-        /* A */          case   1: return SPL::rstring(inet_ntop(AF_INET, record.rdata, buffer4, sizeof(buffer4))); break;
+        /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); // ... was ... SPL::rstring(inet_ntop(AF_INET, record.rdata, buffer4, sizeof(buffer4))); break;
         /* NS */         case   2:
         /* CNAME */      case   5:
         /* SOA */        case   6:
@@ -393,7 +453,7 @@ class DNSMessageParser {
         /* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
         /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
-        /* AAAA */       case  28: return SPL::rstring(inet_ntop(AF_INET6, record.rdata, buffer6, sizeof(buffer6))); break;
+        /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); // ... was ...SPL::rstring(inet_ntop(AF_INET6, record.rdata, buffer6, sizeof(buffer6))); break;
         /* SRV */        case  33: return SPL::rstring("[SRV data]"); break;
         /* EDNS0 */      case  41: return SPL::rstring("[EDNS0 data]"); break;
         /* SSHFP */      case  44: return SPL::rstring("[SSHFP data]"); break;
@@ -418,11 +478,36 @@ class DNSMessageParser {
   // This function converts the DNS 'rdata' fields in the array of 'count'
   // fixed-size records at 'records' into an SPL list of SPL strings.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::rstring> convertResourceDataToStringList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::rstring> strings;
     for (int i=0; i<count; i++) strings.add(convertResourceDataToString(records[i]));
     return strings;
+  }
+
+
+  // This function converts the DNS 'rdata' fields in the array of 'count'
+  // fixed-size records at 'records' into an SPL list of IP version 4 addresses.
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint32> convertResourceDataToIPv4AddressList(const struct Record records[], const uint16_t count) {
+
+    SPL::list<SPL::uint32> addresses;
+    for (int i=0; i<count; i++) if ( records[i].type==1 ) addresses.add( ntohl(*((SPL::uint32*)records[i].rdata)) );
+    return addresses;
+  }
+
+
+  // This function converts the DNS 'rdata' fields in the array of 'count'
+  // fixed-size records at 'records' into an SPL list of IP version 6 addresses.
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::list<SPL::uint8> > convertResourceDataToIPv6AddressList(const struct Record records[], const uint16_t count) {
+
+    SPL::list<SPL::list<SPL::uint8> > addresses;
+    for (int i=0; i<count; i++) if ( records[i].type==28 ) addresses.add( SPL::list<SPL::uint8>(records[0].rdata, records[0].rdata+16)  );
+    return addresses;
   }
 
 
@@ -484,7 +569,6 @@ class DNSMessageParser {
     for (int i=0; i<answerRecordCount; i++) {
       switch(answerRecords[i].type) {
       case 1:  // type A record
-      case 12: // type PTR record
       case 28: // type AAAA record
         addressRecords[addressRecordCount++] = answerRecords[i]; break;
       case 5:  // type CNAME record

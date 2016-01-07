@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>
+
+IPFIXMessageParser is an operator for the IBM InfoSphere Streams product that 
+parses individual fields of IPFIX messages received in input tuples, 
+and emits tuples containing message data.  
+The operator may be configured with one or more output ports,
+and each port may be configured to emit different tuples,
+as specified by output filters.
+The tuples contain individual fields from the input message, as
+specified by output attribute assignments.  
+
+The IPFIXMessageParser operator expects only IPFIX messages in its input tuples,
+without any of the headers that precede them in network packets.  The
+[PacketLiveSource] and [PacketFileSource] operators can produce tuples that contain
+IPFIX messages with the [PAYLOAD_DATA()] output attribute assignment function.
+
+The IPFIXMessageParser operator consumes input tuples containing IPFIX messages,
+parses indivdual fields in flow records within IPFIX messages, 
+selects flows to emit as output tuples with filter expressions,
+and assigns values to them with output attribute assignment expressions.
+
+Output filters and attribute assignments are SPL expressions. They may use any
+of the built-in SPL functions, and any of these functions, which are specific to
+the IPFIXMessageParser operator: 
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|IPFIX parser result functions]
+
+There are result functions for each of the standardized fields.
+Nonstandardized fields in flow records can be accessed by field number.
+
+The IPFIXMessageParser operator emits a tuple on each output port for each flow
+record within a IPFIX message, optionally filtered by the 'outputFilters'
+parameter.  Specified fields from each flow record are assigned to output
+attributes with the IPFIX parser result functions.
+All attributes of all output ports must be assigned values, either with explicit
+assignment expressions, or implicitly by copy from input tuples.
+
+This operator is part of the network toolkit. To use it in an application,
+include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.parse::*;
+
+# Sample Applications
+
+The network toolkit includes several
+[./tk$SampleIPFIXMessageParser/tk$SampleIPFIXMessageParser.html|sample applications]
+that illustrate how to use this operator.
+
+# References
+
+IPFIX messages and the fields they contain are described here:
+
+* [https://tools.ietf.org/html/rfc5101]
+* [https://tools.ietf.org/html/rfc5102]
+* [http://www.iana.org/assignments/ipfix/ipfix.xml#ipfix-information-element-registration-procedures]
+* [http://www.iana.org/assignments/enterprise-numbers/enterprise-numbers]
+
+The result functions that can be used in boolean
+expressions for the `outputFilters` parameter
+and in output attribute assignment expressions are described here:
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|IPFIX result functions].  
+
+      </description>
+      <libraryDependencies>
+        <library>
+          <cmn:description>common code for toolkit operators</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>messageAttribute</name>
+        <description>
+
+This required parameter specifies an input attribute of type `blob` that
+contains a IPFIX message to be parsed by the operator.
+
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <type>blob</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>sourceAttribute</name>
+        <description>
+
+
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>outputFilters</name>
+        <description>
+
+This optional parameter takes a list of SPL expressions that specify which IPFIX
+messages should be emitted by the corresponding output port. The number of
+expressions in the list must match the number of output ports, and each
+expression must evaluate to a `boolean` value.  The output filter expressions may include any
+of the
+[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|IPFIX result functions].  
+
+The default value of the `outputFilters` parameter is an empty list, which
+causes all IPFIX messages processed to be emitted by all output ports.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+      <parameter>
+        <name>processorAffinity</name>
+        <description>
+
+This optional parameter takes one expression of type `uint32` that specifies
+which processor core the operator's thread will run on.  The maximum value is
+*P-1*, where *P* is the number of processors on the machine where the operator
+will run.
+
+Where the operator runs on a thread of its own, this parameter applies to the
+operator's thread.  This is the situation when the operator's input port is
+configured as a threaded input port, and when the operator has an @parallel
+annotation.
+
+Where the operator runs on the thread of an upstream operator, this parameter
+affects the thread of the operator that sends tuples to it. This is the
+situation when the operator is fused with an upstream operator.
+
+The default is to dispatch the operator's thread on any available processor.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description>
+
+The IPFIXMessageParser operator requires one input port.  One input attribute must be
+of type `blob` and must contain a IPFIX message, excluding the network headers that
+proceed them in network packets, as specified by the required parameter
+`messageAttribute`.
+
+The [PAYLOAD_DATA()] output assignment function of the [PacketLiveSource] and
+[PacketFileSource] operators produces attributes that
+can be consumed by the IPFIXMessageParser operator.
+
+        </description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortOpenSet>
+        <description>
+
+The IPFIXMessageParser operator requires one or more output ports.
+
+Each output port will produce one output tuple for each input tuple
+if the corresponding expression in the `outputFilters` parameter evaluates `true`,
+or if no `outputFilters` parameter is specified. 
+
+Output attributes can be assigned values with any SPL expression that evaluates
+to the proper type, and the expressions may include any of the 
+[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|IPFIX result functions].  
+Output attributes that match input attributes in name and
+type are copied automatically.
+
+        </description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Preserving</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>0</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
+      </outputPortOpenSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

@@ -47,9 +47,9 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eno1
+networkInterface=ens6f3
 metricsInterval=1.0
-timeoutInterval=10.0
+timeoutInterval=30.0
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -87,6 +87,7 @@ step "setting capabilities for standalone application '$namespace.$composite' ..
 standalone=$unbundleDirectory/$composite/bin/standalone
 [ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
 
 step "executing standalone application '$namespace.$composite' ..."
 $standalone -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"

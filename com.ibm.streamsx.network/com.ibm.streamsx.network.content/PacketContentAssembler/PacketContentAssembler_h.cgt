@@ -1,0 +1,599 @@
+<%
+
+## Copyright (C) 2011, 2015  International Business Machines Corporation
+## All Rights Reserved
+
+%>
+
+
+
+#include <sys/time.h>
+#include <sys/mman.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <errno.h>
+#include <string.h>
+#include <dlfcn.h>
+
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <tr1/unordered_map>
+
+#include <arpa/inet.h>
+#include <netinet/ether.h>
+
+#include <streams_boost/algorithm/string.hpp>
+
+#include "pam.h"
+
+
+
+    <%SPL::CodeGen::headerPrologue($model);%>
+
+
+
+enum OutputEvent {
+  EventFlowStart,
+  EventFlowTLS,
+  EventFlowData,
+  EventFlowEnd,
+  EventRequest,
+  EventResponse,
+  EventFileChunk
+};
+
+
+
+enum RequestResponseState {
+  noRequestResponseState,
+  receivingRequestHeaders,
+  receivingRequestBody,
+  receivingResponseHeaders,
+  receivingResponseBody
+};
+
+
+// this class converts event codes into event names
+class OutputEventNames {
+ private:
+  std::tr1::unordered_map<uint32, const char*> names;
+ public:
+  OutputEventNames()  {
+    names[EventFlowStart] = "FlowStart";
+    names[EventFlowEnd] = "FlowEnd";
+    names[EventFlowData] = "FlowData";
+    names[EventFlowTLS] = "FlowTLS";
+    names[EventRequest] = "Request";
+    names[EventResponse] = "Response";
+    names[EventFileChunk] = "FileChunk";
+  }
+  const char* event2name(enum OutputEvent event) { return names[event]; }
+};
+static OutputEventNames outputEventNames;
+
+
+
+
+// this class converts XPF direction codes into descriptive strings
+class XPFDirectionNames {
+ private:
+  std::vector<const char*> directionNames;
+ public:
+  XPFDirectionNames()  {
+    directionNames.resize(10, "?");
+    directionNames[XPF_FLOW_UNKNOWN] = "";
+    directionNames[XPF_FLOW_CLIENT_TO_SERVER] = "SrcToDst";
+    directionNames[XPF_FLOW_SERVER_TO_CLIENT] = "DstToSrc"; }
+  const char* direction2name(pam2XpfFlowDirection direction) { return directionNames[direction]; }
+};
+static XPFDirectionNames xpfDirectionNames;
+
+
+
+
+// this class converts XPF disconnect reason codes into descriptive strings
+
+class XPFReasonNames {
+ private:
+  std::vector<const char*> reasonNames;
+ public:
+  XPFReasonNames()  {
+    reasonNames.resize(10, "?");
+    reasonNames[XPF_REASON_NORMAL] = "normal";
+    reasonNames[XPF_REASON_CLIENT_ABORT] = "clientAbort";
+    reasonNames[XPF_REASON_SERVER_ABORT] = "serverAbort";
+    reasonNames[XPF_REASON_SHUTDOWN] = "shutdown";
+    reasonNames[XPF_REASON_DATA_LOSS] = "dataLoss";
+    reasonNames[XPF_REASON_RESOURCES] = "resources"; };
+  const char* reason2name(pam2XpfConnectionReason reason) { return reasonNames[reason]; }
+};
+static XPFReasonNames xpfReasonNames;
+
+
+
+// this class converts XPF tunnel codes into descriptive strings
+
+class XPFTunnelNames {
+ private:
+  std::vector<const char*> tunnelNames;
+ public:
+  XPFTunnelNames()  {
+    tunnelNames.resize(10, "?");
+    tunnelNames[PAM2XPF_TUNNEL_NONE] = "";
+    tunnelNames[PAM2XPF_TUNNEL_6IN4] = "6IN4";
+    tunnelNames[PAM2XPF_TUNNEL_4IN6] = "4IN6";
+    tunnelNames[PAM2XPF_TUNNEL_GRE] = "GRE";
+    tunnelNames[PAM2XPF_TUNNEL_IP] = "IP";
+    tunnelNames[PAM2XPF_TUNNEL_SSLTLS] = "SSL/TLS"; }
+  const char* type2name(pam2XpfTunnelType type) { return tunnelNames[type]; }
+};
+static XPFTunnelNames xpfTunnelNames;
+
+
+
+
+
+
+// this class converts TLS record types into descriptive strings
+
+class TLSRecordNames {
+ private:
+  std::vector<const char*> recordNames;
+ public:
+  TLSRecordNames()  {
+    recordNames.resize(25, "?");
+    recordNames[0] = "";
+    recordNames[20] = "ChangeCipher";
+    recordNames[21] = "Alert";
+    recordNames[22] = "Handshake";
+    recordNames[23] = "Application";
+    recordNames[24] = "Heartbeat"; };
+  const char* recordType2name(int recordType) { return recordType<0 ? "" : recordNames[recordType]; }
+};
+static TLSRecordNames tlsRecordNames;
+
+
+
+// state variables for an active flow, indexed by XPF event 'flowID*4+i', where i is 1/2/3 according to FLOW_TYPE
+class FlowState {
+ public:
+  // fields from PAM struct pam2XpfHeader
+  uint64 FLOW_ID; // really, 'flowID*4+i', where i is 1/2/3 according to FLOW_TYPE
+  uint32 TRANSACTION_ID;
+  double START_TIME;
+  double END_TIME;
+  uint32 IP_PROTOCOL; // one of UDP==17, TCP==6, ICMP==1
+  const char* FLOW_PROTOCOL;
+
+  // fields from PAM struct pam2XpfConnectionOpened
+  SPL::blist<SPL::uint8,6> ETHER_SRC_ADDRESS;
+  SPL::blist<SPL::uint8,6> ETHER_DST_ADDRESS;
+  uint32 IPV4_SRC_ADDRESS;
+  uint32 IPV4_DST_ADDRESS;
+  SPL::blist<SPL::uint8,16> IPV6_SRC_ADDRESS;
+  SPL::blist<SPL::uint8,16> IPV6_DST_ADDRESS;
+  uint32 SRC_PORT;
+  uint32 DST_PORT;
+  const char* TUNNEL_TYPE;
+  uint32 TUNNEL_IPV4_SRC_ADDRESS;
+  uint32 TUNNEL_IPV4_DST_ADDRESS;
+  SPL::blist<SPL::uint8,16> TUNNEL_IPV6_SRC_ADDRESS;
+  SPL::blist<SPL::uint8,16> TUNNEL_IPV6_DST_ADDRESS;
+
+  // fields from PAM struct pam2XpfConnectionClosed
+  uint64 SRC_PACKETS;
+  uint64 DST_PACKETS;
+  uint64 SRC_BYTES;
+  uint64 DST_BYTES;
+  const char* DISCONNECT_REASON;
+
+  // fields from PAM struct pam2XpfTransportData
+  uint64 FLOW_DATA_COUNTER; // starts at 0 for each flow
+
+  // fields from PAM struct pam2XpfApplicationFound
+  enum pam2XpfConfidence FLOW_PROTOCOL_CONFIDENCE;
+  int32 FLOW_PROTOCOL_DEPTH;
+
+  // fields from PAM struct pam2XpfApplicationURI
+  SPL::rstring URI_METHOD; // get or post
+  SPL::rstring URI_RAW; // URI as coded in message
+  SPL::rstring URI_NORMALIZED; // URI after normalization
+  SPL::rstring URI_SCHEME; // protocol
+  SPL::rstring URI_AUTHORITY; // hostname
+  uint32 URI_PORT; // optional port number (not implemented yet)
+  SPL::rstring URI_USERNAME; // optional username
+  SPL::rstring URI_PATH; // directory and file
+  SPL::rstring URI_QUERY; // optional query, following "?"
+  SPL::rstring URI_FRAGMENT; // optional fragment, following "#" (not implemented yet)
+
+  // fields from PAM struct pam2XpfHttpResponse
+  int32 HTTP_STATUS_CODE;
+
+  // fields from PAM struct pam2XpfApplicationHeader
+  pam2XpfFlowDirection flowDirection;
+  const char* FLOW_DIRECTION;
+  SPL::list<SPL::rstring> REQUEST_HEADERS;
+  SPL::list<SPL::rstring> RESPONSE_HEADERS;
+  enum RequestResponseState rrState;
+
+  // fields from PAM struct pam2XpfTlsRecord
+  const char* TLS_RECORD_TYPE;
+  const char* TLS_RECORD_DIRECTION;
+  uint32 TLS_RECORD_LENGTH;
+  uint32 TLS_RECORD_OFFSET;
+  bool TLS_RECORD_MORE;
+  std::string TLS_VERSION;
+
+  // fields for keeping track of files within this flow
+  std::tr1::unordered_map<uint64, int32> activeFileIDs;
+};
+
+
+// state variables for a file within a flow
+class FileState {
+ public:
+  uint64 FLOW_ID;
+  uint64 FILE_ID;
+  uint64 FILE_ID_PARENT;
+  SPL::rstring FILE_NAME;
+  SPL::rstring FILE_CONTENT_TYPE; // from Content-Type header
+  SPL::rstring FILE_CONTENT_CHARSET; // from Content-Type header
+  uint64 FILE_CONTENT_LENGTH; // from Content-Length header, not necessarily accurate
+  uint64 FILE_CHUNK_COUNTER; // starts at 0 for each file
+  bool FILE_CHUNK_FINAL; // true if this is the last chunk of data for this file, false otherwise
+  uint64 FILE_CHUNK_LENGTH; // length of data that should be in FILE_CHUNK_BUFFER
+  uint64 FILE_CHUNK_LENGTH_SUM; // sum of all FILE_CHUNK_LENGTH values so far
+  std::basic_string<uint8_t> FILE_CHUNK_BUFFER;
+};
+
+
+
+class MY_OPERATOR : public MY_BASE_OPERATOR
+{
+ public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+  // ----------- PAM callback methods -----------
+
+  void processEvent(const pam2XpfHeader* eventHeader, void* connectionData, void* assemblerData);
+  void processConnectionOpenedEvent(const pam2XpfHeader& eventHeader, const pam2XpfConnectionOpened& eventMessage);
+  void processConnectionUpdateEvent(const pam2XpfHeader& eventHeader, const pam2XpfConnectionUpdate& eventMessage);
+  void processConnectionClosedEvent(const pam2XpfHeader& eventHeader, const pam2XpfConnectionClosed& eventMessage);
+  void processTransportDataEvent(const pam2XpfHeader& eventHeader, const pam2XpfTransportData& eventMessage);
+  void processApplicationFoundEvent(const pam2XpfHeader& eventHeader, const pam2XpfApplicationFound& eventMessage);
+  void processApplicationURIEvent(const pam2XpfHeader& eventHeader, const pam2XpfApplicationURI& eventMessage);
+  void processHTTPResponseEvent(const pam2XpfHeader& eventHeader, const pam2XpfHttpResponse& eventMessage);
+  void processApplicationHeaderEvent(const pam2XpfHeader& eventHeader, const pam2XpfApplicationHeader& eventMessage);
+  void processFileStartEvent(const pam2XpfHeader& eventHeader, const pam2XpfFileStart& eventMessage);
+  void processFileDataEvent(const pam2XpfHeader& eventHeader, const pam2XpfFileData& eventMessage);
+  void processFileEndEvent(const pam2XpfHeader& eventHeader, const pam2XpfFileEnd& eventMessage);
+  void processTLSProtocolEvent(const pam2XpfHeader& eventHeader, const pam2XpfTlsRecord& eventPointer);
+  void processTCPParamsEvent(const pam2XpfHeader& eventHeader, const pam2XpfTcpParams& eventPointer);
+  void processTerminalProtocolEvent(const pam2XpfHeader& eventHeader, const pam2XpfTerminalProtocol& eventPointer);
+  void processDNSResponseEvent(const pam2XpfHeader& eventHeader, const pam2XpfDnsResponse& eventPointer);
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  uint64_t fileChunkSize;
+  uint32_t maximumFilesPerFlow;
+  const char* pamLibrary;
+  std::vector<std::string> pamTuning;
+
+  // ----------- input tuple ----------
+
+  Tuple const * inTuple;
+
+  // ----------- output tuples ----------
+
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+
+  // ----------- operator state variables ----------
+
+  Mutex processMutex;
+  uint64_t packetNumber;
+  TR_Frame packetContent;
+  PSOM_Frame pamResults;
+  double eventTime;
+  OutputEvent outputEvent;
+
+  // fields for result functions from PAM struct pam2XpfTransportData, pam2XpfTlsRecord, and pam2XpfFileData
+  uint8_t* THIS_DATA_POINTER;
+  uint32 THIS_DATA_LENGTH;
+
+  std::tr1::unordered_map<uint64, struct FlowState*> flowStates; // indexed by XPF event 'flowID'
+  std::tr1::unordered_map<uint64, struct FileState*> fileStates; // indexed by XPF event 'fileID'
+
+  struct FlowState* flowState; // current flow state structure or null, for result functions
+  struct FileState* fileState; // current file state structure or null, for result functions
+
+  uint64_t flowHighWaterMark;
+  uint64_t fileHighWaterMark;
+
+  // ----------- FileState structure allocation methods -----------
+
+  FileState* allocateFileState(const uint64 fileID);
+  void freeFileState(const uint64 fileID);
+
+  // ----------- output tuple submit methods -----------
+
+  void submitOutputTuple(const OutputEvent outputEvent, std::basic_string<uint8_t> buffer)
+  { submitOutputTuple(outputEvent, &buffer[0], buffer.size()); }
+
+  void submitOutputTuple(const OutputEvent outputEvent, const uint8_t* data = NULL, const uint32_t length = 0 );
+
+  // ----------- handles for PAM objects -----------
+
+  void* pamLibraryHandle;
+  pam2InstanceHdl pamInstanceHandle;
+  pam2ConfigHdl pamConfigHandle;
+  pam2ReportNotifications pamReportNotifications;
+  pam2AnalysisContextHdl pamAnalysisContextHandle;
+
+  // ----------- handles for PAM functions -----------
+
+  PFN_pam2GetFunction pam2GetFunction;
+  PFN_pam2GetVersion pam2GetVersion;
+  PFN_pam2CheckVersion pam2CheckVersion;
+
+  PFN_pam2Initialize pam2Initialize;
+  PFN_pam2Finalize pam2Finalize;
+
+  PFN_pam2CreateAnalysisContext pam2CreateAnalysisContext;
+  PFN_pam2DestroyAnalysisContext pam2DestroyAnalysisContext;
+
+  PFN_pam2CreateInstance pam2CreateInstance;
+  PFN_pam2DestroyInstance pam2DestroyInstance;
+
+  PFN_pam2ConfigRetrieve pam2ConfigRetrieve;
+  PFN_pam2ConfigSetParameter pam2ConfigSetParameter;
+  PFN_pam2ConfigApply pam2ConfigApply;
+  PFN_pam2ConfigDestroy pam2ConfigDestroy;
+
+  PFN_pam2XpfInitialize pam2XpfInitialize;
+  PFN_pam2Analyze pam2Analyze;
+  PFN_pam2XpfGetProtocolName pam2XpfGetProtocolName;
+  PFN_pam2XpfGetProtocolType pam2XpfGetProtocolType;
+  PFN_pam2Housekeeping pam2Housekeeping;
+  PFN_pam2XpfFinalize pam2XpfFinalize;
+
+  // ----------- assignment functions for output attributes ----------
+
+  inline __attribute__((always_inline))
+  SPL::rstring EVENT() { return outputEventNames.event2name(outputEvent); }
+
+  inline __attribute__((always_inline))
+  SPL::boolean EVENT_FLOW_START() { return outputEvent==EventFlowStart; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean EVENT_FLOW_TLS() { return outputEvent==EventFlowTLS; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean EVENT_FLOW_DATA() { return outputEvent==EventFlowData; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean EVENT_FLOW_END() { return outputEvent==EventFlowEnd; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean EVENT_REQUEST() { return outputEvent==EventRequest; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean EVENT_RESPONSE() { return outputEvent==EventResponse; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean EVENT_FILE_CHUNK() { return outputEvent==EventFileChunk; }
+
+  inline __attribute__((always_inline))
+  SPL::blist<SPL::uint8,6> FLOW_ETHER_SRC_ADDRESS() { return flowState ? flowState->ETHER_SRC_ADDRESS : SPL::blist<SPL::uint8,6>(); }
+
+  inline __attribute__((always_inline))
+  SPL::blist<SPL::uint8,6> FLOW_ETHER_DST_ADDRESS() { return flowState ? flowState->ETHER_DST_ADDRESS : SPL::blist<SPL::uint8,6>(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 FLOW_IPV4_SRC_ADDRESS() { return flowState ? flowState->IPV4_SRC_ADDRESS : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 FLOW_IPV4_DST_ADDRESS() { return flowState ? flowState->IPV4_DST_ADDRESS : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 FLOW_SRC_PORT() { return flowState ? flowState->SRC_PORT : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 FLOW_DST_PORT() { return flowState ? flowState->DST_PORT : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FLOW_ID() { return flowState ? flowState->FLOW_ID : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 FLOW_TRANSACTION_ID() { return flowState ? flowState->TRANSACTION_ID : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_PROTOCOL() { return flowState ? flowState->FLOW_PROTOCOL : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 FLOW_PROTOCOL_CONFIDENCE() { return flowState ? flowState->FLOW_PROTOCOL_CONFIDENCE : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 FLOW_PROTOCOL_DEPTH() { return flowState ? flowState->FLOW_PROTOCOL_DEPTH : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::float64 FLOW_START_TIME() { return flowState ? flowState->START_TIME : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::float64 FLOW_EVENT_TIME() { return eventTime; }
+
+  inline __attribute__((always_inline))
+  SPL::float64 FLOW_END_TIME() { return flowState ? flowState->END_TIME : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::float64 FLOW_ELAPSED_TIME() { return flowState && flowState->END_TIME && flowState->START_TIME ? flowState->END_TIME - flowState->START_TIME : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 FLOW_IP_PROTOCOL() { return flowState ? flowState->IP_PROTOCOL : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_DIRECTION() { return flowState ? flowState->FLOW_DIRECTION : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FLOW_DATA_COUNTER() { return flowState ? flowState->FLOW_DATA_COUNTER : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FLOW_SRC_PACKETS() { return flowState ? flowState->SRC_PACKETS : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FLOW_DST_PACKETS() { return flowState ? flowState->DST_PACKETS : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FLOW_SRC_BYTES() { return flowState ? flowState->SRC_BYTES : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FLOW_DST_BYTES() { return flowState ? flowState->DST_BYTES : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_DISCONNECT_REASON() { return flowState ? flowState->DISCONNECT_REASON : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FLOW_DATA_LENGTH() { return ( outputEvent==EventFlowData || outputEvent==EventFlowTLS ) ? THIS_DATA_LENGTH : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::blob FLOW_DATA_BINARY() { return ( outputEvent==EventFlowData || outputEvent==EventFlowTLS ) && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_DATA_STRING() { return ( outputEvent==EventFlowData  || outputEvent==EventFlowTLS ) && THIS_DATA_LENGTH ? SPL::rstring((char *)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_METHOD() { return flowState ? flowState->URI_METHOD : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_RAW() { return flowState ? flowState->URI_RAW : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_NORMALIZED() { return flowState ? flowState->URI_NORMALIZED : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_SCHEME() { return flowState ? flowState->URI_SCHEME : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_AUTHORITY() { return flowState ? flowState->URI_AUTHORITY : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_USERNAME() { return flowState ? flowState->URI_USERNAME : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_PATH() { return flowState ? flowState->URI_PATH : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_QUERY() { return flowState ? flowState->URI_QUERY : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FLOW_REQUEST_URI_FRAGMENT() { return flowState ? flowState->URI_FRAGMENT : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::rstring> FLOW_REQUEST_HEADERS() { return flowState ? flowState->REQUEST_HEADERS : SPL::list<SPL::rstring>(); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::rstring> FLOW_RESPONSE_HEADERS() { return flowState ? flowState->RESPONSE_HEADERS : SPL::list<SPL::rstring>(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 FLOW_RESPONSE_STATUS_CODE() { return flowState ? flowState->HTTP_STATUS_CODE : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FILE_ID() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_ID : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FILE_ID_PARENT() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_ID_PARENT : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FILE_FORMAT() { return outputEvent==EventFileChunk && flowState ? flowState->FLOW_PROTOCOL : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FILE_CONTENT_TYPE() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CONTENT_TYPE : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FILE_CONTENT_CHARSET() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CONTENT_CHARSET : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FILE_CONTENT_LENGTH() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CONTENT_LENGTH : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FILE_CHUNK_COUNTER() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_COUNTER : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean FILE_CHUNK_INITIAL() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_COUNTER==0 : false; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean FILE_CHUNK_FINAL() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_FINAL : false; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FILE_CHUNK_LENGTH() { return outputEvent==EventFileChunk ? THIS_DATA_LENGTH : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 FILE_CHUNK_LENGTH_SUM() { return outputEvent==EventFileChunk && fileState ? fileState->FILE_CHUNK_LENGTH_SUM : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::blob FILE_CHUNK_BINARY() { return outputEvent==EventFileChunk && THIS_DATA_LENGTH ? SPL::blob(THIS_DATA_POINTER, THIS_DATA_LENGTH) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring FILE_CHUNK_STRING() { return outputEvent==EventFileChunk && THIS_DATA_LENGTH ? SPL::rstring((char*)THIS_DATA_POINTER, THIS_DATA_LENGTH) : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 OPEN_FLOWS() { return flowStates.size(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 OPEN_FILES() { return fileStates.size(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 OPEN_FLOWS_HIGH_WATER_MARK() { return flowHighWaterMark; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 OPEN_FILES_HIGH_WATER_MARK() { return fileHighWaterMark; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring TLS_RECORD_TYPE() { return flowState ? flowState->TLS_RECORD_TYPE : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring TLS_RECORD_DIRECTION() { return flowState ? flowState->TLS_RECORD_DIRECTION : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 TLS_RECORD_LENGTH() { return flowState ? flowState->TLS_RECORD_LENGTH : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 TLS_RECORD_OFFSET() { return flowState ? flowState->TLS_RECORD_OFFSET : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean TLS_RECORD_MORE() { return flowState ? flowState->TLS_RECORD_MORE : false; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring TLS_VERSION() { return flowState ? flowState->TLS_VERSION : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring TUNNEL_TYPE() { return flowState ? flowState->TUNNEL_TYPE : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 TUNNEL_IPV4_SRC_ADDRESS() { return flowState ? flowState->TUNNEL_IPV4_SRC_ADDRESS : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 TUNNEL_IPV4_DST_ADDRESS() { return flowState ? flowState->TUNNEL_IPV4_SRC_ADDRESS : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::blist<SPL::uint8,16> TUNNEL_IPV6_SRC_ADDRESS() { return flowState ? flowState->TUNNEL_IPV6_SRC_ADDRESS : SPL::blist<SPL::uint8,16>(); }
+
+  inline __attribute__((always_inline))
+  SPL::blist<SPL::uint8,16> TUNNEL_IPV6_DST_ADDRESS() { return flowState ? flowState->TUNNEL_IPV6_DST_ADDRESS : SPL::blist<SPL::uint8,16>(); }
+
+};
+
+<%SPL::CodeGen::headerEpilogue($model);%>

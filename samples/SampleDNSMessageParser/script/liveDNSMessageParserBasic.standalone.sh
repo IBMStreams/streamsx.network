@@ -24,9 +24,9 @@ dataDirectory=$projectDirectory/data
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
-leasePort=23456
+lookupPort=23456
 
-leaseWindowOptions=(
+lookupWindowOptions=(
 -title "$self: DNS Lookups"
 -geometry 130x20
 +sb
@@ -61,7 +61,7 @@ networkInterface=ens6f3
 "inputFilter=udp port 53"
 metricsInterval=1.0
 timeoutInterval=60.0
-leasePort=$leasePort
+lookupPort=$lookupPort
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -99,9 +99,10 @@ step "setting capabilities for standalone application '$namespace.$composite' ..
 standalone=$unbundleDirectory/$composite.standalone/bin/standalone
 [ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
 sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
 
 step "opening window for TCP stream from standalone application '$namespace.$composite' ..."
-( xterm "${leaseWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $leasePort && break ; sleep 1 ; done " ) &
+( xterm "${lookupWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $lookupPort && break ; sleep 1 ; done " ) &
 
 step "executing standalone application '$namespace.$composite' ..."
 $standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"

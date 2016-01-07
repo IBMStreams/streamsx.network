@@ -186,8 +186,6 @@ and in output attribute assignment expressions are described here:
 
 * [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].  
 
-# Operator Diagram
-
       </description>
 
       <metrics>
@@ -203,7 +201,7 @@ filter.
           <kind>Counter</kind>
         </metric>
         <metric>
-          <name>nOctetsProcessedCurrent</name>
+          <name>nBytesProcessedCurrent</name>
           <description>
 
 This metric counts number of bytes of packet data processed by the
