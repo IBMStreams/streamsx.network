@@ -48,6 +48,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
   // ----------- this structure contains geographical locations ----------
 
   struct CityLocation {
+    std::string locationID;       // column 0
     std::string continentCode;    // column 2
     std::string continentName;    // column 3
     std::string countryCode;      // column 4
@@ -128,6 +129,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
     SPL::boolean locationFound(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return !!subnet; }
 
   inline __attribute__((always_inline))
+    SPL::rstring locationID(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->locationID : ""; }
+
+  inline __attribute__((always_inline))
     SPL::rstring locationSubnet(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->cidrAddress : ""; }
 
   inline __attribute__((always_inline))
@@ -181,6 +185,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   inline __attribute__((always_inline))
     SPL::boolean locationFound(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return !!subnet; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationID(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->locationID : ""; }
 
   inline __attribute__((always_inline))
     SPL::rstring locationSubnet(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->cidrAddress : ""; }
