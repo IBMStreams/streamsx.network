@@ -25,6 +25,15 @@
 
       <function:function>
         <function:description>
+          This result function returns the location identifier 
+          for the specified IP version 4 address,
+          if one was found, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationID(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
           This result function returns the IP version 4 subnet address 
           for the specified IP version 4 address,
           if one was found, or zero if not.
@@ -183,6 +192,15 @@
           if one was found, or an empty string if not.
         </function:description>
         <function:prototype>public rstring locationSubnet(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the location identifier
+          for the specified IP version 6 address,
+          if one was found, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationID(list&lt;uint8>[16] ipv6Address)</function:prototype>
       </function:function>
 
       <function:function>

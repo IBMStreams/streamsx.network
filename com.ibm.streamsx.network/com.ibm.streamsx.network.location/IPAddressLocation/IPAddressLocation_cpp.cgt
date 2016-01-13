@@ -208,12 +208,10 @@ void MY_OPERATOR::loadCityLocations(std::string filename) {
     streams_boost::tokenizer<streams_boost::escaped_list_separator<char> >::iterator k = tokens.begin();
     if (k==tokens.end()) continue;
 
-    // get the first token as the location identifer, and discard the second token
-    std::string locationID(*k++);
-    std::string locale(*k++);
-
-    // put the remaining tokens in a location structure, unless this line has no country
+    // put the tokens in a location structure
 	CityLocation* location = new CityLocation();
+    location->locationID = *k++;
+    std::string locale(*k++);
     location->continentCode = *k++;
     location->continentName = *k++;
     location->countryCode = *k++;
@@ -225,11 +223,11 @@ void MY_OPERATOR::loadCityLocations(std::string filename) {
     location->cityName = *k++;
     location->metroCode = *k++;
     location->timezone = *k++;
-    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for location " << locationID << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); }
+    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for location " << location->locationID << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); }
    
     // insert this location structure into the hash table
-    SPLLOG(L_TRACE, "loading location " << locationID << ": continent=" << location->continentName << ", country=" << location->countryName << ", state=" << location->subdivision1Name << ", city=" << location->cityName , "IPAddressLocation");
-    cityLocations.insert( std::make_pair<std::string,CityLocation*>(locationID, location) );
+    SPLLOG(L_TRACE, "loading location " << location->locationID << ": continent=" << location->continentName << ", country=" << location->countryName << ", state=" << location->subdivision1Name << ", city=" << location->cityName , "IPAddressLocation");
+    cityLocations.insert( std::make_pair<std::string,CityLocation*>(location->locationID, location) );
     locationCount++;
   }				 
 
