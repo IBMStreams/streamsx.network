@@ -122,6 +122,10 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   uint64_t tupleCounter;
 
+  int ipv4CacheCount;
+  uint32 ipv4CacheAddress[2];
+  IPSubnet* ipv4CacheSubnet[2];
+
   // ----------- assignment functions for output attributes ----------
 
 
