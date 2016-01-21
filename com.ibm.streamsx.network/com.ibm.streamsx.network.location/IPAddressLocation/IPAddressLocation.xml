@@ -2,7 +2,6 @@
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-
       <description>
 
 IPAddressLocation is an operator for the IBM InfoSphere Streams product that
@@ -96,15 +95,32 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
 * [http://dev.maxmind.com/geoip/geoip2/geoip2-csv-databases/]
 
       </description>
-
+      <libraryDependencies>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_filesystem</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_system</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_regex</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
       <providesSingleThreadedContext>Always</providesSingleThreadedContext>
       <allowCustomLogic>true</allowCustomLogic>
     </context>
-
     <parameters>
       <description></description>
       <allowAny>false</allowAny>
-
       <parameter>
         <name>geographyDirectory</name>
         <description>
@@ -117,7 +133,6 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>
-
       <parameter>
         <name>outputFilters</name>
         <description>
@@ -137,11 +152,8 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
         <type>boolean</type>
         <cardinality>-1</cardinality>
       </parameter>
-
     </parameters>
-
     <inputPorts>
-
       <inputPortSet>
         <description>
           The IPAddressLocation operator requires one input port. One or more input attributes
@@ -155,11 +167,8 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
         <cardinality>1</cardinality>
         <optional>false</optional>
       </inputPortSet>
-
     </inputPorts>
-
     <outputPorts>
-
       <outputPortOpenSet>
         <description>
           The IPAddressLocation operator requires one or more output ports.
@@ -183,8 +192,6 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
       </outputPortOpenSet>
-
     </outputPorts>
-
   </cppOperatorModel>
 </operatorModel>

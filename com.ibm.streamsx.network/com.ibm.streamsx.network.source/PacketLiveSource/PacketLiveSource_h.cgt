@@ -19,7 +19,6 @@
 #include <pcap-bpf.h>
 #include <arpa/inet.h>
 
-#include <streams_boost/filesystem.hpp>
 #include <streams_boost/lexical_cast.hpp>
 
 #include <SPL/Runtime/Common/Metric.h>

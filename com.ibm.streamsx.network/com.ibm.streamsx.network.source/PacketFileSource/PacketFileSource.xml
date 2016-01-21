@@ -187,7 +187,6 @@ and in output attribute assignment expressions are described here:
 * [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].  
 
       </description>
-
       <metrics>
         <metric>
           <name>nPacketsProcessedCurrent</name>
@@ -212,7 +211,6 @@ that pass the filter.
           <kind>Counter</kind>
         </metric>
       </metrics>
-
       <libraryDependencies>
         <library>
           <cmn:description> </cmn:description>
@@ -224,6 +222,18 @@ that pass the filter.
           <cmn:description> </cmn:description>
           <cmn:managedLibrary>
             <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_filesystem</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_system</cmn:lib>
           </cmn:managedLibrary>
         </library>
       </libraryDependencies>
