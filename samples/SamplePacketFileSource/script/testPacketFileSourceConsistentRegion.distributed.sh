@@ -15,7 +15,7 @@ here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 toolkitDirectory=$( cd $here/../../.. ; pwd )
 
-buildDirectory=$projectDirectory/output/build/$composite
+buildDirectory=$projectDirectory/output/build/$composite.distributed
 
 dataDirectory=$projectDirectory/data
 
@@ -35,8 +35,8 @@ compilerOptionsList=(
 --verbose-mode
 --rebuild-toolkits
 --spl-path=$( IFS=: ; echo "${toolkitList[*]}" )
---part-mode=FALL
---allow-convenience-fusion-options
+###???--part-mode=FALL
+###???--allow-convenience-fusion-options
 --optimized-code-generation
 --cxx-flags=-g3
 --static-link
@@ -89,8 +89,8 @@ step "waiting while application runs ..."
 sleep 5
 
 step "cancelling distributed application '$namespace.$composite' ..."
-jobs=$( streamtool lspes -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
-streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
+jobs=$( streamtool lsjobs -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
+streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]}
 
 exit 0
 

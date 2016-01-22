@@ -12,7 +12,7 @@
 #include <netinet/ether.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include <streams_boost/lexical_cast.hpp>
+
 #include "SPL/Runtime/Function/SPLFunctions.h"
 
 namespace com { namespace ibm { namespace streamsx { namespace network { namespace mac {

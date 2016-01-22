@@ -113,7 +113,7 @@ step "getting logs for instance $instance ..."
 streamtool getlog -i $instance -d $domain --includeapps --file $logDirectory/$composite.distributed.logs.tar.gz || die "sorry, could not get logs, $!"
 
 step "cancelling distributed application '$namespace.$composite' ..."
-jobs=$( streamtool lspes -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
+jobs=$( streamtool lsjobs -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
 streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
 
 exit 0

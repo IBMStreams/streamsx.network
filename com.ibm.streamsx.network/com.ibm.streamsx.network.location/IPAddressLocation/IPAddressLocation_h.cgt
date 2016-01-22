@@ -13,6 +13,7 @@
 #include <fstream> 
 #include <string>
 #include <tr1/unordered_map>
+
 #include <streams_boost/filesystem.hpp>
 #include <streams_boost/tokenizer.hpp>
 #include <streams_boost/regex.hpp> 
@@ -121,6 +122,10 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
   // ----------- operator state variables ----------
 
   uint64_t tupleCounter;
+
+  int ipv4CacheCount;
+  uint32 ipv4CacheAddress[2];
+  IPSubnet* ipv4CacheSubnet[2];
 
   // ----------- assignment functions for output attributes ----------
 
