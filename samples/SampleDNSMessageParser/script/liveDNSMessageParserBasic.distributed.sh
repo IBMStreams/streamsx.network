@@ -44,8 +44,8 @@ compilerOptionsList=(
 --verbose-mode
 --rebuild-toolkits
 --spl-path=$( IFS=: ; echo "${toolkitList[*]}" )
-###???--part-mode=FALL
-###???--allow-convenience-fusion-options
+--part-mode=FALL
+--allow-convenience-fusion-options
 --optimized-code-generation
 --cxx-flags=-g3
 --static-link
