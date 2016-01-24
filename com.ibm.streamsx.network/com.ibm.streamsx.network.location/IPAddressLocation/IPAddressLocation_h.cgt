@@ -68,8 +68,10 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   struct IPSubnet {
     uint32_t ipv4Address;
+    uint32_t ipv4AddressUpper;
     uint32_t ipv4Mask;
     SPL::blist<SPL::uint8,16> ipv6Address;
+    SPL::blist<SPL::uint8,16> ipv6AddressUpper;
     SPL::blist<SPL::uint8,16> ipv6Mask;
     rstring cidrAddress;
     rstring postalCode;
@@ -121,11 +123,17 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   // ----------- operator state variables ----------
 
+  Mutex processMutex;
+
   uint64_t tupleCounter;
 
-  int ipv4CacheCount;
-  uint32 ipv4CacheAddress[2];
-  IPSubnet* ipv4CacheSubnet[2];
+  static const int ipv4SubnetCacheSize = 500;
+
+  typedef struct {
+    uint32_t address;
+    IPSubnet* subnet;
+  } IPv4SubnetCacheEntry;
+  IPv4SubnetCacheEntry ipv4SubnetCache[ipv4SubnetCacheSize];
 
   // ----------- assignment functions for output attributes ----------
 
