@@ -127,7 +127,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   uint64_t tupleCounter;
 
-  static const int ipv4SubnetCacheSize = 500;
+  static const int ipv4SubnetCacheSize = 499;
 
   typedef struct {
     uint32_t address;
