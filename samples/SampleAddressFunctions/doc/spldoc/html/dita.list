@@ -1,12 +1,12 @@
-#Thu Oct 29 11:55:30 EDT 2015
+#Wed Feb 10 09:56:38 EST 2016
 copytosourcelist=
-hreftargetslist=tk$SampleAddressFunctions/ns$sample.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
+hreftargetslist=tk$SampleAddressFunctions/ns$sample.xml,tk$SampleAddressFunctions/ix$Namespace.xml,toolkits/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
 fullditatopicfile=fullditatopic.list
 fullditamapandtopicfile=fullditamapandtopic.list
-fullditatopiclist=tk$SampleAddressFunctions/ns$sample.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
-fullditamapandtopiclist=toolkits.ditamap,tk$SampleAddressFunctions/ns$sample.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
+fullditatopiclist=tk$SampleAddressFunctions/ns$sample.xml,tk$SampleAddressFunctions/ix$Namespace.xml,toolkits/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
+fullditamapandtopiclist=toolkits.ditamap,tk$SampleAddressFunctions/ns$sample.xml,tk$SampleAddressFunctions/ix$Namespace.xml,toolkits/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
 hrefditatopicfile=hrefditatopic.list
-hrefditatopiclist=tk$SampleAddressFunctions/ns$sample.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
+hrefditatopiclist=tk$SampleAddressFunctions/ns$sample.xml,tk$SampleAddressFunctions/ix$Namespace.xml,toolkits/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
 user.input.file=toolkits.ditamap
 subtargetsfile=subtargets.list
 fullditamapfile=fullditamap.list
@@ -27,7 +27,7 @@ imagelist=
 htmlfile=html.list
 htmllist=
 canditopicsfile=canditopics.list
-canditopicslist=tk$SampleAddressFunctions/ns$sample.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
+canditopicslist=tk$SampleAddressFunctions/ns$sample.xml,tk$SampleAddressFunctions/ix$Namespace.xml,toolkits/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
 keyreffile=keyref.list
 subjectschemefile=subjectscheme.list
 keyreflist=

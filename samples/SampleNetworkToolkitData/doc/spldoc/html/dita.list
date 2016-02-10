@@ -1,12 +1,12 @@
-#Thu Oct 29 11:56:11 EDT 2015
+#Wed Feb 10 09:57:33 EST 2016
 copytosourcelist=
-hreftargetslist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/toolkits.xml
+hreftargetslist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/ix$Namespace.xml,tk$SampleNetworkToolkitData/ix$Namespace.xml,toolkits/toolkits.xml
 fullditatopicfile=fullditatopic.list
 fullditamapandtopicfile=fullditamapandtopic.list
-fullditatopiclist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/toolkits.xml
-fullditamapandtopiclist=tk$SampleNetworkToolkitData/ns$dummy.xml,toolkits.ditamap,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/toolkits.xml
+fullditatopiclist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/ix$Namespace.xml,tk$SampleNetworkToolkitData/ix$Namespace.xml,toolkits/toolkits.xml
+fullditamapandtopiclist=tk$SampleNetworkToolkitData/ns$dummy.xml,toolkits.ditamap,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/ix$Namespace.xml,tk$SampleNetworkToolkitData/ix$Namespace.xml,toolkits/toolkits.xml
 hrefditatopicfile=hrefditatopic.list
-hrefditatopiclist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/toolkits.xml
+hrefditatopiclist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/ix$Namespace.xml,tk$SampleNetworkToolkitData/ix$Namespace.xml,toolkits/toolkits.xml
 user.input.file=toolkits.ditamap
 subtargetsfile=subtargets.list
 fullditamapfile=fullditamap.list
@@ -27,7 +27,7 @@ imagelist=
 htmlfile=html.list
 htmllist=
 canditopicsfile=canditopics.list
-canditopicslist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/toolkits.xml
+canditopicslist=tk$SampleNetworkToolkitData/ns$dummy.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/ix$Namespace.xml,tk$SampleNetworkToolkitData/ix$Namespace.xml,toolkits/toolkits.xml
 keyreffile=keyref.list
 subjectschemefile=subjectscheme.list
 keyreflist=

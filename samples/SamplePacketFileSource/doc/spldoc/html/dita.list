@@ -1,12 +1,12 @@
-#Thu Oct 29 11:56:21 EDT 2015
+#Wed Feb 10 09:57:52 EST 2016
 copytosourcelist=
-hreftargetslist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
+hreftargetslist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/ix$Namespace.xml,tk$SamplePacketFileSource/ix$Namespace.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
 fullditatopicfile=fullditatopic.list
 fullditamapandtopicfile=fullditamapandtopic.list
-fullditatopiclist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
-fullditamapandtopiclist=toolkits.ditamap,tk$SamplePacketFileSource/ns$sample.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
+fullditatopiclist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/ix$Namespace.xml,tk$SamplePacketFileSource/ix$Namespace.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
+fullditamapandtopiclist=toolkits.ditamap,tk$SamplePacketFileSource/ns$sample.xml,toolkits/ix$Namespace.xml,tk$SamplePacketFileSource/ix$Namespace.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
 hrefditatopicfile=hrefditatopic.list
-hrefditatopiclist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
+hrefditatopiclist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/ix$Namespace.xml,tk$SamplePacketFileSource/ix$Namespace.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
 user.input.file=toolkits.ditamap
 subtargetsfile=subtargets.list
 fullditamapfile=fullditamap.list
@@ -27,7 +27,7 @@ imagelist=
 htmlfile=html.list
 htmllist=
 canditopicsfile=canditopics.list
-canditopicslist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
+canditopicslist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/ix$Namespace.xml,tk$SamplePacketFileSource/ix$Namespace.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
 keyreffile=keyref.list
 subjectschemefile=subjectscheme.list
 keyreflist=
