@@ -30,6 +30,8 @@ lookupWindowOptions=(
 +sb
 )
 
+networkInterface=$( ifconfig ens6f3 1>/dev/null 2>&1 && echo ens6f3 || echo eth0 ) 
+
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 domain=CapabilitiesDomain
@@ -59,7 +61,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
--P networkInterface=ens6f3
+-P networkInterface=$networkInterface
 -P "inputFilter=udp port 53"
 -P metricsInterval=1.0
 -P timeoutInterval=60.0
@@ -115,5 +117,9 @@ streamtool getlog -i $instance -d $domain --includeapps --file $logDirectory/$co
 step "cancelling distributed application '$namespace.$composite' ..."
 jobs=$( streamtool lsjobs -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
 streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
+
+step "closing window for TCP stream, if necessary ..."
+pids=$( ps -ef | grep "ncat .* $lookupPort" | grep -v grep | awk '{print $2}' | tr '\n' ' ' )
+[ -n "$pids" ] && echo "stopping ncat process IDs: $pids ..." && kill -SIGTERM $pids 
 
 exit 0

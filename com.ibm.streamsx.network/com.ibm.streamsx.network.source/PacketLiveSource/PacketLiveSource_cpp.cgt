@@ -64,7 +64,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> constructor ...", "PacketLiveSource");
 
   // set operator parameters
   networkInterface = <%=$networkInterface%>;
@@ -79,9 +79,11 @@ MY_OPERATOR::MY_OPERATOR()
   metricsInterval = <%=$metricsInterval%>;
 
   // initialize operator state variables
+  pcapThreadID = metricsThreadID = 0;
   now = then = 0;
   packetCounter = packetCounterNow = packetCounterThen = 0;
   byteCounter = byteCounterNow = byteCounterThen = 0;
+  pcapDescriptor = NULL;
   pcapStatisticsNow = pcapStatisticsThen = (const struct pcap_stat){0};
   metricsUpdate = false;
 
@@ -195,7 +197,7 @@ MY_OPERATOR::MY_OPERATOR()
     for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "PacketLiveSource"); }
   }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> constructor ...", "PacketLiveSource");
 }
 
 
@@ -203,11 +205,11 @@ MY_OPERATOR::MY_OPERATOR()
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "PacketLiveSource");
 
   if (pcapDescriptor) { pcap_close(pcapDescriptor); }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "PacketLiveSource");
 }
 
 
@@ -215,12 +217,12 @@ MY_OPERATOR::~MY_OPERATOR()
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketLiveSource");
 
   const int threadCount = 2;
   createThreads(threadCount);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketLiveSource");
 }
 
 
@@ -228,26 +230,28 @@ void MY_OPERATOR::allPortsReady()
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketLiveSource");
 
   // tell libpcap to stop reading packets
-  pcap_breakloop(pcapDescriptor);
+  if (pcapDescriptor) pcap_breakloop(pcapDescriptor);
+  if (pcapThreadID) pthread_kill(pcapThreadID, SIGINT);
+  if (metricsThreadID) pthread_kill(metricsThreadID, SIGINT);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketLiveSource");
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketLiveSource");
 
 }
 
 
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
 
   switch (idx) {
   case 0: pcapThread(); break;
   case 1: if (metricsInterval>0) metricsThread(); break;
   default: break; }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "PacketLiveSource");
 }
 
 
@@ -317,7 +321,10 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 
 void MY_OPERATOR::pcapThread()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> pcapThread() for " << networkInterface, "PacketLiveSource");
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> pcapThread() for " << networkInterface, "PacketLiveSource");
+
+  // remember our thread identifer
+  pcapThreadID = pthread_self();
 
   <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
@@ -343,7 +350,7 @@ void MY_OPERATOR::pcapThread()
     const int rc = pcap_loop(pcapDescriptor, -1, &pcapCallback, (u_char*)this);
     SPLLOG(L_TRACE, "pcap_loop() returned " << rc, "PacketLiveSource"); }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> pcapThread() for " << networkInterface, "PacketLiveSource");
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> pcapThread() for " << networkInterface, "PacketLiveSource");
 }
 
 
@@ -353,7 +360,10 @@ void MY_OPERATOR::pcapThread()
 
   void MY_OPERATOR::metricsThread()
   {
-    SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metricsThread() for " << networkInterface, "PacketLiveSource");
+    SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread() for " << networkInterface, "PacketLiveSource");
+    
+    // remember our thread identifer
+    metricsThreadID = pthread_self();
 
     // expose the operator's statistics in these metrics
     OperatorMetrics& opm = getContext().getMetrics();
@@ -398,7 +408,7 @@ void MY_OPERATOR::pcapThread()
       metricsUpdate = true;
     }
 
-    SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread() for " << networkInterface, "PacketLiveSource");
+    SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread() for " << networkInterface, "PacketLiveSource");
   }
 
 

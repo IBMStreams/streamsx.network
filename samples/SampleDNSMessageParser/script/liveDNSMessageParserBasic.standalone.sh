@@ -32,6 +32,8 @@ lookupWindowOptions=(
 +sb
 )
 
+networkInterface=$( ifconfig ens6f3 1>/dev/null 2>&1 && echo ens6f3 || echo eth0 ) 
+
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
@@ -57,7 +59,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=ens6f3
+networkInterface=$networkInterface
 "inputFilter=udp port 53"
 metricsInterval=1.0
 timeoutInterval=60.0
@@ -105,8 +107,13 @@ step "opening window for TCP stream from standalone application '$namespace.$com
 ( xterm "${lookupWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $lookupPort && break ; sleep 1 ; done " ) &
 
 step "executing standalone application '$namespace.$composite' ..."
-$standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
+$standalone -t $traceLevel "${submitParameterList[@]}"
+rc=$?
 
-exit 0
+step "closing window for TCP stream, if necessary ..."
+pids=$( ps -ef | grep "ncat .* $lookupPort" | grep -v grep | awk '{print $2}' | tr '\n' ' ' )
+[ -n "$pids" ] && echo "stopping ncat process IDs: $pids ..." && kill -SIGTERM $pids 
+
+exit $rc
 
 
