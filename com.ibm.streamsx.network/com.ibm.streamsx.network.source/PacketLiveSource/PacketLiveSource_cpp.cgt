@@ -234,8 +234,8 @@ void MY_OPERATOR::prepareToShutdown()
 
   // tell libpcap to stop reading packets
   if (pcapDescriptor) pcap_breakloop(pcapDescriptor);
-  if (pcapThreadID) pthread_kill(pcapThreadID, SIGINT);
-  if (metricsThreadID) pthread_kill(metricsThreadID, SIGINT);
+  if (pcapThreadID) pthread_kill(pcapThreadID, SIGCONT);
+  if (metricsThreadID) pthread_kill(metricsThreadID, SIGCONT);
 
   SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketLiveSource");
 
