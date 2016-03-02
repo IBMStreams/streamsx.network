@@ -3399,7 +3399,7 @@
           bit was not set in any of the observed packets
           of this Flow.
         </function:description>
-	    <function:prototype>public uint8 IPFIX_tcpControlBits()</function:prototype>
+	    <function:prototype>public uint16 IPFIX_tcpControlBits()</function:prototype>
       </function:function>
 
       <function:function>

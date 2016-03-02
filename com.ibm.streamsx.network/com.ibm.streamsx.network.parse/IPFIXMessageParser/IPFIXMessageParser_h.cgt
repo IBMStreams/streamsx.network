@@ -94,7 +94,7 @@ private:
   SPL::uint8 IPFIX_ipClassOfService() { return parser.ipfixStandardFieldAsInteger(5); }
 
   inline __attribute__((always_inline))
-  SPL::uint8 IPFIX_tcpControlBits() { return parser.ipfixStandardFieldAsInteger(6); }
+  SPL::uint16 IPFIX_tcpControlBits() { return parser.ipfixStandardFieldAsInteger(6); }
 
   inline __attribute__((always_inline))
   SPL::uint16 IPFIX_sourceTransportPort() { return parser.ipfixStandardFieldAsInteger(7); }
