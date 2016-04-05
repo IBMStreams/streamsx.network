@@ -1,0 +1,76 @@
+/*
+** Copyright (C) 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.location::*;
+
+composite TestIPAddressLocationBasicIPv6 {
+
+    param
+    expression<rstring> $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_locations_ipv6_only.pcap" );
+
+    type
+
+    PacketType =
+        uint64 packetNumber,                // sequence number of packet, as emitted by operator
+        float64 captureTime,                // time that packet was captured, in seconds since Unix epoch
+        list<uint8>[16] ipSourceAddress,      // IPv6 source address, or empty if not IPv6 packet
+        uint16 ipSourcePort,                // IP source port, or zero if not UDP or TCP packet
+        list<uint8>[16] ipDestinationAddress, // IPv6 destination address, or empty if not IPv6 packet
+        uint16 ipDestinationPort,           // IP destination port, or zero if not UDP or TCP packet
+        uint32 packetLength;                // original length of packet (not necessarily all captured)
+
+    LocatedPacketType =
+        uint64 packetNumber,               // sequence number of packet, as emitted by operator
+        float64 captureTime,               // time that packet was captured, in seconds since Unix epoch
+        uint32 packetLength, 
+        rstring ipSourceAddress,  
+        rstring ipSourceSubnet,  
+        rstring ipSourceLabel,
+        rstring ipSourceCoordinates,
+        rstring ipDestinationAddress,  
+        rstring ipDestinationSubnet,  
+        rstring ipDestinationLabel,
+        rstring ipDestinationCoordinates;
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            outputFilters: IP_VERSION()==6ub;
+        output Out:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipSourceAddress = IPV6_SRC_ADDRESS(),
+            ipSourcePort = IP_SRC_PORT(),
+            ipDestinationAddress = IPV6_DST_ADDRESS(),
+            ipDestinationPort = IP_DST_PORT(),
+            packetLength = PACKET_LENGTH();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPAddressLocationBasicIPv6.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+    stream<LocatedPacketType> LocatedPacketStream as Out = IPAddressLocation(PacketStream) {
+      param
+        geographyDirectory: $geographyDirectory;
+        outputFilters: locationCityName(ipSourceAddress)!="" && locationCityName(ipDestinationAddress)!="";
+      output Out:
+        ipSourceAddress = convertIPV6AddressNumericToString(ipSourceAddress),
+        ipSourceSubnet = locationSubnet(ipSourceAddress),
+        ipSourceLabel = locationCityName(ipSourceAddress) + ", " + locationSubdivision1Name(ipSourceAddress) + ", " + locationCountryName(ipSourceAddress),
+        ipSourceCoordinates = (rstring)locationLatitude(ipSourceAddress) + ", " + (rstring)locationLongitude(ipSourceAddress),
+        ipDestinationAddress = convertIPV6AddressNumericToString(ipDestinationAddress),
+        ipDestinationSubnet = locationSubnet(ipDestinationAddress),
+        ipDestinationLabel = locationCityName(ipDestinationAddress) + ", " + locationSubdivision1Name(ipDestinationAddress) + ", " + locationCountryName(ipDestinationAddress),
+        ipDestinationCoordinates = (rstring)locationLatitude(ipDestinationAddress) + ", " + (rstring)locationLongitude(ipDestinationAddress);
+    }
+    () as LocatedPacketSink = FileSink(LocatedPacketStream) { param file: "debug.TestIPAddressLocationBasicIPv6.LocatedPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+}

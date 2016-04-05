@@ -1,0 +1,121 @@
+/*
+** Copyright (C) 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+use com.ibm.streamsx.network.datetimeformat::*;
+
+composite TestIPFIXMessageParserJuniper {
+
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_ipfix_juniper.pcap" );
+
+    type
+
+    PacketType =
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint32 ipfixSource,           // IP source address of IPFIX message
+        blob ipfixMessage;            // the IPFIX message from a packet, excluding all network headers
+
+    IPFIXMessageType =
+        rstring captureTime,                   // time that packet was captured, in seconds since Unix epoch
+        uint64  messageNumber,                 // sequence number of message
+        rstring ipProtocol,                    // standard field 4, IP protocol byte
+        rstring ipSourceAddress,               // standard field 8 or 27, IP source address
+        uint16  ipSourcePort,                  // standard field 7, IP source port
+        rstring ipDestinationAddress,          // standard field 12 or 28, IP destination address
+        uint16  ipDestinationPort,             // standard field 11, IP destination port
+        rstring juniperFlowStartTime,          // Juniper Networks enterprise field 101
+        rstring juniperFlowEndTime,            // Juniper Networks enterprise field 102
+        uint64 juniperUplinkBytes,             // Juniper Networks enterprise field 103
+        uint64 juniperDownlinkBytes,           // Juniper Networks enterprise field 104
+        uint64 juniperUplinkPackets,           // Juniper Networks enterprise field 105
+        uint64 juniperDownlinkPackets,         // Juniper Networks enterprise field 106
+        uint64 juniperFlowID,                  // Juniper Networks enterprise field 107
+        rstring juniperFirstClientPayloadTime, // Juniper Networks enterprise field 108
+        rstring juniperLastClientPayloadTime,  // Juniper Networks enterprise field 109
+        rstring juniperFirstServerPayloadTime, // Juniper Networks enterprise field 110
+        rstring juniperLastServerPayloadTime,  // Juniper Networks enterprise field 111
+        uint8   juniperRecordReason,           // Juniper Networks enterprise field 112
+        rstring juniperApplicationProtocol,    // Juniper Networks enterprise field 151
+        rstring juniperHost,                   // Juniper Networks enterprise field 157
+        rstring juniperApplicationName,        // Juniper Networks enterprise field 170
+        rstring juniperSCGBNGIPv4Address,      // Juniper Networks enterprise field 502
+        rstring juniperDPIEngineVersion,       // Juniper Networks enterprise field 503
+        rstring juniperUserName,               // Juniper Networks enterprise field 513
+        rstring juniperAccountingSessionID,    // Juniper Networks enterprise field 514
+        uint8   juniperSubscriberType,         // Juniper Networks enterprise field 515
+        rstring juniperSubscriberIPv4Address,  // Juniper Networks enterprise field 516
+        rstring juniperSubscriberVRF,          // Juniper Networks enterprise field 517
+        rstring juniperNASPortID,              // Juniper Networks enterprise field 518
+        rstring juniperNASIPv4Address,         // Juniper Networks enterprise field 519
+        rstring juniperServiceSetName,         // Juniper Networks enterprise field 520
+        rstring juniperRoutingInstance,        // Juniper Networks enterprise field 521
+        rstring juniperClass;                  // Juniper Networks enterprise field 522
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 4739";
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipfixSource = IPV4_SRC_ADDRESS(),
+            ipfixMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPFIXMessageParserJuniper.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+    stream<IPFIXMessageType> IPFIXMessageStream as Out = IPFIXMessageParser(PacketStream) {
+      logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
+      param
+          messageAttribute: ipfixMessage;
+          sourceAttribute: ipfixSource;
+          outputFilters: !parseError();
+      output Out:
+          captureTime = formatEpochDateTime(captureTime),
+          messageNumber = messagesProcessed(),
+          ipProtocol = IPFIX_protocolIdentifier() in ipProtocols ? ipProtocols[IPFIX_protocolIdentifier()] : (rstring)IPFIX_protocolIdentifier(),
+          ipSourceAddress = IPFIX_sourceIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_sourceIPv4Address()) : size(IPFIX_sourceIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_sourceIPv6Address())  : "",
+          ipSourcePort = IPFIX_sourceTransportPort(),
+          ipDestinationAddress = IPFIX_destinationIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_destinationIPv4Address()) : size(IPFIX_destinationIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_destinationIPv6Address())  : "",
+          ipDestinationPort = IPFIX_destinationTransportPort(),
+          juniperFlowStartTime= formatEpochDateTime( (float64)IPFIX_enterpriseFieldAsInteger(101) / 1000.0 ),
+          juniperFlowEndTime = formatEpochDateTime( (float64)IPFIX_enterpriseFieldAsInteger(102) / 1000.0 ),
+          juniperUplinkBytes = IPFIX_enterpriseFieldAsInteger(103),
+          juniperDownlinkBytes = IPFIX_enterpriseFieldAsInteger(104),
+          juniperUplinkPackets = IPFIX_enterpriseFieldAsInteger(105),
+          juniperDownlinkPackets = IPFIX_enterpriseFieldAsInteger(106),
+          juniperFlowID = IPFIX_enterpriseFieldAsInteger(107),
+          juniperFirstClientPayloadTime = IPFIX_enterpriseFieldAsInteger(108)>0lu ? formatEpochDateTime( (float64)IPFIX_enterpriseFieldAsInteger(108) / 1000.0 ) : "",
+          juniperLastClientPayloadTime = IPFIX_enterpriseFieldAsInteger(109)>0lu ? formatEpochDateTime( (float64)IPFIX_enterpriseFieldAsInteger(109) / 1000.0 ) : "",
+          juniperFirstServerPayloadTime = IPFIX_enterpriseFieldAsInteger(110)>0lu ? formatEpochDateTime( (float64)IPFIX_enterpriseFieldAsInteger(110) / 1000.0 ) : "",
+          juniperLastServerPayloadTime = IPFIX_enterpriseFieldAsInteger(111)>0lu ? formatEpochDateTime( (float64)IPFIX_enterpriseFieldAsInteger(111) / 1000.0 ) : "",
+          juniperRecordReason = (uint8)IPFIX_enterpriseFieldAsInteger(112),
+          juniperApplicationProtocol = IPFIX_enterpriseFieldAsString(151),
+          juniperHost = IPFIX_enterpriseFieldAsString(157),
+          juniperApplicationName = IPFIX_enterpriseFieldAsString(170),
+          juniperSCGBNGIPv4Address = convertIPV4AddressNumericToString((uint32)IPFIX_enterpriseFieldAsInteger(502)),
+          juniperDPIEngineVersion = IPFIX_enterpriseFieldAsString(503),
+          juniperUserName = IPFIX_enterpriseFieldAsString(513),
+          juniperAccountingSessionID = IPFIX_enterpriseFieldAsString(514),
+          juniperSubscriberType = (uint8)IPFIX_enterpriseFieldAsInteger(515),
+          juniperSubscriberIPv4Address = convertIPV4AddressNumericToString((uint32)IPFIX_enterpriseFieldAsInteger(516)),
+          juniperSubscriberVRF = IPFIX_enterpriseFieldAsString(517),
+          juniperNASPortID = IPFIX_enterpriseFieldAsString(518),
+          juniperNASIPv4Address = convertIPV4AddressNumericToString((uint32)IPFIX_enterpriseFieldAsInteger(519)),
+          juniperServiceSetName = IPFIX_enterpriseFieldAsString(520),
+          juniperRoutingInstance = IPFIX_enterpriseFieldAsString(521),
+          juniperClass = IPFIX_enterpriseFieldAsString(522);
+    }
+    () as IPFIXMessageSink = FileSink(IPFIXMessageStream) { param file: "debug.TestIPFIXMessageParserJuniper.IPFIXMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+}

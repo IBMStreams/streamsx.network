@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>
+
+IPAddressLocation is an operator for the IBM InfoSphere Streams product that
+finds the geographical location of IP addresses received in input tuples,
+based on the subnets they are part of, and
+emits output tuples containing the country, state or province, city, latitude, and longitude of the subnets.
+The operator may be configured with one or more output ports,
+and each port may be configured to emit different tuples,
+as specified by output filters.
+
+The IPAddressLocation operator consumes input tuples containing IP version 4 and 6 addresses,
+selects messages to emit as output tuples with filter expressions,
+and assigns values to them with output attribute assignment expressions.
+Output filters and attribute assignments are SPL expressions. They may use any
+of the built-in SPL functions, and any of these functions, which are specific to
+the IPAddressLocation operator: 
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html|location result functions]
+
+The IPAddressLocation operator emits a tuple on each output port for each input tuple,
+optionally filtered by the 'outputFilters'
+parameter.  Geographical location data is assigned to output
+attributes with the location result functions, based on the IP addresses specified with the functions.
+All attributes of all output ports must be assigned values, either with explicit
+assignment expressions, or implicitly by copy from input tuples.
+
+This operator is part of the network toolkit. To use it in an application,
+include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.location::*;
+
+# Dependencies
+
+The IPAddressLocation operator depends upon geographical location data 
+provided by [https://www.maxmind.com/|Maxmind, Inc.]:
+
+* GeoLite2 data is available free from [http://dev.maxmind.com/geoip/geoip2/geolite2/]
+
+* GeoIP2 data, which is more accurate, may be purchased from [https://www.maxmind.com/en/geoip2-city/]
+
+The required parameter `geographyDiectory` parameter must point to a directory containing
+geography files, after downloading and unpacking. 
+
+For GeoLite2 data, the geography files are:
+
+    GeoLite2-City-Locations-en.csv
+    GeoLite2-City-Blocks-IPv4.csv   
+    GeoLite2-City-Blocks-IPv6.csv
+
+For GeoIP2 data, the geography files are:
+
+    GeoIP2-City-Locations-en.csv
+    GeoIP2-City-Blocks-IPv4.csv   
+    GeoIP2-City-Blocks-IPv6.csv
+
+The format of the geography files is described here:
+
+* [http://dev.maxmind.com/geoip/geoip2/geoip2-csv-databases/]
+
+# Threads
+
+The IPAddressLocation runs on the thread of the upstream operator that sends
+input tuples to it. It does not start any threads of its own.
+
+# Exceptions
+
+The IPAddressLocation operator will throw an exception and terminate in these
+situations:
+
+* No output ports are specified.
+
+* The `outputFilters` parameter is specified, and the number of expressions 
+specified does not match the number of output ports specified.
+
+# Sample Applications
+
+The network toolkit includes several
+[./tk$SampleIPAddressLocation/tk$SampleIPAddressLocation.html|sample applications]
+that illustrate how to use this operator.
+
+# References
+
+The result functions that can be used in boolean
+expressions for the `outputFilters` parameter
+and in output attribute assignment expressions are described here:
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html|location result functions].  
+
+The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind.com/|Maxmind, Inc.] is described here:
+
+* [http://dev.maxmind.com/geoip/geoip2/geoip2-csv-databases/]
+
+      </description>
+      <libraryDependencies>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_filesystem</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_system</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_regex</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>geographyDirectory</name>
+        <description>
+          This required parameter specifies a directory containing GeoIP2 or GeoLite2 files
+          downloaded from [http://www.maxmind.com|MaxMind, Inc.] 
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>outputFilters</name>
+        <description>
+          This optional parameter takes a list of SPL expressions that specify which input tuples
+          should be emitted by the corresponding output port. The number of
+          expressions in the list must match the number of output ports, and each
+          expression must evaluate to a `boolean` value.  The output filter expressions may include any
+          of the
+          [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html|location result functions].  
+          
+          The default value of the `outputFilters` parameter is an empty list, which
+          causes each input tuple to be emitted by all output ports.
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description>
+          The IPAddressLocation operator requires one input port. One or more input attributes
+          must be of type `uint32` or `list&lt;uint8>\[16\]` containing IP version 4 or 6 addresses, respectively.
+          These attributes are specifed as arguments to the location result functions.
+        </description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortOpenSet>
+        <description>
+          The IPAddressLocation operator requires one or more output ports.
+          
+          Each output port will produce one output tuple for each input tuple
+          if the corresponding expression in the `outputFilters` parameter evaluates `true`,
+          or if no `outputFilters` parameter is specified. 
+          
+          Output attributes can be assigned values with any SPL expression that evaluates
+          to the proper type, and the expressions may include any of the 
+          [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html|location result functions].  
+          Output attributes that match input attributes in name and
+          type are copied automatically.
+        </description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Preserving</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>0</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
+      </outputPortOpenSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

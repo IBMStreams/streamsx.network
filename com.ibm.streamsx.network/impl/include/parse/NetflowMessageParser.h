@@ -6,6 +6,7 @@
 #ifndef NETFLOW_MESSAGE_PARSER_H_
 #define NETFLOW_MESSAGE_PARSER_H_
 
+#include <endian.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -19,7 +20,7 @@
 // suppress " warning: array subscript is above array bounds [-Warray-bounds] " messages
 // from GCC version 4.8.3 in RHEL 7.1
 
-#pragma GCC diagnostic ignored "-Warray-bounds"
+// ??? #pragma GCC diagnostic ignored "-Warray-bounds"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -327,9 +328,9 @@ class NetflowMessageParser {
       if ( memcmp(templateState->fieldTemplate, netflow9Template->fieldTemplate, templateLength) == 0 ) continue;
 
       // clear the portion of the field array used by the previous template
-      templateState->flowLength = 0;
-      templateState->flowTypeMaximum = 0;
       memset( templateState->flowFields, 0, ( templateState->flowTypeMaximum + 1 ) * sizeof(templateState->flowFields[0]) );
+      templateState->flowTypeMaximum = 0;
+      templateState->flowLength = 0;
 
       // store the offset and length of each field from this template in the state table
       for (int i=0; i<fieldCount; i++) {
@@ -475,35 +476,27 @@ class NetflowMessageParser {
   // This function returns the value of the specified field in the current flow,
   // after converting it to an SPL integer.
 
+  inline __attribute__((always_inline))
   SPL::uint64 netflow9FieldAsInteger(const uint16_t fieldType) {
 
     // return zero if there is no such field in this flow
     if ( !netflow9Flow || !templateState || fieldType<1 || fieldType>FLOW_FIELDS_MAXIMUM ) return 0;
 
     // get the length of the field and its offset within the flow record, according to the template
-    uint16_t offset =  templateState->flowFields[fieldType].offset;
-    uint16_t length =  templateState->flowFields[fieldType].length;
+    const uint16_t offset =  templateState->flowFields[fieldType].offset;
+    const uint16_t length =  templateState->flowFields[fieldType].length;
+    if (length==0 || length>8) return 0;
 
     // get the value of the field from the flow record as an integer and return it
-    uint64_t value = 0;
-    switch(length) {
-    case 8: value =              netflow9Flow->fields[offset++];
-    case 7: value = (value<<8) | netflow9Flow->fields[offset++];
-    case 6: value = (value<<8) | netflow9Flow->fields[offset++];
-    case 5: value = (value<<8) | netflow9Flow->fields[offset++];
-    case 4: value = (value<<8) | netflow9Flow->fields[offset++];
-    case 3: value = (value<<8) | netflow9Flow->fields[offset++];
-    case 2: value = (value<<8) | netflow9Flow->fields[offset++];
-    case 1: value = (value<<8) | netflow9Flow->fields[offset++]; break;
-    default: break;
-    }
-    return value;
+    const uint64_t* __attribute__((__may_alias__)) p = reinterpret_cast<uint64_t*>(netflow9Flow->fields+offset);
+    return be64toh( *p ) >> (64-8*length) ; 
   }
 
 
   // This function returns the value of the specified field in the current flow,
   // after converting it to an SPL string.
 
+  inline __attribute__((always_inline))
   SPL::rstring netflow9FieldAsString(const uint16_t fieldType) {
 
     // return zero if there is no such field in this flow
@@ -514,17 +507,20 @@ class NetflowMessageParser {
     const uint16_t length =  templateState->flowFields[fieldType].length;
     if (!length) return SPL::rstring();
 
-    // address the flow's byte array
+    // address the flow's byte array, and get the address and length of the field
     const uint8_t* fields = netflow9Flow->fields;
+    const char* stringAddress = (char*)(&fields[offset]);
+    const size_t stringLength = strnlen(stringAddress, length);
 
-    // get the value of the field from the flow record as an SPL string and return it
-    return SPL::rstring(&fields[offset], &fields[offset+length]);
+    // return the value of the field as a string
+    return SPL::rstring(stringAddress, stringAddress+stringLength);
   }
 
 
   // This function returns the value of the specified field in the current flow,
   // after converting it to an SPL byte list.
 
+  inline __attribute__((always_inline))
   SPL::list<SPL::uint8> netflow9FieldAsByteList(const uint16_t fieldType) {
 
     // return zero if this flow does not contain the specified field

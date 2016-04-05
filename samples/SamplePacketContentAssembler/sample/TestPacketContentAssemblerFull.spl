@@ -1,0 +1,206 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.content::*;
+use com.ibm.streamsx.network.datetimeformat::*;
+
+composite TestPacketContentAssemblerFull {
+
+  param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_http+https.pcap");
+    expression<boolean> $consumeArchives: true;
+    expression<boolean> $decompressOfficeDocuments: false;
+
+  type
+
+  PacketType =
+    float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+    blob rawPacket;                // ethernet packet, including all network headers
+
+  ContentType =
+    float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+    rstring EVENT,
+    boolean EVENT_FLOW_START,
+    boolean EVENT_FLOW_TLS,
+    boolean EVENT_FLOW_DATA,
+    boolean EVENT_FLOW_END,
+    boolean EVENT_REQUEST,
+    boolean EVENT_RESPONSE,
+    boolean EVENT_FILE_CHUNK,
+    rstring FLOW_ETHER_SRC_ADDRESS,
+    rstring FLOW_ETHER_DST_ADDRESS,
+    rstring FLOW_IPV4_SRC_ADDRESS,
+    rstring FLOW_IPV4_DST_ADDRESS,
+    uint16 FLOW_SRC_PORT,
+    uint16 FLOW_DST_PORT,
+    uint64 FLOW_ID,
+    uint32 FLOW_TRANSACTION_ID,
+    rstring FLOW_PROTOCOL,
+    uint8 FLOW_PROTOCOL_CONFIDENCE,
+    uint8 FLOW_PROTOCOL_DEPTH,
+    rstring FLOW_START_TIME,
+    rstring FLOW_END_TIME,
+    rstring FLOW_EVENT_TIME,
+    rstring FLOW_ELAPSED_TIME,
+    rstring FLOW_IP_PROTOCOL,
+    rstring FLOW_DIRECTION,
+    uint64 FLOW_SRC_PACKETS,
+    uint64 FLOW_DST_PACKETS,
+    uint64 FLOW_SRC_BYTES,
+    uint64 FLOW_DST_BYTES,
+    rstring FLOW_DISCONNECT_REASON,
+    uint64 FLOW_DATA_COUNTER,
+    uint64 FLOW_DATA_LENGTH,
+    //blob FLOW_DATA_BINARY,
+    //rstring FLOW_DATA_STRING,
+    rstring FLOW_REQUEST_URI_METHOD,
+    rstring FLOW_REQUEST_URI_RAW,
+    rstring FLOW_REQUEST_URI_NORMALIZED,
+    rstring FLOW_REQUEST_URI_SCHEME,
+    rstring FLOW_REQUEST_URI_AUTHORITY,
+    rstring FLOW_REQUEST_URI_USERNAME,
+    rstring FLOW_REQUEST_URI_PATH,
+    rstring FLOW_REQUEST_URI_QUERY,
+    rstring FLOW_REQUEST_URI_FRAGMENT,
+    list<rstring> FLOW_REQUEST_HEADERS,
+    list<rstring> FLOW_RESPONSE_HEADERS,
+    uint32 FLOW_RESPONSE_STATUS_CODE,
+    uint64 FILE_ID,
+    uint64 FILE_ID_PARENT,
+    rstring FILE_FORMAT,
+    rstring FILE_CONTENT_TYPE,
+    rstring FILE_CONTENT_CHARSET,
+    uint64 FILE_CONTENT_LENGTH,
+    boolean FILE_CHUNK_INITIAL,
+    boolean FILE_CHUNK_FINAL,
+    uint64 FILE_CHUNK_COUNTER,
+    uint64 FILE_CHUNK_LENGTH,
+    uint64 FILE_CHUNK_LENGTH_SUM,
+    //blob FILE_CHUNK_BINARY,
+    //rstring FILE_CHUNK_STRING,
+    uint64 OPEN_FLOWS,
+    uint64 OPEN_FILES,
+    uint64 OPEN_FLOWS_HIGH_WATER_MARK,
+    uint64 OPEN_FILES_HIGH_WATER_MARK,
+    rstring TLS_RECORD_TYPE,
+    rstring TLS_RECORD_DIRECTION,
+    uint32 TLS_RECORD_LENGTH,
+    uint32 TLS_RECORD_OFFSET,
+    boolean TLS_RECORD_MORE,
+    rstring TLS_VERSION,
+    rstring TUNNEL_TYPE,
+    rstring TUNNEL_IPV4_SRC_ADDRESS,
+    rstring TUNNEL_IPV4_DST_ADDRESS,
+    rstring TUNNEL_IPV6_SRC_ADDRESS,
+    rstring TUNNEL_IPV6_DST_ADDRESS;
+
+  graph
+
+  stream<PacketType> PacketStream as Out = PacketFileSource() {
+  param
+    pcapFilename: $pcapFilename;
+    metricsInterval: 0.0;
+  output Out:
+    captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+    rawPacket = PACKET_DATA();
+  }
+  //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketContentAssemblerFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+  stream<ContentType> ContentStream as Out = PacketContentAssembler(PacketStream) {
+  logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
+  param
+    timestampAttribute: captureTime;
+    packetAttribute: rawPacket;
+    fileChunkSize: 4096u;
+    pamTuning: "pam.content.consume.archives=" + ($consumeArchives ? "on" : "off"),
+               "pam.content.docx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
+               "pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
+               "pam.content.xlsx.decompress=" + ($decompressOfficeDocuments ? "true" : "false");
+  output Out:
+    EVENT = EVENT(),
+    EVENT_FLOW_START = EVENT_FLOW_START(),
+    EVENT_FLOW_TLS = EVENT_FLOW_TLS(),
+    EVENT_FLOW_DATA = EVENT_FLOW_DATA(),
+    EVENT_FLOW_END = EVENT_FLOW_END(),
+    EVENT_REQUEST = EVENT_REQUEST(),
+    EVENT_RESPONSE = EVENT_RESPONSE(),
+    EVENT_FILE_CHUNK = EVENT_FILE_CHUNK(),
+    FLOW_ETHER_SRC_ADDRESS = convertMACAddressNumericToString(FLOW_ETHER_SRC_ADDRESS()),
+    FLOW_ETHER_DST_ADDRESS = convertMACAddressNumericToString(FLOW_ETHER_DST_ADDRESS()),
+    FLOW_IPV4_SRC_ADDRESS = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()),
+    FLOW_IPV4_DST_ADDRESS = convertIPV4AddressNumericToString(FLOW_IPV4_DST_ADDRESS()),
+    FLOW_SRC_PORT = FLOW_SRC_PORT(),
+    FLOW_DST_PORT = FLOW_DST_PORT(),
+    FLOW_ID = FLOW_ID(),
+    FLOW_TRANSACTION_ID = FLOW_TRANSACTION_ID(),
+    FLOW_PROTOCOL = FLOW_PROTOCOL(),
+    FLOW_PROTOCOL_CONFIDENCE = FLOW_PROTOCOL_CONFIDENCE(),
+    FLOW_PROTOCOL_DEPTH = FLOW_PROTOCOL_DEPTH(),
+    FLOW_START_TIME = FLOW_START_TIME()>0.0 ? formatEpochDateTime(FLOW_START_TIME()) : "",
+    FLOW_EVENT_TIME = formatEpochDateTime(FLOW_EVENT_TIME()),
+    FLOW_END_TIME = FLOW_END_TIME()>0.0 ? formatEpochDateTime(FLOW_END_TIME()) : "",
+    FLOW_ELAPSED_TIME = FLOW_ELAPSED_TIME()>0.0 ? formatElapsedTime(FLOW_ELAPSED_TIME()) : "",
+    FLOW_IP_PROTOCOL = FLOW_IP_PROTOCOL() in ipProtocols ? ipProtocols[FLOW_IP_PROTOCOL()] : (rstring)FLOW_IP_PROTOCOL(),
+    FLOW_DIRECTION = FLOW_DIRECTION(),
+    FLOW_SRC_PACKETS = FLOW_SRC_PACKETS(),
+    FLOW_DST_PACKETS = FLOW_DST_PACKETS(),
+    FLOW_SRC_BYTES = FLOW_SRC_BYTES(),
+    FLOW_DST_BYTES = FLOW_DST_BYTES(),
+    FLOW_DISCONNECT_REASON = FLOW_DISCONNECT_REASON(),
+    FLOW_DATA_COUNTER = FLOW_DATA_COUNTER(),
+    FLOW_DATA_LENGTH = FLOW_DATA_LENGTH(),
+    //FLOW_DATA_BINARY = FLOW_DATA_BINARY(),
+    //FLOW_DATA_STRING = FLOW_DATA_STRING(),
+    FLOW_REQUEST_URI_METHOD = FLOW_REQUEST_URI_METHOD(),
+    FLOW_REQUEST_URI_RAW = FLOW_REQUEST_URI_RAW(),
+    FLOW_REQUEST_URI_NORMALIZED = FLOW_REQUEST_URI_NORMALIZED(),
+    FLOW_REQUEST_URI_SCHEME = FLOW_REQUEST_URI_SCHEME(),
+    FLOW_REQUEST_URI_AUTHORITY = FLOW_REQUEST_URI_AUTHORITY(),
+    FLOW_REQUEST_URI_USERNAME = FLOW_REQUEST_URI_USERNAME(),
+    FLOW_REQUEST_URI_PATH = FLOW_REQUEST_URI_PATH(),
+    FLOW_REQUEST_URI_QUERY = FLOW_REQUEST_URI_QUERY(),
+    FLOW_REQUEST_URI_FRAGMENT = FLOW_REQUEST_URI_FRAGMENT(),
+    FLOW_REQUEST_HEADERS = FLOW_REQUEST_HEADERS(),
+    FLOW_RESPONSE_HEADERS = FLOW_RESPONSE_HEADERS(),
+    FLOW_RESPONSE_STATUS_CODE = FLOW_RESPONSE_STATUS_CODE(),
+    FILE_ID = FILE_ID(),
+    FILE_ID_PARENT = FILE_ID_PARENT(),
+    FILE_FORMAT = FILE_FORMAT(),
+    FILE_CONTENT_TYPE = FILE_CONTENT_TYPE(),
+    FILE_CONTENT_CHARSET = FILE_CONTENT_CHARSET(),
+    FILE_CONTENT_LENGTH = FILE_CONTENT_LENGTH(),
+    FILE_CHUNK_INITIAL = FILE_CHUNK_INITIAL(),
+    FILE_CHUNK_FINAL = FILE_CHUNK_FINAL(),
+    FILE_CHUNK_COUNTER = FILE_CHUNK_COUNTER(),
+    FILE_CHUNK_LENGTH = FILE_CHUNK_LENGTH(),
+    FILE_CHUNK_LENGTH_SUM = FILE_CHUNK_LENGTH_SUM(),
+    //FILE_CHUNK_BINARY = FILE_CHUNK_BINARY(),
+    //FILE_CHUNK_STRING = FILE_CHUNK_STRING(),
+    OPEN_FLOWS = OPEN_FLOWS(),
+    OPEN_FILES = OPEN_FILES(),
+    OPEN_FLOWS_HIGH_WATER_MARK = OPEN_FLOWS_HIGH_WATER_MARK(),
+    OPEN_FILES_HIGH_WATER_MARK = OPEN_FILES_HIGH_WATER_MARK(),
+    TLS_RECORD_TYPE = TLS_RECORD_TYPE(),
+    TLS_RECORD_DIRECTION = TLS_RECORD_DIRECTION(),
+    TLS_RECORD_LENGTH = TLS_RECORD_LENGTH(),
+    TLS_RECORD_OFFSET = TLS_RECORD_OFFSET(),
+    TLS_RECORD_MORE = TLS_RECORD_MORE(),
+    TLS_VERSION = TLS_VERSION(),
+    TUNNEL_TYPE = TUNNEL_TYPE(),
+    TUNNEL_IPV4_SRC_ADDRESS = convertIPV4AddressNumericToString(TUNNEL_IPV4_SRC_ADDRESS()),
+    TUNNEL_IPV4_DST_ADDRESS = convertIPV4AddressNumericToString(TUNNEL_IPV4_DST_ADDRESS()),
+    TUNNEL_IPV6_SRC_ADDRESS = convertIPV6AddressNumericToString(TUNNEL_IPV6_SRC_ADDRESS()),
+    TUNNEL_IPV6_DST_ADDRESS = convertIPV6AddressNumericToString(TUNNEL_IPV6_DST_ADDRESS());
+  }
+  () as ContentSink = FileSink(ContentStream) { param file: "debug.TestPacketContentAssemblerFull.ContentStream.out" ; format: txt ; hasDelayField: true ; }
+
+}

@@ -1,0 +1,150 @@
+/*
+** Copyright (C) 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.location::*;
+
+composite TestIPAddressLocationFull {
+
+    param
+    expression<rstring> $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_ipv4+ipv6.pcap" );
+
+    type
+
+    PacketType =
+        uint64 packetNumber,                   // sequence number of packet, as emitted by operator
+        float64 captureTime,                   // time that packet was captured, in seconds since Unix epoch
+        uint8  ipVersion,                      // IP version (either '4' or '6')
+        uint32 ipv4SourceAddress,              // IPv4 source address, or zero if not IPv4 packet
+        list<uint8>[16] ipv6SourceAddress,     // IPv4 source address, or empty if not IPv4 packet
+        uint16 ipSourcePort,                   // IP source port, or zero if not UDP or TCP packet
+        uint32 ipv4DestinationAddress,         // IPv4 destination address, or zero if not IPv4 packet
+        list<uint8>[16] ipv6DestinationAddress,// IPv6 destination address, or empty if not IPv6 packet
+        uint16 ipDestinationPort,              // IP destination port, or zero if not UDP or TCP packet
+        uint32 packetLength;                   // original length of packet (not necessarily all captured)
+
+    LocatedPacketType =
+        uint64  packetNumber,               // sequence number of packet, as emitted by operator
+        float64 captureTime,               // time that packet was captured, in seconds since Unix epoch
+        uint32  packetLength, 
+        uint8   ipVersion,
+        rstring ipSourceAddress,  
+        uint16  ipSourcePort,  
+        boolean ipSourceLocationFound,
+        rstring ipSourceLocationID,  
+        rstring ipSourceSubnet,  
+        rstring ipSourceSubnetAddress,  
+        rstring ipSourceSubnetMask,  
+        rstring ipSourceContinentName,
+        rstring ipSourceContinentCode,
+        rstring ipSourceCountryName,
+        rstring ipSourceCountryCode,
+        rstring ipSourceSubdivision1Name,
+        rstring ipSourceSubdivision1Code,
+        rstring ipSourceSubdivision2Name,
+        rstring ipSourceSubdivision2Code,
+        rstring ipSourceCityName,
+        rstring ipSourceMetroCode,
+        rstring ipSourceTimezone,
+        rstring ipSourcePostalCode,
+        float64 ipSourceLatitude,
+        float64 ipSourceLongitude,
+        rstring ipDestinationAddress,  
+        uint16  ipDestinationPort,  
+        boolean ipDestinationLocationFound,
+        rstring ipDestinationLocationID,  
+        rstring ipDestinationSubnet,  
+        rstring ipDestinationSubnetAddress,  
+        rstring ipDestinationSubnetMask,  
+        rstring ipDestinationContinentName,
+        rstring ipDestinationContinentCode,
+        rstring ipDestinationCountryName,
+        rstring ipDestinationCountryCode,
+        rstring ipDestinationSubdivision1Name,
+        rstring ipDestinationSubdivision1Code,
+        rstring ipDestinationSubdivision2Name,
+        rstring ipDestinationSubdivision2Code,
+        rstring ipDestinationCityName,
+        rstring ipDestinationMetroCode,
+        rstring ipDestinationTimezone,
+        rstring ipDestinationPostalCode,
+        float64 ipDestinationLatitude,
+        float64 ipDestinationLongitude;
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+        output Out:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipVersion = IP_VERSION(),
+            ipv4SourceAddress = IPV4_SRC_ADDRESS(),
+            ipv6SourceAddress = IPV6_SRC_ADDRESS(),
+            ipSourcePort = IP_SRC_PORT(),
+            ipv4DestinationAddress = IPV4_DST_ADDRESS(),
+            ipv6DestinationAddress = IPV6_DST_ADDRESS(),
+            ipDestinationPort = IP_DST_PORT(),
+            packetLength = PACKET_LENGTH();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPAddressLocationFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+    stream<LocatedPacketType> LocatedPacketStream as Out = IPAddressLocation(PacketStream) {
+      param
+        geographyDirectory: $geographyDirectory;
+      output Out:
+        ipSourceAddress = ipVersion==4ub ? convertIPV4AddressNumericToString(ipv4SourceAddress) : ipVersion==6ub ? convertIPV6AddressNumericToString(ipv6SourceAddress) : "",
+        ipSourceLocationFound = ipVersion==4ub ? locationFound(ipv4SourceAddress) : ipVersion==6ub ? locationFound(ipv6SourceAddress) : false,
+        ipSourceLocationID = ipVersion==4ub ? locationID(ipv4SourceAddress) : ipVersion==6ub ? locationID(ipv6SourceAddress) : "",
+        ipSourceSubnet = ipVersion==4ub ? locationSubnet(ipv4SourceAddress) : ipVersion==6ub ? locationSubnet(ipv6SourceAddress) : "",
+        ipSourceSubnetAddress = ipVersion==4ub ? convertIPV4AddressNumericToString(locationSubnetAddress(ipv4SourceAddress)) : ipVersion==6ub ? convertIPV6AddressNumericToString(locationSubnetAddress(ipv6SourceAddress)) : "",
+        ipSourceSubnetMask = ipVersion==4ub ? convertIPV4AddressNumericToString(locationSubnetMask(ipv4SourceAddress)) : ipVersion==6ub ? convertIPV6AddressNumericToString(locationSubnetMask(ipv6SourceAddress)) : "",
+        ipSourceContinentName = ipVersion==4ub ? locationContinentName(ipv4SourceAddress) : ipVersion==6ub ? locationContinentName(ipv6SourceAddress) : "",
+        ipSourceContinentCode = ipVersion==4ub ? locationContinentCode(ipv4SourceAddress) : ipVersion==6ub ? locationContinentCode(ipv6SourceAddress) : "",
+        ipSourceCountryName = ipVersion==4ub ? locationCountryName(ipv4SourceAddress) : ipVersion==6ub ? locationCountryName(ipv6SourceAddress) : "",
+        ipSourceCountryCode = ipVersion==4ub ? locationCountryCode(ipv4SourceAddress) : ipVersion==6ub ? locationCountryCode(ipv6SourceAddress) : "",
+        ipSourceSubdivision1Name = ipVersion==4ub ? locationSubdivision1Name(ipv4SourceAddress) : ipVersion==6ub ? locationSubdivision1Name(ipv6SourceAddress) : "",
+        ipSourceSubdivision1Code = ipVersion==4ub ? locationSubdivision1Code(ipv4SourceAddress) : ipVersion==6ub ? locationSubdivision1Code(ipv6SourceAddress) : "",
+        ipSourceSubdivision2Name = ipVersion==4ub ? locationSubdivision2Name(ipv4SourceAddress) : ipVersion==6ub ? locationSubdivision2Name(ipv6SourceAddress) : "",
+        ipSourceSubdivision2Code = ipVersion==4ub ? locationSubdivision2Code(ipv4SourceAddress) : ipVersion==6ub ? locationSubdivision2Code(ipv6SourceAddress) : "",
+        ipSourceCityName = ipVersion==4ub ? locationCityName(ipv4SourceAddress) : ipVersion==6ub ? locationCityName(ipv6SourceAddress) : "",
+        ipSourceMetroCode = ipVersion==4ub ? locationMetroCode(ipv4SourceAddress) : ipVersion==6ub ? locationMetroCode(ipv6SourceAddress) : "",
+        ipSourceTimezone = ipVersion==4ub ? locationTimezone(ipv4SourceAddress) : ipVersion==6ub ? locationTimezone(ipv6SourceAddress) : "",
+        ipSourcePostalCode = ipVersion==4ub ? locationPostalCode(ipv4SourceAddress) : ipVersion==6ub ? locationPostalCode(ipv6SourceAddress) : "",
+        ipSourceLatitude = ipVersion==4ub ? locationLatitude(ipv4SourceAddress) : ipVersion==6ub ? locationLatitude(ipv6SourceAddress) : 0.0,
+        ipSourceLongitude = ipVersion==4ub ? locationLongitude(ipv4SourceAddress) : ipVersion==6ub ? locationLongitude(ipv6SourceAddress) : 0.0,
+        ipDestinationAddress = ipVersion==4ub ? convertIPV4AddressNumericToString(ipv4DestinationAddress) : ipVersion==6ub ? convertIPV6AddressNumericToString(ipv6DestinationAddress) : "",
+        ipDestinationLocationFound = ipVersion==4ub ? locationFound(ipv4DestinationAddress) : ipVersion==6ub ? locationFound(ipv6DestinationAddress) : false,
+        ipDestinationLocationID = ipVersion==4ub ? locationID(ipv4DestinationAddress) : ipVersion==6ub ? locationID(ipv6DestinationAddress) : "",
+        ipDestinationSubnet = ipVersion==4ub ? locationSubnet(ipv4DestinationAddress) : ipVersion==6ub ? locationSubnet(ipv6DestinationAddress) : "",
+        ipDestinationSubnetAddress = ipVersion==4ub ? convertIPV4AddressNumericToString(locationSubnetAddress(ipv4DestinationAddress)) : ipVersion==6ub ? convertIPV6AddressNumericToString(locationSubnetAddress(ipv6DestinationAddress)) : "",
+        ipDestinationSubnetMask = ipVersion==4ub ? convertIPV4AddressNumericToString(locationSubnetMask(ipv4DestinationAddress)) : ipVersion==6ub ? convertIPV6AddressNumericToString(locationSubnetMask(ipv6DestinationAddress)) : "",
+        ipDestinationContinentName = ipVersion==4ub ? locationContinentName(ipv4DestinationAddress) : ipVersion==6ub ? locationContinentName(ipv6DestinationAddress) : "",
+        ipDestinationContinentCode = ipVersion==4ub ? locationContinentCode(ipv4DestinationAddress) : ipVersion==6ub ? locationContinentCode(ipv6DestinationAddress) : "",
+        ipDestinationCountryName = ipVersion==4ub ? locationCountryName(ipv4DestinationAddress) : ipVersion==6ub ? locationCountryName(ipv6DestinationAddress) : "",
+        ipDestinationCountryCode = ipVersion==4ub ? locationCountryCode(ipv4DestinationAddress) : ipVersion==6ub ? locationCountryCode(ipv6DestinationAddress) : "",
+        ipDestinationSubdivision1Name = ipVersion==4ub ? locationSubdivision1Name(ipv4DestinationAddress) : ipVersion==6ub ? locationSubdivision1Name(ipv6DestinationAddress) : "",
+        ipDestinationSubdivision1Code = ipVersion==4ub ? locationSubdivision1Code(ipv4DestinationAddress) : ipVersion==6ub ? locationSubdivision1Code(ipv6DestinationAddress) : "",
+        ipDestinationSubdivision2Name = ipVersion==4ub ? locationSubdivision2Name(ipv4DestinationAddress) : ipVersion==6ub ? locationSubdivision2Name(ipv6DestinationAddress) : "",
+        ipDestinationSubdivision2Code = ipVersion==4ub ? locationSubdivision2Code(ipv4DestinationAddress) : ipVersion==6ub ? locationSubdivision2Code(ipv6DestinationAddress) : "",
+        ipDestinationCityName = ipVersion==4ub ? locationCityName(ipv4DestinationAddress) : ipVersion==6ub ? locationCityName(ipv6DestinationAddress) : "",
+        ipDestinationMetroCode = ipVersion==4ub ? locationMetroCode(ipv4DestinationAddress) : ipVersion==6ub ? locationMetroCode(ipv6DestinationAddress) : "",
+        ipDestinationTimezone = ipVersion==4ub ? locationTimezone(ipv4DestinationAddress) : ipVersion==6ub ? locationTimezone(ipv6DestinationAddress) : "",
+        ipDestinationPostalCode = ipVersion==4ub ? locationPostalCode(ipv4DestinationAddress) : ipVersion==6ub ? locationPostalCode(ipv6DestinationAddress) : "",
+        ipDestinationLatitude = ipVersion==4ub ? locationLatitude(ipv4DestinationAddress) : ipVersion==6ub ? locationLatitude(ipv6DestinationAddress) : 0.0,
+        ipDestinationLongitude = ipVersion==4ub ? locationLongitude(ipv4DestinationAddress) : ipVersion==6ub ? locationLongitude(ipv6DestinationAddress) : 0.0;
+
+    }
+    () as LocatedPacketSink = FileSink(LocatedPacketStream) { param file: "debug.TestIPAddressLocationFull.LocatedPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+}

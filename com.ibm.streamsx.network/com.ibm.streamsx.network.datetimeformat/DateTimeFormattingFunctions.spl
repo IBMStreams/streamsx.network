@@ -1,0 +1,189 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace com.ibm.streamsx.network.datetimeformat;
+
+/**
+This function formats an integer representing 'Unix epoch' time (that is, seconds since
+January 1st, 1970 at midnight in Greenwich, England) as a string, according to
+an 'strftime' format pattern.
+It is used in the
+formatEpochDateTime() and formatEpochTime() functions, and can also be 
+used directly with other patterns.
+
+The `format` argument requires an [http://linux.die.net/man/3/strftime|'strftime' formatting string].
+
+@param seconds an integer number of seconds, relative to the beginning of the 'Unix' epoch
+@param format an 'strftime' formatting string
+@return a string containing the 'seconds' argument value, formatted according to the 'format' argument
+ */
+public rstring formatEpoch(uint32 seconds, rstring format) {
+  timestamp ts = createTimestamp((int64)seconds, 0u);
+  mutable Sys.tm tm = {};
+  time(ts, tm);
+  return strftime(tm, format); }
+
+/**
+This function formats the integer and fractional parts of a
+value representing 'Unix epoch' time (that is, seconds since
+January 1st, 1970 at midnight in Greenwich, England) as a string, 
+with the specified precision for the fractional part.
+It is used in the
+formatEpochDateTime() and formatEpochTime() functions below, and can also be
+used directly with other precisions.
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@param precision the number of digits to format for the fractional part of the 'seconds' argment
+@return a string containing the 'seconds' argument value, with the fractional part expressed as 'precision' digits
+ */
+public rstring formatSubseconds(float64 seconds, uint32 precision) {
+  return precision>0u ? substring(formatNumber(fmod(seconds, 1.0), 0u, precision, false), 1, (int32)precision+1) : ""; }
+
+/**
+This function formats the integer and fractional parts of 
+a timestamp representing 'Unix epoch' time (that is, seconds since
+January 1st, 1970 at midnight in Greenwich, England) as a string,
+with the specified precision for the fractional part.
+It is used in the
+formatEpochDateTime() and formatEpochTime() functions below, and can also be 
+used directly with other patterns and precisions.
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@param precision the number of digits to format for the fractional part of the 'seconds' argment
+@return a string containing the 'seconds' argument value, with the fractional part expressed as 'precision' digits
+ */
+public rstring formatSubseconds(timestamp seconds, uint32 precision) {
+  return precision>0u ? substring(formatNumber((float64)getNanoseconds(seconds)/1000000000.0, 0u, precision, false), 1, (int32)precision+1) : ""; }
+
+/**
+This function formats an integer representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS' in the local time zone. 
+@param seconds an integer number of seconds, relative to the beginning of the 'Unix' epoch
+@return a string containing the 'seconds' argument value, formatted as 'YYYY-MM-DD HH:MM:SS' in the local time zone
+ */
+public rstring formatEpochDateTime(uint32 seconds) { return formatEpoch(seconds, "%Y-%m-%d %H:%M:%S"); }
+
+/**
+This function formats an integer representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'HH:MM:SS' in the local time zone. 
+@param seconds an integer number of seconds, relative to the beginning of the 'Unix' epoch
+@return a string containing the 'seconds' argument value, formatted as 'HH:MM:SS' in the local time zone
+ */
+public rstring formatEpochTime(uint32 seconds) { return formatEpoch(seconds, "%H:%M:%S"); }
+
+/**
+This function formats the integer and fractional parts of a value representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@param precision the number of digits to format for the fractional part of the 'seconds' argment (defaults to '6' if not specified)
+@return a string containing the 'seconds' argument value, formatted as 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochDateTime(float64 seconds, uint32 precision) { return formatEpochDateTime((uint32)seconds) + formatSubseconds(seconds, precision); }
+
+/**
+This function formats the integer and fractional parts of a value representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@param precision the number of digits to format for the fractional part of the 'seconds' argment (defaults to '6' if not specified)
+@return a string containing the 'seconds' argument value, formatted as 'HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochTime(float64 seconds, uint32 precision) { return formatEpochTime((uint32)seconds) + formatSubseconds(seconds, precision); }
+
+/**
+This function formats the integer and fractional parts of a value representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@return a string containing the 'seconds' argument value, formatted as 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochDateTime(float64 seconds) { return formatEpochDateTime((uint32)seconds) + formatSubseconds(seconds, 6u); }
+
+/**
+This function formats the integer and fractional parts of a value representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@return a string containing the 'seconds' argument value, formatted as 'HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochTime(float64 seconds) { return formatEpochTime((uint32)seconds) + formatSubseconds(seconds, 6u); }
+
+/**
+This function formats the integer and fractional parts of a timestamp representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@param precision the number of digits to format for the fractional part of the 'seconds' argment (defaults to '6' if not specified)
+@return a string containing the 'seconds' argument value, formatted as 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochDateTime(timestamp seconds, uint32 precision) { return formatEpochDateTime((uint32)getSeconds(seconds)) + formatSubseconds(seconds, precision); }
+
+/**
+This function formats the integer and fractional parts of a timestamp representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@param precision the number of digits to format for the fractional part of the 'seconds' argment (defaults to '6' if not specified)
+@return a string containing the 'seconds' argument value, formatted as 'HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochTime(timestamp seconds, uint32 precision) { return formatEpochTime((uint32)getSeconds(seconds)) + formatSubseconds(seconds, precision); }
+
+/**
+This function formats the integer and fractional parts of a timestamp representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@return a string containing the 'seconds' argument value, formatted as 'YYYY-MM-DD HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochDateTime(timestamp seconds) { return formatEpochDateTime((uint32)getSeconds(seconds)) + formatSubseconds(seconds, 6u); }
+
+/**
+This function formats the integer and fractional parts of a timestamp representing
+'Unix epoch' time (that is, seconds since January 1st, 1970 at midnight in
+Greenwich, England) as a string in the form 'HH:MM:SS.FFFFFF' in the local time zone. 
+@param seconds a number of seconds, including a fractional part, relative to the beginning of the 'Unix' epoch
+@return a string containing the 'seconds' argument value, formatted as 'HH:MM:SS.FFFFFF' in the local time zone
+ */
+public rstring formatEpochTime(timestamp seconds) { return formatEpochTime((uint32)getSeconds(seconds)) + formatSubseconds(seconds, 6u); }
+
+/**
+This function formats an integer representing elapsed time,
+in seconds, as a string representation of that time in the form 'DDDDd HHh MMm SSs', with leading zeros
+omitted. 
+@param seconds a number of seconds of elapsed time
+@return a string representation of the 'seconds' argument of the form 'DDDDd HHh MMm SSs', with leading zeros omitted 
+ */
+public rstring formatElapsedTime(uint32 seconds) {
+  uint32 days = seconds / (24u*60u*60u);
+  uint32 hours = ( seconds % (24u*60u*60u) ) / (60u*60u);
+  uint32 minutes = ( seconds % (60u*60u) ) / (60u);
+  uint32 sseconds = seconds % 60u;
+  return ( ( days>0u ) ? (rstring)days+"d " : "" ) +
+         ( ( days>0u || hours>0u ) ? (rstring)hours+"h " : "" ) +
+         ( ( days>0u || hours>0u || minutes>0u ) ? (rstring)minutes+"m " : "" ) +
+         (rstring)sseconds+"s"; }
+
+/**
+This function formats a value representing elapsed time,
+in seconds including a fractional part, 
+as a string representation of that time in the form 'DDDDd HHh MMm SS.FFFFFFs', with leading zeros omitted. 
+@param seconds a number of seconds of elapsed time
+@param precision the number of digits to format for the fractional part of the 'seconds' argment (defaults to '6' if not specified)
+@return a string representation of the 'seconds' argument of the form 'DDDDd HHh MMm SS.FFFFFFs', with leading zeros omitted 
+ */
+public rstring formatElapsedTime(float64 seconds, uint32 precision) {
+  rstring dhms = formatElapsedTime((uint32)seconds);
+  if (precision==0u) return dhms;
+  return substring(dhms,0,length(dhms)-1) + substring(formatNumber(fmod(seconds, 1.0), 0u, precision, false), 1, (int32)precision+1) + "s"; }
+
+/**
+This function formats a value representing elapsed time,
+in seconds including a fractional part, 
+as a string representation of that time in the form 'DDDDd HHh MMm SS.FFFFFFs', with leading zeros omitted. 
+@param seconds a number of seconds of elapsed time
+@return a string representation of the 'seconds' argument of the form 'DDDDd HHh MMm SS.FFFFFFs', with leading zeros omitted 
+ */
+public rstring formatElapsedTime(float64 seconds) { return formatElapsedTime(seconds, 6u); }

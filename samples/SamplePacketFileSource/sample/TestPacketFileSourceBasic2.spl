@@ -35,10 +35,10 @@ composite TestPacketFileSourceBasic2 {
         boolean metricsUpdated,         // true if metrics have been updated since previous output tuple
         uint64 packetNumber,            // sequence number of packet, as emitted by operator
         uint64 packetsProcessed,        // number of packets emitted by operator in this interval
-        uint64 octetsProcessed,         // number of bytes emitted by operator in this interval
+        uint64 bytesProcessed,         // number of bytes emitted by operator in this interval
         float64 intervalElapsed,        // elapsed time since last metrics interval, in seconds
         uint64 intervalPacketsProcessed,// number of packets processed since last metrics interval
-        uint64 intervalOctetsProcessed; // number of octets processed since last metrics interval
+        uint64 intervalBytesProcessed; // number of bytes processed since last metrics interval
 
     graph
 
@@ -67,10 +67,10 @@ composite TestPacketFileSourceBasic2 {
             metricsUpdated = metricsUpdated(),
             packetNumber = packetsProcessed() - 1ul,
             packetsProcessed = packetsProcessed(),
-            octetsProcessed = octetsProcessed(),
+            bytesProcessed = bytesProcessed(),
             intervalElapsed = metricsIntervalElapsed(),
             intervalPacketsProcessed = metricsIntervalPacketsProcessed(),
-            intervalOctetsProcessed = metricsIntervalOctetsProcessed();
+            intervalBytesProcessed = metricsIntervalBytesProcessed();
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceBasic2.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
     () as MetricsSink = FileSink(MetricsStream) { param file: "debug.TestPacketFileSourceBasic2.MetricsStream.out"; format: txt; hasDelayField: true; flush: 1u; }

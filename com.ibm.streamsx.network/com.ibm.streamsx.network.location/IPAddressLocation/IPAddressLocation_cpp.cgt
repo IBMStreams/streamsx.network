@@ -1,0 +1,608 @@
+<%
+
+# Copyright (C) 2015  International Business Machines Corporation
+# All Rights Reserved
+
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort = $model->getInputPortAt(0);
+my @outputPortList = @{ $model->getOutputPorts() };
+
+# get C++ expressions for getting the values of this operator's parameters
+my $geographyDirectory = $model->getParameterByName("geographyDirectory") ? $model->getParameterByName("geographyDirectory")->getValueAt(0)->getCppExpression() : -1;
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) {
+  foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+    my $expression = $value->getCppExpression();
+    push @outputFilterList, $expression;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::IPAddressLocation_result_functions::") != -1;
+  }
+}
+
+# basic safety checks
+SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+
+%>
+
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the IPAddressLocation_h.cgt file
+
+#define common_result_functions MY_OPERATOR
+#define IPAddressLocation_result_functions MY_OPERATOR
+
+
+
+const char* MY_OPERATOR::parseIPv4cidrAddress(std::string token, uint32_t& address, uint32_t& mask) {
+
+  // verify that the token contains a CIDR address
+  streams_boost::smatch results;
+  const streams_boost::regex cidrPattern("([0-9.]+)/([0-9]+)"); 
+  if (!regex_match(token, results, cidrPattern)) { return "CIDR address must have format 'xxxx.xxxx.xxxx.xxx/xx'"; }
+
+  // convert the first part of the CIDR block into an address
+  const std::string addressString(results[1]);
+  struct in_addr ipv4Address;
+  if (!inet_aton(addressString.c_str(), &ipv4Address)) { return "CIDR address must have valid IPv4 address"; } 
+  address = ntohl(ipv4Address.s_addr);
+
+  // convert the second part of the CIDR block into a mask
+  const std::string addressMask(results[2]);
+  const int32_t maskSize = atoi( addressMask.c_str() );
+  if (maskSize<1 || maskSize>32) { return "CIDR address must have mask size between 0 and 32"; }
+  mask = (int32_t)0x80000000 >> (maskSize-1);
+
+  SPLLOG(L_TRACE, "parseIPv4cidrAddress(" << token << ") returned address=" << address << " mask=" << mask, "IPAddressLocation"); 
+  return NULL;
+}
+
+
+const char* MY_OPERATOR::parseIPv6cidrAddress(std::string token, SPL::blist<SPL::uint8,16>& address, SPL::blist<SPL::uint8,16>& mask) {
+
+  // verify that the token contains a CIDR address
+  streams_boost::smatch results;
+  const streams_boost::regex cidrPattern("([0-9a-fA-F:]+)/([0-9]+)"); 
+  if (!regex_match(token, results, cidrPattern)) { return "CIDR address must have format 'xxxx:xxxx:xxxx:xxx:xxxx:xxx:xxxx:xxx/xxx'"; }
+
+  // convert the first part of the CIDR block into an address
+  const std::string addressString(results[1]);
+  struct in6_addr ipv6Address;
+  int rc = inet_pton(AF_INET6, addressString.c_str(), &ipv6Address);
+  if (rc!=1) { return "CIDR address must have valid IPv6 address"; } 
+  address = SPL::blist<SPL::uint8,16>(&ipv6Address.s6_addr[0], &ipv6Address.s6_addr[16]);
+
+  // convert the second part of the CIDR block into a mask
+  const std::string addressMask(results[2]);
+  const int32_t maskSize = atoi( addressMask.c_str() );
+  if (maskSize<1 || maskSize>128) { return "CIDR address must have mask size between 0 and 128"; }
+  mask = SPL::blist<SPL::uint8,16>(16, (SPL::uint8)0);
+  for (int i=0; i<maskSize/8; i++) mask[i] = 0xFF;
+  if (maskSize%8) mask[maskSize/8] = (int8_t)0x80 >> ((maskSize%8)-1);
+
+  SPLLOG(L_TRACE, "parseIPv6cidrAddress(" << token << ") returned address=" << address << " mask=" << mask, "IPAddressLocation"); 
+  return NULL;
+}
+
+
+std::string MY_OPERATOR::formatIPv4cidrAddress(uint32_t address, uint32_t mask = 0) {
+
+  // convert the address into a string
+  struct in_addr a;
+  a.s_addr = htonl(address);
+  std::string cidrAddress(inet_ntoa(a));
+
+  // calculate the size of the mask
+  int32_t maskSize = 0;
+  while (mask) { mask <<= 1; maskSize++; }
+
+  // append the size of the mask to the string, if there is one
+  if (maskSize) {
+    char buffer[64];
+    sprintf(buffer, "/%d", maskSize); 
+    cidrAddress.append(buffer); }
+
+  return cidrAddress;
+}
+
+
+
+std::string MY_OPERATOR::formatIPv6cidrAddress(SPL::blist<SPL::uint8,16>& address, SPL::blist<SPL::uint8,16>& mask) {
+
+  // convert the address into a string
+  char ipv6Address[INET6_ADDRSTRLEN];
+  std::string cidrAddress(inet_ntop(AF_INET6, &(*address.begin()), ipv6Address, sizeof(ipv6Address)));
+
+  // calculate the size of the mask
+  int32_t maskSize = 0;
+  for (int i=0; i<mask.getSize(); i++) {
+    switch((uint8_t)mask[i]) {
+    case 0xFF: maskSize += 8; break;
+    case 0x00: break; 
+    default: for (int j=0; j<8; j++) { if (mask[i]&(0x80>>j)) maskSize++; } 
+    }
+  }
+
+  // append the size of the mask to the string, if there is one
+  if (maskSize) {
+    char buffer[64];
+    sprintf(buffer, "/%d", maskSize); 
+    cidrAddress.append(buffer); }
+
+  return cidrAddress;
+}
+
+
+
+
+
+
+SPL::blist<SPL::uint8,16> MY_OPERATOR::combineIPv6AddressAndMask(const SPL::blist<SPL::uint8,16>& address, const SPL::blist<SPL::uint8,16>& mask) {
+  const int length = address.getSize()<mask.getSize() ? address.getSize() : mask.getSize();
+  const SPL::uint8 zero = 0;
+  SPL::blist<SPL::uint8,16> result(zero, length);
+  for (int i=0; i<length; i++) result[i] = address[i] | ~mask[i];
+  return result; }
+
+
+
+// This function reads a MaxMind location file and stores its contents in a
+// hash table of structures containing individual fields from each line,
+// indexed by the location identifier at the beginning of the line. For
+// example:
+
+/****************************** GeoLite2-City-Locations-en.csv *************************************************************************************************************************************************************************
+0-----------1------------2---------------3-----------------4-----------------5-----------------6-----------------------7--------------------8-----------------------9-------------------10------------------11----------12--------------
+geoname_id, locale_code, continent_code, continent_name,   country_iso_code, country_name,     subdivision_1_iso_code, subdivision_1_name,  subdivision_2_iso_code, subdivision_2_name, city_name,          metro_code, time_zone
+2057277,    en,          OC,             Oceania,          AU,               Australia,        WA,                     "Western Australia", ,                       ,                   York,               ,           Australia/Perth
+2633352,    en,          EU,             Europe,           GB,               "United Kingdom", ENG,                    England,             YOR,                    York,               York,               ,           Europe/London
+5145253,    en,          NA,             "North America",  US,               "United States",  NY,                     "New York",          ,                       ,                   "Yorktown Heights", 501,        America/New_York
+***************************************************************************************************************************************************************************************************************************************/
+
+void MY_OPERATOR::loadCityLocations(std::string filename) {
+
+  SPLLOG(L_INFO, "loading geographical locations from " << filename << " ...", "IPAddressLocation");
+
+  // open the location file
+  std::ifstream file(filename.c_str());
+  if (!file) THROW(SPLRuntimeOperator, "error opening location file '" << filename << "', " << strerror(errno));
+
+  // verify that the first line of the location file contains the expected header
+  std::string line;
+  std::getline(file, line);
+  const std::string header("geoname_id,locale_code,continent_code,continent_name,country_iso_code,country_name,subdivision_1_iso_code,subdivision_1_name,subdivision_2_iso_code,subdivision_2_name,city_name,metro_code,time_zone");
+  if (line!=header) THROW(SPLRuntimeOperator, "sorry, expected header '" << header << "' instead of '" << line << "' in location file " << filename);
+
+  // load the location file's contents into a hash table
+  int lineCount = 2;
+  int locationCount = 0;
+  for (; ; lineCount++) {
+     
+    // read the next line from the file, if there is one and its not empty
+    std::getline(file, line);
+	if (file.eof()) break;
+    if ( !line.length() || line.substr(0,1)=="#" ) continue;
+
+    // tokenize the line
+    streams_boost::tokenizer<streams_boost::escaped_list_separator<char> > tokens(line);
+    streams_boost::tokenizer<streams_boost::escaped_list_separator<char> >::iterator k = tokens.begin();
+    if (k==tokens.end()) continue;
+
+    // put the tokens in a location structure
+	CityLocation* location = new CityLocation();
+    location->locationID = *k++;
+    std::string locale(*k++);
+    location->continentCode = *k++;
+    location->continentName = *k++;
+    location->countryCode = *k++;
+    location->countryName = *k++;
+    location->subdivision1Code = *k++;
+    location->subdivision1Name = *k++;
+    location->subdivision2Code = *k++;
+    location->subdivision2Name = *k++;
+    location->cityName = *k++;
+    location->metroCode = *k++;
+    location->timezone = *k++;
+    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for location " << location->locationID << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); }
+   
+    // insert this location structure into the hash table
+    SPLLOG(L_TRACE, "loading location " << location->locationID << ": continent=" << location->continentName << ", country=" << location->countryName << ", state=" << location->subdivision1Name << ", city=" << location->cityName , "IPAddressLocation");
+    cityLocations.insert( std::make_pair<std::string,CityLocation*>(location->locationID, location) );
+    locationCount++;
+  }				 
+
+  // close the location file
+  file.close();
+  SPLLOG(L_INFO, "... loaded " << locationCount << " of " << lineCount << " geographical locations", "IPAddressLocation");
+}
+
+
+
+
+// This function reads a MaxMind IPv4 network address file and stores its
+// contents in a table of structures containing individual fields from each
+// line, sorted by the IP network address at the beginning of the line. For
+// example:
+
+/****************************** GeoLite2-City-Blocks-IPv4.csv **********************************************************************************************************
+0-----------------1-----------2------------------------------3-------------------------------4-------------------5----------------------6------------7---------8--------
+network,          geoname_id, registered_country_geoname_id, represented_country_geoname_id, is_anonymous_proxy, is_satellite_provider, postal_code, latitude, longitude
+1.0.0.0/24,       2077456,    2077456,                       ,                               0,                  0,                     ,            -27,      133.0000
+120.20.156.0/27,  2057277,    2077456,                       ,                               0,                  0,                     6302,        -31.9264, 116.7354
+144.32.0.0/16,    2633352,    2635167,                       ,                               0,                  0,                     YO1,         53.9586,  -1.0828
+166.109.123.0/24, 5145253,    6252001,                       ,                               0,                  0,                     10598,       41.2864,  -73.7908
+***********************************************************************************************************************************************************************/
+
+void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
+
+  SPLLOG(L_INFO, "loading IPv4 subnets from " << filename << " ...", "IPAddressLocation");
+
+  // open the IPv4 subnet file
+  std::ifstream file(filename.c_str());
+  if (!file) THROW(SPLRuntimeOperator, "error opening IPv4 subnet file " << filename << ", " << strerror(errno));
+
+  // verify that the first line of the subnet file contains the expected header
+  std::string line;
+  std::getline(file, line);
+  const std::string header("network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_provider,postal_code,latitude,longitude");
+  if (line!=header) THROW(SPLRuntimeOperator, "sorry, expected header " << header << " instead of " << line << " in IPv4 address file " << filename);
+
+  // load the subnet file's contents into a hash table
+  int lineCount = 2;
+  int addressCount = 0;
+  for (; ; lineCount++) {
+     
+    // read the next line from the file, unless its empty
+    std::getline(file, line);
+	if (file.eof()) break;
+    if ( !line.length() || line.substr(0,1)=="#" ) continue;
+
+    // tokenize the line, unless there aren't any
+    streams_boost::tokenizer<streams_boost::escaped_list_separator<char> > tokens(line);
+    streams_boost::tokenizer<streams_boost::escaped_list_separator<char> >::iterator k = tokens.begin();
+    if (k==tokens.end()) continue;
+
+    // get the first token in a subnet structure as the network address and mask
+	IPv4Subnet subnet;
+    subnet.subnet.cidrAddress = *k++;
+    const char* error = parseIPv4cidrAddress(subnet.subnet.cidrAddress, subnet.subnet.ipv4Address, subnet.subnet.ipv4Mask);
+    if (error) { SPLLOG(L_ERROR, "sorry, " << error << ", not " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+
+    // store the upper address of this subnet
+    subnet.subnet.ipv4AddressUpper = subnet.subnet.ipv4Address | ~subnet.subnet.ipv4Mask;
+
+    // clear the IPv6 address fields for this subnet
+    subnet.subnet.ipv6Address.clear();
+    subnet.subnet.ipv6AddressUpper.clear();
+    subnet.subnet.ipv6Mask.clear();
+
+    // find the location structure cooresponding to the second token, unless there isn't one
+    std::string locationID(*k++);
+    if (!locationID.length()) { continue; }
+    std::tr1::unordered_map<std::string, CityLocation*>::iterator l = cityLocations.find(locationID);
+    if (l==cityLocations.end()) { SPLLOG(L_ERROR, "location " << locationID << " not found for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    subnet.subnet.location = l->second;
+    
+    // ignore the next four tokens
+    k++; k++; k++; k++; 
+    
+    // put the remaining tokens into the subnet structure
+    subnet.subnet.postalCode = *k++;
+    subnet.subnet.latitude = atof((*k++).c_str());
+    subnet.subnet.longitude = atof((*k++).c_str());
+    if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLLOG(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+
+    // put this subnet structure into the table
+    SPLLOG(L_TRACE, "loading IPv4 subnet " << subnet.subnet.cidrAddress << " as " << formatIPv4cidrAddress(subnet.subnet.ipv4Address, subnet.subnet.ipv4Mask) << " at latitude " << subnet.subnet.latitude << " longitude " << subnet.subnet.longitude << " in " << subnet.subnet.location->countryName << ", " << subnet.subnet.location->subdivision1Name << ", " << subnet.subnet.location->cityName, "IPAddressLocation");
+    ipv4Subnets.push_back(subnet);
+    addressCount++;
+  }				 
+
+  // close the subnet file
+  file.close();
+
+  // sort the table so that the network addresses are in ascending order
+  std::sort(ipv4Subnets.begin(), ipv4Subnets.end());
+
+  // check for duplicate addresses
+  for (int i=0; i<ipv4Subnets.size()-1; i++) {
+    if (ipv4Subnets[i].subnet.ipv4Address==ipv4Subnets[i+1].subnet.ipv4Address) SPLLOG(L_ERROR, "duplicate IPv4 address: " << formatIPv4cidrAddress(ipv4Subnets[i].subnet.ipv4Address, ipv4Subnets[i].subnet.ipv4Mask) << " and " << formatIPv4cidrAddress(ipv4Subnets[i+1].subnet.ipv4Address, ipv4Subnets[i+1].subnet.ipv4Mask), "IPAddressLocation"); }
+
+  SPLLOG(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv4 subnets", "IPAddressLocation");
+}
+
+
+
+MY_OPERATOR::IPSubnet* MY_OPERATOR::findIPv4Subnet(const uint32 address) {
+
+  // return 'subnet not found' if no address is specified
+  if (!address) return NULL;
+
+  // if we found this address recently, return its cached subnet 
+  const uint32_t hashIndex = address % ipv4SubnetCacheSize;
+  if (address == ipv4SubnetCache[hashIndex].address) return(ipv4SubnetCache[hashIndex].subnet);
+
+  // search the table for a subnet containing the specified address
+  IPSubnet* subnet = NULL;
+  for (int i=0, j=ipv4Subnets.size()-1; i<=j;) {    
+    const int k = (i+j)/2;
+    if      ( address < ipv4Subnets[k].subnet.ipv4Address ) { j = k-1; }
+    else if ( address > ipv4Subnets[k].subnet.ipv4AddressUpper ) { i = k+1; }
+    else    { subnet = &ipv4Subnets[k].subnet; break; }
+  }
+
+  // save this address/subnet in the cache
+  ipv4SubnetCache[hashIndex].address = address;
+  ipv4SubnetCache[hashIndex].subnet = subnet;
+  
+  // return the subnet found, or NULL if the specified address is not in any subnet
+  return subnet;
+}
+
+
+
+
+
+// This function reads a MaxMind IPv6 network address file and stores its
+// contents in a table of structures containing individual fields from each
+// line, sorted by the IP network address at the beginning of the line. For
+// example:
+
+/****************************** GeoLite2-City-Blocks-IPv6.csv **********************************************************************************************************************
+0------------------------1----------------2------------------------------3-------------------------------4-------------------5----------------------6------------7---------8--------
+network,                 geoname_id,      registered_country_geoname_id, represented_country_geoname_id, is_anonymous_proxy, is_satellite_provider, postal_code, latitude, longitude
+2001:208:3::/49,         1880252,         ,                              ,                               0,                  0,                     ,            1.2931,   103.8558
+2001:208:5::/49,         1880252,         ,                              ,                               0,                  0,                     ,            1.2931,   103.8558
+2001:218::/35,           1861060,         1861060,                       ,                               0,                  0,                     ,            35.68536, 139.75309
+2001:218:2000::/49,      1850147,         1861060,                       ,                               0,                  0,                     100-0001,    35.685,   139.7514
+2001:218:2000:8000::/49, 1861060,         1861060,                       ,                               0,                  0,                     ,            35.68536, 139.75309
+************************************************************************************************************************************************************************************/
+
+void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
+
+  SPLLOG(L_INFO, "loading IPv6 subnets from " << filename << " ...", "IPAddressLocation");
+
+  // open the IPv6 address file
+  std::ifstream file(filename.c_str());
+  if (!file) THROW(SPLRuntimeOperator, "error opening IPv6 address file " << filename << ", " << strerror(errno));
+
+  // verify that the first line of the address file contains the expected header
+  std::string line;
+  std::getline(file, line);
+  const std::string header("network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_provider,postal_code,latitude,longitude");
+  if (line!=header) THROW(SPLRuntimeOperator, "sorry, expected header " << header << " instead of " << line << " in IPv6 address file " << filename);
+
+  // load the address file's contents into a hash table
+  int lineCount = 2;
+  int addressCount = 0;
+  for (; ; lineCount++) {
+     
+    // read the next line from the file, if there is one and its not empty
+    std::getline(file, line);
+	if (file.eof()) break;
+    if ( !line.length() || line.substr(0,1)=="#" ) continue;
+ 
+    // tokenize the line
+    streams_boost::tokenizer<streams_boost::escaped_list_separator<char> > tokens(line);
+    streams_boost::tokenizer<streams_boost::escaped_list_separator<char> >::iterator k = tokens.begin();
+
+    // get the first token in a subnet structure as the network address and mask
+	IPv6Subnet subnet;
+    subnet.subnet.cidrAddress = *k++;
+    const char* error = parseIPv6cidrAddress(subnet.subnet.cidrAddress, subnet.subnet.ipv6Address, subnet.subnet.ipv6Mask);
+    if (error) { SPLLOG(L_ERROR, "Sorry, " << error << ", not " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+
+    // we should store the upper address of this subnet here
+    subnet.subnet.ipv6AddressUpper.clear();
+
+    // clear the IPv4 address fields for this subnet
+    subnet.subnet.ipv4Address = 0;
+    subnet.subnet.ipv4AddressUpper = 0;
+    subnet.subnet.ipv4Mask = 0;
+
+    // find the location structure cooresponding to the second token, if there is one
+    std::string locationID(*k++);
+    if (!locationID.length()) { continue; }
+    std::tr1::unordered_map<std::string, CityLocation*>::iterator l = cityLocations.find(locationID);
+    if (l==cityLocations.end()) { SPLLOG(L_ERROR, "location " << locationID << " not found for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    subnet.subnet.location = l->second;
+    
+    // ignore the next four tokens
+    k++; k++; k++; k++; 
+    
+    // put the remaining tokens into the address block structure
+    subnet.subnet.postalCode = *k++;
+    subnet.subnet.latitude = atof((*k++).c_str());
+    subnet.subnet.longitude = atof((*k++).c_str());
+    if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLLOG(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+
+    // append this address structure into the table
+    SPLLOG(L_TRACE, "loading IPv6 address " << subnet.subnet.cidrAddress << " as " << formatIPv6cidrAddress(subnet.subnet.ipv6Address, subnet.subnet.ipv6Mask) << " at latitude " << subnet.subnet.latitude << " longitude " << subnet.subnet.longitude << " in " << subnet.subnet.location->countryName << ", " << subnet.subnet.location->subdivision1Name << ", " << subnet.subnet.location->cityName, "IPAddressLocation");
+    ipv6Subnets.push_back(subnet);
+    addressCount++;
+  }				 
+
+  // close the address file
+  file.close();
+
+  // sort the table so that the network addresses are in ascending order
+  std::sort(ipv6Subnets.begin(), ipv6Subnets.end());
+
+  // check for duplicate addresses
+  for (int i=0; i<ipv6Subnets.size()-1; i++) {
+    if (ipv6Subnets[i].subnet.ipv6Address==ipv6Subnets[i+1].subnet.ipv6Address) SPLLOG(L_ERROR, "duplicate IPv6 address: " << formatIPv6cidrAddress(ipv6Subnets[i].subnet.ipv6Address, ipv6Subnets[i].subnet.ipv6Mask) << " and " << formatIPv6cidrAddress(ipv6Subnets[i+1].subnet.ipv6Address, ipv6Subnets[i+1].subnet.ipv6Mask), "IPAddressLocation"); }
+
+  SPLLOG(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv6 subnets", "IPAddressLocation");
+}
+
+
+
+MY_OPERATOR::IPSubnet* MY_OPERATOR::findIPv6Subnet(const SPL::blist<SPL::uint8,16>& address){
+
+  // return 'subnet not found' if no address is specified
+  if (!address.getSize()) return NULL;
+
+  // search the table for a subnet containing the specified address and return it if found
+  for (int i=0, j=ipv6Subnets.size()-1; i<=j;) {    
+    const int k = (i+j)/2;
+    if      ( compareIPv6Addresses(address, ipv6Subnets[k].subnet.ipv6Address)<0 ) { j = k-1; }
+    else if ( compareIPv6Addresses(address, combineIPv6AddressAndMask(ipv6Subnets[k].subnet.ipv6Address, ipv6Subnets[k].subnet.ipv6Mask) )>0 ) { i = k+1; }
+    else    { return &ipv6Subnets[k].subnet; }
+  }
+
+  // return 'subnet not found' if the specified address is not in any subnet
+  return NULL;
+}
+
+
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+
+  // set operator parameters
+  geographyDirectory = <%=$geographyDirectory%>;
+
+  // initialize operator state variables
+  tupleCounter = 0;
+
+  // clear the IPv4 address/subnet cache
+  for (int i=0; i<ipv4SubnetCacheSize; i++) {
+    ipv4SubnetCache[i].address = 0;
+    ipv4SubnetCache[i].subnet = NULL;
+  }
+
+  // clear the output tuples
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    outTuple<%=$i%>.clear();
+    <% } %> ;
+
+  // load the city location data
+  cityLocations.clear();
+  if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoIP2-City-Locations-en.csv") ) {
+    loadCityLocations(geographyDirectory + "/GeoIP2-City-Locations-en.csv");
+  } else if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoLite2-City-Locations-en.csv") ) {
+    loadCityLocations(geographyDirectory + "/GeoLite2-City-Locations-en.csv");
+  } else {
+    THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Locations-en.csv' file");
+  }
+
+  // load the IP version 4 subnet data
+  ipv4Subnets.clear();
+  if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoIP2-City-Blocks-IPv4.csv") ) {
+    loadIPv4Subnets(geographyDirectory + "/GeoIP2-City-Blocks-IPv4.csv");
+  } else if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoLite2-City-Blocks-IPv4.csv") ) {
+    loadIPv4Subnets(geographyDirectory + "/GeoLite2-City-Blocks-IPv4.csv");
+  } else {
+    THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Blocks-IPv4.csv' file");
+  }
+
+  // load the IP version 6 subnet data
+  ipv6Subnets.clear();
+  if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoIP2-City-Blocks-IPv6.csv") ) {
+    loadIPv6Subnets(geographyDirectory + "/GeoIP2-City-Blocks-IPv6.csv");
+  } else if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoLite2-City-Blocks-IPv6.csv") ) {
+    loadIPv6Subnets(geographyDirectory + "/GeoLite2-City-Blocks-IPv6.csv");
+  } else {
+    THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Blocks-IPv6.csv' file");
+  }
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "IPAddressLocation");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "IPAddressLocation");
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "IPAddressLocation");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "IPAddressLocation");
+}
+
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+}
+
+// Processing for source and threaded operators
+void MY_OPERATOR::process(uint32_t idx)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+}
+
+// Tuple processing for mutating ports
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+
+  SPL::AutoPortMutex automutex(processMutex, *this);
+
+  // increment tuple counter
+  tupleCounter++;
+
+  // point at the input tuple
+  const IPort0Type& iport$0 = tuple;
+
+  // fill in and submit output tuples, as selected by output filters, if specified
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+    {
+      <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
+      <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+      SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPAddressLocation");
+      submit(outTuple<%=$i%>, <%=$i%>);
+    }
+    <% } %> ;
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+}
+
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+
+  forwardWindowPunctuation(punct);
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+}
+
+
+<%SPL::CodeGen::implementationEpilogue($model);%>

@@ -22,9 +22,9 @@ logDirectory=$projectDirectory/log
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
-leasePort=23456
+lookupPort=23456
 
-leaseWindowOptions=(
+lookupWindowOptions=(
 -title "$self: DNS Lookups"
 -geometry 130x20
 +sb
@@ -63,7 +63,7 @@ submitParameterList=(
 -P "inputFilter=udp port 53"
 -P metricsInterval=1.0
 -P timeoutInterval=60.0
--P leasePort=$leasePort
+-P lookupPort=$lookupPort
 )
 
 tracing=info # ... one of ... off, error, warn, info, debug, trace
@@ -104,7 +104,7 @@ bundle=$buildDirectory/$namespace.$composite.sab
 streamtool submitjob -i $instance -d $domain --config tracing=$tracing "${submitParameterList[@]}" $bundle || die "sorry, could not submit application '$composite', $?"
 
 step "opening window for TCP stream from standalone application '$namespace.$composite' ..."
-( xterm "${leaseWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $leasePort && break ; sleep 1 ; done " ) &
+( xterm "${lookupWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $lookupPort && break ; sleep 1 ; done " ) &
 
 step "waiting while application runs ..."
 sleep 25
@@ -113,7 +113,7 @@ step "getting logs for instance $instance ..."
 streamtool getlog -i $instance -d $domain --includeapps --file $logDirectory/$composite.distributed.logs.tar.gz || die "sorry, could not get logs, $!"
 
 step "cancelling distributed application '$namespace.$composite' ..."
-jobs=$( streamtool lspes -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
+jobs=$( streamtool lsjobs -i $instance -d $domain | grep $namespace::$composite | gawk '{ print $1 }' )
 streamtool canceljob -i $instance -d $domain --collectlogs ${jobs[*]} || die "sorry, could not cancel application, $!"
 
 exit 0

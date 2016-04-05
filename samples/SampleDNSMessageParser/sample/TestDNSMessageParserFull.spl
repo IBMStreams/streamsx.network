@@ -6,8 +6,10 @@
 namespace sample;
 
 use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
 use com.ibm.streamsx.network.source::*;
 use com.ibm.streamsx.network.parse::*;
+use com.ibm.streamsx.network.datetimeformat::*;
 
 composite TestDNSMessageParserFull {
 
@@ -54,7 +56,13 @@ composite TestDNSMessageParserFull {
       list<rstring> DNS_ANSWER_DATA,
       rstring DNS_ANSWER_CANONICAL,
       rstring DNS_ANSWER_ADDRESS,
+      uint32 DNS_ANSWER_IPV4_ADDRESS_AS_NUMBER,
+      rstring DNS_ANSWER_IPV4_ADDRESS_AS_STRING,
+      list<uint8>[16] DNS_ANSWER_IPV6_ADDRESS_AS_NUMBER,
+      rstring DNS_ANSWER_IPV6_ADDRESS_AS_STRING,
       list<rstring> DNS_ANSWER_ADDRESSES,
+      list<uint32> DNS_ANSWER_IPV4_ADDRESSES,
+      list<list<uint8>[16]> DNS_ANSWER_IPV6_ADDRESSES,
       uint16 DNS_NAMESERVER_COUNT,
       list<rstring> DNS_NAMESERVER_NAMES,
       list<uint16> DNS_NAMESERVER_TYPES,
@@ -132,7 +140,13 @@ composite TestDNSMessageParserFull {
           DNS_ANSWER_DATA = DNS_ANSWER_DATA(),
           DNS_ANSWER_CANONICAL = DNS_ANSWER_CANONICAL(),
           DNS_ANSWER_ADDRESS = DNS_ANSWER_ADDRESS(),
+          DNS_ANSWER_IPV4_ADDRESS_AS_NUMBER = DNS_ANSWER_IPV4_ADDRESS(),
+          DNS_ANSWER_IPV4_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(DNS_ANSWER_IPV4_ADDRESS()),
+          DNS_ANSWER_IPV6_ADDRESS_AS_NUMBER = DNS_ANSWER_IPV6_ADDRESS(),
+          DNS_ANSWER_IPV6_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(DNS_ANSWER_IPV6_ADDRESS()),
           DNS_ANSWER_ADDRESSES = DNS_ANSWER_ADDRESSES(),
+          DNS_ANSWER_IPV4_ADDRESSES = DNS_ANSWER_IPV4_ADDRESSES(),
+          DNS_ANSWER_IPV6_ADDRESSES = DNS_ANSWER_IPV6_ADDRESSES(),
           DNS_NAMESERVER_COUNT = DNS_NAMESERVER_COUNT(),
           DNS_NAMESERVER_NAMES = DNS_NAMESERVER_NAMES(),
           DNS_NAMESERVER_TYPES = DNS_NAMESERVER_TYPES(),

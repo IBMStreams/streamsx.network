@@ -1,7 +1,7 @@
 <%
 
-## Copyright (C) 2011, 2015  International Business Machines Corporation
-## All Rights Reserved
+# Copyright (C) 2011, 2015  International Business Machines Corporation
+# All Rights Reserved
 
 %>
 
@@ -36,6 +36,7 @@ private:
 
   // ----------- operator state variables ----------
 
+  Mutex processMutex;
   uint64_t tupleCounter;
 
   // ----------- DNS message parser ----------
@@ -44,80 +45,130 @@ private:
 
   // ----------- assignment functions for output attributes ----------
 
+  inline __attribute__((always_inline))
   SPL::boolean parseError() { return parser.error ? true : false; }
 
+  inline __attribute__((always_inline))
   SPL::rstring parseErrorDescription() { return parser.error ? parser.error : ""; }
 
+  inline __attribute__((always_inline))
   SPL::uint32 parseErrorOffset() { return parser.error ? ( parser.dnsPointer - parser.dnsStart ) : 0; }
 
+  inline __attribute__((always_inline))
   SPL::uint64 messagesProcessed() { return tupleCounter; }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_IDENTIFIER() { return ntohs(parser.dnsHeader->identifier); }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DNS_OPCODE() { return parser.dnsHeader->opcodeField; }
 
+  inline __attribute__((always_inline))
   SPL::uint8 DNS_RESPONSE_CODE() { return parser.dnsHeader->responseCode; }
 
+  inline __attribute__((always_inline))
   SPL::boolean DNS_RESPONSE_FLAG() { return parser.dnsHeader->responseFlag; }
 
+  inline __attribute__((always_inline))
   SPL::boolean DNS_AUTHORITATIVE_FLAG() { return parser.dnsHeader->authoritativeFlag; }
 
+  inline __attribute__((always_inline))
   SPL::boolean DNS_TRUNCATION_FLAG() { return parser.dnsHeader->truncatedFlag; }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_QUESTION_COUNT() { return parser.questionCount; }
 
+  inline __attribute__((always_inline))
   SPL::rstring DNS_QUESTION_NAME() { return parser.questionRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.questionRecords[0].name) : ""; }
 
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_QUESTION_NAMES() { return parser.convertResourceNamesToStringList(parser.questionRecords, parser.questionRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_QUESTION_TYPE() { return parser.questionRecordCount>0 ? parser.questionRecords[0].type : 0; }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_QUESTION_TYPES() { return parser.convertResourceTypesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_QUESTION_CLASS() { return parser.questionRecordCount>0 ? parser.questionRecords[0].classs : 0; }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_QUESTION_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_ANSWER_COUNT() { return parser.answerCount; }
 
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ANSWER_NAMES() { return parser.convertResourceNamesToStringList(parser.answerRecords, parser.answerRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_ANSWER_TYPES() { return parser.convertResourceTypesToIntegerList(parser.answerRecords, parser.answerRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_ANSWER_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.answerRecords, parser.answerRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint32> DNS_ANSWER_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.answerRecords, parser.answerRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ANSWER_DATA() { return parser.convertResourceDataToStringList(parser.answerRecords, parser.answerRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::rstring DNS_ANSWER_CANONICAL() { return parser.canonicalRecordCount>0 ? parser.convertResourceDataToString(parser.canonicalRecords[0]) : ""; }
 
+  inline __attribute__((always_inline))
   SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertResourceDataToString(parser.addressRecords[0]) : ""; }
 
+  inline __attribute__((always_inline))
+  SPL::uint32 DNS_ANSWER_IPV4_ADDRESS() { return parser.addressRecordCount>0 && parser.addressRecords[0].type==1 ? ntohl(*((uint32*)parser.addressRecords[0].rdata)) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> DNS_ANSWER_IPV6_ADDRESS() { return parser.addressRecordCount>0 && parser.addressRecords[0].type==28 ? SPL::list<SPL::uint8>(parser.addressRecords[0].rdata,parser.addressRecords[0].rdata+16) : SPL::list<SPL::uint8>(); }
+
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ANSWER_ADDRESSES() { return parser.convertResourceDataToStringList(parser.addressRecords, parser.addressRecordCount); }
 
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint32> DNS_ANSWER_IPV4_ADDRESSES() { return parser.convertResourceDataToIPv4AddressList(parser.addressRecords, parser.addressRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::list<SPL::uint8> > DNS_ANSWER_IPV6_ADDRESSES() { return parser.convertResourceDataToIPv6AddressList(parser.addressRecords, parser.addressRecordCount); }
+
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_NAMESERVER_COUNT() { return parser.nameserverCount; }
 
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_NAMESERVER_NAMES() { return parser.convertResourceNamesToStringList(parser.nameserverRecords, parser.nameserverRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_NAMESERVER_TYPES() { return parser.convertResourceTypesToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_NAMESERVER_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint32> DNS_NAMESERVER_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_NAMESERVER_DATA() { return parser.convertResourceDataToStringList(parser.nameserverRecords, parser.nameserverRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_ADDITIONAL_COUNT() { return parser.additionalCount; }
 
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ADDITIONAL_NAMES() { return parser.convertResourceNamesToStringList(parser.additionalRecords, parser.additionalRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_ADDITIONAL_TYPES() { return parser.convertResourceTypesToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint16> DNS_ADDITIONAL_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<uint32> DNS_ADDITIONAL_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
 
+  inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ADDITIONAL_DATA() { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount); }
 
 };
