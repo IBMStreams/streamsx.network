@@ -9,9 +9,6 @@ use com.ibm.streamsx.network.source::*;
  * sends the packet data to a file.
  *
  * Parameters:
- *   pmdDriver: Absolute path to the DPDK PMD drivers on the system.
- *              Note that only the first instance of the PacketDPDKSource
- *              must set this parm.  All others are ignored.
  *   coreMask : Hex bit mask listing the cores used for DPDK polling loops.
  *              The low order bit corresponds to the master lcore and all
  *              other bits indicate cores that will be assigned to 
@@ -32,12 +29,10 @@ type PacketData = uint64 timestampMicroseconds,
 public composite TestPacketDPDKSource {   
 	graph   
         // One instance per NIC port/queue -- e.g. 4 NICs each with
-	// a single queue require 4 instances.  Note that the pmdDriver
-	// and coreMask parameters should be constant for all instances.
+	// a single queue require 4 instances.  Note that the coreMask 
+        // parameter should be constant for all instances.
         (stream<PacketData>  PacketStream_0 ) = PacketDPDKSource() {
             param
-		pmdDriver: "/home/engebret/apps/network/dpdk-2.1.0/build/lib/librte_pmd_e1000.so";
-		// pmdDriver: " ";
                 coreMask: "0x3";
                 lcore   : 1;
                 nicPort : 0;
@@ -58,8 +53,6 @@ public composite TestPacketDPDKSource {
 /*
         (stream<PacketData>  PacketStream_1 ) = PacketDPDKSource() {
             param
-		// pmdDriver: "/home/engebret/apps/network/dpdk-2.0.0/build/lib/librte_pmd_e1000.so";
-		pmdDriver: " ";
                 coreMask: "0x7";
                 lcore   : 2;
                 nicPort : 1;

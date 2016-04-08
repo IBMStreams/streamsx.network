@@ -22,8 +22,8 @@ extern "C" {
                   unsigned int len,
 	          uint64_t timestamp);
 
-    int streams_source_init(const char *pmdDriver, const char *coreMask, 
-	    streams_packet_cb_t callback, int lcore, int nicPort, int nicQueue,
+    int streams_source_init(const char *coreMask, streams_packet_cb_t callback, 
+            int lcore, int nicPort, int nicQueue,
 	    int promiscuous, void *user);
 
     uint64_t streams_source_get_tsc_hz(void);

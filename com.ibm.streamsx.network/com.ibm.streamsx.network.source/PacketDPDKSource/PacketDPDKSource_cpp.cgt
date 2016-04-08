@@ -30,10 +30,7 @@ my $myOperatorKind = $model->getContext()->getKind();
 my @outputPortList = @{ $model->getOutputPorts() };
 
 # Get C++ expressions for getting the values of this operator's parameters.
-my $pmdDriver = $model->getParameterByName("pmdDriver")->getValueAt(0)->getCppExpression();
-
 my $coreMask = $model->getParameterByName("coreMask")->getValueAt(0)->getCppExpression();
-
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
@@ -70,7 +67,6 @@ void dpdkCallback(void *correlator, void *data,
 
 MY_OPERATOR::MY_OPERATOR() {
     // Get the operator's parameters into variables.
-    const char* pmdDriver = <%=$pmdDriver%>.c_str();
     const char* coreMask  = <%=$coreMask%>.c_str();
     const bool promiscuous = <%=$promiscuous%>;
     lcore = <%=$lcore%>;
@@ -79,15 +75,14 @@ MY_OPERATOR::MY_OPERATOR() {
     metricsInterval = <%=$metricsInterval%>;
 
     // Initialize the DPDK subsystem.
-    int rc = streams_source_init(pmdDriver, coreMask, &dpdkCallback,
+    int rc = streams_source_init(coreMask, &dpdkCallback,
                                  lcore, nicPort, nicQueue, 
 				 (int)promiscuous, (void*)this);
 
     SPLLOG(L_TRACE, "streams_source_init() on lcore = " << lcore <<
            ", nicPort = " << nicPort <<
            ", nicQueue = " << nicQueue <<
-           " completed.  Return code = " << rc << 
-           ".  Used pmdDriver: " << pmdDriver, 
+           " completed.  Return code = " << rc,
            "PacketDPDKSource"); 
 
     tscHz = streams_source_get_tsc_hz(); 

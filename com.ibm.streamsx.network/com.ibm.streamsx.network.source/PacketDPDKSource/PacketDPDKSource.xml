@@ -219,15 +219,6 @@
     <parameters>
     <allowAny>false</allowAny>
     <parameter>
-      <name>pmdDriver</name>
-      <description> </description>
-      <optional>false</optional>
-      <rewriteAllowed>true</rewriteAllowed>
-      <expressionMode>Expression</expressionMode>
-      <type>rstring</type>
-      <cardinality>-1</cardinality>
-    </parameter>
-    <parameter>
       <name>coreMask</name>
       <description> </description>
       <optional>false</optional>

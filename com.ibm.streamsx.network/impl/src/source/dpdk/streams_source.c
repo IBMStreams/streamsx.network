@@ -55,9 +55,8 @@ uint64_t streams_source_get_tsc_hz(void) {
  * should always be serialized as they run on a single thread.  However,
  * to be safe a mutex is used here to ensure the calls are in fact serialized.
  */
-// TODO remove pmdDriver here 
-int streams_source_init(const char *pmdDriver, const char *coreMask, 
-	streams_packet_cb_t callback, int lcore, int nicPort, int nicQueue,
+int streams_source_init(const char *coreMask, streams_packet_cb_t callback, 
+        int lcore, int nicPort, int nicQueue,
 	int promiscuous, void *user) {
     int ret;
     pthread_mutex_lock(&mutexInit);   
