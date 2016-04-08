@@ -21,7 +21,7 @@
 # implementation below
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
-require OutputAssignmentGenerator;
+require CodeGenX;
 
 # get the name of this operator's template
 my $myOperatorKind = $model->getContext()->getKind();
@@ -171,12 +171,11 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
     // Fill in and submit output tuples to output ports, as selected by 
     // output filters, if specified.
     <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-	{
-	    outTuple<%=$i%>.clear();
-	    <% OutputAssignmentGenerator::generate("outTuple$i", $model->getOutputPortAt($i)); %> ;
-	    SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketLiveSource");
-	    submit(outTuple<%=$i%>, <%=$i%>);
-	}
+       {
+         <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+         SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketLiveSource");
+         submit(outTuple<%=$i%>, <%=$i%>);
+       }
     <% } %> ;
 }
 

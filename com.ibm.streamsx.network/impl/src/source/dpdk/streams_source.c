@@ -26,7 +26,7 @@
 
 #include "streams_source.h"
 
-#define ARGN 7
+#define ARGN 5
 
 pthread_mutex_t mutexInit;
 int32_t  initComplete = 0;
@@ -55,6 +55,7 @@ uint64_t streams_source_get_tsc_hz(void) {
  * should always be serialized as they run on a single thread.  However,
  * to be safe a mutex is used here to ensure the calls are in fact serialized.
  */
+// TODO remove pmdDriver here 
 int streams_source_init(const char *pmdDriver, const char *coreMask, 
 	streams_packet_cb_t callback, int lcore, int nicPort, int nicQueue,
 	int promiscuous, void *user) {
@@ -102,17 +103,12 @@ int streams_source_init(const char *pmdDriver, const char *coreMask,
     strncpy(arg2, coreMask, MAX_COREMASK);
     char arg3[]="-n";
     char arg4[]="4";
-    char arg5[]="-d";
-    char arg6[MAX_COREMASK];
-    strncpy(arg6, pmdDriver, MAX_COREMASK);
 
     rte_arg[0]=arg0;
     rte_arg[1]=arg1;
     rte_arg[2]=arg2;
     rte_arg[3]=arg3;
     rte_arg[4]=arg4;
-    rte_arg[5]=arg5;	
-    rte_arg[6]=arg6;	
 
     optind = 0; // Reset getopt state as it is called again in rte_eal_init.
 
