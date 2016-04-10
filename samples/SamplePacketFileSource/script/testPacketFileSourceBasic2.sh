@@ -47,7 +47,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
-processorAffinity=3
+processorAffinity=1
 metricsInterval=1.0
 )
 

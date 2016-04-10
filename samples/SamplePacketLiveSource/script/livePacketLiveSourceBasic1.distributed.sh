@@ -21,6 +21,8 @@ logDirectory=$projectDirectory/log
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
+networkInterface=$( ifconfig eno1 1>/dev/null 2>&1 && echo eno1 || echo eth0 ) 
+
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 domain=CapabilitiesDomain
@@ -49,7 +51,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=eno1
+networkInterface=$networkInterface
 timeoutInterval=30
 )
 

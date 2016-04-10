@@ -23,7 +23,9 @@ dataDirectory=$projectDirectory/data
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
-libpamDirectory=$HOME/com.ibm.iss.pam
+libpamDirectory=$HOME/workspace/com.ibm.iss.pam
+
+networkInterface=$( ifconfig ens6f1 1>/dev/null 2>&1 && echo ens6f1 || echo eth0 ) 
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
@@ -50,8 +52,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=ens6f1
-processorAffinity=3
+networkInterface=$networkInterface
+processorAffinity=1
 applicationTimeout=60.0
 )
 

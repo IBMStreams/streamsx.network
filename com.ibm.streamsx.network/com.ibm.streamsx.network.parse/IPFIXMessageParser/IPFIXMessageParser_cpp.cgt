@@ -144,7 +144,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   // parse the flow records in the IPFIX message, submitting output tuples to output ports, as selected by output filters, if specified
   while( !parser.error && !parser.done )
     {
-      parser.nextDataRecord();
+      parser.nextFlowRecord();
       if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "IPFIXMessageParser"); break; }
       if ( parser.done ) { break; }
       <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
