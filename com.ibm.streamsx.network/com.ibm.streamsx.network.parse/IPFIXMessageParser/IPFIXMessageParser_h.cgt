@@ -78,7 +78,7 @@ private:
   SPL::list<uint8> IPFIX_enterpriseFieldAsByteList(SPL::int32 field) { return parser.ipfixEnterpriseFieldAsByteList(field); }
 
   inline __attribute__((always_inline))
-  SPL::uint32 IPFIX_fieldEnterpriseIdentifier(SPL::int32 field) { return parser.ipfixEnterpriseIdentifier(field); }
+  SPL::uint32 IPFIX_enterpriseIdentifier(SPL::int32 field) { return parser.ipfixEnterpriseIdentifier(field); }
 
 
   inline __attribute__((always_inline))

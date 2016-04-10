@@ -1,0 +1,211 @@
+/*
+** Copyright (C) 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+use com.ibm.streamsx.network.datetimeformat::*;
+
+composite TestIPFIXMessageParserDecapper {
+
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_ipfix_decapper.pcap" );
+
+    type
+
+    PacketType =
+        float64 captureTime,          // time that packet was captured, in seconds since Unix epoch
+        uint32 ipfixSource,           // IP source address of IPFIX message
+        blob ipfixMessage;            // the IPFIX message from a packet, excluding all network headers
+
+    IPFIXMessageType =
+        rstring captureTime,                   // time that packet was captured, in seconds since Unix epoch
+        uint64  messageNumber,                 // sequence number of message
+        rstring ipProtocol,                    // standard field 4, IP protocol byte
+        uint8   ipTOS,                         // standard field 5, IP class of service
+        rstring ipSourceAddress,               // standard field 8 or 27, IP source address
+        uint16  ipSourcePort,                  // standard field 7, IP source port
+        rstring ipDestinationAddress,          // standard field 12 or 28, IP destination address
+        uint16  ipDestinationPort,             // standard field 11, IP destination port
+        uint64  flowIdentifier,                // standard field 148, flow identifier
+        uint64  flowByteCount,                 // standard field 1, byte count
+        uint64  flowPacketCount,               // standard field 2, packet count
+        rstring flowStartTime,                 // standard field 152, flow start time, in milliseconds since Unix epoch
+        rstring flowEndTime;                   // standard field 153, flow end time, in milliseconds since Unix epoch
+
+    DecapperMessageType =
+        rstring captureTime,                   // time that packet was captured, in seconds since Unix epoch
+        uint64  messageNumber,                 // sequence number of message
+        rstring ipProtocol,                    // standard field 4, IP protocol byte
+        rstring ipSourceAddress,               // standard field 8 or 27, IP source address
+        uint16  ipSourcePort,                  // standard field 7, IP source port
+        rstring ipDestinationAddress,          // standard field 12 or 28, IP destination address
+        uint16  ipDestinationPort,             // standard field 11, IP destination port
+        uint64  flowIdentifier,                // standard field 148, flow identifier
+        rstring flowStartTime,                 // standard field 152, flow start time, in milliseconds since Unix epoch
+        rstring usernamePrimary,               // Decapper enterprise field 19
+        rstring usernameSecondary,             // Decapper enterprise field 20
+        rstring httpURL,                       // Decapper enterprise field 21
+        rstring httpContentType,               // Decapper enterprise field 31
+        rstring httpHostname,                  // Decapper enterprise field 33
+        uint16  httpResponseCode,              // Decapper enterprise field 35 
+        rstring httpServer,                    // Decapper enterprise field 36
+        rstring httpUserAgent,                 // Decapper enterprise field 37
+        rstring httpVersion,                   // Decapper enterprise field 38
+        rstring webCategory,                   // Decapper enterprise field 53
+        rstring fileName,                      // Decapper enterprise field 43
+        rstring fileHash,                      // Decapper enterprise field 55
+        uint64  fileSize,                      // Decapper enterprise field 56 
+        uint8   aggregationControl;            // Decapper enterprise field 57 
+
+    HTTPMessageType =
+        rstring captureTime,                   // time that packet was captured, in seconds since Unix epoch
+        uint64  messageNumber,                 // sequence number of message
+        rstring ipProtocol,                    // standard field 4, IP protocol byte
+        rstring ipSourceAddress,               // standard field 8 or 27, IP source address
+        uint16  ipSourcePort,                  // standard field 7, IP source port
+        rstring ipDestinationAddress,          // standard field 12 or 28, IP destination address
+        uint16  ipDestinationPort,             // standard field 11, IP destination port
+        uint64  flowIdentifier,                // standard field 148, flow identifier
+        rstring flowStartTime,                 // standard field 152, flow start time, in milliseconds since Unix epoch
+        rstring httpURL,                       // Decapper enterprise field 21
+        rstring httpContentType,               // Decapper enterprise field 31
+        rstring httpHostname,                  // Decapper enterprise field 33
+        uint16  httpResponseCode,              // Decapper enterprise field 35 
+        rstring httpServer,                    // Decapper enterprise field 36
+        rstring httpUserAgent,                 // Decapper enterprise field 37
+        rstring httpVersion,                   // Decapper enterprise field 38
+        rstring webCategory,                   // Decapper enterprise field 53
+        rstring fileName,                      // Decapper enterprise field 43
+        rstring fileHash,                      // Decapper enterprise field 55
+        uint64  fileSize;                      // Decapper enterprise field 56 
+
+    UsernameMessageType =
+        rstring captureTime,                   // time that packet was captured, in seconds since Unix epoch
+        uint64  messageNumber,                 // sequence number of message
+        rstring ipProtocol,                    // standard field 4, IP protocol byte
+        rstring ipSourceAddress,               // standard field 8 or 27, IP source address
+        uint16  ipSourcePort,                  // standard field 7, IP source port
+        rstring ipDestinationAddress,          // standard field 12 or 28, IP destination address
+        uint16  ipDestinationPort,             // standard field 11, IP destination port
+        uint64  flowIdentifier,                // standard field 148, flow identifier
+        rstring flowStartTime,                 // standard field 152, flow start time, in milliseconds since Unix epoch
+        rstring usernamePrimary,               // Decapper enterprise field 19
+        rstring usernameSecondary,             // Decapper enterprise field 20
+        rstring fileName,                      // Decapper enterprise field 43
+        rstring fileHash,                      // Decapper enterprise field 55
+        uint64  fileSize;                      // Decapper enterprise field 56 
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 2055";
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipfixSource = IPV4_SRC_ADDRESS(),
+            ipfixMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPFIXMessageParserDecapper.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+    ( stream<IPFIXMessageType> AllMessageStream as OutAll ;
+      stream<DecapperMessageType> DecapperMessageStream as OutDecapper ;
+      stream<HTTPMessageType> HTTPMessageStream as OutHTTP ;
+      stream<UsernameMessageType> UsernameMessageStream as OutUsername ) = IPFIXMessageParser(PacketStream) {
+      logic state: { map<uint8,rstring> ipProtocols = { 1: "icmp", 6: "tcp", 17: "udp" }; }
+      param
+          messageAttribute: ipfixMessage;
+          sourceAttribute: ipfixSource;
+          outputFilters: !parseError(), 
+                         !parseError() && IPFIX_enterpriseIdentifier(57)==2u,
+                         !parseError() && IPFIX_enterpriseIdentifier(57)==2u && IPFIX_enterpriseFieldAsString(21)!="",
+                         !parseError() && IPFIX_enterpriseIdentifier(57)==2u && IPFIX_enterpriseFieldAsString(19)!="";
+      output 
+      OutAll:
+          captureTime = formatEpochDateTime(captureTime),
+          messageNumber = messagesProcessed(),
+          ipProtocol = IPFIX_protocolIdentifier() in ipProtocols ? ipProtocols[IPFIX_protocolIdentifier()] : (rstring)IPFIX_protocolIdentifier(),
+          ipTOS = IPFIX_ipClassOfService(),
+          ipSourceAddress = IPFIX_sourceIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_sourceIPv4Address()) : size(IPFIX_sourceIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_sourceIPv6Address())  : "",
+          ipSourcePort = IPFIX_sourceTransportPort(),
+          ipDestinationAddress = IPFIX_destinationIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_destinationIPv4Address()) : size(IPFIX_destinationIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_destinationIPv6Address())  : "",
+          ipDestinationPort = IPFIX_destinationTransportPort(),
+          flowIdentifier = IPFIX_flowId(),
+          flowByteCount = IPFIX_octetDeltaCount(),
+          flowPacketCount = IPFIX_packetDeltaCount(),
+          flowStartTime= formatEpochDateTime( (float64)IPFIX_flowStartMilliseconds() / 1000.0 , 3u ),
+          flowEndTime = formatEpochDateTime( (float64)IPFIX_flowEndMilliseconds() / 1000.0 , 3u );
+      OutDecapper:
+          captureTime = formatEpochDateTime(captureTime),
+          messageNumber = messagesProcessed(),
+          ipProtocol = IPFIX_protocolIdentifier() in ipProtocols ? ipProtocols[IPFIX_protocolIdentifier()] : (rstring)IPFIX_protocolIdentifier(),
+          ipSourceAddress = IPFIX_sourceIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_sourceIPv4Address()) : size(IPFIX_sourceIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_sourceIPv6Address())  : "",
+          ipSourcePort = IPFIX_sourceTransportPort(),
+          ipDestinationAddress = IPFIX_destinationIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_destinationIPv4Address()) : size(IPFIX_destinationIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_destinationIPv6Address())  : "",
+          ipDestinationPort = IPFIX_destinationTransportPort(),
+          flowIdentifier = IPFIX_flowId(),
+          flowStartTime= formatEpochDateTime( (float64)IPFIX_flowStartMilliseconds() / 1000.0 , 3u ),
+          usernamePrimary = IPFIX_enterpriseFieldAsString(19),             
+          usernameSecondary = (rstring)IPFIX_enterpriseFieldAsByteList(20),           
+          httpURL = IPFIX_enterpriseFieldAsString(21),                     
+          httpContentType = IPFIX_enterpriseFieldAsString(31),             
+          httpHostname = IPFIX_enterpriseFieldAsString(33),                
+          httpResponseCode = (uint16)IPFIX_enterpriseFieldAsInteger(35),   
+          httpServer = IPFIX_enterpriseFieldAsString(36),                  
+          httpUserAgent = IPFIX_enterpriseFieldAsString(37),               
+          httpVersion = IPFIX_enterpriseFieldAsString(38),                 
+          webCategory = (rstring)IPFIX_enterpriseFieldAsByteList(53),      
+          fileName = IPFIX_enterpriseFieldAsString(43),         
+          fileHash = (rstring)IPFIX_enterpriseFieldAsByteList(55),         
+          fileSize = IPFIX_enterpriseFieldAsInteger(56),                   
+          aggregationControl = (uint8)IPFIX_enterpriseFieldAsInteger(57);  
+      OutHTTP:
+          captureTime = formatEpochDateTime(captureTime),
+          messageNumber = messagesProcessed(),
+          ipProtocol = IPFIX_protocolIdentifier() in ipProtocols ? ipProtocols[IPFIX_protocolIdentifier()] : (rstring)IPFIX_protocolIdentifier(),
+          ipSourceAddress = IPFIX_sourceIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_sourceIPv4Address()) : size(IPFIX_sourceIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_sourceIPv6Address())  : "",
+          ipSourcePort = IPFIX_sourceTransportPort(),
+          ipDestinationAddress = IPFIX_destinationIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_destinationIPv4Address()) : size(IPFIX_destinationIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_destinationIPv6Address())  : "",
+          ipDestinationPort = IPFIX_destinationTransportPort(),
+          flowIdentifier = IPFIX_flowId(),
+          flowStartTime= formatEpochDateTime( (float64)IPFIX_flowStartMilliseconds() / 1000.0 , 3u ),
+          httpURL = IPFIX_enterpriseFieldAsString(21),                     
+          httpContentType = IPFIX_enterpriseFieldAsString(31),             
+          httpHostname = IPFIX_enterpriseFieldAsString(33),                
+          httpResponseCode = (uint16)IPFIX_enterpriseFieldAsInteger(35),   
+          httpServer = IPFIX_enterpriseFieldAsString(36),                  
+          httpUserAgent = IPFIX_enterpriseFieldAsString(37),               
+          httpVersion = IPFIX_enterpriseFieldAsString(38),                 
+          webCategory = (rstring)IPFIX_enterpriseFieldAsByteList(53),      
+          fileName = IPFIX_enterpriseFieldAsString(43),         
+          fileHash = (rstring)IPFIX_enterpriseFieldAsByteList(55),         
+          fileSize = IPFIX_enterpriseFieldAsInteger(56);                   
+      OutUsername:
+          captureTime = formatEpochDateTime(captureTime),
+          messageNumber = messagesProcessed(),
+          ipProtocol = IPFIX_protocolIdentifier() in ipProtocols ? ipProtocols[IPFIX_protocolIdentifier()] : (rstring)IPFIX_protocolIdentifier(),
+          ipSourceAddress = IPFIX_sourceIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_sourceIPv4Address()) : size(IPFIX_sourceIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_sourceIPv6Address())  : "",
+          ipSourcePort = IPFIX_sourceTransportPort(),
+          ipDestinationAddress = IPFIX_destinationIPv4Address()>0u ? convertIPV4AddressNumericToString(IPFIX_destinationIPv4Address()) : size(IPFIX_destinationIPv6Address())>0 ? convertIPV6AddressNumericToString(IPFIX_destinationIPv6Address())  : "",
+          ipDestinationPort = IPFIX_destinationTransportPort(),
+          flowIdentifier = IPFIX_flowId(),
+          flowStartTime= formatEpochDateTime( (float64)IPFIX_flowStartMilliseconds() / 1000.0 , 3u ),
+          usernamePrimary = IPFIX_enterpriseFieldAsString(19),             
+          usernameSecondary = (rstring)IPFIX_enterpriseFieldAsByteList(20),           
+          fileName = IPFIX_enterpriseFieldAsString(43),         
+          fileHash = (rstring)IPFIX_enterpriseFieldAsByteList(55),         
+          fileSize = IPFIX_enterpriseFieldAsInteger(56);                   
+    }
+    () as AllMessageSink = FileSink(AllMessageStream) { param file: "debug.TestIPFIXMessageParserDecapper.AllMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DecapperMessageSink = FileSink(DecapperMessageStream) { param file: "debug.TestIPFIXMessageParserDecapper.DecapperMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as HTTPMessageSink = FileSink(HTTPMessageStream) { param file: "debug.TestIPFIXMessageParserDecapper.HTTPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as UsernameMessageSink = FileSink(UsernameMessageStream) { param file: "debug.TestIPFIXMessageParserDecapper.UsernameMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+}
