@@ -1,4 +1,4 @@
-#Wed Feb 10 09:56:38 EST 2016
+#Tue Apr 12 10:17:34 EDT 2016
 copytosourcelist=
 hreftargetslist=tk$SampleAddressFunctions/ns$sample.xml,tk$SampleAddressFunctions/ix$Namespace.xml,toolkits/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleAddressFunctions/tk$SampleAddressFunctions.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/streamsadmin/git/streamsx.network/samples/SampleAddressFunctions/doc/spldoc/dita
+user.input.dir=/home/pring/git/streamsx.network/samples/SampleAddressFunctions/doc/spldoc/dita
 uplevels=
 tempdirToinputmapdir.relative.value=
 conrefpushfile=conrefpush.list
