@@ -49,7 +49,7 @@ composite TestIPFIXMessageParserDecapper {
         uint64  flowIdentifier,                // standard field 148, flow identifier
         rstring flowStartTime,                 // standard field 152, flow start time, in milliseconds since Unix epoch
         rstring usernamePrimary,               // Decapper enterprise field 19
-        rstring usernameSecondary,             // Decapper enterprise field 20
+        list<rstring> usernameSecondary,             // Decapper enterprise field 20
         rstring httpURL,                       // Decapper enterprise field 21
         rstring httpContentType,               // Decapper enterprise field 31
         rstring httpHostname,                  // Decapper enterprise field 33
@@ -57,7 +57,7 @@ composite TestIPFIXMessageParserDecapper {
         rstring httpServer,                    // Decapper enterprise field 36
         rstring httpUserAgent,                 // Decapper enterprise field 37
         rstring httpVersion,                   // Decapper enterprise field 38
-        rstring webCategory,                   // Decapper enterprise field 53
+        list<rstring> webCategory,                   // Decapper enterprise field 53
         rstring fileName,                      // Decapper enterprise field 43
         rstring fileHash,                      // Decapper enterprise field 55
         uint64  fileSize,                      // Decapper enterprise field 56 
@@ -80,7 +80,7 @@ composite TestIPFIXMessageParserDecapper {
         rstring httpServer,                    // Decapper enterprise field 36
         rstring httpUserAgent,                 // Decapper enterprise field 37
         rstring httpVersion,                   // Decapper enterprise field 38
-        rstring webCategory,                   // Decapper enterprise field 53
+        list<rstring> webCategory,                   // Decapper enterprise field 53
         rstring fileName,                      // Decapper enterprise field 43
         rstring fileHash,                      // Decapper enterprise field 55
         uint64  fileSize;                      // Decapper enterprise field 56 
@@ -96,7 +96,7 @@ composite TestIPFIXMessageParserDecapper {
         uint64  flowIdentifier,                // standard field 148, flow identifier
         rstring flowStartTime,                 // standard field 152, flow start time, in milliseconds since Unix epoch
         rstring usernamePrimary,               // Decapper enterprise field 19
-        rstring usernameSecondary,             // Decapper enterprise field 20
+        list<rstring> usernameSecondary,             // Decapper enterprise field 20
         rstring fileName,                      // Decapper enterprise field 43
         rstring fileHash,                      // Decapper enterprise field 55
         uint64  fileSize;                      // Decapper enterprise field 56 
@@ -113,7 +113,7 @@ composite TestIPFIXMessageParserDecapper {
             ipfixSource = IPV4_SRC_ADDRESS(),
             ipfixMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPFIXMessageParserDecapper.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPFIXMessageParserDecapper.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     ( stream<IPFIXMessageType> AllMessageStream as OutAll ;
       stream<DecapperMessageType> DecapperMessageStream as OutDecapper ;
@@ -153,7 +153,7 @@ composite TestIPFIXMessageParserDecapper {
           flowIdentifier = IPFIX_flowId(),
           flowStartTime= formatEpochDateTime( (float64)IPFIX_flowStartMilliseconds() / 1000.0 , 3u ),
           usernamePrimary = IPFIX_enterpriseFieldAsString(19),             
-          usernameSecondary = (rstring)IPFIX_enterpriseFieldAsByteList(20),           
+          usernameSecondary = IPFIX_enterpriseBasicListFieldElementIdentifier(20)==60uh ? IPFIX_enterpriseBasicListFieldAsStrings(20) : (list<rstring>)[],                        
           httpURL = IPFIX_enterpriseFieldAsString(21),                     
           httpContentType = IPFIX_enterpriseFieldAsString(31),             
           httpHostname = IPFIX_enterpriseFieldAsString(33),                
@@ -161,7 +161,7 @@ composite TestIPFIXMessageParserDecapper {
           httpServer = IPFIX_enterpriseFieldAsString(36),                  
           httpUserAgent = IPFIX_enterpriseFieldAsString(37),               
           httpVersion = IPFIX_enterpriseFieldAsString(38),                 
-          webCategory = (rstring)IPFIX_enterpriseFieldAsByteList(53),      
+          webCategory = IPFIX_enterpriseBasicListFieldElementIdentifier(53)==62uh ? IPFIX_enterpriseBasicListFieldAsStrings(53) : (list<rstring>)[],      
           fileName = IPFIX_enterpriseFieldAsString(43),         
           fileHash = (rstring)IPFIX_enterpriseFieldAsByteList(55),         
           fileSize = IPFIX_enterpriseFieldAsInteger(56),                   
@@ -183,7 +183,7 @@ composite TestIPFIXMessageParserDecapper {
           httpServer = IPFIX_enterpriseFieldAsString(36),                  
           httpUserAgent = IPFIX_enterpriseFieldAsString(37),               
           httpVersion = IPFIX_enterpriseFieldAsString(38),                 
-          webCategory = (rstring)IPFIX_enterpriseFieldAsByteList(53),      
+          webCategory = IPFIX_enterpriseBasicListFieldElementIdentifier(53)==60uh ? IPFIX_enterpriseBasicListFieldAsStrings(53) : (list<rstring>)[],           
           fileName = IPFIX_enterpriseFieldAsString(43),         
           fileHash = (rstring)IPFIX_enterpriseFieldAsByteList(55),         
           fileSize = IPFIX_enterpriseFieldAsInteger(56);                   
@@ -198,7 +198,7 @@ composite TestIPFIXMessageParserDecapper {
           flowIdentifier = IPFIX_flowId(),
           flowStartTime= formatEpochDateTime( (float64)IPFIX_flowStartMilliseconds() / 1000.0 , 3u ),
           usernamePrimary = IPFIX_enterpriseFieldAsString(19),             
-          usernameSecondary = (rstring)IPFIX_enterpriseFieldAsByteList(20),           
+          usernameSecondary = IPFIX_enterpriseBasicListFieldElementIdentifier(20)==62uh ? IPFIX_enterpriseBasicListFieldAsStrings(20) : (list<rstring>)[],               
           fileName = IPFIX_enterpriseFieldAsString(43),         
           fileHash = (rstring)IPFIX_enterpriseFieldAsByteList(55),         
           fileSize = IPFIX_enterpriseFieldAsInteger(56);                   
