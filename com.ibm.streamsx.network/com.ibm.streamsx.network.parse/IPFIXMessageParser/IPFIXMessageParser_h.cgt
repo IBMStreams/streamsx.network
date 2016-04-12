@@ -82,6 +82,25 @@ private:
 
 
   inline __attribute__((always_inline))
+    SPL::list<SPL::uint64> IPFIX_enterpriseBasicListFieldAsIntegers(SPL::int32 field) { return parser.ipfixBasicListFieldAsIntegers(field); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::rstring> IPFIX_enterpriseBasicListFieldAsStrings(SPL::int32 field) { return parser.ipfixBasicListFieldAsStrings(field); }
+
+  inline __attribute__((always_inline))
+  SPL::list< SPL::list<uint8> > IPFIX_enterpriseBasicListFieldAsByteLists(SPL::int32 field) { return parser.ipfixBasicListFieldAsByteLists(field); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IPFIX_enterpriseBasicListFieldSemantic(SPL::int32 field) { return parser.ipfixBasicListFieldSemantic(field); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 IPFIX_enterpriseBasicListFieldElementIdentifier(SPL::int32 field) { return parser.ipfixBasicListFieldElementIdentifier(field); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPFIX_enterpriseBasicListFieldEnterpriseIdentifier(SPL::int32 field) { return parser.ipfixBasicListFieldEnterpriseIdentifier(field); }
+
+
+  inline __attribute__((always_inline))
   SPL::uint64 IPFIX_octetDeltaCount() { return parser.ipfixStandardFieldAsInteger(1); }
 
   inline __attribute__((always_inline))
