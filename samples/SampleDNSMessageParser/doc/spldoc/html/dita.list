@@ -1,4 +1,4 @@
-#Wed Feb 10 09:56:56 EST 2016
+#Tue Apr 12 10:17:49 EDT 2016
 copytosourcelist=
 hreftargetslist=tk$SampleDNSMessageParser/ns$sample.xml,tk$SampleDNSMessageParser/tk$SampleDNSMessageParser.xml,toolkits/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleDNSMessageParser/ix$Namespace.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/streamsadmin/git/streamsx.network/samples/SampleDNSMessageParser/doc/spldoc/dita
+user.input.dir=/home/pring/git/streamsx.network/samples/SampleDNSMessageParser/doc/spldoc/dita
 uplevels=
 tempdirToinputmapdir.relative.value=
 conrefpushfile=conrefpush.list
