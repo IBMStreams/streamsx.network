@@ -31,26 +31,33 @@ http://dpdk.org. The library must be installed on the machine where this
 operator executes.   It has been tested with the following versions:
   DPDK 2.0
   DPDK 2.1
+  DPDK 2.2
 
 There are very good documents for DPDK build/install/use that should be 
 referenced.  Here are some notes of the steps that will help getting started
 on Streams:
   - Download & untar the dpdk.tgz file from dpdk.org.
+
   - Set environment variables (these are needed for DPDK & Streams builds):
     export EXTRA_CFLAGS=-fPIC
     export RTE_TARGET=x86_64-native-linuxapp-gcc
       OR
     export RTE_TARGET=ppc_64-default-linuxapp-gcc
     export RTE_SDK=/home/userid/dpdk-2.0.0 (point to install directory)
+
   - Configure the DPDK build from the top directory
     make config T=x86_64-native-linuxapp-gcc
+      OR
+    make config T=ppc_64-power8-linuxapp-gcc
+
     vi ./build/.config
       Change as needed.  For example:
         CONFIG_RTE_BUILD_SHARED_LIB=y (e1000 NIC)
+        COMBINE_LIBS=y
           OR
         CONFIG_RTE_BUILD_SHARED_LIB=n (MLX4 NIC)
         COMBINE_LIBS=y
-        LIBRTE_MLX4_PMD=y (MLX4 NIC)
+        LIBRTE_MLX4_PMD=y
   - make
   - make install T=x86_64-native-linuxapp-gcc    
   - cp build/lib/libintel_dpdk.so <toolkit>/com.ibm.streamsx.network/impl/lib/source/
@@ -62,8 +69,8 @@ do this, take the following steps:
   - cd <toolkit>/com.ibm.streamsx.network/impl/src/source/dpdk
   - Set the RTE env variables noted above.
   - make
-  - cp streams_source.h ../../../include/
-  - cp build/lib/libstreams_source.a ../../../lib/source
+  - cp streams_source.h <toolkit>/com.ibm.streamsx.network/impl/lib/include 
+  - cp build/lib/libstreams_source.a <toolkit>/com.ibm.streamsx.network/impl/lib/source/ 
 
 Building the Streams example application requires the following steps:
   - cd <toolkit>/streamsx.network/samples/SamplePacketDPDKSource
@@ -71,6 +78,7 @@ Building the Streams example application requires the following steps:
     Primary change is to pick the right dpdk library. 
   - vi TestPacketDPDKSource.splmm
     Primary change is to modify the operator parameters.  
+  - make
 
 Configuring & enabling acces to key system resources:
   General items (run as root typically)
