@@ -41,6 +41,13 @@ step "setting dynamic service ports for Streams domain '$domain' ..."
 streamtool setdomainproperty -d $domain jmx.port=0 jmx.startTimeout=60 || die "sorry, could not set JMX properties for Streams domain '$domain', $?"
 streamtool setdomainproperty -d $domain sws.port=0 sws.startTimeout=60 || die "sorry, could not set SWS properties for Streams domain '$domain', $?"
 
+# instead of 'streamtool registerdomainhost' and 'streamtool mkinstance --property instance.canSetPeOSCapabilities=true' below
+# verify that 'root' user has executed:
+# /usr/sbin/setcap 'CAP_SETFCAP+eip CAP_FOWNER+eip' $STREAMS_INSTALL/system/impl/bin/streams-hc
+# by getting stdout from:
+#/usr/sbin/getcap $STREAMS_INSTALL/system/impl/bin/streams-hc
+# and checking for 'CAP_SETFCAP+eip' and 'CAP_FOWNER+eip'
+
 step "registering Streams domain '$domain' as a Linux system service ..."
 sudo STREAMS_INSTALL=$STREAMS_INSTALL $STREAMS_INSTALL/bin/streamtool registerdomainhost -d $domain --application --management --zkconnect $zkconnect || die "sorry, could not register Streams domain '$domain', $?"
 

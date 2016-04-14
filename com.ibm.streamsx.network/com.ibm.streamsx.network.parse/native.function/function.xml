@@ -1941,6 +1941,7 @@
 
 
 
+
   <function:functionSet>
     <function:headerFileName></function:headerFileName>
     <function:cppNamespaceName>IPFIXMessageParser_result_functions</function:cppNamespaceName>
@@ -2001,6 +2002,62 @@
         </function:description>
 	    <function:prototype>public uint32 IPFIX_enterpriseIdentifier(int32)</function:prototype>
       </function:function>
+
+
+      <function:function>
+        <function:description>
+          This function returns the value of the specified IPFIX 'enterprise' field as a list of integers, if
+          it is present in the 'data flow' record and it was encoded as an IPFIX 'basic list', 
+          or an empty list if absent.
+        </function:description>
+	    <function:prototype>public list&lt;uint64> IPFIX_enterpriseBasicListFieldAsIntegers(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This function returns the value of the specified IPFIX 'enterprise' field as a list of strings, if
+          it is present in the 'data flow' record and it was encoded as an IPFIX 'basic list', 
+          or an empty list if absent.
+        </function:description>
+	    <function:prototype>public list&lt;rstring> IPFIX_enterpriseBasicListFieldAsStrings(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This function returns the value of the specified IPFIX 'enterprise' field as a list of byte lists, if
+          it is present in the 'data flow' record and it was encoded as an IPFIX 'basic list', 
+          or an empty list if absent.
+        </function:description>
+	    <function:prototype>public list&lt;list&lt;uint8>> IPFIX_enterpriseBasicListFieldAsByteLists(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This function returns the value of the 'semantic code' corresponding to the specified 
+           IPFIX 'enterprise' field, if one is present in the 'data flow' record and it was encoded as an IPFIX 'basic list', 
+           or zero if absent.
+        </function:description>
+	    <function:prototype>public uint8 IPFIX_enterpriseBasicListFieldSemantic(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This function returns the value of the 'element identifier' corresponding to the specified 
+          IPFIX 'enterprise' 'field, if one is present in the 'data flow' record and it was encoded as an IPFIX 'basic list', 
+          or zero if absent.
+        </function:description>
+	    <function:prototype>public uint16 IPFIX_enterpriseBasicListFieldElementIdentifier(int32)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This function returns the value of the 'enterprise identifier' corresponding to the specified 
+          IPFIX 'enterprise' field, if one is present in the 'data flow' record and it was encoded as an IPFIX 'basic list', 
+          or zero if absent.
+        </function:description>
+	    <function:prototype>public uint32 IPFIX_enterpriseBasicListFieldEnterpriseIdentifier(int32)</function:prototype>
+      </function:function>
+
 
       <function:function>
         <function:description>
@@ -3399,7 +3456,7 @@
           bit was not set in any of the observed packets
           of this Flow.
         </function:description>
-	    <function:prototype>public uint8 IPFIX_tcpControlBits()</function:prototype>
+	    <function:prototype>public uint16 IPFIX_tcpControlBits()</function:prototype>
       </function:function>
 
       <function:function>

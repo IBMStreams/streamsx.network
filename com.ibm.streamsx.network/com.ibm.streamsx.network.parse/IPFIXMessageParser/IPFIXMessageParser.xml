@@ -56,7 +56,9 @@ IPFIX messages and the fields they contain are described here:
 
 * [https://tools.ietf.org/html/rfc5101]
 * [https://tools.ietf.org/html/rfc5102]
+* [https://tools.ietf.org/html/rfc6313]
 * [http://www.iana.org/assignments/ipfix/ipfix.xml#ipfix-information-element-registration-procedures]
+* [http://www.iana.org/assignments/ipfix/ipfix.xhtml#ipfix-structured-data-types-semantics]
 * [http://www.iana.org/assignments/enterprise-numbers/enterprise-numbers]
 
 The result functions that can be used in boolean

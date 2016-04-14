@@ -33,13 +33,13 @@ if ($doPush && !$doCommit) {
 } 
 
 if ($help) {
-    print STDOUT "makeDocs.pl runs spl-make-doc in the current repository for all toolkits and samples,\n";
+    print STDOUT "updateWeb.pl runs spl-make-doc in the current repository for all toolkits and samples,\n";
     print STDOUT "and then commits the doc updates to a second document repository (one set to gh-pages).\n";
-    print STDOUT "Usage: makeDocs.pl [--commit|--nocommit] [--push|--nopush] [--message <msg>] <gh-pagesrepos>\n";
+    print STDOUT "Usage: updateWeb.pl [--createTempRepository] [--push|--nopush] [--commit|--nocommit] [--message <msg>] [--deleteTemp|--nodeleteTemp] <gh-pagesrepos>\n";
     exit 0;
 }
 if (scalar @ARGV != 1 && !$useTemp) {
-    print STDERR "Usage: makeDocs.pl <pagesrepo>\n";
+    print STDERR "Usage: updateWeb.pl <pagesrepo>\n";
     exit 1;
 }
 if ($useTemp && $deleteTemp) {

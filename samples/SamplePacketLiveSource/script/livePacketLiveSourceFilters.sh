@@ -23,6 +23,8 @@ dataDirectory=$projectDirectory/data
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
+networkInterface=$( ifconfig ens6f3 1>/dev/null 2>&1 && echo ens6f3 || echo eth0 ) 
+
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
@@ -47,7 +49,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-networkInterface=ens6f3
+networkInterface=$networkInterface
 metricsInterval=1.0
 timeoutInterval=30.0
 )

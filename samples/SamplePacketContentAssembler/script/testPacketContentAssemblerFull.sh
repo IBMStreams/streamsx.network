@@ -21,7 +21,7 @@ dataDirectory=$projectDirectory/data
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
-libpamDirectory=$HOME/com.ibm.iss.pam
+libpamDirectory=$HOME/workspace/com.ibm.iss.pam
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 

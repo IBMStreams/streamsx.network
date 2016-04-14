@@ -22,7 +22,7 @@ scripts=( $( find $here -name "autotest.sh" ) )
 step "executing all sample applications ..."
 for script in ${scripts[*]} ; do 
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n$script\n"
-    $script || die "sorry, '$script' failed"
+    $script 
 done
 echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nDone."
 
