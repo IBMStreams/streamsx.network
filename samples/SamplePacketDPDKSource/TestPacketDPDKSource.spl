@@ -3,6 +3,8 @@
  * All Rights Reserved
  *********************************************************************/
 
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
 use com.ibm.streamsx.network.source::*;
 
 /* Simple example application which configures the DPDP source and 
@@ -50,27 +52,6 @@ public composite TestPacketDPDKSource {
             param
                 file : "PacketStream0.out";
         }
-/*
-        (stream<PacketData>  PacketStream_1 ) = PacketDPDKSource() {
-            param
-                coreMask: "0x7";
-                lcore   : 2;
-                nicPort : 1;
-                nicQueue: 0;
-                promiscuous: true;
-                metricsInterval: 1.0;
-            output 
-                PacketStream_1:
-                    timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
-                    packet = PACKET_DATA(),
-                    length = (uint64) PACKET_LENGTH();
-        } 
-
-        () as FS_PacketData_1 = FileSink( PacketStream_1 ) {
-            param
-                file : "PacketStream1.out";
-        }
-*/
 	config
 	    placement : partitionColocation('SinglePE');
 	    tracing   : trace;

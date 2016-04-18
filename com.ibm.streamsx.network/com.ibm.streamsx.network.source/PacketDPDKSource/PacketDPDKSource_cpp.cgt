@@ -41,6 +41,18 @@ my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParamet
 
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
 
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) {
+    foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+	my $expression = $value->getCppExpression();
+	push @outputFilterList, $expression;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::PacketDPDKSource _result_functions::") != -1;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::PacketSource_result_functions::") != -1;
+    }
+}
+
 # basic safety checks
 SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
 
@@ -56,7 +68,14 @@ SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPort
 // Calls to output assignment functions within expressions are generated with
 // an explicit namespace matching the operator tempate name, so it must be
 // equated to the operator's namespace
-#define PacketDPDKSource MY_OPERATOR
+// #define PacketDPDKSource MY_OPERATOR
+
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the PacketLiveSource_h.cgt file
+
+#define PacketLiveSource_result_functions MY_OPERATOR
+#define PacketSource_result_functions MY_OPERATOR
 
 // Function called from the DPDK library as each packet arrives.
 void dpdkCallback(void *correlator, void *data, 
@@ -152,23 +171,21 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
 
     timestampMicroseconds = tscTimestamp / tscMicrosecondAdjust;
 
-#if 0
     // Optionally parse the network headers in the packet.
     // This example makes sure its an IPv4 or IPv6 formatted packet before
     // sending it downstream, and will drop other packet types.
     headers.parseNetworkHeaders((char*)packetPtr, packetLen);
     if (!(headers.ipv4Header || headers.ipv6Header)) { 
-        SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketLiveSource");  
+        SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketDPDKSource");  
 	return; 
     }
-#endif 
 
     // Fill in and submit output tuples to output ports, as selected by 
     // output filters, if specified.
     <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
        {
          <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-         SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketLiveSource");
+         SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketDPDKSource");
          submit(outTuple<%=$i%>, <%=$i%>);
        }
     <% } %> ;
@@ -185,12 +202,10 @@ void MY_OPERATOR::metricsThread() {
 	&opm.getCustomMetricByName("nPacketsReceivedCurrent");
     Metric* totalPacketsDropped = 
 	&opm.getCustomMetricByName("nPacketsDroppedCurrent");
-    Metric* totalPacketsDroppedByInterface = 
-	&opm.getCustomMetricByName("nPacketsDroppedByInterfaceCurrent");
     Metric* totalPacketsProcessed = 
 	&opm.getCustomMetricByName("nPacketsProcessedCurrent");
-    Metric* totalOctetsProcessed = 
-	&opm.getCustomMetricByName("nOctetsProcessedCurrent");
+    Metric* totalBytesProcessed = 
+	&opm.getCustomMetricByName("nBytesProcessedCurrent");
 
     // Get statistics periodically and emit a tuple whenever they change.
     double previousStatisticsTime = SPL::Functions::Time::getTimestampInSecs();
@@ -199,11 +214,11 @@ void MY_OPERATOR::metricsThread() {
 	now = SPL::Functions::Time::getTimestampInSecs();
 	const double secondsToWait = then + metricsInterval - now;
 	if (secondsToWait>0) {
-	    SPLLOG(L_DEBUG, "next statistics interval in " << secondsToWait << " seconds", "PacketLiveSource");
+	    SPLLOG(L_DEBUG, "next statistics interval in " << secondsToWait << " seconds", "PacketDPDKSource");
 	    getPE().blockUntilShutdownRequest(secondsToWait);
 	    now = SPL::Functions::Time::getTimestampInSecs();
 	} else {
-	    SPLLOG(L_DEBUG, "missed statistics interval by " << -secondsToWait << " seconds", "PacketLiveSource");
+	    SPLLOG(L_DEBUG, "missed statistics interval by " << -secondsToWait << " seconds", "PacketDPDKSource");
 	}
 
 	// get recieved and dropped statistics
@@ -212,9 +227,8 @@ void MY_OPERATOR::metricsThread() {
 	// expose the operator's statistics as metrics
 	totalPacketsReceived->setValue(stats.received);
 	totalPacketsDropped->setValue(stats.dropped); 
-	totalPacketsDroppedByInterface->setValue(0); // NA for dpdk
 	totalPacketsProcessed->setValue(packetCounter);
-	totalOctetsProcessed->setValue(octetCounter);
+	totalBytesProcessed->setValue(octetCounter);
 
 	// save the current time for the next interval
 	then = now;

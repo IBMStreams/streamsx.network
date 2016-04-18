@@ -2,243 +2,297 @@
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-    <description></description>
+    <description>
+
+PacketDPDKSource is an operator for the IBM InfoSphere Streams product that
+captures live network packets from one of the network interfaces attached to the
+machine where it executes. The operator function and structure are very
+similar to PacketLiveSource; see that operator's documentation for details
+of common functions and general background.  The primary difference between
+these related operators is that PacketDPDKSource leverages the DPDK libraries
+available at [http://www.dpdk.org] for higher performance and lower processing
+overhead.
+
+Output filters and attribute assignments are SPL expressions. They may use any
+of the built-in SPL functions, and any of these functions, which are specific to
+the PacketFileSource operator:
+
+* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
+
+The PacketDPDKSource operator steps quietly over 'jmirror' headers prepended to packets
+by Juniper Networks 'mirror encapsulation'.
+
+This operator is part of the network toolkit. To use it in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.source::*;
+
+# Promiscuous Mode
+
+Network interfaces normally ignore packets that are not addressed to them.
+However, when 'promiscious' mode is enabled on a network interface, it can
+capture all network packets on its ethernet segment, even those that are not
+addressed to it.  This is sometimes referred to as "network sniffing".  Modern
+ethernet switches normally send network interfaces only packets that are
+addressed to them; 'promiscious' mode is useful only when a switch has been
+specifically configured to send packets to a network interface that are not
+addressed to it. This is sometimes referred to as "mirroring".
+
+The PacketDPDKSource operator will enable 'promiscuous' mode in a ethernet
+interface when its 'promiscous' parameter is set to `true`.
+
+# Dependencies
+
+The PacketDPDKSource operator depends upon the DPDK libraries available from
+[http://dpdk.org]. The library must be installed on the machine where this
+operator is built.   It has been tested with the following versions:
+* DPDK 2.0
+* DPDK 2.1
+* DPDK 2.2
+
+The base DPDK library supports a wide range of NICs as described at
+[http://dpdk.org].  For IBM Streams, we have tested the following:
+* Mellanox CX-3
+* Mellanox CX-3 Pro
+* Intel e1000
+
+There are very good documents for DPDK build/install/use that should be
+referenced.  Here are some notes of the steps that will help getting started
+on Streams:
+
+* Download and untar the dpdk.tgz file from [http://dpdk.org].
+
+* Set environment variables (these are needed for DPDK and Streams builds and depend on 
+  your specific platform):
+
+    export EXTRA_CFLAGS=-fPIC
+    export RTE_SDK=/home/userid/dpdk-2.0.0 (point to install directory)
+
+    export RTE_TARGET=x86_64-native-linuxapp-gcc
+       OR
+    export RTE_TARGET=ppc_64-default-linuxapp-gcc
+
+* Configure the DPDK build from the top directory
+
+    make config T=x86_64-native-linuxapp-gcc
+       OR
+    make config T=ppc_64-power8-linuxapp-gcc
+
+* Change configuration as needed.  For example:
+
+    # Edit the .config files
+    vi ./build/.config
+
+    # Set key parameters
+    COMBINE_LIBS=y
+    LIBRTE_MLX4_PMD=y (MLX4 NIC)
+    CONFIG_RTE_BUILD_SHARED_LIB=y (e1000 NIC)
+       OR
+    CONFIG_RTE_BUILD_SHARED_LIB=n (MLX4 NIC)
+
+    # Build the library
+    make
+
+    # Complete the build
+    make install T=x86_64-native-linuxapp-gcc
+       OR
+    make install T=ppc_64-power8-linuxapp-gcc
+
+    # Move the resulting library to your Streams application build location
+    cp build/lib/libdpdk.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/source/
+
+* There is also a Streams to DPDK glue library that must be built.  To
+  do this, make sure the RTE environment variables noted above are set and then
+  do the following:
+
+    cd /toolkit-directory/com.ibm.streamsx.network/impl/src/source/dpdk
+    make
+    cp streams_source.h /toolkit-directory/com.ibm.streamsx.network/impl/lib/include/source/
+    cp build/lib/libstreams_source.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/source/
+
+* Build the Streams example application with the following steps:
+
+    cd /toolkit-directory/streamsx.network/samples/SamplePacketDPDKSource
+
+    # Update any libraries that need to be linked based on the examples
+    vi Makefile (Primary change is to pick the right libraries)
+
+    # Modify the operator parameters as needed for your NIC and environment
+    vi TestPacketDPDKSource.splmm
+    make
+
+* Create a dpdk group for permisssions.  Note that udev rules would be a
+  better approach -- documentation is being worked.
+
+    groupadd dpdk
+    usermod -G userid,dpdk userid
+    groups userid
+
+* Configure and enable acces to key system resources. General items (run as root typically):
+
+    mkdir -p /mnt/huge
+    mount -t hugetlbfs nodev /mnt/huge
+    echo 1000 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+    chown root:dpdk /dev/hugepages
+    chmod 775 /dev/hugepages
+    chown root:dpdk /mnt/huge/
+    chmod 775 /mnt/huge/
+
+* Example additional items for e1000 (RHEL 7.1):
+
+    ifconfig eth1 down
+    modprobe uio
+    insmod /dpdk-path/dpdk-2.1.0/build/kmod/igb_uio.ko
+    /dpdk-path/dpdk-2.1.0/tools/dpdk_nic_bind.py --bind=igb_uio eth-interface
+    /dpdk-path/dpdk-2.1.0/tools/dpdk_nic_bind.py --status
+    chown root:dpdk /dev/uio0
+    chmod 660 /dev/uio0
+    chown root:dpdk /sys/class/uio/uio0/device/config
+    cdmod 660 /sys/class/uio/uio0/device/config
+    chown root:dpdk /sys/class/uio/uio0/device/resource*
+    chmod 660 /sys/class/uio/uio0/device/resource*
+
+
+* Example additional items for Mellanox (RHEL 7.1).  This assumes the OFED packages
+  have been installed.
+
+    # Configure IB module. Add the line:
+    # "options ib_uverbs disable_raw_qp_enforcement=1"
+    vi /etc/modprobe.d/mlnx.conf,
+
+    modprobe mlx4_en
+    /etc/init.d/openibd restart
+    # "ibstat" and "/etc/init.d/openibd status" are useful commands.
+
+* Running the Streams application
+    Normal submit : streamtool submitjob output/TestPacketDPDKSource.sab
+    Packet output can be found in the "data" directory.
+
+    </description>
 
     <metrics>
-    <metric>
-    <name>nPacketsReceivedCurrent</name>
-    <description>Number packets received in current session.</description>
-    <kind>Counter</kind>
-    </metric>
-    <metric>
-    <name>nPacketsDroppedCurrent</name>
-    <description>Number of packets dropped in current session because there was no room in the operating system's buffer when they arrived, because packets weren't being read fast enough</description>
-    <kind>Counter</kind>
-    </metric>
-    <metric>
-    <name>nPacketsDroppedByInterfaceCurrent</name>
-    <description>Number of packets dropped in current session by the network interface or its driver.</description>
-    <kind>Counter</kind>
-    </metric>
-    <metric>
-    <name>nPacketsProcessedCurrent</name>
-    <description>Number of packets procesed by this operator.</description>
-    <kind>Counter</kind>
-    </metric>
-    <metric>
-    <name>nOctetsProcessedCurrent</name>
-    <description>Number of packet bytesd processed by this operator.</description>
-    <kind>Counter</kind>
-    </metric>
+       <metric>
+          <name>nPacketsReceivedCurrent</name>
+          <description>
+
+This metric counts the number of packets received by the network interface,
+as counted by `dpdk`
+
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+
+       <metric>
+          <name>nPacketsDroppedCurrent</name>
+          <description>
+	  
+This metric counts the number of packets dropped by the network interface,
+as counted by `dpdk`
+
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+
+       <metric>
+          <name>nPacketsProcessedCurrent</name>
+          <description>
+	  
+This metric counts number of bytes of packet data processed by the
+operator.
+	  
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+
+       <metric>
+          <name>nBytesProcessedCurrent</name>
+          <description>
+
+This metric counts number of bytes of packet data processed by the
+operator.
+
+	  </description>
+          <kind>Counter</kind>
+       </metric>
     </metrics>
 
-      <customOutputFunctions>
-      <customOutputFunction>
-      <name>packet output functions</name>
-      <function>
-      <description></description>
-      <prototype>uint64 packetsReceived()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint64 packetsDropped()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint64 packetsDroppedByInterface()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint64 packetsProcessed()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint64 octetsProcessed()</prototype>
-      </function>
-
-      <function>
-      <description></description>
-      <prototype>uint32 CAPTURE_SECONDS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint32 CAPTURE_MICROSECONDS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint32 PACKET_LENGTH()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>blob PACKET_DATA()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint32 PAYLOAD_LENGTH()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>blob PAYLOAD_DATA()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>list&lt;uint8>[6] ETHER_SRC_ADDRESS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>list&lt;uint8>[6] ETHER_DST_ADDRESS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 ETHER_PROTOCOL()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint8 IP_VERSION()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint8 IP_PROTOCOL()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint32 IPV4_SRC_ADDRESS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint32 IPV4_DST_ADDRESS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>list&lt;uint8>[16] IPV6_SRC_ADDRESS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>list&lt;uint8>[16] IPV6_DST_ADDRESS()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 IP_SRC_PORT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 IP_DST_PORT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 UDP_SRC_PORT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 UDP_DST_PORT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 TCP_SRC_PORT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 TCP_DST_PORT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint32 TCP_SEQUENCE()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint32 TCP_ACKNOWLEDGEMENT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>boolean TCP_FLAGS_URGENT()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>boolean TCP_FLAGS_ACK()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>boolean TCP_FLAGS_PUSH()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>boolean TCP_FLAGS_RESET()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>boolean TCP_FLAGS_SYN()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>boolean TCP_FLAGS_FIN()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>uint16 TCP_WINDOW()</prototype>
-      </function>
-      <function>
-      <description></description>
-      <prototype>&lt;any T> T copy()</prototype>
-      </function>
-      </customOutputFunction>
-      </customOutputFunctions>
-
       <libraryDependencies>
-
 	<library>
 	<cmn:description>
+
+General support functions.
+
 	</cmn:description>
 	<cmn:managedLibrary>
-	<cmn:libPath>../../impl/lib/parse</cmn:libPath>
-	<cmn:includePath>../../impl/include/parse</cmn:includePath>
+	<cmn:includePath>../../impl/include</cmn:includePath>
 	</cmn:managedLibrary>
 	</library>
 
 	<library>
 	<cmn:description>
+	
+streams_source interface library to dpdk.
+	
 	</cmn:description>
 	<cmn:managedLibrary>
+	<cmn:lib>streams_source</cmn:lib>
+	<cmn:lib>dpdk</cmn:lib>
 	<cmn:libPath>../../impl/lib/source</cmn:libPath>
 	<cmn:includePath>../../impl/include/source</cmn:includePath>
 	</cmn:managedLibrary>
 	</library>
 
-	<library>
-	<cmn:description>streams_source interface to dkdp</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:lib>streams_source</cmn:lib>
-	<cmn:libPath>../../impl/src/source/dpdk/build/lib</cmn:libPath>
-	<cmn:includePath>../../impl/src/source/dpdk</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
+      </libraryDependencies>
 
-	</libraryDependencies>
-	<providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
       <allowCustomLogic>true</allowCustomLogic>
     </context>
+
     <parameters>
-    <allowAny>false</allowAny>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>coreMask</name>
+        <description> 
+
+Hex bit mask listing the cores used for DPDK polling loops.
+The low order bit corresponds to the master lcore and all
+other bits indicate cores that will be assigned to
+ports/queues.
+
+Note that only the first instance of the PacketDPDKSource
+must set this parm.  All others are ignored.
+
+	</description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>-1</cardinality>
+    </parameter>
+
     <parameter>
-      <name>coreMask</name>
-      <description> </description>
-      <optional>false</optional>
+      <name>promiscuous</name>
+      <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not 'promiscuous' mode should be enabled on the
+network interface.
+
+      </description>
+      <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
-      <type>rstring</type>
+      <type>boolean</type>
       <cardinality>-1</cardinality>
     </parameter>
-    <parameter>
-    <name>promiscuous</name>
-    <description> </description>
-    <optional>true</optional>
-    <rewriteAllowed>true</rewriteAllowed>
-    <expressionMode>Expression</expressionMode>
-    <type>boolean</type>
-    <cardinality>-1</cardinality>
-    </parameter>
+
     <parameter>
       <name>lcore</name>
       <description>
+
+Logical core number on which this operator will run.
+
       </description>
       <optional>false</optional>
       <rewriteAllowed>true</rewriteAllowed>
@@ -246,9 +300,25 @@
       <type>int32</type>
       <cardinality>-1</cardinality>
     </parameter>
+
     <parameter>
       <name>nicPort</name>
       <description>
+
+NIC port of type uint32 which sources packets for this
+operator instance.  Obtaining the proper mapping may require
+use of multiple tools, and varies by NIC.  
+
+Suggested tools to help identify NIC ports:
+
+   \- ifconfig
+
+   \- dpdk-*/tools/dpdk_nic_bind.py --status
+
+   \- ibstat (for Mellanox NICs)
+
+   \- lspci | grep -i net
+
       </description>
       <optional>false</optional>
       <rewriteAllowed>true</rewriteAllowed>
@@ -256,9 +326,14 @@
       <type>int32</type>
       <cardinality>-1</cardinality>
     </parameter>
+
     <parameter>
       <name>nicQueue</name>
       <description>
+
+NIC queue of type uint32 which sources packets for this operator instance.  Use of this parameter 
+is not yet implemented in the PacketDPDKSource operator but is included for future enhancements.
+
       </description>
       <optional>false</optional>
       <rewriteAllowed>true</rewriteAllowed>
@@ -266,9 +341,21 @@
       <type>int32</type>
       <cardinality>-1</cardinality>
     </parameter>
+
     <parameter>
       <name>metricsInterval</name>
-      <description></description>
+      <description>
+     
+
+This optional parameter takes an expression of type
+`float64` that specifies the interval, in seconds, for sending operator
+metrics to the Streams runtime. If the value is zero or less, the operator
+will not report metrics to the runtime, and the output assigment functions
+for `libpcap` statistics will be zero.
+
+The default value is '10.0'.
+
+      </description>
       <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
@@ -281,15 +368,25 @@
     </inputPorts>
     <outputPorts>
       <outputPortOpenSet>
-        <description></description>
+        <description>
+
+The PacketDPDKSource operator requires one or more output ports:
+
+Each output port will produce one output tuple for each packet received
+if the corresponding expression in the `outputFilters` parameter evaluates `true`,
+or if no `outputFilters` parameter is specified.
+
+Output attributes can be assigned values with any SPL expression that evaluates
+to the proper type, and the expressions may include any of the
+[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketDPDKSource result functions].
+Output attributes that match input attributes in name and
+type are copied automatically.
+
+	</description>
         <expressionMode>Expression</expressionMode>
         <autoAssignment>false</autoAssignment>
         <completeAssignment>false</completeAssignment>
         <rewriteAllowed>true</rewriteAllowed>
-        <outputFunctions>
-          <default>copy</default>
-          <type>packet output functions</type>
-        </outputFunctions>
         <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <tupleMutationAllowed>false</tupleMutationAllowed>
