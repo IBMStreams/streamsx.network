@@ -49,27 +49,34 @@ The PacketLiveSource operator requires these Linux capabilities to receive
 * CAP_NET_RAW+eip
 * CAP_NET_ADMIN+eip
 
+Linux capabilities can only be granted to an executable that resides on a local
+disk volume such as /tmp.
+
 For 'standalone' Streams applications (that is, SPL source files compiled with a
 'standalone' configuration), the user must grant these capabilities to the
 program before executing it. This requires 'root' privileges. To do this:
 
 * the SPL source must be compiled with the '--static-link' option
 
-* the 'application bundle' must be unpacked with the 'spl-app-info' command
+* the 'application bundle' must be unpacked with the 'spl-app-info' command into a directory on a local disk volume such as /tmp
 
-* Linux capabilities must be granted to the program with this command:
+* Linux capabilities must be granted to the unbundled program with this command:
  
-    sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
+    sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /tmp/.../bin/standalone.exe
 
 For 'distributed' Streams applications, (that is, SPL source files compiled with
-a 'distributed' configuration), the Streams runtime must grant these privileges to
+a 'distributed' configuration), the Streams runtime must grant these capabilities to
 the program before executing it. This requires 'root' privileges.  To do this:
 
 * the Streams runtime must be installed as 'root'
 
 * the Streams domain must be registered as a Linux system service
 
-* the Streams instance must have the 'instance.canSetPeOSCapabilities' property
+* the Streams instance must have the 'instance.canSetPeOSCapabilities=true' property
+
+* the Streams instance must have the 'instance.runAsUser=$USER' property
+
+* the Streams instance must have the 'instance.applicationBundlesPath=/tmp/...' property
 
 * the SPL source must be compiled with the '--static-link' option
 
