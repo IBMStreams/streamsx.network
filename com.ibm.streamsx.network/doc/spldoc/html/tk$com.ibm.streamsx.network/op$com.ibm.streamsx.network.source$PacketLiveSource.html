@@ -94,6 +94,9 @@ use com.ibm.streamsx.network.source::*;
 
 </div>
 
+<p class="p">Linux capabilities can only be granted to an executable that resides on a local disk volume such as /tmp.
+</p>
+
 <p class="p">For 'standalone' Streams applications (that is, SPL source files compiled with a 'standalone' configuration), the user must grant these capabilities to the program before executing it. This requires 'root' privileges. To do this:
 </p>
 
@@ -102,17 +105,17 @@ use com.ibm.streamsx.network.source::*;
 <li class="li"> the SPL source must be compiled with the '--static-link' option</li>
 
 <li class="li">
-<p class="p"> the 'application bundle' must be unpacked with the 'spl-app-info' command
+<p class="p"> the 'application bundle' must be unpacked with the 'spl-app-info' command into a directory on a local disk volume such as /tmp
 </p>
 </li>
 
 <li class="li">
-<p class="p"> Linux capabilities must be granted to the program with this command:
+<p class="p"> Linux capabilities must be granted to the unbundled program with this command:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /tmp/.../bin/standalone.exe
 </pre>
 
 
@@ -123,7 +126,7 @@ sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
 
 </div>
 
-<p class="p">For 'distributed' Streams applications, (that is, SPL source files compiled with a 'distributed' configuration), the Streams runtime must grant these privileges to the program before executing it. This requires 'root' privileges.  To do this:
+<p class="p">For 'distributed' Streams applications, (that is, SPL source files compiled with a 'distributed' configuration), the Streams runtime must grant these capabilities to the program before executing it. This requires 'root' privileges.  To do this:
 </p>
 
 <div class="p">
@@ -136,7 +139,17 @@ sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
 </li>
 
 <li class="li">
-<p class="p"> the Streams instance must have the 'instance.canSetPeOSCapabilities' property
+<p class="p"> the Streams instance must have the 'instance.canSetPeOSCapabilities=true' property
+</p>
+</li>
+
+<li class="li">
+<p class="p"> the Streams instance must have the 'instance.runAsUser=$USER' property
+</p>
+</li>
+
+<li class="li">
+<p class="p"> the Streams instance must have the 'instance.applicationBundlesPath=/tmp/...' property
 </p>
 </li>
 
