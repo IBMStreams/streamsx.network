@@ -12,8 +12,8 @@ require CodeGenX;
 
 # get the name of this operator's template
 my $myOperatorKind = $model->getContext()->getKind();
-
-# get Perl objects for input and output ports
+ 
+# get Perl objects for input and output ports 
 my $inputPort = $model->getInputPortAt(0);
 my @outputPortList = @{ $model->getOutputPorts() };
 
@@ -500,30 +500,38 @@ MY_OPERATOR::MY_OPERATOR()
 
   // load the city location data
   cityLocations.clear();
-  if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoIP2-City-Locations-en.csv") ) {
-    loadCityLocations(geographyDirectory + "/GeoIP2-City-Locations-en.csv");
-  } else if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoLite2-City-Locations-en.csv") ) {
-    loadCityLocations(geographyDirectory + "/GeoLite2-City-Locations-en.csv");
+  
+  // convert geographyDirectory parameter value to absolute path. 
+  streams_boost::filesystem::path filepath(geographyDirectory);
+  if(filepath.is_relative()) {
+    filepath = streams_boost::filesystem::absolute(filepath, getPE().getDataDirectory());
+  }
+  
+  
+  if ( streams_boost::filesystem::exists(filepath.string() + "/GeoIP2-City-Locations-en.csv") ) {
+    loadCityLocations(filepath.string() + "/GeoIP2-City-Locations-en.csv");
+  } else if ( streams_boost::filesystem::exists(filepath.string() + "/GeoLite2-City-Locations-en.csv") ) {
+    loadCityLocations(filepath.string() + "/GeoLite2-City-Locations-en.csv");
   } else {
     THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Locations-en.csv' file");
   }
 
   // load the IP version 4 subnet data
   ipv4Subnets.clear();
-  if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoIP2-City-Blocks-IPv4.csv") ) {
-    loadIPv4Subnets(geographyDirectory + "/GeoIP2-City-Blocks-IPv4.csv");
-  } else if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoLite2-City-Blocks-IPv4.csv") ) {
-    loadIPv4Subnets(geographyDirectory + "/GeoLite2-City-Blocks-IPv4.csv");
+  if ( streams_boost::filesystem::exists(filepath.string() + "/GeoIP2-City-Blocks-IPv4.csv") ) {
+    loadIPv4Subnets(filepath.string() + "/GeoIP2-City-Blocks-IPv4.csv");
+  } else if ( streams_boost::filesystem::exists(filepath.string() + "/GeoLite2-City-Blocks-IPv4.csv") ) {
+    loadIPv4Subnets(filepath.string() + "/GeoLite2-City-Blocks-IPv4.csv");
   } else {
     THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Blocks-IPv4.csv' file");
   }
 
   // load the IP version 6 subnet data
   ipv6Subnets.clear();
-  if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoIP2-City-Blocks-IPv6.csv") ) {
-    loadIPv6Subnets(geographyDirectory + "/GeoIP2-City-Blocks-IPv6.csv");
-  } else if ( streams_boost::filesystem::exists(geographyDirectory + "/GeoLite2-City-Blocks-IPv6.csv") ) {
-    loadIPv6Subnets(geographyDirectory + "/GeoLite2-City-Blocks-IPv6.csv");
+  if ( streams_boost::filesystem::exists(filepath.string() + "/GeoIP2-City-Blocks-IPv6.csv") ) {
+    loadIPv6Subnets(filepath.string() + "/GeoIP2-City-Blocks-IPv6.csv");
+  } else if ( streams_boost::filesystem::exists(filepath.string() + "/GeoLite2-City-Blocks-IPv6.csv") ) {
+    loadIPv6Subnets(filepath.string() + "/GeoLite2-City-Blocks-IPv6.csv");
   } else {
     THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Blocks-IPv6.csv' file");
   }
