@@ -50,7 +50,7 @@ pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+
 #pcapFilename=$HOME/data.haifa/dns_tunneling_long.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_hour.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_another_hour.pcap
-processorAffinity=3
+processorAffinity=1
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

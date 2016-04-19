@@ -17,11 +17,8 @@
 
 #include <SPL/Runtime/Type/SPLType.h>
 
-// suppress " warning: array subscript is above array bounds [-Warray-bounds] " messages
-// from GCC version 4.8.3 in RHEL 7.1
-
-// ??? #pragma GCC diagnostic ignored "-Warray-bounds"
-
+// suppress "warning: operation on ‘((IPFIXMessageParser*)this)->IPFIXMessageParser::templateState->IPFIXMessageParser::TemplateState::dataLength’ may be undefined [-Wsequence-point]" message
+#pragma GCC diagnostic ignored "-Wsequence-point"
 
 ////////////////////////////////////////////////////////////////////////////////
 // This class locates IPFIX fields within a IPFIX message
@@ -33,9 +30,9 @@ class IPFIXMessageParser {
  private:
 
   struct IPFIXFieldSpecifier {
-      uint16_t identifier; // enterprise flag (0x80000) and field type code (0x7FFF)
-      uint16_t length; // length of this field as encoded in data records, or 65535 for variable length
-      uint32_t enterpriseNumber[0]; // present only if enterprise flag in 'identifier' is set
+      uint16_t fieldIdentifier; // enterprise flag (0x80000) and field identifier code (0x7FFF)
+      uint16_t fieldLength; // length of this field as encoded in data records, or 65535 for variable length
+      uint32_t enterpriseNumber[0]; // private enterprise number, if enterprise flag is set, or omitted if not
   } __attribute__((packed)) ;
 
   struct IPFIXTemplate {
@@ -51,8 +48,8 @@ class IPFIXMessageParser {
     struct IPFIXFieldSpecifier fieldSpecifiers[0];
   } __attribute__((packed)) ;
 
-  struct IPFIXData {
-    uint8_t fields[0]; // flow fields (number and length according to template specified by templateID)
+  struct IPFIXFlow {
+    uint8_t fields[0]; // flow fields (number and lengths according to template specified by templateID)
   } __attribute__((packed)) ;
 
   struct IPFIXSet {
@@ -61,7 +58,7 @@ class IPFIXMessageParser {
     union {
       struct IPFIXTemplate templates[0];
       struct IPFIXOption options[0];
-      struct IPFIXData data[0];
+      struct IPFIXFlow flows[0];
     } u;
     uint8_t padding[0];
   } __attribute__((packed)) ;
@@ -73,6 +70,14 @@ class IPFIXMessageParser {
     uint32_t dataSequence; // data record sequence number, according to sender
     uint32_t sourceID; // unique identifier for source's observation domain, for correlating templates and data
     struct IPFIXSet sets[0];
+  } __attribute__((packed)) ;
+
+  struct IPFIXBasicListHeader {
+    uint8_t  semanticCode; // semantic meaning of elements in this list (see IANA "IPFIX Structured Data Types Semantics")
+    uint16_t elementIdentifier; // enterprise flag (0x80000) and element identifier code (0x7FFF)
+    uint16_t elementLength; // length of individual elements in this field, or 65535 for variable length
+    uint32_t enterpriseNumber[0]; // private enterprise number, if enterprise flag is set, or omitted if not
+    uint8_t  content[0]; // list of elements of length specified by 'elementLength'
   } __attribute__((packed)) ;
 
   // This table keeps track of the last sequence number in IPFIX messages received from
@@ -87,10 +92,15 @@ class IPFIXMessageParser {
   std::tr1::unordered_map<uint64_t, struct SourceState*> sourceTable; // indexed by sourceAddress+sourceID
 
   // This table keeps track of the templates received from each source
-  // Each template is stored as received
-  // (in the 'template' variables) and as an offset/length array, indexed
-  // by field number (in the 'flowFields' array), for faster access when flow
-  // records are parsed.
+  // Each template is stored as received in the 'template' variables and 
+  // as an offset/length array, indexed by field number (in the 
+  // 'flowFields' array), for faster access when flow records are parsed.
+
+  // Most fields in most templates have fixed length; in this case, the 
+  // offset/length variables are calculated once when the template is 
+  // received. However, if any field in a template has variable length, 
+  // then the offset/length variables must be recalculated for each
+  // flow record that uses the template.
 
   static const uint16_t MAXIMUM_TEMPLATE_LENGTH = 1024; 
   static const uint16_t MAXIMUM_IDENTIFIER_VALUE = 1024;
@@ -102,8 +112,10 @@ class IPFIXMessageParser {
     uint8_t templat[MAXIMUM_TEMPLATE_LENGTH]; // template, as received from source
     uint16_t templateLength; // length of this template, as received from source
     uint16_t dataLength; // length of 'data flow' records that use this template
+    bool dataLengthVariable; // length of at least one field in 'data flow' records will be variable 
     uint16_t identifierMaximum; // largest value of 'identifier' used in this template
     struct { 
+      bool dataLengthVariable; // length of this field in 'data flow' records will be variable 
       uint16_t standardOffset; // offset to standardized field in data record, or zero if absent
       uint16_t standardLength; // length of standardized field in data record, or zero if absent
       uint16_t enterpriseOffset; // offset to enterprise field in data record, or zero if absent
@@ -118,49 +130,55 @@ class IPFIXMessageParser {
 
   uint32_t sourceAddress;
 
+  uint64_t missedMessageCount;
+
   // The prepareIPFIXMessage() function below keeps track of the IPFIX
   // message being parsed in these variables.
 
   int messageLength;
   uint8_t* messageStart;
   uint8_t* messageEnd;
-  uint64_t messageMissedCount;
 
-  // The nextDataRecord() function keeps track of the template for the current
-  // 'flow data' record in this variable.
+  // The nextFlowRecord() function below keeps track of the IPFIX set 
+  // being parsed in these variables.
 
-  struct TemplateState *templateState;
+  int setLength;
+  uint8_t* setStart;
+  uint8_t* setEnd;
 
-  // The nextDataRecord() function keeps track of the number of fields in a
-  // 'flow data' record, plus their combined length, in these variables.
+  // The nextFlowRecord() function keeps track of the state for the current set's 
+  // template in this variable.
 
-  int ipfixDataCount;
-  int ipfixDataLength;
+  struct TemplateState *templateState; 
 
 
  public:
 
-  // The prepareIPFIXMessage() and nextDataRecord() functions below return the
+  // The prepareIPFIXMessage() and nextFlowRecord() functions below return the
   // address of the current IPFIX message header, set, and data message in these
   // variables.
 
   struct IPFIXHeader* ipfixHeader;
   struct IPFIXSet* ipfixSet;
-  struct IPFIXData* ipfixData;
+  struct IPFIXFlow* ipfixFlow;
 
-  // The prepareIPFIXMessage() and nextDataRecord() functions below set this
+  // The prepareIPFIXMessage() and nextFlowRecord() functions below set this
   // variable when they find an encoding error in the IPFIX message, or set it
   // to NULL if no problems are found.
 
   char const* error;
 
-  // The nextDataRecord() function below sets this flag when there are no more
+  // The nextFlowRecord() function below sets this flag when there are no more
   // data records in the current IPFIX mesage.
 
   bool done;
 
 
  private:
+
+  // Templates indicate variable-length fields by specifying their length as 65535==0xFFFF
+
+  static const uint16_t VARIABLE_FIELD_MARKER = 0xFFFF;
 
   // This function stores all of the templates from a IPFIX template set
   // in a state table for use in decoding subsequent data records. If an
@@ -187,6 +205,7 @@ class IPFIXMessageParser {
         memset( templateState->templat, 0, sizeof(templateState->templat) );
         templateState->templateLength = 0;
         templateState->dataLength = 0;
+        templateState->dataLengthVariable = false;
         templateState->identifierMaximum = 0;
         memset( templateState->dataFields, 0, sizeof(templateState->dataFields) );
         templateTable[index] = templateState;
@@ -206,6 +225,7 @@ class IPFIXMessageParser {
       memset( templateState->dataFields, 0, ( templateState->identifierMaximum + 1 ) * sizeof(templateState->dataFields[0]) );
       templateState->identifierMaximum = 0;
       templateState->dataLength = 0;
+      templateState->dataLengthVariable = false;
       templateState->templateLength = sizeof(struct IPFIXTemplate);
 
       // store the offset, length and perhaps enterprise identifier of each
@@ -214,15 +234,22 @@ class IPFIXMessageParser {
       for (int count=0; count < templateState->fieldCount; count++) { 
 
         // get the type and length of this field
-        bool enterprise = ntohs(ipfixField->identifier) & 0x8000;
-        uint16_t identifier = ntohs(ipfixField->identifier) & 0x7FFF;
-        uint16_t length = ntohs(ipfixField->length);
+        bool enterprise = ntohs(ipfixField->fieldIdentifier) & 0x8000;
+        uint16_t identifier = ntohs(ipfixField->fieldIdentifier) & 0x7FFF;
+        uint16_t length = ntohs(ipfixField->fieldLength);
         uint32_t enterpriseIdentifier = enterprise ? ntohl(ipfixField->enterpriseNumber[0]) : 0;
         if (identifier>MAXIMUM_IDENTIFIER_VALUE) { error = "IPFIX template field identifier too large"; return; }
         if (!length) { error = "IPFIX template field length zero"; return; }
-        if (length==65535) { error = "IPFIX template field length variable"; return; }
 
-        // store the offset and length this field will have in 'data flow' records
+        // if this template has any variable length fields, set a flag to indicate that
+        // and store zero for the lengths of those fields. The offsets and lengths of all
+        // fields in such templates will need to be recalculated for each flow that uses them.
+        templateState->dataFields[identifier].dataLengthVariable = length==VARIABLE_FIELD_MARKER;
+        if (length==VARIABLE_FIELD_MARKER) { 
+          templateState->dataLengthVariable = true;
+          length = 0; }
+
+        // store the offset and length of this field
         templateState->dataFields[identifier].standardOffset = !enterprise ? templateState->dataLength : 0;
         templateState->dataFields[identifier].standardLength = !enterprise ? length : 0;
         templateState->dataFields[identifier].enterpriseOffset = enterprise ? templateState->dataLength : 0;
@@ -232,7 +259,7 @@ class IPFIXMessageParser {
         // keep track of how much of the field array this template uses
         if ( templateState->identifierMaximum < identifier ) templateState->identifierMaximum = identifier;
 
-        // keep track of the length this data will have in 'flow data' records
+        // keep track of the length 'flow data' records using this template will have
         templateState->dataLength += length;
         templateState->templateLength += sizeof(struct IPFIXFieldSpecifier) + ( enterprise ? 4 : 0 );
         ipfixField = (IPFIXFieldSpecifier*)( (uint8_t*)ipfixField + sizeof(struct IPFIXFieldSpecifier) + ( enterprise ? 4 : 0 ) );
@@ -248,11 +275,89 @@ class IPFIXMessageParser {
   }
 
 
+
+
+  // if the template for the current 'flow data' record contains any variable-length
+  // fields, the offsets and lengths of each field in the record are calculated and
+  // stored in the template's field array, replacing the values calculated for the 
+  // previous 'flow data' record that used the same template
+  
+  void calculateFieldOffsetsAndLengths() {
+
+    if ( error || !ipfixFlow || !templateState || !templateState->dataLengthVariable ) return;
+    
+    // point at first field in template for this 'flow data' record
+    struct IPFIXTemplate* ipfixTemplate = (struct IPFIXTemplate*)(&templateState->templat);
+    struct IPFIXFieldSpecifier* ipfixField = &ipfixTemplate->fieldSpecifiers[0];
+
+    // accumulate total length of this 'flow data' record here
+    templateState->dataLength = 0;
+
+    // calculate the offsets and lengths of each field in this 'flow record' and 
+    // store them in the template's field array
+    for (int count=0; count < templateState->fieldCount; count++) { 
+
+      // get the type and length of this field from the template
+      bool enterprise = ntohs(ipfixField->fieldIdentifier) & 0x8000;
+      uint16_t identifier = ntohs(ipfixField->fieldIdentifier) & 0x7FFF;
+      uint16_t length = ntohs(ipfixField->fieldLength);
+
+      // if this is a variable length field, get its length from the 'flow record' itself
+      if (length==VARIABLE_FIELD_MARKER) { 
+        length = ipfixFlow->fields[templateState->dataLength++];
+        if (length==255) { length = ((uint16_t)(ipfixFlow->fields[templateState->dataLength++]))<<8 | (uint16_t)(ipfixFlow->fields[templateState->dataLength++]); }
+      }
+
+      // store the offset and length of this field in the template's field array
+      templateState->dataFields[identifier].standardOffset = !enterprise ? templateState->dataLength : 0;
+      templateState->dataFields[identifier].standardLength = !enterprise ? length : 0;
+      templateState->dataFields[identifier].enterpriseOffset = enterprise ? templateState->dataLength : 0;
+      templateState->dataFields[identifier].enterpriseLength = enterprise ? length : 0;
+
+      // accumulate the length of this 'flow record'
+      templateState->dataLength += length;
+      if ( (uint8_t*)(&ipfixFlow->fields[templateState->dataLength]) > setEnd ) { error = "flow record overran set"; return; }
+      if ( (uint8_t*)(&ipfixFlow->fields[templateState->dataLength]) > messageEnd ) { error = "flow record overran message"; return; }
+
+      // step over this field specifier in the template to the next field specifier
+      ipfixField = (IPFIXFieldSpecifier*)( (uint8_t*)ipfixField + sizeof(struct IPFIXFieldSpecifier) + ( enterprise ? 4 : 0 ) );
+    }
+  }
+
+
   // This function should store something when an Options set is found in a
   // IPFIX message, but it doesn't yet.
 
   void storeOptions() {
   }
+
+
+  // This function returns the address of a 'basic list' header, if there is one in the
+  // current 'data flow' record, or NLL if not. If there is one, it also returns the 
+  // address and length of the list's content, that is, the data for its elements.
+
+  const struct IPFIXBasicListHeader* getBasicListHeader(const uint16_t identifier, uint8_t** listContent = NULL, uint16_t* listLength = NULL) {
+
+    // return NULL if there is no such field in this flow
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return NULL;
+
+    // get the length of the field and its offset within the flow record, according to the template
+    const uint16_t fieldOffset =  identifier==291 ? templateState->dataFields[identifier].standardOffset : templateState->dataFields[identifier].enterpriseOffset;
+    const uint16_t fieldLength =  identifier==291 ? templateState->dataFields[identifier].standardLength : templateState->dataFields[identifier].enterpriseLength;
+    if (!fieldLength) return NULL;
+
+    // address the 'basic list' header
+    const  struct IPFIXBasicListHeader* ipfixBasicListHeader = (struct IPFIXBasicListHeader*)(ipfixFlow->fields+fieldOffset);
+
+    // return the 'basic list' header and the address and length of its content, that is, its element data
+    const bool enterprise = ntohs(ipfixBasicListHeader->elementIdentifier) & 0x8000;
+    if (listContent) *listContent = (uint8_t*)ipfixBasicListHeader + sizeof(struct IPFIXBasicListHeader) + ( enterprise ? 4 : 0 );
+    if (listLength) *listLength = fieldLength - sizeof(struct IPFIXBasicListHeader) - ( enterprise ? 4 : 0 );
+
+    return ipfixBasicListHeader;
+  }
+
+
 
 
  public:
@@ -264,7 +369,7 @@ class IPFIXMessageParser {
   SPL::uint64 ipfixStandardFieldAsInteger(const uint16_t identifier) {
 
     // return zero if there is no such field in this flow
-    if ( !ipfixData || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return 0;
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return 0;
 
     // get the length of the field and its offset within the flow record, according to the template
     const uint16_t offset =  templateState->dataFields[identifier].standardOffset;
@@ -272,7 +377,7 @@ class IPFIXMessageParser {
     if (length==0 || length>8) return 0;
 
     // get the value of the field from the flow record as an integer and return it
-    const uint64_t* __attribute__((__may_alias__)) p = reinterpret_cast<uint64_t*>(ipfixData->fields+offset);
+    const uint64_t* __attribute__((__may_alias__)) p = reinterpret_cast<uint64_t*>(ipfixFlow->fields+offset);
     return be64toh( *p ) >> (64-8*length) ; 
   }
 
@@ -284,7 +389,7 @@ class IPFIXMessageParser {
   SPL::rstring ipfixStandardFieldAsString(const uint16_t identifier) {
 
     // return zero if there is no such field in this flow
-    if ( !ipfixData || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::rstring();
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::rstring();
 
     // get the length of the field and its offset within the flow record, according to the template
     const uint16_t offset =  templateState->dataFields[identifier].standardOffset;
@@ -292,7 +397,7 @@ class IPFIXMessageParser {
     if (!length) return SPL::rstring();
 
     // address the flow's byte array, and get the address and length of the field
-    const uint8_t* fields = ipfixData->fields;
+    const uint8_t* fields = ipfixFlow->fields;
     const char* stringAddress = (char*)(&fields[offset]);
     const size_t stringLength = strnlen(stringAddress, length);
 
@@ -308,7 +413,7 @@ class IPFIXMessageParser {
   SPL::list<SPL::uint8> ipfixStandardFieldAsByteList(const uint16_t identifier) {
 
     // return zero if this flow does not contain the specified field
-    if ( !ipfixData || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::list<SPL::uint8>();
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::list<SPL::uint8>();
 
     // get the length of the field and its offset within this 'data flow' record, according to the template
     const uint16_t offset =  templateState->dataFields[identifier].standardOffset;
@@ -316,7 +421,7 @@ class IPFIXMessageParser {
     if (!length) return SPL::list<SPL::uint8>();
 
     // address the flow's byte array
-    const uint8_t* fields = ipfixData->fields;
+    const uint8_t* fields = ipfixFlow->fields;
 
     // get the value of the field from the flow record as an SPL byte list and return it
     return SPL::list<SPL::uint8>(&fields[offset], &fields[offset+length]);
@@ -330,7 +435,7 @@ class IPFIXMessageParser {
   SPL::uint64 ipfixEnterpriseFieldAsInteger(const uint16_t identifier) {
 
     // return zero if there is no such field in this flow
-    if ( !ipfixData || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return 0;
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return 0;
 
     // get the length of the field and its offset within the flow record, according to the template
     const uint16_t offset =  templateState->dataFields[identifier].enterpriseOffset;
@@ -338,7 +443,7 @@ class IPFIXMessageParser {
     if (length==0 || length>8) return 0;
 
     // get the value of the field from the flow record as an integer and return it
-    const uint64_t* __attribute__((__may_alias__)) p = reinterpret_cast<uint64_t*>(ipfixData->fields+offset);
+    const uint64_t* __attribute__((__may_alias__)) p = reinterpret_cast<uint64_t*>(ipfixFlow->fields+offset);
     return be64toh( *p ) >> (64-8*length) ; 
   }
 
@@ -350,7 +455,7 @@ class IPFIXMessageParser {
   SPL::rstring ipfixEnterpriseFieldAsString(const uint16_t identifier) {
 
     // return zero if there is no such field in this flow
-    if ( !ipfixData || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::rstring();
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::rstring();
 
     // get the length of the field and its offset within the flow record, according to the template
     const uint16_t offset =  templateState->dataFields[identifier].enterpriseOffset;
@@ -358,7 +463,7 @@ class IPFIXMessageParser {
     if (!length) return SPL::rstring();
 
     // address the flow's byte array, and get the address and length of the field
-    const uint8_t* fields = ipfixData->fields;
+    const uint8_t* fields = ipfixFlow->fields;
     const char* stringAddress = (char*)(&fields[offset]);
     const size_t stringLength = strnlen(stringAddress, length);
 
@@ -374,7 +479,7 @@ class IPFIXMessageParser {
   SPL::list<SPL::uint8> ipfixEnterpriseFieldAsByteList(const uint16_t identifier) {
 
     // return zero if this flow does not contain the specified field
-    if ( !ipfixData || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::list<SPL::uint8>();
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return SPL::list<SPL::uint8>();
 
     // get the length of the field and its offset within this 'data flow' record, according to the template
     const uint16_t offset =  templateState->dataFields[identifier].enterpriseOffset;
@@ -382,7 +487,7 @@ class IPFIXMessageParser {
     if (!length) return SPL::list<SPL::uint8>();
 
     // address the flow's byte array
-    const uint8_t* fields = ipfixData->fields;
+    const uint8_t* fields = ipfixFlow->fields;
 
     // get the value of the field from the flow record as an SPL byte list and return it
     return SPL::list<SPL::uint8>(&fields[offset], &fields[offset+length]);
@@ -396,10 +501,126 @@ class IPFIXMessageParser {
   SPL::uint32 ipfixEnterpriseIdentifier(const uint16_t identifier) {
 
     // return zero if there is no such field in this flow
-    if ( !ipfixData || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return 0;
+    if ( !ipfixFlow || !templateState || identifier<1 || identifier>MAXIMUM_IDENTIFIER_VALUE ) return 0;
 
     // return the enterprise identifier for this field identifier, if there is one
     return templateState->dataFields[identifier].enterpriseIdentifier;
+  }
+
+
+
+  // This function returns a list of byte lists containing the elements of the 
+  // 'basic list' in the specified 'field idenifier', if there is one.
+
+  inline __attribute__((always_inline))
+  SPL::list< SPL::list<SPL::uint8> > ipfixBasicListFieldAsByteLists(const uint16_t field) {
+    SPL::list< SPL::list<SPL::uint8> > byteLists;
+
+    // address the 'basic list' header, and get the address and length of its data content
+    uint8_t* listContent;
+    uint16_t listLength;
+    const IPFIXBasicListHeader* ipfixBasicListHeader = getBasicListHeader(field, &listContent, &listLength);
+    if (!ipfixBasicListHeader) return byteLists;
+
+    // create a list of byte lists containing the elements of the 'basic list'
+    while (listLength>0) {
+
+      // get the length of the next element
+      uint16_t elementLength = ipfixBasicListHeader->elementLength;
+      if (elementLength==VARIABLE_FIELD_MARKER) { 
+        elementLength = *listContent++; listLength--;
+        if (elementLength==255) { elementLength = ((uint16_t)(*listContent++))<<8 | (uint16_t)(*listContent++); listLength-=2; }
+      }
+
+      // validate the length of the element
+      if (listContent+elementLength>setEnd) { error = "varible-length basic list element overrrun"; return byteLists; }
+
+      // add the element to the list of byte lists, and then step over the element
+      byteLists.push_back( SPL::list<SPL::uint8>(listContent, listContent+elementLength) );
+      listContent += elementLength;
+      listLength -= elementLength;
+    }
+
+    // return the list of byte lists
+    return byteLists;
+  }
+
+
+  // This function returns a list of strings containing the elements of the 
+  // 'basic list' in the specified 'field idenifier', if there is one.
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> ipfixBasicListFieldAsStrings(const uint16_t field) {
+
+    // get a list of byte lists containing the elements of the 'basic list'
+    SPL::list< SPL::list<SPL::uint8> > byteLists = ipfixBasicListFieldAsByteLists(field);
+
+    // convert the list of byte lists into a list of strings
+    SPL::list<SPL::rstring> strings;
+    for (SPL::list< SPL::list<SPL::uint8> >::iterator i = byteLists.begin() ; i != byteLists.end(); ++i) {
+      SPL::list<SPL::uint8> byteList = *i;
+      strings.push_back( SPL::rstring( byteList.begin(), byteList.end() ) );
+    }
+
+    // return the list of strings
+    return strings;
+  }
+
+
+
+  // This function returns a list of integers containing the elements of the 
+  // 'basic list' in the specified 'field idenifier', if there is one.
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::uint64> ipfixBasicListFieldAsIntegers(const uint16_t field) {
+
+    // get a list of byte lists containing the elements of the 'basic list'
+    SPL::list< SPL::list<SPL::uint8> > byteLists = ipfixBasicListFieldAsByteLists(field);
+
+    // convert the list of byte lists into a list of integers
+    SPL::list<SPL::uint64> integers;
+    for (SPL::list< SPL::list<SPL::uint8> >::iterator i = byteLists.begin() ; i != byteLists.end(); ++i) {
+
+      // get the value of the field from the flow record as an integer and return it
+      SPL::list<SPL::uint8> byteList = *i;
+      const int32_t length = byteList.getSize();
+      const uint64_t* address = (const uint64_t*)byteList.getElement(0).getValuePointer();
+      const uint64_t value = be64toh( *address ) >> (64-8*length) ; 
+      integers.push_back(value); 
+    }
+
+    // return the list of integers
+    return integers;
+  }
+
+
+  // This function returns the 'semantic' of the 
+  // 'basic list' in the specified 'field idenifier', if there is one.
+
+  inline __attribute__((always_inline))
+  SPL::uint8 ipfixBasicListFieldSemantic(const uint16_t field) {
+    const IPFIXBasicListHeader* ipfixBasicListHeader = getBasicListHeader(field);
+    return ipfixBasicListHeader ? ipfixBasicListHeader->semanticCode : 0;
+  }
+
+
+  // This function returns the 'element identifier' of the 
+  // 'basic list' in the specified 'field idenifier', if there is one.
+
+  inline __attribute__((always_inline))
+    SPL::uint16 ipfixBasicListFieldElementIdentifier(const uint16_t field) {
+    const IPFIXBasicListHeader* ipfixBasicListHeader = getBasicListHeader(field);
+    return ipfixBasicListHeader ? ntohs(ipfixBasicListHeader->elementIdentifier) & 0x7FFF : 0;
+  }
+
+
+  // This function returns the 'enterprise identifier' of the 
+  // 'basic list' in the specified 'field idenifier', if there is one.
+
+  inline __attribute__((always_inline))
+    SPL::uint32 ipfixBasicListFieldEnterpriseIdentifier(const uint16_t field) {
+    const IPFIXBasicListHeader* ipfixBasicListHeader = getBasicListHeader(field);
+    return ipfixBasicListHeader && (ntohs(ipfixBasicListHeader->elementIdentifier) & 0x8000) ? ntohl(ipfixBasicListHeader->enterpriseNumber[0]) : 0;
   }
 
 
@@ -409,7 +630,7 @@ class IPFIXMessageParser {
   SPL::uint32 errorOffset() {
 
     if (!error) return 0;
-    if (ipfixData) return (uint8_t*)ipfixData - messageStart;
+    if (ipfixFlow) return (uint8_t*)ipfixFlow - messageStart;
     if (ipfixSet) return (uint8_t*)ipfixSet - messageStart;
 
     return 0;
@@ -422,17 +643,15 @@ class IPFIXMessageParser {
   void prepareIPFIXMessage(char* buffer, int length, uint32_t source) {
 
       // clear all of the variables results will be returned in
+      missedMessageCount = 0;
       messageLength = 0;
       messageStart = NULL;
       messageEnd = NULL;
-      messageMissedCount = 0;
       sourceAddress = 0;
       ipfixHeader = NULL;
       ipfixSet = NULL;
-      ipfixData = NULL;
+      ipfixFlow = NULL;
       templateState = NULL;
-      ipfixDataCount = 0;
-      ipfixDataLength = 0;
       error = NULL;
       done = false;
 
@@ -469,39 +688,34 @@ class IPFIXMessageParser {
     const uint32_t thisSequenceNumber = ntohl(ipfixHeader->dataSequence);
     const uint32_t previousSequenceNumber = sourceState->previousSequenceNumber;
     if ( thisSequenceNumber && previousSequenceNumber && thisSequenceNumber!=previousSequenceNumber+1 ) {
-        messageMissedCount = thisSequenceNumber - previousSequenceNumber - 1;
+        missedMessageCount = thisSequenceNumber - previousSequenceNumber - 1;
     }
     sourceState->previousSequenceNumber = thisSequenceNumber; 
   }
 
 
-  // This function advances the parser to the next IPFIXData record in the
+  // This function advances the parser to the next IPFIXFlow record in the
   // prepared IPFIX message.  If there is a next data record, it sets
-  // 'ipfixData' to point at it, or if there are no more data records in this
+  // 'ipfixFlow' to point at it, or if there are no more data records in this
   // message, it sets 'done'.  If an encoding error is found, it sets 'error'.
 
-  void nextDataRecord() {
+  void nextFlowRecord() {
 
       // don't do anything more with a IPFIX message that's mis-encoded
       if (error) return;
 
-    // if we are currently parsing a 'flow data' record, and there are more
-    // flows in it, return the next one
-    if (ipfixData && ipfixDataCount>1) {
-        if ( (uint8_t*)ipfixData + ipfixDataLength > messageEnd ) { error = "IPFIX data record truncated"; return; }
-        ipfixData = (IPFIXData*)((uint8_t*)ipfixData + ipfixDataLength);
-        ipfixDataCount--;
-        return;
-    }
+    // if we just parsed a 'flow data' record, and there are more
+    // flows in this set, return the next one
+    if ( ipfixFlow && templateState && (uint8_t*)ipfixFlow + templateState->dataLength < setEnd ) {
+        ipfixFlow = (IPFIXFlow*)((uint8_t*)ipfixFlow + templateState->dataLength);
+        calculateFieldOffsetsAndLengths();
+        return; }
 
-    // if we will be starting to parse the next 'flow data' record, reset
-    // data-related variables 
-    templateState = NULL;
-    ipfixData = NULL;
-    ipfixDataCount = 0;
-    ipfixDataLength = 0;
+    // reset flow-related variables 
+    ipfixFlow = NULL;
+    templateState = NULL;    
 
-    // if we have finished parsing the current set of records, advance to the next set,
+    // if we have finished parsing the flow records in the current set, advance to the next set,
     // or, if we have not started parsing this IPFIX message yet, point at the first set in it
     if (ipfixSet) {
         ipfixSet = (IPFIXSet*)((uint8_t*)ipfixSet + ntohs(ipfixSet->length));
@@ -521,6 +735,10 @@ class IPFIXMessageParser {
       if ( setLength < sizeof(IPFIXSet) ) { error = "IPFIX set too small"; return; }
       if ( (uint8_t*)ipfixSet + setLength > messageEnd ) { error = "IPFIX set truncated"; return; }
 
+      // remember where this set starts and ends
+      setStart = (uint8_t*)ipfixSet;
+      setEnd = (uint8_t*)ipfixSet + setLength;
+      
       // if this set contains 'flow data' records, and we have stored its template, return the first flow in it
       if (setID>255) {
 
@@ -530,14 +748,9 @@ class IPFIXMessageParser {
           templateState = templateTable[index];
           if (!templateState) { continue; }
 
-          // check for empty set
-          ipfixDataLength = templateState->dataLength;
-          if (!ipfixDataLength) { error = "IPFIX data length zero"; return; }
-          ipfixDataCount = setLength / ipfixDataLength;
-          if (!ipfixDataCount) { error = "IPFIX data set empty"; return; }
-
           // return the first 'flow data' record in this set
-          ipfixData = &ipfixSet->u.data[0];
+          ipfixFlow = &ipfixSet->u.flows[0];
+          calculateFieldOffsetsAndLengths();
           return;
       }
 

@@ -22,6 +22,8 @@ logDirectory=$projectDirectory/log
 
 libpcapDirectory=$HOME/libpcap-1.7.4
 
+networkInterface=$( ifconfig ens6f3 1>/dev/null 2>&1 && echo ens6f3 || echo eth0 ) 
+
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 ingestProcessor=2
@@ -54,7 +56,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
--P networkInterface=ens6f3
+-P networkInterface=$networkInterface
 -P "inputFilter=udp port 53"
 -P metricsInterval=1.0
 -P timeoutInterval=30.0

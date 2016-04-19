@@ -64,6 +64,7 @@ streamtool mkinstance -i $instance -d $domain \
 --property instanceTrace.maximumFileSize=1000000 \
 --property instance.canSetPeOSCapabilities=true \
 --property instance.runAsUser=$USER \
+--property instance.applicationBundlesPath=/tmp/Streams-$instance\@$USER \
 || die "Sorry, could not create Streams instance '$instance', $?"
 
 step "starting Streams instance '$instance' ..."
