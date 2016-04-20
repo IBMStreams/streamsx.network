@@ -1,4 +1,4 @@
-#Mon Apr 18 21:17:22 EDT 2016
+#Wed Apr 20 17:06:46 EDT 2016
 copytosourcelist=
 hreftargetslist=tk$SamplePacketFileSource/ns$sample.xml,toolkits/ix$Namespace.xml,tk$SamplePacketFileSource/ix$Namespace.xml,toolkits/toolkits.xml,tk$SamplePacketFileSource/tk$SamplePacketFileSource.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/pring/git/streamsx.network/samples/SamplePacketFileSource/doc/spldoc/dita
+user.input.dir=/tmp/streamsx.network/samples/SamplePacketFileSource/doc/spldoc/dita
 uplevels=
 tempdirToinputmapdir.relative.value=
 conrefpushfile=conrefpush.list
