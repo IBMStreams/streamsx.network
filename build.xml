@@ -104,9 +104,9 @@
 
 	<target name="clean_spldoc">
 		<echo message="Removing SPLDOC directories" />
-		<delete dir="${basedir}/${toolkit}/doc"/>
-		<delete verbose="true">
-			<dirset dir="samples" includes="**/doc/**" />
+		<delete verbose="true" includeEmptyDirs="true" failonerror="false">
+			<fileset dir="${toolkit}/doc" />
+			<fileset dir="samples" includes="*/doc/**" />
 		</delete>
 	</target>
 
