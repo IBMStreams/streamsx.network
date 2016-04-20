@@ -1,0 +1,60 @@
+/*********************************************************************
+ * Copyright (C) 2015, International Business Machines Corporation
+ * All Rights Reserved
+ *********************************************************************/
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+
+/* Simple example application which configures the DPDP source and 
+ * sends the packet data to a file.
+ *
+ * Parameters:
+ *   coreMask : Hex bit mask listing the cores used for DPDK polling loops.
+ *              The low order bit corresponds to the master lcore and all
+ *              other bits indicate cores that will be assigned to 
+ *              ports/queues.
+ *              Note that only the first instance of the PacketDPDKSource
+ *              must set this parm.  All others are ignored.
+ *   lcore    : Logical core number on which this operator will run.
+ *   nicPort  : NIC port that sources packets for this operator instance.
+ *   nicQueue : NIC queue that sources packets for this operator instance.
+ *   Promiscuous : Enable promisicuous mode in the NIC. 
+ *   metricsInterval : Rate at which metrics are pulled out of the NIC stack. 
+ */
+
+type PacketData = uint64 timestampMicroseconds,
+     blob   packet,
+     uint64 length;
+
+public composite TestPacketDPDKSource {   
+	graph   
+        // One instance per NIC port/queue -- e.g. 4 NICs each with
+	// a single queue require 4 instances.  Note that the coreMask 
+        // parameter should be constant for all instances.
+        (stream<PacketData>  PacketStream_0 ) = PacketDPDKSource() {
+            param
+                coreMask: "0x3";
+                lcore   : 1;
+                nicPort : 0;
+                nicQueue: 0;
+                promiscuous: true;
+                metricsInterval: 1.0;
+            output 
+                PacketStream_0:
+                    timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
+                    packet = PACKET_DATA(),
+                    length = (uint64) PACKET_LENGTH();
+        } 
+
+        () as FS_PacketData_0 = FileSink( PacketStream_0 ) {
+            param
+                file : "PacketStream0.out";
+        }
+	config
+	    placement : partitionColocation('SinglePE');
+	    tracing   : trace;
+}
+
+
