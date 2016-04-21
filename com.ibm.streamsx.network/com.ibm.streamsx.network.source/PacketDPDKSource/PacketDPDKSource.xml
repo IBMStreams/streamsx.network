@@ -313,7 +313,7 @@ Suggested tools to help identify NIC ports:
 
    \- ifconfig
 
-   \- dpdk-*/tools/dpdk_nic_bind.py --status
+   \- dpdk-\*/tools/dpdk_nic_bind.py --status
 
    \- ibstat (for Mellanox NICs)
 
