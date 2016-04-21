@@ -237,7 +237,6 @@ streams_source interface library to dpdk.
 	</cmn:description>
 	<cmn:managedLibrary>
 	<cmn:lib>streams_source</cmn:lib>
-	<cmn:lib>dpdk</cmn:lib>
 	<cmn:libPath>../../impl/lib/source</cmn:libPath>
 	<cmn:includePath>../../impl/include/source</cmn:includePath>
 	</cmn:managedLibrary>
