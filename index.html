@@ -1,61 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Streamsx.network : (Incubation) Toolkit for working with network data">
+    <title>Streamsx.network by ejpring</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <title>Streamsx.network</title>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Streamsx.network</h1>
+        <p>(Incubation) Toolkit for working with network data</p>
+        <p class="view"><a href="https://github.com/ejpring/streamsx.network">View the Project on GitHub <small>ejpring/streamsx.network</small></a></p>
+        <ul>
+          <li><a href="https://github.com/ejpring/streamsx.network/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/ejpring/streamsx.network/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/ejpring/streamsx.network">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="streamsxnetwork" class="anchor" href="#streamsxnetwork" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>streamsx.network</h1>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/IBMStreams/streamsx.network">View on GitHub</a>
+<p>The <a href="http://ibmstreams.github.io/streamsx.network/">Network toolkit for IBM Streams</a> enables SPL applications to process low-level network traffic. It includes operators and functions that can:</p>
 
-          <h1 id="project_title">Streamsx.network</h1>
-          <h2 id="project_tagline">(Incubation) Toolkit for working with network data</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/IBMStreams/streamsx.network/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/IBMStreams/streamsx.network/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>
-<a id="streamsx-network" class="anchor" href="#streamsx-network" aria-hidden="true"><span class="octicon octicon-link"></span></a>streamsx.network</h3>
-
-<p>This toolkit provides operators and functions for ingesting and parsing ethernet packets.</p>
-
-<a href="http://ibmstreams.github.io/streamsx.network/com.ibm.streamsx.network/doc/spldoc/html/">SPLDOC for the Network toolkit</a>
-
-<h3>
-<a id="sample-applications" class="anchor" href="#sample-applications" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sample Applications</h3>
-
-<!-- BEGIN SAMPLE LIST -->
 <ul>
-<li><a href="./samples/SampleIPAddressLocation/doc/spldoc/html/index.html">SampleIPAddressLocation</a>
-<li><a href="./samples/SamplePacketLiveSource/doc/spldoc/html/index.html">SamplePacketLiveSource</a>
-<li><a href="./samples/SamplePacketDPDKSource/doc/spldoc/html/index.html">SamplePacketDPDKSource</a>
-<li><a href="./samples/SamplePacketContentAssembler/doc/spldoc/html/index.html">SamplePacketContentAssembler</a>
-<li><a href="./samples/SampleNetworkToolkitData/doc/spldoc/html/index.html">SampleNetworkToolkitData</a>
-<li><a href="./samples/SampleIPFIXMessageParser/doc/spldoc/html/index.html">SampleIPFIXMessageParser</a>
-<li><a href="./samples/SampleAddressFunctions/doc/spldoc/html/index.html">SampleAddressFunctions</a>
-<li><a href="./samples/SamplePacketFileSource/doc/spldoc/html/index.html">SamplePacketFileSource</a>
-<li><a href="./samples/SampleDNSMessageParser/doc/spldoc/html/index.html">SampleDNSMessageParser</a>
-<li><a href="./samples/SampleDHCPMessageParser/doc/spldoc/html/index.html">SampleDHCPMessageParser</a>
-<li><a href="./samples/SampleNetflowMessageParser/doc/spldoc/html/index.html">SampleNetflowMessageParser</a>
+<li><p>ingest raw ethernet packets from live network interfaces and recordings of network traffic</p></li>
+<li><p>parse DHCP, DNS, Netflow, and IPFIX messages</p></li>
+<li><p>reassemble application-level files from network packets</p></li>
+<li><p>map IP addresses into city, state, and country locations</p></li>
+<li><p>convert IP addresses betweeen binary and string representations</p></li>
 </ul>
-<!-- END SAMPLE LIST -->
 
+<p>This version of the toolkit is intended for use with IBM Streams release 4.1 and later.</p>
+
+<p>For the toolkit's documentation, please see <a href="http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/">http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/</a>.</p>
+
+<p>For the toolkit's source code, please see <a href="https://github.com/IBMStreams/streamsx.network/">https://github.com/IBMStreams/streamsx.network/</a>.</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/ejpring">ejpring</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
   </body>
 </html>
