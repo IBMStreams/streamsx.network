@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File Functions.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File Functions.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">Functions.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SamplePacketContentAssembler.html">SamplePacketContentAssembler 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; Functions.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Functions</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$Functions.html#spldoc_compilationunit__function__leadingZeros.uint64.int32">leadingZeros(uint64, int32)</a></strong>
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$Functions.html#spldoc_compilationunit__function__mimetype2extension.rstring">mimetype2extension(rstring)</a></strong>
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$Functions.html#spldoc_compilationunit__function__trancateNonASCII.rstring">trancateNonASCII(rstring)</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Functions</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__function__trancateNonASCII.rstring"><h2 class="title sectiontitle splpart">rstring trancateNonASCII(rstring data)</h2>
+  
+</div>
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+ <ul class="sl simple">
+   <li class="sli">
+<strong class="ph b">data</strong>
+   </li>
+
+ </ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Returns</h2>
+
+<ul class="sl simple"><li class="sli">
+<tt class="ph tt">rstring</tt>
+</li>
+</ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ rstring trancateNonASCII(rstring data) {
+   for (int32 i in range(length(data))) {
+     uint32 c = toCharacterCode(substring(data,i,1));
+     if ( c==0x00000009u || c==0x0000000Au || c==0x0000000Du || ( c&gt;=0x00000020u &amp;&amp; c&lt;=0x0000007Eu ) ) continue;
+     return substring(data,0,i) + "...[" + (rstring)(length(data)-i) + " bytes of binary data]...";
+   }
+   return data;
+ }
+
+   </pre>
+
+</div>
+
+<div class="section" id="spldoc_compilationunit__function__mimetype2extension.rstring"><h2 class="title sectiontitle splpart">rstring mimetype2extension(rstring contentType)</h2>
+  
+</div>
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+ <ul class="sl simple">
+   <li class="sli">
+<strong class="ph b">contentType</strong>
+   </li>
+
+ </ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Returns</h2>
+
+<ul class="sl simple"><li class="sli">
+<tt class="ph tt">rstring</tt>
+</li>
+</ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ rstring mimetype2extension(rstring contentType) {
+   map&lt;rstring,rstring&gt; extensions = {
+     ""                                  : "",
+     "application/ecmascript"            : "js",
+     "application/gzip"                  : "gz",
+     "application/javascript"            : "js",
+     "application/json"                  : "json",
+     "application/pdf"                   : "pdf",
+     "application/rss+xml"               : "xml",
+     "application/x-gzip"                : "gz",
+     "application/x-javascript"          : "js",
+     "application/xml"                   : "xml",
+     "application/zip"                   : "zip",
+     "image/bmp"                         : "bmp",
+     "image/gif"                         : "gif",
+     "image/jpeg"                        : "jpeg",
+     "image/png"                         : "png",
+     "image/svg+xml"                     : "svg",
+     "text"                              : "txt",
+     "text/css"                          : "css",
+     "text/html"                         : "html",
+     "text/javascript"                   : "js",
+     "text/json"                         : "json",
+     "text/plain"                        : "txt",
+     "text/x-json"                       : "json",
+     "text/xml"                          : "xml" };
+ 
+   // separate the MIME type from whatever else is in the ContentType header
+   list&lt;rstring&gt; tokens = tokenize(contentType, "; ", false);
+   rstring mimeType = size(tokens)&gt;0 ? lower(tokens[0]) : lower(contentType);
+ 
+   // return the extension for this MIME type, if there is one
+   if ( mimeType in extensions ) return extensions[mimeType];
+ 
+   // if there is no extension for this MIME type, log it and return an empty string
+   //???log(Sys.info, "no file extension found for ContentType '" + contentType + "'");
+   return ""; 
+ }
+
+   </pre>
+
+</div>
+
+<div class="section" id="spldoc_compilationunit__function__leadingZeros.uint64.int32"><h2 class="title sectiontitle splpart">rstring leadingZeros(uint64 number, int32 width)</h2>
+  
+</div>
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+ <ul class="sl simple">
+   <li class="sli">
+<strong class="ph b">number</strong>
+   </li>
+
+   <li class="sli">
+<strong class="ph b">width</strong>
+   </li>
+
+ </ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Returns</h2>
+
+<ul class="sl simple"><li class="sli">
+<tt class="ph tt">rstring</tt>
+</li>
+</ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ rstring leadingZeros(uint64 number, int32 width) {
+   mutable rstring string = (rstring)number;
+   int32 padding = width-length(string)&gt;0 ? width-length(string) : 0;
+   return substring("0000000000000000000000000000000000000", 0, padding) + string;
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

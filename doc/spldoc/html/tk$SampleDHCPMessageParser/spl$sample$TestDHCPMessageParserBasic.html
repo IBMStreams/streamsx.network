@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestDHCPMessageParserBasic.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestDHCPMessageParserBasic.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestDHCPMessageParserBasic.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleDHCPMessageParser.html">SampleDHCPMessageParser 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestDHCPMessageParserBasic.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestDHCPMessageParserBasic.html#spldoc_compilationunit__composite_operator__TestDHCPMessageParserBasic">TestDHCPMessageParserBasic</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestDHCPMessageParserBasic"><h2 class="title sectiontitle splpart">public composite TestDHCPMessageParserBasic</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleDHCPMessageParser/op$sample$TestDHCPMessageParserBasic.svg" width="342" height="175"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestDHCPMessageParserBasic {
+ 
+     param
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+ 
+     type
+ 
+     PacketType =
+         uint64 packetNumber,            // sequence number of packet, as emitted by operator
+         uint32 captureTime,             // time that packet was captured, in seconds since Unix epoch
+         rstring ipSourceAddress,        // IP source address
+         rstring ipDestinationAddress,   // IP destination address
+         blob dhcpMessage;               // the DHCP message from a packet, excluding all network headers
+ 
+     DHCPMessageType =
+         uint64 packetNumber,            // sequence number of packet, as emitted by operator
+         rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
+         rstring ipSourceAddress,        // IP source address
+         rstring ipDestinationAddress,   // IP destination address
+         uint64 messagesProcessed,
+         rstring dhcpMessageType,        // option 53: type of this DHCP message
+         rstring dhcpServer,             // header: address of DHCP server, as an IPv4 address
+         rstring dhcpServerError,        // option 56: error message from server, if request failed
+         rstring clientMACAddress,       // header: client hardware address
+         rstring clientIPAddress,        // header: address of client requesting renewal of lease, as an IPv4 address
+         rstring leaseDuration,          // option 51: address lease time, in seconds
+         rstring leasedAddress,          // header: address leased to client by server, as an IPv4 address
+         rstring leasedAddressSubnetMask,// option 1: the subnet mask of the client, as an IPv4 address
+         list&lt;rstring&gt; subnetRouters,    // option 3: list of routers on client's subnet, as IPv4 addresses
+         list&lt;rstring&gt; staticRoutes,     // option 33: list of address pairs for routing table, as IPv4 addresses
+         list&lt;rstring&gt; dnsServers,       // option 6: list of DNS servers, as IPv4 addresses
+         rstring hostname,               // option 12: hostname of the client
+         rstring domainName,             // option 15: domain name client should use with DNS
+         uint32 requestIdentifier,       // header: request correlator, chosen by client, returned by server
+         rstring requestedAddress,       // option 50: client's requested address, as an IPv4 address
+         list&lt;uint8&gt; requestedParameters,// option 55: list of requested DHCP parameters, specified as option codes
+         rstring parseError;
+ 
+     // error output from DHCPMessageParser operator
+     DHCPErrorType =
+         uint64 packetNumber,            // sequence number of packet, as emitted by operator
+         rstring captureTime,            // time that packet was captured, in seconds since Unix epoch
+         rstring ipSourceAddress,        // binary representation of IP source address
+         rstring ipDestinationAddress,   // IP destination address
+         rstring parserError,
+         rstring dhcpError,              // option 56: error message from server, if request failed
+         rstring dhcpMessage;
+ 
+     graph
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource() {
+         param
+             pcapFilename: $pcapFilename;
+             inputFilter: "udp port 67 or udp port 68";
+             metricsInterval: 0.0;
+         output Out:
+             packetNumber = packetsProcessed(),
+             captureTime = CAPTURE_SECONDS(),
+             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+             dhcpMessage = PAYLOAD_DATA();
+     }
+     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDHCPMessageParserBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     ( stream&lt;DHCPMessageType&gt; DHCPMessageStream as OutMessage ;
+       stream&lt;DHCPErrorType&gt; DHCPErrorStream as OutError ) = DHCPMessageParser(PacketStream) {
+         logic state: {
+           map&lt;uint8,rstring&gt; dhcpTypes = { 1: "DHCPDISCOVER", 2: "DHCPOFFER", 3: "DHCPREQUEST", 4: "DHCPDECLINE", 5: "DHCPACK", 6: "DHCPNAK", 7: "DHCPRELEASE", 8: "DHCPINFORM" };
+         }
+       param
+           messageAttribute: dhcpMessage;
+           outputFilters: true, parseError();
+       output OutMessage:
+           captureTime = formatEpochDateTime(captureTime),
+           messagesProcessed = messagesProcessed(),
+           dhcpMessageType = DHCP_MESSAGE_TYPE() in dhcpTypes ? dhcpTypes[DHCP_MESSAGE_TYPE()] : (rstring)DHCP_MESSAGE_TYPE(),
+           dhcpServer = convertIPV4AddressNumericToString(DHCP_SERVER_ADDRESS()),
+           dhcpServerError = DHCP_ERROR_MESSAGE(),
+           clientMACAddress = convertMACAddressNumericToString((list&lt;uint8&gt;[6])DHCP_CLIENT_HARDWARE_ADDRESS()),
+           clientIPAddress = convertIPV4AddressNumericToString(DHCP_CLIENT_ADDRESS()),
+           leaseDuration = formatElapsedTime(DHCP_ADDRESS_LEASE_TIME()),
+           leasedAddress = convertIPV4AddressNumericToString(DHCP_YOUR_ADDRESS()),
+           leasedAddressSubnetMask = convertIPV4AddressNumericToString(DHCP_SUBNET_MASK()),
+           subnetRouters = convertIPV4AddressListToStringList(DHCP_ROUTERS()),
+           staticRoutes = convertIPV4AddressListToStringList(DHCP_STATIC_ROUTES()),
+           dnsServers = convertIPV4AddressListToStringList(DHCP_DNS_SERVERS()),
+           hostname = DHCP_HOST_NAME(),
+           domainName = DHCP_DOMAIN_NAME(),
+           requestIdentifier = DHCP_TRANSACTION_IDENTIFIER(),
+           requestedAddress = convertIPV4AddressNumericToString(DHCP_REQUESTED_ADDRESS()),
+           requestedParameters = DHCP_PARAMETER_REQUESTS(),
+           parseError = parseErrorDescription();
+       OutError:
+           captureTime = formatEpochDateTime(captureTime),
+           parserError = parseErrorDescription(),
+           dhcpError = DHCP_ERROR_MESSAGE(),
+           dhcpMessage = substring((rstring)dhcpMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dhcpMessage, 2*(int32)parseErrorOffset(), 2*size(dhcpMessage)-2*(int32)parseErrorOffset());
+     }
+     () as DHCPMessageSink = FileSink(DHCPMessageStream) { param file: "debug.TestDHCPMessageParserBasic.DHCPMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as DHCPErrorSink = FileSink(DHCPErrorStream) { param file: "debug.TestDHCPMessageParserBasic.DHCPErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ 
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
