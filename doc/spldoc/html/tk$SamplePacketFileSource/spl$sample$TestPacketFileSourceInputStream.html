@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestPacketFileSourceInputStream.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestPacketFileSourceInputStream.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestPacketFileSourceInputStream.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SamplePacketFileSource.html">SamplePacketFileSource 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestPacketFileSourceInputStream.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestPacketFileSourceInputStream.html#spldoc_compilationunit__composite_operator__TestPacketFileSourceInputStream">TestPacketFileSourceInputStream</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestPacketFileSourceInputStream"><h2 class="title sectiontitle splpart">public composite TestPacketFileSourceInputStream</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapDirectory</strong>
+</li>
+
+<li class="sli"><strong class="ph b">processorAffinity</strong>
+</li>
+
+<li class="sli"><strong class="ph b">timeoutInterval</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketFileSource/op$sample$TestPacketFileSourceInputStream.svg" width="337" height="152"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestPacketFileSourceInputStream {
+ 
+     param
+     expression&lt;rstring&gt; $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "data" );
+     expression&lt;uint32&gt; $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1" );
+     expression&lt;float64&gt; $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "1.0" );
+ 
+     type
+ 
+     PacketType =
+       uint64 packetNumber,      // sequence number of packet, as emitted by operator
+       rstring filepath,         // implicitly copied from input tuple
+       rstring filename,         // explicitly extracted from input tuple's 'filepath' attribute
+       float64 captureTime,      // time that packet was captured, in seconds since Unix epoch
+       uint32 packetLength,      // original length of packet (not necessarily all captured)
+       blob packetData;          // contents of packet captured, including network headers (not necessarily complete)
+ 
+     graph
+ 
+     stream&lt;rstring filepath&gt; FilepathStream as Out = DirectoryScan() {
+       param
+           directory: $pcapDirectory;
+           pattern: "\\.pcap$";
+     output Out:
+           filepath = FullPath(); }
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource(FilepathStream) {
+         param
+             processorAffinity: $processorAffinity;
+         output Out:
+             packetNumber = packetsProcessed() - 1ul,
+             filename = regexMatchPerl(filepath, "([^/]+)$")[0],
+             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             packetLength = PACKET_LENGTH(),
+             packetData = PACKET_DATA();
+     }
+     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceInputStream.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

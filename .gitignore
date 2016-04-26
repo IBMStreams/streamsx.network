@@ -30,4 +30,3 @@ StreamsLogs*.tgz
 
 # ignore directories
 /tmp/
-/doc/
