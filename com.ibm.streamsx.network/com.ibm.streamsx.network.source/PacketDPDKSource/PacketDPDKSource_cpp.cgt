@@ -30,15 +30,15 @@ my $myOperatorKind = $model->getContext()->getKind();
 my @outputPortList = @{ $model->getOutputPorts() };
 
 # Get C++ expressions for getting the values of this operator's parameters.
-my $coreMask = $model->getParameterByName("coreMask")->getValueAt(0)->getCppExpression();
+my $coreMask = $model->getParameterByName("coreMask") ? $model->getParameterByName("coreMask")->getValueAt(0)->getCppExpression() : undef; 
+my $portMask = $model->getParameterByName("portMask") ? $model->getParameterByName("portMask")->getValueAt(0)->getCppExpression() : undef;
+my $numQueues = $model->getParameterByName("numQueues") ? $model->getParameterByName("numQueues")->getValueAt(0)->getCppExpression() : 1;
+my $isMaster = $model->getParameterByName("isMaster") ? $model->getParameterByName("isMaster")->getValueAt(0)->getCppExpression() : 0;
+
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
-
-my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
-
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
-
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
@@ -78,7 +78,7 @@ SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPort
 #define PacketSource_result_functions MY_OPERATOR
 
 // Function called from the DPDK library as each packet arrives.
-void dpdkCallback(void *correlator, void *data, 
+static void dpdkCallback(void *correlator, void *data, 
 	uint32_t length, uint64_t tscTimestamp) {
     MY_OPERATOR* self = (MY_OPERATOR*)correlator;
     self->packetProcess((uint8_t *)data, length, tscTimestamp);
@@ -86,23 +86,38 @@ void dpdkCallback(void *correlator, void *data,
 
 MY_OPERATOR::MY_OPERATOR() {
     // Get the operator's parameters into variables.
-    const char* coreMask  = <%=$coreMask%>.c_str();
-    const bool promiscuous = <%=$promiscuous%>;
+    rstring coreRstring  = <%= $coreMask ? $coreMask : '""' %>;
+    const char* coreMask = coreRstring.c_str(); 
+    rstring portRstring  = <%= $portMask ? $portMask : '""' %>;
+    const char* portMask = portRstring.c_str();
+    const bool isMaster = <%=$isMaster%>;
+    int numQueues = <%=$numQueues%>;
+
     lcore = <%=$lcore%>;
     nicPort = <%=$nicPort%>;
     nicQueue = <%=$nicQueue%>;
+    const bool promiscuous = <%=$promiscuous%>;
     metricsInterval = <%=$metricsInterval%>;
 
     // Initialize the DPDK subsystem.
-    int rc = streams_source_init(coreMask, &dpdkCallback,
-                                 lcore, nicPort, nicQueue, 
-				 (int)promiscuous, (void*)this);
+    int rc = 0;
+    if(isMaster) {
+       rc = streams_master_init(coreMask, portMask, numQueues,     
+                                lcore, &dpdkCallback, (void *)this);
+    } else {
+       rc = streams_slave_init(lcore, nicPort, nicQueue, (int)promiscuous,
+                               &dpdkCallback, (void *)this);
+    }
 
     SPLLOG(L_TRACE, "streams_source_init() on lcore = " << lcore <<
            ", nicPort = " << nicPort <<
            ", nicQueue = " << nicQueue <<
            " completed.  Return code = " << rc,
            "PacketDPDKSource"); 
+
+    if (rc != 0) {
+       THROW (SPLRuntimeOperator, "Error in DPDK streams init.");
+    }
 
     tscHz = streams_source_get_tsc_hz(); 
     tscMicrosecondAdjust = (tscHz + 500000ul) / 1000000ul; 
@@ -236,7 +251,13 @@ void MY_OPERATOR::metricsThread() {
 }
 
 void MY_OPERATOR::processDpdkLoop() {
-    streams_source_start();
+    const bool isMaster = <%=$isMaster%>;
+
+    int rc = 0;
+    rc = streams_source_start((int)isMaster);
+    if (rc != 0) {
+       THROW (SPLRuntimeOperator, "Error in DPDK streams_source_start.");
+    }
     while(!getPE().getShutdownRequested()) {
 	usleep(100);
     }

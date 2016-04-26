@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <net/if.h>
 #include <string.h>
 
 #include <rte_byteorder.h>
@@ -25,6 +26,13 @@
 
 struct rte_mempool *socket_mempool_[MAX_SOCKETS];
 struct lcore_conf lcore_conf_[RTE_MAX_LCORE];
+struct port_info port_info_[MAX_PORTS];
+unsigned long long coreMask_;
+unsigned long long portMask_;
+int numPorts_;
+int numQueues_;
+int coreMaster_;
+int numOperators_;
 
 static uint16_t num_rxd_ = STREAMS_SOURCE_RX_DESC_DEFAULT;
 static uint16_t num_txd_ = STREAMS_SOURCE_TX_DESC_DEFAULT;
@@ -68,7 +76,7 @@ static struct rte_eth_txconf tx_conf_ = {
 	.wthresh = TX_WTHRESH,
     },
     .tx_free_thresh = 0, /* Use PMD default values */
-    .tx_rs_thresh = 0, /* Use PMD detauls values */
+    .tx_rs_thresh = 0,   /* Use PMD detault values */
     .txq_flags = 0x0,
 };
 
@@ -82,59 +90,98 @@ static void init_pools(void) {
     char s[64];
 
     for (i = 0; i < RTE_MAX_LCORE; ++i) {
-	if (rte_lcore_is_enabled(i) == 0)
+	if (rte_lcore_is_enabled(i) == 0) {
 	    continue;
+        }
 
 	socket_id = rte_lcore_to_socket_id(i);
-	if (socket_id > MAX_SOCKETS)
+	if (socket_id > MAX_SOCKETS) {
 	    rte_exit(EXIT_FAILURE, "socket_id %d > MAX_SOCKETS\n",
 		    socket_id);
+        }
 
-	if (socket_mempool_[socket_id] != NULL)
+	if (socket_mempool_[socket_id] != NULL) {
 	    continue;
+        }
+
 	mp = rte_mempool_create(s, NB_MBUF, MBUF_SIZE, MEMPOOL_CACHE_SIZE,
 		sizeof(struct rte_pktmbuf_pool_private),
 		rte_pktmbuf_pool_init, NULL,
 		rte_pktmbuf_init, NULL, socket_id, 0);
-	if (mp == NULL)
+
+	if (mp == NULL) {
 	    rte_exit(EXIT_FAILURE, "Error on rte_mempool_create");
+        }
 
 	socket_mempool_[socket_id] = mp;
     }
 }
 
-static void init_ports(int promiscuous) {
+static void init_ports(void) {
     int ret;
     uint8_t num_rx_queues, num_tx_queues, socket_id, queue_id;
     unsigned port_id, lcore_id, queue;
     struct lcore_conf *conf;
     struct rte_eth_link link;
+    struct rte_eth_dev_info dev_info;
     struct ether_addr eth_addr;
     uint32_t num_ports = rte_eth_dev_count();
+    uint32_t if_index;
+    char     ifname[IF_NAMESIZE];
 
     lcore_id = rte_get_master_lcore();
     socket_id = rte_lcore_to_socket_id(lcore_id);
     conf = &lcore_conf_[lcore_id];
 
+    RTE_LOG(INFO, STREAMS_SOURCE, "==========\n");
+    if(num_ports) {
+        RTE_LOG(INFO, STREAMS_SOURCE, "Port numbers available: 0 to %d\n", num_ports-1);
+    } else {
+        RTE_LOG(INFO, STREAMS_SOURCE, "Port numbers available: <none>\n");
+    }
     for (port_id = 0; port_id < num_ports; port_id++) {
-
 	RTE_LOG(INFO, STREAMS_SOURCE, "Init port %u\n", port_id);
+	rte_eth_dev_info_get(port_id, &dev_info);
 	rte_eth_macaddr_get(port_id, &eth_addr);
+
+        if_index = dev_info.if_index;
+        if((if_index >= 0) && (if_indextoname(if_index, ifname))) {
+        } else {
+            strcpy(ifname, "<none>"); 
+        }
 	RTE_LOG(INFO, STREAMS_SOURCE, 
-		"  Addr: %02x:%02x:%02x:%02x:%02x:%02x\n", 
+		"  Interface    : %s\n", ifname);
+
+	RTE_LOG(INFO, STREAMS_SOURCE, 
+		"  Driver       : %s\n", dev_info.driver_name); 
+	RTE_LOG(INFO, STREAMS_SOURCE, 
+		"  MAC Addr     : %02x:%02x:%02x:%02x:%02x:%02x\n", 
 		eth_addr.addr_bytes[0],
 		eth_addr.addr_bytes[1],
 		eth_addr.addr_bytes[2],
 		eth_addr.addr_bytes[3],
 		eth_addr.addr_bytes[4],
 		eth_addr.addr_bytes[5]);
-	RTE_LOG(INFO, STREAMS_SOURCE, "  Socket: %d\n", 
+	RTE_LOG(INFO, STREAMS_SOURCE, 
+		"  PCI Bus Addr : %04x:%02x:%02x:%x\n", 
+		dev_info.pci_dev->addr.domain,
+		dev_info.pci_dev->addr.bus,
+		dev_info.pci_dev->addr.devid,
+		dev_info.pci_dev->addr.function);
+	RTE_LOG(INFO, STREAMS_SOURCE, 
+                "  Socket       : %d\n", 
 		rte_eth_dev_socket_id(port_id));
+	RTE_LOG(INFO, STREAMS_SOURCE, 
+		"  RXQ Max      : %d\n", dev_info.max_rx_queues); 
+	RTE_LOG(INFO, STREAMS_SOURCE, 
+		"  TXQ Max      : %d\n", dev_info.max_tx_queues); 
 
-	num_rx_queues = 1; // TODO make this a param on the operator
+	num_rx_queues = numQueues_;
 	num_tx_queues = 1;
-	RTE_LOG(INFO, STREAMS_SOURCE, "  num_rxq: %d\n", num_rx_queues);
-	RTE_LOG(INFO, STREAMS_SOURCE, "  num_txq: %d\n", num_tx_queues);
+	RTE_LOG(INFO, STREAMS_SOURCE, 
+                "  RXQ Set      : %d\n", num_rx_queues);
+	RTE_LOG(INFO, STREAMS_SOURCE,
+                "  TXQ Set      : %d\n", num_tx_queues);
 	ret = rte_eth_dev_configure(port_id, num_rx_queues, num_tx_queues,
 		&port_conf_);
 	if (ret < 0) {
@@ -152,6 +199,7 @@ static void init_ports(int promiscuous) {
 	}
 
 	conf->tx_queue_id[port_id] = queue_id;
+        RTE_LOG(INFO, STREAMS_SOURCE, "----------\n");
     }
 
     /* Initialize rx queues */
@@ -160,7 +208,7 @@ static void init_ports(int promiscuous) {
 	    continue;
 
 	conf = &lcore_conf_[lcore_id];
-	RTE_LOG(INFO, STREAMS_SOURCE, "Init rx queues on lcore %u num_rx_queue: %d\n", lcore_id, conf->num_rx_queue);
+	RTE_LOG(INFO, STREAMS_SOURCE, "Init rx queues on lcore %u num_rx_queue: %d, callback: 0x%lx\n", lcore_id, conf->num_rx_queue, conf->rx_queue_list[0].packetCallbackFunction);
 	for (queue = 0; queue < conf->num_rx_queue; queue++) {
 	    port_id = conf->rx_queue_list[queue].port_id;
 	    queue_id = conf->rx_queue_list[queue].queue_id;
@@ -203,34 +251,25 @@ static void init_ports(int promiscuous) {
 	    RTE_LOG(INFO, STREAMS_SOURCE, "  Link down.\n");
 	}
 
-	if (promiscuous) rte_eth_promiscuous_enable(port_id);
+	if (port_info_[port_id].promiscuous) rte_eth_promiscuous_enable(port_id);
     }
 }
 
-// TODO add some validation
-static int validate_port_config(void) {
-    return 0;
-}
-
-int init(int promiscuous) {
-    int ret = -1, i ;
-
-    if (validate_port_config() < 0)
-	goto exit;
+int init(void) {
+    int i;
 
     /* Assign socket id's */
-    for (i = 0; i < RTE_MAX_LCORE; ++i) {
-	if (rte_lcore_is_enabled(i) == 0)
+    for(i = 0; i < RTE_MAX_LCORE; ++i) {
+	if (rte_lcore_is_enabled(i) == 0) {
 	    continue;
+        }
 	lcore_conf_[i].socket_id = rte_lcore_to_socket_id(i);
     }
 
     rte_srand(rte_rdtsc());
 
     init_pools();
-    init_ports(promiscuous);
-    ret = 0;
+    init_ports();
 
-exit:
-    return ret;
+    return(0);
 }

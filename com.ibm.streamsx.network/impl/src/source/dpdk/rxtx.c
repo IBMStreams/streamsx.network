@@ -19,6 +19,8 @@ void receive_loop(struct lcore_conf *conf) {
 
     RTE_LOG(INFO, STREAMS_SOURCE, "Starting receive loop on lcore %u\n",
 	    rte_lcore_id());
+    RTE_LOG(INFO, STREAMS_SOURCE, "conf = 0x%lx, num_rx_queue = %d\n",
+	    conf, conf->num_rx_queue);
 
     while(1) {
 	// Read rx packets from the queue.
@@ -36,17 +38,21 @@ void receive_loop(struct lcore_conf *conf) {
 		    rte_prefetch0(rte_pktmbuf_mtod(pkts_burst[j
 				+ PREFETCH_OFFSET], void *));
 
-		    packetCallback(conf->rx_queue_list[i].userData,
-		                   rte_pktmbuf_mtod(pkts_burst[j], char *),
-				   pkts_burst[j]->data_len, rte_rdtsc());
+                    if(packetCallback) {
+		        packetCallback(conf->rx_queue_list[i].userData,
+		                       rte_pktmbuf_mtod(pkts_burst[j], char *),
+			    	       pkts_burst[j]->data_len, rte_rdtsc());
+                    }
 		    rte_pktmbuf_free(pkts_burst[j]);
 		    count++;
 		}
 
 		for (; j < num_rx; j++) {
-		    packetCallback(conf->rx_queue_list[i].userData,
-		                   rte_pktmbuf_mtod(pkts_burst[j], char *),
-				   pkts_burst[j]->data_len, rte_rdtsc());
+                    if(packetCallback) {
+		        packetCallback(conf->rx_queue_list[i].userData,
+		                       rte_pktmbuf_mtod(pkts_burst[j], char *),
+			    	       pkts_burst[j]->data_len, rte_rdtsc());
+                    }
 		    rte_pktmbuf_free(pkts_burst[j]);
 		    count++;
 		}

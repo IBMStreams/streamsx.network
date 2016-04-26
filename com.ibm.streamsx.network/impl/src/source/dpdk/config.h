@@ -63,7 +63,7 @@
 
 struct rx_queue {
     uint8_t port_id;
-    uint8_t queue_id; // TODO remove as it is redundant
+    uint8_t queue_id;
     streams_packet_cb_t packetCallbackFunction;
     void *userData;
 };
@@ -80,6 +80,18 @@ struct lcore_conf {
     struct rte_ring *ring;
 } __rte_cache_aligned;
 
+struct port_info {
+    int promiscuous;
+} __rte_cache_aligned;
+
 extern struct lcore_conf lcore_conf_[RTE_MAX_LCORE];
+extern struct port_info port_info_[MAX_PORTS];
+extern unsigned long long coreMask_;
+extern unsigned long long portMask_;
+extern int numPorts_;
+extern int numQueues_;
+extern int coreMaster_;
+extern int numOperators_;
+
 
 #endif

@@ -7,8 +7,6 @@
 #ifndef _STREAMS_SOURCE_H_
 #define _STREAMS_SOURCE_H_
 
-#define MAX_PORT_COUNT 32
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,13 +20,15 @@ extern "C" {
                   unsigned int len,
 	          uint64_t timestamp);
 
-    int streams_source_init(const char *coreMask, streams_packet_cb_t callback, 
-            int lcore, int nicPort, int nicQueue,
-	    int promiscuous, void *user);
+    int streams_master_init(const char* coreMask, const char* portMask, int numQueues, 
+                            int lcore, streams_packet_cb_t callback, void *user);
+
+    int streams_slave_init(int lcore, int nicPort, int nicQueue, int promiscuous,
+                           streams_packet_cb_t callback, void *user);
 
     uint64_t streams_source_get_tsc_hz(void);
 
-    int streams_source_start(void);
+    int streams_source_start(int isMaster);
 
     int streams_port_stats(int, struct port_stats *);
 
