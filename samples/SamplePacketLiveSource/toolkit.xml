@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.1.1.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <toolkit name="SamplePacketLiveSource" requiredProductVersion="4.0.1.0" version="2.0.0">
+    <description>Sample applications that illustrate use of the PacketLiveSource operator.</description>
+    <uriTable>
+      <uri index="2" value="sample/LivePacketLiveSourceBasic1.spl"/>
+      <uri index="1" value="sample/LivePacketLiveSourceFull.spl"/>
+      <uri index="3" value="sample/LivePacketLiveSourceFilters.spl"/>
+      <uri index="5" value="sample/LivePacketLiveSourceExpressions.spl"/>
+      <uri index="4" value="sample/LivePacketLiveSourceBasic2.spl"/>
+    </uriTable>
+    <namespace name="sample">
+      <compositeOp column="11" line="13" name="LivePacketLiveSourceFull" potentialMain="true" uriIndex="1">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;metricsInterval&quot;, &quot;1.0&quot;)" metaType="Expression" name="metricsInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <type column="5" line="23" name="PacketType" type="uint64 packetsReceived, uint64 packetsDropped, uint64 packetsProcessed, uint64 bytesProcessed, float64 metricsIntervalElapsed, uint64 metricsIntervalPacketsReceived, uint64 metricsIntervalPacketsDropped, uint64 metricsIntervalPacketsProcessed, uint64 metricsIntervalBytesProcessed, boolean metricsUpdated, uint32 CAPTURE_SECONDS, uint32 CAPTURE_MICROSECONDS, list&lt;uint8>[6] ETHER_SRC_ADDRESS, list&lt;uint8>[6] ETHER_DST_ADDRESS, rstring ETHER_SRC_ADDRESS_AS_STRING, rstring ETHER_DST_ADDRESS_AS_STRING, uint16 ETHER_PROTOCOL, uint8 IP_VERSION, uint8 IP_PROTOCOL, uint32 IPV4_SRC_ADDRESS, uint32 IPV4_DST_ADDRESS, rstring IPV4_SRC_ADDRESS_AS_STRING, rstring IPV4_DST_ADDRESS_AS_STRING, list&lt;uint8>[16] IPV6_SRC_ADDRESS, list&lt;uint8>[16] IPV6_DST_ADDRESS, rstring IPV6_SRC_ADDRESS_AS_STRING, rstring IPV6_DST_ADDRESS_AS_STRING, uint16 IP_SRC_PORT, uint16 IP_DST_PORT, boolean UDP_PORT_53, uint16 UDP_SRC_PORT, uint16 UDP_DST_PORT, boolean TCP_PORT_80, uint16 TCP_SRC_PORT, uint16 TCP_DST_PORT, uint32 TCP_SEQUENCE, uint32 TCP_ACKNOWLEDGEMENT, boolean TCP_FLAGS_URGENT, boolean TCP_FLAGS_ACK, boolean TCP_FLAGS_PUSH, boolean TCP_FLAGS_RESET, boolean TCP_FLAGS_SYN, boolean TCP_FLAGS_FIN, uint16 TCP_WINDOW, rstring JMIRROR_SRC_ADDRESS_AS_STRING, rstring JMIRROR_DST_ADDRESS_AS_STRING, uint16 JMIRROR_SRC_PORT, uint16 JMIRROR_DST_PORT, uint32 JMIRROR_INTERCEPT_ID, uint32 JMIRROR_SESSION_ID, uint32 PACKET_LENGTH, uint32 PAYLOAD_LENGTH, blob PACKET_DATA, blob PAYLOAD_DATA" uriIndex="1"/>
+      </compositeOp>
+      <compositeOp column="11" line="12" name="LivePacketLiveSourceBasic1" potentialMain="true" uriIndex="2">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <type column="5" line="20" name="PacketType" type="uint64 packetNumber, uint64 packetsProcessed, uint64 bytesProcessed, float64 captureTime, uint8 ipVersion, rstring ipProtocol, rstring ipSourceAddress, uint16 ipSourcePort, rstring ipDestinationAddress, uint16 ipDestinationPort, uint32 packetLength, uint32 payloadLength, blob packetData, blob payloadData" uriIndex="2"/>
+      </compositeOp>
+      <compositeOp column="11" line="12" name="LivePacketLiveSourceFilters" potentialMain="true" uriIndex="3">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;metricsInterval&quot;, &quot;1.0&quot;)" metaType="Expression" name="metricsInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <type column="5" line="21" name="DHCPPacketType" type="uint64 packetNumber, float64 captureTime, rstring etherSourceAddress, rstring etherDestinationAddress, rstring ipSourceAddress, rstring ipDestinationAddress, uint32 dhcpLength, blob dhcpMessage" uriIndex="3"/>
+        <type column="5" line="31" name="DNSPacketType" type="uint64 packetNumber, float64 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, uint32 dnsLength, blob dnsMessage" uriIndex="3"/>
+        <type column="5" line="39" name="HTTPPacketType" type="uint64 packetNumber, float64 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, uint32 httpLength, blob httpData" uriIndex="3"/>
+        <type column="5" line="47" name="MetricsType" type="float64 metricsTime, boolean metricsUpdated, float64 averagePacketsReceived, float64 averagePacketsDropped, float64 averagePacketsProcessed, float64 averageBytesProcessed" uriIndex="3"/>
+        <type column="5" line="55" name="AllPacketType" type="uint64 packetNumber, float64 captureTime, uint8 ipVersion, rstring ipProtocol, rstring ipSourceAddress, uint16 ipSourcePort, rstring ipDestinationAddress, uint16 ipDestinationPort, uint32 payloadLength, uint32 packetLength, blob packetData" uriIndex="3"/>
+      </compositeOp>
+      <compositeOp column="11" line="12" name="LivePacketLiveSourceBasic2" potentialMain="true" uriIndex="4">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(uint32)getSubmissionTimeValue(&quot;processorAffinity&quot;, &quot;1&quot;)" metaType="Expression" name="processorAffinity" optional="true" type="&lt;uint32>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;metricsInterval&quot;, &quot;1.0&quot;)" metaType="Expression" name="metricsInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <type column="5" line="22" name="PacketType" type="uint64 packetNumber, float64 captureTime, uint8 ipVersion, rstring ipProtocol, rstring ipSourceAddress, uint16 ipSourcePort, rstring ipDestinationAddress, uint16 ipDestinationPort, uint32 packetLength, uint32 payloadLength, blob packetData, blob payloadData" uriIndex="4"/>
+        <type column="5" line="36" name="MetricsType" type="float64 metricsTime, boolean metricsUpdated, uint64 packetNumber, uint64 packetsReceived, uint64 packetsDropped, uint64 packetsProcessed, uint64 bytesProcessed, float64 intervalElapsed, uint64 intervalPacketsReceived, uint64 intervalPacketsDropped, uint64 intervalPacketsProcessed, uint64 intervalBytesProcessed" uriIndex="4"/>
+      </compositeOp>
+      <compositeOp column="11" line="10" name="LivePacketLiveSourceExpressions" potentialMain="true" uriIndex="5">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <type column="5" line="18" name="PacketType" type="uint32 captureTimeAsSeconds, uint64 captureTimeAsMilliseconds, uint64 captureTimeAsMicroseconds, float64 captureTimeAsFloat, timestamp captureTimeAsTimestamp, uint64 partitionKey, int8 packetNumberModulo13, int32 packetLength, int32 packetCaptureLength, int32 packetHeaderLength, int32 packetPayloadLength" uriIndex="5"/>
+      </compositeOp>
+    </namespace>
+    <dependency>
+      <common:name>com.ibm.streamsx.network</common:name>
+      <common:version>2.0.0</common:version>
+    </dependency>
+    <sabFiles>
+      <ti:include path="toolkit.xml" root="toolkitDir"/>
+      <ti:include path="impl/java/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/java/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/nl/*.dat" root="toolkitDir"/>
+      <ti:include path="etc/**" root="toolkitDir"/>
+      <ti:include path="lib/**" root="toolkitDir"/>
+      <ti:include path="nl/**" root="toolkitDir"/>
+      <ti:include path="opt/**" root="toolkitDir"/>
+    </sabFiles>
+  </toolkit>
+
+</toolkitModel>

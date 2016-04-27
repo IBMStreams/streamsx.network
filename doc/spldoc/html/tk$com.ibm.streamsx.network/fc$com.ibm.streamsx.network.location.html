@@ -72,6 +72,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationCityNames.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationCityNames(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of city names corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationContinentCode.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationContinentCode(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -86,6 +96,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns the continent code           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationContinentCodes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationContinentCodes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of continent codes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
 </p>
 
    </dd>
@@ -112,6 +132,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationContinentNames.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationContinentNames(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of continent names corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationCountryCode.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationCountryCode(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -132,6 +162,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationCountryCodes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationCountryCodes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of country codes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationCountryName.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationCountryName(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -146,6 +186,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns the country name           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationCountryNames.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationCountryNames(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of country names corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
 </p>
 
    </dd>
@@ -192,6 +242,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationIDs.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationIDs(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of IDs corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationLatitude.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public float64 locationLatitude(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -212,6 +272,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationLatitudes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;float64&gt; locationLatitudes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of latitudes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationLongitude.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public float64 locationLongitude(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -226,6 +296,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns the longitude           for the specified IP version 4 address,           if its location was found, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationLongitudes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;float64&gt; locationLongitudes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of longitudes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
 </p>
 
    </dd>
@@ -272,6 +352,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationPostalCodes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationPostalCodes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of postal codes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationSubdivision1Code.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationSubdivision1Code(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -286,6 +376,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns the first division code (typically a state or province)           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationSubdivision1Codes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationSubdivision1Codes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of first subdivision codes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
 </p>
 
    </dd>
@@ -312,6 +412,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationSubdivision1Names.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationSubdivision1Names(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of the first subdivision names corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationSubdivision2Code.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationSubdivision2Code(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -332,6 +442,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationSubdivision2Codes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationSubdivision2Codes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of second subdivision codes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationSubdivision2Name.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationSubdivision2Name(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -346,6 +466,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns the second division name           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationSubdivision2Names.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationSubdivision2Names(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of the second subdivision names corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
 </p>
 
    </dd>
@@ -392,6 +522,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationSubnetAddresses.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationSubnetAddresses(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of subnet addresses corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationSubnetMask.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public list&lt;uint8&gt;[16] locationSubnetMask(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -412,6 +552,26 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationSubnetMasks.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationSubnetMasks(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of subnet masks corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationSubnets.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationSubnets(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of IP subnets and masks, in CIDR notation, corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationTimezone.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationTimezone(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -426,6 +586,26 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns the continent time zone           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationTimezones.list:.:uint32:.:"><tt class="ph tt">      public list&lt;rstring&gt; locationTimezones(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of time zones corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationsFound.list:.:uint32:.:"><tt class="ph tt">      public list&lt;boolean&gt; locationsFound(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of booleans indicating whether or not the specified list of IP version 4 addresses were found.           Empty strings are returned for IP addresses where no location is found.
 </p>
 
    </dd>

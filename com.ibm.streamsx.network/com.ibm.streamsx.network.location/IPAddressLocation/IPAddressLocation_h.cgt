@@ -253,6 +253,121 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
   inline __attribute__((always_inline))
     SPL::rstring locationTimezone(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->timezone : ""; }
 
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::boolean> locationsFound(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::boolean> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationFound(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationIDs(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationID(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationSubnets(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationSubnet(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationSubnetAddresses(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationSubnetAddress(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationSubnetMasks(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationSubnetMask(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationPostalCodes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationPostalCode(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::float64> locationLatitudes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::float64> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationLatitude(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::float64> locationLongitudes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::float64> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationLongitude(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationContinentNames(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationContinentName(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationContinentCodes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationContinentCode(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationCountryNames(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationCountryName(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationCountryCodes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationCountryCode(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationSubdivision1Names(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationSubdivision1Name(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationSubdivision1Codes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationSubdivision1Code(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationSubdivision2Names(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationSubdivision2Name(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationSubdivision2Codes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationSubdivision2Code(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationCityNames(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationCityName(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationMetroCodes(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationMetroCode(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::rstring> locationTimezones(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::rstring> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationTimezone(*it)); }
+    return results; }
+
 };
 
 <%SPL::CodeGen::headerEpilogue($model);%>
