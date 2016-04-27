@@ -27,9 +27,7 @@
 struct rte_mempool *socket_mempool_[MAX_SOCKETS];
 struct lcore_conf lcore_conf_[RTE_MAX_LCORE];
 struct port_info port_info_[MAX_PORTS];
-unsigned long long coreMask_;
-unsigned long long portMask_;
-int numPorts_;
+int maxPort_;
 int numQueues_;
 int coreMaster_;
 int numOperators_;

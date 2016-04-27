@@ -19,26 +19,14 @@ type PacketData = uint64 timestampMicroseconds,
 
 public composite TestPacketDPDKSource {   
 	graph   
-        // One DPDK master operator + one operator per NIC port/queue.  In this
-        // example we have 1 port with 2 queues, so 3 PacketDPDKSource operators are 
-        // required.
-
-        // This is the master PacketDPDKSource.  It configures the overall DPDK
-        // subsystem and does runtime management but does not produce a packet stream.
-        (stream<PacketData>  PacketStream_NULL ) = PacketDPDKSource() {
-            param
-                // Parameters for the DPDK environment on this host.
-                coreMask   : "0x7"; // 3 cores (0,1,2) required. One master, one for each queue.
-                portMask   : "0x1"; // Only NIC port 0 will be utilized.
-                numQueues  : 2;     // Utilize 2 queues on the NIC.
-                isMaster   : true;  // This is the master DPDK operator.
-
-                // Parameters for this specific operator.
-                lcore      : 0;     // Run the master operator on core 0.
-        } 
+        // One DPDK operator per NIC port/queue.  In this example we have 1 port 
+        // with 2 queues, so 2 PacketDPDKSource operators are required.
 
         (stream<PacketData>  PacketStream_0 ) = PacketDPDKSource() {
             param
+                // Parameters for the DPDK environment on this host.
+                lcoreMaster: 0;     // Run the master operator on core 0.
+
                 // Parameters for this specific operator.
                 lcore   : 1;     // Run this ingest operator on core 1.
                 nicPort : 0;     // Bind to NIC port 0

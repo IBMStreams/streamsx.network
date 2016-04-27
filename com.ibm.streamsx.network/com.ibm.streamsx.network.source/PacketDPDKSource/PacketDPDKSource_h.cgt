@@ -74,7 +74,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         double now, then, metricsInterval;
         int32_t processorAffinity;
 
-        uint16_t lcore, nicPort, nicQueue;
+        uint16_t lcoreMaster, lcore, nicPort, nicQueue;
 
         uint64_t tscHz; 
         uint64_t tscMicrosecondAdjust; 

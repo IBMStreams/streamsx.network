@@ -30,11 +30,8 @@ my $myOperatorKind = $model->getContext()->getKind();
 my @outputPortList = @{ $model->getOutputPorts() };
 
 # Get C++ expressions for getting the values of this operator's parameters.
-my $coreMask = $model->getParameterByName("coreMask") ? $model->getParameterByName("coreMask")->getValueAt(0)->getCppExpression() : undef; 
-my $portMask = $model->getParameterByName("portMask") ? $model->getParameterByName("portMask")->getValueAt(0)->getCppExpression() : undef;
-my $numQueues = $model->getParameterByName("numQueues") ? $model->getParameterByName("numQueues")->getValueAt(0)->getCppExpression() : 1;
-my $isMaster = $model->getParameterByName("isMaster") ? $model->getParameterByName("isMaster")->getValueAt(0)->getCppExpression() : 0;
 
+my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParameterByName("lcoreMaster")->getValueAt(0)->getCppExpression() : -1;
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
@@ -86,13 +83,8 @@ static void dpdkCallback(void *correlator, void *data,
 
 MY_OPERATOR::MY_OPERATOR() {
     // Get the operator's parameters into variables.
-    rstring coreRstring  = <%= $coreMask ? $coreMask : '""' %>;
-    const char* coreMask = coreRstring.c_str(); 
-    rstring portRstring  = <%= $portMask ? $portMask : '""' %>;
-    const char* portMask = portRstring.c_str();
-    const bool isMaster = <%=$isMaster%>;
-    int numQueues = <%=$numQueues%>;
 
+    lcoreMaster = <%=$lcoreMaster%>;
     lcore = <%=$lcore%>;
     nicPort = <%=$nicPort%>;
     nicQueue = <%=$nicQueue%>;
@@ -101,22 +93,19 @@ MY_OPERATOR::MY_OPERATOR() {
 
     // Initialize the DPDK subsystem.
     int rc = 0;
-    if(isMaster) {
-       rc = streams_master_init(coreMask, portMask, numQueues,     
-                                lcore, &dpdkCallback, (void *)this);
-    } else {
-       rc = streams_slave_init(lcore, nicPort, nicQueue, (int)promiscuous,
-                               &dpdkCallback, (void *)this);
-    }
 
-    SPLLOG(L_TRACE, "streams_source_init() on lcore = " << lcore <<
+    rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue,
+                               (int)promiscuous, &dpdkCallback, (void *)this);
+
+    SPLLOG(L_TRACE, "streams_operator_init() for lcore = " << lcore <<
            ", nicPort = " << nicPort <<
            ", nicQueue = " << nicQueue <<
+           ", lcoreMaster = " << lcoreMaster <<
            " completed.  Return code = " << rc,
            "PacketDPDKSource"); 
 
     if (rc != 0) {
-       THROW (SPLRuntimeOperator, "Error in DPDK streams init.");
+       THROW (SPLRuntimeOperator, "Error in streams_operator_init.");
     }
 
     tscHz = streams_source_get_tsc_hz(); 
@@ -131,6 +120,12 @@ MY_OPERATOR::~MY_OPERATOR() {
 void MY_OPERATOR::allPortsReady() { 
     SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...",
             "PacketDPDKSource");
+
+    int rc = streams_dpdk_init();
+
+    if (rc != 0) {
+       THROW (SPLRuntimeOperator, "Error in streams_dpdk_init.");
+    }
 
     createThreads(2);
 }
@@ -251,12 +246,10 @@ void MY_OPERATOR::metricsThread() {
 }
 
 void MY_OPERATOR::processDpdkLoop() {
-    const bool isMaster = <%=$isMaster%>;
-
     int rc = 0;
-    rc = streams_source_start((int)isMaster);
+    rc = streams_source_start();
     if (rc != 0) {
-       THROW (SPLRuntimeOperator, "Error in DPDK streams_source_start.");
+       THROW (SPLRuntimeOperator, "Error in streams_source_start.");
     }
     while(!getPE().getShutdownRequested()) {
 	usleep(100);

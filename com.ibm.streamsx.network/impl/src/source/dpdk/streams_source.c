@@ -29,11 +29,18 @@
 
 #define ARGN 7
 
-pthread_mutex_t mutexInit;
-int numOperatorsNotReady;
+// TODO : make the port# use the interface name
 
-int32_t  initComplete = 0;
-uint32_t portCount    = 0;
+pthread_mutex_t mutexInit = PTHREAD_MUTEX_INITIALIZER;
+
+volatile int32_t dpdkInitComplete = 0;
+volatile int32_t numOperators = 0;
+volatile int32_t firstInitComplete = 0;
+volatile int32_t numOperatorsReady = 0;
+
+// Assume maximum of 4 digits+space+comma
+#define MAX_CORESTRING RTE_MAX_LCORE*6+1
+char lcoreList[MAX_CORESTRING] = "";
 
 /*
  * This is the entry point for the spin loop that is started on each lcore
@@ -53,16 +60,11 @@ static int main_loop(__attribute__((unused)) void *arg) {
 }
 
 /*
- *  Initialize the master thread.
- *
- *  Parameters:
- *    coreMask : Hex string representing the lcores to be used for DPDK threads.
- *               A maximum of 32 hex characters can be used for 128 lcores.
- *
- *    portMask : Hex string representing the ports to be used for DPDK.
- *
- *    numQueues: Number of queues configured for each port.  This value is defined to
- *               be constant across all ports being utilized.
+ * This function is called by each Streams PacketDPDKSource operator in its constructor.
+ * There is no architectural requirement that the constructors run serially or in any specific
+ * order, so this code uses a mutex to do some basic initialization once on the first call.
+ * The remaining calls all update operator specific data structures.  Note that by implementation
+ * the Streams runtime does serialize the operator constructors.
  *
  *    lcore    : Logical core number (hardware thread) on which to run.
  *
@@ -72,77 +74,156 @@ static int main_loop(__attribute__((unused)) void *arg) {
  *
  *  Return Values: 0 on success, -1 on failure.
  *
- *  Notes: The total number of Streams operators that must be instantiated is equal to 
- *         1 master + numPorts * numQueues.  If too few operators are instantiated, the
- *         application will terminate.
  */
-int streams_master_init(const char* coreMask, const char* portMask, int numQueues,
-                        int lcore, streams_packet_cb_t callback, void *user) {
+int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
+                          int promiscuous, streams_packet_cb_t dpdkCallback, void *user) {
 
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_master_init starting.\n"); 
+    printf("STREAMS_SOURCE: streams_operator_init starting.\n"); 
+    
+    if(firstInitComplete == 0) {
+        // Initialize data structures.
+        coreMaster_   = -1;
+        numQueues_    = -1;
+        maxPort_      = -1;
+        numOperators_ = -1;
 
-    if(initComplete != 0) {
-	// Not the first master thread through the init code.
-        printf("STREAMS_SOURCE: Error - streams_master_init called twice.\n");
-        printf("STREAMS_SOURCE: Only one master DPDK operator can be created.\n");
+        int lcore_id;
+        for(lcore_id = 0; lcore_id < RTE_MAX_LCORE; lcore_id++) {
+            lcore_conf_[lcore_id].num_rx_queue = 0;
+            lcore_conf_[lcore_id].socket_id = 0;
+            lcore_conf_[lcore_id].num_frames = 0;
+            lcore_conf_[lcore_id].ring = NULL;
+
+            int port;
+            for(port = 0; port < MAX_PORTS; port++) {
+                lcore_conf_[lcore_id].tx_queue_id[port] = 0;
+            }
+
+            int rxq;
+            for(rxq = 0; rxq < MAX_RX_QUEUE_PER_LCORE; rxq++) {
+                lcore_conf_[lcore_id].rx_queue_list[rxq].port_id = 0;
+                lcore_conf_[lcore_id].rx_queue_list[rxq].queue_id = 0;
+                lcore_conf_[lcore_id].rx_queue_list[rxq].userData = NULL;
+                lcore_conf_[lcore_id].rx_queue_list[rxq].packetCallbackFunction = NULL;
+            }
+        }
+
+        int port_id;
+        for(port_id = 0; port_id < MAX_PORTS; port_id++) {
+            port_info_[port_id].promiscuous = 0;
+        }
+
+        // Add the lcore for this operator to the lcore list.
+        sprintf(lcoreList, "%d", lcore); 
+
+        firstInitComplete = 1;
+    } else {
+        // Add the lcore for this operator to the lcore list.
+        char coreStr[6];
+        snprintf(coreStr, 6, ", %d", lcore); 
+        strcat(lcoreList, coreStr); 
+    }
+
+    if((coreMaster_ == -1) && (lcoreMaster >= 0)) {
+        // If no lcore master has been set by any operator, and this one has set a
+        // value, use it.
+        coreMaster_ = lcoreMaster;
+        char coreStr[6];
+        snprintf(coreStr, 6, ", %d", lcoreMaster); 
+        strcat(lcoreList, coreStr); 
+        printf("STREAMS_SOURCE: streams_operator_init: coreMaster set to lcore %d.\n", 
+            coreMaster_); 
+    } else if((coreMaster_ != lcoreMaster) && (lcoreMaster >= 0)) {
+        // The lcore master has been set and this operator has specified a value.
+        // Do not use the new value, but log a warning.
+        printf("STREAMS_SOURCE: streams_operator_init: coreMaster not changed from lcore %d.\n", 
+            coreMaster_); 
+    }
+
+    if(nicPort >= MAX_PORTS) {
+        printf("STREAMS_SOURCE: Error - Invalid NIC port value %d, max of %d can be used.\n", 
+               nicPort, MAX_PORTS);
+        pthread_mutex_unlock(&mutexInit);
+        return(-1);
+    }
+    
+    if(lcore >= RTE_MAX_LCORE) {
+        printf("STREAMS_SOURCE: Error - Invalid lcore value %d, max of %d can be used.\n", 
+               lcore, RTE_MAX_LCORE);
+        pthread_mutex_unlock(&mutexInit);
+        return(-1);
+    }
+    
+    int coreQueue = lcore_conf_[lcore].num_rx_queue;
+    lcore_conf_[lcore].rx_queue_list[coreQueue].port_id = nicPort;
+    lcore_conf_[lcore].rx_queue_list[coreQueue].queue_id = nicQueue;
+    lcore_conf_[lcore].rx_queue_list[coreQueue].userData = user;
+    lcore_conf_[lcore].rx_queue_list[coreQueue].packetCallbackFunction = dpdkCallback;
+    lcore_conf_[lcore].num_rx_queue += 1;
+    if(lcore_conf_[lcore].num_rx_queue == MAX_RX_QUEUE_PER_LCORE) {
+        printf("STREAMS_SOURCE: Error - Invalid number of queues on lcore %d, only %d can be defined.\n", lcore, MAX_RX_QUEUE_PER_LCORE);
+        pthread_mutex_unlock(&mutexInit);
+        return(-1);
+    }
+
+    if(promiscuous) port_info_[nicPort].promiscuous = 1;
+
+    // Set the number of queues for all NICs equal to the largest queue value that any
+    // operator defines.  This could be made more granular and be done by NIC port in a
+    // future code update.
+    if((nicQueue+1) > numQueues_) {
+        numQueues_  = nicQueue+1;
+    }
+
+    if(nicPort > maxPort_) {
+        maxPort_ = nicPort;
+    }
+
+    printf("STREAMS_SOURCE: lcore = %d, coreQueue = %d, nicPort = %d, nicQueue = %d.\n",
+        lcore, coreQueue, nicPort, nicQueue);
+    printf("STREAMS_SOURCE: promiscuous = %d, callback = 0x%lx, user = 0x%lx.\n",
+        promiscuous, dpdkCallback, user);
+
+
+    printf("STREAMS_SOURCE: lcoreList = %s\n", lcoreList); 
+
+    numOperators++;  // Keep a count of the number of operators that are constructed.
+    pthread_mutex_unlock(&mutexInit); 
+    return(0); 
+}
+
+/*
+ *  Initialize the DPDK library.
+ */
+int streams_dpdk_init() {
+    pthread_mutex_lock(&mutexInit);   
+    printf("STREAMS_SOURCE: streams_dpdk_init starting.\n"); 
+
+    if(dpdkInitComplete != 0) {
+	// Not the first thread through the init code so just return.
+	pthread_mutex_unlock(&mutexInit); 
+        return(0);
+    }
+
+    numOperators_ = numOperators; 
+
+    if((numOperators_ == 0) || (coreMaster_ == -1) || 
+       (numQueues_ == -1) || (maxPort_ == -1)) {
+        printf("STREAMS_SOURCE: streams_dpdk_init aborting due to invalid configuration.\n"); 
+        printf("STREAMS_SOURCE: numOperators_ = %d, coreMaster_ = %d, numQueues_ = %d, maxPort_ = %d\n", 
+               numOperators_, coreMaster_, numQueues_, maxPort_); 
 	pthread_mutex_unlock(&mutexInit); 
         return(-1);
-    }
-
-    char *end = NULL;
-    coreMask_   = strtoull(coreMask, &end, 16);
-    if ((coreMask[0] == '\0') || (end == NULL) || (*end != '\0')) {
-        printf("STREAMS_SOURCE: Error - Invalid core mask.\n");
-        return(-1);
-    }
-
-    end = NULL;
-    portMask_   = strtoull(portMask, &end, 16);
-    if ((portMask[0] == '\0') || (end == NULL) || (*end != '\0')) {
-        printf("STREAMS_SOURCE: Error - Invalid port mask.\n");
-        return(-1);
-    }
-
-    numQueues_  = numQueues;
-    coreMaster_ = lcore;
-    numPorts_   = __builtin_popcount(portMask_); 
-    numOperators_ = (numPorts_ * numQueues_) + 1;
-    numOperatorsNotReady = numOperators_;
-
-    int lcore_id;
-    for(lcore_id = 0; lcore_id < RTE_MAX_LCORE; lcore_id++) {
-        lcore_conf_[lcore_id].num_rx_queue = 0;
-        lcore_conf_[lcore_id].socket_id = 0;
-        lcore_conf_[lcore_id].num_frames = 0;
-        lcore_conf_[lcore_id].ring = NULL;
-
-        int port;
-        for(port = 0; port < MAX_PORTS; port++) {
-            lcore_conf_[lcore_id].tx_queue_id[port] = 0;
-        }
-
-        int rxq;
-        for(rxq = 0; rxq < MAX_RX_QUEUE_PER_LCORE; rxq++) {
-            lcore_conf_[lcore_id].rx_queue_list[rxq].port_id = 0;
-            lcore_conf_[lcore_id].rx_queue_list[rxq].queue_id = 0;
-            lcore_conf_[lcore_id].rx_queue_list[rxq].userData = NULL;
-            lcore_conf_[lcore_id].rx_queue_list[rxq].packetCallbackFunction = NULL;
-        }
-    }
-
-    int port_id;
-    for(port_id = 0; port_id < MAX_PORTS; port_id++) {
-        port_info_[port_id].promiscuous = 0;
     }
 
     uint32_t nb_ports;
     char *rte_arg[ARGN];
 
     char arg0[]="dpdk";
-    char arg1[]="-c";
-    char arg2[MAX_COREMASK];
-    sprintf(arg2, "0x%llx", coreMask_); 
+    char arg1[]="-l";
+    char arg2[MAX_CORESTRING];
+    strcpy(arg2, lcoreList); 
     char arg3[]="-n";
     char arg4[]="4";
     char arg5[]="--master-lcore";
@@ -157,10 +238,10 @@ int streams_master_init(const char* coreMask, const char* portMask, int numQueue
     rte_arg[5]=arg5;
     rte_arg[6]=arg6;
 
-    printf("STREAMS_SOURCE: coreMask = 0x%llx, portMask = 0x%llx.\n", coreMask_, portMask_);
-    printf("STREAMS_SOURCE: numQueues = %d, lcore = %d.\n", numQueues, lcore);
-    printf("STREAMS_SOURCE: callback = 0x%lx, user = 0x%lx.\n", callback, user);
-    printf("STREAMS_SOURCE: args = %s %s %s %s %s.\n", arg0, arg1, arg2, arg3, arg4);
+    printf("STREAMS_SOURCE: Queues per port = %d, Number of operators = %d.\n", 
+           numQueues_, numOperators);
+    printf("STREAMS_SOURCE: args = %s %s %s %s %s %s %s.\n", 
+           arg0, arg1, arg2, arg3, arg4, arg5, arg6);
 
     optind = 0; // Reset getopt state as it is called again in rte_eal_init.
 
@@ -183,114 +264,42 @@ int streams_master_init(const char* coreMask, const char* portMask, int numQueue
     nb_ports = rte_eth_dev_count();
     if (nb_ports == 0) {
         pthread_mutex_unlock(&mutexInit);
-	rte_panic("No eth dev found.\n");
+        RTE_LOG(ERR, STREAMS_SOURCE, "No ethernet device found.\n");
+        return(-1);
+    }
+    if (maxPort_ > nb_ports) {
+        pthread_mutex_unlock(&mutexInit);
+        RTE_LOG(ERR, STREAMS_SOURCE, "A PacketDPDKSource operator specified an invalid port.\n");
         return(-1);
     }
 
-    initComplete = 1;
+    dpdkInitComplete = 1;
     pthread_mutex_unlock(&mutexInit);
 
     return(0);
 }
 
 /*
- *  Initialize a slave thread.
+ * This function starts a dpdk receive thread on each lcore.  That thread takes in packets
+ * and calls the Streams operator callback function for processing.
  *
- *  Parameters:
- *    lcore    : Logical core number (hardware thread) on which to run.
- *    nicPort  : Port number of the NIC 
- *    nicQueue : Logical core number (hardware thread) on which to run.
- *
- *    callback : Pointer to the Streams operator function to call for packet processing.
- *
- *    user     : Pointer to the this pointer of the Streams operator.
- *
- *  Return Values: 0 on success, -1 on failure.
- *
- *  Notes: The total number of Streams operators that must be instantiated is equal to 
- *         1 master + numPorts * numQueues.  If too few operators are instantiated, the
- *         application will terminate.
+ * Each PacketDPDKSource operator calls this function once its constructor is complete 
+ * and a source operator thread has been started.  That Streams thread is then held in
+ * a loop in the operator until it is shut down.  Once all of the operators have called this
+ * function and are ready, we can start the dpdk threads on all lcores.
  */
-int streams_slave_init(int lcore, int nicPort, int nicQueue, int promiscuous,
-                       streams_packet_cb_t callback, void *user) {
-
-    // Wait until a master thread completes initialization.
-    int timeoutCount = 0;
-    while(!initComplete) {
-        sleep(1);
-        timeoutCount++;
-        if(timeoutCount == 30) {
-            printf("STREAMS_SOURCE: Error - streams_slave_init timeout.\n");
-            return(-1);
-        }
-    }
-
+int streams_source_start(void) {
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_slave_init starting.\n"); 
-
-    if((coreMask_ & (0x1 << ((unsigned long long)lcore)) == 0)) {
-        printf("STREAMS_SOURCE: Error - Invalid lcore %d.\n", lcore);
-        pthread_mutex_unlock(&mutexInit); 
-        return(-1);
-    }
-    if((portMask_ & (0x1 << ((unsigned long long)nicPort))) == 0) {
-        printf("STREAMS_SOURCE: Error - Invalid nicPort %d.\n", nicPort);
-        pthread_mutex_unlock(&mutexInit); 
-        return(-1);
-    }
-    if(nicQueue >= numQueues_) {
-        printf("STREAMS_SOURCE: Error - Invalid nicQueue %d.\n", nicQueue);
-        pthread_mutex_unlock(&mutexInit); 
-        return(-1);
-    }
-
-    int coreQueue = lcore_conf_[lcore].num_rx_queue;
-    lcore_conf_[lcore].rx_queue_list[coreQueue].port_id = nicPort;
-    lcore_conf_[lcore].rx_queue_list[coreQueue].queue_id = nicQueue;
-    lcore_conf_[lcore].rx_queue_list[coreQueue].userData = user;
-    lcore_conf_[lcore].rx_queue_list[coreQueue].packetCallbackFunction = callback;
-    lcore_conf_[lcore].num_rx_queue += 1;
-    if(lcore_conf_[lcore].num_rx_queue == MAX_RX_QUEUE_PER_LCORE) {
-        printf("STREAMS_SOURCE: Error - Invalid number of queues on lcore %d, only %d can be defined.\n", lcore, MAX_RX_QUEUE_PER_LCORE);
-        pthread_mutex_unlock(&mutexInit); 
-        return(-1);
-    }
-
-    if(promiscuous) port_info_[nicPort].promiscuous = 1;
-
-    printf("STREAMS_SOURCE: lcore = %d, coreQueue = %d, nicPort = %d, nicQueue = %d.\n", 
-        lcore, coreQueue, nicPort, nicQueue);
-    printf("STREAMS_SOURCE: promiscuous = %d, callback = 0x%lx, user = 0x%lx.\n", 
-        promiscuous, callback, user);
-
-    pthread_mutex_unlock(&mutexInit); 
-    return 0;
-}
-
-/*
- * Each PacketDPDKSource operator, including the master, calls this function
- * once its constructor is complete and a source operator thread has been started.
- */
-int streams_source_start(int isMaster) {
-    pthread_mutex_lock(&mutexInit);   
-    --numOperatorsNotReady;
-    pthread_mutex_unlock(&mutexInit);   
-
-    if(!isMaster) {
+    numOperatorsReady++;
+    if(numOperatorsReady < numOperators) {
+        // Not all operator threads are ready, so this one can return and enter its
+        // spin loop.
+        pthread_mutex_unlock(&mutexInit);     
         return(0); 
     }
 
-    int timeoutCount = 0;
-    while(numOperatorsNotReady) {
-        sleep(1);
-        timeoutCount++;
-        if(timeoutCount == 30) {
-            printf("STREAMS_SOURCE: Error - streams_source_start timeout.\n");
-            return(-1);
-        }
-    }
-
-    if (init() < 0) {
+    pthread_mutex_unlock(&mutexInit);     
+    if(init() < 0) {
         return(-1); 
     }
 

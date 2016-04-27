@@ -86,9 +86,7 @@ struct port_info {
 
 extern struct lcore_conf lcore_conf_[RTE_MAX_LCORE];
 extern struct port_info port_info_[MAX_PORTS];
-extern unsigned long long coreMask_;
-extern unsigned long long portMask_;
-extern int numPorts_;
+extern int maxPort_;
 extern int numQueues_;
 extern int coreMaster_;
 extern int numOperators_;
