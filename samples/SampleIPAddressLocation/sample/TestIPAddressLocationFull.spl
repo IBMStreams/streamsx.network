@@ -142,7 +142,6 @@ composite TestIPAddressLocationFull {
         ipDestinationPostalCode = ipVersion==4ub ? locationPostalCode(ipv4DestinationAddress) : ipVersion==6ub ? locationPostalCode(ipv6DestinationAddress) : "",
         ipDestinationLatitude = ipVersion==4ub ? locationLatitude(ipv4DestinationAddress) : ipVersion==6ub ? locationLatitude(ipv6DestinationAddress) : 0.0,
         ipDestinationLongitude = ipVersion==4ub ? locationLongitude(ipv4DestinationAddress) : ipVersion==6ub ? locationLongitude(ipv6DestinationAddress) : 0.0;
-
     }
     () as LocatedPacketSink = FileSink(LocatedPacketStream) { param file: "debug.TestIPAddressLocationFull.LocatedPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 

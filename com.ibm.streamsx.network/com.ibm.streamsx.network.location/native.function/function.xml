@@ -348,6 +348,151 @@
       </function:function>
 
 
+      <function:function>
+        <function:description>
+          This result function returns a list of booleans indicating whether or not the specified list of IP version 4 addresses were found.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;boolean> locationsFound(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of IP subnets and masks, in CIDR notation, corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationSubnets(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of IDs corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationIDs(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of subnet addresses corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationSubnetAddresses(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of subnet masks corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationSubnetMasks(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of postal codes corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationPostalCodes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of latitudes corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;float64> locationLatitudes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of longitudes corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;float64> locationLongitudes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of continent names corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationContinentNames(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of continent codes corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationContinentCodes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of country names corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationCountryNames(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of country codes corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationCountryCodes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of the first subdivision names corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationSubdivision1Names(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of first subdivision codes corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationSubdivision1Codes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of the second subdivision names corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationSubdivision2Names(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of second subdivision codes corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationSubdivision2Codes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of city names corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationCityNames(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of time zones corresponding to the specified list of IP version 4 addresses.
+          Empty strings are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;rstring> locationTimezones(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+
     </function:functions>
   </function:functionSet>
 </function:functionModel>

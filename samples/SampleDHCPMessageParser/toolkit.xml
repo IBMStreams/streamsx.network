@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.1.1.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <toolkit name="SampleDHCPMessageParser" requiredProductVersion="4.0.1.0" version="2.0.0">
+    <description>Sample applications that illustrate use of the DHCPMessageParser operator.</description>
+    <uriTable>
+      <uri index="5" value="sample/Functions.spl"/>
+      <uri index="4" value="sample/TestDHCPMessageParserFull.spl"/>
+      <uri index="1" value="sample/TestDHCPMessageParserBasic.spl"/>
+      <uri index="3" value="sample/TestDHCPMessageParserLeases.spl"/>
+      <uri index="2" value="sample/LiveDHCPMessageParserBasic.spl"/>
+    </uriTable>
+    <namespace name="sample">
+      <compositeOp column="11" line="15" name="TestDHCPMessageParserBasic" potentialMain="true" uriIndex="1">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="22" name="PacketType" type="uint64 packetNumber, uint32 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dhcpMessage" uriIndex="1"/>
+        <type column="5" line="29" name="DHCPMessageType" type="uint64 packetNumber, rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, uint64 messagesProcessed, rstring dhcpMessageType, rstring dhcpServer, rstring dhcpServerError, rstring clientMACAddress, rstring clientIPAddress, rstring leaseDuration, rstring leasedAddress, rstring leasedAddressSubnetMask, list&lt;rstring> subnetRouters, list&lt;rstring> staticRoutes, list&lt;rstring> dnsServers, rstring hostname, rstring domainName, uint32 requestIdentifier, rstring requestedAddress, list&lt;uint8> requestedParameters, rstring parseError" uriIndex="1"/>
+        <type column="5" line="54" name="DHCPErrorType" type="uint64 packetNumber, rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring parserError, rstring dhcpError, rstring dhcpMessage" uriIndex="1"/>
+      </compositeOp>
+      <compositeOp column="11" line="15" name="LiveDHCPMessageParserBasic" potentialMain="true" uriIndex="2">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;metricsInterval&quot;, &quot;1.0&quot;)" metaType="Expression" name="metricsInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(uint32)getSubmissionTimeValue(&quot;leasePort&quot;, &quot;12345&quot;)" metaType="Expression" name="leasePort" optional="true" type="&lt;uint32>"/>
+        <type column="5" line="26" name="PacketType" type="uint64 packetNumber, uint32 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dhcpMessage" uriIndex="2"/>
+        <type column="5" line="34" name="MetricsType" type="float64 metricsTime, float64 averagePacketsReceived, float64 averagePacketsDropped, float64 averagePacketsProcessed, float64 averageBytesProcessed" uriIndex="2"/>
+        <type column="5" line="42" name="DHCPMessageType" type="uint64 packetNumber, rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, uint64 messagesProcessed, rstring dhcpMessageType, rstring dhcpServer, rstring dhcpServerError, rstring clientMACAddress, rstring clientIPAddress, rstring leaseDuration, rstring leasedAddress, rstring leasedAddressSubnetMask, list&lt;rstring> subnetRouters, list&lt;rstring> staticRoutes, list&lt;rstring> dnsServers, rstring hostname, rstring domainName, uint32 requestIdentifier, rstring requestedAddress, list&lt;uint8> requestedParameters, rstring parseError" uriIndex="2"/>
+        <type column="5" line="67" name="DHCPErrorType" type="uint64 packetNumber, rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring parserError, rstring dhcpError, rstring dhcpMessage" uriIndex="2"/>
+      </compositeOp>
+      <compositeOp column="11" line="15" name="TestDHCPMessageParserLeases" potentialMain="true" uriIndex="3">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="22" name="PacketType" type="uint64 packetNumber, uint32 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dhcpMessage" uriIndex="3"/>
+        <type column="5" line="29" name="DHCPInformType" type="rstring clientMACAddress, rstring clientIPAddress, rstring hostname, rstring domainName, list&lt;rstring> subnetRouters, list&lt;rstring> staticRoutes, list&lt;rstring> dnsServers, rstring dhcpServer" uriIndex="3"/>
+        <type column="5" line="39" name="DHCPLeaseType" type="rstring clientMACAddress, rstring hostname, rstring domainName, rstring leasedAddress, rstring leasedAddressSubnetMask, rstring leaseStartTime, rstring leaseEndTime, rstring leaseDuration, rstring dhcpServer" uriIndex="3"/>
+      </compositeOp>
+      <compositeOp column="11" line="15" name="TestDHCPMessageParserFull" potentialMain="true" uriIndex="4">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="22" name="PacketType" type="uint64 packetNumber, uint32 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dhcpMessage" uriIndex="4"/>
+        <type column="5" line="29" name="DHCPMessageType" type="rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, boolean parseError, rstring parseErrorDescription, uint32 parseErrorOffset, uint64 messagesProcessed, uint8 OPCODE, uint8 CLIENT_HARDWARE_TYPE, rstring CLIENT_HARDWARE_ADDRESS, uint8 HOP_COUNT, uint32 TRANSACTION_IDENTIFIER, rstring SECONDS, uint16 FLAGS, rstring CLIENT_ADDRESS, rstring YOUR_ADDRESS, rstring DHCP_SERVER_NEXT, rstring RELAY_AGENT, rstring SERVER_HOSTNAME, rstring BOOTFILE_NAME, rstring SUBNET_MASK, rstring TIME_OFFSET, list&lt;rstring> ROUTERS, list&lt;rstring> TIME_SERVERS, list&lt;rstring> NAME_SERVERS, list&lt;rstring> DNS_SERVERS, list&lt;rstring> LOG_SERVERS, list&lt;rstring> COOKIE_SERVERS, list&lt;rstring> LPR_SERVERS, list&lt;rstring> IMPRESS_SERVERS, list&lt;rstring> RESOURCE_SERVERS, rstring HOST_NAME, uint16 BOOT_FILE_SIZE, rstring MERIT_DUMP_FILE, rstring DOMAIN_NAME, rstring SWAP_SERVER, rstring ROOT_PATH, rstring EXTENSIONS_PATH, boolean IP_FORWARDING, boolean NONLOCAL_SOURCE_ROUTING, list&lt;rstring> NONLOCAL_SOURCE_FILTERS, uint16 MAXIMUM_REASSEMBLY_SIZE, uint8 IP_DEFAULT_TTL, rstring MTU_AGING_TIMEOUT, list&lt;uint16> MTU_PLATEAU_TABLE, uint16 INTERFACE_MTU, boolean ALL_SUBNETS_LOCAL, rstring BROADCAST_ADDRESS, boolean PERFORM_MASK_DISCOVERY, boolean MASK_SUPPLIER, boolean PERFORM_ROUTER_DISCOVERY, rstring ROUTER_SOLICITATION_ADDRESS, list&lt;rstring> STATIC_ROUTES, boolean TRAILER_ENCAPSULATION, rstring ARP_CACHE_TIMEOUT, boolean ETHERNET_ENCAPSULATION, uint8 TCP_DEFUALT_TTL, rstring TCP_KEEPALIVE_INTERVAL, boolean TCP_KEEPALIVE_GARBAGE, rstring NIS_DOMAIN, list&lt;rstring> NIS_SERVERS, list&lt;rstring> NTP_SERVERS, list&lt;uint8> VENDOR_INFORMATION, list&lt;rstring> NETBIOS_NAME_SERVERS, list&lt;rstring> NETBIOS_NBDD_SERVERS, uint8 NETBIOS_NODE_TYPE, rstring NETBIOS_SCOPE, list&lt;rstring> XWINDOW_FONT_SERVERS, list&lt;rstring> XWINDOW_DISPLAY_MANAGERS, rstring REQUESTED_ADDRESS, rstring ADDRESS_LEASE_TIME, uint8 OPTION_OVERLOAD_FLAGS, rstring DHCP_MESSAGE_TYPE, rstring SERVER_ADDRESS, list&lt;uint8> PARAMETER_REQUESTS, rstring ERROR_MESSAGE, uint16 MAXIMUM_DHCP_MESSAGE_SIZE, rstring RENEWAL_TIME, rstring REBINDING_TIME, list&lt;uint8> VENDOR_IDENTIFIER, list&lt;uint8> CLIENT_IDENTIFIER, rstring NISPLUS_DOMAIN, list&lt;rstring> NISPLUS_SERVERS, list&lt;rstring> MOBILE_IP_HOME_AGENTS, list&lt;rstring> SMTP_SERVERS, list&lt;rstring> POP3_SERVERS, list&lt;rstring> NNTP_SERVERS, list&lt;rstring> WWW_SERVERS, list&lt;rstring> FINGER_SERVERS, list&lt;rstring> IRC_SERVERS, list&lt;rstring> STREETTALK_SERVERS, list&lt;rstring> STDA_SERVERS" uriIndex="4"/>
+        <type column="5" line="126" name="DHCPErrorType" type="uint64 packetNumber, rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring parserError, rstring dhcpError, rstring dhcpMessage" uriIndex="4"/>
+      </compositeOp>
+      <function column="1" line="15" name="convertIPV4AddressListToStringList" native="false" returnType="list&lt;rstring>" uriIndex="5">
+        <prototype>list&lt;rstring&gt; convertIPV4AddressListToStringList(list&lt;uint32&gt; addresses)</prototype>
+        <parameter name="addresses" type="list&lt;uint32>"/>
+      </function>
+    </namespace>
+    <dependency>
+      <common:name>com.ibm.streamsx.network</common:name>
+      <common:version>2.1.0</common:version>
+    </dependency>
+    <dependency>
+      <common:name>SampleNetworkToolkitData</common:name>
+      <common:version>2.0.0</common:version>
+    </dependency>
+    <sabFiles>
+      <ti:include path="toolkit.xml" root="toolkitDir"/>
+      <ti:include path="impl/java/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/java/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/nl/*.dat" root="toolkitDir"/>
+      <ti:include path="etc/**" root="toolkitDir"/>
+      <ti:include path="lib/**" root="toolkitDir"/>
+      <ti:include path="nl/**" root="toolkitDir"/>
+      <ti:include path="opt/**" root="toolkitDir"/>
+    </sabFiles>
+  </toolkit>
+
+</toolkitModel>
