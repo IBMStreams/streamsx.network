@@ -1,5 +1,5 @@
 {
-  "name": "Streamsx.network",
+  "name": "streamsx.network",
   "tagline": "(Incubation) Toolkit for working with network data",
   "body": "# streamsx.network\r\n\r\nThe [Network toolkit for IBM Streams](http://ibmstreams.github.io/streamsx.network/) enables SPL applications to process low-level network traffic. It includes operators and functions that can:\r\n\r\n- ingest raw ethernet packets from live network interfaces and recordings of network traffic\r\n\r\n- parse DHCP, DNS, Netflow, and IPFIX messages\r\n\r\n- reassemble application-level files from network packets\r\n\r\n- map IP addresses into city, state, and country locations\r\n\r\n- convert IP addresses betweeen binary and string representations\r\n\r\nThis version of the toolkit is intended for use with IBM Streams release 4.1 and later.\r\n\r\nFor the toolkit's documentation, please see [http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/](http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/).\r\n\r\nFor the toolkit's source code, please see [https://github.com/IBMStreams/streamsx.network/](https://github.com/IBMStreams/streamsx.network/).\r\n",
   "google": "",
