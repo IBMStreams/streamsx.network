@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.1.1.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <toolkit name="SampleDNSMessageParser" requiredProductVersion="4.0.1.0" version="2.0.0">
+    <description>Sample applications that illustrate use of the DNSMessageParser operator.</description>
+    <uriTable>
+      <uri index="10" value="sample/LiveDNSMessageParserBasic.spl"/>
+      <uri index="8" value="sample/TestDNSMessageParserBase64.spl"/>
+      <uri index="7" value="sample/LiveDNSMessageParserAnalysis.spl"/>
+      <uri index="5" value="sample/LiveDNSMessageParserParallelAnalysis.spl"/>
+      <uri index="9" value="sample/TestDNSMessageParserFilters.spl"/>
+      <uri index="1" value="sample/TestDNSMessageParserFull.spl"/>
+      <uri index="4" value="sample/TestDNSMessageParserErrors.spl"/>
+      <uri index="3" value="sample/TestDNSMessageParserBasic.spl"/>
+      <uri index="2" value="sample/TestDNSMessageParserParallelAnalysis.spl"/>
+      <uri index="6" value="sample/TestDNSMessageParserAnalysis.spl"/>
+    </uriTable>
+    <namespace name="sample">
+      <compositeOp column="11" line="14" name="TestDNSMessageParserFull" potentialMain="true" uriIndex="1">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="21" name="PacketType" type="uint64 packetNumber, float64 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dnsMessage" uriIndex="1"/>
+        <type column="5" line="28" name="DNSMessageType" type="rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, boolean parseError, rstring parseErrorDescription, uint32 parseErrorOffset, uint64 messagesProcessed, uint16 DNS_IDENTIFIER, uint8 DNS_OPCODE, boolean DNS_RESPONSE_FLAG, uint8 DNS_RESPONSE_CODE, rstring DNS_RESPONSE_CODE_AS_STRING, boolean DNS_AUTHORITATIVE_FLAG, boolean DNS_TRUNCATION_FLAG, uint16 DNS_QUESTION_COUNT, rstring DNS_QUESTION_NAME, uint16 DNS_QUESTION_TYPE, rstring DNS_QUESTION_TYPE_AS_STRING, uint16 DNS_QUESTION_CLASS, list&lt;rstring> DNS_QUESTION_NAMES, list&lt;uint16> DNS_QUESTION_TYPES, list&lt;uint16> DNS_QUESTION_CLASSES, uint16 DNS_ANSWER_COUNT, list&lt;rstring> DNS_ANSWER_NAMES, list&lt;uint16> DNS_ANSWER_TYPES, list&lt;uint16> DNS_ANSWER_CLASSES, list&lt;uint32> DNS_ANSWER_TTLS, list&lt;rstring> DNS_ANSWER_DATA, rstring DNS_ANSWER_CANONICAL, rstring DNS_ANSWER_ADDRESS, uint32 DNS_ANSWER_IPV4_ADDRESS_AS_NUMBER, rstring DNS_ANSWER_IPV4_ADDRESS_AS_STRING, list&lt;uint8>[16] DNS_ANSWER_IPV6_ADDRESS_AS_NUMBER, rstring DNS_ANSWER_IPV6_ADDRESS_AS_STRING, list&lt;rstring> DNS_ANSWER_ADDRESSES, list&lt;uint32> DNS_ANSWER_IPV4_ADDRESSES, list&lt;list&lt;uint8>[16]> DNS_ANSWER_IPV6_ADDRESSES, uint16 DNS_NAMESERVER_COUNT, list&lt;rstring> DNS_NAMESERVER_NAMES, list&lt;uint16> DNS_NAMESERVER_TYPES, list&lt;uint16> DNS_NAMESERVER_CLASSES, list&lt;uint32> DNS_NAMESERVER_TTLS, list&lt;rstring> DNS_NAMESERVER_DATA, uint16 DNS_ADDITIONAL_COUNT, list&lt;rstring> DNS_ADDITIONAL_NAMES, list&lt;uint16> DNS_ADDITIONAL_TYPES, list&lt;uint16> DNS_ADDITIONAL_CLASSES, list&lt;uint32> DNS_ADDITIONAL_TTLS, list&lt;rstring> DNS_ADDITIONAL_DATA" uriIndex="1"/>
+        <type column="5" line="80" name="DNSErrorType" type="uint64 packetNumber, rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring parseErrorDescription, uint32 parseErrorOffset, rstring dnsMessage" uriIndex="1"/>
+      </compositeOp>
+      <compositeOp column="11" line="12" name="TestDNSMessageParserParallelAnalysis" potentialMain="true" uriIndex="2">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(uint32)getSubmissionTimeValue(&quot;ingesterProcessorAffinity&quot;, &quot;1&quot;)" metaType="Expression" name="ingesterProcessorAffinity" optional="true" type="&lt;uint32>"/>
+        <parameter defaultValue="(list&lt;uint32>)getSubmissionTimeListValue(&quot;parserProcessorAffinities&quot;)" metaType="Expression" name="parserProcessorAffinities" optional="true" type="&lt;list&lt;uint32>>"/>
+        <parameter defaultValue="(int32)getSubmissionTimeValue(&quot;parallelChannels&quot;, &quot;1&quot;)" metaType="Expression" name="parallelChannels" optional="true" type="&lt;int32>"/>
+        <type column="5" line="22" name="PacketType" type="timestamp captureTime, rstring dstAddress, uint64 partitionKey, blob dnsMessage" uriIndex="2"/>
+      </compositeOp>
+      <compositeOp column="11" line="60" name="TestDNSAnalytics" potentialMain="false" uriIndex="2">
+        <parameter metaType="Expression" name="parserProcessorAffinities" optional="false" type="&lt;list&lt;uint32>>"/>
+        <inputPort name="PacketStream" portIndex="0"/>
+        <outputPort name="PredictiveBlacklistingResultStream" portIndex="0"/>
+        <outputPort name="DomainProfilingResultStream" portIndex="1"/>
+        <outputPort name="HostProfilingResultStream" portIndex="2"/>
+        <type column="5" line="68" name="FullDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, rstring questionType, uint8 responseCode, uint16 answerCount, list&lt;rstring> answerNames, list&lt;rstring> answerData, list&lt;uint16> answerTypes, list&lt;uint32> answerTTLs, uint16 nameserverCount, list&lt;rstring> nameserverNames, list&lt;rstring> nameserverData, list&lt;uint16> nameserverTypes, list&lt;uint32> nameserverTTLs, uint16 additionalCount, list&lt;rstring> additionalNames, list&lt;rstring> additionalData, list&lt;uint16> additionalTypes, list&lt;uint32> additionalTTLs" uriIndex="2"/>
+        <type column="5" line="91" name="ShortDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, rstring questionType, uint8 responseCode, list&lt;rstring> answerData, list&lt;rstring> additionalData" uriIndex="2"/>
+        <type column="12" line="101" name="PredictiveBlacklistingResultType" static="true" type="int32 result" uriIndex="2"/>
+        <type column="12" line="105" name="DomainProfilingResultType" static="true" type="int32 result" uriIndex="2"/>
+        <type column="12" line="109" name="HostProfilingResultType" static="true" type="int32 result" uriIndex="2"/>
+      </compositeOp>
+      <compositeOp column="11" line="13" name="TestDNSMessageParserBasic" potentialMain="true" uriIndex="3">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="20" name="PacketType" type="float64 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dnsMessage" uriIndex="3"/>
+        <type column="5" line="26" name="DNSMessageType" type="rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, boolean isResponse, rstring responseCode, rstring questionName, rstring questionType, list&lt;rstring> answerNames, list&lt;uint32> answerTTLs, list&lt;rstring> answerData, list&lt;rstring> nameserverNames" uriIndex="3"/>
+      </compositeOp>
+      <compositeOp column="11" line="13" name="TestDNSMessageParserErrors" potentialMain="true" uriIndex="4">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns_only_errors.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="20" name="PacketType" type="float64 captureTime, uint64 packetNumber, uint32 packetLength, rstring ipSourceAddress, rstring ipDestinationAddress, blob dnsMessage" uriIndex="4"/>
+        <type column="5" line="28" name="DNSErrorMessageType" type="rstring captureTime, uint64 packetNumber, uint32 packetLength, rstring ipSourceAddress, rstring ipDestinationAddress, rstring questionName, rstring questionType, list&lt;rstring> answerNames, list&lt;rstring> answerData, list&lt;rstring> answerAddresses, list&lt;rstring> nameserverNames, list&lt;rstring> nameserverData, list&lt;rstring> additionalNames, list&lt;rstring> additionalData, boolean isResponse, rstring responseCode, rstring error" uriIndex="4"/>
+      </compositeOp>
+      <compositeOp column="11" line="12" name="LiveDNSMessageParserParallelAnalysis" potentialMain="true" uriIndex="5">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(uint32)getSubmissionTimeValue(&quot;ingesterProcessorAffinity&quot;, &quot;1&quot;)" metaType="Expression" name="ingesterProcessorAffinity" optional="true" type="&lt;uint32>"/>
+        <parameter defaultValue="(list&lt;uint32>)getSubmissionTimeListValue(&quot;parserProcessorAffinities&quot;)" metaType="Expression" name="parserProcessorAffinities" optional="true" type="&lt;list&lt;uint32>>"/>
+        <parameter defaultValue="getSubmissionTimeValue(&quot;inputFilter&quot;, &quot;udp port 53&quot;)" metaType="Expression" name="inputFilter" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;metricsInterval&quot;, &quot;1.0&quot;)" metaType="Expression" name="metricsInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(boolean)getSubmissionTimeValue(&quot;errorStream&quot;, &quot;true&quot;)" metaType="Expression" name="errorStream" optional="true" type="&lt;boolean>"/>
+        <parameter defaultValue="(int32)getSubmissionTimeValue(&quot;parallelChannels&quot;, &quot;1&quot;)" metaType="Expression" name="parallelChannels" optional="true" type="&lt;int32>"/>
+        <type column="5" line="27" name="PacketType" type="timestamp captureTime, uint32 srcAddress, rstring dstAddress, uint64 partitionKey, blob dnsMessage" uriIndex="5"/>
+        <type column="5" line="35" name="MetricsType" type="float64 metricsTime, float64 averagePacketsReceived, float64 averagePacketsDropped, float64 averagePacketsProcessed, float64 averageBytesProcessed" uriIndex="5"/>
+      </compositeOp>
+      <compositeOp column="11" line="89" name="LiveDNSAnalytics" potentialMain="false" uriIndex="5">
+        <parameter metaType="Expression" name="parserProcessorAffinities" optional="false" type="&lt;list&lt;uint32>>"/>
+        <parameter metaType="Expression" name="errorStream" optional="false" type="&lt;boolean>"/>
+        <inputPort name="PacketStream" portIndex="0"/>
+        <outputPort name="PredictiveBlacklistingResultStream" portIndex="0"/>
+        <outputPort name="DomainProfilingResultStream" portIndex="1"/>
+        <outputPort name="HostProfilingResultStream" portIndex="2"/>
+        <type column="5" line="98" name="DNSErrorType" type="timestamp captureTime, rstring srcAddress, rstring parseErrorDescription, uint32 parseErrorOffset, rstring dnsMessage" uriIndex="5"/>
+        <type column="5" line="106" name="FullDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, rstring questionType, uint8 responseCode, uint16 answerCount, list&lt;rstring> answerNames, list&lt;rstring> answerData, list&lt;uint16> answerTypes, list&lt;uint32> answerTTLs, uint16 nameserverCount, list&lt;rstring> nameserverNames, list&lt;rstring> nameserverData, list&lt;uint16> nameserverTypes, list&lt;uint32> nameserverTTLs, uint16 additionalCount, list&lt;rstring> additionalNames, list&lt;rstring> additionalData, list&lt;uint16> additionalTypes, list&lt;uint32> additionalTTLs" uriIndex="5"/>
+        <type column="5" line="129" name="ShortDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, rstring questionType, uint8 responseCode, list&lt;rstring> answerData, list&lt;rstring> additionalData" uriIndex="5"/>
+        <type column="12" line="139" name="PredictiveBlacklistingResultType" static="true" type="int32 result" uriIndex="5"/>
+        <type column="12" line="143" name="DomainProfilingResultType" static="true" type="int32 result" uriIndex="5"/>
+        <type column="12" line="147" name="HostProfilingResultType" static="true" type="int32 result" uriIndex="5"/>
+      </compositeOp>
+      <compositeOp column="11" line="12" name="TestDNSMessageParserAnalysis" potentialMain="true" uriIndex="6">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(uint32)getSubmissionTimeValue(&quot;processorAffinity&quot;, &quot;1&quot;)" metaType="Expression" name="processorAffinity" optional="true" type="&lt;uint32>"/>
+        <type column="5" line="20" name="PacketType" type="timestamp captureTime, rstring dstAddress, blob dnsMessage" uriIndex="6"/>
+        <type column="5" line="26" name="FullDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, rstring questionType, uint8 responseCode, uint16 answerCount, list&lt;rstring> answerNames, list&lt;rstring> answerData, list&lt;uint16> answerTypes, list&lt;uint32> answerTTLs, uint16 nameserverCount, list&lt;rstring> nameserverNames, list&lt;rstring> nameserverData, list&lt;uint16> nameserverTypes, list&lt;uint32> nameserverTTLs, uint16 additionalCount, list&lt;rstring> additionalNames, list&lt;rstring> additionalData, list&lt;uint16> additionalTypes, list&lt;uint32> additionalTTLs" uriIndex="6"/>
+        <type column="5" line="49" name="ShortDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, uint8 responseCode, list&lt;rstring> answerData, list&lt;rstring> additionalData" uriIndex="6"/>
+      </compositeOp>
+      <compositeOp column="11" line="12" name="LiveDNSMessageParserAnalysis" potentialMain="true" uriIndex="7">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(uint32)getSubmissionTimeValue(&quot;processorAffinity&quot;, &quot;1&quot;)" metaType="Expression" name="processorAffinity" optional="true" type="&lt;uint32>"/>
+        <parameter defaultValue="getSubmissionTimeValue(&quot;inputFilter&quot;, &quot;udp port 53&quot;)" metaType="Expression" name="inputFilter" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;metricsInterval&quot;, &quot;1.0&quot;)" metaType="Expression" name="metricsInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(boolean)getSubmissionTimeValue(&quot;errorStream&quot;, &quot;true&quot;)" metaType="Expression" name="errorStream" optional="true" type="&lt;boolean>"/>
+        <type column="5" line="25" name="PacketType" type="timestamp captureTime, uint32 srcAddress, rstring dstAddress, blob dnsMessage" uriIndex="7"/>
+        <type column="5" line="32" name="MetricsType" type="float64 metricsTime, float64 averagePacketsReceived, float64 averagePacketsDropped, float64 averagePacketsProcessed, float64 averageBytesProcessed" uriIndex="7"/>
+        <type column="5" line="40" name="DNSErrorType" type="timestamp captureTime, rstring srcAddress, rstring parseErrorDescription, uint32 parseErrorOffset, rstring dnsMessage" uriIndex="7"/>
+        <type column="5" line="48" name="FullDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, rstring questionType, uint8 responseCode, uint16 answerCount, list&lt;rstring> answerNames, list&lt;rstring> answerData, list&lt;uint16> answerTypes, list&lt;uint32> answerTTLs, uint16 nameserverCount, list&lt;rstring> nameserverNames, list&lt;rstring> nameserverData, list&lt;uint16> nameserverTypes, list&lt;uint32> nameserverTTLs, uint16 additionalCount, list&lt;rstring> additionalNames, list&lt;rstring> additionalData, list&lt;uint16> additionalTypes, list&lt;uint32> additionalTTLs" uriIndex="7"/>
+        <type column="5" line="71" name="ShortDNSResponseMessage_t" type="timestamp captureTime, rstring dstAddress, rstring questionName, rstring questionType, uint8 responseCode, list&lt;rstring> answerData, list&lt;rstring> additionalData" uriIndex="7"/>
+      </compositeOp>
+      <compositeOp column="11" line="13" name="TestDNSMessageParserBase64" potentialMain="true" uriIndex="8">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns_only_txt_base64.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="20" name="PacketType" type="timestamp captureTime, uint64 packetNumber, rstring ipSourceAddress, rstring ipDestinationAddress, blob dnsMessage" uriIndex="8"/>
+        <type column="5" line="27" name="DNSMessageType" type="rstring captureTime, uint64 packetNumber, rstring ipSourceAddress, rstring ipDestinationAddress, rstring questionName, list&lt;rstring> answerNames, list&lt;rstring> answerData" uriIndex="8"/>
+      </compositeOp>
+      <compositeOp column="11" line="13" name="TestDNSMessageParserFilters" potentialMain="true" uriIndex="9">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_dns+dhcp.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="20" name="PacketType" type="float64 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dnsMessage" uriIndex="9"/>
+        <type column="5" line="26" name="DNSRequestMessageType" type="rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring questionName, rstring questionType" uriIndex="9"/>
+        <type column="5" line="33" name="DNSResponseMessageType" type="rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring questionName, rstring questionType, list&lt;rstring> answerNames, list&lt;uint32> answerTTLs, list&lt;rstring> answerData, list&lt;rstring> nameserverNames" uriIndex="9"/>
+        <type column="5" line="44" name="DNSErrorMessageType" type="rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring questionName, rstring questionType, list&lt;rstring> answerNames, boolean isResponse, rstring responseCode, rstring error" uriIndex="9"/>
+      </compositeOp>
+      <compositeOp column="11" line="13" name="LiveDNSMessageParserBasic" potentialMain="true" uriIndex="10">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;networkInterface&quot;, &quot;eth0&quot;)" metaType="Expression" name="networkInterface" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="getSubmissionTimeValue(&quot;inputFilter&quot;, &quot;udp port 53&quot;)" metaType="Expression" name="inputFilter" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;metricsInterval&quot;, &quot;1.0&quot;)" metaType="Expression" name="metricsInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(float64)getSubmissionTimeValue(&quot;timeoutInterval&quot;, &quot;10.0&quot;)" metaType="Expression" name="timeoutInterval" optional="true" type="&lt;float64>"/>
+        <parameter defaultValue="(uint32)getSubmissionTimeValue(&quot;lookupPort&quot;, &quot;23456&quot;)" metaType="Expression" name="lookupPort" optional="true" type="&lt;uint32>"/>
+        <type column="5" line="25" name="PacketType" type="float64 captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, blob dnsMessage" uriIndex="10"/>
+        <type column="5" line="32" name="MetricsType" type="float64 metricsTime, float64 averagePacketsReceived, float64 averagePacketsDropped, float64 averagePacketsProcessed, float64 averageBytesProcessed" uriIndex="10"/>
+        <type column="5" line="39" name="DNSResponseMessageType" type="rstring captureTime, rstring ipSourceAddress, rstring ipDestinationAddress, rstring questionName, rstring questionType, rstring answerAddress, list&lt;rstring> answerNames, list&lt;rstring> answerData" uriIndex="10"/>
+      </compositeOp>
+      <function column="1" line="71" name="isSPFAnswer" native="false" returnType="boolean" uriIndex="8">
+        <prototype>boolean isSPFAnswer(list&lt;rstring&gt; answerList)</prototype>
+        <parameter name="answerList" type="list&lt;rstring>"/>
+      </function>
+      <function column="1" line="76" name="isGoogleSiteVerificationAnswer" native="false" returnType="boolean" uriIndex="8">
+        <prototype>boolean isGoogleSiteVerificationAnswer(list&lt;rstring&gt; answerList)</prototype>
+        <parameter name="answerList" type="list&lt;rstring>"/>
+      </function>
+      <function column="1" line="81" name="isBase64EncodedAnswer" native="false" returnType="boolean" uriIndex="8">
+        <prototype>boolean isBase64EncodedAnswer(list&lt;rstring&gt; answerList)</prototype>
+        <parameter name="answerList" type="list&lt;rstring>"/>
+      </function>
+    </namespace>
+    <dependency>
+      <common:name>com.ibm.streamsx.network</common:name>
+      <common:version>2.0.0</common:version>
+    </dependency>
+    <dependency>
+      <common:name>SampleNetworkToolkitData</common:name>
+      <common:version>2.0.0</common:version>
+    </dependency>
+    <sabFiles>
+      <ti:include path="toolkit.xml" root="toolkitDir"/>
+      <ti:include path="impl/java/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/java/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/nl/*.dat" root="toolkitDir"/>
+      <ti:include path="etc/**" root="toolkitDir"/>
+      <ti:include path="lib/**" root="toolkitDir"/>
+      <ti:include path="nl/**" root="toolkitDir"/>
+      <ti:include path="opt/**" root="toolkitDir"/>
+    </sabFiles>
+  </toolkit>
+
+</toolkitModel>
