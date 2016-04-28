@@ -1,0 +1,4312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="C++ Native Functions: com.ibm.streamsx.network.parse"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_functions"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>C++ Native Functions: com.ibm.streamsx.network.parse</title>
+</head>
+<body id="spldoc_functions">
+
+
+<h1 class="title topictitle1">C++ Native Functions: <tt class="ph tt">com.ibm.streamsx.network.parse</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; C++ Native Functions</p>
+
+</div>
+
+<div class="section">
+This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> common_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__messagesProcessed"><tt class="ph tt">      public uint64 messagesProcessed()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of messages processed by the operator since it started,           including the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseError"><tt class="ph tt">      public boolean parseError()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if an encoding error was detected while decoding the current packet,           or <tt class="ph tt">false</tt> otherwise. Note that a value of <tt class="ph tt">false</tt> does not necessarily mean the packet has           no encoding errors, since the operator only decodes the fields needed.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorDescription"><tt class="ph tt">      public rstring parseErrorDescription()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a description of an encoding error found while decoding the current packet,           or an empty string if no enoding errors were found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorOffset"><tt class="ph tt">      public uint32 parseErrorOffset()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the offset from the beginning of the message to the encoding error found,           or zero if no encoding errors were found.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> DHCPMessageParser_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ADDRESS_LEASE_TIME"><tt class="ph tt">      public uint32 DHCP_ADDRESS_LEASE_TIME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the           duration of the address lease, in seconds, if DHCP option 51 is included           in the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ALL_SUBNETS_LOCAL"><tt class="ph tt">      public boolean DHCP_ALL_SUBNETS_LOCAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if           all subnets use the same MTU size, if DHCP option 27 is included in the           message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ARP_CACHE_TIMEOUT"><tt class="ph tt">      public uint32 DHCP_ARP_CACHE_TIMEOUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the timeout           for ARP cache entries, in seconds, if DHCP option 35 is included in the           message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_BOOTFILE_NAME"><tt class="ph tt">      public rstring DHCP_BOOTFILE_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the pathname of a boot file the client can use, if there is one, or an empty string otherwise. This may be DHCP option 67, depending upon option 52.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_BOOT_FILE_SIZE"><tt class="ph tt">      public uint16 DHCP_BOOT_FILE_SIZE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the size of           boot file in 512 byte blocks, if DHCP option 13 is included in the           message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_BROADCAST_ADDRESS"><tt class="ph tt">      public uint32 DHCP_BROADCAST_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4           address to use when broadcasting on subnet, if DHCP option 28 is           included in the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_CLIENT_ADDRESS"><tt class="ph tt">      public uint32 DHCP_CLIENT_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the DHCP client's IP version 4 address when it requests renewal of its lease.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_CLIENT_HARDWARE_ADDRESS"><tt class="ph tt">      public list&lt;uint8&gt; DHCP_CLIENT_HARDWARE_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the DHCP client's network hardware address, for example, the MAC address           of its ethernet adapter.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_CLIENT_HARDWARE_TYPE"><tt class="ph tt">      public uint8 DHCP_CLIENT_HARDWARE_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the           client's hardware address type, for example, '1' for ethernet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_CLIENT_IDENTIFIER"><tt class="ph tt">      public list&lt;uint8&gt; DHCP_CLIENT_IDENTIFIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           client-specific information, if DHCP option 61 is included in the           message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_COOKIE_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_COOKIE_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           cookie servers, represented as IP version 4 addresses, if DHCP option 8 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_DNS_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_DNS_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           DNS servers, represented as IP version 4 addresses, if DHCP option 6 is included           in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_DOMAIN_NAME"><tt class="ph tt">      public rstring DHCP_DOMAIN_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the domain name           the client should use with DNS, if DHCP option 15 is included in the           message, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ERROR_MESSAGE"><tt class="ph tt">      public rstring DHCP_ERROR_MESSAGE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns an error           message from server, if request failed, if DHCP option 56 is included in           the message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ETHERNET_ENCAPSULATION"><tt class="ph tt">      public boolean DHCP_ETHERNET_ENCAPSULATION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt>           when the client should use ethernet encapsulation, if DHCP option 36 is           included in the message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_EXTENSIONS_PATH"><tt class="ph tt">      public rstring DHCP_EXTENSIONS_PATH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns BOOTP           extensions, if DHCP option 18 is included in the message, or an empty           string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_FINGER_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_FINGER_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           Finger servers, represented as IP version 4 addresses, if DHCP option 73 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_FLAGS"><tt class="ph tt">      public uint16 DHCP_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the DHCP broadcast flag.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_HOP_COUNT"><tt class="ph tt">      public uint8 DHCP_HOP_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of relay agents separating the DHCP client and server.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_HOST_NAME"><tt class="ph tt">      public rstring DHCP_HOST_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the hostname of the           client, if DHCP option 12 is included in the message, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_IMPRESS_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_IMPRESS_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list           of Impress servers, represented as IP version 4 addresses, if DHCP option 10 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_INTERFACE_MTU"><tt class="ph tt">      public uint16 DHCP_INTERFACE_MTU()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the MTU size to           use on this interface, if DHCP option 26 is included in the message, or           zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_IP_DEFAULT_TTL"><tt class="ph tt">      public uint8 DHCP_IP_DEFAULT_TTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the default IP           time-to-live for outgoing packets, if DHCP option 23 is included in the           message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_IP_FORWARDING"><tt class="ph tt">      public boolean DHCP_IP_FORWARDING()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the           client should forward IP packets, if DHCP option 19 is included in the           message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_IRC_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_IRC_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           IRC servers, represented as IP version 4 addresses, if DHCP option 74 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_LOG_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_LOG_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           log servers, represented as IP version 4 addresses, if DHCP option 7 is included           in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_LPR_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_LPR_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           print servers, represented as IP version 4 addresses, if DHCP option 9 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MASK_SUPPLIER"><tt class="ph tt">      public boolean DHCP_MASK_SUPPLIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> when           client should respond to subnet mask discovery, if DHCP option 30 is           included in the message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MAXIMUM_MESSAGE_SIZE"><tt class="ph tt">      public uint16 DHCP_MAXIMUM_MESSAGE_SIZE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the           maximum size of DHCP message, if DHCP option 57 is included in the           message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MAXIMUM_REASSEMBLY_SIZE"><tt class="ph tt">      public uint16 DHCP_MAXIMUM_REASSEMBLY_SIZE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the           maximum size of reassembled packets, if DHCP option 22 is included in           the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MERIT_DUMP_FILE"><tt class="ph tt">      public rstring DHCP_MERIT_DUMP_FILE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the pathname           of a file for client's core dump image, if DHCP option 14 is included in           the message, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MESSAGE_TYPE"><tt class="ph tt">      public uint8 DHCP_MESSAGE_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the type of this DHCP message, if DHCP option 53 is included in the message, or zero if           not, for example:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '1' for Discover, </li>
+
+<li class="li"> '2' for Offer, </li>
+
+<li class="li"> '3' for Request, </li>
+
+<li class="li"> '4' for Decline, </li>
+
+<li class="li"> '5' for Positive Acknowledge, </li>
+
+<li class="li"> '6' for Negative Acknowledge, </li>
+
+<li class="li"> '7' for Release, or</li>
+
+<li class="li"> '8' for Inform.</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MOBILE_IP_HOME_AGENTS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_MOBILE_IP_HOME_AGENTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a           list of mobile IP home agents, represented as IP version 4 addresses, if DHCP           option 68 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MTU_AGING_TIMEOUT"><tt class="ph tt">      public uint32 DHCP_MTU_AGING_TIMEOUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the time to           use when aging path MTU values, in seconds, if DHCP option 24 is           included in the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_MTU_PLATEAU_TABLE"><tt class="ph tt">      public list&lt;uint16&gt; DHCP_MTU_PLATEAU_TABLE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list           of MTU sizes for path discovery, if DHCP option 25 is included in the           message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NAME_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NAME_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           name servers (not DNS servers, see next option), represented as IP version 4           addresses, if DHCP option 5 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NETBIOS_NAME_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NETBIOS_NAME_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a           list of NetBIOS-over-TCP name servers, represented as IP version 4 addresses, if           DHCP option 44 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NETBIOS_NBDD_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NETBIOS_NBDD_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a           list of NetBIOS-over-TCP NBDD servers, represented as IP version 4 addresses, if           DHCP option 45 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NETBIOS_NODE_TYPE"><tt class="ph tt">      public uint8 DHCP_NETBIOS_NODE_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the type of           NetBIOS-over-TCP node, if DHCP option 46 is included in the message, or           zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NETBIOS_SCOPE"><tt class="ph tt">      public rstring DHCP_NETBIOS_SCOPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the client's           NetBIOS-over-TCP scope parameter, if DHCP option 47 is included in the           message, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NISPLUS_DOMAIN"><tt class="ph tt">      public rstring DHCP_NISPLUS_DOMAIN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the name of           the client's NIS+ domain, if DHCP option 64 is included in the message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NISPLUS_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NISPLUS_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list           of NIS+ servers, represented as IP version 4 addresses, if DHCP option 65 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NIS_DOMAIN"><tt class="ph tt">      public rstring DHCP_NIS_DOMAIN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the name of the           client's NIS domain, if DHCP option 40 is included in the message, or an           empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NIS_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NIS_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           NIS servers, represented as IP version 4 addresses, if DHCP option 41 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NNTP_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NNTP_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           NNTP servers, represented as IP version 4 addresses, if DHCP option 71 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NONLOCAL_SOURCE_FILTERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NONLOCAL_SOURCE_FILTERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           a list of IP version 4 address/mask pairs for filtering source packets, if DHCP           option 21 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NONLOCAL_SOURCE_ROUTING"><tt class="ph tt">      public boolean DHCP_NONLOCAL_SOURCE_ROUTING()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           <tt class="ph tt">true</tt> if the client should forward IP packets with non-local source           routing, if DHCP option 20 is included in the message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_NTP_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_NTP_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           NTP servers, represented as IP version 4 addresses, if DHCP option 42 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_OPCODE"><tt class="ph tt">      public uint8 DHCP_OPCODE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the DHCP message type           ('1' for request, '2' for reply).
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_OPTION_OVERLOAD_FLAGS"><tt class="ph tt">      public uint8 DHCP_OPTION_OVERLOAD_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns flags indicating whether the <tt class="ph tt">sname</tt> and <tt class="ph tt">file</tt> fields           in the DHCP message header contain the server's host name and client's boot file name,           or additional DHCP options, if DHCP option 52 is included in the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_PARAMETER_REQUESTS"><tt class="ph tt">      public list&lt;uint8&gt; DHCP_PARAMETER_REQUESTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list           of requested DHCP parameters, expressed as option codes, if DHCP option           55 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_PERFORM_MASK_DISCOVERY"><tt class="ph tt">      public boolean DHCP_PERFORM_MASK_DISCOVERY()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt>           when client should perform subnet mask discovery, if DHCP option 29 is           included in the message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_PERFORM_ROUTER_DISCOVERY"><tt class="ph tt">      public boolean DHCP_PERFORM_ROUTER_DISCOVERY()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           <tt class="ph tt">true</tt> when the client should solicit routers, if DHCP option 31 is           included in the message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_POP3_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_POP3_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           POP3 servers, represented as IP version 4 addresses, if DHCP option 70 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_REBINDING_TIME"><tt class="ph tt">      public uint32 DHCP_REBINDING_TIME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the time from           address lease to rebinding, in seconds, if DHCP option 59 is included in           the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_RELAY_AGENT"><tt class="ph tt">      public uint32 DHCP_RELAY_AGENT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the relay agent between the DHCP client and server,           if there is one, or zero otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_RENEWAL_TIME"><tt class="ph tt">      public uint32 DHCP_RENEWAL_TIME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns then time from           address lease to renewal, in seconds, if DHCP option 58 is included in           the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_REQUESTED_ADDRESS"><tt class="ph tt">      public uint32 DHCP_REQUESTED_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the client's           requested address, as an IP version 4 address, if DHCP option 50 is included in           the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_RESOURCE_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_RESOURCE_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list           of resource location servers, represented as IP version 4 addresses, if DHCP           option 11 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ROOT_PATH"><tt class="ph tt">      public rstring DHCP_ROOT_PATH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the pathname of the           client's root disk (for diskless workstations), if DHCP option 17 is           included in the message, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ROUTERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_ROUTERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           routers on client's subnet, represented as IP version 4 addresses, if DHCP           option 3 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_ROUTER_SOLICITATION_ADDRESS"><tt class="ph tt">      public uint32 DHCP_ROUTER_SOLICITATION_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           the IP version 4 address to which router solicitations should be sent, if DHCP           option 32 is included in the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_SECONDS"><tt class="ph tt">      public uint16 DHCP_SECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the elased time, in seconds, between the request and the response.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_SERVER_ADDRESS"><tt class="ph tt">      public uint32 DHCP_SERVER_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4           address of DHCP server, if DHCP option 54 is included in the message, or           zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_SERVER_HOSTNAME"><tt class="ph tt">      public rstring DHCP_SERVER_HOSTNAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the name of the DHCP server, if it has one, or an empty string otherwise. This may be DHCP option 66, depending upon option 52.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_SERVER_NEXT"><tt class="ph tt">      public uint32 DHCP_SERVER_NEXT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the next DHCP server to use.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_SMTP_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_SMTP_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           SMTP servers, represented as IP version 4 addresses, if DHCP option 69 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_STATIC_ROUTES"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_STATIC_ROUTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           IP version 4 address pairs for the client's static routing table, if DHCP option           33 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_STDA_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_STDA_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           StreetTalk Directory Assistance servers, represented as IP version 4 addresses,           if DHCP option 76 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_STREETTALK_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_STREETTALK_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a           list of StreetTalk servers, represented as IP version 4 addresses, if DHCP           option 75 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_SUBNET_MASK"><tt class="ph tt">      public uint32 DHCP_SUBNET_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the mask of the           client's subnet, represented as an IP version 4 address, if DHCP option 1 is           included in the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_SWAP_SERVER"><tt class="ph tt">      public uint32 DHCP_SWAP_SERVER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address           of the client's swap server, if DHCP option 16 is included in the           message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_TCP_DEFUALT_TTL"><tt class="ph tt">      public uint8 DHCP_TCP_DEFUALT_TTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the default TCP           time-to-live for outgoing segments, if DHCP option 37 is included in the           message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_TCP_KEEPALIVE_GARBAGE"><tt class="ph tt">      public boolean DHCP_TCP_KEEPALIVE_GARBAGE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt>           when the client should send a byte of garbage with TCP keepalive           messages, if DHCP option 39 is included in the message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_TCP_KEEPALIVE_INTERVAL"><tt class="ph tt">      public uint32 DHCP_TCP_KEEPALIVE_INTERVAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the           time the client should wait before sending TCP keepalive messages, in           seconds, if DHCP option 38 is included in the message, or zero if not.          
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_TIME_OFFSET"><tt class="ph tt">      public int32 DHCP_TIME_OFFSET()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the time offset of           the client's subnet, relative to GMT/UTC, in seconds, if DHCP option 2           is included in the message, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_TIME_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_TIME_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           time servers, represented as IP version 4 addresses, if DHCP option 4 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_TRAILER_ENCAPSULATION"><tt class="ph tt">      public boolean DHCP_TRAILER_ENCAPSULATION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt>           when the client should negotiate trailers, if DHCP option 34 is included           in the message, or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_TRANSACTION_IDENTIFIER"><tt class="ph tt">      public uint32 DHCP_TRANSACTION_IDENTIFIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the request correlator chosen by the DHCP client in its request and returned to it by server in its response.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_VENDOR_IDENTIFIER"><tt class="ph tt">      public list&lt;uint8&gt; DHCP_VENDOR_IDENTIFIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           vendor-specific information, if DHCP option 60 is included in the           message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_VENDOR_INFORMATION"><tt class="ph tt">      public list&lt;uint8&gt; DHCP_VENDOR_INFORMATION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           vendor-specific information, if DHCP option 43 is included in the           message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_WWW_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_WWW_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of           WWW servers, represented as IP version 4 addresses, if DHCP option 72 is           included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_XWINDOW_DISPLAY_MANAGERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_XWINDOW_DISPLAY_MANAGERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns           a list of X-Windows display managers, represented as IP version 4 addresses, if           DHCP option 49 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_XWINDOW_FONT_SERVERS"><tt class="ph tt">      public list&lt;uint32&gt; DHCP_XWINDOW_FONT_SERVERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a           list of X-Windows font servers, represented as IP version 4 addresses, if DHCP           option 48 is included in the message, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DHCP_YOUR_ADDRESS"><tt class="ph tt">      public uint32 DHCP_YOUR_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address           leased to the client by the DHCP server, if the message is an           acknowledgement granting a lease, or zero if not.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> DNSMessageParser_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ADDITIONAL_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_COUNT"><tt class="ph tt">      public uint16 DNS_ADDITIONAL_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'additional' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_DATA"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ADDITIONAL_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ADDITIONAL_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'additional' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_TTLS"><tt class="ph tt">      public list&lt;uint32&gt; DNS_ADDITIONAL_TTLS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ADDITIONAL_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_ADDRESS"><tt class="ph tt">      public rstring DNS_ANSWER_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record,           if there is one with a 'type' value            of '1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),           as a string value,           or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_ADDRESSES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ANSWER_ADDRESSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'answer' resource records            that have a 'type' value of            '1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),           as string values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_CANONICAL"><tt class="ph tt">      public rstring DNS_ANSWER_CANONICAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record,           if there is one with           a 'type' value of '5' (meaning, the answer is a canonical domain name from a type 'CNAME' record),           or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ANSWER_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_COUNT"><tt class="ph tt">      public uint16 DNS_ANSWER_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_DATA"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ANSWER_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV4_ADDRESS"><tt class="ph tt">      public uint32 DNS_ANSWER_IPV4_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record, if            there is one with a           'type' value of '1' (meaning, the answer is an IP version 4 address from a type 'A' record),           as a binary value,           or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV4_ADDRESSES"><tt class="ph tt">      public list&lt;uint32&gt; DNS_ANSWER_IPV4_ADDRESSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' fields of the 'answer' resource records that have            'type' values of '1' (meaning, the answers are IP version 4 addresses from type 'A' records),           as a list of binary values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV6_ADDRESS"><tt class="ph tt">      public list&lt;uint8&gt;[16] DNS_ANSWER_IPV6_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record, if            there is one with a            'type' value of '28' (meaning, the answer is an IP version 6 address from a type 'AAAA' record),           as a binary value,           or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV6_ADDRESSES"><tt class="ph tt">      public list&lt;list&lt;uint8&gt;[16]&gt; DNS_ANSWER_IPV6_ADDRESSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' fields of the 'answer' resource records that have            'type' values of '28' (meaning, the answers IP version 6 addresses from type 'AAAA' records),           as a binary values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ANSWER_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'answer' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_TTLS"><tt class="ph tt">      public list&lt;uint32&gt; DNS_ANSWER_TTLS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'time to live' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ANSWER_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_AUTHORITATIVE_FLAG"><tt class="ph tt">      public boolean DNS_AUTHORITATIVE_FLAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the 'authoritative' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_IDENTIFIER"><tt class="ph tt">      public uint16 DNS_IDENTIFIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the DNS client's request correlator in the current message, and returned by the server in its response.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_NAMESERVER_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_COUNT"><tt class="ph tt">      public uint16 DNS_NAMESERVER_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_DATA"><tt class="ph tt">      public list&lt;rstring&gt; DNS_NAMESERVER_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_NAMESERVER_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'name server' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_TTLS"><tt class="ph tt">      public list&lt;uint32&gt; DNS_NAMESERVER_TTLS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_NAMESERVER_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_OPCODE"><tt class="ph tt">      public uint8 DNS_OPCODE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the operation code requested by the DNS client in the current message, for example,
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '1' for standard queries, </li>
+
+<li class="li"> '2' for inverse queries, or</li>
+
+<li class="li"> '3' for server status requests.</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_CLASS"><tt class="ph tt">      public uint16 DNS_QUESTION_CLASS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records),
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_QUESTION_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'question' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_COUNT"><tt class="ph tt">      public uint16 DNS_QUESTION_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'question' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_NAME"><tt class="ph tt">      public rstring DNS_QUESTION_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'name' field of the first 'question' resource record in the current message,           if there is one, or an empty string if not.           Note that if the DNS message does contain a 'question'           resource record, and the name is encoded incorrecty, this function may           return an empty or truncated string.  In this case, the <tt class="ph tt">parseError()</tt>           function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_QUESTION_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'question' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_TYPE"><tt class="ph tt">      public uint16 DNS_QUESTION_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '1' for IP version 4 address to domain name lookup ('A' records),</li>
+
+<li class="li"> '5' for domain name to canonical domain name lookup ('CNAME' records),</li>
+
+<li class="li"> '12' for domain name to IP address lookup ('TXT' records), or</li>
+
+<li class="li"> '28' for IP version 6 address to domain name lookup ('AAAA' records).</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_QUESTION_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'question' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_RESPONSE_CODE"><tt class="ph tt">      public uint8 DNS_RESPONSE_CODE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the response code from the DNS server in the current message, for example,
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '0' for OK, </li>
+
+<li class="li"> '1' for Format Error, </li>
+
+<li class="li"> '2' for Server Failure, </li>
+
+<li class="li"> '3' for Name Error, </li>
+
+<li class="li"> '4' for not implemented, or</li>
+
+<li class="li"> '5' for Server Refused.</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_RESPONSE_FLAG"><tt class="ph tt">      public boolean DNS_RESPONSE_FLAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the current message is a response sent by a DNS server,           or <tt class="ph tt">false</tt> if it is a request sent by a DNS client.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_TRUNCATION_FLAG"><tt class="ph tt">      public boolean DNS_TRUNCATION_FLAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the 'truncation' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> NetflowMessageParser_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_DESCRIPTION"><tt class="ph tt">      public rstring NETFLOW_APPLICATION_DESCRIPTION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the application description.           For Netflow version 9, this is field 94.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_NAME"><tt class="ph tt">      public rstring NETFLOW_APPLICATION_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the name associated with a classification.           For Netflow version 9, this is field 96.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_TAG"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_APPLICATION_TAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns 8 bits of engine ID, followed by <em class="ph i">n</em> bits of classification.           For Netflow version 9, this is field 95.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_BGP_IPV4_NEXT_HOP"><tt class="ph tt">      public uint32 NETFLOW_BGP_IPV4_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the next router in the BGP domain.           For Netflow version 9, this is field 18. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_BPG_IPV6_NEXT_HOP"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_BPG_IPV6_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the next router in the BGP domain.            For Netflow version 9, this is field 63.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_COUNT"><tt class="ph tt">      public uint16 NETFLOW_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of Netflow records in the current message,           including templates, options, and flows.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DIRECTION"><tt class="ph tt">      public uint8 NETFLOW_DIRECTION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the direction of the flow,           '0' for ingress, '1' for egress.            For Netflow version 9, this is field 61.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_AS"><tt class="ph tt">      public uint32 NETFLOW_DST_AS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the BGP autonomous system number of the destination endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">dst_as</tt> field.           For Netflow version 9, this is field 17. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_MASK"><tt class="ph tt">      public uint8 NETFLOW_DST_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 4 address of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dst_mask</tt> field.           For Netflow version 9, this is field 13.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_PORT"><tt class="ph tt">      public uint16 NETFLOW_DST_PORT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the TCP or UDP port number of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dstport</tt> field.           For Netflow version 9, this is field 11.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_TOS"><tt class="ph tt">      public uint8 NETFLOW_DST_TOS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'type of service' byte setting for the flow when exiting the outgoing interface.            For Netflow version 9, this is field 55.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_TRAFFIC_INDEX"><tt class="ph tt">      public uint32 NETFLOW_DST_TRAFFIC_INDEX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns BGP policy accounting destination traffic index.            For Netflow version 9, this is field 93.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_VLAN"><tt class="ph tt">      public uint16 NETFLOW_DST_VLAN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the virtual LAN identifier associated with the egress interface.            For Netflow version 9, this is field 59.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ENGINE_ID"><tt class="ph tt">      public uint8 NETFLOW_ENGINE_ID()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the identifier of the switching engine in the router.           For Netflow version 9, this is field 39.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ENGINE_TYPE"><tt class="ph tt">      public uint8 NETFLOW_ENGINE_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the type code of the switching engine in the router.           For Netflow version 9, this is field 38.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_BYTE_LIST.int32"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_FIELD_AS_BYTE_LIST(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,            represented as list of unsigned bytes, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_INTEGER.int32"><tt class="ph tt">      public uint64 NETFLOW_FIELD_AS_INTEGER(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,           represented as an unsigned integer, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_STRING.int32"><tt class="ph tt">      public rstring NETFLOW_FIELD_AS_STRING(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,            represented as a string, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIRST_SWITCHED"><tt class="ph tt">      public uint32 NETFLOW_FIRST_SWITCHED()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the first packet of the current flow,           that is,           the time that the first packet in this flow           passed through the router, relative to when the router was booted, in milliseconds.           For Netflow version 5, this is the <tt class="ph tt">first</tt> field.           For Netflow version 9, this is field 22.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOWS"><tt class="ph tt">      public uint64 NETFLOW_FLOWS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of flows that were aggregated for the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 3.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_ACTIVE_TIMEOUT"><tt class="ph tt">      public uint16 NETFLOW_FLOW_ACTIVE_TIMEOUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the timeout value, in seconds, for active flow entries in the Netflow cache.            For Netflow version 9, this is field 36.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_INACTIVE_TIMEOUT"><tt class="ph tt">      public uint16 NETFLOW_FLOW_INACTIVE_TIMEOUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the timeout value, in seconds, for inactive flow entries in the Netflow cache.            For Netflow version 9, this is field 37.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_ID"><tt class="ph tt">      public uint8 NETFLOW_FLOW_SAMPLER_ID()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the identifier shown in "show flow-sampler".            For Netflow version 9, this is field 48.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_MODE"><tt class="ph tt">      public uint8 NETFLOW_FLOW_SAMPLER_MODE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sampling mode, when Netflow is sampled,           For Netflow version 9, this is field 49.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL"><tt class="ph tt">      public uint32 NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the packet sampling interval, when Netflow is sampled.           For Netflow version 9, this is field 50.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FORWARDING_STATUS"><tt class="ph tt">      public uint8 NETFLOW_FORWARDING_STATUS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the forwarding status, with the 2 left bits giving the status and the 6 remaining bits giving the reason code.           For Netflow version 9, this is field 89.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FRAGMENT_OFFSET"><tt class="ph tt">      public uint16 NETFLOW_FRAGMENT_OFFSET()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the fragment offset value from fragmented IP packets.            For Netflow version 9, this is field 88.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ICMP_TYPE"><tt class="ph tt">      public uint16 NETFLOW_ICMP_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the ICMP packet type.           For Netflow version 9, this is field 32.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IF_DESC"><tt class="ph tt">      public rstring NETFLOW_IF_DESC()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the router's interface description.            For Netflow version 9, this is field 83. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IF_NAME"><tt class="ph tt">      public rstring NETFLOW_IF_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the router's interface name.            For Netflow version 9, this is field 82. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_INPUT_INTERFACE"><tt class="ph tt">      public uint32 NETFLOW_INPUT_INTERFACE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the interface index where the current flow entered the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">input</tt> field.           For Netflow version 9, this is field 10.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_BYTES"><tt class="ph tt">      public uint64 NETFLOW_IN_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of bytes that entered the router for the current flow record,            if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dOctets</tt> field.           For Netflow version 9, this is field 1.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PERMANENT_BYTES"><tt class="ph tt">      public uint64 NETFLOW_IN_PERMANENT_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the running byte counter for a permanent flow.            For Netflow version 9, this is field 85.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PERMANENT_PKTS"><tt class="ph tt">      public uint64 NETFLOW_IN_PERMANENT_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the running packet counter for a permanent flow.            For Netflow version 9, this is field 86.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PKTS"><tt class="ph tt">      public uint64 NETFLOW_IN_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of packets that entered the router for the current flow record,            if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dPkts</tt> field.           For Netflow version 9, this is field 2.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_DST_ADDR"><tt class="ph tt">      public uint32 NETFLOW_IPV4_DST_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dstaddr</tt> field.           For Netflow version 9, this is field 12.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_DST_PREFIX"><tt class="ph tt">      public uint32 NETFLOW_IPV4_DST_PREFIX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 destination address prefix (specific for Cisco Catalyst architecture).            For Netflow version 9, this is field 45.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_IDENT"><tt class="ph tt">      public uint16 NETFLOW_IPV4_IDENT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns The IP version 4 identification field of the flow.            For Netflow version 9, this is field 54.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_NEXT_HOP"><tt class="ph tt">      public uint32 NETFLOW_IPV4_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the next router towards the destination endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">nexthop</tt> field.           For Netflow version 9, this is field 15.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_SRC_ADDR"><tt class="ph tt">      public uint32 NETFLOW_IPV4_SRC_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">srcaddr</tt> field.           For Netflow version 9, this is field 8.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_SRC_PREFIX"><tt class="ph tt">      public uint32 NETFLOW_IPV4_SRC_PREFIX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 source address prefix (specific for Cisco Catalyst architecture).            For Netflow version 9, this is field 44.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_DST_ADDR"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_DST_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 address of the destination endpoint of the current flow record,           if available, or an empty list if not.           For Netflow version 9, this is field 28.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_DST_MASK"><tt class="ph tt">      public uint8 NETFLOW_IPV6_DST_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 6 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 30.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_FLOW_LABEL"><tt class="ph tt">      public uint32 NETFLOW_IPV6_FLOW_LABEL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 flow label.           For Netflow version 9, this is field 31.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_NEXT_HOP"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 address of the next-hop router.            For Netflow version 9, this is field 62.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_OPTION_HEADERS"><tt class="ph tt">      public uint32 NETFLOW_IPV6_OPTION_HEADERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 option headers found in the flow.            For Netflow version 9, this is field 64.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_SRC_ADDR"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_SRC_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 address of the source endpoint of the current flow record,           if available, or an empty list if not.           For Netflow version 9, this is field 27.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_SRC_MASK"><tt class="ph tt">      public uint8 NETFLOW_IPV6_SRC_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 6 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 29.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IP_PROTOCOL_VERSION"><tt class="ph tt">      public uint8 NETFLOW_IP_PROTOCOL_VERSION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version for the flow, either '4' or '6'.           For Netflow version 9, this is field 60.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_LAST_SWITCHED"><tt class="ph tt">      public uint32 NETFLOW_LAST_SWITCHED()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the last packet of the current flow,           that is,           the time that the last packet in this flow           passed through the router, relative to when the router was booted, in milliseconds.           For Netflow version 5, this is the <tt class="ph tt">last</tt> field.           For Netflow version 9, this is field 21.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_DST_ADDR_IN"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_DST_ADDR_IN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the incoming destination MAC address.            For Netflow version 9, this is field 80.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_DST_ADDR_OUT"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_DST_ADDR_OUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the incoming destination MAC address for the flow.            For Netflow version 9, this is field 56.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_SRC_ADDR_IN"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_SRC_ADDR_IN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the incoming source MAC address for the flow.            For Netflow version 9, this is field 56.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_SRC_ADDR_OUT"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_SRC_ADDR_OUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the outgoing source MAC address.            For Netflow version 9, this is field 81.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAX_PKT_LNGTH"><tt class="ph tt">      public uint16 NETFLOW_MAX_PKT_LNGTH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the maximum packet length for the current flow.           For Netflow version 9, this is field 26.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAX_TTL"><tt class="ph tt">      public uint8 NETFLOW_MAX_TTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the maximum 'time to live' for incoming packets of the flow.            For Netflow version 9, this is field 53.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MIN_PKT_LNGTH"><tt class="ph tt">      public uint16 NETFLOW_MIN_PKT_LNGTH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the minimum packet length for the current flow.           For Netflow version 9, this is field 25.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MIN_TTL"><tt class="ph tt">      public uint8 NETFLOW_MIN_TTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the minimum 'time to live' for incoming packets of the flow.            For Netflow version 9, this is field 52.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_LABEL.int32"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_MPLS_LABEL(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the MPLS label at the specified position in the stack,           where the position is specified with an argument between 1 and 10.           This comprises 20 bits of MPLS label, 3 experimental bits and 1 end-of-stack bit.           For Netflow version 9, these are fields 71 through 79.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_PAL_RD"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_MPLS_PAL_RD()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the MPLS PAL Route Distinguisher.            For Netflow version 9, this is field 90.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_PREFIX_LEN"><tt class="ph tt">      public uint8 NETFLOW_MPLS_PREFIX_LEN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of consecutive bits in the MPLS prefix length.           For Netflow version 9, this is field 91.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR"><tt class="ph tt">      public uint32 NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the Forwarding Equivalent Class corresponding to the MPLS Top Label.            For Netflow version 9, this is field 47.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_TOP_LABEL_TYPE"><tt class="ph tt">      public uint8 NETFLOW_MPLS_TOP_LABEL_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the MPLS top label type, '0' for  UNKNOWN, '1' for TE-MIDPT, '2' for ATOM, '3' for VPN '4' for BGP, '5' for LDP.            For Netflow version 9, this is field 46.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_DST_BYTES"><tt class="ph tt">      public uint64 NETFLOW_MUL_DST_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of outgoing multicast bytes in the current flow.           For Netflow version 9, this is field 20.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_DST_PKTS"><tt class="ph tt">      public uint64 NETFLOW_MUL_DST_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of outgoing multicast packets in the current flow.           For Netflow version 9, this is field 19.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_IGMP_TYPE"><tt class="ph tt">      public uint8 NETFLOW_MUL_IGMP_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IGMP packet type.           For Netflow version 9, this is field 33.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUTPUT_INTERFACE"><tt class="ph tt">      public uint32 NETFLOW_OUTPUT_INTERFACE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the interface index where the current flow left the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">output</tt> field.           For Netflow version 9, this is field 14.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUT_BYTES"><tt class="ph tt">      public uint64 NETFLOW_OUT_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of bytes that left the router for the current flow.           For Netflow version 9, this is field 23.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUT_PKTS"><tt class="ph tt">      public uint64 NETFLOW_OUT_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of packets that left the router for the current flow.           For Netflow version 9, this is field 24.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_POST_IP_DSCP"><tt class="ph tt">      public uint8 NETFLOW_POST_IP_DSCP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.           For Netflow version 9, this is field 98.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_PROTOCOL"><tt class="ph tt">      public uint8 NETFLOW_PROTOCOL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP protocol number for the current flow record,            if available,           for example, '17' for UDP, or '6' for TCP, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">prot</tt> field.           For Netflow version 9, this is field 4.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_REPLICATION_FACTOR"><tt class="ph tt">      public uint32 NETFLOW_REPLICATION_FACTOR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the multicast replication factor.           For Netflow version 9, this is field 99.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLER_NAME"><tt class="ph tt">      public rstring NETFLOW_SAMPLER_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the name of the flow sampler, when Netflow is sampled.           For Netflow version 9, this is field 84.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLING_ALGORITHM"><tt class="ph tt">      public uint8 NETFLOW_SAMPLING_ALGORITHM()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sampling algorithm, when Netflow is sampled, with            '1' for deterministic sampling, and '2' for random sampling.            For Netflow version 9, this is field 35.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLING_INTERVAL"><tt class="ph tt">      public uint32 NETFLOW_SAMPLING_INTERVAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sampling rate, when Netflow is sampled,           for example, a value of 100 indicates that one of every 100 packets is sampled.           For Netflow version 9, this is field 34. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SEQUENCE_NUMBER"><tt class="ph tt">      public uint32 NETFLOW_SEQUENCE_NUMBER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sequence number assigned to the current message by the router.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SOURCE_ID"><tt class="ph tt">      public uint32 NETFLOW_SOURCE_ID()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the port identifier of the router.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_AS"><tt class="ph tt">      public uint32 NETFLOW_SRC_AS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the BGP autonomous system number of the source endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">src_as</tt> field.           For Netflow version 9, this is field 16. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_MASK"><tt class="ph tt">      public uint8 NETFLOW_SRC_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 4 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">src_mask</tt> field.           For Netflow version 9, this is field 9.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_PORT"><tt class="ph tt">      public uint16 NETFLOW_SRC_PORT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the TCP or UDP port number of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">srcport</tt> field.           For Netflow version 9, this is field 7.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_TOS"><tt class="ph tt">      public uint8 NETFLOW_SRC_TOS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP 'type of service' byte for the current flow record on entering the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">tos</tt> field.           For Netflow version 9, this is field 5.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_TRAFFIC_INDEX"><tt class="ph tt">      public uint32 NETFLOW_SRC_TRAFFIC_INDEX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns BGP policy accounting source traffic index.            For Netflow version 9, this is field 92.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_VLAN"><tt class="ph tt">      public uint16 NETFLOW_SRC_VLAN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the virtual LAN identifier associated with the ingress interface.            For Netflow version 9, this is field 58.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SYSTEM_UPTIME"><tt class="ph tt">      public uint32 NETFLOW_SYSTEM_UPTIME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the elapsed time from when the router started until the current message was sent,           in milliseconds.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TCP_FLAGS"><tt class="ph tt">      public uint8 NETFLOW_TCP_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the cumulative value of all TCP flags in the current flow record,            that is, the logical 'or' of the TCP flags in all packets in the flow,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">tcp_flags</tt> field.           For Netflow version 9, this is field 6.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_BYTES_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_BYTES_EXP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of bytes exported by the Observation Domain.            For Netflow version 9, this is field 40.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_FLOWS_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_FLOWS_EXP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of flows exported by the Observation Domain.            For Netflow version 9, this is field 42.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_PKTS_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_PKTS_EXP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of packets exported by the Observation Domain.            For Netflow version 9, this is field 41.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_UNIX_NANOSECONDS"><tt class="ph tt">      public uint32 NETFLOW_UNIX_NANOSECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the fractional part of NETFLOW_UNIX_SECONDS(), in nanoseconds,           for Netflow version 5 messages only.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_UNIX_SECONDS"><tt class="ph tt">      public uint32 NETFLOW_UNIX_SECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the time that the current message was sent, in seconds,           according to the router's clock, relative to the beginning of the Unix epoch            (at midnight on the first of January in Greenwich, England).
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_VERSION"><tt class="ph tt">      public uint16 NETFLOW_VERSION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the Netflow version of the current message, either '5' or '9'.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> IPFIXMessageParser_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_bgpDestinationAsNumber"><tt class="ph tt">      public uint32 IPFIX_bgpDestinationAsNumber()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 17:            The autonomous system (AS) number of the destination IP           address.  If AS path information for this Flow is only           available as an unordered AS set (and not as an ordered AS           sequence), then the value of this Information Element is 0.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_bgpNextAdjacentAsNumber"><tt class="ph tt">      public uint32 IPFIX_bgpNextAdjacentAsNumber()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 128:            The autonomous system (AS) number of the first AS in the AS           path to the destination IP address.  The path is deduced           by looking up the destination IP address of the Flow in the           BGP routing information base.  If AS path information for           this Flow is only available as an unordered AS set (and not           as an ordered AS sequence), then the value of this Information           Element is 0.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_bgpNextHopIPv4Address"><tt class="ph tt">      public uint32 IPFIX_bgpNextHopIPv4Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 18:            The IPv4 address of the next (adjacent) BGP hop.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_bgpNextHopIPv6Address"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_bgpNextHopIPv6Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 63:            The IPv6 address of the next (adjacent) BGP hop.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_bgpPrevAdjacentAsNumber"><tt class="ph tt">      public uint32 IPFIX_bgpPrevAdjacentAsNumber()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 129:            The autonomous system (AS) number of the last AS in the AS           path from the source IP address.  The path is deduced           by looking up the source IP address of the Flow in the BGP           routing information base.  If AS path information for this           Flow is only available as an unordered AS set (and not as           an ordered AS sequence), then the value of this Information           Element is 0.  In case of BGP asymmetry, the           bgpPrevAdjacentAsNumber might not be able to report the correct           value.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_bgpSourceAsNumber"><tt class="ph tt">      public uint32 IPFIX_bgpSourceAsNumber()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 16:            The autonomous system (AS) number of the source IP address.           If AS path information for this Flow is only available as           an unordered AS set (and not as an ordered AS sequence),           then the value of this Information Element is 0.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_collectorIPv4Address"><tt class="ph tt">      public uint32 IPFIX_collectorIPv4Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 211:            An IPv4 address to which the Exporting Process sends Flow           information.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_collectorIPv6Address"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_collectorIPv6Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 212:            An IPv6 address to which the Exporting Process sends Flow           information.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_collectorTransportPort"><tt class="ph tt">      public uint16 IPFIX_collectorTransportPort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 216:            The destination port identifier to which the Exporting           Process sends Flow information.  For the transport protocols           UDP, TCP, and SCTP, this is the destination port number.           This field MAY also be used for future transport protocols           that have 16-bit source port identifiers.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_commonPropertiesId"><tt class="ph tt">      public uint64 IPFIX_commonPropertiesId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 137:            An identifier of a set of common properties that is           unique per Observation Domain and Transport Session.           Typically, this Information Element is used to link to           information reported in separate Data Records.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationIPv4Address"><tt class="ph tt">      public uint32 IPFIX_destinationIPv4Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 12:            The IPv4 destination address in the IP packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationIPv4Prefix"><tt class="ph tt">      public uint32 IPFIX_destinationIPv4Prefix()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 45:  	      IPv4 destination address prefix. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationIPv4PrefixLength"><tt class="ph tt">      public uint8 IPFIX_destinationIPv4PrefixLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 13:            The number of contiguous bits that are relevant in the           destinationIPv4Prefix Information Element.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationIPv6Address"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_destinationIPv6Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 28:            The IPv6 destination address in the IP packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationIPv6Prefix"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_destinationIPv6Prefix()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 169:            IPv6 destination address prefix.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationIPv6PrefixLength"><tt class="ph tt">      public uint8 IPFIX_destinationIPv6PrefixLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 30:            The number of contiguous bits that are relevant in the           destinationIPv6Prefix Information Element.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationMacAddress"><tt class="ph tt">      public list&lt;uint8&gt;[6] IPFIX_destinationMacAddress()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 80:            The IEEE 802 destination MAC address field.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_destinationTransportPort"><tt class="ph tt">      public uint16 IPFIX_destinationTransportPort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 11:            The destination port identifier in the transport header.           For the transport protocols UDP, TCP, and SCTP, this is the           destination port number given in the respective header.           This field MAY also be used for future transport protocols           that have 16-bit destination port identifiers.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_droppedOctetDeltaCount"><tt class="ph tt">      public uint64 IPFIX_droppedOctetDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 132:            The number of octets since the previous report (if any)           in packets of this Flow dropped by packet treatment.           The number of octets includes IP header(s) and IP payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_droppedOctetTotalCount"><tt class="ph tt">      public uint64 IPFIX_droppedOctetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 134:            The total number of octets in packets of this Flow dropped           by packet treatment since the Metering Process           (re-)initialization for this Observation Point.           The number of octets includes IP header(s) and IP payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_droppedPacketDeltaCount"><tt class="ph tt">      public uint64 IPFIX_droppedPacketDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 133:            The number of packets since the previous report (if any)           of this Flow dropped by packet treatment.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_droppedPacketTotalCount"><tt class="ph tt">      public uint64 IPFIX_droppedPacketTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 135:            The number of packets of this Flow dropped by packet           treatment since the Metering Process           (re-)initialization for this Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_egressInterface"><tt class="ph tt">      public uint32 IPFIX_egressInterface()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 14:            The index of the IP interface where packets of           this Flow are being sent.  The value matches the value of           managed object 'ifIndex' as defined in RFC 2863.           Note that ifIndex values are not assigned statically to an           interface and that the interfaces may be renumbered every           time the device's management system is re-initialized, as           specified in RFC 2863.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseBasicListFieldAsByteLists.int32"><tt class="ph tt">      public list&lt;list&lt;uint8&gt;&gt; IPFIX_enterpriseBasicListFieldAsByteLists(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'enterprise' field as a list of byte lists, if           it is present in the 'data flow' record and it was encoded as an IPFIX 'basic list',            or an empty list if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseBasicListFieldAsIntegers.int32"><tt class="ph tt">      public list&lt;uint64&gt; IPFIX_enterpriseBasicListFieldAsIntegers(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'enterprise' field as a list of integers, if           it is present in the 'data flow' record and it was encoded as an IPFIX 'basic list',            or an empty list if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseBasicListFieldAsStrings.int32"><tt class="ph tt">      public list&lt;rstring&gt; IPFIX_enterpriseBasicListFieldAsStrings(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'enterprise' field as a list of strings, if           it is present in the 'data flow' record and it was encoded as an IPFIX 'basic list',            or an empty list if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseBasicListFieldElementIdentifier.int32"><tt class="ph tt">      public uint16 IPFIX_enterpriseBasicListFieldElementIdentifier(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the 'element identifier' corresponding to the specified            IPFIX 'enterprise' 'field, if one is present in the 'data flow' record and it was encoded as an IPFIX 'basic list',            or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseBasicListFieldEnterpriseIdentifier.int32"><tt class="ph tt">      public uint32 IPFIX_enterpriseBasicListFieldEnterpriseIdentifier(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the 'enterprise identifier' corresponding to the specified            IPFIX 'enterprise' field, if one is present in the 'data flow' record and it was encoded as an IPFIX 'basic list',            or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseBasicListFieldSemantic.int32"><tt class="ph tt">      public uint8 IPFIX_enterpriseBasicListFieldSemantic(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the 'semantic code' corresponding to the specified             IPFIX 'enterprise' field, if one is present in the 'data flow' record and it was encoded as an IPFIX 'basic list',             or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseFieldAsByteList.int32"><tt class="ph tt">      public list&lt;uint8&gt; IPFIX_enterpriseFieldAsByteList(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'enterprise' field as a list of bytes, if           it is present in the 'data flow' record, or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseFieldAsInteger.int32"><tt class="ph tt">      public uint64 IPFIX_enterpriseFieldAsInteger(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'enterprise' field as an integer, if           it is present in the 'data flow' record, or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseFieldAsString.int32"><tt class="ph tt">      public rstring IPFIX_enterpriseFieldAsString(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'enterprise' field as a string, if           it is present in the 'data flow' record, or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_enterpriseIdentifier.int32"><tt class="ph tt">      public uint32 IPFIX_enterpriseIdentifier(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the 'enterprise identifier' corresponding to the specified            IPFIX 'field identifier', if one is present in the 'data flow' record, or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exportInterface"><tt class="ph tt">      public uint32 IPFIX_exportInterface()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 213:            The index of the interface from which IPFIX Messages sent           by the Exporting Process to a Collector leave the IPFIX           Device.  The value matches the value of           managed object 'ifIndex' as defined in RFC 2863.           Note that ifIndex values are not assigned statically to an           interface and that the interfaces may be renumbered every           time the device's management system is re-initialized, as           specified in RFC 2863.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exportProtocolVersion"><tt class="ph tt">      public uint8 IPFIX_exportProtocolVersion()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 214:            The protocol version used by the Exporting Process for           sending Flow information.  The protocol version is given           by the value of the Version Number field in the Message           Header.
+</p>
+
+<p class="p">          The protocol version is 10 for IPFIX and 9 for NetFlow           version 9.           A value of 0 indicates that no export protocol is in use.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exportTransportProtocol"><tt class="ph tt">      public uint8 IPFIX_exportTransportProtocol()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 215:            The value of the protocol number used by the Exporting Process           for sending Flow information.           The protocol number identifies the IP packet payload type.           Protocol numbers are defined in the IANA Protocol Numbers           registry.
+</p>
+
+<p class="p">          In Internet Protocol version 4 (IPv4), this is carried in the           Protocol field.  In Internet Protocol version 6 (IPv6), this           is carried in the Next Header field in the last extension           header of the packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exportedFlowRecordTotalCount"><tt class="ph tt">      public uint64 IPFIX_exportedFlowRecordTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 42:            The total number of Flow Records that the Exporting           Process has sent as Data Records since the Exporting           Process (re-)initialization to a particular Collecting           Process.  The reported number excludes Flow Records in           the IPFIX Message that carries the counter value.           If this Information Element is sent to a particular           Collecting Process, then by default it specifies the number           of Flow Records sent to this process.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exportedMessageTotalCount"><tt class="ph tt">      public uint64 IPFIX_exportedMessageTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 41:            The total number of IPFIX Messages that the Exporting Process           has sent since the Exporting Process (re-)initialization to           a particular Collecting Process.           The reported number excludes the IPFIX Message that carries           the counter value.           If this Information Element is sent to a particular           Collecting Process, then by default it specifies the number           of IPFIX Messages sent to this Collecting Process.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exportedOctetTotalCount"><tt class="ph tt">      public uint64 IPFIX_exportedOctetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 40:            The total number of octets that the Exporting Process           has sent since the Exporting Process (re-)initialization           to a particular Collecting Process.           The value of this Information Element is calculated by           summing up the IPFIX Message Header length values of all           IPFIX Messages that were successfully sent to the Collecting           Process.  The reported number excludes octets in the IPFIX           Message that carries the counter value.           If this Information Element is sent to a particular           Collecting Process, then by default it specifies the number           of octets sent to this Collecting Process.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exporterIPv4Address"><tt class="ph tt">      public uint32 IPFIX_exporterIPv4Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 130:            The IPv4 address used by the Exporting Process.  This is used           by the Collector to identify the Exporter in cases where the           identity of the Exporter may have been obscured by the use of           a proxy.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exporterIPv6Address"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_exporterIPv6Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 131:            The IPv6 address used by the Exporting Process.  This is used           by the Collector to identify the Exporter in cases where the           identity of the Exporter may have been obscured by the use of           a proxy.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exporterTransportPort"><tt class="ph tt">      public uint16 IPFIX_exporterTransportPort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 217:            The source port identifier from which the Exporting           Process sends Flow information.  For the transport protocols           UDP, TCP, and SCTP, this is the source port number.           This field MAY also be used for future transport protocols           that have 16-bit source port identifiers.  This field may           be useful for distinguishing multiple Exporting Processes           that use the same IP address.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_exportingProcessId"><tt class="ph tt">      public uint32 IPFIX_exportingProcessId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 144:            An identifier of an Exporting Process that is unique per           IPFIX Device.  Typically, this Information Element is used           for limiting the scope of other Information Elements.           Note that process identifiers are typically assigned           dynamically.  The Exporting Process may be re-started           with a different ID.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowActiveTimeout"><tt class="ph tt">      public uint16 IPFIX_flowActiveTimeout()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 36:            The number of seconds after which an active Flow is timed out           anyway, even if there is still a continuous flow of packets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowDirection"><tt class="ph tt">      public uint8 IPFIX_flowDirection()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 61:            The direction of the Flow observed at the Observation           Point.  There are only two values defined.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowDurationMicroseconds"><tt class="ph tt">      public uint32 IPFIX_flowDurationMicroseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 162:            The difference in time between the first observed packet           of this Flow and the last observed packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowDurationMilliseconds"><tt class="ph tt">      public uint32 IPFIX_flowDurationMilliseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 161:            The difference in time between the first observed packet           of this Flow and the last observed packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowEndDeltaMicroseconds"><tt class="ph tt">      public uint32 IPFIX_flowEndDeltaMicroseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 159:            This is a relative timestamp only valid within the scope           of a single IPFIX Message.  It contains the negative time           offset of the last observed packet of this Flow relative           to the export time specified in the IPFIX Message Header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowEndMicroseconds"><tt class="ph tt">      public uint64 IPFIX_flowEndMicroseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 155:            The absolute timestamp of the last packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowEndMilliseconds"><tt class="ph tt">      public uint64 IPFIX_flowEndMilliseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 153:            The absolute timestamp of the last packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowEndNanoseconds"><tt class="ph tt">      public uint64 IPFIX_flowEndNanoseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 157:            The absolute timestamp of the last packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowEndReason"><tt class="ph tt">      public uint8 IPFIX_flowEndReason()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 136:            The reason for Flow termination.  
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowEndSeconds"><tt class="ph tt">      public uint32 IPFIX_flowEndSeconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 151:            The absolute timestamp of the last packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowEndSysUpTime"><tt class="ph tt">      public uint32 IPFIX_flowEndSysUpTime()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 21:            The relative timestamp of the last packet of this Flow.           It indicates the number of milliseconds since the           last (re-)initialization of the IPFIX Device (sysUpTime).
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowId"><tt class="ph tt">      public uint64 IPFIX_flowId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 148:            An identifier of a Flow that is unique within an Observation           Domain.  This Information Element can be used to distinguish           between different Flows if Flow Keys such as IP addresses and           port numbers are not reported or are reported in separate           records.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowIdleTimeout"><tt class="ph tt">      public uint16 IPFIX_flowIdleTimeout()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 37:            A Flow is considered to be timed out if no packets belonging           to the Flow have been observed for the number of seconds           specified by this field.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowKeyIndicator"><tt class="ph tt">      public uint64 IPFIX_flowKeyIndicator()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 173:            This set of bit fields is used for marking the Information           Elements of a Data Record that serve as Flow Key.  Each bit           represents an Information Element in the Data Record with           the n-th bit representing the n-th Information Element.           A bit set to value 1 indicates that the corresponding           Information Element is a Flow Key of the reported Flow.           A bit set to value 0 indicates that this is not the case.
+</p>
+
+<p class="p">          If the Data Record contains more than 64 Information Elements,           the corresponding Template SHOULD be designed such that all           Flow Keys are among the first 64 Information Elements, because           the flowKeyIndicator only contains 64 bits.  If the Data Record           contains less than 64 Information Elements, then the bits in           the flowKeyIndicator for which no corresponding Information           Element exists MUST have the value 0.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowLabelIPv6"><tt class="ph tt">      public uint32 IPFIX_flowLabelIPv6()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 31:            The value of the IPv6 Flow Label field in the IP packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowStartDeltaMicroseconds"><tt class="ph tt">      public uint32 IPFIX_flowStartDeltaMicroseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 158:            This is a relative timestamp only valid within the scope           of a single IPFIX Message.  It contains the negative time           offset of the first observed packet of this Flow relative           to the export time specified in the IPFIX Message Header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowStartMicroseconds"><tt class="ph tt">      public uint64 IPFIX_flowStartMicroseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 154:            The absolute timestamp of the first packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowStartMilliseconds"><tt class="ph tt">      public uint64 IPFIX_flowStartMilliseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 152:            The absolute timestamp of the first packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowStartNanoseconds"><tt class="ph tt">      public uint64 IPFIX_flowStartNanoseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 156:            The absolute timestamp of the first packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowStartSeconds"><tt class="ph tt">      public uint32 IPFIX_flowStartSeconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 150:            The absolute timestamp of the first packet of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_flowStartSysUpTime"><tt class="ph tt">      public uint32 IPFIX_flowStartSysUpTime()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 22:            The relative timestamp of the first packet of this Flow.           It indicates the number of milliseconds since the           last (re-)initialization of the IPFIX Device (sysUpTime).
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_fragmentFlags"><tt class="ph tt">      public uint8 IPFIX_fragmentFlags()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 197:            Fragmentation properties indicated by flags in the IPv4           packet header or the IPv6 Fragment header, respectively.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_fragmentIdentification"><tt class="ph tt">      public uint32 IPFIX_fragmentIdentification()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 54:            The value of the Identification field           in the IPv4 packet header or in the IPv6 Fragment header,           respectively.  The value is 0 for IPv6 if there is           no fragment header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_fragmentOffset"><tt class="ph tt">      public uint16 IPFIX_fragmentOffset()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 88:            The value of the IP fragment offset field in the           IPv4 packet header or the IPv6 Fragment header,           respectively.  The value is 0 for IPv6 if there is           no fragment header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_icmpCodeIPv4"><tt class="ph tt">      public uint8 IPFIX_icmpCodeIPv4()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 177:            Code of the IPv4 ICMP message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_icmpCodeIPv6"><tt class="ph tt">      public uint8 IPFIX_icmpCodeIPv6()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 179:            Code of the IPv6 ICMP message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_icmpTypeCodeIPv4"><tt class="ph tt">      public uint16 IPFIX_icmpTypeCodeIPv4()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 32:            Type and Code of the IPv4 ICMP message.  The combination of           both values is reported as (ICMP type * 256) + ICMP code.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_icmpTypeCodeIPv6"><tt class="ph tt">      public uint16 IPFIX_icmpTypeCodeIPv6()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 139:            Type and Code of the IPv6 ICMP message.  The combination of           both values is reported as (ICMP type * 256) + ICMP code.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_icmpTypeIPv4"><tt class="ph tt">      public uint8 IPFIX_icmpTypeIPv4()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 176:            Type of the IPv4 ICMP message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_icmpTypeIPv6"><tt class="ph tt">      public uint8 IPFIX_icmpTypeIPv6()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 178:            Type of the IPv6 ICMP message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_igmpType"><tt class="ph tt">      public uint8 IPFIX_igmpType()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 33:            The type field of the IGMP message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ignoredOctetTotalCount"><tt class="ph tt">      public uint64 IPFIX_ignoredOctetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 165:            The total number of octets in observed IP packets           (including the IP header) that the Metering Process           did not process since the (re-)initialization of the           Metering Process.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ignoredPacketTotalCount"><tt class="ph tt">      public uint64 IPFIX_ignoredPacketTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 164:            The total number of observed IP packets that the           Metering Process did not process since the           (re-)initialization of the Metering Process.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ingressInterface"><tt class="ph tt">      public uint32 IPFIX_ingressInterface()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 10:            The index of the IP interface where packets of this Flow           are being received.  The value matches the value of managed           object 'ifIndex' as defined in RFC 2863.           Note that ifIndex values are not assigned statically to an           interface and that the interfaces may be renumbered every           time the device's management system is re-initialized, as           specified in RFC 2863.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipClassOfService"><tt class="ph tt">      public uint8 IPFIX_ipClassOfService()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 5:            For IPv4 packets, this is the value of the TOS field in           the IPv4 packet header.  For IPv6 packets, this is the           value of the Traffic Class field in the IPv6 packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipDiffServCodePoint"><tt class="ph tt">      public uint8 IPFIX_ipDiffServCodePoint()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 195:            The value of a Differentiated Services Code Point (DSCP)           encoded in the Differentiated Services field.  The           Differentiated Services field spans the most significant           6 bits of the IPv4 TOS field or the IPv6 Traffic Class           field, respectively.
+</p>
+
+<p class="p">          This Information Element encodes only the 6 bits of the           Differentiated Services field.  Therefore, its value may           range from 0 to 63.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipHeaderLength"><tt class="ph tt">      public uint8 IPFIX_ipHeaderLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 189:            The length of the IP header.  For IPv6, the value of this           Information Element is 40.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipNextHopIPv4Address"><tt class="ph tt">      public uint32 IPFIX_ipNextHopIPv4Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 15:            The IPv4 address of the next IPv4 hop.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipNextHopIPv6Address"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_ipNextHopIPv6Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 62:            The IPv6 address of the next IPv6 hop.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipPayloadLength"><tt class="ph tt">      public uint32 IPFIX_ipPayloadLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 204:            The effective length of the IP payload.
+</p>
+
+<p class="p">          For IPv4 packets, the value of this Information Element is           the difference between the total length of the IPv4 packet           (as reported by Information Element totalLengthIPv4) and the           length of the IPv4 header (as reported by Information Element           headerLengthIPv4).
+</p>
+
+<p class="p">          For IPv6, the value of the Payload Length field           in the IPv6 header is reported except in the case that           the value of this field is zero and that there is a valid           jumbo payload option.  In this case, the value of the           Jumbo Payload Length field in the jumbo payload option           is reported.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipPrecedence"><tt class="ph tt">      public uint8 IPFIX_ipPrecedence()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 196:            The value of the IP Precedence.  The IP Precedence value           is encoded in the first 3 bits of the IPv4 TOS field           or the IPv6 Traffic Class field, respectively.
+</p>
+
+<p class="p">          This Information Element encodes only these 3 bits.           Therefore, its value may range from 0 to 7.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipTTL"><tt class="ph tt">      public uint8 IPFIX_ipTTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 192:            For IPv4, the value of the Information Element matches           the value of the Time to Live (TTL) field in the IPv4 packet           header.  For IPv6, the value of the Information Element           matches the value of the Hop Limit field in the IPv6           packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipTotalLength"><tt class="ph tt">      public uint64 IPFIX_ipTotalLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 224:            The total length of the IP packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipVersion"><tt class="ph tt">      public uint8 IPFIX_ipVersion()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 60:            The IP version field in the IP packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipv4IHL"><tt class="ph tt">      public uint8 IPFIX_ipv4IHL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 207:            The value of the Internet Header Length (IHL) field in           the IPv4 header.  It specifies the length of the header           in units of 4 octets.  Please note that its unit is           different from most of the other Information Elements           reporting length values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipv4Options"><tt class="ph tt">      public uint32 IPFIX_ipv4Options()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 208:            IPv4 options in packets of this Flow.           The information is encoded in a set of bit fields.  For           each valid IPv4 option type, there is a bit in this set.           The bit is set to 1 if any observed packet of this Flow           contains the corresponding IPv4 option type.  Otherwise,           if no observed packet of this Flow contained the           respective IPv4 option type, the value of the           corresponding bit is 0.
+</p>
+
+<p class="p">          The list of valid IPv4 options is maintained by IANA.           Note that for identifying an option not just the 5-bit           Option Number, but all 8 bits of the Option Type need to           match one of the IPv4 options specified at           http://www.iana.org/assignments/ip-parameters.
+</p>
+
+<p class="p">          Options are mapped to bits according to their option numbers.           Option number X is mapped to bit X.           The mapping is illustrated by the figure below.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_ipv6ExtensionHeaders"><tt class="ph tt">      public uint32 IPFIX_ipv6ExtensionHeaders()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 64:            IPv6 extension headers observed in packets of this Flow.           The information is encoded in a set of bit fields.  For           each IPv6 option header, there is a bit in this set.           The bit is set to 1 if any observed packet of this Flow           contains the corresponding IPv6 extension header.           Otherwise, if no observed packet of this Flow contained           the respective IPv6 extension header, the value of the           corresponding bit is 0.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_isMulticast"><tt class="ph tt">      public uint8 IPFIX_isMulticast()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 206:            If the IP destination address is not a reserved multicast           address, then the value of all bits of the octet (including           the reserved ones) is zero.
+</p>
+
+<p class="p">          The first bit of this octet is set to 1 if the Version           field of the IP header has the value 4 and if the           Destination Address field contains a reserved multicast           address in the range from 224.0.0.0 to 239.255.255.255.           Otherwise, this bit is set to 0.
+</p>
+
+<p class="p">          The second and third bits of this octet are reserved for           future use.
+</p>
+
+<p class="p">          The remaining bits of the octet are only set to values           other than zero if the IP Destination Address is a           reserved IPv6 multicast address.  Then the fourth bit           of the octet is set to the value of the T flag in the           IPv6 multicast address and the remaining four bits are           set to the value of the scope field in the IPv6           multicast address.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_lineCardId"><tt class="ph tt">      public uint32 IPFIX_lineCardId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 141:            An identifier of a line card that is unique per IPFIX           Device hosting an Observation Point.  Typically, this           Information Element is used for limiting the scope           of other Information Elements.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_maximumIpTotalLength"><tt class="ph tt">      public uint64 IPFIX_maximumIpTotalLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 26:            Length of the largest packet observed for this Flow.           The packet length includes the IP header(s) length and           the IP payload length.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_maximumTTL"><tt class="ph tt">      public uint8 IPFIX_maximumTTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 53:            Maximum TTL value observed for any packet in this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_meteringProcessId"><tt class="ph tt">      public uint32 IPFIX_meteringProcessId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 143:            An identifier of a Metering Process that is unique per           IPFIX Device.  Typically, this Information Element is used           for limiting the scope of other Information Elements.           Note that process identifiers are typically assigned           dynamically.           The Metering Process may be re-started with a different ID.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_minimumIpTotalLength"><tt class="ph tt">      public uint64 IPFIX_minimumIpTotalLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 25:            Length of the smallest packet observed for this Flow.           The packet length includes the IP header(s) length and           the IP payload length.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_minimumTTL"><tt class="ph tt">      public uint8 IPFIX_minimumTTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 52:            Minimum TTL value observed for any packet in this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackDepth"><tt class="ph tt">      public uint32 IPFIX_mplsLabelStackDepth()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 202:            The number of labels in the MPLS label stack.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackLength"><tt class="ph tt">      public uint32 IPFIX_mplsLabelStackLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 201:            The length of the MPLS label stack in units of octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection10"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection10()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 79:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection9.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection2"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection2()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 71:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsTopLabelStackSection.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection3"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection3()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 72:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection2.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection4"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection4()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 73:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection3.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection5"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection5()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 74:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection4.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection6"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection6()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 75:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection5.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection7"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection7()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 76:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection6.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection8"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection8()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 77:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection7.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsLabelStackSection9"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsLabelStackSection9()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 78:            The Label, Exp, and S fields from the label stack entry that           was pushed immediately before the label stack entry that would           be reported by mplsLabelStackSection8.  See the definition of           mplsTopLabelStackSection for further details.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsPayloadLength"><tt class="ph tt">      public uint32 IPFIX_mplsPayloadLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 194:            The size of the MPLS packet without the label stack.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsTopLabelExp"><tt class="ph tt">      public uint8 IPFIX_mplsTopLabelExp()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 203:            The Exp field from the top MPLS label stack entry,           i.e., the last label that was pushed.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsTopLabelIPv4Address"><tt class="ph tt">      public uint32 IPFIX_mplsTopLabelIPv4Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 47:            The IPv4 address of the system that the MPLS top label will           cause this Flow to be forwarded to.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsTopLabelIPv6Address"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_mplsTopLabelIPv6Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 140:            The IPv6 address of the system that the MPLS top label will           cause this Flow to be forwarded to.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsTopLabelStackSection"><tt class="ph tt">      public list&lt;uint8&gt;[3] IPFIX_mplsTopLabelStackSection()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 70:            The Label, Exp, and S fields from the top MPLS label           stack entry, i.e., from the last label that was pushed.
+</p>
+
+<p class="p">          The size of this Information Element is 3 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsTopLabelTTL"><tt class="ph tt">      public uint8 IPFIX_mplsTopLabelTTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 200:            The TTL field from the top MPLS label stack entry,           i.e., the last label that was pushed.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsTopLabelType"><tt class="ph tt">      public uint8 IPFIX_mplsTopLabelType()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 46:            This field identifies the control protocol that allocated the           top-of-stack label.  Initial values for this field are           listed below.  Further values may be assigned by IANA in           the MPLS label type registry.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_mplsVpnRouteDistinguisher"><tt class="ph tt">      public list&lt;uint8&gt; IPFIX_mplsVpnRouteDistinguisher()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 90:            The value of the VPN route distinguisher of a corresponding           entry in a VPN routing and forwarding table.  Route           distinguisher ensures that the same address can be used in           several different MPLS VPNs and that it is possible for BGP to           carry several completely different routes to that address, one           for each VPN.  According to RFC 4364, the size of           mplsVpnRouteDistinguisher is 8 octets.  However, in RFC 4382 an           octet string with flexible length was chosen for representing a           VPN route distinguisher by object MplsL3VpnRouteDistinguisher.           This choice was made in order to be open to future changes of           the size.  This idea was adopted when choosing octetArray as           abstract data type for this Information Element.  The maximum           length of this Information Element is 256 octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_nextHeaderIPv6"><tt class="ph tt">      public uint8 IPFIX_nextHeaderIPv6()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 193:            The value of the Next Header field of the IPv6 header.           The value identifies the type of the following IPv6           extension header or of the following IP payload.           Valid values are defined in the IANA           Protocol Numbers registry.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_notSentFlowTotalCount"><tt class="ph tt">      public uint64 IPFIX_notSentFlowTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 166:            The total number of Flow Records that were generated by the           Metering Process and dropped by the Metering Process or           by the Exporting Process instead of being sent to the           Collecting Process.  There are several potential reasons for           this including resource shortage and special Flow export           policies.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_notSentOctetTotalCount"><tt class="ph tt">      public uint64 IPFIX_notSentOctetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 168:            The total number of octets in packets in Flow Records           that were generated by the Metering Process and           dropped by the Metering Process or by the Exporting           Process instead of being sent to the Collecting Process.           There are several potential reasons for this including           resource shortage and special Flow export policies.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_notSentPacketTotalCount"><tt class="ph tt">      public uint64 IPFIX_notSentPacketTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 167:            The total number of packets in Flow Records that were           generated by the Metering Process and dropped           by the Metering Process or by the Exporting Process           instead of being sent to the Collecting Process.           There are several potential reasons for this including           resource shortage and special Flow export policies.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_observationDomainId"><tt class="ph tt">      public uint32 IPFIX_observationDomainId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 149:            An identifier of an Observation Domain that is locally           unique to an Exporting Process.  The Exporting Process uses           the Observation Domain ID to uniquely identify to the           Collecting Process the Observation Domain where Flows           were metered.  It is RECOMMENDED that this identifier is           also unique per IPFIX Device.
+</p>
+
+<p class="p">          A value of 0 indicates that no specific Observation Domain           is identified by this Information Element.
+</p>
+
+<p class="p">          Typically, this Information Element is used for limiting           the scope of other Information Elements.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_observationPointId"><tt class="ph tt">      public uint32 IPFIX_observationPointId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 138:            An identifier of an Observation Point that is unique per           Observation Domain.  It is RECOMMENDED that this identifier is           also unique per IPFIX Device.  Typically, this Information           Element is used for limiting the scope of other Information           Elements.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_observedFlowTotalCount"><tt class="ph tt">      public uint64 IPFIX_observedFlowTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 163:            The total number of Flows observed in the Observation Domain           since the Metering Process (re-)initialization for this           Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_octetDeltaCount"><tt class="ph tt">      public uint64 IPFIX_octetDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 1:            The number of octets since the previous report (if any)           in incoming packets for this Flow at the Observation Point.           The number of octets includes IP header(s) and IP payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_octetDeltaSumOfSquares"><tt class="ph tt">      public uint64 IPFIX_octetDeltaSumOfSquares()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 198:            The sum of the squared numbers of octets per incoming           packet since the previous report (if any) for this           Flow at the Observation Point.           The number of octets includes IP header(s) and IP payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_octetTotalCount"><tt class="ph tt">      public uint64 IPFIX_octetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 85:            The total number of octets in incoming packets           for this Flow at the Observation Point since the Metering           Process (re-)initialization for this Observation Point.  The           number of octets includes IP header(s) and IP payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_octetTotalSumOfSquares"><tt class="ph tt">      public uint64 IPFIX_octetTotalSumOfSquares()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 199:            The total sum of the squared numbers of octets in incoming           packets for this Flow at the Observation Point since the           Metering Process (re-)initialization for this Observation           Point.  The number of octets includes IP header(s) and IP           payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_packetDeltaCount"><tt class="ph tt">      public uint64 IPFIX_packetDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 2:            The number of incoming packets since the previous report           (if any) for this Flow at the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_packetTotalCount"><tt class="ph tt">      public uint64 IPFIX_packetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 86:            The total number of incoming packets for this Flow           at the Observation Point since the Metering Process           (re-)initialization for this Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_paddingOctets"><tt class="ph tt">      public list&lt;uint8&gt; IPFIX_paddingOctets()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 210:            The value of this Information Element is always a sequence of           0x00 values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_payloadLengthIPv6"><tt class="ph tt">      public uint16 IPFIX_payloadLengthIPv6()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 191:            This Information Element reports the value of the Payload           Length field in the IPv6 header.  Note that IPv6 extension           headers belong to the payload.  Also note that in case of a           jumbo payload option the value of the Payload Length field in           the IPv6 header is zero and so will be the value reported           by this Information Element.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_portId"><tt class="ph tt">      public uint32 IPFIX_portId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 142:            An identifier of a line port that is unique per IPFIX           Device hosting an Observation Point.  Typically, this           Information Element is used for limiting the scope           of other Information Elements.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postDestinationMacAddress"><tt class="ph tt">      public list&lt;uint8&gt;[6] IPFIX_postDestinationMacAddress()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 57:            The definition of this Information Element is identical           to the definition of Information Element           'destinationMacAddress', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postIpClassOfService"><tt class="ph tt">      public uint8 IPFIX_postIpClassOfService()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 55:            The definition of this Information Element is identical           to the definition of Information Element           'ipClassOfService', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postMCastOctetDeltaCount"><tt class="ph tt">      public uint64 IPFIX_postMCastOctetDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 20:            The number of octets since the previous report (if any)           in outgoing multicast packets sent for packets of this           Flow by a multicast daemon within the Observation Domain.           This property cannot necessarily be observed at the           Observation Point, but may be retrieved by other means.           The number of octets includes IP header(s) and IP payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postMCastOctetTotalCount"><tt class="ph tt">      public uint64 IPFIX_postMCastOctetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 175:            The total number of octets in outgoing multicast packets           sent for packets of this Flow by a multicast daemon in the           Observation Domain since the Metering Process           (re-)initialization.  This property cannot necessarily be           observed at the Observation Point, but may be retrieved by           other means.           The number of octets includes IP header(s) and IP payload.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postMCastPacketDeltaCount"><tt class="ph tt">      public uint64 IPFIX_postMCastPacketDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 19:            The number of outgoing multicast packets since the           previous report (if any) sent for packets of this Flow           by a multicast daemon within the Observation Domain.           This property cannot necessarily be observed at the           Observation Point, but may be retrieved by other means.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postMCastPacketTotalCount"><tt class="ph tt">      public uint64 IPFIX_postMCastPacketTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 174:            The total number of outgoing multicast packets sent for           packets of this Flow by a multicast daemon within the           Observation Domain since the Metering Process           (re-)initialization.  This property cannot necessarily           be observed at the Observation Point, but may be retrieved           by other means.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postMplsTopLabelExp"><tt class="ph tt">      public uint8 IPFIX_postMplsTopLabelExp()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 237:            The definition of this Information Element is identical to the           definition of Information Element 'mplsTopLabelExp', except           that it reports a potentially modified value caused by a           middlebox function after the packet passed the Observation           Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postOctetDeltaCount"><tt class="ph tt">      public uint64 IPFIX_postOctetDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 23:            The definition of this Information Element is identical           to the definition of Information Element           'octetDeltaCount', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postOctetTotalCount"><tt class="ph tt">      public uint64 IPFIX_postOctetTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 171:            The definition of this Information Element is identical           to the definition of Information Element           'octetTotalCount', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postPacketDeltaCount"><tt class="ph tt">      public uint64 IPFIX_postPacketDeltaCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 24:            The definition of this Information Element is identical           to the definition of Information Element           'packetDeltaCount', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postPacketTotalCount"><tt class="ph tt">      public uint64 IPFIX_postPacketTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 172:            The definition of this Information Element is identical           to the definition of Information Element           'packetTotalCount', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postSourceMacAddress"><tt class="ph tt">      public list&lt;uint8&gt;[6] IPFIX_postSourceMacAddress()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 81:            The definition of this Information Element is identical           to the definition of Information Element           'sourceMacAddress', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_postVlanId"><tt class="ph tt">      public uint16 IPFIX_postVlanId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 59:            The definition of this Information Element is identical           to the definition of Information Element           'vlanId', except that it reports a           potentially modified value caused by a middlebox           function after the packet passed the Observation Point.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_protocolIdentifier"><tt class="ph tt">      public uint8 IPFIX_protocolIdentifier()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 4:            The value of the protocol number in the IP packet header.           The protocol number identifies the IP packet payload type.           Protocol numbers are defined in the IANA Protocol Numbers           registry.
+</p>
+
+<p class="p">	      In Internet Protocol version 4 (IPv4), this is carried in the           Protocol field.  In Internet Protocol version 6 (IPv6), this           is carried in the Next Header field in the last extension           header of the packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceIPv4Address"><tt class="ph tt">      public uint32 IPFIX_sourceIPv4Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 8:            The IPv4 source address in the IP packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceIPv4Prefix"><tt class="ph tt">      public uint32 IPFIX_sourceIPv4Prefix()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 44:            IPv4 source address prefix.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceIPv4PrefixLength"><tt class="ph tt">      public uint8 IPFIX_sourceIPv4PrefixLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 9:            The number of contiguous bits that are relevant in the           sourceIPv4Prefix Information Element.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceIPv6Address"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_sourceIPv6Address()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 27:            The IPv6 source address in the IP packet header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceIPv6Prefix"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPFIX_sourceIPv6Prefix()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 170:            IPv6 source address prefix.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceIPv6PrefixLength"><tt class="ph tt">      public uint8 IPFIX_sourceIPv6PrefixLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 29:            The number of contiguous bits that are relevant in the           sourceIPv6Prefix Information Element.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceMacAddress"><tt class="ph tt">      public list&lt;uint8&gt;[6] IPFIX_sourceMacAddress()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 56:            The IEEE 802 source MAC address field.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_sourceTransportPort"><tt class="ph tt">      public uint16 IPFIX_sourceTransportPort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 7:            The source port identifier in the transport header.           For the transport protocols UDP, TCP, and SCTP, this is the           source port number given in the respective header.  This           field MAY also be used for future transport protocols that           have 16-bit source port identifiers.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_standardFieldAsByteList.int32"><tt class="ph tt">      public list&lt;uint8&gt; IPFIX_standardFieldAsByteList(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'standard' field as a list of bytes, if           it is present in the 'data flow' record, or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_standardFieldAsInteger.int32"><tt class="ph tt">      public uint64 IPFIX_standardFieldAsInteger(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'standard' field as an integer, if           it is present in the 'data flow' record, or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_standardFieldAsString.int32"><tt class="ph tt">      public rstring IPFIX_standardFieldAsString(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This function returns the value of the specified IPFIX 'standard' field as a string, if           it is present in the 'data flow' record, or zero if absent.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_systemInitTimeMilliseconds"><tt class="ph tt">      public uint64 IPFIX_systemInitTimeMilliseconds()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 160:            The absolute timestamp of the last (re-)initialization of the           IPFIX Device.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpAckTotalCount"><tt class="ph tt">      public uint64 IPFIX_tcpAckTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 222:            The total number of packets of this Flow with           TCP "Acknowledgment field significant" (ACK) flag set.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpAcknowledgementNumber"><tt class="ph tt">      public uint32 IPFIX_tcpAcknowledgementNumber()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 185:            The acknowledgement number in the TCP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpControlBits"><tt class="ph tt">      public uint16 IPFIX_tcpControlBits()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 6:            TCP control bits observed for packets of this Flow.           The information is encoded in a set of bit fields.           For each TCP control bit, there is a bit in this           set.  A bit is set to 1 if any observed packet of this           Flow has the corresponding TCP control bit set to 1.           A value of 0 for a bit indicates that the corresponding           bit was not set in any of the observed packets           of this Flow.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpDestinationPort"><tt class="ph tt">      public uint16 IPFIX_tcpDestinationPort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 183:            The destination port identifier in the TCP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpFinTotalCount"><tt class="ph tt">      public uint64 IPFIX_tcpFinTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 219:            The total number of packets of this Flow with           TCP "No more data from sender" (FIN) flag set.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpHeaderLength"><tt class="ph tt">      public uint8 IPFIX_tcpHeaderLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 188:            The length of the TCP header.  Note that the value of this           Information Element is different from the value of the Data           Offset field in the TCP header.  The Data Offset field           indicates the length of the TCP header in units of 4 octets.           This Information Elements specifies the length of the TCP           header in units of octets.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpOptions"><tt class="ph tt">      public uint64 IPFIX_tcpOptions()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 209:            TCP options in packets of this Flow.           The information is encoded in a set of bit fields.  For           each TCP option, there is a bit in this set.           The bit is set to 1 if any observed packet of this Flow           contains the corresponding TCP option.           Otherwise, if no observed packet of this Flow contained           the respective TCP option, the value of the           corresponding bit is 0.
+</p>
+
+<p class="p">          Options are mapped to bits according to their option           numbers.  Option number X is mapped to bit X.           TCP option numbers are maintained by IANA.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpPshTotalCount"><tt class="ph tt">      public uint64 IPFIX_tcpPshTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 221:            The total number of packets of this Flow with           TCP "Push Function" (PSH) flag set.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpRstTotalCount"><tt class="ph tt">      public uint64 IPFIX_tcpRstTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 220:            The total number of packets of this Flow with           TCP "Reset the connection" (RST) flag set.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpSequenceNumber"><tt class="ph tt">      public uint32 IPFIX_tcpSequenceNumber()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 184:            The sequence number in the TCP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpSourcePort"><tt class="ph tt">      public uint16 IPFIX_tcpSourcePort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 182:            The source port identifier in the TCP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpSynTotalCount"><tt class="ph tt">      public uint64 IPFIX_tcpSynTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 218:            The total number of packets of this Flow with           TCP "Synchronize sequence numbers" (SYN) flag set.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpUrgTotalCount"><tt class="ph tt">      public uint64 IPFIX_tcpUrgTotalCount()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 223:            The total number of packets of this Flow with           TCP "Urgent Pointer field significant" (URG) flag set.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpUrgentPointer"><tt class="ph tt">      public uint16 IPFIX_tcpUrgentPointer()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 187:            The urgent pointer in the TCP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpWindowScale"><tt class="ph tt">      public uint16 IPFIX_tcpWindowScale()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 238:            The scale of the window field in the TCP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_tcpWindowSize"><tt class="ph tt">      public uint16 IPFIX_tcpWindowSize()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 186:            The window field in the TCP header.           If the TCP window scale is supported,           then TCP window scale must be known           to fully interpret the value of this information.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_templateId"><tt class="ph tt">      public uint16 IPFIX_templateId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 145:            An identifier of a Template that is locally unique within a           combination of a Transport session and an Observation Domain.
+</p>
+
+<p class="p">          Template IDs 0-255 are reserved for Template Sets, Options           Template Sets, and other reserved Sets yet to be created.           Template IDs of Data Sets are numbered from 256 to 65535.
+</p>
+
+<p class="p">          Typically, this Information Element is used for limiting           the scope of other Information Elements.           Note that after a re-start of the Exporting Process Template           identifiers may be re-assigned.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_totalLengthIPv4"><tt class="ph tt">      public uint16 IPFIX_totalLengthIPv4()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 190:            The total length of the IPv4 packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_udpDestinationPort"><tt class="ph tt">      public uint16 IPFIX_udpDestinationPort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 181:            The destination port identifier in the UDP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_udpMessageLength"><tt class="ph tt">      public uint16 IPFIX_udpMessageLength()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 205:            The value of the Length field in the UDP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_udpSourcePort"><tt class="ph tt">      public uint16 IPFIX_udpSourcePort()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 180:            The source port identifier in the UDP header.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_vlanId"><tt class="ph tt">      public uint16 IPFIX_vlanId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 58:            The IEEE 802.1Q VLAN identifier (VID) extracted from the Tag           Control Information field that was attached to the IP packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_wlanChannelId"><tt class="ph tt">      public uint8 IPFIX_wlanChannelId()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 146:            The identifier of the 802.11 (Wi-Fi) channel used.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_wlanSSID"><tt class="ph tt">      public rstring IPFIX_wlanSSID()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          IPFIX field 147:            The Service Set IDentifier (SSID) identifying an 802.11           (Wi-Fi) network used.  According to IEEE.802-11.1999, the           SSID is encoded into a string of up to 32 characters.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

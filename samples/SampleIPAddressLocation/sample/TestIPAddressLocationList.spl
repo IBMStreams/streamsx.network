@@ -1,0 +1,153 @@
+/*
+** Copyright (C) 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+use com.ibm.streamsx.network.location::*;
+use com.ibm.streamsx.network.datetimeformat::*;
+
+list<uint32> convertIPV4AddressStringsToNumbers(list<rstring> ipv4AddressStrings) {
+    mutable list<uint32> ipv4AddressNumbers = [];
+    for (rstring ipv4AddressString in ipv4AddressStrings) {
+        appendM(ipv4AddressNumbers, convertIPV4AddressStringToNumeric(ipv4AddressString)); }
+    return ipv4AddressNumbers;
+}
+
+list<rstring> convertIPV4AddressNumbersToStrings(list<uint32> ipv4AddressNumbers) {
+    mutable list<rstring> ipv4AddressStrings = [];
+    for (uint32 ipv4AddressNumber in ipv4AddressNumbers) {
+        appendM(ipv4AddressStrings, convertIPV4AddressNumericToString(ipv4AddressNumber)); }
+    return ipv4AddressStrings;
+}
+
+composite TestIPAddressLocationList {
+
+    param
+    expression<rstring> $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_ipv4+ipv6.pcap" );
+
+    type
+
+    PacketType =
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint32 ipv4SourceAddress,       // IPv4 source address
+        uint32 ipv4DestinationAddress,  // IPv4 destination address
+        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
+
+    DNSMessageType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+      uint32 ipv4SourceAddress,         // IPv4 source address
+      uint32 ipv4DestinationAddress,    // IPv4 destination address
+      rstring DNS_QUESTION_NAME,
+      list<rstring> DNS_ANSWER_NAMES,
+      list<uint32> DNS_ANSWER_IPV4_ADDRESSES,
+      list<rstring> DNS_ADDITIONAL_NAMES,
+      list<rstring> DNS_ADDITIONAL_DATA;
+
+    DNSLocationType =
+      uint64 packetNumber,               // sequence number of packet, as emitted by operator
+      rstring captureTime,               // time that packet was captured, in seconds since Unix epoch
+      rstring ipv4SourceAddress,         // IPv4 source address
+      rstring ipv4DestinationAddress,    // IPv4 destination address
+      rstring dns_question_name,
+      list<rstring> dnsAnswerNames,
+      list<rstring> dnsAnswerIPv4Addresses,
+      list<rstring> dnsAnswerCityNames,
+      list<rstring> dnsAnswerStateNames,
+      list<rstring> dnsAnswerCountryNames,
+      list<float64> dnsAnswerLatitudes,
+      list<float64> dnsAnswerLongitudes,
+      list<rstring> dnsAdditionalNames,
+      list<rstring> dnsAdditionalData,
+      list<rstring> dnsAdditionalCityNames,
+      list<rstring> dnsAdditionalStateNames,
+      list<rstring> dnsAdditionalCountryNames,
+      list<float64> dnsAdditionalLatitudes,
+      list<float64> dnsAdditionalLongitudes;
+
+    DNSErrorType =
+      uint64 packetNumber,              // sequence number of packet, as emitted by operator
+      rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
+      rstring ipv4SourceAddress,        // IPv4 source address
+      rstring ipv4DestinationAddress,   // IPv4 destination address
+      rstring parseErrorDescription,
+      uint32 parseErrorOffset,
+      rstring dnsMessage;
+
+    graph
+
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            inputFilter: "udp port 53";
+            metricsInterval: 0.0;
+        output Out:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipv4SourceAddress = IPV4_SRC_ADDRESS(),
+            ipv4DestinationAddress = IPV4_DST_ADDRESS(),
+            dnsMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPAddressLocationList.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+    ( stream<DNSMessageType> DNSMessageStream as OutMessage ;
+      stream<DNSErrorType> DNSErrorStream as OutError ) = DNSMessageParser(PacketStream) {
+      logic state: {
+        map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
+      }
+      param
+          messageAttribute: dnsMessage;
+          outputFilters: DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError(), parseError();
+      output OutMessage:
+          DNS_QUESTION_NAME = DNS_QUESTION_NAME(),
+          DNS_ANSWER_NAMES = DNS_ANSWER_NAMES(),
+          DNS_ANSWER_IPV4_ADDRESSES = DNS_ANSWER_IPV4_ADDRESSES(),
+          DNS_ADDITIONAL_NAMES = DNS_ADDITIONAL_NAMES(),
+          DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA();
+      OutError:
+          captureTime = formatEpochTime(captureTime),
+          ipv4SourceAddress = convertIPV4AddressNumericToString(ipv4SourceAddress),
+          ipv4DestinationAddress = convertIPV4AddressNumericToString(ipv4DestinationAddress),
+          parseErrorDescription = parseErrorDescription(),
+          parseErrorOffset = parseErrorOffset(),
+          dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
+    }
+    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestIPAddressLocationList.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestIPAddressLocationList.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+    stream<DNSLocationType> DNSLocationStream as Out = IPAddressLocation(DNSMessageStream as In) {
+      param
+        geographyDirectory: $geographyDirectory;
+      output Out:
+        captureTime = formatEpochTime(captureTime),
+        ipv4SourceAddress = convertIPV4AddressNumericToString(ipv4SourceAddress),
+        ipv4DestinationAddress = convertIPV4AddressNumericToString(ipv4DestinationAddress),
+        dnsAnswerNames = DNS_ANSWER_NAMES,
+        dnsAnswerIPv4Addresses = convertIPV4AddressNumbersToStrings(DNS_ANSWER_IPV4_ADDRESSES),
+        dnsAnswerCityNames = locationCityNames(DNS_ANSWER_IPV4_ADDRESSES),
+        dnsAnswerStateNames = locationSubdivision1Names(DNS_ANSWER_IPV4_ADDRESSES),
+        dnsAnswerCountryNames = locationCountryNames(DNS_ANSWER_IPV4_ADDRESSES),
+        dnsAnswerLatitudes = locationLatitudes(DNS_ANSWER_IPV4_ADDRESSES),
+        dnsAnswerLongitudes = locationLongitudes(DNS_ANSWER_IPV4_ADDRESSES),
+        dnsAdditionalNames = DNS_ADDITIONAL_NAMES,
+        dnsAdditionalData = DNS_ADDITIONAL_DATA,
+        dnsAdditionalCityNames = locationCityNames(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+        dnsAdditionalStateNames = locationSubdivision1Names(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+        dnsAdditionalCountryNames = locationCountryNames(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+        dnsAdditionalLatitudes = locationLatitudes(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+        dnsAdditionalLongitudes = locationLongitudes(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA));
+    }
+    () as DNSLocationStreamSink = FileSink(DNSLocationStream) { param file: "debug.TestIPAddressLocationList.DNSLocationStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+}

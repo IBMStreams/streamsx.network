@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestPacketContentAssemblerFlowsAndFiles.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestPacketContentAssemblerFlowsAndFiles.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestPacketContentAssemblerFlowsAndFiles.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SamplePacketContentAssembler.html">SamplePacketContentAssembler 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestPacketContentAssemblerFlowsAndFiles.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestPacketContentAssemblerFlowsAndFiles.html#spldoc_compilationunit__composite_operator__TestPacketContentAssemblerFlowsAndFiles">TestPacketContentAssemblerFlowsAndFiles</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestPacketContentAssemblerFlowsAndFiles"><h2 class="title sectiontitle splpart">public composite TestPacketContentAssemblerFlowsAndFiles</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+<li class="sli"><strong class="ph b">connectionIdleTimeout</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$TestPacketContentAssemblerFlowsAndFiles.svg" width="342" height="243"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestPacketContentAssemblerFlowsAndFiles {
+ 
+   param
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "./firewallcontent_sample.pcap");
+     expression&lt;rstring&gt; $connectionIdleTimeout: getSubmissionTimeValue("connectionIdleTimeout", "15");
+ 
+   type
+ 
+   PacketType =
+     float64 captureTime,    // time that packet was captured, in seconds since Unix epoch
+     blob rawPacket ;        // contents of packet captured, including all headers
+ 
+   FlowDataType =
+     rstring flowEventTime,
+     rstring ipSource,
+     rstring ipDestination,
+     boolean tlsEvent,
+     rstring flowDirection,
+     uint64 flowID,
+     uint32 transactionID,
+     rstring flowProtocol,
+     rstring tlsRecordType,
+     rstring tlsRecordDirection,
+     uint32 tlsRecordLength,
+     uint32 tlsRecordOffset,
+     boolean tlsRecordMore,
+     boolean flowDataInitial,
+     rstring flowData;
+ 
+   FileChunkType =
+     uint64 flowID,
+     uint32 transactionID,
+     uint64 fileID,
+     rstring fileExtension,
+     boolean fileChunkInitial,
+     blob fileChunk;
+ 
+   graph
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource() {
+     param
+       pcapFilename: $pcapFilename;
+       inputFilter: "tcp";
+       metricsInterval: 0.0;
+     output Out:
+       captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+       rawPacket = PACKET_DATA(); }
+     //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.PacketStream.out" ; format: csv ; hasDelayField: true ; }
+ 
+   ( stream&lt;FlowDataType&gt; FlowDataStream as Flow ;
+     stream&lt;FileChunkType&gt; FileChunkStream as File ) = PacketContentAssembler(PacketStream) {
+     param
+     timestampAttribute: captureTime;
+     packetAttribute: rawPacket;
+     outputFilters: ( EVENT_FLOW_DATA() &amp;&amp; FLOW_PROTOCOL()!="unknown" &amp;&amp; FLOW_PROTOCOL()!="" ) || EVENT_FLOW_TLS(), 
+                    EVENT_FILE_CHUNK() &amp;&amp; mimetype2extension(FILE_CONTENT_TYPE())!="";
+     pamTuning: 
+       "pam.bodetect.autodecrypt=false",
+       "pam.ca.aim.enabled=false",
+       "pam.ca.aolimft.enabled=false",
+       "pam.ca.credit_card_num.validate=false",
+       "pam.ca.ftp.enabled=false",
+       "pam.ca.http.enabled=false", 
+       "pam.ca.report.packetinfo=false",
+       "pam.ca.smb.enabled=false",
+       "pam.ca.webmsn.enabled=false",
+       "pam.cisco.sccp.enabled=false",
+       //"pam.content.consume.archives=on", dunno about this one ......
+       "pam.content.disable.application/pdf=on",
+       "pam.content.disable.multipart/form-data=true",
+       "pam.content.disable.text/html=true",
+       "pam.content.docx.decompress=false", 
+       "pam.content.encoded_script.parse=false",
+       "pam.content.gif.enabled=true",
+       "pam.content.java.parse=false",
+       "pam.content.pptx.decompress=false", 
+       "pam.content.riff.parse=false",
+       "pam.content.sami.parse=false",
+       "pam.content.sdp.parse=false",
+       "pam.content.shellcode.enabled=false",
+       "pam.content.sis.parse=false",
+       "pam.content.soap.parse=false",
+       "pam.content.text.maxbytes=1",
+       "pam.content.text.parse=false",
+       "pam.content.wmz.decompress=false",
+       "pam.content.xlsx.decompress=false",
+       "pam.content.xml.parse=false",
+       "pam.cvs.authenticate=false",
+       "pam.dbt.enable=false",
+       "pam.email.datascan=false",
+       "pam.firewall.analyze.drops=false",
+       "pam.flash.compressed.parse=false",
+       "pam.fsp.enable=false",
+       "pam.gre.enable=false",
+       "pam.html.asp.parse.enable=false",
+       "pam.html.identify.prefilter=false",
+       "pam.http.forcedbrowsingdetect.enabled=false",
+       "pam.http.postscan=false",
+       "pam.http.request.xml.enabled=false",
+       //"pam.http.response.content.scan=false",  // disables all HTTP content, not just responses
+       "pam.http.shellcode.enabled=false",
+       "pam.http.url.enabled=false",
+       "pam.http.urllimit.enabled=false",
+       "pam.icon.parse=false",
+       "pam.inflate.parse=off",
+       "pam.injection.http.headers.enabled=false",
+       "pam.injection.http.hostpath.enabled=false",
+       "pam.isl.parse=false",
+       "pam.mem.log.timestamp=false",
+       "pam.mem.log=false",
+       "pam.ospf.checksum.ignore=false",
+       "pam.parser.BitTorrentDHT.enabled=false",
+       "pam.parser.HP_DP_CellMgr.enabled=false",
+       "pam.parser.RealwinHmi.enabled=false",
+       "pam.parser.RealwinScada.enabled=false",
+       "pam.parser.SymantecAms.enabled=false",
+       "pam.parser.agentx.enabled=false",
+       "pam.parser.argument.injection.enabled=false",
+       "pam.parser.conficker.enabled=false",
+       "pam.parser.divx.enabled=false",
+       "pam.parser.eDonkey.enabled=false",
+       "pam.parser.eot.enabled=false",
+       "pam.parser.fff.enabled=false",
+       "pam.parser.flac.enabled=false",
+       "pam.parser.ipp.enabled=false",
+       "pam.parser.mdb.enabled=false",
+       "pam.parser.mif.enabled=false",
+       "pam.parser.mp3.enabled=false",
+       "pam.parser.otf.enabled=false",
+       "pam.parser.passwd.enabled=false",
+       "pam.parser.pptp.enabled=false",
+       "pam.parser.rmf.enabled=false",
+       "pam.parser.sametime.enabled=false",
+       "pam.parser.smil.enabled=false",
+       "pam.parser.teamviewer.enabled=false",
+       //"pam.parser.urlfile.enabled=false", // Anand commented this out
+       "pam.parser.veritas.enabled=false",
+       "pam.pdf.compressed.parse=false",
+       "pam.report.audit=off",
+       "pam.report=off", 
+       "pam.script.shellcode_noop.aggressive=false",
+       "pam.shellcode.detection=false",
+       "pam.smb.file.parse=false",
+       "pam.snmp.iftable.filter=false",
+       "pam.statistics.logging=false",
+       "pam.statistics=false",
+       "pam.tcp.checksum.ignore=true",
+       //"pam.tcp.comparedata=false", // removed from PAM 2.0.115.64, 2015-03-06
+       "pam.tcp.data.timeout=" + $connectionIdleTimeout, 
+       "pam.tcp.flushqueue=true",            
+       "pam.tcp.synflood.dstport=false",
+       "pam.tcp.synflood.protection=false",
+       "pam.tls.parse=false",
+       "pam.trojan_numcmd.parse=false",
+       "pam.unistim.parse=false" ;
+     output
+     Flow:
+       flowEventTime = formatEpochDateTime(FLOW_EVENT_TIME()),
+       ipSource = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()) + ":" + (rstring)FLOW_SRC_PORT(),
+       ipDestination = convertIPV4AddressNumericToString(FLOW_IPV4_DST_ADDRESS()) + ":" + (rstring)FLOW_DST_PORT(),
+       tlsEvent = EVENT_FLOW_TLS(),
+       flowDirection = FLOW_DIRECTION(),
+       flowID = FLOW_ID(),
+       transactionID = FLOW_TRANSACTION_ID(),
+       flowProtocol = EVENT_FLOW_TLS() ? "tls" : FLOW_PROTOCOL(),
+       tlsRecordType = TLS_RECORD_TYPE(),
+       tlsRecordDirection = TLS_RECORD_DIRECTION(),
+       tlsRecordLength = TLS_RECORD_LENGTH(),
+       tlsRecordOffset = TLS_RECORD_OFFSET(),
+       tlsRecordMore = TLS_RECORD_MORE(),
+       flowDataInitial = FLOW_DATA_COUNTER()==0ul,
+       flowData = FLOW_DATA_STRING();
+     File:
+       flowID = FLOW_ID(),
+       transactionID = FLOW_TRANSACTION_ID(),
+       fileID = FILE_ID(),
+       fileExtension = mimetype2extension(FILE_CONTENT_TYPE()),
+       fileChunkInitial = FILE_CHUNK_INITIAL(),
+       fileChunk = FILE_CHUNK_BINARY();
+   }
+   () as FlowDataSink = FileSink(FlowDataStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FlowDataStream.out" ; suppress: flowData; format: txt ; hasDelayField: true ; }
+   () as FileChunkSink = FileSink(FileChunkStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FileChunkStream.out" ; suppress: fileChunk; format: txt ; hasDelayField: true ; }
+ 
+   () as FlowDataStore = Custom(FlowDataStream as In) {
+     logic state: {
+       map&lt;rstring,rstring&gt; directionFlags = {
+         "?"        : "????????",
+         ""         : "--------",
+         "SrcToDst" : "&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;",
+         "DstToSrc" : "&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;" }; }
+     onTuple In: {
+       rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles/debug.flow_" + leadingZeros(flowID,6) + "." + flowProtocol;
+       rstring filemode = flowDataInitial ? "w" : "a";
+       mutable int32 error = 0;
+       uint64 handle = fopen(filename, filemode, error);
+       assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+       if (tlsEvent) {
+         fwriteString("TLS " + tlsRecordType + " " + tlsRecordDirection + " (bytes " + (rstring)tlsRecordOffset + " to " + (rstring)(tlsRecordOffset+(uint32)length(flowData)) + (tlsRecordMore ? ", more..." : "") + ")\n", handle, error);
+         assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+       } else {
+         fwriteString("\n" + flowEventTime + " -- " + ipSource + " " + directionFlags[flowDirection] + " " + ipDestination + " (" + (rstring)length(flowData) + " bytes of " + flowProtocol + ")\n", handle, error);
+         assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+         fwriteString(trancateNonASCII(flowData) + "\n", handle, error);
+         assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+       }
+       fclose(handle, error);
+       assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error)); } }
+ 
+   () as FileChunkStore = Custom(FileChunkStream as In) {
+     logic onTuple In: {
+       rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles/debug.flow_" + leadingZeros(flowID,6) + "_file_" + leadingZeros(fileID,6) + "." + fileExtension;
+       rstring filemode = fileChunkInitial ? "w" : "a";
+       mutable int32 error = 0;
+       uint64 handle = fopen(filename, filemode, error);
+       assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+       fwriteblob(fileChunk, handle, error);
+       assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+       fclose(handle, error);
+       assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error));
+     } }
+ 
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
