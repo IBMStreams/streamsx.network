@@ -30,7 +30,6 @@ struct port_info port_info_[MAX_PORTS];
 int maxPort_;
 int numQueues_;
 int coreMaster_;
-int numOperators_;
 
 static uint16_t num_rxd_ = STREAMS_SOURCE_RX_DESC_DEFAULT;
 static uint16_t num_txd_ = STREAMS_SOURCE_TX_DESC_DEFAULT;
@@ -148,7 +147,7 @@ static void init_ports(void) {
             strcpy(ifname, "<none>"); 
         }
 	RTE_LOG(INFO, STREAMS_SOURCE, 
-		"  Interface    : %s\n", ifname);
+		"  Interface (%d): %s\n", if_index, ifname);
 
 	RTE_LOG(INFO, STREAMS_SOURCE, 
 		"  Driver       : %s\n", dev_info.driver_name); 
@@ -180,6 +179,12 @@ static void init_ports(void) {
                 "  RXQ Set      : %d\n", num_rx_queues);
 	RTE_LOG(INFO, STREAMS_SOURCE,
                 "  TXQ Set      : %d\n", num_tx_queues);
+
+        if((num_rx_queues > dev_info.max_rx_queues) || 
+           (num_tx_queues > dev_info.max_tx_queues)) {
+	    rte_exit(EXIT_FAILURE, "More RX or TX queues requested than this device supports.\n");
+        }
+
 	ret = rte_eth_dev_configure(port_id, num_rx_queues, num_tx_queues,
 		&port_conf_);
 	if (ret < 0) {

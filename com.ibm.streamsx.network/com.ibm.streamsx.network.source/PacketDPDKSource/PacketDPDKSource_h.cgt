@@ -78,7 +78,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
         uint64_t tscHz; 
         uint64_t tscMicrosecondAdjust; 
-        uint64_t timestampMicroseconds;
+        uint64_t tscMicroseconds;
 
 	uint8_t *packetPtr;
 	uint32_t packetLen; 
@@ -104,8 +104,11 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 	uint64_t packetsDroppedByInterface() { return 0; }
 	uint64_t packetsProcessed() { return packetCounter; }
 	uint64_t octetsProcessed() { return octetCounter; }
-	SPL::uint32 CAPTURE_SECONDS() { return 0; }
-	SPL::uint32 CAPTURE_MICROSECONDS() { return timestampMicroseconds; }
+	SPL::uint32 CAPTURE_SECONDS() { 
+          struct timespec tp; clock_gettime(CLOCK_REALTIME, &tp); return(tp.tv_sec);}
+	SPL::uint32 CAPTURE_MICROSECONDS() {
+          struct timespec tp; clock_gettime(CLOCK_REALTIME, &tp); return(tp.tv_nsec/1000);}
+	SPL::uint64 CAPTURE_TSC_MICROSECONDS() { return (tscMicroseconds); }
 
 	SPL::uint32 PACKET_LENGTH() { return packetLen; }
 	SPL::blob PACKET_DATA() { return SPL::blob((const unsigned char*)packetPtr, packetLen); }

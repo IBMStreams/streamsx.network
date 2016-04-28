@@ -33,13 +33,13 @@
 
 pthread_mutex_t mutexInit = PTHREAD_MUTEX_INITIALIZER;
 
-volatile int32_t dpdkInitComplete = 0;
-volatile int32_t numOperators = 0;
-volatile int32_t firstInitComplete = 0;
-volatile int32_t numOperatorsReady = 0;
+int32_t dpdkInitComplete = 0;
+int32_t numOperators = 0;
+int32_t firstInitComplete = 0;
+int32_t numOperatorsReady = 0;
 
-// Assume maximum of 4 digits+space+comma
-#define MAX_CORESTRING RTE_MAX_LCORE*6+1
+// Assume maximum of 4 digits+comma
+#define MAX_CORESTRING RTE_MAX_LCORE*5+1
 char lcoreList[MAX_CORESTRING] = "";
 
 /*
@@ -84,9 +84,9 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
     if(firstInitComplete == 0) {
         // Initialize data structures.
         coreMaster_   = -1;
-        numQueues_    = -1;
+        numQueues_    =  0;
         maxPort_      = -1;
-        numOperators_ = -1;
+        numOperators  = 0;
 
         int lcore_id;
         for(lcore_id = 0; lcore_id < RTE_MAX_LCORE; lcore_id++) {
@@ -121,7 +121,7 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
     } else {
         // Add the lcore for this operator to the lcore list.
         char coreStr[6];
-        snprintf(coreStr, 6, ", %d", lcore); 
+        snprintf(coreStr, 6, ",%d", lcore); 
         strcat(lcoreList, coreStr); 
     }
 
@@ -130,7 +130,7 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
         // value, use it.
         coreMaster_ = lcoreMaster;
         char coreStr[6];
-        snprintf(coreStr, 6, ", %d", lcoreMaster); 
+        snprintf(coreStr, 6, ",%d", lcoreMaster); 
         strcat(lcoreList, coreStr); 
         printf("STREAMS_SOURCE: streams_operator_init: coreMaster set to lcore %d.\n", 
             coreMaster_); 
@@ -206,13 +206,11 @@ int streams_dpdk_init() {
         return(0);
     }
 
-    numOperators_ = numOperators; 
-
-    if((numOperators_ == 0) || (coreMaster_ == -1) || 
-       (numQueues_ == -1) || (maxPort_ == -1)) {
+    if((numOperators == 0) || (coreMaster_ == -1) || 
+       (numQueues_ == 0) || (maxPort_ == -1)) {
         printf("STREAMS_SOURCE: streams_dpdk_init aborting due to invalid configuration.\n"); 
-        printf("STREAMS_SOURCE: numOperators_ = %d, coreMaster_ = %d, numQueues_ = %d, maxPort_ = %d\n", 
-               numOperators_, coreMaster_, numQueues_, maxPort_); 
+        printf("STREAMS_SOURCE: numOperators = %d, coreMaster_ = %d, numQueues_ = %d, maxPort_ = %d\n", 
+               numOperators, coreMaster_, numQueues_, maxPort_); 
 	pthread_mutex_unlock(&mutexInit); 
         return(-1);
     }

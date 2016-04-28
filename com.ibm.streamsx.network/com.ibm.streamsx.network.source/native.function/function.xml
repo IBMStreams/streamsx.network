@@ -139,6 +139,19 @@ according to the system clock on the machine that captured it.
             </function:description>
             <function:prototype>public uint32 CAPTURE_MICROSECONDS()</function:prototype>
           </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the value of the machine's timestamp counter when the packet was 
+captured, that is, the number of microseconds since the machine was booted. Note that 
+unlike the CAPTURE_SECONDS() and CAPTURE_MICROSECONDS() functions, this function's value 
+is not relative to the Unix 'epoch'.
+
+            </function:description>
+            <function:prototype>public uint64 CAPTURE_TSC_MICROSECONDS()</function:prototype>
+          </function:function>
+
           <function:function>
             <function:description>
 

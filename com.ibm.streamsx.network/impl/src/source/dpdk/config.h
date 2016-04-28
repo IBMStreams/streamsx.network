@@ -89,7 +89,5 @@ extern struct port_info port_info_[MAX_PORTS];
 extern int maxPort_;
 extern int numQueues_;
 extern int coreMaster_;
-extern int numOperators_;
-
 
 #endif

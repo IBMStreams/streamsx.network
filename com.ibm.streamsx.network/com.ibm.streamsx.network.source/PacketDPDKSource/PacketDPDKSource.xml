@@ -308,8 +308,7 @@ Suggested tools to help identify NIC ports:
       <name>nicQueue</name>
       <description>
 
-NIC queue of type uint32 which sources packets for this operator instance.  Use of this parameter 
-is not yet implemented in the PacketDPDKSource operator but is included for future enhancements.
+NIC queue of type int32 which sources packets for this operator instance.
 
       </description>
       <optional>true</optional>
