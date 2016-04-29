@@ -237,7 +237,6 @@ streams_source interface library to dpdk.
 	</cmn:description>
 	<cmn:managedLibrary>
 	<cmn:lib>streams_source</cmn:lib>
-	<cmn:lib>dpdk</cmn:lib>
 	<cmn:libPath>../../impl/lib/source</cmn:libPath>
 	<cmn:includePath>../../impl/include/source</cmn:includePath>
 	</cmn:managedLibrary>
@@ -251,39 +250,17 @@ streams_source interface library to dpdk.
 
     <parameters>
       <allowAny>false</allowAny>
-      <parameter>
-        <name>coreMask</name>
-        <description> 
-
-Hex bit mask listing the cores used for DPDK polling loops.
-The low order bit corresponds to the master lcore and all
-other bits indicate cores that will be assigned to
-ports/queues.
-
-Note that only the first instance of the PacketDPDKSource
-must set this parm.  All others are ignored.
-
-	</description>
-        <optional>false</optional>
-        <rewriteAllowed>true</rewriteAllowed>
-        <expressionMode>Expression</expressionMode>
-        <type>rstring</type>
-        <cardinality>-1</cardinality>
-    </parameter>
-
     <parameter>
-      <name>promiscuous</name>
-      <description> 
+      <name>lcoreMaster</name>
+      <description>
 
-This optional parameter takes an expression of type 'boolean'
-that specifies whether or not 'promiscuous' mode should be enabled on the
-network interface.
+Logical core number to be used for the master DPDK thread.
 
       </description>
       <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
-      <type>boolean</type>
+      <type>int32</type>
       <cardinality>-1</cardinality>
     </parameter>
 
@@ -320,7 +297,7 @@ Suggested tools to help identify NIC ports:
    \- lspci | grep -i net
 
       </description>
-      <optional>false</optional>
+      <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
       <type>int32</type>
@@ -331,14 +308,29 @@ Suggested tools to help identify NIC ports:
       <name>nicQueue</name>
       <description>
 
-NIC queue of type uint32 which sources packets for this operator instance.  Use of this parameter 
-is not yet implemented in the PacketDPDKSource operator but is included for future enhancements.
+NIC queue of type int32 which sources packets for this operator instance.
 
       </description>
-      <optional>false</optional>
+      <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
       <type>int32</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
+    <parameter>
+      <name>promiscuous</name>
+      <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not 'promiscuous' mode should be enabled on the
+network interface.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>boolean</type>
       <cardinality>-1</cardinality>
     </parameter>
 

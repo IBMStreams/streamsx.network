@@ -6,7 +6,7 @@
 #ifndef _INIT_H__
 #define _INIT_H__
 
-int init(int promiscuous);
+int init(void);
 
 #endif
 
