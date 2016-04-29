@@ -7,21 +7,10 @@ use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.ipv6::*;
 use com.ibm.streamsx.network.source::*;
 
-/* Simple example application which configures the DPDP source and 
- * sends the packet data to a file.
- *
- * Parameters:
- *   coreMask : Hex bit mask listing the cores used for DPDK polling loops.
- *              The low order bit corresponds to the master lcore and all
- *              other bits indicate cores that will be assigned to 
- *              ports/queues.
- *              Note that only the first instance of the PacketDPDKSource
- *              must set this parm.  All others are ignored.
- *   lcore    : Logical core number on which this operator will run.
- *   nicPort  : NIC port that sources packets for this operator instance.
- *   nicQueue : NIC queue that sources packets for this operator instance.
- *   Promiscuous : Enable promisicuous mode in the NIC. 
- *   metricsInterval : Rate at which metrics are pulled out of the NIC stack. 
+/* 
+ * Simple example application which configures the DPDP source and 
+ * sends the packet data to a file.  In this sample, we configure ingest
+ * to run on 1 NIC port with 2 queues.
  */
 
 type PacketData = uint64 timestampMicroseconds,
@@ -30,28 +19,53 @@ type PacketData = uint64 timestampMicroseconds,
 
 public composite TestPacketDPDKSource {   
 	graph   
-        // One instance per NIC port/queue -- e.g. 4 NICs each with
-	// a single queue require 4 instances.  Note that the coreMask 
-        // parameter should be constant for all instances.
+        // One DPDK operator per NIC port/queue.  In this example we have 1 port 
+        // with 2 queues, so 2 PacketDPDKSource operators are required.
+
         (stream<PacketData>  PacketStream_0 ) = PacketDPDKSource() {
             param
-                coreMask: "0x3";
-                lcore   : 1;
-                nicPort : 0;
-                nicQueue: 0;
+                // Parameters for the DPDK environment on this host.
+                lcoreMaster: 0;     // Run the master operator on core 0.
+
+                // Parameters for this specific operator.
+                lcore   : 1;     // Run this ingest operator on core 1.
+                nicPort : 0;     // Bind to NIC port 0
+                nicQueue: 0;     // Bind to NIC queue 0
                 promiscuous: true;
                 metricsInterval: 1.0;
-            output 
+            output
                 PacketStream_0:
                     timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
                     packet = PACKET_DATA(),
                     length = (uint64) PACKET_LENGTH();
-        } 
+        }
+
+        (stream<PacketData>  PacketStream_1 ) = PacketDPDKSource() {
+            param
+                // Parameters for this specific operator.
+                lcore   : 2;     // Run this ingest operator on core 2.
+                nicPort : 0;     // Bind to NIC port 0
+                nicQueue: 1;     // Bind to NIC queue 1
+                promiscuous: true;
+                metricsInterval: 1.0;
+            output
+                PacketStream_1:
+                    timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
+                    packet = PACKET_DATA(),
+                    length = (uint64) PACKET_LENGTH();
+        }
 
         () as FS_PacketData_0 = FileSink( PacketStream_0 ) {
             param
                 file : "PacketStream0.out";
         }
+
+        () as FS_PacketData_1 = FileSink( PacketStream_1 ) {
+            param
+                file : "PacketStream1.out";
+        }
+
+        // All of the PacketDPDKSource operators must run in the same PE (process).
 	config
 	    placement : partitionColocation('SinglePE');
 	    tracing   : trace;
