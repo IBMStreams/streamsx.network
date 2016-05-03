@@ -84,8 +84,8 @@ on Streams:
     vi ./build/.config
 
     # Set key parameters
-    COMBINE_LIBS=y
-    LIBRTE_MLX4_PMD=y (MLX4 NIC)
+    CONFIG_RTE_BUILD_COMBINE_LIBS=y
+    CONFIG_RTE_LIBRTE_MLX4_PMD=y (MLX4 NIC)
     CONFIG_RTE_BUILD_SHARED_LIB=y (e1000 NIC)
        OR
     CONFIG_RTE_BUILD_SHARED_LIB=n (MLX4 NIC)
@@ -107,7 +107,7 @@ on Streams:
 
     cd /toolkit-directory/com.ibm.streamsx.network/impl/src/source/dpdk
     make
-    cp streams_source.h /toolkit-directory/com.ibm.streamsx.network/impl/lib/include/source/
+    cp streams_source.h /toolkit-directory/com.ibm.streamsx.network/impl/include/source/
     cp build/lib/libstreams_source.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/source/
 
 * Build the Streams example application with the following steps:
