@@ -25,10 +25,14 @@ type
 					rstring postalCode, 
 					float64 latitude, 
 					float64 longitude ; 
-	
+/**
+ * 32-bit ASN number 
+ */
 type
 	IPASNumber_t = uint32;
-	
+/**
+ * ASN record associated with the input IP address
+ */	
 type
 	IPASNInfo_t = rstring;
 			  	 				
