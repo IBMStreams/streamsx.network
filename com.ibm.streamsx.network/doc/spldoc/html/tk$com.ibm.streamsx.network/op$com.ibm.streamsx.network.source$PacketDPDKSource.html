@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketDPDKSource</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.2</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketDPDKSource</p>
 
 </div>
 
@@ -150,8 +150,8 @@ make config T=ppc_64-power8-linuxapp-gcc
 vi ./build/.config
 
 # Set key parameters
-COMBINE_LIBS=y
-LIBRTE_MLX4_PMD=y (MLX4 NIC)
+CONFIG_RTE_BUILD_COMBINE_LIBS=y
+CONFIG_RTE_LIBRTE_MLX4_PMD=y (MLX4 NIC)
 CONFIG_RTE_BUILD_SHARED_LIB=y (e1000 NIC)
    OR
 CONFIG_RTE_BUILD_SHARED_LIB=n (MLX4 NIC)
@@ -180,7 +180,7 @@ cp build/lib/libdpdk.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/sour
 <pre class="pre codeblock">
 cd /toolkit-directory/com.ibm.streamsx.network/impl/src/source/dpdk
 make
-cp streams_source.h /toolkit-directory/com.ibm.streamsx.network/impl/lib/include/source/
+cp streams_source.h /toolkit-directory/com.ibm.streamsx.network/impl/include/source/
 cp build/lib/libstreams_source.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/source/
 </pre>
 
@@ -322,12 +322,12 @@ Packet output can be found in the "data" directory.
 
   <dd class="dd">This operator supports 6 parameters.
 <p class="p"> Required: 
-<a class="xref" href="#spldoc_operator__parameter__coreMask">coreMask</a>, <a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>
+<a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
+<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>
 
 </p>
 </dd>
@@ -419,15 +419,22 @@ Packet output can be found in the "data" directory.
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 6 parameters.<dl class="dl">
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__coreMask"><!-- --></a><tt class="ph tt">coreMask</tt></dt>
+This operator supports 6 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>
 
-     <dd class="dd">
-<p class="p">Hex bit mask listing the cores used for DPDK polling loops. The low order bit corresponds to the master lcore and all other bits indicate cores that will be assigned to ports/queues.
 </p>
 
-<p class="p">Note that only the first instance of the PacketDPDKSource must set this parm.  All others are ignored.
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>
+
+</p>
+<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcore"><!-- --></a><tt class="ph tt">lcore</tt></dt>
+
+     <dd class="dd">
+<p class="p">Logical core number on which this operator will run.
 </p>
 
   <dl class="dl">
@@ -435,7 +442,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
@@ -456,10 +463,10 @@ This operator supports 6 parameters.<dl class="dl">
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcoreMaster"><!-- --></a><tt class="ph tt">lcoreMaster</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
+<p class="p">Logical core number to be used for the master DPDK thread.
 </p>
 
   <dl class="dl">
@@ -467,7 +474,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
@@ -488,10 +495,13 @@ This operator supports 6 parameters.<dl class="dl">
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcore"><!-- --></a><tt class="ph tt">lcore</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
 
      <dd class="dd">
-<p class="p">Logical core number on which this operator will run.
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+</p>
+
+<p class="p">The default value is '10.0'.
 </p>
 
   <dl class="dl">
@@ -499,10 +509,13 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
@@ -549,7 +562,7 @@ This operator supports 6 parameters.<dl class="dl">
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
@@ -570,7 +583,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicQueue"><!-- --></a><tt class="ph tt">nicQueue</tt></dt>
 
      <dd class="dd">
-<p class="p">NIC queue of type uint32 which sources packets for this operator instance.  Use of this parameter  is not yet implemented in the PacketDPDKSource operator but is included for future enhancements.
+<p class="p">NIC queue of type int32 which sources packets for this operator instance.
 </p>
 
   <dl class="dl">
@@ -581,7 +594,7 @@ This operator supports 6 parameters.<dl class="dl">
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
@@ -599,13 +612,10 @@ This operator supports 6 parameters.<dl class="dl">
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
-</p>
-
-<p class="p">The default value is '10.0'.
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
 </p>
 
   <dl class="dl">
@@ -613,10 +623,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
@@ -713,7 +720,7 @@ This operator supports 6 parameters.<dl class="dl">
   <dt class="dt dlterm"><tt class="ph tt">streams_source interface library to dpdk.</tt>  </dt>
 
 <dd class="dd"/>
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">streams_source, dpdk</tt></dd>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">streams_source</tt></dd>
 
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/source</tt></dd>
 
