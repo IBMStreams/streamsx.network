@@ -237,6 +237,9 @@ private:
 
   inline __attribute__((always_inline))
   SPL::uint32 JMIRROR_SESSION_ID() { return headers.jmirrorHeader ? ntohl(headers.jmirrorHeader->jmirrorHeader.sessionIdentifier) : 0; }
+  
+  inline __attribute__((always_inline))
+  SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
 
   // ------------------------------------------------------------------------------------------
 

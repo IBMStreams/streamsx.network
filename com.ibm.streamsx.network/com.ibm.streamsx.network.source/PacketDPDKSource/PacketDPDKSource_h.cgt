@@ -138,7 +138,8 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 	SPL::boolean TCP_FLAGS_RESET() { return headers.tcpHeader ? headers.tcpHeader->rst : false; }
 	SPL::boolean TCP_FLAGS_SYN() { return headers.tcpHeader ? headers.tcpHeader->syn : false; }
 	SPL::boolean TCP_FLAGS_FIN() { return headers.tcpHeader ? headers.tcpHeader->fin : false; }
-	SPL::uint16 TCP_WINDOW() { return headers.tcpHeader ? ntohs(headers.tcpHeader->window) : 0; }
+	SPL::uint16 TCP_WINDOW() { return headers.tcpHeader ? ntohs(headers.tcpHeader->window) : 0; }	
+    SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
 }; 
 
 <%SPL::CodeGen::headerEpilogue($model);%>

@@ -61,19 +61,23 @@ private:
   SPL::uint16 DNS_IDENTIFIER() { return ntohs(parser.dnsHeader->identifier); }
 
   inline __attribute__((always_inline))
-  SPL::uint8 DNS_OPCODE() { return parser.dnsHeader->opcodeField; }
+  SPL::uint8 DNS_OPCODE() { return parser.dnsHeader->flags.indFlags.opcodeField; }
 
   inline __attribute__((always_inline))
-  SPL::uint8 DNS_RESPONSE_CODE() { return parser.dnsHeader->responseCode; }
+  SPL::uint8 DNS_RESPONSE_CODE() { return parser.dnsHeader->flags.indFlags.responseCode; }
 
   inline __attribute__((always_inline))
-  SPL::boolean DNS_RESPONSE_FLAG() { return parser.dnsHeader->responseFlag; }
+  SPL::boolean DNS_RESPONSE_FLAG() { return parser.dnsHeader->flags.indFlags.responseFlag; }
 
   inline __attribute__((always_inline))
-  SPL::boolean DNS_AUTHORITATIVE_FLAG() { return parser.dnsHeader->authoritativeFlag; }
+  SPL::boolean DNS_AUTHORITATIVE_FLAG() { return parser.dnsHeader->flags.indFlags.authoritativeFlag; }
 
   inline __attribute__((always_inline))
-  SPL::boolean DNS_TRUNCATION_FLAG() { return parser.dnsHeader->truncatedFlag; }
+  SPL::boolean DNS_TRUNCATION_FLAG() { return parser.dnsHeader->flags.indFlags.truncatedFlag; }
+  
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_ALL_FLAGS() { return parser.dnsHeader->flags.allFlags; }
+  
 
   inline __attribute__((always_inline))
   SPL::uint16 DNS_QUESTION_COUNT() { return parser.questionCount; }
