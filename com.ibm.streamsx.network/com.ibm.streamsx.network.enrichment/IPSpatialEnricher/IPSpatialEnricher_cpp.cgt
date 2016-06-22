@@ -27,7 +27,7 @@ IPSpatialEnricherCommon::validate($model);
 using namespace SPL;
 using namespace std;
 
-#define BLOCKSFILE_FIELD_COUNT 9
+#define MIN_BLOCKSFILE_FIELD_COUNT 9
 #define LOCATIONFILE_FIELD_COUNT 13
 
 #define BLOCKS_CAPACITY 3000000
@@ -399,9 +399,9 @@ void MY_OPERATOR::parseBlocksFile(rstring filename, protocol proto)
 			lineTokens.push_back(streams_boost::trim_copy_if(*it, streams_boost::is_any_of("\"")));
 		}
 		
-		if(lineTokens.size() != BLOCKSFILE_FIELD_COUNT)
+		if(lineTokens.size() < MIN_BLOCKSFILE_FIELD_COUNT)
 		{
-			SPLAPPLOG(L_ERROR, "Unknown error while parsing blocks record: " << line, IP_SPATIAL);
+			SPLAPPLOG(L_ERROR, "Number of fields in record is less than expected (found: " << lineTokens.size() << ", min_expected: " << MIN_BLOCKSFILE_FIELD_COUNT << ", line: " << line, IP_SPATIAL);
 			continue;
 		}
 		
