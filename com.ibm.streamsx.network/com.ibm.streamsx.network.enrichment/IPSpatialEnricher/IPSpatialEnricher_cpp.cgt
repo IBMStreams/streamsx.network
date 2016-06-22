@@ -401,7 +401,7 @@ void MY_OPERATOR::parseBlocksFile(rstring filename, protocol proto)
 		
 		if(lineTokens.size() < MIN_BLOCKSFILE_FIELD_COUNT)
 		{
-			SPLAPPLOG(L_ERROR, "Number of fields in record is less than expected (found: " << lineTokens.size() << ", min_expected: " << MIN_BLOCKSFILE_FIELD_COUNT << ", line: " << line, IP_SPATIAL);
+			SPLAPPLOG(L_ERROR, "Number of fields in record is less than expected (found: " << lineTokens.size() << ", min_expected: " << MIN_BLOCKSFILE_FIELD_COUNT << ", line: " << line << ")", IP_SPATIAL);
 			continue;
 		}
 		
