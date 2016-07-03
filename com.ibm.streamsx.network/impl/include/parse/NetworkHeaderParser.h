@@ -12,6 +12,8 @@
 #include <netinet/udp.h>
 #include <netinet/tcp.h>
 
+#include <SPL/Runtime/Type/SPLType.h>
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 // this class parses ethernet, IPv4, IPv6, UDP, and TCP headers in network packets
@@ -37,6 +39,11 @@ class NetworkHeaderParser {
 
     static const uint16_t jmirrorPort = 30030;
 
+    struct VlanHeader {
+    	uint16_t   id;
+    	uint16_t   proto;  // type
+    }  __attribute__((packed)) ;
+
 
  public:
 
@@ -53,6 +60,7 @@ class NetworkHeaderParser {
     struct JMirrorHeaders* jmirrorHeader; int jmirrorHeaderLength;
 
     struct ethhdr*  etherHeader; int etherHeaderLength;
+    struct VlanHeader* vlanHeader; int vlanHeaderLength;
     struct iphdr*   ipv4Header;  int ipv4HeaderLength;
     struct ip6_hdr* ipv6Header;  int ipv6HeaderLength;
     struct udphdr*  udpHeader;   int udpHeaderLength;
@@ -77,6 +85,7 @@ class NetworkHeaderParser {
 
         // clear network header pointers and lengths to be returned
         jmirrorHeader = NULL; jmirrorHeaderLength = 0;
+        vlanHeader = NULL;  vlanHeaderLength = 0;
         etherHeader = NULL; etherHeaderLength = 0;
         ipv4Header = NULL; ipv4HeaderLength = 0;
         ipv6Header = NULL; ipv6HeaderLength = 0;
@@ -89,9 +98,26 @@ class NetworkHeaderParser {
 
         // overlay an ethernet header on the buffer and step over it
         etherHeader = (struct ethhdr*)buffer;
+        uint16_t etherType = ntohs(etherHeader->h_proto);
         etherHeaderLength = sizeof(struct ethhdr); // ... plus length of optional VLAN tag ?
         buffer += etherHeaderLength;
         length -= etherHeaderLength;
+
+        // Check for 0 to N VLAN tags
+        if (ETH_P_8021Q == etherType) {
+          vlanHeader = (struct VlanHeader*) buffer;
+          vlanHeaderLength = sizeof(VlanHeader);
+          struct VlanHeader *nextVlan = vlanHeader;
+          etherType = ntohs(nextVlan->proto);
+          while(ETH_P_8021Q == etherType) {
+            vlanHeaderLength += sizeof(VlanHeader);
+            nextVlan++;
+            etherType = ntohs(nextVlan->proto);
+          } ;
+      	  buffer += vlanHeaderLength;
+      	  length -= vlanHeaderLength;
+        }
+
 
         // if the buffer contains a Juniper Networks mirror packet, step over the 'jmirror' headers
         // (note that field tests are not in natural order so the 'if' will fail faster in the usual case)
@@ -109,7 +135,7 @@ class NetworkHeaderParser {
         }
 
         // if the buffer contains an IPv4 packet, overlay an IPv4 header on it
-        if ( ntohs(etherHeader->h_proto)==ETH_P_IP && length>=sizeof(struct ip) && ((struct iphdr*)buffer)->version==4 ) {
+        if ( etherType == ETH_P_IP && length>=sizeof(struct ip) && ((struct iphdr*)buffer)->version==4 ) {
             ipv4Header = (struct iphdr*)buffer;
             ipv4HeaderLength = ipv4Header->ihl * 4;
             buffer += ipv4HeaderLength;
@@ -117,7 +143,7 @@ class NetworkHeaderParser {
         }
 
         // if the buffer contains an IPv6 packet, overlay an IPv6 header on it
-        if ( ntohs(etherHeader->h_proto)==ETH_P_IPV6 && length>=sizeof(struct ip6_hdr) && (((struct ip6_hdr*)buffer)->ip6_vfc)>>4==6 ) {
+        if ( etherType ==ETH_P_IPV6 && length>=sizeof(struct ip6_hdr) && (((struct ip6_hdr*)buffer)->ip6_vfc)>>4==6 ) {
             ipv6Header = (struct ip6_hdr*)buffer;
             ipv6HeaderLength = sizeof(struct ip6_hdr); // ... plus length of optional extension headers ?
             buffer += ipv6HeaderLength;
@@ -150,6 +176,14 @@ class NetworkHeaderParser {
             payload = buffer;
             payloadLength = length;
         }
+    }
+
+    SPL::list<SPL::uint16> convertVlanTagsToList() {
+    	SPL::list<SPL::uint16> vList;
+    	int numIds = vlanHeaderLength / sizeof(struct VlanHeader);
+    	for (int i = 0;  i < numIds; i++)
+    	  vList.push_back((vlanHeader + i)->id);
+    	return(vList);
     }
 
 };

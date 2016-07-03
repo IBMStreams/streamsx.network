@@ -484,7 +484,16 @@ if it has one, or zero if otherwise.
 
             </function:description>
             <function:prototype>public uint32 JMIRROR_SESSION_ID()</function:prototype>
-          </function:function>
+          </function:function>  
+            
+          <function:function>
+            <function:description>
+
+This function returns a list of 0 to N VLAN tags found in the current packet.
+
+            </function:description>
+            <function:prototype>public list&lt;uint16> VLAN_TAGS()</function:prototype>
+          </function:function>          
 
     </function:functions>
   </function:functionSet>

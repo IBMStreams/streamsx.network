@@ -42,31 +42,36 @@ class DNSMessageParser {
 
   struct DNSHeader {
     uint16_t identifier;
+    union {
+      struct {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-    uint8_t recursionDesiredFlag:1;
-    uint8_t truncatedFlag:1;
-    uint8_t authoritativeFlag:1;
-    uint8_t opcodeField:4;
-    uint8_t responseFlag:1;
-    uint8_t responseCode:4;
-    uint8_t nonauthenticatedFlag:1;
-    uint8_t authenticatedFlag:1;
-    uint8_t reserved:1;
-    uint8_t recursionAvailableFlag:1;
+        uint8_t recursionDesiredFlag:1;
+        uint8_t truncatedFlag:1;
+        uint8_t authoritativeFlag:1;
+        uint8_t opcodeField:4;
+        uint8_t responseFlag:1;
+        uint8_t responseCode:4;
+        uint8_t nonauthenticatedFlag:1;
+        uint8_t authenticatedFlag:1;
+        uint8_t reserved:1;
+        uint8_t recursionAvailableFlag:1;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-    uint8_t responseFlag:1;
-    uint8_t opcodeField:4;
-    uint8_t authoritativeFlag:1;
-    uint8_t truncatedFlag:1;
-    uint8_t recursionDesiredFlag:1;
-    uint8_t recursionAvailableFlag:1;
-    uint8_t reserved:1;
-    uint8_t authenticatedFlag:1;
-    uint8_t nonauthenticatedFlag:1;
-    uint8_t responseCode:4;
+        uint8_t responseFlag:1;
+        uint8_t opcodeField:4;
+        uint8_t authoritativeFlag:1;
+        uint8_t truncatedFlag:1;
+        uint8_t recursionDesiredFlag:1;
+        uint8_t recursionAvailableFlag:1;
+        uint8_t reserved:1;
+        uint8_t authenticatedFlag:1;
+        uint8_t nonauthenticatedFlag:1;
+        uint8_t responseCode:4;
 #else
 # error "sorry, __BYTE_ORDER not setm check <bits/endian.h>"
 #endif
+      } indFlags;
+      uint16_t allFlags;
+    } flags;
     uint16_t questionCount;
     uint16_t answerCount;
     uint16_t nameserverCount;
