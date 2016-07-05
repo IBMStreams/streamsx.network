@@ -1,0 +1,114 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.parse::*;
+
+composite TestDNSMessageParserERSPAN {
+
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_erspan_dns+dhcp.pcap" );
+    expression<uint32> $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1");
+
+    type
+
+    PacketType =
+        timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch
+        rstring dstAddress,             // string representation of IP destination address
+        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
+
+    // input to 'predictive blacklisting' analytic
+    FullDNSResponseMessage_t =
+      timestamp captureTime,
+      rstring dstAddress,
+      rstring questionName,
+      rstring questionType,
+      uint8 responseCode,
+      uint16 answerCount,
+      list<rstring> answerNames,
+      list<rstring> answerData,
+      list<uint16> answerTypes,
+      list<uint32> answerTTLs,
+      uint16 nameserverCount,
+      list<rstring> nameserverNames,
+      list<rstring> nameserverData,
+      list<uint16> nameserverTypes,
+      list<uint32> nameserverTTLs,
+      uint16 additionalCount,
+      list<rstring> additionalNames,
+      list<rstring> additionalData,
+      list<uint16> additionalTypes,
+      list<uint32> additionalTTLs;
+
+    // input to 'domain profiling' and 'host profiling' analytics
+    ShortDNSResponseMessage_t =
+      timestamp captureTime,
+      rstring dstAddress,
+      rstring questionName,
+      uint8 responseCode,
+      list<rstring> answerData,
+      list<rstring> additionalData;
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            processorAffinity: $processorAffinity;
+            //inputFilter: "udp port 53"; // ... when packets are not encapsulated
+            inputFilter: "ip proto 47"; // ... when packets are encapsulated with GRE
+            //inputFilter: "udp port 53 or ip proto 47"; // ... when file includes encapsulated and unencapsulated DNS packets
+            outputFilters: UDP_PORT(53uh); // ... when packets are encapsulated
+            metricsInterval: 0.0;
+        output Out:
+            captureTime = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
+            dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            dnsMessage = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserERSPAN.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+    ( stream<FullDNSResponseMessage_t> FullDNSResponseMessageStream as OutFull ;
+      stream<ShortDNSResponseMessage_t> ShortDNSResponseMessageStream as OutShort ) = DNSMessageParser(PacketStream) {
+      logic state: {
+        map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+        map<uint16,boolean> dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
+      }
+      param
+          messageAttribute: dnsMessage;
+          outputFilters: DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError(),
+                         DNS_RESPONSE_FLAG() && DNS_QUESTION_TYPE() in dnsAnalysisTypes && !parseError();
+      output
+      OutFull:
+          questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
+          responseCode = DNS_RESPONSE_CODE(),
+          answerCount = DNS_ANSWER_COUNT(),
+          answerNames = DNS_ANSWER_NAMES(),
+          answerData = DNS_ANSWER_DATA(),
+          answerTypes = DNS_ANSWER_TYPES(),
+          answerTTLs = DNS_ANSWER_TTLS(),
+          nameserverCount = DNS_NAMESERVER_COUNT(),
+          nameserverNames = DNS_NAMESERVER_NAMES(),
+          nameserverData = DNS_NAMESERVER_DATA(),
+          nameserverTypes = DNS_NAMESERVER_TYPES(),
+          nameserverTTLs = DNS_NAMESERVER_TTLS(),
+          additionalCount = DNS_ADDITIONAL_COUNT(),
+          additionalNames = DNS_ADDITIONAL_NAMES(),
+          additionalData = DNS_ADDITIONAL_DATA(),
+          additionalTypes = DNS_ADDITIONAL_TYPES(),
+          additionalTTLs = DNS_ADDITIONAL_TTLS();
+      OutShort:
+          questionName = DNS_QUESTION_NAME(),
+          responseCode = DNS_RESPONSE_CODE(),
+          answerData = DNS_ANSWER_DATA(),
+          additionalData = DNS_ADDITIONAL_DATA();
+    }
+    () as FullDNSResponseMessageSink = FileSink(FullDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserERSPAN.FullDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as ShortDNSResponseMessageSink = FileSink(ShortDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserERSPAN.ShortDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+}
