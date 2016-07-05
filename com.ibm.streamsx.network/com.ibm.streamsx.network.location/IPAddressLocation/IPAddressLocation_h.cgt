@@ -77,6 +77,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
     rstring postalCode;
     double latitude;
     double longitude;
+    double radius;
     CityLocation* location; 
   };
 
@@ -163,6 +164,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
     SPL::float64 locationLongitude(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->longitude : 0.0; }
 
   inline __attribute__((always_inline))
+    SPL::float64 locationRadius(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->radius : 0.0; }
+
+  inline __attribute__((always_inline))
     SPL::rstring locationContinentName(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->continentName : ""; }
 
   inline __attribute__((always_inline))
@@ -219,6 +223,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   inline __attribute__((always_inline))
     SPL::float64 locationLongitude(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->longitude : 0.0; }
+
+  inline __attribute__((always_inline))
+    SPL::float64 locationRadius(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->radius : 0.0; }
 
   inline __attribute__((always_inline))
     SPL::rstring locationContinentName(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->continentName : ""; }
@@ -300,6 +307,12 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
     SPL::list<SPL::float64> locationLongitudes(SPL::list<SPL::uint32> ipv4Addresses) { 
     SPL::list<SPL::float64> results;
     for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationLongitude(*it)); }
+    return results; }
+
+  inline __attribute__((always_inline))
+    SPL::list<SPL::float64> locationRadii(SPL::list<SPL::uint32> ipv4Addresses) { 
+    SPL::list<SPL::float64> results;
+    for(SPL::list<SPL::uint32>::iterator it = ipv4Addresses.begin(); it!=ipv4Addresses.end(); ++it) { results.pushBack(locationRadius(*it)); }
     return results; }
 
   inline __attribute__((always_inline))
