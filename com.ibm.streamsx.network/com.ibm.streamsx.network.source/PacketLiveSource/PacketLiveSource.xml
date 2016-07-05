@@ -33,8 +33,11 @@ the PacketFileSource operator:
 
 * [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
 
-The PacketLiveSource operator steps quietly over 'jmirror' headers prepended to packets
-by Juniper Networks 'mirror encapsulation'.
+The PacketLiveSource operator recognizes these types of packet encapsulation, 
+and steps quietly over their headers:
+
+* Juniper Networks 'jmirror' encapsulation
+* Cisco Systems 'Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation
 
 The PacketLiveSource operator is part of the network toolkit. To use it in an
 application, include this statement in the SPL source file:
@@ -258,9 +261,18 @@ The TCP header and the fields it contains are described here:
 * [http://tools.ietf.org/html/rfc793]
 * [http://linux.die.net/include/netinet/tcp.h]
 
-The 'jmirror' header is described here:
+The Juniper Networks 'jmirror' encapsulation header is described here:
 
 * [http://wiki.wireshark.org/jmirror]
+
+The Cisco Systems ''Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
+
+* [https://tools.ietf.org/html/draft-foschiano-erspan-00]
+
+The 'Generic Route Encapsulation (GRE)' headers used by Cisco ERSPAN encapsulation are described here:
+
+* [https://tools.ietf.org/html/rfc2784]
+* [https://tools.ietf.org/html/rfc1701]
 
 Linux capabilities are described here:
 

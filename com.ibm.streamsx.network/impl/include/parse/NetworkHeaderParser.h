@@ -24,6 +24,7 @@ class NetworkHeaderParser {
 
  private:
 
+
     // structure of Juniper Networks 'jmirror' headers
 
     struct JMirrorHeader {
@@ -39,13 +40,56 @@ class NetworkHeaderParser {
 
     static const uint16_t jmirrorPort = 30030;
 
+
+ public:
+
+
+    // structure of IEEE 802.1Q VLAN extension of ethernet header
+
     struct VlanHeader {
     	uint16_t   id;
     	uint16_t   proto;  // type
     }  __attribute__((packed)) ;
 
 
- public:
+
+    // structure of Generic Routing Encapsulation (GRE) header
+    // as used with Encapsulated Remote Switch Port Analyzer II (ERSPAN2) header
+
+    struct GREHeader {
+      uint16_t flags;                     // flags for optional fields, plus header version
+      static const uint16_t checksumFlag = 0x8000; // checksum field is present
+      static const uint16_t routingFlag  = 0x4000; // routing field is present 
+      static const uint16_t keyFlag      = 0x2000; // key field is present
+      static const uint16_t sequenceFlag = 0x1000; // sequence field is present
+      static const uint16_t strictFlag   = 0x0800; // strict routing is requested
+      static const uint16_t recursion    = 0x0700; // number of encapsulation layers permitted
+      static const uint16_t reserved     = 0x00F8; // reserved flags (should be zero)
+      static const uint16_t version      = 0x0007; // version of this header (must be zero)
+      uint16_t protocolType;              // ether type of encapsulated packet, always 0x88BE for ERSPAN
+      uint16_t checksum[0];               // optional checksum of encapsulated packet, always omitted for ERSPAN
+      uint16_t offset[0];                 // optional offset from routing field to first routing entry, always omitted for ERSPAN
+      uint32_t key[0];                    // optional correlator set by encapsulator, always omitted for ERSPAN
+      uint32_t sequence[0];               // optional sequence number set by encapsulator, almost always included for ERSPAN
+      uint32_t routing[0];                // optional routing field set by encapsulator, always omitted for ERSPAN
+    } __attribute__((packed)) ;
+
+    struct ERSPAN2Header {
+      uint16_t version;                   // header version and VLAN of encapsulated ethernet frame
+      uint16_t flags;                     // flags for encapsulated frame
+      uint32_t index;                     // index or port number of encapsulator
+    } __attribute__((packed)) ;
+
+    struct ERSPAN2Headers {
+      struct iphdr ipHeader;
+      struct GREHeader greHeader;
+      struct ERSPAN2Header erspanHeader;
+      struct ethhdr etherHeader;
+    } __attribute__((packed)) ;
+
+    static const uint8_t greProtocol = 47; // value of IP header 'protocol' field for GRE packets
+    static const uint16_t erspanProtocolType = 0x88BE; // value of GRE header 'protocolType' field for ERSPAN2 packets
+
 
     // The parseNetworkHeaders() function below returns the address and length
     // of the full packet in these variables.
@@ -58,14 +102,13 @@ class NetworkHeaderParser {
     // present, or NULL and zero, if absent.
 
     struct JMirrorHeaders* jmirrorHeader; int jmirrorHeaderLength;
-
+    struct ERSPAN2Headers* erspanHeader; int erspanHeaderLength;
     struct ethhdr*  etherHeader; int etherHeaderLength;
     struct VlanHeader* vlanHeader; int vlanHeaderLength;
     struct iphdr*   ipv4Header;  int ipv4HeaderLength;
     struct ip6_hdr* ipv6Header;  int ipv6HeaderLength;
     struct udphdr*  udpHeader;   int udpHeaderLength;
     struct tcphdr*  tcpHeader;   int tcpHeaderLength;
-
     char*           payload;     int payloadLength;
 
 
@@ -77,6 +120,7 @@ class NetworkHeaderParser {
     // such as those with VLAN tags, or variable-length IPv6 headers, such as
     // those with extension headers
 
+
     void parseNetworkHeaders(char* buffer, int length) {
 
         // store address and length of packet for the output attribute assignment functions
@@ -85,6 +129,7 @@ class NetworkHeaderParser {
 
         // clear network header pointers and lengths to be returned
         jmirrorHeader = NULL; jmirrorHeaderLength = 0;
+        erspanHeader = NULL; erspanHeaderLength = 0;
         vlanHeader = NULL;  vlanHeaderLength = 0;
         etherHeader = NULL; etherHeaderLength = 0;
         ipv4Header = NULL; ipv4HeaderLength = 0;
@@ -100,10 +145,12 @@ class NetworkHeaderParser {
         etherHeader = (struct ethhdr*)buffer;
         uint16_t etherType = ntohs(etherHeader->h_proto);
         etherHeaderLength = sizeof(struct ethhdr); // ... plus length of optional VLAN tag ?
+        //???printf("ethernet: "); for (int i=0; i<etherHeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n");
         buffer += etherHeaderLength;
         length -= etherHeaderLength;
 
-        // Check for 0 to N VLAN tags
+        // if the ethernet header has one or more IEEE 802.1Q VLAN headers, 
+        // remember where they are in the buffer and step over them
         if (ETH_P_8021Q == etherType) {
           vlanHeader = (struct VlanHeader*) buffer;
           vlanHeaderLength = sizeof(VlanHeader);
@@ -118,9 +165,8 @@ class NetworkHeaderParser {
       	  length -= vlanHeaderLength;
         }
 
-
         // if the buffer contains a Juniper Networks mirror packet, step over the 'jmirror' headers
-        // (note that field tests are not in natural order so the 'if' will fail faster in the usual case)
+        // (note that field tests are not in natural order so the inner 'if' will fail faster in the usual case)
         if ( length>=sizeof(struct JMirrorHeaders) ) {
             struct JMirrorHeaders* jmirror = (struct JMirrorHeaders*)buffer;
             if ( ntohs(jmirror->udpHeader.dest)==jmirrorPort &&
@@ -134,10 +180,37 @@ class NetworkHeaderParser {
             }
         }
 
+        // if the buffer contains a GRE ERSPAN packet, step over the GRE and ERSPAN headers
+        // (note that field tests are not in natural order so the inner 'if' will fail faster in the usual case)
+        if ( length>=sizeof(struct ERSPAN2Headers) ) {
+            struct ERSPAN2Headers* erspan = (struct ERSPAN2Headers*)buffer;
+            if ( ntohs(erspan->greHeader.protocolType)==erspanProtocolType && 
+                 erspan->ipHeader.protocol==greProtocol && 
+                 erspan->ipHeader.version==4 &&
+                 erspan->ipHeader.ihl==5 ) {
+              uint16_t greHeaderFlags = ntohs(erspan->greHeader.flags);
+              int greHeaderLength = 
+                ( greHeaderFlags&GREHeader::checksumFlag ? 4 : 0 ) +
+                ( greHeaderFlags&GREHeader::routingFlag ? 4 : 0 ) +
+                ( greHeaderFlags&GREHeader::keyFlag ? 4 : 0 ) +
+                ( greHeaderFlags&GREHeader::sequenceFlag ? 4 : 0 );
+              erspanHeader = (struct ERSPAN2Headers*)buffer;
+              erspanHeaderLength = sizeof(struct ERSPAN2Headers) + greHeaderLength;
+              //???printf("IPv4+GRE+%d+ERSPAN+ethernet: ", greHeaderLength); for (int i=0; i<erspanHeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n");
+              etherHeader = (struct ethhdr*)( (uint8_t*)(&erspan->etherHeader) + greHeaderLength );
+              etherHeaderLength = sizeof(struct ethhdr); // ... plus length of optional VLAN tag ?
+              //???printf("inner ethernet: "); for (int i=0; i<etherHeaderLength; i++) printf("%02x ", ((uint8_t*)etherHeader)[i]); printf("\n");
+              buffer += sizeof(struct ERSPAN2Headers) + greHeaderLength;
+              length -= sizeof(struct ERSPAN2Headers) + greHeaderLength;
+            }
+        }
+
+
         // if the buffer contains an IPv4 packet, overlay an IPv4 header on it
         if ( etherType == ETH_P_IP && length>=sizeof(struct ip) && ((struct iphdr*)buffer)->version==4 ) {
             ipv4Header = (struct iphdr*)buffer;
             ipv4HeaderLength = ipv4Header->ihl * 4;
+            //???printf("IPv4: "); for (int i=0; i<ipv4HeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n"); 
             buffer += ipv4HeaderLength;
             length -= ipv4HeaderLength;
         }
@@ -146,6 +219,7 @@ class NetworkHeaderParser {
         if ( etherType ==ETH_P_IPV6 && length>=sizeof(struct ip6_hdr) && (((struct ip6_hdr*)buffer)->ip6_vfc)>>4==6 ) {
             ipv6Header = (struct ip6_hdr*)buffer;
             ipv6HeaderLength = sizeof(struct ip6_hdr); // ... plus length of optional extension headers ?
+            //???printf("IPv6: "); for (int i=0; i<ipv6HeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n"); 
             buffer += ipv6HeaderLength;
             length -= ipv6HeaderLength;
         }
@@ -158,6 +232,7 @@ class NetworkHeaderParser {
              ( ipv6Header && ipv6Header->ip6_nxt==IPPROTO_UDP && length>=sizeof(struct udphdr) ) ) {
             udpHeader = (struct udphdr*)buffer;
             udpHeaderLength = sizeof(struct udphdr);
+            //???printf("UDP: "); for (int i=0; i<udpHeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n"); 
             buffer += udpHeaderLength;
             length -= udpHeaderLength;
         }
@@ -167,6 +242,7 @@ class NetworkHeaderParser {
              ( ipv6Header && ipv6Header->ip6_nxt==IPPROTO_TCP && length>=sizeof(struct tcphdr) ) ) {
             tcpHeader = (struct tcphdr*)buffer;
             tcpHeaderLength = tcpHeader->doff * 4;
+            //???printf("TCP: "); for (int i=0; i<tcpHeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n"); 
             buffer += tcpHeaderLength;
             length -= tcpHeaderLength;
         }
