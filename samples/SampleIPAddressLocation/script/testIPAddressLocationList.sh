@@ -46,7 +46,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-geographyDirectory=$projectDirectory/data/www.maxmind.com+w3.ibm.com
+geographyDirectory=$projectDirectory/data/www.maxmind.com
+#geographyDirectory=$projectDirectory/data/www.maxmind.com+w3.ibm.com
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
 )
 

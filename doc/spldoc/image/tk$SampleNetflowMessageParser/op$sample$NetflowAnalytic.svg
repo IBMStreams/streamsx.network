@@ -62,7 +62,7 @@
       /><polygon points=" 133 61 126 57 126 65" style="stroke-miterlimit:10; stroke-width:1; clip-path:url(#clipPath1); stroke:none; stroke-linejoin:miter;"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="94.0" y="43.0" width="142.98" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
+    ><rect x="94.0" y="43.0" width="148.28" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
       /><text x="95.0" y="53.0"
       >NetflowAnalyticResultStream</text
       ><set attributeName="visibility" from="hidden" end="sdt0.mouseout" to="visible" begin="sdt0.mouseover"

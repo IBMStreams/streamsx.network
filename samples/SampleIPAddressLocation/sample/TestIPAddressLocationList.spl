@@ -65,13 +65,15 @@ composite TestIPAddressLocationList {
       list<rstring> dnsAnswerCountryNames,
       list<float64> dnsAnswerLatitudes,
       list<float64> dnsAnswerLongitudes,
+      list<float64> dnsAnswerRadii,
       list<rstring> dnsAdditionalNames,
       list<rstring> dnsAdditionalData,
       list<rstring> dnsAdditionalCityNames,
       list<rstring> dnsAdditionalStateNames,
       list<rstring> dnsAdditionalCountryNames,
       list<float64> dnsAdditionalLatitudes,
-      list<float64> dnsAdditionalLongitudes;
+      list<float64> dnsAdditionalLongitudes,
+      list<float64> dnsAdditionalRadii;
 
     DNSErrorType =
       uint64 packetNumber,              // sequence number of packet, as emitted by operator
@@ -140,13 +142,15 @@ composite TestIPAddressLocationList {
         dnsAnswerCountryNames = locationCountryNames(DNS_ANSWER_IPV4_ADDRESSES),
         dnsAnswerLatitudes = locationLatitudes(DNS_ANSWER_IPV4_ADDRESSES),
         dnsAnswerLongitudes = locationLongitudes(DNS_ANSWER_IPV4_ADDRESSES),
+        dnsAnswerRadii = locationRadii(DNS_ANSWER_IPV4_ADDRESSES),
         dnsAdditionalNames = DNS_ADDITIONAL_NAMES,
         dnsAdditionalData = DNS_ADDITIONAL_DATA,
         dnsAdditionalCityNames = locationCityNames(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
         dnsAdditionalStateNames = locationSubdivision1Names(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
         dnsAdditionalCountryNames = locationCountryNames(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
         dnsAdditionalLatitudes = locationLatitudes(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
-        dnsAdditionalLongitudes = locationLongitudes(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA));
+        dnsAdditionalLongitudes = locationLongitudes(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+        dnsAdditionalRadii = locationRadii(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA));
     }
     () as DNSLocationStreamSink = FileSink(DNSLocationStream) { param file: "debug.TestIPAddressLocationList.DNSLocationStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 

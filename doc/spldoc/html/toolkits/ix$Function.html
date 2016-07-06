@@ -42,6 +42,12 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html#spldoc_functions__CAPTURE_TSC_MICROSECONDS">CAPTURE_TSC_MICROSECONDS()</a></dt>
+
+  <dd class="dd">This function returns the value of the machine's timestamp counter when the packet was  captured, that is, the number of microseconds since the machine was booted.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_ADDRESS_LEASE_TIME">DHCP_ADDRESS_LEASE_TIME()</a></dt>
 
   <dd class="dd">          This parser result function returns the           duration of the address lease, in seconds, if DHCP option 51 is included           in the message, or zero if not.</dd>
@@ -588,6 +594,12 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></dt>
+
+  <dd class="dd">          This parser result function returns a 16 bit mask containing all flags in the DNS header of the current message.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_ADDRESS">DNS_ANSWER_ADDRESS()</a></dt>
 
   <dd class="dd">          This parser result function returns the 'data' field of the first 'answer' resource record,           if there is one with a 'type' value            of '1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),           as a string value,           or an empty string if not.</dd>
@@ -777,6 +789,18 @@
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_TRUNCATION_FLAG">DNS_TRUNCATION_FLAG()</a></dt>
 
   <dd class="dd">          This parser result function returns <tt class="ph tt">true</tt> if the 'truncation' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html#spldoc_functions__ERSPAN_DST_ADDRESS">ERSPAN_DST_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the value of the GRE ERSPAN destination address in the current packet,  if it has one, or zero if otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html#spldoc_functions__ERSPAN_SRC_ADDRESS">ERSPAN_SRC_ADDRESS()</a></dt>
+
+  <dd class="dd">This function returns the value of the GRE ERSPAN source address in the current packet,  if it has one, or zero if otherwise.</dd>
 
 
 
@@ -3068,13 +3092,19 @@
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html#spldoc_functions__UDP_PORT.uint16">UDP_PORT(uint16)</a></dt>
 
-  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet has a UDP source or destination port, or <tt class="ph tt">false</tt> if not.</dd>
+  <dd class="dd">This function returns <tt class="ph tt">true</tt> if the current packet is a UDP packet and the argument matches its source or destination port, or <tt class="ph tt">false</tt> otherwise.</dd>
 
 
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html#spldoc_functions__UDP_SRC_PORT">UDP_SRC_PORT()</a></dt>
 
   <dd class="dd">This function returns the UDP source port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html#spldoc_functions__VLAN_TAGS">VLAN_TAGS()</a></dt>
+
+  <dd class="dd">This function returns a list of 0 to N VLAN tags found in the current packet.</dd>
 
 
 
@@ -3699,6 +3729,24 @@
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationPostalCodes.list:.:uint32:.:">locationPostalCodes(list&lt;uint32&gt;)</a></dt>
 
   <dd class="dd">          This result function returns a list of postal codes corresponding to the specified list of IP version 4 addresses.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationRadii.list:.:uint32:.:">locationRadii(list&lt;uint32&gt;)</a></dt>
+
+  <dd class="dd">          This result function returns a list of accuracy radii corresponding to the specified list of IP version 4 addresses.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationRadius.list:.:uint8:.::..:16:..:">locationRadius(list&lt;uint8&gt;[16])</a></dt>
+
+  <dd class="dd">          This result function returns the accuracy of the latitude and longitude,           expressed as a radius,           for the specified IP version 6 address,           if its location was found, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationRadius.uint32">locationRadius(uint32)</a></dt>
+
+  <dd class="dd">          This result function returns the accuracy of the latitude and longitude           for the specified IP version 4 address,           expressed as a radius,           if its location was found,            or zero if not.</dd>
 
 
 

@@ -79,6 +79,17 @@
 
       <function:function>
         <function:description>
+          This result function returns the accuracy of the latitude and longitude
+          for the specified IP version 4 address,
+          expressed as a radius,
+          if its location was found, 
+          or zero if not.
+        </function:description>
+        <function:prototype>public float64 locationRadius(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
           This result function returns the continent name
           for the specified IP version 4 address,
           if its location was found and it has one, or an empty string if not.
@@ -250,6 +261,16 @@
 
       <function:function>
         <function:description>
+          This result function returns the accuracy of the latitude and longitude,
+          expressed as a radius,
+          for the specified IP version 6 address,
+          if its location was found, or zero if not.
+        </function:description>
+        <function:prototype>public float64 locationRadius(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
           This result function returns the continent name
           for the specified IP version 6 address,
           if its location was found and it has one, or an empty string if not.
@@ -399,7 +420,7 @@
       <function:function>
         <function:description>
           This result function returns a list of latitudes corresponding to the specified list of IP version 4 addresses.
-          Empty strings are returned for IP addresses where no location is found.
+          Zeros are returned for IP addresses where no location is found.
         </function:description>
         <function:prototype>public list&lt;float64> locationLatitudes(list&lt;uint32> ipv4Addresses)</function:prototype>
       </function:function>
@@ -407,9 +428,17 @@
       <function:function>
         <function:description>
           This result function returns a list of longitudes corresponding to the specified list of IP version 4 addresses.
-          Empty strings are returned for IP addresses where no location is found.
+          Zeroes are returned for IP addresses where no location is found.
         </function:description>
         <function:prototype>public list&lt;float64> locationLongitudes(list&lt;uint32> ipv4Addresses)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns a list of accuracy radii corresponding to the specified list of IP version 4 addresses.
+          Zeros are returned for IP addresses where no location is found.
+        </function:description>
+        <function:prototype>public list&lt;float64> locationRadii(list&lt;uint32> ipv4Addresses)</function:prototype>
       </function:function>
 
       <function:function>

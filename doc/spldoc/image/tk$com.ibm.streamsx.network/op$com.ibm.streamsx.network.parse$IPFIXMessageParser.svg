@@ -56,19 +56,19 @@
     /></g
     ><rect width="6.0" x="162.0" height="16.0" id="sdt5" y="42.0" style="stroke-opacity:0; fill-opacity:0;"
     /><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="40.8" y="4.0" width="103.759995" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
+    ><rect x="40.8" y="4.0" width="105.88" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
       /><text x="41.8" y="14.0"
       >IPFIXMessageParser</text
       ><set attributeName="visibility" from="hidden" end="sdt0.mouseout" to="visible" begin="sdt0.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="130.25" y="89.0" width="308.34" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
+    ><rect x="130.25" y="89.0" width="318.93997" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
       /><text x="131.25" y="99.0"
       >Operator always provides a single threaded execution context.</text
       ><set attributeName="visibility" from="hidden" end="sdt1.mouseout" to="visible" begin="sdt1.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="47.65" y="77.0" width="229.9" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="26.0"
+    ><rect x="47.65" y="77.0" width="236.26" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="26.0"
       /><text x="48.65" y="87.0"
       >Required: messageAttribute, sourceAttribute / </text
       ><text x="48.65" y="99.0"
@@ -76,19 +76,19 @@
       ><set attributeName="visibility" from="hidden" end="sdt2.mouseout" to="visible" begin="sdt2.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="28.0" y="34.0" width="51.819996" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
+    ><rect x="28.0" y="34.0" width="56.059998" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
       /><text x="29.0" y="44.0"
       >immutable</text
       ><set attributeName="visibility" from="hidden" end="sdt3.mouseout" to="visible" begin="sdt3.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="164.0" y="34.0" width="51.819996" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
+    ><rect x="164.0" y="34.0" width="56.059998" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
       /><text x="165.0" y="44.0"
       >immutable</text
       ><set attributeName="visibility" from="hidden" end="sdt4.mouseout" to="visible" begin="sdt4.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="170.0" y="50.0" width="175.84" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
+    ><rect x="170.0" y="50.0" width="183.26" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
       /><text x="171.0" y="60.0"
       >This port is preserving punctuations</text
       ><set attributeName="visibility" from="hidden" end="sdt5.mouseout" to="visible" begin="sdt5.mouseover"

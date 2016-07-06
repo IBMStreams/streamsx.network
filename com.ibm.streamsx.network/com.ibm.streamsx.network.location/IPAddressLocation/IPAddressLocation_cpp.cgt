@@ -242,7 +242,16 @@ void MY_OPERATOR::loadCityLocations(std::string filename) {
 // line, sorted by the IP network address at the beginning of the line. For
 // example:
 
-/****************************** GeoLite2-City-Blocks-IPv4.csv **********************************************************************************************************
+/****************************** new GeoLite2-City-Blocks-IPv4.csv ***********************************************************************************************************************
+0-----------------1-----------2------------------------------3-------------------------------4-------------------5----------------------6------------7---------8----------9--------------
+network,          geoname_id, registered_country_geoname_id, represented_country_geoname_id, is_anonymous_proxy, is_satellite_provider, postal_code, latitude, longitude, accuracy_radius
+1.0.0.0/24,       2077456,    2077456,                       ,                               0,                  0,                     ,            -27.0000, 133.0000,  1000
+120.20.156.0/24,  2078025,    2077456,                       ,                               0,                  0,                     5000,        -34.9287, 138.5986,  100
+144.32.0.0/16,    2633352,    2635167,                       ,                               0,                  0,                     YO1,         53.9586,  -1.0828,   5
+166.109.123.0/24, 5125657,    6252001,                       ,                               0,                  0,                     10541,       41.3796,  -73.7537,  10
+****************************************************************************************************************************************************************************************/
+
+/****************************** old GeoLite2-City-Blocks-IPv4.csv ******************************************************************************************************
 0-----------------1-----------2------------------------------3-------------------------------4-------------------5----------------------6------------7---------8--------
 network,          geoname_id, registered_country_geoname_id, represented_country_geoname_id, is_anonymous_proxy, is_satellite_provider, postal_code, latitude, longitude
 1.0.0.0/24,       2077456,    2077456,                       ,                               0,                  0,                     ,            -27,      133.0000
@@ -262,7 +271,7 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
   // verify that the first line of the subnet file contains the expected header
   std::string line;
   std::getline(file, line);
-  const std::string header("network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_provider,postal_code,latitude,longitude");
+  const std::string header("network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_provider,postal_code,latitude,longitude,accuracy_radius");
   if (line!=header) THROW(SPLRuntimeOperator, "sorry, expected header " << header << " instead of " << line << " in IPv4 address file " << filename);
 
   // load the subnet file's contents into a hash table
@@ -308,6 +317,7 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
     subnet.subnet.postalCode = *k++;
     subnet.subnet.latitude = atof((*k++).c_str());
     subnet.subnet.longitude = atof((*k++).c_str());
+    subnet.subnet.radius = atof((*k++).c_str());
     if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLLOG(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
     if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
 
@@ -367,7 +377,16 @@ MY_OPERATOR::IPSubnet* MY_OPERATOR::findIPv4Subnet(const uint32 address) {
 // line, sorted by the IP network address at the beginning of the line. For
 // example:
 
-/****************************** GeoLite2-City-Blocks-IPv6.csv **********************************************************************************************************************
+/****************************** new GeoLite2-City-Blocks-IPv6.csv ***********************************************************************************************************************************
+0------------------------1----------------2------------------------------3-------------------------------4-------------------5----------------------6------------7---------8----------9--------------
+network,                 geoname_id,      registered_country_geoname_id, represented_country_geoname_id, is_anonymous_proxy, is_satellite_provider, postal_code, latitude, longitude, accuracy_radius
+2001:208:3::/49,         1880252,         ,                              ,                               0,                  0,                     ,            1.2931,   103.8558,  100
+2001:218::/35,           1861060,         1861060,                       ,                               0,                  0,                     ,            35.68536, 139.75309, 100
+2001:218:2000::/49,      1850147,         1861060,                       ,                               0,                  0,                     100-0001,    35.6845,  139.7559,  100
+2001:218:2000:8000::/49, 1861060,         1861060,                       ,                               0,                  0,                     ,            35.68536, 139.75309, 100
+****************************************************************************************************************************************************************************************************/
+
+/****************************** old GeoLite2-City-Blocks-IPv6.csv ******************************************************************************************************************
 0------------------------1----------------2------------------------------3-------------------------------4-------------------5----------------------6------------7---------8--------
 network,                 geoname_id,      registered_country_geoname_id, represented_country_geoname_id, is_anonymous_proxy, is_satellite_provider, postal_code, latitude, longitude
 2001:208:3::/49,         1880252,         ,                              ,                               0,                  0,                     ,            1.2931,   103.8558
@@ -388,7 +407,7 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
   // verify that the first line of the address file contains the expected header
   std::string line;
   std::getline(file, line);
-  const std::string header("network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_provider,postal_code,latitude,longitude");
+  const std::string header("network,geoname_id,registered_country_geoname_id,represented_country_geoname_id,is_anonymous_proxy,is_satellite_provider,postal_code,latitude,longitude,accuracy_radius");
   if (line!=header) THROW(SPLRuntimeOperator, "sorry, expected header " << header << " instead of " << line << " in IPv6 address file " << filename);
 
   // load the address file's contents into a hash table
@@ -433,6 +452,7 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
     subnet.subnet.postalCode = *k++;
     subnet.subnet.latitude = atof((*k++).c_str());
     subnet.subnet.longitude = atof((*k++).c_str());
+    subnet.subnet.radius = atof((*k++).c_str());
     if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLLOG(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
     if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
 
