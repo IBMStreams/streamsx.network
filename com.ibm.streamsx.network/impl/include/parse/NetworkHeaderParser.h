@@ -46,9 +46,12 @@ class NetworkHeaderParser {
 
     // structure of IEEE 802.1Q VLAN extension of ethernet header
 
-    struct VlanHeader {
-    	uint16_t   id;
-    	uint16_t   proto;  // type
+    struct VLANHeader {
+      uint16_t vlanTag;
+      static const uint16_t priorityClass   = 0xE000;
+      static const uint16_t dropEligibility = 0x1000;
+      static const uint16_t vlanIdentifier  = 0x0FFF;
+      uint16_t protocol;
     }  __attribute__((packed)) ;
 
 
@@ -104,7 +107,7 @@ class NetworkHeaderParser {
     struct JMirrorHeaders* jmirrorHeader; int jmirrorHeaderLength;
     struct ERSPAN2Headers* erspanHeader; int erspanHeaderLength;
     struct ethhdr*  etherHeader; int etherHeaderLength;
-    struct VlanHeader* vlanHeader; int vlanHeaderLength;
+    struct VLANHeader* vlanHeader; int vlanHeaderLength;
     struct iphdr*   ipv4Header;  int ipv4HeaderLength;
     struct ip6_hdr* ipv6Header;  int ipv6HeaderLength;
     struct udphdr*  udpHeader;   int udpHeaderLength;
@@ -144,26 +147,27 @@ class NetworkHeaderParser {
         // overlay an ethernet header on the buffer and step over it
         etherHeader = (struct ethhdr*)buffer;
         uint16_t etherType = ntohs(etherHeader->h_proto);
-        etherHeaderLength = sizeof(struct ethhdr); // ... plus length of optional VLAN tag ?
-        //???printf("ethernet: "); for (int i=0; i<etherHeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n");
+        etherHeaderLength = sizeof(struct ethhdr); // ... not including optional VLAN tags
+        //printf("ethernet: "); for (int i=0; i<etherHeaderLength; i++) printf("%02x ", (uint8_t)buffer[i]); printf("\n");
         buffer += etherHeaderLength;
         length -= etherHeaderLength;
 
         // if the ethernet header has one or more IEEE 802.1Q VLAN headers, 
         // remember where they are in the buffer and step over them
         if (ETH_P_8021Q == etherType) {
-          vlanHeader = (struct VlanHeader*) buffer;
-          vlanHeaderLength = sizeof(VlanHeader);
-          struct VlanHeader *nextVlan = vlanHeader;
-          etherType = ntohs(nextVlan->proto);
+          vlanHeader = (struct VLANHeader*) buffer;
+          vlanHeaderLength = sizeof(VLANHeader);
+          struct VLANHeader *nextVLAN = vlanHeader;
+          etherType = ntohs(nextVLAN->protocol);
           while(ETH_P_8021Q == etherType) {
-            vlanHeaderLength += sizeof(VlanHeader);
-            nextVlan++;
-            etherType = ntohs(nextVlan->proto);
+            vlanHeaderLength += sizeof(VLANHeader);
+            nextVLAN++;
+            etherType = ntohs(nextVLAN->protocol);
           } ;
       	  buffer += vlanHeaderLength;
       	  length -= vlanHeaderLength;
         }
+        //if (vlanHeader) printf("    VLAN: "); for (int i=0; i<vlanHeaderLength; i++) printf("%02x ", (uint8_t)(((uint8_t*)vlanHeader)[i]) ); printf("\n");
 
         // if the buffer contains a Juniper Networks mirror packet, step over the 'jmirror' headers
         // (note that field tests are not in natural order so the inner 'if' will fail faster in the usual case)
@@ -256,10 +260,10 @@ class NetworkHeaderParser {
 
     SPL::list<SPL::uint16> convertVlanTagsToList() {
     	SPL::list<SPL::uint16> vList;
-    	int numIds = vlanHeaderLength / sizeof(struct VlanHeader);
+    	int numIds = vlanHeaderLength / sizeof(struct VLANHeader);
     	for (int i = 0;  i < numIds; i++)
-    	  vList.push_back((vlanHeader + i)->id);
-    	return(vList);
+    	  vList.push_back( ntohs(vlanHeader[i].vlanTag) & VLANHeader::vlanIdentifier );
+    	return vList;
     }
 
 };
