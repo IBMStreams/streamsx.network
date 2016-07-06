@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.location.html">com.ibm.streamsx.network.location</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.4</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.location.html">com.ibm.streamsx.network.location</a> &gt; C++ Native Functions</p>
 
 </div>
 
@@ -275,7 +275,7 @@ This page documents native functions that can be invoked from SPL, including the
    <dt class="dt dlterm splpart" id="spldoc_functions__locationLatitudes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;float64&gt; locationLatitudes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
 
    <dd class="dd">
-<p class="p">          This result function returns a list of latitudes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+<p class="p">          This result function returns a list of latitudes corresponding to the specified list of IP version 4 addresses.           Zeros are returned for IP addresses where no location is found.
 </p>
 
    </dd>
@@ -305,7 +305,7 @@ This page documents native functions that can be invoked from SPL, including the
    <dt class="dt dlterm splpart" id="spldoc_functions__locationLongitudes.list:.:uint32:.:"><tt class="ph tt">      public list&lt;float64&gt; locationLongitudes(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
 
    <dd class="dd">
-<p class="p">          This result function returns a list of longitudes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+<p class="p">          This result function returns a list of longitudes corresponding to the specified list of IP version 4 addresses.           Zeroes are returned for IP addresses where no location is found.
 </p>
 
    </dd>
@@ -356,6 +356,36 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns a list of postal codes corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationRadii.list:.:uint32:.:"><tt class="ph tt">      public list&lt;float64&gt; locationRadii(list&lt;uint32&gt; ipv4Addresses)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns a list of accuracy radii corresponding to the specified list of IP version 4 addresses.           Zeros are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationRadius.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public float64 locationRadius(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns the accuracy of the latitude and longitude,           expressed as a radius,           for the specified IP version 6 address,           if its location was found, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationRadius.uint32"><tt class="ph tt">      public float64 locationRadius(uint32 ipv4Address)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns the accuracy of the latitude and longitude           for the specified IP version 4 address,           expressed as a radius,           if its location was found,            or zero if not.
 </p>
 
    </dd>

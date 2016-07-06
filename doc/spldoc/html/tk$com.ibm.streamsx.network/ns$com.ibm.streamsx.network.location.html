@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.0</a> &gt; com.ibm.streamsx.network.location</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.4</a> &gt; com.ibm.streamsx.network.location</p>
 
 </div>
 
@@ -130,6 +130,15 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationPostalCodes.list:.:uint32:.:">locationPostalCodes(list&lt;uint32&gt;)</a></strong>:           This result function returns a list of postal codes corresponding to the specified list of IP version 4 addresses.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationRadii.list:.:uint32:.:">locationRadii(list&lt;uint32&gt;)</a></strong>:           This result function returns a list of accuracy radii corresponding to the specified list of IP version 4 addresses.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationRadius.list:.:uint8:.::..:16:..:">locationRadius(list&lt;uint8&gt;[16])</a></strong>:           This result function returns the accuracy of the latitude and longitude,           expressed as a radius,           for the specified IP version 6 address,           if its location was found, or zero if not.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationRadius.uint32">locationRadius(uint32)</a></strong>:           This result function returns the accuracy of the latitude and longitude           for the specified IP version 4 address,           expressed as a radius,           if its location was found,            or zero if not.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationSubdivision1Code.list:.:uint8:.::..:16:..:">locationSubdivision1Code(list&lt;uint8&gt;[16])</a></strong>:           This result function returns the first division code (typically a state or province)           for the specified IP version 6 address,           if its location was found and it has one, or an empty string if not.
