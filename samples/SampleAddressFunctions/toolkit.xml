@@ -4,14 +4,14 @@
   <toolkit name="SampleAddressFunctions" requiredProductVersion="4.0.1.0" version="2.0.0">
     <description/>
     <uriTable>
-      <uri index="1" value="sample/Common.spl"/>
-      <uri index="3" value="sample/TestIPv6AddressFunctions.spl"/>
-      <uri index="2" value="sample/TestIPv4AddressFunctions.spl"/>
+      <uri index="2" value="sample/Common.spl"/>
+      <uri index="1" value="sample/TestIPv6AddressFunctions.spl"/>
+      <uri index="3" value="sample/TestIPv4AddressFunctions.spl"/>
     </uriTable>
     <namespace name="sample">
-      <compositeOp column="11" line="5" name="TestIPv4AddressFunctions" potentialMain="true" uriIndex="2"/>
-      <compositeOp column="11" line="5" name="TestIPv6AddressFunctions" potentialMain="true" uriIndex="3"/>
-      <function column="1" line="3" name="doAssert" native="false" returnType="void" stateful="true" uriIndex="1">
+      <compositeOp column="11" line="5" name="TestIPv6AddressFunctions" potentialMain="true" uriIndex="1"/>
+      <compositeOp column="11" line="5" name="TestIPv4AddressFunctions" potentialMain="true" uriIndex="3"/>
+      <function column="1" line="3" name="doAssert" native="false" returnType="void" stateful="true" uriIndex="2">
         <prototype>stateful void doAssert(boolean condition, rstring id)</prototype>
         <parameter name="condition" type="boolean"/>
         <parameter name="id" type="rstring"/>

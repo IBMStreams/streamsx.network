@@ -131,7 +131,7 @@
       /><polygon points=" 243 197 236 194 236 201" style="stroke-miterlimit:10; stroke-width:1; clip-path:url(#clipPath2); stroke:none; stroke-linejoin:miter;"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="191.0" y="119.613785" width="124.95999" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
+    ><rect x="191.0" y="119.613785" width="128.13998" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="14.0"
       /><text x="192.0" y="129.61378"
       >PacketContentAssembler</text
       ><set attributeName="visibility" from="hidden" end="sdt0.mouseout" to="visible" begin="sdt0.mouseover"

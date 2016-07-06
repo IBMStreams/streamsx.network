@@ -5,22 +5,21 @@
     <description>Sample applications that illustrate use of the NetflowMessageParser operator.</description>
     <uriTable>
       <uri index="4" value="sample/TestNetflowMessageParserParallelAnalysis.spl"/>
-      <uri index="1" value="sample/TestNetflowMessageParserBasic.spl"/>
+      <uri index="2" value="sample/TestNetflowMessageParserBasic.spl"/>
       <uri index="3" value="sample/TestNetflowMessageParserFullVerion9.spl"/>
-      <uri index="5" value="sample/TestNetflowMessageParserAnalysis.spl"/>
-      <uri index="2" value="sample/TestNetflowMessageParserFullVerion5.spl"/>
+      <uri index="5" value="sample/TestNetflowMessageParserFullVerion5.spl"/>
+      <uri index="1" value="sample/TestNetflowMessageParserAnalysis.spl"/>
     </uriTable>
     <namespace name="sample">
-      <compositeOp column="11" line="14" name="TestNetflowMessageParserBasic" potentialMain="true" uriIndex="1">
-        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_netflow5_port9500.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
-        <type column="5" line="21" name="PacketType" type="float64 captureTime, uint32 netflowSource, blob netflowMessage" uriIndex="1"/>
-        <type column="5" line="26" name="NetflowMessageType" type="rstring captureTime, uint64 messageNumber, rstring flowStartTime, rstring flowEndTime, rstring flowDuration, uint64 flowBytes, uint64 flowPackets, rstring ipProtocol, rstring ipSourceAddress, uint16 ipSourcePort, rstring ipDestinationAddress, uint16 ipDestinationPort, uint8 tcpFlags" uriIndex="1"/>
+      <compositeOp column="11" line="12" name="TestNetflowMessageParserAnalysis" potentialMain="true" uriIndex="1">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_netflow9_new.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="19" name="PacketType" type="int64 captureTime, uint32 netflowSource, blob netflowMessage" uriIndex="1"/>
+        <type column="5" line="24" name="netflow_t" type="int64 endTime, int64 startTime, uint8 protocol, uint32 srcAddress, uint16 srcPort, uint32 dstAddress, uint16 dstPort, uint64 packetCount, uint64 byteCount" uriIndex="1"/>
       </compositeOp>
-      <compositeOp column="11" line="15" name="TestNetflowMessageParserFullVersion5" potentialMain="true" uriIndex="2">
+      <compositeOp column="11" line="14" name="TestNetflowMessageParserBasic" potentialMain="true" uriIndex="2">
         <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_netflow5_port9500.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
-        <parameter defaultValue="getSubmissionTimeValue(&quot;netflowPort&quot;, &quot;2055&quot;)" metaType="Expression" name="netflowPort" optional="true" type="&lt;rstring>"/>
-        <type column="5" line="23" name="PacketType" type="float64 captureTime, uint32 netflowSource, blob netflowMessage" uriIndex="2"/>
-        <type column="5" line="28" name="NetflowMessageType" type="rstring captureTime, boolean parseError, rstring parseErrorDescription, uint32 parseErrorOffset, uint64 messagesProcessed, uint16 NETFLOW_VERSION, uint16 NETFLOW_COUNT, rstring NETFLOW_SYSTEM_UPTIME, rstring NETFLOW_UNIX_SECONDS, uint32 NETFLOW_SEQUENCE_NUMBER, uint64 NETFLOW_IN_BYTES, uint64 NETFLOW_IN_PKTS, uint8 NETFLOW_PROTOCOL, uint8 NETFLOW_SRC_TOS, uint8 NETFLOW_TCP_FLAGS, uint16 NETFLOW_SRC_PORT, rstring NETFLOW_IPV4_SRC_ADDR, uint8 NETFLOW_SRC_MASK, uint32 NETFLOW_INPUT_INTERFACE, uint16 NETFLOW_DST_PORT, rstring NETFLOW_IPV4_DST_ADDR, uint8 NETFLOW_DST_MASK, uint32 NETFLOW_OUTPUT_INTERFACE, rstring NETFLOW_IPV4_NEXT_HOP, uint32 NETFLOW_SRC_AS, uint32 NETFLOW_DST_AS, rstring NETFLOW_LAST_SWITCHED, rstring NETFLOW_FIRST_SWITCHED, uint64 NETFLOW_OUT_BYTES, uint64 NETFLOW_OUT_PKTS, uint32 NETFLOW_SAMPLING_INTERVAL, uint8 NETFLOW_ENGINE_TYPE, uint8 NETFLOW_ENGINE_ID" uriIndex="2"/>
+        <type column="5" line="21" name="PacketType" type="float64 captureTime, uint32 netflowSource, blob netflowMessage" uriIndex="2"/>
+        <type column="5" line="26" name="NetflowMessageType" type="rstring captureTime, uint64 messageNumber, rstring flowStartTime, rstring flowEndTime, rstring flowDuration, uint64 flowBytes, uint64 flowPackets, rstring ipProtocol, rstring ipSourceAddress, uint16 ipSourcePort, rstring ipDestinationAddress, uint16 ipDestinationPort, uint8 tcpFlags" uriIndex="2"/>
       </compositeOp>
       <compositeOp column="11" line="15" name="TestNetflowMessageParserFullVersion9" potentialMain="true" uriIndex="3">
         <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_netflow9_new.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
@@ -38,10 +37,11 @@
         <outputPort name="NetflowAnalyticResultStream" portIndex="0"/>
         <type column="12" line="86" name="NetflowAnalyticResultType" static="true" type="int32 result" uriIndex="4"/>
       </compositeOp>
-      <compositeOp column="11" line="12" name="TestNetflowMessageParserAnalysis" potentialMain="true" uriIndex="5">
-        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_netflow9_new.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
-        <type column="5" line="19" name="PacketType" type="int64 captureTime, uint32 netflowSource, blob netflowMessage" uriIndex="5"/>
-        <type column="5" line="24" name="netflow_t" type="int64 endTime, int64 startTime, uint8 protocol, uint32 srcAddress, uint16 srcPort, uint32 dstAddress, uint16 dstPort, uint64 packetCount, uint64 byteCount" uriIndex="5"/>
+      <compositeOp column="11" line="15" name="TestNetflowMessageParserFullVersion5" potentialMain="true" uriIndex="5">
+        <parameter defaultValue="getSubmissionTimeValue(&quot;pcapFilename&quot;, &quot;../../SampleNetworkToolkitData/sample_netflow5_port9500.pcap&quot;)" metaType="Expression" name="pcapFilename" optional="true" type="&lt;rstring>"/>
+        <parameter defaultValue="getSubmissionTimeValue(&quot;netflowPort&quot;, &quot;2055&quot;)" metaType="Expression" name="netflowPort" optional="true" type="&lt;rstring>"/>
+        <type column="5" line="23" name="PacketType" type="float64 captureTime, uint32 netflowSource, blob netflowMessage" uriIndex="5"/>
+        <type column="5" line="28" name="NetflowMessageType" type="rstring captureTime, boolean parseError, rstring parseErrorDescription, uint32 parseErrorOffset, uint64 messagesProcessed, uint16 NETFLOW_VERSION, uint16 NETFLOW_COUNT, rstring NETFLOW_SYSTEM_UPTIME, rstring NETFLOW_UNIX_SECONDS, uint32 NETFLOW_SEQUENCE_NUMBER, uint64 NETFLOW_IN_BYTES, uint64 NETFLOW_IN_PKTS, uint8 NETFLOW_PROTOCOL, uint8 NETFLOW_SRC_TOS, uint8 NETFLOW_TCP_FLAGS, uint16 NETFLOW_SRC_PORT, rstring NETFLOW_IPV4_SRC_ADDR, uint8 NETFLOW_SRC_MASK, uint32 NETFLOW_INPUT_INTERFACE, uint16 NETFLOW_DST_PORT, rstring NETFLOW_IPV4_DST_ADDR, uint8 NETFLOW_DST_MASK, uint32 NETFLOW_OUTPUT_INTERFACE, rstring NETFLOW_IPV4_NEXT_HOP, uint32 NETFLOW_SRC_AS, uint32 NETFLOW_DST_AS, rstring NETFLOW_LAST_SWITCHED, rstring NETFLOW_FIRST_SWITCHED, uint64 NETFLOW_OUT_BYTES, uint64 NETFLOW_OUT_PKTS, uint32 NETFLOW_SAMPLING_INTERVAL, uint8 NETFLOW_ENGINE_TYPE, uint8 NETFLOW_ENGINE_ID" uriIndex="5"/>
       </compositeOp>
     </namespace>
     <dependency>
