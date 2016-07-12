@@ -53,6 +53,7 @@ private:
 	SPL::Mutex mutex_ ;
 	ASNList * asn4List_;
 	ASNList * asn6List_;
+        bool runProcessorAffinity;
 	
 	void parseASNFile(rstring filename, protocol proto);
 	uint32 parseASNumber(rstring asnData);

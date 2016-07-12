@@ -106,6 +106,7 @@ MY_OPERATOR::MY_OPERATOR()
 		parseASNFile(<%=$::asnIPv6FileParamCppValue%>, IPv6);
 	<%}%>
 	
+        runProcessorAffinity = true;
 }
 
 // Destructor
@@ -134,19 +135,131 @@ void MY_OPERATOR::prepareToShutdown()
 
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
+    <% if ($::inputPort0SPLType ne $::outputPort0SPLType) { %>
 	Tuple const & t = tuple;
 	process(t, port);
+    <%} else { %>
+        <% if ($model->getParameterByName("processorAffinityList")) { %>
+            if (runProcessorAffinity) {
+                std::vector<uint64_t> cpuList = <%=$model->getParameterByName("processorAffinityList")->getValueAt(0)->getCppExpression();%>;
+                cpu_set_t cpumask;
+                CPU_ZERO(&cpumask);
+                for (std::vector<uint64_t>::iterator it = cpuList.begin(); it != cpuList.end(); ++it) {
+                    CPU_SET(*it, &cpumask);
+                }
+                const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
+                if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to CPUs"
+                    << ", " << strerror(errno));
+
+                runProcessorAffinity = false;
+            }
+        <%}%>
+
+	if(port == 0)
+	{
+	IPort0Type & <%=$::inputPort0CppName%> = static_cast <IPort0Type &>(tuple);
+        // enrich IP
+
+    	<% if($::isScalar) {%>
+    		rstring strResults;
+    		uint32 numResults;
+    		asn_record_t asn_info = {};
+		{
+			AutoPortMutex am(mutex_, *this);
+			lookupIP(<%=$::inputIPAttrParamCppValue%>, asn_info);
+		}
+		
+		strResults = asn_info.data;
+		numResults = asn_info.number;
+				
+    	<%} elsif($::isVector) {%>  
+    		SPL::list<rstring> strResults;
+    		SPL::list<uint32> numResults;
+    	
+    		<%=$::inputIPAttrParamCppType%>::iterator it;
+    		<%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+    		for(it = data.begin(); it != data.end(); ++it)
+    		{ 
+    			asn_record_t asn_info = {};
+    			{
+				AutoPortMutex am(mutex_, *this);
+				lookupIP(*it, asn_info);
+			} 
+    			
+    			strResults.push_back(asn_info.data);
+    			numResults.push_back(asn_info.number); 		
+    		}
+
+    	<%} elsif($::isMatrix) {%>
+    		SPL::list<SPL::list<rstring> > strResults;
+    		SPL::list<SPL::list<uint32> > numResults;
+    	
+    		<%=$::inputIPAttrParamCppType%>::iterator matrixIt;
+    		<%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+
+                SPL::list<rstring> vecStrResultList;
+                SPL::list<uint32> vecNumResultList;
+
+    		for(matrixIt = data.begin(); matrixIt != data.end(); ++matrixIt)
+    		{
+                        vecStrResultList.clear();
+                        vecNumResultList.clear();
+    			<%=$::inputIPAttrParamCppType%>::value_type::iterator vectorIt;
+    			for(vectorIt = (*matrixIt).begin(); vectorIt != (*matrixIt).end(); ++vectorIt)
+    			{
+    				asn_record_t asn_info = {};
+    				{
+					AutoPortMutex am(mutex_, *this);
+					lookupIP(*vectorIt, asn_info);
+    				}
+    				
+    				vecStrResultList.push_back(asn_info.data);
+    				vecNumResultList.push_back(asn_info.number);
+    			}
+    			strResults.push_back(vecStrResultList);
+    			numResults.push_back(vecNumResultList);
+    		}	
+    	<%}%>
+    	
+        OPort0Type & otuple = static_cast <OPort0Type &>(tuple);
+    	<%  foreach my $attribute (@{ $::outputPort0->getAttributes()}) {
+            my $name = $attribute->getName();
+            my $operation = $attribute->getAssignmentOutputFunctionName();
+            if($operation eq "getASNInfo") {%>
+		otuple.set_<%=$name%>(strResults);
+            <%} elsif($operation eq "getASNumber") {%>
+		otuple.set_<%=$name%>(numResults);                    
+            <%}%>
+        <%}%>
+	
+	submit(otuple,0);		
+	}
+    <%}%>
 }
 
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
+    <% if ($model->getParameterByName("processorAffinityList")) { %>
+    if (runProcessorAffinity) {
+	std::vector<uint64_t> cpuList = <%=$model->getParameterByName("processorAffinityList")->getValueAt(0)->getCppExpression();%>;
+	cpu_set_t cpumask;
+	CPU_ZERO(&cpumask);
+	for (std::vector<uint64_t>::iterator it = cpuList.begin(); it != cpuList.end(); ++it) {
+	    CPU_SET(*it, &cpumask);
+	}
+	const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
+	if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to CPUs"
+	    << ", " << strerror(errno));
+
+	runProcessorAffinity = false;
+    }
+    <%}%>
 	if(port == 0)
 	{
     	const IPort0Type & <%=$::inputPort0CppName%> = static_cast <IPort0Type>(tuple);
     	// enrich IP
 		 
-		<%=$::outputAttributeCppType%> results; 
     	<% if($::isScalar) {%>
     		rstring strResults;
     		uint32 numResults;
@@ -169,11 +282,11 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
     		{ 
     			asn_record_t asn_info = {};
     			{
-					AutoPortMutex am(mutex_, *this);
-					lookupIP(*it, asn_info);
-				} 
+				AutoPortMutex am(mutex_, *this);
+				lookupIP(*it, asn_info);
+			} 
     			
-    			results.push_back(asn_info.data);
+    			strResults.push_back(asn_info.data);
     			numResults.push_back(asn_info.number); 		
     		}
     	<%} elsif($::isMatrix) {%>
@@ -182,17 +295,21 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
     	
     		<%=$::inputIPAttrParamCppType%>::iterator matrixIt;
     		<%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+
+                SPL::list<rstring> vecStrResultList;
+                SPL::list<uint32> vecNumResultList;
+
     		for(matrixIt = data.begin(); matrixIt != data.end(); ++matrixIt)
     		{
-    			SPL::list<rstring> vecStrResultList;
-    			SPL::list<uint32> vecNumResultList;
+                        vecStrResultList.clear();
+                        vecNumResultList.clear();
     			<%=$::inputIPAttrParamCppType%>::value_type::iterator vectorIt;
     			for(vectorIt = (*matrixIt).begin(); vectorIt != (*matrixIt).end(); ++vectorIt)
     			{
     				asn_record_t asn_info = {};
     				{
-						AutoPortMutex am(mutex_, *this);
-						lookupIP(*vectorIt, asn_info);
+					AutoPortMutex am(mutex_, *this);
+					lookupIP(*vectorIt, asn_info);
     				}
     				
     				vecStrResultList.push_back(asn_info.data);
@@ -211,13 +328,13 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
                 my $init = $attribute->getAssignmentValue()->getCppExpression();%>
                 otuple.set_<%=$name%>(<%=$init%>);
             <%} elsif($operation eq "getASNInfo") {%>
-				otuple.set_<%=$name%>(strResults);
-			<%} elsif($operation eq "getASNumber") {%>
-				otuple.set_<%=$name%>(numResults);                    
+		otuple.set_<%=$name%>(strResults);
+	    <%} elsif($operation eq "getASNumber") {%>
+		otuple.set_<%=$name%>(numResults);                    
             <%}%>
         <%}%>
 	
-		submit(otuple,0);		
+	submit(otuple,0);		
 	}
 	<% if(defined $::inputPort1) {%>
 	else if(port == 1)
