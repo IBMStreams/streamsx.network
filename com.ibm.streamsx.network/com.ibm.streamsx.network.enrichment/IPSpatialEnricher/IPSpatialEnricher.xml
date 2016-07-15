@@ -123,8 +123,6 @@ This parameter should not be used if input port 1 is defined.</description>
       <parameter>
         <name>processorAffinityList</name>
         <description>
-Requires the Utility toolkit.
-
 This optional parameter takes a list of `uint64` that specifies
 which processor cores the operator's thread is allowed to run on. The maximum 
 value is *P-1*, where *P* is the number of processors on the machine where 
