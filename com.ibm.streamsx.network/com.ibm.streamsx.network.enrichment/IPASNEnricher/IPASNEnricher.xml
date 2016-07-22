@@ -77,38 +77,7 @@ This parameter should not be used if input port 1 is defined.</description>
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>
-      <parameter>
-        <name>processorAffinityList</name>
-        <description>
-This optional parameter takes a list of `uint64` that specifies
-which processor cores the operator's thread is allowed to run on. The maximum
-value is *P-1*, where *P* is the number of processors on the machine where
-the operator will run.
-
-Where the operator runs on a thread of its own, this parameter applies to the
-operator's thread. This is the situation when the operator's input port is
-configured as a threaded input port, and when the operator has an @parallel
-annotation.
-
-Where the operator runs on the thread of an upstream operator, this parameter
-affects the thread of the operator that sends tuples to it. This is the
-situation when the operator is fused with an upstream operator.
-
-In most cases, the default is to dispatch the operator's thread on any
-available processor. In some cases, such as using a DPDK Source, the
-operator's thread will have the same processor affinity as the master
-DPDK thread.
-
-Example usage:
-    param processorAffinityList: [0ul, 8ul, 16ul];
-        </description>
-        <optional>true</optional>
-        <rewriteAllowed>true</rewriteAllowed>
-        <expressionMode>Expression</expressionMode>
-        <type>list&lt;uint64></type>
-        <cardinality>1</cardinality>
-      </parameter>
-    </parameters>
+   </parameters>
     <inputPorts>
       <inputPortSet>
         <description>Ingests tuples containing IP addresses. The `inputIPAttr` parameter specifies the attribute containing the IP addresses.</description>

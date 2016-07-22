@@ -105,8 +105,6 @@ MY_OPERATOR::MY_OPERATOR()
 	<% if(defined $::asnIPv6FileParam) {%>
 		parseASNFile(<%=$::asnIPv6FileParamCppValue%>, IPv6);
 	<%}%>
-	
-        runProcessorAffinity = true;
 }
 
 // Destructor
@@ -139,22 +137,6 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 	Tuple const & t = tuple;
 	process(t, port);
     <%} else { %>
-        <% if ($model->getParameterByName("processorAffinityList")) { %>
-            if (runProcessorAffinity) {
-                std::vector<uint64_t> cpuList = <%=$model->getParameterByName("processorAffinityList")->getValueAt(0)->getCppExpression();%>;
-                cpu_set_t cpumask;
-                CPU_ZERO(&cpumask);
-                for (std::vector<uint64_t>::iterator it = cpuList.begin(); it != cpuList.end(); ++it) {
-                    CPU_SET(*it, &cpumask);
-                }
-                const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
-                if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to CPUs"
-                    << ", " << strerror(errno));
-
-                runProcessorAffinity = false;
-            }
-        <%}%>
-
 	if(port == 0)
 	{
 	IPort0Type & <%=$::inputPort0CppName%> = static_cast <IPort0Type &>(tuple);
@@ -240,21 +222,6 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-    <% if ($model->getParameterByName("processorAffinityList")) { %>
-    if (runProcessorAffinity) {
-	std::vector<uint64_t> cpuList = <%=$model->getParameterByName("processorAffinityList")->getValueAt(0)->getCppExpression();%>;
-	cpu_set_t cpumask;
-	CPU_ZERO(&cpumask);
-	for (std::vector<uint64_t>::iterator it = cpuList.begin(); it != cpuList.end(); ++it) {
-	    CPU_SET(*it, &cpumask);
-	}
-	const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
-	if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to CPUs"
-	    << ", " << strerror(errno));
-
-	runProcessorAffinity = false;
-    }
-    <%}%>
 	if(port == 0)
 	{
     	const IPort0Type & <%=$::inputPort0CppName%> = static_cast <IPort0Type>(tuple);
