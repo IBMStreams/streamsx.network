@@ -17,7 +17,7 @@ Output filters and attribute assignments are SPL expressions. They may use any
 of the built-in SPL functions, and any of these functions, which are specific to
 the PacketFileSource operator:
 
-* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
 
 The PacketDPDKSource operator steps quietly over 'jmirror' headers prepended to packets
 by Juniper Networks 'mirror encapsulation'.
@@ -416,7 +416,7 @@ or if no `outputFilters` parameter is specified.
 
 Output attributes can be assigned values with any SPL expression that evaluates
 to the proper type, and the expressions may include any of the
-[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketDPDKSource result functions].
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketDPDKSource result functions].
 Output attributes that match input attributes in name and
 type are copied automatically.
 

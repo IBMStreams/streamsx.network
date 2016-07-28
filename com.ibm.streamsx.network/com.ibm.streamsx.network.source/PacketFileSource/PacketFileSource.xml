@@ -33,7 +33,7 @@ Output filters and attribute assignments are SPL expressions. They may use any
 of the built-in SPL functions, and any of these functions, which are specific to
 the PacketFileSource operator: 
 
-* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
 
 The PacketFileSource operator recognizes these types of packet encapsulation, 
 and steps quietly over their headers:
@@ -125,7 +125,7 @@ The PacketFileSource operator will throw an exception and terminate in these sit
 # Sample Applications
 
 The network toolkit includes several
-[./tk$SamplePacketFileSource/tk$SamplePacketFileSource.html|sample applications]
+[https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
 that illustrate how to use this operator.
 
 # References
@@ -196,7 +196,7 @@ The result functions that can be used in boolean
 expressions for the `outputFilters` parameter
 and in output attribute assignment expressions are described here:
 
-* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].  
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].  
 
       </description>
       <metrics>
@@ -303,7 +303,7 @@ should be emitted by the corresponding output port. The number of
 expressions in the list must match the number of output ports, and each
 expression must evaluate to a `boolean` value.  The output filter expressions may include any
 of the
-[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketFileSource result functions].  
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketFileSource result functions].  
 
 The default value of the `outputFilters` parameter is an empty list, which
 causes all packets processed to be emitted by all output ports.
@@ -424,7 +424,7 @@ or if no `outputFilters` parameter is specified.
 
 Output attributes can be assigned values with any SPL expression that evaluates
 to the proper type, and the expressions may include any of the 
-[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketFileSource result functions].  
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketFileSource result functions].  
 Output attributes that match input attributes in name and
 type are copied automatically.
 
