@@ -560,7 +560,7 @@
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_CLASSES">DNS_ADDITIONAL_CLASSES()</a></dt>
 
-  <dd class="dd">          This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.</dd>
+  <dd class="dd">          This parser result function returns a list of the 'class' fields in the 'additional' resource records in the current message.</dd>
 
 
 
@@ -572,7 +572,13 @@
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_DATA">DNS_ADDITIONAL_DATA()</a></dt>
 
-  <dd class="dd">          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.</dd>
+  <dd class="dd">          This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_DATA.rstring">DNS_ADDITIONAL_DATA(rstring)</a></dt>
+
+  <dd class="dd">          This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.</dd>
 
 
 
@@ -584,19 +590,19 @@
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TTLS">DNS_ADDITIONAL_TTLS()</a></dt>
 
-  <dd class="dd">          This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.</dd>
+  <dd class="dd">          This parser result function returns a list of the 'time to live' fields in the 'additional' resource records in the current message.</dd>
 
 
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TYPES">DNS_ADDITIONAL_TYPES()</a></dt>
 
-  <dd class="dd">          This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.</dd>
+  <dd class="dd">          This parser result function returns a list of the 'type' fields in the 'additional' resource records in the current message.</dd>
 
 
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></dt>
 
-  <dd class="dd">          This parser result function returns a 16 bit mask containing all flags in the DNS header of the current message.</dd>
+  <dd class="dd">          This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.</dd>
 
 
 
@@ -703,6 +709,12 @@
 
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_DATA">DNS_NAMESERVER_DATA()</a></dt>
+
+  <dd class="dd">          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_DATA.rstring">DNS_NAMESERVER_DATA(rstring)</a></dt>
 
   <dd class="dd">          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.</dd>
 
