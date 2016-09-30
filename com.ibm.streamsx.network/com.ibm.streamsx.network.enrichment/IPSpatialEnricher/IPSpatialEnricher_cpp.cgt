@@ -153,11 +153,144 @@ void MY_OPERATOR::prepareToShutdown()
     // This is an asynchronous call
 }
 
-  // Tuple processing for non-mutating ports
+  // Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
-	Tuple const & t = tuple;
-	process(t,port);
+    <% if ($::inputPort0SPLType ne $::outputPort0SPLType) { %>
+        Tuple const & t = tuple;
+        process(t,port);
+    <%} else { %>
+        if(port == 0)
+        {
+            <% if(defined $::baseCppOutputType) {%>
+            IPort0Type & <%=$::inputPort0CppName%> = static_cast <IPort0Type &>(tuple);
+            // enrich IP
+            
+            <%=$::outputAttributeCppType%> ipLocResults;
+            <%=$::outputAttributeCppType%> regCountryResults;
+            <%=$::outputAttributeCppType%> repCountryResults;
+     
+            <% if($::isScalar) {%>
+                spatial_info_t ip_info = {};
+                {
+                    AutoPortMutex am(mutex_, *this);
+                    lookupIP(<%=$::inputIPAttrParamCppValue%>, ip_info);
+                }
+                
+    //			cout << "ip=" << addrStr << ", geoname_id=" << ip_info.block_record.geoname_id << endl;
+                
+                blocks_record_t empty_record = {} ;
+                
+                <% if(defined $::usingIPLocationData) { %>
+                    getMaxMindLocation(ipLocResults, ip_info.ip_loc, ip_info.block_record);
+                <%}%>
+                
+                <% if(defined $::usingRegCountryData) {%>
+                    getMaxMindLocation(regCountryResults, ip_info.reg_country_loc, empty_record);
+                <%}%>
+                
+                <% if(defined $::usingRepCountryData) {%>
+                    getMaxMindLocation(repCountryResults, ip_info.rep_country_loc, empty_record);
+                <%}%>
+                
+            <%} elsif($::isVector) {%>  
+                <%=$::inputIPAttrParamCppType%>::iterator it;
+                <%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+                for(it = data.begin(); it != data.end(); ++it)
+                { 
+                    spatial_info_t ip_info = {};
+                    {
+                        AutoPortMutex am(mutex_, *this);
+                        lookupIP(*it, ip_info);
+                    } 
+                    
+                    blocks_record_t empty_record = {} ;
+                    <%=$::baseCppOutputType%> ipLocEntry;
+                    <%=$::baseCppOutputType%> regCountryEntry;
+                    <%=$::baseCppOutputType%> repCountryEntry;
+                    
+                    <% if(defined $::usingIPLocationData) { %>
+                        getMaxMindLocation(ipLocEntry, ip_info.ip_loc, ip_info.block_record);
+                        ipLocResults.push_back(ipLocEntry);
+                    <%}%>
+                    
+                    <% if(defined $::usingRegCountryData) {%>
+                        getMaxMindLocation(regCountryEntry, ip_info.reg_country_loc, empty_record);
+                        regCountryResults.push_back(regCountryEntry);
+                    <%}%>
+                    
+                    <% if(defined $::usingRepCountryData) {%>
+                        getMaxMindLocation(repCountryEntry, ip_info.rep_country_loc, empty_record);
+                        repCountryResults.push_back(repCountryEntry);
+                    <%}%>				
+                }
+                
+            <%} elsif($::isMatrix) {%>
+                <%=$::inputIPAttrParamCppType%>::iterator matrixIt;
+                <%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+
+                <%=$::outputAttributeCppType%>::value_type ipLocResultList;
+                <%=$::outputAttributeCppType%>::value_type regCountryResultList;
+                <%=$::outputAttributeCppType%>::value_type repCountryResultList;
+                <%=$::inputIPAttrParamCppType%>::value_type::iterator vectorIt;
+
+                for(matrixIt = data.begin(); matrixIt != data.end(); ++matrixIt)
+                {
+                    ipLocResultList.clear();
+                    regCountryResultList.clear();
+                    repCountryResultList.clear();
+                    for(vectorIt = (*matrixIt).begin(); vectorIt != (*matrixIt).end(); ++vectorIt)
+                    {
+                        spatial_info_t ip_info = {};
+                        {
+                            AutoPortMutex am(mutex_, *this);
+                            lookupIP(*vectorIt, ip_info);
+                        }
+                        
+                        blocks_record_t empty_record = {} ;
+                        <%=$::baseCppOutputType%> ipLocEntry;
+                        <%=$::baseCppOutputType%> regCountryEntry;
+                        <%=$::baseCppOutputType%> repCountryEntry;
+                        
+                        <% if(defined $::usingIPLocationData) { %>
+                            getMaxMindLocation(ipLocEntry, ip_info.ip_loc, ip_info.block_record);
+                            ipLocResultList.push_back(ipLocEntry);
+                        <%}%>
+                        
+                        <% if(defined $::usingRegCountryData) {%>
+                            getMaxMindLocation(regCountryEntry, ip_info.reg_country_loc, empty_record);
+                            regCountryResultList.push_back(regCountryEntry);
+                        <%}%>
+                        
+                        <% if(defined $::usingRepCountryData) {%>
+                            getMaxMindLocation(repCountryEntry, ip_info.rep_country_loc, empty_record);
+                            repCountryResultList.push_back(repCountryEntry);
+                        <%}%>
+                    }
+                    
+                    ipLocResults.push_back(ipLocResultList);
+                    regCountryResults.push_back(regCountryResultList);
+                    repCountryResults.push_back(repCountryResultList);
+                }	
+            <%}%>
+            
+            OPort0Type & otuple = static_cast <OPort0Type &>(tuple);
+            <%  foreach my $attribute (@{ $::outputPort0->getAttributes()}) {
+                my $name = $attribute->getName();
+                my $operation = $attribute->getAssignmentOutputFunctionName();
+                if($operation eq "getIPLocationData") {%>
+                        otuple.set_<%=$name%>(ipLocResults);
+                <%} elsif($operation eq "getRegisteredCountryData") {%>
+                        otuple.set_<%=$name%>(regCountryResultList);
+                <%} elsif($operation eq "getRepresentedCountryData") {%>
+                        otuple.set_<%=$name%>(repCountryResultList);                                        
+                <%}%>
+            <%}%>
+        
+            submit(otuple,0);
+            <%}%> // baseCppOutputType
+        }
+    <%}%>
 }
 
 // Tuple processing for non-mutating ports
@@ -231,18 +364,23 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
     	<%} elsif($::isMatrix) {%>
     		<%=$::inputIPAttrParamCppType%>::iterator matrixIt;
     		<%=$::inputIPAttrParamCppType%> data = <%=$::inputIPAttrParamCppValue%>;
+
+                <%=$::outputAttributeCppType%>::value_type ipLocResultList;
+                <%=$::outputAttributeCppType%>::value_type regCountryResultList;
+                <%=$::outputAttributeCppType%>::value_type repCountryResultList;
+                <%=$::inputIPAttrParamCppType%>::value_type::iterator vectorIt;
+
     		for(matrixIt = data.begin(); matrixIt != data.end(); ++matrixIt)
     		{
-    			<%=$::outputAttributeCppType%>::value_type ipLocResultList;
-    			<%=$::outputAttributeCppType%>::value_type regCountryResultList;
-    			<%=$::outputAttributeCppType%>::value_type repCountryResultList;
-    			<%=$::inputIPAttrParamCppType%>::value_type::iterator vectorIt;
+                        ipLocResultList.clear();
+                        regCountryResultList.clear();
+                        repCountryResultList.clear();
     			for(vectorIt = (*matrixIt).begin(); vectorIt != (*matrixIt).end(); ++vectorIt)
     			{
     				spatial_info_t ip_info = {};
     				{
     					AutoPortMutex am(mutex_, *this);
-						lookupIP(*vectorIt, ip_info);
+					lookupIP(*vectorIt, ip_info);
     				}
     				
 					blocks_record_t empty_record = {} ;

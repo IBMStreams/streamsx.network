@@ -46,7 +46,7 @@
 #define EM_TX_WTHRESH 8  /**< Default values of TX write-back threshold reg. */
 
 #define MAX_RX_QUEUE_PER_LCORE 4
-#define MAX_PKT_BURST  128
+#define MAX_PKT_BURST  8
 #define BURST_TX_DRAIN 220000ULL /* around 100us at 2.2 Ghz */
 
 /*

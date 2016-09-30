@@ -86,7 +86,7 @@ Output filters and attribute assignments may use any
 of the built-in SPL functions, and any of these functions, which are specific to
 the PacketContentAssembler operator: 
 
-* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions]
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions]
 
 Output tuple attributes that are not assigned a value explicitly, but which match
 an input attribute in both name and type, will be copied automatically when the output tuple is produced.
@@ -129,7 +129,7 @@ specified does not match the number of output ports specified.
 # Sample Applications
 
 The network toolkit includes several
-[./tk$SamplePacketContentAssembler/tk$SamplePacketContentAssembler.html|sample applications]
+[https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
 that illustrate how to use this operator.
 
 # References
@@ -138,7 +138,7 @@ The result functions that can be used in boolean
 expressions for the `outputFilters` parameter
 and in output attribute assignment expressions are described here:
 
-* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions].  
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html|content assembler result functions].  
 
       </description>
       <libraryDependencies>

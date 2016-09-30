@@ -84,44 +84,71 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
         return SPL::rstring(hbuf);
       }
 
-
-
       // This function converts a four-byte binary representation of an IPv4
       // address in host byte order into a string representation.
-
       static SPL::rstring convertIPV4AddressNumericToString(SPL::uint32 ipv4AddressNumeric) {
+        struct textEntry {
+          char text[4];
+        };
 
-        // save results in this cache so the conversion is only done once
-        static SPL::Mutex cacheMutex;
-        static SPL::map<SPL::uint32, SPL::rstring> cache;
+        static struct textEntry textValue[256] = {
+           "0",  "1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",
+          "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+          "20", "21", "22", "23", "24", "25", "26", "27", "28", "29",
+          "30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+          "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+          "50", "51", "52", "53", "54", "55", "56", "57", "58", "59",
+          "60", "61", "62", "63", "64", "65", "66", "67", "68", "69",
+          "70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
+          "80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
+          "90", "91", "92", "93", "94", "95", "96", "97", "98", "99",
 
-        // return the string saved in the cache, if this address has been converted before
-        {
-          SPL::AutoMutex m(cacheMutex); 
-          const SPL::map<SPL::uint32, SPL::rstring>::iterator i = cache.find(ipv4AddressNumeric);
-          if (i != cache.end()) return i->second;
-        }
+          "100", "101", "102", "103", "104", "105", "106", "107", "108", "109",
+          "110", "111", "112", "113", "114", "115", "116", "117", "118", "119",
+          "120", "121", "122", "123", "124", "125", "126", "127", "128", "129",
+          "130", "131", "132", "133", "134", "135", "136", "137", "138", "139",
+          "140", "141", "142", "143", "144", "145", "146", "147", "148", "149",
+          "150", "151", "152", "153", "154", "155", "156", "157", "158", "159",
+          "160", "161", "162", "163", "164", "165", "166", "167", "168", "169",
+          "170", "171", "172", "173", "174", "175", "176", "177", "178", "179",
+          "180", "181", "182", "183", "184", "185", "186", "187", "188", "189",
+          "190", "191", "192", "193", "194", "195", "196", "197", "198", "199",
 
-        // convert binary representation of address to a tring
-        char ipv4Address[INET_ADDRSTRLEN];
+          "200", "201", "202", "203", "204", "205", "206", "207", "208", "209",
+          "210", "211", "212", "213", "214", "215", "216", "217", "218", "219",
+          "220", "221", "222", "223", "224", "225", "226", "227", "228", "229",
+          "230", "231", "232", "233", "234", "235", "236", "237", "238", "239",
+          "240", "241", "242", "243", "244", "245", "246", "247", "248", "249",
+          "250", "251", "252", "253", "254", "255"};
+        
+        char retString[16];
+        uint8_t strOffset = 0;
         const uint32_t networkOrderAddress = htonl(ipv4AddressNumeric);
-        const std::string ipv4AddressString(inet_ntop(AF_INET, &networkOrderAddress, ipv4Address, sizeof(ipv4Address)));
+        for(uint8_t byteOffset=0; byteOffset<4; byteOffset++) {
+          uint8_t byteVal = (networkOrderAddress >> ((byteOffset)*8)) & 0xff;
 
-        // save the conversion in the cache
-        {
-          SPL::AutoMutex m(cacheMutex); 
-          cache.add(ipv4AddressNumeric, ipv4AddressString);
+          uint8_t endCnt = 1; 
+          if(byteVal >= 10) endCnt++; 
+          if(byteVal >= 100) endCnt++; 
+
+          for(int i=0; i<endCnt; i++) {
+            retString[strOffset] = textValue[byteVal].text[i];
+            strOffset++;
+          }
+          if(byteOffset == 3) {
+            retString[strOffset] = 0;
+          } else {
+            retString[strOffset] = '.';
+          }
+          strOffset++;
         }
 
-        return ipv4AddressString;
+        return(retString);
       }
-
-
 
       // This function converts a string representation of an IPv4 address
       // to a four-byte binary representation. If the string does not represent a valid
       // IPv4 address, zero is returned.
-
       static SPL::uint32 convertIPV4AddressStringToNumeric(SPL::rstring ipv4AddressString) {
 
         // save results in this cache so the conversion is only done once
@@ -148,8 +175,6 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 
         return ipv4AddressNumeric;
       }
-
-
 
       // This function converts a string representing an IPv4 address into a
       // string representation of the subnet address, using the specified number of mask

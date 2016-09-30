@@ -3,7 +3,7 @@
   <info:identity>
     <info:name>com.ibm.streamsx.network</info:name>
     <info:description>Operators and functions for ingesting and parsing raw network data at the packet level.</info:description>
-    <info:version>2.8.4</info:version>
+    <info:version>2.8.5</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

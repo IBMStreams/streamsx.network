@@ -27,7 +27,7 @@ Output filters and attribute assignments are SPL expressions. They may use any
 of the built-in SPL functions, and any of these functions, which are specific to
 the DHCPMessageParser operator: 
 
-* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP parser result functions]
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP parser result functions]
 
 The DHCPMessageParser operator emits a tuple on each output port for each input tuple,
 optionally filtered by the 'outputFilters'
@@ -59,7 +59,7 @@ specified does not match the number of output ports specified.
 # Sample Applications
 
 The network toolkit includes several
-[./tk$SampleDNSMessageParser/tk$SampleDNSMessageParser.html|sample applications]
+[https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
 that illustrate how to use this operator.
 
 # References
@@ -75,7 +75,7 @@ The result functions that can be used in boolean
 expressions for the `outputFilters` parameter
 and in output attribute assignment expressions are described here:
 
-* [./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP result functions].  
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP result functions].  
 
       </description>
       <libraryDependencies>
@@ -115,7 +115,7 @@ messages should be emitted by the corresponding output port. The number of
 expressions in the list must match the number of output ports, and each
 expression must evaluate to a `boolean` value.  The output filter expressions may include any
 of the
-[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP result functions].  
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP result functions].  
 
 The default value of the `outputFilters` parameter is an empty list, which
 causes all DHCP messages processed to be emitted by all output ports.
@@ -189,7 +189,7 @@ or if no `outputFilters` parameter is specified.
 
 Output attributes can be assigned values with any SPL expression that evaluates
 to the proper type, and the expressions may include any of the 
-[./tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP result functions].  
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html|DHCP result functions].  
 Output attributes that match input attributes in name and
 type are copied automatically.
 

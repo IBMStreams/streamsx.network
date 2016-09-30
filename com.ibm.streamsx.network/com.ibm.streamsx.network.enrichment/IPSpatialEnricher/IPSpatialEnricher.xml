@@ -120,13 +120,13 @@ This parameter should not be used if input port 1 is defined.</description>
         <expressionMode>AttributeFree</expressionMode>
         <cardinality>1</cardinality>
       </parameter>
-    </parameters>
+   </parameters>
     <inputPorts>
       <inputPortSet>
         <description>Ingests tuples containing IP addresses. The `inputIPAttr` parameter specifies the attribute containing the IP addresses.
 Both IPv4 and IPv6 addresses are supported.</description>
         <windowingDescription></windowingDescription>
-        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
         <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
         <cardinality>1</cardinality>
@@ -167,7 +167,7 @@ The output tuple attributes whose assignments are not specified are assigned fro
         </outputFunctions>
         <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
-        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
         <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
         <cardinality>1</cardinality>
         <optional>false</optional>

@@ -82,6 +82,9 @@ static void dpdkCallback(void *correlator, void *data,
 }
 
 MY_OPERATOR::MY_OPERATOR() {
+    packetCounter = 0;
+    octetCounter = 0;
+
     // Get the operator's parameters into variables.
 
     lcoreMaster = <%=$lcoreMaster%>;
