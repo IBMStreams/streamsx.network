@@ -868,12 +868,14 @@
         <function:prototype>public boolean DNS_TRUNCATION_FLAG()</function:prototype>
       </function:function>
       
-      
       <function:function>
         <function:description>
-          This parser result function returns a 16 bit mask containing all flags in the DNS header of the current message. 
-          Note that no bit manipulation is being done.  Conversion from network byte order may be necessary to utilize this value later on.
-        </function:description>
+          This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.
+          The value is in host byte order, so, for example, 
+          `DNS_ALL_FLAGS()&amp; 0x8000 == 0x8000` has the same value as DNS_RESPONSE_FLAG(), 
+          `DNS_ALL_FLAGS() >> 11 &amp; 0x000F` has the same value as DNS_OPCODE(), and
+          `DNS_ALL_FLAGS() &amp; 0x000F` has the same value as DNS_RESPONSE_CODE().
+         </function:description>
         <function:prototype>public uint16 DNS_ALL_FLAGS()</function:prototype>
       </function:function>
 

@@ -76,7 +76,7 @@ private:
   SPL::boolean DNS_TRUNCATION_FLAG() { return parser.dnsHeader->flags.indFlags.truncatedFlag; }
   
   inline __attribute__((always_inline))
-  SPL::uint16 DNS_ALL_FLAGS() { return parser.dnsHeader->flags.allFlags; }
+  SPL::uint16 DNS_ALL_FLAGS() { return ntohs(parser.dnsHeader->flags.allFlags); }
   
 
   inline __attribute__((always_inline))
