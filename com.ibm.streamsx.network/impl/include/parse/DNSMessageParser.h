@@ -434,7 +434,7 @@ class DNSMessageParser {
   SPL::list<SPL::uint16> convertResourceClassesToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint16> integers;
-    for (int i=0; i<count; i++) integers.add(records[i].type!=EDNS0_TYPE ? records[i].classs : 0);
+    for (int i=0; i<count; i++) integers.add(records[i].classs);
     return integers;
   }
 
@@ -446,7 +446,7 @@ class DNSMessageParser {
   SPL::list<SPL::uint32> convertResourceTTLsToIntegerList(const struct Record records[], const uint16_t count) {
 
     SPL::list<SPL::uint32> integers;
-    for (int i=0; i<count; i++) integers.add(records[i].type!=EDNS0_TYPE ? records[i].ttl : 0);
+    for (int i=0; i<count; i++) integers.add(records[i].ttl);
     return integers;
   }
 
@@ -533,7 +533,7 @@ class DNSMessageParser {
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
         /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); 
         /* SRV */        case  33: return SPL::rstring("[SRV data]"); break;
-        /* EDNS0 */      case  41: return SPL::rstring("[EDNS0 data]"); break;
+        /* EDNS0 */      case  41: return SPL::rstring(""); break;
         /* SSHFP */      case  44: return SPL::rstring("[SSHFP data]"); break;
         /* IPSECKEY */   case  45: return SPL::rstring("[IPSECKEY data]"); break;
         /* RRSIG */      case  46: return SPL::rstring("[RRSIG data]"); break;
