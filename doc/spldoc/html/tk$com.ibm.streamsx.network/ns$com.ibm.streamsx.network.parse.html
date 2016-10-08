@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.4</a> &gt; com.ibm.streamsx.network.parse</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.6</a> &gt; com.ibm.streamsx.network.parse</p>
 
 </div>
 
@@ -303,25 +303,28 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_YOUR_ADDRESS">DHCP_YOUR_ADDRESS()</a></strong>:           This parser result function returns the IP version 4 address           leased to the client by the DHCP server, if the message is an           acknowledgement granting a lease, or zero if not.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_CLASSES">DNS_ADDITIONAL_CLASSES()</a></strong>:           This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_CLASSES">DNS_ADDITIONAL_CLASSES()</a></strong>:           This parser result function returns a list of the 'class' fields in the 'additional' resource records in the current message.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_COUNT">DNS_ADDITIONAL_COUNT()</a></strong>:           This parser result function returns the number of 'additional' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_DATA">DNS_ADDITIONAL_DATA()</a></strong>:           This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_DATA">DNS_ADDITIONAL_DATA()</a></strong>:           This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_DATA.rstring">DNS_ADDITIONAL_DATA(rstring)</a></strong>:           This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_NAMES">DNS_ADDITIONAL_NAMES()</a></strong>:           This parser result function returns a list of the 'name' fields in the 'additional' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TTLS">DNS_ADDITIONAL_TTLS()</a></strong>:           This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TTLS">DNS_ADDITIONAL_TTLS()</a></strong>:           This parser result function returns a list of the 'time to live' fields in the 'additional' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TYPES">DNS_ADDITIONAL_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TYPES">DNS_ADDITIONAL_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'additional' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></strong>:           This parser result function returns a 16 bit mask containing all flags in the DNS header of the current message.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></strong>:           This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ANSWER_ADDRESS">DNS_ANSWER_ADDRESS()</a></strong>:           This parser result function returns the 'data' field of the first 'answer' resource record,           if there is one with a 'type' value            of '1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),           as a string value,           or an empty string if not.
@@ -376,6 +379,9 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_DATA">DNS_NAMESERVER_DATA()</a></strong>:           This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_DATA.rstring">DNS_NAMESERVER_DATA(rstring)</a></strong>:           This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_NAMES">DNS_NAMESERVER_NAMES()</a></strong>:           This parser result function returns a list of the 'name' fields in the 'name server' resource records in the current message.

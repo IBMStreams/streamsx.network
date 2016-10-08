@@ -76,7 +76,7 @@ private:
   SPL::boolean DNS_TRUNCATION_FLAG() { return parser.dnsHeader->flags.indFlags.truncatedFlag; }
   
   inline __attribute__((always_inline))
-  SPL::uint16 DNS_ALL_FLAGS() { return parser.dnsHeader->flags.allFlags; }
+  SPL::uint16 DNS_ALL_FLAGS() { return ntohs(parser.dnsHeader->flags.allFlags); }
   
 
   inline __attribute__((always_inline))
@@ -158,6 +158,9 @@ private:
   SPL::list<rstring> DNS_NAMESERVER_DATA() { return parser.convertResourceDataToStringList(parser.nameserverRecords, parser.nameserverRecordCount); }
 
   inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_NAMESERVER_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.nameserverRecords, parser.nameserverRecordCount, fieldDelimiter); }
+
+  inline __attribute__((always_inline))
   SPL::uint16 DNS_ADDITIONAL_COUNT() { return parser.additionalCount; }
 
   inline __attribute__((always_inline))
@@ -174,6 +177,9 @@ private:
 
   inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ADDITIONAL_DATA() { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
 
 };
 

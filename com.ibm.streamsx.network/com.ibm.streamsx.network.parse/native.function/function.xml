@@ -868,12 +868,14 @@
         <function:prototype>public boolean DNS_TRUNCATION_FLAG()</function:prototype>
       </function:function>
       
-      
       <function:function>
         <function:description>
-          This parser result function returns a 16 bit mask containing all flags in the DNS header of the current message. 
-          Note that no bit manipulation is being done.  Conversion from network byte order may be necessary to utilize this value later on.
-        </function:description>
+          This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.
+          The value is in host byte order, so, for example, 
+          `DNS_ALL_FLAGS()&amp; 0x8000 == 0x8000` has the same value as DNS_RESPONSE_FLAG(), 
+          `DNS_ALL_FLAGS() >> 11 &amp; 0x000F` has the same value as DNS_OPCODE(), and
+          `DNS_ALL_FLAGS() &amp; 0x000F` has the same value as DNS_RESPONSE_CODE().
+         </function:description>
         <function:prototype>public uint16 DNS_ALL_FLAGS()</function:prototype>
       </function:function>
 
@@ -1103,8 +1105,18 @@
       <function:function>
         <function:description>
           This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
+          For resource records containing multiple fields, such as SOA records, only the first field is returned.
         </function:description>
         <function:prototype>public list&lt;rstring> DNS_NAMESERVER_DATA()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
+          For resource records containing multiple fields, such as SOA records, all fields are returned, in order, 
+          separated by the string specified as the function's argument.
+        </function:description>
+        <function:prototype>public list&lt;rstring> DNS_NAMESERVER_DATA(rstring)</function:prototype>
       </function:function>
 
       <function:function>
@@ -1127,30 +1139,40 @@
 
       <function:function>
         <function:description>
-          This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
+          This parser result function returns a list of the 'type' fields in the 'additional' resource records in the current message.
         </function:description>
         <function:prototype>public list&lt;uint16> DNS_ADDITIONAL_TYPES()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description>
-          This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.
+          This parser result function returns a list of the 'class' fields in the 'additional' resource records in the current message.
         </function:description>
         <function:prototype>public list&lt;uint16> DNS_ADDITIONAL_CLASSES()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description>
-          This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.
+          This parser result function returns a list of the 'time to live' fields in the 'additional' resource records in the current message.
         </function:description>
         <function:prototype>public list&lt;uint32> DNS_ADDITIONAL_TTLS()</function:prototype>
       </function:function>
 
       <function:function>
         <function:description>
-          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.
+          This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.
+          For resource records containing multiple fields, such as SOA records, only the first field is returned.
         </function:description>
         <function:prototype>public list&lt;rstring> DNS_ADDITIONAL_DATA()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.
+          For resource records containing multiple fields, such as SOA records, all fields are returned, in the order, 
+          separated by the string specified as the function's argument.
+        </function:description>
+        <function:prototype>public list&lt;rstring> DNS_ADDITIONAL_DATA(rstring)</function:prototype>
       </function:function>
 
     </function:functions>

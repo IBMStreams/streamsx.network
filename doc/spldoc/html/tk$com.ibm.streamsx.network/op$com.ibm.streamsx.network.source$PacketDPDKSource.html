@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.4</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketDPDKSource</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.6</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketDPDKSource</p>
 
 </div>
 
@@ -40,7 +40,7 @@
 
 <div class="p">
 <ul class="ul">
-<li class="li"> <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">network header parser result functions</a></li>
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">network header parser result functions</a></li>
 
 </ul>
 
@@ -78,10 +78,6 @@ use com.ibm.streamsx.network.source::*;
 
 <div class="p">The PacketDPDKSource operator depends upon the DPDK libraries available from <a class="xref" href="http://dpdk.org">http://dpdk.org</a>. The library must be installed on the machine where this operator is built.   It has been tested with the following versions:
 <ul class="ul">
-<li class="li"> DPDK 2.0</li>
-
-<li class="li"> DPDK 2.1</li>
-
 <li class="li"> DPDK 2.2</li>
 
 </ul>
@@ -100,7 +96,7 @@ use com.ibm.streamsx.network.source::*;
 
 </div>
 
-<p class="p">There are very good documents for DPDK build/install/use that should be referenced.  Here are some notes of the steps that will help getting started on Streams:
+<p class="p">There are very good documents for DPDK build/install/use on the <a class="xref" href="http://dpdk.org/doc/guides/linux_gsg/index.html">DPDK website</a> that should be referenced.  Here are some notes of the steps that will help getting started on Streams:
 </p>
 
 <div class="p">
@@ -114,7 +110,7 @@ use com.ibm.streamsx.network.source::*;
 <div class="p">
 <pre class="pre codeblock">
 export EXTRA_CFLAGS=-fPIC
-export RTE_SDK=/home/userid/dpdk-2.0.0 (point to install directory)
+export RTE_SDK=/home/&lt;userid&gt;/dpdk-2.2.0   # (point to install directory)
 
 export RTE_TARGET=x86_64-native-linuxapp-gcc
    OR
@@ -131,6 +127,7 @@ export RTE_TARGET=ppc_64-default-linuxapp-gcc
 
 <div class="p">
 <pre class="pre codeblock">
+cd $RTE_SDK
 make config T=x86_64-native-linuxapp-gcc
    OR
 make config T=ppc_64-power8-linuxapp-gcc
@@ -165,7 +162,8 @@ make install T=x86_64-native-linuxapp-gcc
 make install T=ppc_64-power8-linuxapp-gcc
 
 # Move the resulting library to your Streams application build location
-cp build/lib/libdpdk.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/source/
+# libdpdk.a will be libdpdk.so if CONFIG_RTE_BUILD_SHARED_LIB=y was used.
+cp build/lib/libdpdk.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
 </pre>
 
 
@@ -178,10 +176,10 @@ cp build/lib/libdpdk.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/sour
 
 <div class="p">
 <pre class="pre codeblock">
-cd /toolkit-directory/com.ibm.streamsx.network/impl/src/source/dpdk
+cd &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/src/source/dpdk
 make
-cp streams_source.h /toolkit-directory/com.ibm.streamsx.network/impl/include/source/
-cp build/lib/libstreams_source.a /toolkit-directory/com.ibm.streamsx.network/impl/lib/source/
+cp streams_source.h &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/include/source/
+cp build/lib/libstreams_source.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
 </pre>
 
 
@@ -194,13 +192,13 @@ cp build/lib/libstreams_source.a /toolkit-directory/com.ibm.streamsx.network/imp
 
 <div class="p">
 <pre class="pre codeblock">
-cd /toolkit-directory/streamsx.network/samples/SamplePacketDPDKSource
+cd &lt;toolkit-directory&gt;/samples/SamplePacketDPDKSource
 
-# Update any libraries that need to be linked based on the examples
-vi Makefile (Primary change is to pick the right libraries)
+# Update the sample Makefile to use the appropriate libraries for your adapter type
+vi Makefile
 
 # Modify the operator parameters as needed for your NIC and environment
-vi TestPacketDPDKSource.splmm
+vi TestPacketDPDKSource.spl
 make
 </pre>
 
@@ -209,14 +207,18 @@ make
 </li>
 
 <li class="li">
-<p class="p"> Create a dpdk group for permisssions.  Note that udev rules would be a   better approach -- documentation is being worked.
+<p class="p"> Create a dpdk group for permisssions.
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
 groupadd dpdk
-usermod -G userid,dpdk userid
-groups userid
+usermod -a -G dpdk &lt;userid&gt;
+groups &lt;userid&gt;
+
+# You may need to log out and back in to make sure your user is actively in the group.
+# Alternatively, you could use newgrp to change the current default group for the current shell session:
+newgrp dpdk
 </pre>
 
 
@@ -224,19 +226,35 @@ groups userid
 </li>
 
 <li class="li">
-<p class="p"> Configure and enable acces to key system resources. General items (run as root typically):
+<p class="p"> Configure and enable access to hugepages (You'll need to be root to do most of these):
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-mkdir -p /mnt/huge
-mount -t hugetlbfs nodev /mnt/huge
+# Make sure hugetlbfs is mounted, and the appropriate group owner and permissions are set:
+# (May need to umount /dev/hugepages first, to make sure the right gid and mode settings take.)
+mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
+
+# Enable a suitable number of huge pages of the appropriate size, on the appropriate NUMA nodes
+# The exact number and size of hugepages will depend on your workload and packet rates.
+# Note: Fewer, larger hugepages can be used if available, such as on POWER systems.
+# The exact NUMA nodes that need huge pages will depend on adapter location and which CPUs the
+# DPDK application threads will be running on.
 echo 1000 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 
-chown root:dpdk /dev/hugepages
-chmod 775 /dev/hugepages
-chown root:dpdk /mnt/huge/
-chmod 775 /mnt/huge/
+# Ensure all users in the dpdk group can lock an unlimited amount of memory.
+# Add a line to /etc/security/limits.conf like the following:
+@dpdk - memlock unlimited
+# This will take effect at next login.
+
+# An alternative to setting up huge pages after booting each time, you could add
+# the mount options to /etc/fstab or a systemd unit file, and add a line to
+# /etc/sysctl.conf with the number of huge pages to reserve:
+vm.nr_hugepages = 1000
+# These will be spread over the NUMA nodes, and be of the default size for the system.
+# If you change these files, you will not need to run the explicit mount or echo 1000
+# commands, above, before running the DPDK applications (provided you have rebooted
+# the system after making the changes).
 </pre>
 
 
@@ -244,22 +262,45 @@ chmod 775 /mnt/huge/
 </li>
 
 <li class="li">
-<p class="p"> Example additional items for e1000 (RHEL 7.1):
+<p class="p"> Additional Items for e1000 Adapters (RHEL7):
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-ifconfig eth1 down
+# Bring the interface down
+ifconfig &lt;eth-interface&gt; down
+  OR
+ip link set dev &lt;eth-interface&gt; down
+
+# Load the intel DPDK uio driver:
 modprobe uio
-insmod /dpdk-path/dpdk-2.1.0/build/kmod/igb_uio.ko
-/dpdk-path/dpdk-2.1.0/tools/dpdk_nic_bind.py --bind=igb_uio eth-interface
-/dpdk-path/dpdk-2.1.0/tools/dpdk_nic_bind.py --status
+insmod &lt;dpdk-path&gt;/dpdk-2.2.0/build/kmod/igb_uio.ko
+
+# Bind the interface to the intel DPDK uio driver:
+&lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --bind=igb_uio &lt;eth-interface&gt;
+&lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --status
+
+# Ensure the dpdk group has full access to the new uio device:
 chown root:dpdk /dev/uio0
 chmod 660 /dev/uio0
+
+# Ensure the dpdk group has full access to config and resources for the new uio device:
 chown root:dpdk /sys/class/uio/uio0/device/config
 cdmod 660 /sys/class/uio/uio0/device/config
 chown root:dpdk /sys/class/uio/uio0/device/resource*
 chmod 660 /sys/class/uio/uio0/device/resource*
+
+# Alternatively, a system-level udev rule could be used to ensure the dpdk group had access to
+# any new uio device by adding a file at /etc/udev/rules.d/10-dpdk.rules with content like:
+SUBSYSTEM=="uio", GROUP="dpdk", MODE="0660"
+# but note that this will not give access to the config and resource files, so that step would still
+# need to be done manually (or in a script).  If you do add a udev rule, it will take effect at the
+# next reboot, or, after forcing udev to reload rules (but then only at the time of the next uio bind):
+udevadm control --reload
+
+# If you need a particular interface to always be bound to the uio driver, at boot
+# time, the easiest way is to add the ifconfig down, modprobe/insmod,
+# dpdk_nic_bind.py, and chown/chmod commands to a simple startup script.
 </pre>
 
 
@@ -267,29 +308,37 @@ chmod 660 /sys/class/uio/uio0/device/resource*
 </li>
 
 <li class="li">
-<p class="p"> Example additional items for Mellanox (RHEL 7.1).  This assumes the OFED packages   have been installed.
+<p class="p"> Additional Items for Mellanox Adapters (RHEL7).  Assumes OFED packages have been installed.   (See <a class="xref" href="http://www.mellanox.com/page/products_dyn?product_family=209&amp;mtag=pmd_for_dpdk">Mellanox Poll Mode Driver for DPDK</a> and <a class="xref" href="http://www.mellanox.com/page/products_dyn?product_family=26&amp;mtag=linux_sw_drivers">Mellanox OFED</a> for more information.)
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-# Configure IB module. Add the line:
-# "options ib_uverbs disable_raw_qp_enforcement=1"
-vi /etc/modprobe.d/mlnx.conf,
+# Configure IB module.
+# Add a line to (or create) /etc/modprobe.d/mlnx.conf:
+options ib_uverbs disable_raw_qp_enforcement=1
 
+# Make sure the mlx4 driver is re-loaded and uses the above settings:
 modprobe mlx4_en
 /etc/init.d/openibd restart
-# "ibstat" and "/etc/init.d/openibd status" are useful commands.
+# "ibstat" and "/etc/init.d/openibd status" are useful commands to verify things worked.
 </pre>
 
 
 </div>
+</li>
+
+<li class="li">
+<p class="p"> Other Adapters may require other additional items.  See the DPDK documentation for more details.
+</p>
 </li>
 
 <li class="li">
 <div class="p"> Running the Streams application
 <pre class="pre codeblock">
-Normal submit : streamtool submitjob output/TestPacketDPDKSource.sab
-Packet output can be found in the "data" directory.
+# Submit normally:
+streamtool submitjob output/TestPacketDPDKSource.sab
+
+# Packet output can be found in the "data" directory.
 </pre>
 
 
@@ -384,7 +433,7 @@ Packet output can be found in the "data" directory.
 <p class="p">Each output port will produce one output tuple for each packet received if the corresponding expression in the <tt class="ph tt">outputFilters</tt> parameter evaluates <tt class="ph tt">true</tt>, or if no <tt class="ph tt">outputFilters</tt> parameter is specified.
 </p>
 
-<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">PacketDPDKSource result functions</a>. Output attributes that match input attributes in name and type are copied automatically.
+<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">PacketDPDKSource result functions</a>. Output attributes that match input attributes in name and type are copied automatically.
 </p>
 
    <p class="p"/>

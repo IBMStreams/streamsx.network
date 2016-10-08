@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.4</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketLiveSource</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.6</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketLiveSource</p>
 
 </div>
 
@@ -56,7 +56,7 @@
 
 <div class="p">
 <ul class="ul">
-<li class="li"> <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">network header parser result functions</a></li>
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">network header parser result functions</a></li>
 
 </ul>
 
@@ -376,7 +376,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 <div class="section"><h2 class="title sectiontitle">Sample Applications
 </h2>
 
-<p class="p">The network toolkit includes several <a class="xref" href=".././tk$SamplePacketLiveSource/tk$SamplePacketLiveSource.html">sample applications</a> that illustrate how to use this operator.
+<p class="p">The network toolkit includes several <a class="xref" href="https://github.com/IBMStreams/streamsx.network/tree/master/samples">sample applications</a> that illustrate how to use this operator.
 </p>
 
 </div>
@@ -549,7 +549,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
 <div class="p">
 <ul class="ul">
-<li class="li"> <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">network header parser result functions</a>.  </li>
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">network header parser result functions</a>.  </li>
 
 </ul>
 
@@ -639,7 +639,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 <p class="p">Each output port will produce one output tuple for each packet received (and passed by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter is specified) if the corresponding expression in the <tt class="ph tt">outputFilters</tt> parameter evaluates <tt class="ph tt">true</tt>, or if no <tt class="ph tt">outputFilters</tt> parameter is specified. 
 </p>
 
-<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the  <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">PacketLiveSource result functions</a>.   Output attributes that match input attributes in name and type are copied automatically.
+<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the  <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">PacketLiveSource result functions</a>.   Output attributes that match input attributes in name and type are copied automatically.
 </p>
 
    <p class="p"/>
@@ -809,7 +809,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">PacketLiveSource result functions</a>.  
+<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">PacketLiveSource result functions</a>.  
 </p>
 
 <p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all packets processed to be emitted by all output ports.
