@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>
+
+DNSPacketFileSource is an operator for the IBM InfoSphere Streams product that
+reads prerecorded network packets from 'packet capture (PCAP)' files, parses
+the network headers, and emits tuples containing packet data.  
+The operator may be configured with one or more output ports,
+and each port may be configured to emit different tuples,
+as specified by output filters.
+The tuples may contain the entire packet, the
+payload portion of the packet, or individual fields from the network headers, as
+specified by output attribute assignments.  
+
+The DNSPacketFileSource operator expects PCAP files to contain complete ethernet
+packets, starting with the ethernet header, including all protocol-specific
+headers and the packet payload.  
+
+The DNSPacketFileSource operator 
+selects packets to process with input filters,
+parses individual fields in the packet's network headers, 
+selects messages to emit as output tuples with output filter expressions,
+and assigns values to them with output attribute assignment expressions.
+
+Input filters are PCAP filter expressions, as described here:
+
+* [http://www.tcpdump.org/manpages/pcap-filter.7.html]
+* [http://linux.die.net/man/7/pcap-filter]
+
+Output filters and attribute assignments are SPL expressions. They may use any
+of the built-in SPL functions, and any of these functions, which are specific to
+the DNSPacketFileSource operator: 
+
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
+
+The DNSPacketFileSource operator recognizes these types of packet encapsulation, 
+and steps quietly over their headers:
+
+* Juniper Networks 'jmirror' encapsulation
+* Cisco Systems 'Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation
+
+Files containing complete ethernet packets can be created in PCAP format by a
+variety of network diagnostic tools, such as the Linux `tcpdump` command and the
+Wireshark open-source tools.
+
+The DNSPacketFileSource operator is part of the network toolkit. To use it in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.source::*;
+
+# Dependencies
+
+The DNSPacketFileSource operator depends upon the Linux 'packet capture library
+(libpcap)'.  The library must be installed on the machine where this operator
+executes. It is available as an installable 'repository package (RPM)' from the
+'base' RHEL and CentOS repositories.  It can be installed with administrator
+tools such as 'yum'.  This requires root privileges, which can be acquired
+temporarily with administrator tools such as 'sudo'.
+
+To install `libpcap`, enter this command at a Linux command prompt:
+
+    sudo yum install libpcap-devel
+
+Alternatively, you can download the source code for a newer version of `libpcap`
+and build the library yourself. The new library can then be installed in system
+directories, or used where built without being installed.
+
+To do this, download the distribution package for the latest version of
+`libpcap` from this address:
+
+* [http://www.tcpdump.org/]
+
+To build `libpcap` from source code, open a 'terminal' window and type this at a
+command prompt:
+
+    cd .../directory
+    tar -xvf .../libpcap-X.Y.Z.tar.gz
+    cd .../directory/libpcap-X.Y.Z
+    ./configure
+    make
+
+To instruct the Streams compiler (that is, the 'sc' command) to use your version
+of `libpcap` instead of the system version, set these environment variables
+before compiling an application that contains the PacketLiveSource operator:
+
+    export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=.../directory/libpcap-X.Y.Z
+    export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
+
+For more information on configuring, building, and installing `libpcap`, refer
+to its 'INSTALL.txt' file.
+
+This operator has been tested with these versions of `libpcap`:
+
+* libpcap 0.9.4, included in RHEL/CentOS 5.x
+* libpcap 0.9.8, included in SLES 11
+* libpcap 1.0.0, included in RHEL/CentOS 6.2
+* libpcap 1.4.0, included in RHEL/CentOS 6.5
+* libpcap 1.5.3, included in RHEL/CentOS 7.1
+* libpcap 1.6.1
+* libpcap 1.6.2
+* libpcap 1.7.4
+
+# Threads 
+
+The PacketFileOperator contains a separate thread for reporting its metrics to
+the Streams runtime if the `metricsInterval` parameter is greater than zero.
+
+When the DNSPacketFileSource operator is configured without an input port, it
+contains another thread which reads the PCAP file specified by the
+`pcapFilename` operator.  When the operator reaches end-of-file, it terminates
+the thread and terminates the operator.
+
+# Exceptions 
+
+The DNSPacketFileSource operator will throw an exception and terminate in these situations:
+
+* The `pcapFilename` parameter does not specify a valid PCAP recording.
+
+* An input tuple's first parameter is not of type `rstring`, or does not specify a valid PCAP recording.
+
+* The `inputFilter` and `outputFilters` parameters do not specify a valid PCAP filter expression.
+
+# Sample Applications
+
+The network toolkit includes several
+[https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
+that illustrate how to use this operator.
+
+# References
+
+The ethernet frame format is described here:
+
+* [http://en.wikipedia.org/wiki/Ethernet_frame]
+
+The ethernet header and the fields it contains are described here:
+
+* [http://linux.die.net/include/net/ethernet.h]
+* [http://linux.die.net/include/linux/if_ether.h]
+
+The IPv4 header and the fields it contains are described here:
+
+* [http://en.wikipedia.org/wiki/IPv4]
+* [http://www.ietf.org/rfc/rfc791.txt]
+* [http://linux.die.net/include/netinet/in.h]
+* [http://linux.die.net/include/netinet/ip.h]
+
+The IPv6 header and the fields it contains are described here:
+
+* [https://en.wikipedia.org/wiki/IPv6_packet]
+* [https://tools.ietf.org/html/rfc2460]
+* [http://linux.die.net/include/netinet/ip6.h]
+
+The UDP header and the fields it contains are described here:
+
+* [http://en.wikipedia.org/wiki/User_Datagram_Protocol]
+* [http://tools.ietf.org/html/rfc768]
+* [http://linux.die.net/include/netinet/udp.h]
+
+The TCP header and the fields it contains are described here:
+
+* [http://en.wikipedia.org/wiki/Transmission_Control_Protocol]
+* [http://tools.ietf.org/html/rfc793]
+* [http://linux.die.net/include/netinet/tcp.h]
+
+The Juniper Networks 'jmirror' encapsulation header is described here:
+
+* [http://wiki.wireshark.org/jmirror]
+
+The Cisco Systems ''Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
+
+* [https://tools.ietf.org/html/draft-foschiano-erspan-00]
+
+The 'Generic Route Encapsulation (GRE)' headers used by Cisco ERSPAN encapsulation are described here:
+
+* [https://tools.ietf.org/html/rfc2784]
+* [https://tools.ietf.org/html/rfc1701]
+
+The Linux `tcpdump` command is described here:
+
+* [http://www.tcpdump.org/]
+* [http://linux.die.net/man/8/tcpdump]
+
+The Wireshark tools are described here:
+
+* [http://www.wireshark.org/]
+
+`libpcap` filter expressions, 
+which are used with the `inputFilter` parameter, are described here:
+
+* [http://www.tcpdump.org/manpages/pcap-filter.7.html]
+* [http://linux.die.net/man/7/pcap-filter]
+
+The result functions that can be used in boolean
+expressions for the `outputFilters` parameter
+and in output attribute assignment expressions are described here:
+
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].  
+
+      </description>
+      <metrics>
+        <metric>
+          <name>nPacketsProcessedCurrent</name>
+          <description>
+
+This metric counts number of packets processed by the operator.  When
+an input filter is specified, this includes only packets that pass the
+filter.
+
+          </description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nBytesProcessedCurrent</name>
+          <description>
+
+This metric counts number of bytes of packet data processed by the
+operator.  When an input filter is specified, this includes only packets
+that pass the filter.
+
+          </description>
+          <kind>Counter</kind>
+        </metric>
+      </metrics>
+      <libraryDependencies>
+        <library>
+          <cmn:description> </cmn:description>
+          <cmn:managedLibrary>
+            <cmn:command>../../impl/bin/libpcapPath.pl</cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description> </cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_filesystem</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_system</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>pcapFilename</name>
+        <description>
+
+This parameter takes an expression of type `rstring` that specifies the pathname
+of a single input PCAP file for the operator to read. 
+
+If the operator is
+configured without an inport port, this parameter is required; if the operator
+has an input port, this parameter is not allowed.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>inputFilter</name>
+        <description>
+
+This optional parameter takes an expression of type `rstring` that specifies
+which input packets should be processed. The value of this string must be a
+valid PCAP filter expression, as defined here:
+
+* [http://www.tcpdump.org/manpages/pcap-filter.7.html]
+* [http://linux.die.net/man/7/pcap-filter]
+
+The default value is an empty string, which
+causes all packets read from the PCAP file to be processed.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>outputFilters</name>
+        <description>
+
+This optional parameter takes a list of SPL expressions that specify which packets
+should be emitted by the corresponding output port. The number of
+expressions in the list must match the number of output ports, and each
+expression must evaluate to a `boolean` value.  The output filter expressions may include any
+of the
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|DNSPacketFileSource result functions].  
+
+The default value of the `outputFilters` parameter is an empty list, which
+causes all packets processed to be emitted by all output ports.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+      <parameter>
+        <name>initDelay</name>
+        <description>
+
+This optional parameter takes an expression of type `float64` that specifies the
+number of seconds the operator will wait before it begins to produce tuples.
+
+This parameter is allowed only when the `pcapFilename` parameter is also
+specified.  
+
+The default value is '0.0'.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>processorAffinity</name>
+        <description>
+
+This optional parameter takes an expression of type `uint32` that specifies
+which processor core the operator's thread will run on.  The maximum value is
+*P-1*, where *P* is the number of processors on the machine where the operator
+will run.
+      
+Where the operator runs on a thread of its own, this parameter applies to the
+operator's thread.  This is the situation when the operator does not have an
+input port (and the `pcapFilename` parameter is specified). This is also the
+case when the operator has an input port, and it is configured as a threaded
+input port, and when the operator has an @parallel annotation.
+     
+Where the operator runs on the thread of an upstream operator, this parameter
+affects the thread of the operator that sends tuples to it. This is the
+situation when the operator has an input port, and is fused with its upstream
+operator.
+      
+The default is to dispatch the operator's thread on any available processor.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>metricsInterval</name>
+        <description>
+
+This optional parameter takes an expression of type `float64` that specifies the
+interval, in seconds, for sending operator metrics to the Streams runtime. If
+the value is zero or less, the operator will not report metrics to the runtime,
+and the output assigment functions for `libpcap` statistics will be zero.
+      
+The default value is '10.0'.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description>
+
+The DNSPacketFileSource operator has one optional input port.
+
+When the DNSPacketFileSource operator is configured with an input port, the first
+attribute must be of type `rstring`, and specifies the pathname of an input PCAP
+file for the operator to read.
+
+When the DNSPacketFileSource operator is configured without an input port, the `pcapFilename`
+parameter specifies the pathname of a single input PCAP file for the operator to
+read.
+
+The packets in a PCAP file may optionally be filtered as they are 
+read from the file with
+the `inputFilter` parameter.
+The tuples produced by the operator may optionally be filtered
+with the `outputFilter` parameter.
+
+        </description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortOpenSet>
+        <description>
+
+The DNSPacketFileSource operator requires one or more output ports:
+
+Each output port will produce one output tuple for each packet read from 
+the PCAP file (and passed by the input filter, if the `inputFilter` parameter is specified)
+if the corresponding expression in the `outputFilters` parameter evaluates `true`,
+or if no `outputFilters` parameter is specified. 
+
+Output attributes can be assigned values with any SPL expression that evaluates
+to the proper type, and the expressions may include any of the 
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|DNSPacketFileSource result functions].  
+Output attributes that match input attributes in name and
+type are copied automatically.
+
+The DNSPacketFileSource operator emits a punctuation marker on each output port
+when it reaches the end of each input file.
+
+        </description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
+      </outputPortOpenSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>
