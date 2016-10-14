@@ -20,7 +20,7 @@ my @outputPortList = @{ $model->getOutputPorts() };
 
 # get C++ expressions for getting the values of this operator's parameters
 my $pcapFilename = $model->getParameterByName("pcapFilename") ? $model->getParameterByName("pcapFilename")->getValueAt(0)->getCppExpression() : undef;
-my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : undef;
+my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : "\"udp port 53\"";
 my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterByName("initDelay")->getValueAt(0)->getCppExpression() : 0;
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
@@ -297,7 +297,16 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
     // parse the network headers in the packet
     headers.parseNetworkHeaders(packetBuffer, packetBufferLength);
-    if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "DNSPacketFileSource");  continue; }
+    if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 or IPv6 header found", "DNSPacketFileSource");  continue; }
+
+    // ignore the packet if its not to/from UDP port 53, or has no payload
+    if ( ! ( headers.udpHeader && ( ntohs(headers.udpHeader->source)==53 || ntohs(headers.udpHeader->dest)==53 ) ) ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not to/from UDP port 53", "DNSPacketFileSource");  continue; }
+    if ( ! headers.payload ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no payload", "DNSPacketFileSource");  continue; }
+
+    // parse the DNS header and resource records in the packet payload
+    parser.parseDNSMessage(headers.payload, headers.payloadLength);
+    if ( parser.error ) { SPLLOG(L_DEBUG, "error parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DNSPacketFileSource"); }
+    if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketFileSource");  continue; }
 
     // point at the input tuple with the name used by the code generator, if there is one
     <% if ($inputPort) { print "IPort0Type& iport\$0 = (IPort0Type&)(*inTuple);"; } %> ;

@@ -49,7 +49,7 @@ submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
 )
 
-traceLevel=5 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
+traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
 
 ################### functions used in this script #############################
 
@@ -77,7 +77,7 @@ sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, co
 
 step "executing standalone application '$namespace.$composite' ..."
 executable=$buildDirectory/bin/$namespace.$composite
-###???$here/debugthis.sh ...
+###???$here/debugthis.sh 
 $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

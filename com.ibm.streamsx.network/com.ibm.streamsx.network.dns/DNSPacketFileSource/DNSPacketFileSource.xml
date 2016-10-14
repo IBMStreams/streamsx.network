@@ -5,18 +5,19 @@
       <description>
 
 DNSPacketFileSource is an operator for the IBM InfoSphere Streams product that
-reads prerecorded network packets from 'packet capture (PCAP)' files, parses
-the network headers, and emits tuples containing packet data.  
+reads prerecorded DNS packets from 'packet capture (PCAP)' files, parses
+the network headers and the fields of the DNS message, and emits tuples containing packet data.  
 The operator may be configured with one or more output ports,
 and each port may be configured to emit different tuples,
 as specified by output filters.
 The tuples may contain the entire packet, the
-payload portion of the packet, or individual fields from the network headers, as
+payload portion of the packet, or individual fields from the network headers and DNS message, as
 specified by output attribute assignments.  
 
 The DNSPacketFileSource operator expects PCAP files to contain complete ethernet
 packets, starting with the ethernet header, including all protocol-specific
-headers and the packet payload.  
+headers, and a DNS message. The operator ignores packets unless they were
+sent to or from UDP port 53.
 
 The DNSPacketFileSource operator 
 selects packets to process with input filters,
@@ -33,7 +34,7 @@ Output filters and attribute assignments are SPL expressions. They may use any
 of the built-in SPL functions, and any of these functions, which are specific to
 the DNSPacketFileSource operator: 
 
-* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header and parser result functions]
 
 The DNSPacketFileSource operator recognizes these types of packet encapsulation, 
 and steps quietly over their headers:
@@ -48,7 +49,7 @@ Wireshark open-source tools.
 The DNSPacketFileSource operator is part of the network toolkit. To use it in an
 application, include this statement in the SPL source file:
 
-    use com.ibm.streamsx.network.source::*;
+    use com.ibm.streamsx.network.dns::*;
 
 # Dependencies
 
@@ -104,7 +105,7 @@ This operator has been tested with these versions of `libpcap`:
 
 # Threads 
 
-The PacketFileOperator contains a separate thread for reporting its metrics to
+The DNSPacketFileSource operator contains a separate thread for reporting its metrics to
 the Streams runtime if the `metricsInterval` parameter is greater than zero.
 
 When the DNSPacketFileSource operator is configured without an input port, it
@@ -164,6 +165,11 @@ The TCP header and the fields it contains are described here:
 * [http://tools.ietf.org/html/rfc793]
 * [http://linux.die.net/include/netinet/tcp.h]
 
+DNS messages and the fields they contain are described here:
+  
+* [http://en.wikipedia.org/wiki/Domain_Name_System]
+* [http://tools.ietf.org/html/rfc1035]
+
 The Juniper Networks 'jmirror' encapsulation header is described here:
 
 * [http://wiki.wireshark.org/jmirror]
@@ -196,7 +202,7 @@ The result functions that can be used in boolean
 expressions for the `outputFilters` parameter
 and in output attribute assignment expressions are described here:
 
-* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].  
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header and DNS parser result functions].  
 
       </description>
       <metrics>
@@ -284,8 +290,8 @@ valid PCAP filter expression, as defined here:
 * [http://www.tcpdump.org/manpages/pcap-filter.7.html]
 * [http://linux.die.net/man/7/pcap-filter]
 
-The default value is an empty string, which
-causes all packets read from the PCAP file to be processed.
+The default value is 'udp port 53', which
+causes only DNS packets read from the PCAP file to be processed.
 
         </description>
         <optional>true</optional>
@@ -303,7 +309,7 @@ should be emitted by the corresponding output port. The number of
 expressions in the list must match the number of output ports, and each
 expression must evaluate to a `boolean` value.  The output filter expressions may include any
 of the
-[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|DNSPacketFileSource result functions].  
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|DNSPacketSource result functions].  
 
 The default value of the `outputFilters` parameter is an empty list, which
 causes all packets processed to be emitted by all output ports.

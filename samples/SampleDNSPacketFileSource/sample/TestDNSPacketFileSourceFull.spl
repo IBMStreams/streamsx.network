@@ -104,7 +104,7 @@ composite TestDNSPacketFileSourceFull {
             map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; }
         param
             pcapFilename: $pcapFilename;
-            inputFilter: "udp port 53";
+            //inputFilter: "udp port 30030"; // ... for 'jmirror' packets only
             metricsInterval: 0.0;
         output Out:
             packetsProcessed = packetsProcessed(),
