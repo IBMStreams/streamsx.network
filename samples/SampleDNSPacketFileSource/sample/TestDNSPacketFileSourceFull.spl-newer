@@ -106,7 +106,7 @@ composite TestDNSPacketFileSourceFull {
             map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; }
         param
             pcapFilename: $pcapFilename;
-            //inputFilter: "udp port 30030"; // ... for 'jmirror' packets only
+            inputFilter: "udp port 53";
             metricsInterval: 0.0;
         output Out:
             packetsProcessed = packetsProcessed(),
@@ -182,8 +182,8 @@ composite TestDNSPacketFileSourceFull {
           DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
           DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
           DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
-          DNS_ALL_FIELDS = DNS_ALL_FIELDS("\n", "|", "^"),
-          DNS_INVALID_FIELDS = DNS_INVALID_FIELDS("\n"),
+          DNS_ALL_FIELDS = DNS_ALL_FIELDS(),
+          DNS_INVALID_FIELDS = DNS_INVALID_FIELDS(),
             PACKET_LENGTH = PACKET_LENGTH(),
             PAYLOAD_LENGTH = PAYLOAD_LENGTH(),
             PACKET_DATA = PACKET_DATA(),

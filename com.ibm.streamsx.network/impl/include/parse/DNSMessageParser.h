@@ -274,10 +274,12 @@ class DNSMessageParser {
   char const* error;
 
 
-  // This function decodes an encoded DNS name located at '*p'. If no problems
-  // are found, it puts the decoded DNS name in 'nameBuffer' and sets
-  // '*nameLength'.  If an encoding problem is found, 'error' is set to a
-  // description of the problem; a partially decoded DNS name may be left in
+  // This function decodes an encoded DNS name located at '*p', writes the
+  // decoded DNS name in 'nameBuffer', sets '*nameLength' to the number of bytes
+  // written, and advances '*p' to the next field. The function does not write a
+  // trailing null byte after the string (that is, it does not write an ASCIIZ
+  // string). If an encoding problem is found, 'error' is set to a description
+  // of the problem, and a partially decoded DNS name may be left in
   // 'nameBuffer'.
 
   inline __attribute__((always_inline))
@@ -330,6 +332,25 @@ class DNSMessageParser {
         error = "label flags invalid"; break;
       }
     }
+  }
+
+
+  // This function decodes an encoded DNS name located at '*p' and writes the
+  // decoded DNS name in 'nameBuffer'. The function writes a trailing null byte
+  // after the string (that is, it writes an ASCIIZ string). The function
+  // returns the address of the string written. If an encoding problem is found,
+  // 'error' is set to a description of the problem, and a partially decoded DNS
+  // name may be left in 'nameBuffer'.
+  inline __attribute__((always_inline))
+    const char* convertDNSEncodedNameToString(const uint8_t* p, const char* nameBuffer) { 
+
+    uint8_t* q = (uint8_t*)p;
+    char* buffer = (char*)nameBuffer;
+    int bufferLength = 0;
+    decodeDNSEncodedName(&q, buffer, &bufferLength);
+    buffer[bufferLength] = '\0';
+    
+    return nameBuffer;
   }
 
 

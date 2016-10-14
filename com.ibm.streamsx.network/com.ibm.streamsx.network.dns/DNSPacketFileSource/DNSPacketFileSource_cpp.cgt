@@ -297,10 +297,11 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
     // parse the network headers in the packet
     headers.parseNetworkHeaders(packetBuffer, packetBufferLength);
-    if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 or IPv6 header found", "DNSPacketFileSource");  continue; }
 
-    // ignore the packet if its not to/from UDP port 53, or has no payload
-    if ( ! ( headers.udpHeader && ( ntohs(headers.udpHeader->source)==53 || ntohs(headers.udpHeader->dest)==53 ) ) ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not to/from UDP port 53", "DNSPacketFileSource");  continue; }
+    // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
+    if ( ! headers.ipv4Header ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 header found", "DNSPacketFileSource");  continue; }
+    if ( ! headers.udpHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not UDP protocol", "DNSPacketFileSource");  continue; }
+    if ( ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53 ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not to/from UDP port 53", "DNSPacketFileSource");  continue; }
     if ( ! headers.payload ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no payload", "DNSPacketFileSource");  continue; }
 
     // parse the DNS header and resource records in the packet payload

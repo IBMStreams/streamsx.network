@@ -30,3 +30,6 @@ StreamsLogs*.tgz
 
 # ignore directories
 /tmp/
+
+# ignore files added by MacOS
+.DS_Store

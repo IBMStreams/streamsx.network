@@ -29,6 +29,7 @@ my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegio
 
 #include "parse/NetworkHeaderParser.h"
 #include "parse/DNSMessageParser.h"
+#include "dns/DNSPacketFlattener.h"
 
 
 <%SPL::CodeGen::headerPrologue($model);%>
@@ -100,9 +101,10 @@ public:
   uint32_t packetBufferLength;
   NetworkHeaderParser headers;
 
-  // ----------- DNS message parser ----------
+  // ----------- DNS message parser and flattener ----------
 
   DNSMessageParser parser;
+  DNSPacketFlattener flattener;
 
   // ----------- assignment functions for output attributes ----------
 
@@ -313,6 +315,11 @@ public:
   inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
 
+  inline __attribute__((always_inline))
+    SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { return flattener.dnsAllFields(pcapHeader, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str()); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring DNS_INVALID_FIELDS(SPL::rstring fieldDelimiter) { return ""; }
 
 
 

@@ -10,7 +10,7 @@
 
       <function:function>
         <function:description>
-          This DNS parser result function returns `true` if an encoding error was detected while decoding the current packet,
+          This parser result function returns `true` if an encoding error was detected while decoding the current packet,
           or `false` otherwise. Note that a value of `false` does not necessarily mean the packet has
           no encoding errors, since the operator only decodes the fields needed.
         </function:description>
@@ -19,7 +19,7 @@
 
       <function:function>
         <function:description>
-          This DNS parser result function returns a description of an encoding error found while decoding the current packet,
+          This parser result function returns a description of an encoding error found while decoding the current packet,
           or an empty string if no enoding errors were found.
         </function:description>
         <function:prototype>public rstring parseErrorDescription()</function:prototype>
@@ -27,7 +27,7 @@
 
       <function:function>
         <function:description>
-          This DNS parser result function returns the offset from the beginning of the message to the encoding error found,
+          This parser result function returns the offset from the beginning of the message to the encoding error found,
           or zero if no encoding errors were found.
         </function:description>
         <function:prototype>public uint32 parseErrorOffset()</function:prototype>
@@ -741,6 +741,7 @@ if it has one, or zero otherwise.
         </function:description>
         <function:prototype>public rstring DNS_INVALID_FIELDS(rstring)</function:prototype>
       </function:function>
+
 
     </function:functions>
   </function:functionSet>
