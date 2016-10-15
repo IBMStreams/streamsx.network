@@ -18,7 +18,7 @@ composite TestDNSPacketFileSourceBasic {
     type
 
     DNSMessageType =
-        uint64 messageNumber,            // sequence number of packet
+        uint64 packetNumber,            // sequence number of packet
         float64 captureTime,             // time that packet was captured, in seconds since Unix epoch
         rstring ipSourceAddress,         // IP source address
         rstring ipDestinationAddress,    // IP destination address
@@ -32,7 +32,7 @@ composite TestDNSPacketFileSourceBasic {
         list<rstring> nameserverNames;
 
     FlattenedDNSMessageType = 
-        uint64 messageNumber,            // sequence number of packet
+        uint64 packetNumber,            // sequence number of packet
         rstring flattenedDNSMessage;
 
     graph
@@ -48,7 +48,7 @@ composite TestDNSPacketFileSourceBasic {
             metricsInterval: 0.0;
         output 
         DNSMessageStream:
-          messageNumber = packetsProcessed(),
+          packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
           ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
           ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
@@ -61,7 +61,7 @@ composite TestDNSPacketFileSourceBasic {
           answerData = DNS_ANSWER_DATA(),
           nameserverNames = DNS_NAMESERVER_NAMES();
         FlattenedDNSMessageStream:
-          messageNumber = packetsProcessed(),
+          packetNumber = packetsProcessed(),
           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
     }
     () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSPacketFileSourceBasic.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
