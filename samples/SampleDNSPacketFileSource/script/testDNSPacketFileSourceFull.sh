@@ -38,7 +38,7 @@ compilerOptionsList=(
 --static-link
 --main-composite=$namespace::$composite
 --output-directory=$buildDirectory 
---data-directory=data
+--data-directory=$dataDirectory
 --num-make-threads=$coreCount
 )
 
