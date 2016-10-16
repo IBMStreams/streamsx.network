@@ -335,24 +335,6 @@ class DNSMessageParser {
   }
 
 
-  // This function decodes an encoded DNS name located at '*p' and writes the
-  // decoded DNS name in 'nameBuffer'. The function writes a trailing null byte
-  // after the string (that is, it writes an ASCIIZ string). The function
-  // returns the address of the string written (that is, it returns the argument
-  // '*p' unchanged). If an encoding problem is found, 'error' is set to a
-  // description of the problem, and a partially decoded DNS name may be left in
-  // 'nameBuffer'.
-#if 0
-  inline __attribute__((always_inline))
-  const char* convertDNSEncodedNameToString(const uint8_t* p, char* nameBuffer) { 
-    uint8_t* q = (uint8_t*)p;
-    int nameBufferLength = 0;
-    decodeDNSEncodedName(&q, nameBuffer, &nameBufferLength);
-    *(nameBuffer+nameBufferLength) = '\0';
-    return nameBuffer;
-  }
-#endif
-
   // This function decodes an encoded DNS name located at 'p'. If no problems
   // are found, it returns an SPL::rstring containing the decoded name. If an
   // encoding problem is found, the function returns an empty string, or perhaps
