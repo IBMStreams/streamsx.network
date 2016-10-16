@@ -1,0 +1,440 @@
+<%
+
+# Copyright (C) 2011, 2015  International Business Machines Corporation
+# All Rights Reserved
+
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
+
+# get Perl objects for input and output ports
+my $inputPort = $model->getNumberOfInputPorts()>0 ? $model->getInputPortAt(0) : undef;
+my @outputPortList = @{ $model->getOutputPorts() };
+
+# get C++ expressions for getting the values of this operator's parameters
+my $pcapFilename = $model->getParameterByName("pcapFilename") ? $model->getParameterByName("pcapFilename")->getValueAt(0)->getCppExpression() : undef;
+my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : "\"udp port 53\"";
+my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterByName("initDelay")->getValueAt(0)->getCppExpression() : 0;
+my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
+my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) {
+  foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+    my $expression = $value->getCppExpression();
+    push @outputFilterList, $expression;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::DNSPacketSource_result_functions::") != -1;
+  }
+}
+
+# basic safety checks
+SPL::CodeGen::exit("Sorry, either 'pcapFilename' parameter or an input port must be specified") unless $pcapFilename || $inputPort;
+SPL::CodeGen::exit("Sorry, 'pcapFilename' parameter and an input port cannot both be specified") if $pcapFilename && $inputPort;
+SPL::CodeGen::exit("Sorry, 'initDelay' can only be specified when 'pcapFilename' is also specified") if $initDelay && !$pcapFilename;
+SPL::CodeGen::exit("Sorry, an input port cannot be specified when starting a consistent region") if $consistentRegion && $consistentRegion->isStartOfRegion() && $inputPort;
+SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+
+%>
+
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+
+// calls to SPL functions within expressions are generated with this
+// namespace, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the DNSPacketLiveSource_h.cgt file
+
+#define common_result_functions MY_OPERATOR
+#define DNSPacketSource_result_functions MY_OPERATOR
+
+
+struct groupByThree : std::numpunct<char> {
+  std::string do_grouping() const { return "\3"; }  // separate digits into groups of three
+  char do_thousands_sep()   const { return ','; }   // separate groups of digits with commas
+};
+
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+<% if ($consistentRegion) { %> : crContext(static_cast<ConsistentRegionContext *>(getContext().getOptionalContext(CONSISTENT_REGION))) <% } %>
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "DNSPacketLiveSource");
+
+  // set operator parameters
+  pcapFilename = <%= $pcapFilename ? $pcapFilename : '""' %>;
+  inputFilter = <%= $inputFilter ? $inputFilter : '""' %>;
+  initDelay = <%=$initDelay%>;
+  processorAffinity = <%=$processorAffinity%>;
+  metricsInterval = <%=$metricsInterval%>;
+
+  // initialize operator state variables
+  startTimeInNanoseconds = SPL::Functions::Time::getCPUCounterInNanoSeconds();
+  now = then = 0;
+  packetCounter = packetCounterNow = packetCounterThen = 0;
+  byteCounter = byteCounterNow = byteCounterThen = 0;
+  pcapDescriptor = NULL;
+  metricsUpdate = false;
+  done = false;
+
+  // clear the output tuples
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    outTuple<%=$i%>.clear();
+    <% } %> ;
+
+#if defined(lib_pcap_pcap_h)
+  // log the 'libpcap' version that will be used
+  SPLLOG(L_INFO, "using " << pcap_lib_version(), "DNSPacketLiveSource");
+#endif
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "DNSPacketLiveSource");
+}
+
+
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "DNSPacketLiveSource");
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "DNSPacketLiveSource");
+}
+
+
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketLiveSource");
+
+  const int threadCount = <%= $inputPort ? 1 : 2 %>;
+  createThreads(threadCount);
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketLiveSource");
+}
+
+
+
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown()
+{
+  // calculate elapsed time, excluding initialization and termination, but including enqueued tuples
+  const uint64_t endTimeInNanoseconds = SPL::Functions::Time::getCPUCounterInNanoSeconds();
+  const double elapsedSeconds = (double)(endTimeInNanoseconds-startTimeInNanoseconds) / 1000000000.0;
+
+  // create a formatter for large numbers to be logged below
+  std::stringstream formattingStream;
+  formattingStream.imbue(std::locale(formattingStream.getloc(), new groupByThree));
+
+  // log packet and byte counters, average processing rates
+  formattingStream.str("");
+  formattingStream << "read " << packetCounter << " packets in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)packetCounter / elapsedSeconds) << " packets/second";
+  SPLLOG(L_INFO, formattingStream.str(), "DNSPacketLiveSource");
+  formattingStream.str("");
+  formattingStream << "read " << byteCounter << " bytes in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)byteCounter / elapsedSeconds) << " bytes/second";
+  SPLLOG(L_INFO, formattingStream.str(), "DNSPacketLiveSource");
+  formattingStream.str("");
+  formattingStream << "read " << byteCounter*8 << " bits in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)byteCounter*8 / elapsedSeconds) << " bits/second";
+  SPLLOG(L_INFO, formattingStream.str(), "DNSPacketLiveSource");
+}
+
+
+
+// start processing threads
+void MY_OPERATOR::process(uint32_t idx)
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") ...", "DNSPacketLiveSource");
+
+    switch (idx) {
+    case 0: if (metricsInterval>0) metricsThread(); break;
+    case 1: fileThread(); break;
+    default: break; }
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DNSPacketLiveSource");
+}
+
+
+
+// Tuple processing for mutating ports
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{
+}
+
+
+
+// tuple processing for non-source operator (that is, where an input port is configured)
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+  <% if ($inputPort) { %>
+
+    SPL::AutoPortMutex automutex(processMutex, *this);
+
+    if (getPE().getShutdownRequested()) return;
+
+    // point at the input tuple
+    inTuple = (IPort0Type*)(&tuple);
+
+    // get the value of the first attribute
+    const std::string filename = static_cast<const std::string>( inTuple->get_<%=$inputPort->getAttributeAt(0)->getName()%>() );
+
+    // process the PCAP input file specified by the first attribute in the tuple
+    processPCAPfile(filename);
+    <% } %> ;
+}
+
+
+
+// Punctuation processing for non-source operator (that is, where an input port is configured)
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+  SPLLOG(L_INFO, "entering <%=$myOperatorKind%> process(" << punct << ") ...", "DNSPacketLiveSource");
+
+  // tell statistics thread we're done, in case there is one
+  if (punct==SPL::Punctuation::WindowMarker) done = true;
+
+  SPLLOG(L_INFO, "leaving <%=$myOperatorKind%> process(" << punct << ") ...", "DNSPacketLiveSource");
+}
+
+
+
+
+<% if ($consistentRegion) { %>
+  void MY_OPERATOR::checkpoint(Checkpoint &ckpt)
+  {
+  }
+
+  void MY_OPERATOR::reset(Checkpoint &ckpt)
+  {
+  }
+
+  void MY_OPERATOR::resetToInitialState()
+  {
+  }
+  <% } %> ;
+
+
+
+// Process one PCAP file, specified either with a parameter or an input tuple
+void MY_OPERATOR::processPCAPfile(const std::string filename)
+{
+  <% if ($processorAffinity>-1) { %> ;
+  // assign caller's thread to a particular processor core, if specified
+  if (processorAffinity>-1) {
+    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "DNSPacketLiveSource");
+    cpu_set_t cpumask; // CPU affinity bit mask
+    CPU_ZERO(&cpumask);
+    CPU_SET(processorAffinity, &cpumask);
+    const int rc = sched_setaffinity(gettid(), sizeof cpumask, &cpumask);
+    if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to " << processorAffinity << ", " << strerror(errno));
+    processorAffinity = -1;
+  }
+ <% } %> ;
+
+  SPLLOG(L_INFO, "opening PCAP file '" << filename << "'", "DNSPacketLiveSource");
+  char pcapError[PCAP_ERRBUF_SIZE] = "\0";
+  pcapDescriptor = pcap_open_offline(filename.c_str(), pcapError);
+  if (!pcapDescriptor) THROW (SPLRuntimeOperator, "error opening PCAP file '" << filename << "', " << pcapError);
+
+  // we'll need to append packets that lack ethernet headers to an empty one in a temporary buffer
+  struct ethhdr emptyEthernetHeader = {};
+  SPL::blob rawIPBuffer;
+
+  // remember whether or not packets in this PCAP file have ethernet headers
+  const int linktype = pcap_datalink(pcapDescriptor);
+  SPLLOG(L_INFO, "PCAP linktype of file is " << linktype, "DNSPacketLiveSource");
+  bool isRawIP = false;
+  switch(linktype) {
+  case DLT_EN10MB: isRawIP = false; break;
+  case DLT_RAW: isRawIP = true; break;
+  default: THROW (SPLRuntimeOperator, "unsupported PCAP linktype " << linktype << " in file '" << filename << "', " << pcapError);
+  }
+
+  // compile and activate the input filter, if there is one
+  if (!inputFilter.empty()) {
+    SPLLOG(L_INFO, "filtering packets on input with '" << inputFilter << "'", "DNSPacketLiveSource");
+    int rc1 = pcap_compile(pcapDescriptor, &inputFilterProgram, inputFilter.c_str(), 0, 0);
+    if (rc1) THROW (SPLRuntimeOperator, "error compiling input filter '" << inputFilter << "', rc=" << rc1 << ", " << pcap_geterr(pcapDescriptor));
+    int rc2 = pcap_setfilter(pcapDescriptor, &inputFilterProgram);
+    if (rc2) THROW (SPLRuntimeOperator, "error activating input filter '" << inputFilter << "', rc=" << rc2 << ", " << pcap_geterr(pcapDescriptor));
+    struct bpf_insn* instruction = inputFilterProgram.bf_insns;
+    for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "DNSPacketLiveSource"); }
+  }
+
+  // process each packet in the PCAP file
+  while(!getPE().getShutdownRequested()) {
+
+    // get the next packet, if there is one
+    int rc = pcap_next_ex(pcapDescriptor, &pcapHeader, (const u_char**)(&pcapBuffer));
+    if (rc==-2) break; // end of file
+    if (rc==-1) THROW (SPLRuntimeOperator, "error reading PCAP file, " << strerror(errno)); // something went wrong
+    //if (rc==0) ... // got another packet to process
+
+    // count the packets and bytes processed so far
+    packetCounter++;
+    byteCounter += pcapHeader->len;
+
+    // if the packet does not have an ethernet header, prepend an empty one
+    if (!isRawIP) {
+      packetBuffer = (char*)pcapBuffer;
+      packetBufferLength = pcapHeader->caplen;
+    } else {
+      emptyEthernetHeader.h_proto = htons( ( ((struct ip*)pcapBuffer)->ip_v ) == 6 ? ETH_P_IPV6 : ETH_P_IP );
+      rawIPBuffer.clear();
+      rawIPBuffer.append( (const unsigned char *)(&emptyEthernetHeader), sizeof(emptyEthernetHeader) );
+      rawIPBuffer.append( (const unsigned char *)pcapBuffer, pcapHeader->caplen );
+      packetBuffer = (char*)rawIPBuffer.getData();
+      packetBufferLength = rawIPBuffer.getSize();
+    }
+
+    // parse the network headers in the packet
+    headers.parseNetworkHeaders(packetBuffer, packetBufferLength);
+
+    // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
+    if ( ! headers.ipv4Header ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 header found", "DNSPacketLiveSource");  continue; }
+    if ( ! headers.udpHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not UDP protocol", "DNSPacketLiveSource");  continue; }
+    if ( ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53 ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not to/from UDP port 53", "DNSPacketLiveSource");  continue; }
+    if ( ! headers.payload ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no payload", "DNSPacketLiveSource");  continue; }
+
+    // parse the DNS header and resource records in the packet payload
+    parser.parseDNSMessage(headers.payload, headers.payloadLength);
+    if ( parser.error ) { SPLLOG(L_DEBUG, "error parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DNSPacketLiveSource"); }
+    if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketLiveSource");  continue; }
+
+    // point at the input tuple with the name used by the code generator, if there is one
+    <% if ($inputPort) { print "IPort0Type& iport\$0 = (IPort0Type&)(*inTuple);"; } %> ;
+
+    // fill in and submit output tuples to output ports, as selected by output filters, if specified
+    <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+      <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+      {
+        <% if ($inputPort) { CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); } %> ;
+        <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+        SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSPacketLiveSource");
+        submit(outTuple<%=$i%>, <%=$i%>);
+      }
+      <% } %> ;
+
+    // reset the 'metrics updated' flag, in case one of the output ports references it
+    metricsUpdate = false;
+  }
+
+  // close the PCAP file before returning
+  pcap_close(pcapDescriptor);
+  pcapDescriptor = NULL;
+
+  // submit punctuation mark to each output port
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    SPLLOG(L_TRACE, "submitting punctuation to output port <%=$i%>", "DNSPacketLiveSource");
+    submit(SPL::Punctuation::WindowMarker, <%=$i%>);
+    <% } %> ;
+
+  SPLLOG(L_INFO, "closing PCAP file '" << filename << "'", "DNSPacketLiveSource");
+}
+
+
+
+
+
+
+
+// When there is no input port, this thread processes the PCAP file specified with the 'pcapFilename' parameter
+
+void MY_OPERATOR::fileThread()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> fileThread()", "DNSPacketLiveSource");
+
+  // wait for a while before starting, if necessary
+  if (initDelay>0) {
+    SPLLOG(L_INFO, "waiting " << initDelay << " seconds before starting", "DNSPacketLiveSource");
+    getPE().blockUntilShutdownRequest(initDelay);
+    if (getPE().getShutdownRequested()) return;
+  }
+
+  // convert pcapFilename parameter value to absolute path, if necessary
+  streams_boost::filesystem::path filepath(pcapFilename);
+  if(filepath.is_relative()) {
+    filepath = streams_boost::filesystem::absolute(filepath, getPE().getDataDirectory());
+  }
+
+  // process the entire PCAP file, checkpointing if necessary
+  {
+    <% if ($consistentRegion) { %> ConsistentRegionPermit crp(crContext); <% } %> ;
+    processPCAPfile( static_cast<const std::string>(filepath.string()) );
+    <% if ($consistentRegion && $consistentRegion->isTriggerOperator()) { %> crContext->makeConsistent(); <% } %> ;
+  }
+
+  // tell the metrics thread we're done
+  done = true;
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> fileThread()", "DNSPacketLiveSource");
+}
+
+
+
+
+
+
+
+// When a second output port is configured, this thread periodically emits
+// statistics tuples on that output port
+
+void MY_OPERATOR::metricsThread()
+{
+  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metricsThread()", "DNSPacketLiveSource");
+
+  // expose the operator's statistics in these metrics
+  OperatorMetrics& opm = getContext().getMetrics();
+  Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
+  Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
+
+  // get metrics periodically and send them to the runtime
+  while (!getPE().getShutdownRequested()) {
+
+    // wait until the next interval, or the 'file' thread finishes, or the PE is shutting down
+    const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
+    if (secondsToWait>0) {
+      SPLLOG(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "PacketLiveSource");
+      getPE().blockUntilShutdownRequest(secondsToWait);
+    } else {
+        SPLLOG(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "PacketLiveSource");
+    }
+
+    // store the previous interval's metrics for difference calculations
+    then = now;
+    packetCounterThen = packetCounterNow;
+    byteCounterThen = byteCounterNow;
+
+    // store the current interval's metrics
+    now = SPL::Functions::Time::getTimestampInSecs();
+    packetCounterNow = packetCounter;
+    byteCounterNow = byteCounter;
+    // ??? SPLLOG(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now)  << " processed=" << packetCounterNow, "PacketLiveSource");
+
+    // send the operator's metrics to the runtime
+    totalPacketsProcessed->setValue(packetCounterNow);
+    totalBytesProcessed->setValue(byteCounterNow);
+
+    // updated metrics will be available to the next output tuple emitted
+    metricsUpdate = true;
+
+    if (done) break;
+  }
+
+  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread()", "DNSPacketLiveSource");
+}
+
+
+
+
+
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
