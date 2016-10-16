@@ -191,4 +191,5 @@ composite LiveDNSPacketLiveSourceFull {
     }
     () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.LiveDNSPacketLiveSourceFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 }

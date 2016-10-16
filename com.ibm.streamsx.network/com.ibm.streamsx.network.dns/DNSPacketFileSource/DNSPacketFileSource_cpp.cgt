@@ -32,6 +32,7 @@ if ($outputFilterParameter) {
   foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
     my $expression = $value->getCppExpression();
     push @outputFilterList, $expression;
+    $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
     $value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::DNSPacketSource_result_functions::") != -1;
   }
 }
@@ -278,10 +279,6 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
     if (rc==-1) THROW (SPLRuntimeOperator, "error reading PCAP file, " << strerror(errno)); // something went wrong
     //if (rc==0) ... // got another packet to process
 
-    // count the packets and bytes processed so far
-    packetCounter++;
-    byteCounter += pcapHeader->len;
-
     // if the packet does not have an ethernet header, prepend an empty one
     if (!isRawIP) {
       packetBuffer = (char*)pcapBuffer;
@@ -308,6 +305,10 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
     parser.parseDNSMessage(headers.payload, headers.payloadLength);
     if ( parser.error ) { SPLLOG(L_DEBUG, "error parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DNSPacketFileSource"); }
     if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketFileSource");  continue; }
+
+    // count the packets and bytes processed so far
+    packetCounter++;
+    byteCounter += pcapHeader->len;
 
     // point at the input tuple with the name used by the code generator, if there is one
     <% if ($inputPort) { print "IPort0Type& iport\$0 = (IPort0Type&)(*inTuple);"; } %> ;
