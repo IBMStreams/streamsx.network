@@ -32,6 +32,6 @@ streamtool stopdomain -d $STREAMS_DOMAIN_ID --force --zkconnect $STREAMS_ZKCONNE
 streamtool rmdomain -d $STREAMS_DOMAIN_ID --force --noprompt --zkconnect $STREAMS_ZKCONNECT
 
 step "stopping zookeeper ..."
-/opt/ibm/InfoSphere_Streams/4.1.1.1/system/impl/bin/streams-zk.sh stop
+$STREAMS_INSTALL/system/impl/bin/streams-zk.sh stop
 
 exit 0
