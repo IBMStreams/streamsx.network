@@ -20,8 +20,8 @@ headers, and a DNS message. The operator ignores packets unless they were
 sent to or from UDP port 53.
 
 The DNSPacketFileSource operator 
-selects packets to process with input filters,
-parses individual fields in the packet's network headers, 
+selects packets to process with an input filter,
+parses individual fields in the packet's network headers and DNS message, 
 selects messages to emit as output tuples with output filter expressions,
 and assigns values to them with output attribute assignment expressions.
 

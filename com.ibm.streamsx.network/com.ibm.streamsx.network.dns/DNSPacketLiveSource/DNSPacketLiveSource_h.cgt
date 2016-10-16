@@ -1,11 +1,8 @@
 <%
-
-## Copyright (C) 2016  International Business Machines Corporation
+## Copyright (C) 2011, 2016  International Business Machines Corporation
 ## All Rights Reserved
-
-my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
-
 %>
+
 
 #include <iostream>
 #include <iomanip>
@@ -18,10 +15,12 @@ my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegio
 #include <errno.h>
 #include <string.h>
 #include <sched.h>
+#include <pthread.h>
+#include <signal.h>
 #include <pcap.h>
 #include <pcap-bpf.h>
+#include <arpa/inet.h>
 
-#include <streams_boost/filesystem.hpp>
 #include <streams_boost/lexical_cast.hpp>
 
 #include <SPL/Runtime/Common/Metric.h>
@@ -35,7 +34,6 @@ my $consistentRegion = $model->getContext()->getOptionalContext("ConsistentRegio
 <%SPL::CodeGen::headerPrologue($model);%>
 
 class MY_OPERATOR : public MY_BASE_OPERATOR
-<% if($consistentRegion) { %> , public StateHandler <% } %>
 {
 public:
 
@@ -50,50 +48,47 @@ public:
   void process(Tuple const & tuple, uint32_t port);
   void process(Punctuation const & punct, uint32_t port);
 
-  <% if ($consistentRegion) { %>
-    ConsistentRegionContext * const crContext;
-    void checkpoint(Checkpoint &ckpt);
-    void reset(Checkpoint &ckpt);
-    void resetToInitialState();
-    <% } %> ;
-
   // ----------- additional operator methods ----------
 
-  void processPCAPfile(const std::string pcapFilename);
-  void fileThread();
   void metricsThread();
+  void pcapThread();
+  void processPCAPbuffer(const struct pcap_pkthdr* header, const u_char* buffer);
 
- private:
+
+private:
 
   // ----------- operator parameters (constant after constructor executes) ----------
 
-  std::string pcapFilename;
+  std::string networkInterface;
+  std::string timestampType;
   double initDelay;
   int32_t processorAffinity;
+  int32_t maximumLength;
+  int32_t bufferSize;
+  bool promiscuous;
+  double timeout;
   double metricsInterval;
   std::string inputFilter;
 
   // ----------- input and output tuples ----------
 
-  <% if ($model->getNumberOfInputPorts()) { print "IPort0Type* inTuple;"; } %> ;
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
 
   // ----------- operator state variables ----------
 
-  Mutex processMutex;
-  uint64_t startTimeInNanoseconds;
+  pthread_t pcapThreadID;
+  pthread_t metricsThreadID;
   double now, then;
   uint64_t packetCounter, packetCounterNow, packetCounterThen;
   uint64_t byteCounter, byteCounterNow, byteCounterThen;
   bool metricsUpdate;
-  boolean done;
 
   // ----------- libpcap-specific variables ----------
 
   pcap_t* pcapDescriptor;
   struct pcap_pkthdr* pcapHeader;
-  const u_char* pcapBuffer;
   struct bpf_program inputFilterProgram;
+  struct pcap_stat pcapStatisticsNow, pcapStatisticsThen;
 
   // ----------- packet header parser ----------
 
@@ -109,6 +104,12 @@ public:
   // ----------- assignment functions for output attributes ----------
 
   inline __attribute__((always_inline))
+  SPL::uint64 packetsReceived() { return pcapStatisticsNow.ps_recv; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDropped() { return pcapStatisticsNow.ps_drop; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
   inline __attribute__((always_inline))
@@ -116,6 +117,12 @@ public:
 
   inline __attribute__((always_inline))
   SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsReceived() { return then ? pcapStatisticsNow.ps_recv - pcapStatisticsThen.ps_recv : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDropped() { return then ? pcapStatisticsNow.ps_drop - pcapStatisticsThen.ps_drop : 0; }
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
@@ -319,14 +326,11 @@ public:
     SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { return flattener.dnsAllFields(pcapHeader, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str()); }
 
   inline __attribute__((always_inline))
-  SPL::rstring DNS_INVALID_FIELDS(SPL::rstring fieldDelimiter) { return ""; }
-
+  SPL::rstring DNS_INVALID_FIELDS(SPL::rstring fieldDelimiter) { return ""; }  
 
 
   // ------------------------------------------------------------------------------------------
 
 };
-
-
 
 <%SPL::CodeGen::headerEpilogue($model);%>

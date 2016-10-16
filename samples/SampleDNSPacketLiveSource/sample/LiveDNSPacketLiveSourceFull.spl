@@ -1,0 +1,194 @@
+/*
+** Copyright (C) 2011, 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.dns::*;
+
+composite LiveDNSPacketLiveSourceFull {
+
+    param
+    expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+
+    type
+
+    DNSPacketType =
+        uint64 packetsProcessed,            // total number of packets processed by operator, so far
+        uint64 bytesProcessed,             // total number of bytes of packet data processed by operator, so far
+        float64 metricsIntervalElapsed,     // elapsed time since last metrics interval, in seconds
+        uint64 metricsIntervalPacketsProcessed, // number of packets processed since last metrics interval
+        uint64 metricsIntervalBytesProcessed,  // number of bytes processed since last metrics interval
+        boolean metricsUpdated,             // true if metrics have been updated since previous output tuple
+        uint32 CAPTURE_SECONDS,             // time that packet was captured, in seconds since Unix epoch
+        uint32 CAPTURE_MICROSECONDS,        // time since CAPTURE_SECONDS, in microseconds
+        list<uint8>[6] ETHER_SRC_ADDRESS,   // ethernet source address, or empty list if 'raw IP' PCAP recording
+        list<uint8>[6] ETHER_DST_ADDRESS,   // ethernet destination address, or empty list if 'raw IP' PCAP recording
+        rstring ETHER_SRC_ADDRESS_AS_STRING,// string representation of ethernet source address
+        rstring ETHER_DST_ADDRESS_AS_STRING,// string representation of ethernet destination address
+        uint16 ETHER_PROTOCOL,              // ethernet protocol: 0x0800==2048 for IPv4, 0x86DD==34525 for IPv6
+        rstring VLAN_TAGS,                  // string representation of ethernet VLAN tags, if any
+        uint8 IP_VERSION,                   // IP version: 4 for IPv4, 6 for IPv6
+        uint8 IP_PROTOCOL,                  // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+        uint32 IPV4_SRC_ADDRESS,            // IPv4 source address, or zero if not IPv4 packet
+        uint32 IPV4_DST_ADDRESS,            // IPv4 destination address, or zero if not IPv4 packet
+        rstring IPV4_SRC_ADDRESS_AS_STRING, // string representation of IPv4 source address
+        rstring IPV4_DST_ADDRESS_AS_STRING, // string representation of IPv4 destination address
+        list<uint8>[16] IPV6_SRC_ADDRESS,   // IPv6 source address, or zero if not IPv6 packet
+        list<uint8>[16] IPV6_DST_ADDRESS,   // IPv6 destination address, or zero if not IPv6 packet
+        rstring IPV6_SRC_ADDRESS_AS_STRING, // string representation of IPv6 source address
+        rstring IPV6_DST_ADDRESS_AS_STRING, // string representation of IPv6 destination address
+        boolean UDP_PORT_53,                // UDP source or destination port is '53' if true, else false
+        uint16 UDP_SRC_PORT,                // UDP source port, or zero if not UDP packet
+        uint16 UDP_DST_PORT,                // UDP destination port, or zero if not UDP packet
+      boolean parseError,
+      rstring parseErrorDescription,
+      uint32 parseErrorOffset,
+      uint16 DNS_IDENTIFIER,
+      uint8 DNS_OPCODE,
+      boolean DNS_RESPONSE_FLAG,
+      uint8 DNS_RESPONSE_CODE,
+      rstring DNS_RESPONSE_CODE_AS_STRING,
+      boolean DNS_AUTHORITATIVE_FLAG,
+      boolean DNS_TRUNCATION_FLAG,
+      rstring DNS_ALL_FLAGS,
+      uint16 DNS_QUESTION_COUNT,
+      rstring DNS_QUESTION_NAME,
+      uint16 DNS_QUESTION_TYPE,
+      rstring DNS_QUESTION_TYPE_AS_STRING,
+      uint16 DNS_QUESTION_CLASS,
+      list<rstring> DNS_QUESTION_NAMES,
+      list<uint16> DNS_QUESTION_TYPES,
+      list<uint16> DNS_QUESTION_CLASSES,
+      uint16 DNS_ANSWER_COUNT,
+      list<rstring> DNS_ANSWER_NAMES,
+      list<uint16> DNS_ANSWER_TYPES,
+      list<uint16> DNS_ANSWER_CLASSES,
+      list<uint32> DNS_ANSWER_TTLS,
+      list<rstring> DNS_ANSWER_DATA,
+      rstring DNS_ANSWER_CANONICAL,
+      rstring DNS_ANSWER_ADDRESS,
+      uint32 DNS_ANSWER_IPV4_ADDRESS_AS_NUMBER,
+      rstring DNS_ANSWER_IPV4_ADDRESS_AS_STRING,
+      list<uint8>[16] DNS_ANSWER_IPV6_ADDRESS_AS_NUMBER,
+      rstring DNS_ANSWER_IPV6_ADDRESS_AS_STRING,
+      list<rstring> DNS_ANSWER_ADDRESSES,
+      list<uint32> DNS_ANSWER_IPV4_ADDRESSES,
+      list<list<uint8>[16]> DNS_ANSWER_IPV6_ADDRESSES,
+      uint16 DNS_NAMESERVER_COUNT,
+      list<rstring> DNS_NAMESERVER_NAMES,
+      list<uint16> DNS_NAMESERVER_TYPES,
+      list<uint16> DNS_NAMESERVER_CLASSES,
+      list<uint32> DNS_NAMESERVER_TTLS,
+      list<rstring> DNS_NAMESERVER_DATA,
+      uint16 DNS_ADDITIONAL_COUNT,
+      list<rstring> DNS_ADDITIONAL_NAMES,
+      list<uint16> DNS_ADDITIONAL_TYPES,
+      list<uint16> DNS_ADDITIONAL_CLASSES,
+      list<uint32> DNS_ADDITIONAL_TTLS,
+      list<rstring> DNS_ADDITIONAL_DATA,
+      rstring DNS_ALL_FIELDS,
+      rstring DNS_INVALID_FIELDS,
+        uint32 PACKET_LENGTH,               // original length of packet (not necessarily all captured)
+        uint32 PAYLOAD_LENGTH,              // length of packet payload, following all network headers
+        blob PACKET_DATA,                   // contents of packet captured, including network headers (not necessarily complete)
+        blob PAYLOAD_DATA;                  // contents of packet payload, following all network headers
+
+    graph
+
+    stream<DNSPacketType> DNSPacketStream as Out = DNSPacketLiveSource() {
+        logic state: {
+            map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+            map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; }
+        param
+            networkInterface: $networkInterface;
+            metricsInterval: 0.0;
+        output Out:
+            packetsProcessed = packetsProcessed(),
+            bytesProcessed = bytesProcessed(),
+            metricsIntervalElapsed = metricsIntervalElapsed(),
+            metricsIntervalPacketsProcessed = metricsIntervalPacketsProcessed(),
+            metricsIntervalBytesProcessed = metricsIntervalBytesProcessed(),
+            metricsUpdated = metricsUpdated(),
+            CAPTURE_SECONDS = CAPTURE_SECONDS(),
+            CAPTURE_MICROSECONDS = CAPTURE_MICROSECONDS(),
+            ETHER_SRC_ADDRESS = ETHER_SRC_ADDRESS(),
+            ETHER_DST_ADDRESS = ETHER_DST_ADDRESS(),
+            ETHER_SRC_ADDRESS_AS_STRING = convertMACAddressNumericToString(ETHER_SRC_ADDRESS()),
+            ETHER_DST_ADDRESS_AS_STRING = convertMACAddressNumericToString(ETHER_DST_ADDRESS()),
+            ETHER_PROTOCOL = ETHER_PROTOCOL(),
+            VLAN_TAGS = (rstring)VLAN_TAGS(),
+            IP_VERSION = IP_VERSION(),
+            IP_PROTOCOL = IP_PROTOCOL(),
+            IPV4_SRC_ADDRESS = IPV4_SRC_ADDRESS(),
+            IPV4_DST_ADDRESS = IPV4_DST_ADDRESS(),
+            IPV4_SRC_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+            IPV4_DST_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+            IPV6_SRC_ADDRESS = IPV6_SRC_ADDRESS(),
+            IPV6_DST_ADDRESS = IPV6_DST_ADDRESS(),
+            IPV6_SRC_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(IPV6_SRC_ADDRESS()),
+            IPV6_DST_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(IPV6_DST_ADDRESS()),
+            UDP_PORT_53 = UDP_PORT(53uh),
+            UDP_SRC_PORT = UDP_SRC_PORT(),
+            UDP_DST_PORT = UDP_DST_PORT(),
+          parseError = parseError(),
+          parseErrorDescription = parseErrorDescription(),
+          parseErrorOffset = parseErrorOffset(),
+          DNS_IDENTIFIER = DNS_IDENTIFIER(),
+          DNS_OPCODE = DNS_OPCODE(),
+          DNS_RESPONSE_FLAG = DNS_RESPONSE_FLAG(),
+          DNS_RESPONSE_CODE = DNS_RESPONSE_CODE(),
+          DNS_RESPONSE_CODE_AS_STRING = DNS_RESPONSE_CODE() in dnsResponseCodes ? dnsResponseCodes[DNS_RESPONSE_CODE()] : (rstring)DNS_RESPONSE_CODE(),
+          DNS_AUTHORITATIVE_FLAG = DNS_AUTHORITATIVE_FLAG(),
+          DNS_TRUNCATION_FLAG = DNS_TRUNCATION_FLAG(),
+          DNS_ALL_FLAGS = (rstring)DNS_ALL_FLAGS(),
+          DNS_QUESTION_COUNT = DNS_QUESTION_COUNT(),
+          DNS_QUESTION_NAME = DNS_QUESTION_NAME(),
+          DNS_QUESTION_TYPE = DNS_QUESTION_TYPE(),
+          DNS_QUESTION_TYPE_AS_STRING = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
+          DNS_QUESTION_CLASS = DNS_QUESTION_CLASS(),
+          DNS_QUESTION_NAMES = DNS_QUESTION_NAMES(),
+          DNS_QUESTION_TYPES = DNS_QUESTION_TYPES(),
+          DNS_QUESTION_CLASSES = DNS_QUESTION_CLASSES(),
+          DNS_ANSWER_COUNT = DNS_ANSWER_COUNT(),
+          DNS_ANSWER_NAMES = DNS_ANSWER_NAMES(),
+          DNS_ANSWER_TYPES = DNS_ANSWER_TYPES(),
+          DNS_ANSWER_CLASSES = DNS_ANSWER_CLASSES(),
+          DNS_ANSWER_TTLS = DNS_ANSWER_TTLS(),
+          DNS_ANSWER_DATA = DNS_ANSWER_DATA(),
+          DNS_ANSWER_CANONICAL = DNS_ANSWER_CANONICAL(),
+          DNS_ANSWER_ADDRESS = DNS_ANSWER_ADDRESS(),
+          DNS_ANSWER_IPV4_ADDRESS_AS_NUMBER = DNS_ANSWER_IPV4_ADDRESS(),
+          DNS_ANSWER_IPV4_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(DNS_ANSWER_IPV4_ADDRESS()),
+          DNS_ANSWER_IPV6_ADDRESS_AS_NUMBER = DNS_ANSWER_IPV6_ADDRESS(),
+          DNS_ANSWER_IPV6_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(DNS_ANSWER_IPV6_ADDRESS()),
+          DNS_ANSWER_ADDRESSES = DNS_ANSWER_ADDRESSES(),
+          DNS_ANSWER_IPV4_ADDRESSES = DNS_ANSWER_IPV4_ADDRESSES(),
+          DNS_ANSWER_IPV6_ADDRESSES = DNS_ANSWER_IPV6_ADDRESSES(),
+          DNS_NAMESERVER_COUNT = DNS_NAMESERVER_COUNT(),
+          DNS_NAMESERVER_NAMES = DNS_NAMESERVER_NAMES(),
+          DNS_NAMESERVER_TYPES = DNS_NAMESERVER_TYPES(),
+          DNS_NAMESERVER_CLASSES = DNS_NAMESERVER_CLASSES(),
+          DNS_NAMESERVER_TTLS = DNS_NAMESERVER_TTLS(),
+          DNS_NAMESERVER_DATA = DNS_NAMESERVER_DATA(),
+          DNS_ADDITIONAL_COUNT = DNS_ADDITIONAL_COUNT(),
+          DNS_ADDITIONAL_NAMES = DNS_ADDITIONAL_NAMES(),
+          DNS_ADDITIONAL_TYPES = DNS_ADDITIONAL_TYPES(),
+          DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
+          DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
+          DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
+          DNS_ALL_FIELDS = DNS_ALL_FIELDS("\n", "|", "^"),
+          DNS_INVALID_FIELDS = DNS_INVALID_FIELDS("\n"),
+            PACKET_LENGTH = PACKET_LENGTH(),
+            PAYLOAD_LENGTH = PAYLOAD_LENGTH(),
+            PACKET_DATA = PACKET_DATA(),
+            PAYLOAD_DATA = PAYLOAD_DATA();
+    }
+    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.LiveDNSPacketLiveSourceFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+}
