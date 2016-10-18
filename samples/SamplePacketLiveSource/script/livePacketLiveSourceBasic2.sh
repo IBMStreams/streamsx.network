@@ -24,6 +24,8 @@ dataDirectory=$projectDirectory/data
 libpcapDirectory=$HOME/libpcap-1.7.4
 
 networkInterface=$( ifconfig eno1 1>/dev/null 2>&1 && echo eno1 || echo eth0 ) 
+#etworkInterface=enP2p1s0
+#networkInterface=enP3p5s0f3
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 

@@ -18,6 +18,11 @@ type PacketData = uint64 timestampMicroseconds,
      uint64 length;
 
 public composite TestPacketDPDKSource {   
+
+  param
+        expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+
+
 	graph   
         // One DPDK operator per NIC port/queue.  In this example we have 1 port 
         // with 2 queues, so 2 PacketDPDKSource operators are required.
@@ -64,6 +69,8 @@ public composite TestPacketDPDKSource {
             param
                 file : "PacketStream1.out";
         }
+
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 
         // All of the PacketDPDKSource operators must run in the same PE (process).
 	config
