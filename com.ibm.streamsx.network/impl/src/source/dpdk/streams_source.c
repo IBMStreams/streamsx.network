@@ -9,9 +9,11 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <signal.h>
 #include <getopt.h>
 #include <semaphore.h>
+#include <pwd.h>
 
 #include <rte_byteorder.h>
 #include <rte_cycles.h>
@@ -82,6 +84,12 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
     printf("STREAMS_SOURCE: streams_operator_init starting.\n"); 
     
     if(firstInitComplete == 0) {
+        const char *homeDir = getenv("HOME");
+        const uid_t uid = getuid(); 
+        const char *newHomeDir = getpwuid(getuid())->pw_dir;
+        if(newHomeDir) setenv("HOME", newHomeDir, 1); 
+        printf("STREAMS_SOURCE: UID=%d, Original Home=%s, New Home=%s.\n", 
+            (int)uid, homeDir, newHomeDir); 
         // Initialize data structures.
         coreMaster_   = -1;
         numQueues_    =  0;
