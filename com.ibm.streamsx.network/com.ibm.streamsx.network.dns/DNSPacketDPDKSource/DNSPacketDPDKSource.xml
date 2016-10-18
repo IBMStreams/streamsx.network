@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+    <description>
+
+DNSPacketDPDKSource is an operator for the IBM InfoSphere Streams product that
+captures live network packets from one of the network interfaces attached to the
+machine where it executes. The operator function and structure are very
+similar to PacketLiveSource; see that operator's documentation for details
+of common functions and general background.  The primary difference between
+these related operators is that DNSPacketDPDKSource leverages the DPDK libraries
+available at [http://www.dpdk.org] for higher performance and lower processing
+overhead.
+
+Output filters and attribute assignments are SPL expressions. They may use any
+of the built-in SPL functions, and any of these functions, which are specific to
+the PacketFileSource operator:
+
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header parser result functions]
+
+The DNSPacketDPDKSource operator steps quietly over 'jmirror' headers prepended to packets
+by Juniper Networks 'mirror encapsulation'.
+
+This operator is part of the network toolkit. To use it in an
+application, include this statement in the SPL source file:
+
+    use com.ibm.streamsx.network.source::*;
+
+# Promiscuous Mode
+
+Network interfaces normally ignore packets that are not addressed to them.
+However, when 'promiscious' mode is enabled on a network interface, it can
+capture all network packets on its ethernet segment, even those that are not
+addressed to it.  This is sometimes referred to as "network sniffing".  Modern
+ethernet switches normally send network interfaces only packets that are
+addressed to them; 'promiscious' mode is useful only when a switch has been
+specifically configured to send packets to a network interface that are not
+addressed to it. This is sometimes referred to as "mirroring".
+
+The DNSPacketDPDKSource operator will enable 'promiscuous' mode in a ethernet
+interface when its 'promiscous' parameter is set to `true`.
+
+# Dependencies
+
+The DNSPacketDPDKSource operator depends upon the DPDK libraries available from
+[http://dpdk.org]. The library must be installed on the machine where this
+operator is built.   It has been tested with the following versions:
+* DPDK 2.2
+
+The base DPDK library supports a wide range of NICs as described at
+[http://dpdk.org].  For IBM Streams, we have tested the following:
+* Mellanox CX-3
+* Mellanox CX-3 Pro
+* Intel e1000
+
+There are very good documents for DPDK build/install/use on the [http://dpdk.org/doc/guides/linux_gsg/index.html|DPDK website] that should be
+referenced.  Here are some notes of the steps that will help getting started
+on Streams:
+
+* Download and untar the dpdk.tgz file from [http://dpdk.org].
+
+* Set environment variables (these are needed for DPDK and Streams builds and depend on 
+  your specific platform):
+
+    export EXTRA_CFLAGS=-fPIC
+    export RTE_SDK=/home/&lt;userid&gt;/dpdk-2.2.0   # (point to install directory)
+
+    export RTE_TARGET=x86_64-native-linuxapp-gcc
+       OR
+    export RTE_TARGET=ppc_64-default-linuxapp-gcc
+
+* Configure the DPDK build from the top directory
+
+    cd $RTE_SDK
+    make config T=x86_64-native-linuxapp-gcc
+       OR
+    make config T=ppc_64-power8-linuxapp-gcc
+
+* Change configuration as needed.  For example:
+
+    # Edit the .config files
+    vi ./build/.config
+
+    # Set key parameters
+    CONFIG_RTE_BUILD_COMBINE_LIBS=y
+    CONFIG_RTE_LIBRTE_MLX4_PMD=y (MLX4 NIC)
+    CONFIG_RTE_BUILD_SHARED_LIB=y (e1000 NIC)
+       OR
+    CONFIG_RTE_BUILD_SHARED_LIB=n (MLX4 NIC)
+
+    # Build the library
+    make
+
+    # Complete the build
+    make install T=x86_64-native-linuxapp-gcc
+       OR
+    make install T=ppc_64-power8-linuxapp-gcc
+
+    # Move the resulting library to your Streams application build location
+    # libdpdk.a will be libdpdk.so if CONFIG_RTE_BUILD_SHARED_LIB=y was used.
+    cp build/lib/libdpdk.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
+
+* There is also a Streams to DPDK glue library that must be built.  To
+  do this, make sure the RTE environment variables noted above are set and then
+  do the following:
+
+    cd &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/src/source/dpdk
+    make
+    cp streams_source.h &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/include/source/
+    cp build/lib/libstreams_source.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
+
+* Build the Streams example application with the following steps:
+
+    cd &lt;toolkit-directory&gt;/samples/SampleDNSPacketDPDKSource
+
+    # Update the sample Makefile to use the appropriate libraries for your adapter type
+    vi Makefile
+
+    # Modify the operator parameters as needed for your NIC and environment
+    vi TestDNSPacketDPDKSource.spl
+    make
+
+* Create a dpdk group for permisssions.
+
+    groupadd dpdk
+    usermod -a -G dpdk &lt;userid&gt;
+    groups &lt;userid&gt;
+
+    # You may need to log out and back in to make sure your user is actively in the group.
+    # Alternatively, you could use newgrp to change the current default group for the current shell session:
+    newgrp dpdk
+
+* Configure and enable access to hugepages (You'll need to be root to do most of these):
+
+    # Make sure hugetlbfs is mounted, and the appropriate group owner and permissions are set:
+    # (May need to umount /dev/hugepages first, to make sure the right gid and mode settings take.)
+    mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
+
+    # Enable a suitable number of huge pages of the appropriate size, on the appropriate NUMA nodes
+    # The exact number and size of hugepages will depend on your workload and packet rates.
+    # Note: Fewer, larger hugepages can be used if available, such as on POWER systems.
+    # The exact NUMA nodes that need huge pages will depend on adapter location and which CPUs the
+    # DPDK application threads will be running on.
+    echo 1000 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+
+    # Ensure all users in the dpdk group can lock an unlimited amount of memory.
+    # Add a line to /etc/security/limits.conf like the following:
+    @dpdk - memlock unlimited
+    # This will take effect at next login.
+
+    # An alternative to setting up huge pages after booting each time, you could add
+    # the mount options to /etc/fstab or a systemd unit file, and add a line to
+    # /etc/sysctl.conf with the number of huge pages to reserve:
+    vm.nr_hugepages = 1000
+    # These will be spread over the NUMA nodes, and be of the default size for the system.
+    # If you change these files, you will not need to run the explicit mount or echo 1000
+    # commands, above, before running the DPDK applications (provided you have rebooted
+    # the system after making the changes).
+
+* Additional Items for e1000 Adapters (RHEL7):
+
+    # Bring the interface down
+    ifconfig &lt;eth-interface&gt; down
+      OR
+    ip link set dev &lt;eth-interface&gt; down
+
+    # Load the intel DPDK uio driver:
+    modprobe uio
+    insmod &lt;dpdk-path&gt;/dpdk-2.2.0/build/kmod/igb_uio.ko
+
+    # Bind the interface to the intel DPDK uio driver:
+    &lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --bind=igb_uio &lt;eth-interface&gt;
+    &lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --status
+
+    # Ensure the dpdk group has full access to the new uio device:
+    chown root:dpdk /dev/uio0
+    chmod 660 /dev/uio0
+
+    # Ensure the dpdk group has full access to config and resources for the new uio device:
+    chown root:dpdk /sys/class/uio/uio0/device/config
+    cdmod 660 /sys/class/uio/uio0/device/config
+    chown root:dpdk /sys/class/uio/uio0/device/resource*
+    chmod 660 /sys/class/uio/uio0/device/resource*
+
+    # Alternatively, a system-level udev rule could be used to ensure the dpdk group had access to
+    # any new uio device by adding a file at /etc/udev/rules.d/10-dpdk.rules with content like:
+    SUBSYSTEM=="uio", GROUP="dpdk", MODE="0660"
+    # but note that this will not give access to the config and resource files, so that step would still
+    # need to be done manually (or in a script).  If you do add a udev rule, it will take effect at the
+    # next reboot, or, after forcing udev to reload rules (but then only at the time of the next uio bind):
+    udevadm control --reload
+
+    # If you need a particular interface to always be bound to the uio driver, at boot
+    # time, the easiest way is to add the ifconfig down, modprobe/insmod,
+    # dpdk_nic_bind.py, and chown/chmod commands to a simple startup script.
+
+* Additional Items for Mellanox Adapters (RHEL7).  Assumes OFED packages have been installed.
+  (See [http://www.mellanox.com/page/products_dyn?product_family=209&amp;mtag=pmd_for_dpdk|Mellanox Poll Mode Driver for DPDK] and [http://www.mellanox.com/page/products_dyn?product_family=26&amp;mtag=linux_sw_drivers|Mellanox OFED] for more information.)
+  
+    # Configure IB module.
+    # Add a line to (or create) /etc/modprobe.d/mlnx.conf:
+    options ib_uverbs disable_raw_qp_enforcement=1
+
+    # Make sure the mlx4 driver is re-loaded and uses the above settings:
+    modprobe mlx4_en
+    /etc/init.d/openibd restart
+    # "ibstat" and "/etc/init.d/openibd status" are useful commands to verify things worked.
+
+* Other Adapters may require other additional items.  See the DPDK documentation for more details.
+
+* Running the Streams application
+    # Submit normally:
+    streamtool submitjob output/TestDNSPacketDPDKSource.sab
+
+    # Packet output can be found in the "data" directory.
+
+    </description>
+
+    <metrics>
+       <metric>
+          <name>nPacketsReceivedCurrent</name>
+          <description>
+
+This metric counts the number of packets received by the network interface,
+as counted by `dpdk`
+
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+
+       <metric>
+          <name>nPacketsDroppedCurrent</name>
+          <description>
+	  
+This metric counts the number of packets dropped by the network interface,
+as counted by `dpdk`
+
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+
+       <metric>
+          <name>nPacketsProcessedCurrent</name>
+          <description>
+	  
+This metric counts number of bytes of packet data processed by the
+operator.
+	  
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+
+       <metric>
+          <name>nBytesProcessedCurrent</name>
+          <description>
+
+This metric counts number of bytes of packet data processed by the
+operator.
+
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+    </metrics>
+
+      <libraryDependencies>
+	<library>
+	<cmn:description>
+
+General support functions.
+
+	</cmn:description>
+	<cmn:managedLibrary>
+	<cmn:includePath>../../impl/include</cmn:includePath>
+	</cmn:managedLibrary>
+	</library>
+
+	<library>
+	<cmn:description>
+	
+streams_source interface library to dpdk.
+	
+	</cmn:description>
+	<cmn:managedLibrary>
+	<cmn:lib>streams_source</cmn:lib>
+	<cmn:libPath>../../impl/lib/source</cmn:libPath>
+	<cmn:includePath>../../impl/include/source</cmn:includePath>
+	</cmn:managedLibrary>
+	</library>
+
+      </libraryDependencies>
+
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <allowCustomLogic>true</allowCustomLogic>
+    </context>
+
+    <parameters>
+      <allowAny>false</allowAny>
+    <parameter>
+      <name>lcoreMaster</name>
+      <description>
+
+Logical core number to be used for the master DPDK thread.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>int32</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
+    <parameter>
+      <name>lcore</name>
+      <description>
+
+Logical core number on which this operator will run.
+
+      </description>
+      <optional>false</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>int32</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
+    <parameter>
+      <name>nicPort</name>
+      <description>
+
+NIC port of type uint32 which sources packets for this
+operator instance.  Obtaining the proper mapping may require
+use of multiple tools, and varies by NIC.  
+
+Suggested tools to help identify NIC ports:
+
+   \- ifconfig
+
+   \- dpdk-\*/tools/dpdk_nic_bind.py --status
+
+   \- ibstat (for Mellanox NICs)
+
+   \- lspci | grep -i net
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>int32</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
+    <parameter>
+      <name>nicQueue</name>
+      <description>
+
+NIC queue of type int32 which sources packets for this operator instance.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>int32</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
+      <parameter>
+        <name>outputFilters</name>
+        <description>
+
+This optional parameter takes a list of SPL expressions that specify which packets
+should be emitted by the corresponding output port. The number of
+expressions in the list must match the number of output ports, and each
+expression must evaluate to a `boolean` value.  The output filter expressions may include any
+of the
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|DNSPacketDPDKSource result functions].  
+
+The default value of the `outputFilters` parameter is an empty list, which
+causes all packets processed to be emitted by all output ports.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
+
+    <parameter>
+      <name>promiscuous</name>
+      <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not 'promiscuous' mode should be enabled on the
+network interface.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>boolean</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
+    <parameter>
+      <name>metricsInterval</name>
+      <description>
+     
+
+This optional parameter takes an expression of type
+`float64` that specifies the interval, in seconds, for sending operator
+metrics to the Streams runtime. If the value is zero or less, the operator
+will not report metrics to the runtime, and the output assigment functions
+for `libpcap` statistics will be zero.
+
+The default value is '10.0'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>float64</type>
+      <cardinality>1</cardinality>
+    </parameter>
+
+    </parameters>
+    <inputPorts>
+    </inputPorts>
+    <outputPorts>
+      <outputPortOpenSet>
+        <description>
+
+The DNSPacketDPDKSource operator requires one or more output ports:
+
+Each output port will produce one output tuple for each packet received
+if the corresponding expression in the `outputFilters` parameter evaluates `true`,
+or if no `outputFilters` parameter is specified.
+
+Output attributes can be assigned values with any SPL expression that evaluates
+to the proper type, and the expressions may include any of the
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|DNSPacketDPDKSource result functions].
+Output attributes that match input attributes in name and
+type are copied automatically.
+
+	</description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+	<allowNestedCustomOutputFunctions>true</allowNestedCustomOutputFunctions>
+      </outputPortOpenSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

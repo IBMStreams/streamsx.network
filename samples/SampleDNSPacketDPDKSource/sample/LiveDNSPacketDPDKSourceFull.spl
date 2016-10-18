@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2011, 2015  International Business Machines Corporation
+** Copyright (C) 2016  International Business Machines Corporation
 ** All Rights Reserved
 */
 
@@ -10,10 +10,9 @@ use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.ipv6::*;
 use com.ibm.streamsx.network.dns::*;
 
-composite LiveDNSPacketLiveSourceFull {
+composite LiveDNSPacketDPDKSourceFull {
 
     param
-    expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 
     type
@@ -101,12 +100,15 @@ composite LiveDNSPacketLiveSourceFull {
 
     graph
 
-    stream<DNSPacketType> DNSPacketStream as Out = DNSPacketLiveSource() {
+    stream<DNSPacketType> DNSPacketStream as Out = DNSPacketDPDKSource() {
         logic state: {
             map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
             map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; }
         param
-            networkInterface: $networkInterface;
+            lcoreMaster: 0; // run the master thread on core 0.
+            lcore: 1; // run this ingest thread on core 1.
+            nicPort: 0; // bind to NIC port 0
+            nicQueue: 0; // bind to NIC queue 0
             promiscuous: true;
             metricsInterval: 0.0;
         output Out:
@@ -190,7 +192,7 @@ composite LiveDNSPacketLiveSourceFull {
             PACKET_DATA = PACKET_DATA(),
             PAYLOAD_DATA = PAYLOAD_DATA();
     }
-    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.LiveDNSPacketLiveSourceFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.LiveDNSPacketDPDKSourceFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
 }
