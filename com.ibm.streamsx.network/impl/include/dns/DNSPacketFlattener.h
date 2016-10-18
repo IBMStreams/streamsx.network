@@ -13,8 +13,6 @@
 #include <stdint.h>
 #include <errno.h>
 #include <string>
-#include <pcap.h>
-#include <pcap-bpf.h>
 
 #include <SPL/Runtime/Type/SPLType.h>
 //??? #include <SPL/Runtime/Utility/Mutex.h>
@@ -173,7 +171,7 @@ class DNSPacketFlattener {
 
  public:
 
-  SPL::rstring dnsAllFields(struct pcap_pkthdr* pcapHeader, NetworkHeaderParser& headers, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter) {
+  SPL::rstring dnsAllFields(uint32_t captureTime, uint32_t packetLength, NetworkHeaderParser& headers, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter) {
 
     // allocate a buffer large enough to hold the largest possible string representation of a DNS message
     char buffer[1024*1024];
@@ -189,8 +187,8 @@ class DNSPacketFlattener {
     char fields1to14[10*1024];
     const size_t fields1to14Length = snprintf( fields1to14, 
                                                sizeof(fields1to14), 
-                                               "%ld%s%s%s%s%s%hhu%s%hu%s%hu%s%hu%s%c%s%hhu%s%hhu%s%hu%s%s%s%hu%s%hu%s",
-                                               pcapHeader->ts.tv_sec, // field 1
+                                               "%u%s%s%s%s%s%hhu%s%hu%s%hu%s%hu%s%c%s%hhu%s%hhu%s%hu%s%s%s%hu%s%hu%s",
+                                               captureTime, // field 1
                                                fieldDelimiter,
                                                convertIPV4AddressToString(headers.ipv4Header->saddr, sourceAddressBuffer), // field 2
                                                fieldDelimiter,
@@ -224,7 +222,7 @@ class DNSPacketFlattener {
     const size_t fields21and22Length = snprintf( fields21and22,
                                                  sizeof(fields21and22),
                                                  "%u%s%hu%s",
-                                                 pcapHeader->len, // field 21
+                                                 packetLength, // field 21
                                                  fieldDelimiter,
                                                  ( (headers.etherHeader->h_dest[4]<<8) + headers.etherHeader->h_dest[5] ), // field 22
                                                  recordDelimiter );

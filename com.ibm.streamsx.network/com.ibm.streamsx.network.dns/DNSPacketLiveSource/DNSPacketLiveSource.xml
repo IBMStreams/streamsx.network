@@ -446,7 +446,7 @@ should be emitted by the corresponding output port. The number of
 expressions in the list must match the number of output ports, and each
 expression must evaluate to a `boolean` value.  The output filter expressions may include any
 of the
-[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|DNSPacketLiveSource result functions].  
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|DNSPacketLiveSource result functions].  
 
 The default value of the `outputFilters` parameter is an empty list, which
 causes all packets processed to be emitted by all output ports.
