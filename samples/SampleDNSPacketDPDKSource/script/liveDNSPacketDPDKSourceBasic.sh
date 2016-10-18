@@ -37,7 +37,6 @@ compilerOptionsList=(
 --spl-path=$( IFS=: ; echo "${toolkitList[*]}" )
 --standalone-application
 --optimized-code-generation
---cxx-flags=-g3
 --static-link
 --main-composite=$namespace::$composite
 --output-directory=$buildDirectory 
@@ -75,8 +74,22 @@ step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\n$composite submission-time parameters:\n${submitParameterList[*]}" )
 echo -e "\ntrace level: $traceLevel"
 
+
+
 step "building standalone application '$namespace.$composite' ..."
-sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
+pwd
+###sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
+sc ${compilerOptionsList[*]} --cxx-flags="-fPIC -m64 -pthread" --ld-flags="-Wl,-L -Wl,/home/pring/git/streamsx.network/com.ibm.streamsx.network/impl/lib/source -Wl,--no-as-needed -Wl,-export-dynamic -Wl,--whole-archive -Wl,-ldpdk -Wl,--start-group -Wl,-lrt -Wl,-lm -Wl,-ldl -Wl,--end-group -Wl,--no-whole-archive -Wl,-Map=app.map -Wl,--cref" -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
+
+
+step "executing standalone application '$namespace.$composite' ..."
+sudo STREAMS_INSTALL=$STREAMS_INSTALL /home/pring/git/streamsx.network/samples/SampleDNSPacketDPDKSource/output/build/LiveDNSPacketDPDKSourceBasic/bin/standalone -t 3
+
+exit 0
+
+
+
+
 
 step "unbundling standalone application '$namespace.$composite' ..."
 bundle=$buildDirectory/$namespace.$composite.sab

@@ -12,8 +12,8 @@ use com.ibm.streamsx.network.dns::*;
 composite LiveDNSPacketDPDKSourceFilter {
 
     param
-    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "10.0" );
-    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "60.0" );
+    expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 
     type
 
