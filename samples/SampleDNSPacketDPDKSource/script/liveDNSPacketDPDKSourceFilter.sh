@@ -42,9 +42,9 @@ compilerOptionsList=(
 --num-make-threads=$coreCount
 )
 
-gccOptions="--cxx-flags=-g3"
+gccOptions="-g3"
 
-ldOptions="--ld-flags=-Wl,-L -Wl,$dpdkDirectory -Wl,--no-as-needed -Wl,-export-dynamic -Wl,--whole-archive -Wl,-ldpdk -Wl,-libverbs -Wl,-lrt -Wl,-lm -Wl,-ldl -Wl,--no-whole-archive"
+ldOptions="-Wl,-L -Wl,$dpdkDirectory -Wl,--no-as-needed -Wl,-export-dynamic -Wl,--whole-archive -Wl,-ldpdk -Wl,-libverbs -Wl,-lrt -Wl,-lm -Wl,-ldl -Wl,--no-whole-archive"
 
 compileTimeParameterList=(
 )
@@ -71,14 +71,14 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
 ( IFS=$'\n' ; echo -e "\nStreams compiler options:\n${compilerOptionsList[*]}" )
-echo -e "\n$GNU compiler parameters:\n$gccOptions" 
-echo -e "\n$GNU linker parameters:\n$ldOptions" 
+echo -e "\nGNU compiler parameters:\n$gccOptions" 
+echo -e "\nGNU linker parameters:\n$ldOptions" 
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite submission-time parameters:\n${submitParameterList[*]}" )
 echo -e "\ntrace level: $traceLevel"
 
 step "building standalone application '$namespace.$composite' ..."
-sc ${compilerOptionsList[*]} "$gccOptions" "$ldOptions" -- "${compileTimeParameterList[*]}" || die "Sorry, could not build '$composite', $?" 
+sc ${compilerOptionsList[*]} "--cxx-flags=$gccOptions" "--ld-flags=$ldOptions" -- "${compileTimeParameterList[*]}" || die "Sorry, could not build '$composite', $?" 
 
 step "deleting old '/dev/hugepages/rtemap_*' files, if necessary ..."
 [[ ! -f /dev/hugepages/rtemap_* ]] || sudo rm /dev/hugepages/rtemap_* || die "sorry, could not delete /dev/hugepages/rtemap_* files, $?"
