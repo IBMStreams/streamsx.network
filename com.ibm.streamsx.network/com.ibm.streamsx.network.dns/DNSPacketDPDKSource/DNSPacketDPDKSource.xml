@@ -97,10 +97,6 @@ on Streams:
        OR
     make install T=ppc_64-power8-linuxapp-gcc
 
-    # Move the resulting library to your Streams application build location
-    # libdpdk.a will be libdpdk.so if CONFIG_RTE_BUILD_SHARED_LIB=y was used.
-    cp build/lib/libdpdk.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib
-
 * There is also a Streams to DPDK glue library that must be built.  To
   do this, make sure the RTE environment variables noted above are set and then
   do the following:

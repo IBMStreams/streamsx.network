@@ -1,3 +1,7 @@
 #!/bin/bash
 
-sudo STREAMS_INSTALL=$STREAMS_INSTALL ./output/bin/standalone -t 3 
+sudo rm /dev/hugepages/rtemap_*
+./output/bin/standalone -t 3 
+sudo rm /dev/hugepages/rtemap_*
+
+exit
