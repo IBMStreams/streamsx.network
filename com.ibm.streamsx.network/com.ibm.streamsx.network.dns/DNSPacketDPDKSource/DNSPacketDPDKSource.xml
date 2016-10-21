@@ -203,11 +203,92 @@ on Streams:
 
 * Other Adapters may require other additional items.  See the DPDK documentation for more details.
 
-* Running the Streams application
-    # Submit normally:
-    streamtool submitjob output/TestDNSPacketDPDKSource.sab
+# Sample Applications
 
-    # Packet output can be found in the "data" directory.
+The network toolkit includes several
+[https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
+that illustrate how to use this operator.
+
+# References
+
+The ethernet frame format is described here:
+
+* [http://en.wikipedia.org/wiki/Ethernet_frame]
+
+The ethernet header and the fields it contains are described here:
+
+* [http://linux.die.net/include/net/ethernet.h]
+* [http://linux.die.net/include/linux/if_ether.h]
+
+The IPv4 header and the fields it contains are described here:
+
+* [http://en.wikipedia.org/wiki/IPv4]
+* [http://www.ietf.org/rfc/rfc791.txt]
+* [http://linux.die.net/include/netinet/in.h]
+* [http://linux.die.net/include/netinet/ip.h]
+
+The IPv6 header and the fields it contains are described here:
+
+* [https://en.wikipedia.org/wiki/IPv6_packet]
+* [https://tools.ietf.org/html/rfc2460]
+* [http://linux.die.net/include/netinet/ip6.h]
+
+The UDP header and the fields it contains are described here:
+
+* [http://en.wikipedia.org/wiki/User_Datagram_Protocol]
+* [http://tools.ietf.org/html/rfc768]
+* [http://linux.die.net/include/netinet/udp.h]
+
+The TCP header and the fields it contains are described here:
+
+* [http://en.wikipedia.org/wiki/Transmission_Control_Protocol]
+* [http://tools.ietf.org/html/rfc793]
+* [http://linux.die.net/include/netinet/tcp.h]
+
+DNS messages and the fields they contain are described here:
+  
+* [http://en.wikipedia.org/wiki/Domain_Name_System]
+* [http://en.wikipedia.org/wiki/List_of_DNS_record_types]
+* [http://tools.ietf.org/html/rfc1035]
+* [http://tools.ietf.org/html/rfc2308] for SOA resource records
+* [http://tools.ietf.org/html/rfc2872] for SRV resource records
+* [http://tools.ietf.org/html/rfc3403] for NAPTR resource records
+* [http://tools.ietf.org/html/rfc3596] for AAAA resource records
+* [http://tools.ietf.org/html/rfc4034] for DS, RRSIG, NSEC, and DNSKEY resource records
+* [http://tools.ietf.org/html/rfc4408] for SPF resource records
+* [http://tools.ietf.org/html/rfc5155] for NSEC3 and NSEC3PARAM resource records
+* [http://tools.ietf.org/html/rfc6891] for OPT resource records
+* [http://tools.ietf.org/html/rfc7208] for SPF resource records
+* [http://tools.ietf.org/html/rfc7505] for MX resource records
+
+The Juniper Networks 'jmirror' encapsulation header is described here:
+
+* [http://wiki.wireshark.org/jmirror]
+
+The Cisco Systems ''Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
+
+* [https://tools.ietf.org/html/draft-foschiano-erspan-00]
+
+The 'Generic Route Encapsulation (GRE)' headers used by Cisco ERSPAN encapsulation are described here:
+
+* [https://tools.ietf.org/html/rfc2784]
+* [https://tools.ietf.org/html/rfc1701]
+
+The Linux `tcpdump` command is described here:
+
+* [http://www.tcpdump.org/]
+* [http://linux.die.net/man/8/tcpdump]
+
+The Wireshark tools are described here:
+
+* [http://www.wireshark.org/]
+
+The result functions that can be used in boolean
+expressions for the `outputFilters` parameter
+and in output attribute assignment expressions are described here:
+
+* [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header and DNS parser result functions].  
+
 
     </description>
 

@@ -523,28 +523,31 @@ class DNSMessageParser {
         /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); 
         /* NS */         case   2: return convertDNSEncodedNameToString(record.rdata); break;
         /* CNAME */      case   5: return convertDNSEncodedNameToString(record.rdata); break;
-        /* SOA */        case   6: return convertSOAResourceDataToString(record.rdata, fieldDelimiter.c_str()); break; // record has multiple fields
-        /* WKS */        case  11: return SPL::rstring("[WKS data]"); break; // record has multiple fields
+        /* SOA */        case   6: return convertSOAResourceDataToString(record.rdata, fieldDelimiter.c_str()); break; // 7 subfields
+        /* WKS */        case  11: return SPL::rstring("[WKS data]"); break; // multiple subfields
         /* PTR */        case  12: return convertDNSEncodedNameToString(record.rdata); break;
-        /* HINFO */      case  13: return SPL::rstring("[HINFO data]"); break; // record has multiple fields
-        /* MINFO */      case  14: return SPL::rstring("[MINFO data]"); break; // record has multiple fields
-        /* MX */         case  15: return convertDNSEncodedNameToString(record.rdata + 2); break; // record has multiple fields
+        /* HINFO */      case  13: return SPL::rstring("[HINFO data]"); break; // multiple subfields
+        /* MINFO */      case  14: return SPL::rstring("[MINFO data]"); break; // multiple subfields
+        /* MX */         case  15: return convertDNSEncodedNameToString(record.rdata + 2); break; // 2 subfields
         /* TXT */        case  16: return SPL::rstring((char*)record.rdata, record.rdlength); break;
         /* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
         /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
         /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); 
-        /* SRV */        case  33: return SPL::rstring("[SRV data]"); break;
-        /* EDNS0 */      case  41: return SPL::rstring(""); break;
+        /* SRV */        case  33: return SPL::rstring("[SRV data]"); break; // 4 subfields
+        /* NAPTR */      case  35: return SPL::rstring("[NAPTR data]"); break; // 6 subfields
+        /* EDNS0 */      case  41: return SPL::rstring(""); break; // variable subfields
+        /* DS */         case  43: return SPL::rstring("[DS data]"); break; // 4 subfields
         /* SSHFP */      case  44: return SPL::rstring("[SSHFP data]"); break;
         /* IPSECKEY */   case  45: return SPL::rstring("[IPSECKEY data]"); break;
-        /* RRSIG */      case  46: return SPL::rstring("[RRSIG data]"); break;
-        /* NSEC */       case  47: return SPL::rstring("[NSEC data]"); break;
-        /* DNSKEY */     case  48: return SPL::rstring("[DNSKEY data]"); break;
-        /* NSEC3 */      case  50: return SPL::rstring("[NSEC3 data]"); break;
-        /* NSEC3PARAM */ case  51: return SPL::rstring("[NSEC3PARAM data]"); break;
+        /* RRSIG */      case  46: return SPL::rstring("[RRSIG data]"); break; // 9 subfields
+        /* NSEC */       case  47: return SPL::rstring("[NSEC data]"); break; // 2 subfields
+        /* DNSKEY */     case  48: return SPL::rstring("[DNSKEY data]"); break; // 4 subfields
+        /* NSEC3 */      case  50: return SPL::rstring("[NSEC3 data]"); break; // 8 subfields
+        /* NSEC3PARAM */ case  51: return SPL::rstring("[NSEC3PARAM data]"); break; // 5 subfields
         /* TLSA */       case  52: return SPL::rstring("[TLSA data]"); break;
         /* CDNSKEY */    case  60: return SPL::rstring("[CDNSKEY data]"); break;
+        /* SPF */        case  99: return SPL::rstring((char*)record.rdata, record.rdlength); break;
         /* TKEY */       case 249: return SPL::rstring("[TKEY data]"); break;
         /* TSIG */       case 250: return SPL::rstring("[TSIG data]"); break;
                          default:  break;
