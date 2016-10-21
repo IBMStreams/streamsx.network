@@ -16,7 +16,7 @@ dataDirectory=$projectDirectory/data
 logDirectory=$projectDirectory/log
 
 scripts=(
-$here/test*.sh
+$here/live*.sh
 )
 
 ################### functions used in this script #############################
