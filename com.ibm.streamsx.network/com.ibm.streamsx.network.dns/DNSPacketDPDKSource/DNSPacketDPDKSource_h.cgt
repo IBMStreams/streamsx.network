@@ -144,7 +144,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
 
   inline __attribute__((always_inline))
-  SPL::uint32 CAPTURE_MICROSECONDS() 
+  SPL::uint32 CAPTURE_MICROSECONDS() { return captureMicroseconds; }
 
   //inline __attribute__((always_inline))
   //SPL::uint64 CAPTURE_TSC_MICROSECONDS() { return tscMicroseconds; }

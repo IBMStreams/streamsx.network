@@ -13,9 +13,10 @@ use com.ibm.streamsx.network.source::*;
  * to run on 1 NIC port with 2 queues.
  */
 
-type PacketData = uint64 timestampMicroseconds,
-     blob   packet,
-     uint64 length;
+type PacketData = 
+  uint64 timestampMicroseconds,
+  blob   packet,
+  uint64 length;
 
 public composite TestPacketDPDKSource {   
 
