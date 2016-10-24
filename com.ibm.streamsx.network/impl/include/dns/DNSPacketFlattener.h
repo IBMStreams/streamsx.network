@@ -107,7 +107,7 @@ class DNSPacketFlattener {
 
 
 
-  // This function flattens all of the subfields of an SOA resource record
+  // This function flattens the five subfields of an SOA resource record
   // 'rdata' field into the specified buffer, converting numbers to strings as
   // appropriate, folding uppercase characters to lowercase, and appending a
   // trailing null character. The function returns the address of the buffer.
@@ -145,7 +145,54 @@ class DNSPacketFlattener {
 
 
 
-  // This function flattens the specified resource record 'rdata' field into the
+   // This function flattens the two subfields of an MX resource record
+  // 'rdata' field into the specified buffer, converting numbers to strings as
+  // appropriate, folding uppercase characters to lowercase, and appending a
+  // trailing null character. The function returns the address of the buffer.
+
+  const char* flattenMXResourceRecord(DNSMessageParser& parser, uint8_t* rdata, int32_t rdataLength, const char* delimiter, char* buffer) {
+
+    // format the unsigned integer in the first subfield of the resource record
+    const uint16_t* p = (uint16_t*)rdata;
+    int bufferLength = sprintf( buffer, 
+                                "%u%s",
+                                ntohs(*p),
+                                delimiter );
+
+    // decode the DNS-encoded name in the second subfield of the resource record
+    flattenDNSEncodedName(parser, rdata+2, buffer+bufferLength);
+
+    return buffer;
+  }
+
+
+
+  // This function flattens the four subfields of an SRV resource record
+  // 'rdata' field into the specified buffer, converting numbers to strings as
+  // appropriate, folding uppercase characters to lowercase, and appending a
+  // trailing null character. The function returns the address of the buffer.
+
+  const char* flattenSRVResourceRecord(DNSMessageParser& parser, uint8_t* rdata, int32_t rdataLength, const char* delimiter, char* buffer) {
+
+    // format the unsigned integers in the first three subfields of the resource record
+    const uint16_t* p = (uint16_t*)rdata;
+    int bufferLength = sprintf( buffer, 
+                                "%u%s%u%s%u%s",
+                                ntohs(p[0]),
+                                delimiter,
+                                ntohs(p[1]),
+                                delimiter,
+                                ntohs(p[2]),
+                                delimiter );
+
+    // decode the DNS-encoded name in the fourth subfield of the resource record
+    flattenDNSEncodedName(parser, rdata+6, buffer+bufferLength);
+
+    return buffer;
+  }
+
+
+ // This function flattens the specified resource record 'rdata' field into the
   // specified buffer, appends a trailing null character, and folds uppercase
   // characters to lowercase. For SOA resource records, all of the subfields are
   // converted to strings as appropriate, and included in the buffer, separated
@@ -159,10 +206,11 @@ class DNSPacketFlattener {
         /* CNAME */      case   5: flattenDNSEncodedName(parser, rdata, buffer); break;
         /* SOA */        case   6: flattenSOAResourceRecord(parser, rdata, rdataLength, delimiter, buffer);  break;
         /* PTR */        case  12: flattenDNSEncodedName(parser, rdata, buffer);  break;
-        /* MX */         case  15: flattenDNSEncodedName(parser, rdata+2, buffer);  break;
+        /* MX */         case  15: flattenMXResourceRecord(parser, rdata, rdataLength, delimiter, buffer);  break;
         /* TXT */        case  16: memcpy(buffer, rdata, rdataLength); *(buffer+rdataLength) = '\0'; break;
         /* AFSDB */      case  18: flattenDNSEncodedName(parser, rdata+2, buffer);  break;
         /* AAAA */       case  28: inet_ntop(AF_INET6, rdata, buffer, 100);  break;
+        /* SRV */        case  33: flattenSRVResourceRecord(parser, rdata, rdataLength, delimiter, buffer);  break;
                          default: *buffer = '\0'; break;
     }
     return buffer;
