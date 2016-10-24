@@ -326,7 +326,7 @@ private:
     SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { return flattener.dnsAllFields(pcapHeader->ts.tv_sec, pcapHeader->len, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str()); }
 
   inline __attribute__((always_inline))
-  SPL::rstring DNS_INVALID_FIELDS(SPL::rstring fieldDelimiter) { return ""; }  
+  SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
 
 
   // ------------------------------------------------------------------------------------------

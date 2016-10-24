@@ -265,15 +265,17 @@ class DNSPacketFlattener {
                                                parser.questionRecordCount>0 ? parser.questionRecords[0].classs : 0, // field 14
                                                fieldDelimiter );
 
-    // format fields 21 and 22 once, to be copied below after each resource record
-    char fields21and22[1024];
-    const size_t fields21and22Length = snprintf( fields21and22,
-                                                 sizeof(fields21and22),
-                                                 "%u%s%hu%s",
-                                                 packetLength, // field 21
-                                                 fieldDelimiter,
-                                                 ( (headers.etherHeader->h_dest[4]<<8) + headers.etherHeader->h_dest[5] ), // field 22
-                                                 recordDelimiter );
+    // format fields 21 through 23 once, to be copied below after each resource record
+    char fields21through23[1024];
+    const size_t fields21through23Length = snprintf( fields21through23,
+                                                     sizeof(fields21through23),
+                                                     "%u%s%hu%s%d%s",
+                                                     packetLength, // field 21
+                                                     fieldDelimiter,
+                                                     ( (headers.etherHeader->h_dest[4]<<8) + headers.etherHeader->h_dest[5] ), // field 22
+                                                     fieldDelimiter,
+                                                     parser.incompatibleFlags(), // field 23
+                                                     recordDelimiter );
                       
     // if there are no resource records in this DNS message, format an empty resource record
     if ( parser.answerRecordCount==0 && parser.nameserverRecordCount==0 && parser.additionalRecordCount==0 ) {
@@ -288,8 +290,8 @@ class DNSPacketFlattener {
                                 fieldDelimiter,
                                 fieldDelimiter,
                                 fieldDelimiter );
-      memcpy(buffer+bufferLength, fields21and22, fields21and22Length);
-      bufferLength += fields21and22Length;
+      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
+      bufferLength += fields21through23Length;
     }
     
     // format 'answer' resource records
@@ -311,8 +313,8 @@ class DNSPacketFlattener {
                                 flattenRdataField(parser, parser.answerRecords[i].type, parser.answerRecords[i].rdata, parser.answerRecords[i].rdlength, subfieldDelimiter, rdataBuffer), // field 20
                                 fieldDelimiter );
 
-      memcpy(buffer+bufferLength, fields21and22, fields21and22Length);
-      bufferLength += fields21and22Length;
+      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
+      bufferLength += fields21through23Length;
     }
 
     // format 'nameserver' resource records
@@ -334,8 +336,8 @@ class DNSPacketFlattener {
                                 flattenRdataField(parser, parser.nameserverRecords[i].type, parser.nameserverRecords[i].rdata, parser.nameserverRecords[i].rdlength, subfieldDelimiter, rdataBuffer), // field 20
                                 fieldDelimiter );
 
-      memcpy(buffer+bufferLength, fields21and22, fields21and22Length);
-      bufferLength += fields21and22Length;
+      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
+      bufferLength += fields21through23Length;
     }
 
     // format 'additional' resource records
@@ -357,8 +359,8 @@ class DNSPacketFlattener {
                                 flattenRdataField(parser, parser.additionalRecords[i].type, parser.additionalRecords[i].rdata, parser.additionalRecords[i].rdlength, subfieldDelimiter, rdataBuffer), // field 20
                                 fieldDelimiter );
 
-      memcpy(buffer+bufferLength, fields21and22, fields21and22Length);
-      bufferLength += fields21and22Length;
+      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
+      bufferLength += fields21through23Length;
     }
 
     // return the completed results as an SPL 'rstring' attribute

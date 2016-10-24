@@ -18,6 +18,40 @@
 #include <SPL/Runtime/Utility/Mutex.h>
 
 ////////////////////////////////////////////////////////////////////////////////
+// This class maps DNS parser error codes to error messages
+////////////////////////////////////////////////////////////////////////////////
+
+class DNSMessageParserErrorDescriptions {
+
+ public:
+
+  static const int maximumErrorCode = 200;
+  const char* errorDescription[maximumErrorCode];
+
+  DNSMessageParserErrorDescriptions() {
+    for (int i = 0; i<sizeof(maximumErrorCode); i++) errorDescription[i] = NULL;
+    errorDescription[102] = "label overruns packet";
+    errorDescription[103] = "label compression length overruns packet";
+    errorDescription[104] = "label compression offset underruns packet";
+    errorDescription[105] = "label compression offset loop";
+    errorDescription[106] = "label compression offset overruns packet";
+    errorDescription[107] = "label flags invalid";
+    errorDescription[108] = "label limit exceeded";
+    errorDescription[109] = "resource record missing";
+    errorDescription[110] = "question resource record truncated";
+    errorDescription[111] = "resource record truncated";
+    errorDescription[112] = "resource record data truncated";
+    errorDescription[113] = "too many labels";
+    errorDescription[114] = "label flags invalid";
+    errorDescription[115] = "invalid address family";
+    errorDescription[116] = "unexpected resource type";
+    errorDescription[117] = "message too short";
+    errorDescription[118] = "counts too large";
+  }
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
 // This class parses DNS fields within a DNS message
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -272,7 +306,7 @@ class DNSMessageParser {
   // variable, if an encoding error is found, or NULL, if no errors are found.
 
   char const* error;
-
+  DNSMessageParserErrorDescriptions errorDescriptions;
 
   // This function decodes an encoded DNS name located at '*p', writes the
   // decoded DNS name in 'nameBuffer', sets '*nameLength' to the number of bytes
@@ -579,6 +613,20 @@ class DNSMessageParser {
     SPL::list<SPL::uint32> addresses;
     for (int i=0; i<count; i++) if ( records[i].type==1 ) addresses.add( ntohl(*((SPL::uint32*)records[i].rdata)) );
     return addresses;
+  }
+
+
+  // This function returns a non-zero error code if the DNS message contains
+  // incompatible flags, mainly for column 23 of the 'flattened' DNS format
+
+  inline __attribute__((always_inline))
+  int32_t incompatibleFlags() {
+    if (dnsHeader->flags.indFlags.authoritativeFlag && !dnsHeader->flags.indFlags.responseFlag) return 1;
+    if (dnsHeader->flags.indFlags.truncatedFlag && !dnsHeader->flags.indFlags.responseFlag) return 2;
+    if (dnsHeader->flags.indFlags.authoritativeFlag && dnsHeader->flags.indFlags.truncatedFlag) return 3;
+    //if (dnsHeader->flags.indFlags.authoritativeFlag && dnsHeader->flags.indFlags.recursionDesiredFlag) return 4;
+    //if (dnsHeader->flags.indFlags.recursionDesiredFlag && dnsHeader->flags.indFlags.recursionAvailableFlag) return 5;
+    return 0;
   }
 
 

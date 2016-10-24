@@ -1175,6 +1175,18 @@
         <function:prototype>public list&lt;rstring> DNS_ADDITIONAL_DATA(rstring)</function:prototype>
       </function:function>
 
+      <function:function>
+        <function:description>
+          This parser result function returns a non-zero integer indicating that the DNS message header
+          has incompatible flags:
+
+          * '1' for Authoritative flag but not Response flag
+          * '2' for Truncated flag but not Response flag
+          * '3' for Authoritative flag and Truncated flag
+        </function:description>
+        <function:prototype>public int32 DNS_INCOMPATIBLE_FLAGS()</function:prototype>
+      </function:function>
+
     </function:functions>
   </function:functionSet>
 

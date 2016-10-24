@@ -75,7 +75,8 @@ composite TestDNSMessageParserFull {
       list<uint16> DNS_ADDITIONAL_TYPES,
       list<uint16> DNS_ADDITIONAL_CLASSES,
       list<uint32> DNS_ADDITIONAL_TTLS,
-      list<rstring> DNS_ADDITIONAL_DATA;
+      list<rstring> DNS_ADDITIONAL_DATA,
+      int32 DNS_INCOMPATIBLE_FLAGS;
 
     // error output from DNSMessageParser operator
     DNSErrorType =
@@ -160,7 +161,9 @@ composite TestDNSMessageParserFull {
           DNS_ADDITIONAL_TYPES = DNS_ADDITIONAL_TYPES(),
           DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
           DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
-          DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA();
+          DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
+          DNS_INCOMPATIBLE_FLAGS = DNS_INCOMPATIBLE_FLAGS();
+
       OutError:
           captureTime = formatEpochTime(captureTime),
           parseErrorDescription = parseErrorDescription(),

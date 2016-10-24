@@ -180,6 +180,9 @@ private:
   inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
 
+  inline __attribute__((always_inline))
+  SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
+
 };
 
 <%SPL::CodeGen::headerEpilogue($model);%>

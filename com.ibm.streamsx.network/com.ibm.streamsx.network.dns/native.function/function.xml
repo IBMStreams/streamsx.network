@@ -736,11 +736,14 @@ if it has one, or zero otherwise.
 
       <function:function>
         <function:description>
-          This parser result function returns a string identifying fields in the
-          DNS message and DNS resource records that have invalid values, separated by the specified
-          delimiter when there is more than one.
+          This parser result function returns a non-zero integer indicating that the DNS message header
+          has incompatible flags:
+
+          * '1' for Authoritative flag but not Response flag
+          * '2' for Truncated flag but not Response flag
+          * '3' for Authoritative flag and Truncated flag
         </function:description>
-        <function:prototype>public rstring DNS_INVALID_FIELDS(rstring)</function:prototype>
+        <function:prototype>public int32 DNS_INCOMPATIBLE_FLAGS()</function:prototype>
       </function:function>
 
     </function:functions>
