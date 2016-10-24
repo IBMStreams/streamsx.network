@@ -534,7 +534,7 @@ class DNSMessageParser {
         /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
         /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); 
-        /* SRV */        case  33: return SPL::rstring("[SRV data]"); break; // 4 subfields
+        /* SRV */        case  33: return convertDNSEncodedNameToString(record.rdata + 6); break; // 4 subfields
         /* NAPTR */      case  35: return SPL::rstring("[NAPTR data]"); break; // 6 subfields
         /* EDNS0 */      case  41: return SPL::rstring(""); break; // variable subfields
         /* DS */         case  43: return SPL::rstring("[DS data]"); break; // 4 subfields
