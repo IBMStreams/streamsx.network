@@ -35,10 +35,12 @@ composite LiveDNSPacketDPDKSourceFilter {
         list<rstring> additionalNames,
         list<rstring> additionalData;
 
-    DNSMalformedType =
+    DNSErrorType =
       uint64 packetNumber,
       float64 captureTime, 
-      rstring error,
+      int32 errorCode,
+      rstring errorDescription,
+      int32 incompatibleFlags,
       blob dnsMessage;
 
     FlattenedDNSMessageType = 
@@ -70,7 +72,8 @@ composite LiveDNSPacketDPDKSourceFilter {
       stream<FlattenedDNSMessageType> FlattenedDNSNormalResponseStream ;
       stream<FlattenedDNSMessageType> FlattenedDNSErrorResponseStream ;
       stream<FlattenedDNSMessageType> FlattenedDNSMalformedStream ;
-      stream<DNSMalformedType> DNSMalformedStream ;
+      stream<FlattenedDNSMessageType> FlattenedDNSIncompatibleFlagsStream ;
+      stream<DNSErrorType> DNSErrorStream ;
       stream<MetricsType> MetricsStream ) = DNSPacketDPDKSource() {
         param
             lcoreMaster: 0; // run the master thread on core 0.
@@ -78,12 +81,13 @@ composite LiveDNSPacketDPDKSourceFilter {
             nicPort: 0; // bind to NIC port 0
             nicQueue: 0; // bind to NIC queue 0
             promiscuous: true;
-            outputFilters: !parseError() && DNS_RESPONSE_FLAG(), // selects messages for DNSMessageStream
+            outputFilters: !parseError(), // selects messages for DNSMessageStream
                            !parseError() && !DNS_RESPONSE_FLAG(), // selects messages for FlattenedDNSQuestionStream
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub, // selects messages for FlattenedDNSNormalResponseStream
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub, // selects messages for FlattenedDNSErrorResponseStream
-                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSMalformedStream
-                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for DNSMalformedStream
+                           parseErrorCode()!=0, // selects messages for FlattenedDNSMalformedStream
+                           DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSIncompatibleStream
+                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0; // selects messages for DNSMalformedStream
                            metricsUpdated(); // selects messages for MetricsStream
             metricsInterval: $metricsInterval;
         output 
@@ -113,10 +117,15 @@ composite LiveDNSPacketDPDKSourceFilter {
         FlattenedDNSMalformedStream:
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
-        DNSMalformedStream:
+        FlattenedDNSIncompatibleFlagsStream:
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+        DNSErrorStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
-          error = parseErrorDescription(),
+          errorCode = parseErrorCode(),
+          errorDescription = parseErrorDescription(),
+          incompatibleFlags = DNS_INCOMPATIBLE_FLAGS(),
           dnsMessage = PAYLOAD_DATA();
         MetricsStream:
             metricsTime = getTimestampInSecs(),
@@ -142,7 +151,9 @@ composite LiveDNSPacketDPDKSourceFilter {
     () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSNormalResponseStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSErrorResponseStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSMalformedSink = FileSink(FlattenedDNSMalformedStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.FlattenedDNSMalformedStream.out"; format: line; suppress: captureTime; }
-    () as DNSMalformedSink = FileSink(DNSMalformedStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.DNSMalformedStream.out"; format: txt; hasDelayField: true; }
+    () as FlattenedDNSMalformedSink = FileSink(FlattenedDNSMalformedStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.FlattenedDNSMalformedStream.out"; format: line; suppress: captureTime; }
+    () as FlattenedDNSIncompatibleSink = FileSink(FlattenedDNSIncompatibleFlagsStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.FlattenedDNSIncompatibleFlagsStream.out"; format: line; suppress: captureTime; }
+    () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.DNSErrorStream.out"; format: txt; hasDelayField: true; }
     () as MetricsSink = FileSink(MetricsStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.MetricsStream.out"; format: txt; hasDelayField: true; }
 
 
