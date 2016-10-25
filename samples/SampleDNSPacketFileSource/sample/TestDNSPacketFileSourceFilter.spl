@@ -50,6 +50,7 @@ composite TestDNSPacketFileSourceFilter {
    stream<FlattenedDNSMessageType> FlattenedDNSQuestionStream ;
    stream<FlattenedDNSMessageType> FlattenedDNSNormalResponseStream ;
    stream<FlattenedDNSMessageType> FlattenedDNSErrorResponseStream ;
+   stream<FlattenedDNSMessageType> FlattenedDNSMalformedStream ;
    stream<DNSMalformedType> DNSMalformedStream ) = DNSPacketFileSource() {
         param
             pcapFilename: $pcapFilename;
@@ -57,6 +58,7 @@ composite TestDNSPacketFileSourceFilter {
                            !parseError() && !DNS_RESPONSE_FLAG(), // selects messages for FlattenedDNSQuestionStream
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub, // selects messages for FlattenedDNSNormalResponseStream
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub, // selects messages for FlattenedDNSErrorResponseStream
+                           parseError(), // selects messages for FlattenedDNSMalformedStream
                            parseError(); // selects messages for DNSMalformedStream
             metricsInterval: 0.0;
         output 
@@ -83,6 +85,9 @@ composite TestDNSPacketFileSourceFilter {
         FlattenedDNSErrorResponseStream:
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+        FlattenedDNSMalformedStream:
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
         DNSMalformedStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
@@ -93,6 +98,7 @@ composite TestDNSPacketFileSourceFilter {
     () as FlattenedDNSQuesstionSink = FileSink(FlattenedDNSQuestionStream) { param file: "debug.TestDNSPacketFileSourceFilter.FlattenedDNSQuestionStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream) { param file: "debug.TestDNSPacketFileSourceFilter.FlattenedDNSNormalResponseStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream) { param file: "debug.TestDNSPacketFileSourceFilter.FlattenedDNSErrorResponseStream.out"; format: line; suppress: captureTime; }
+    () as FlattenedDNSMalformedSink = FileSink(FlattenedDNSMalformedStream) { param file: "debug.TestDNSPacketFileSourceFilter.FlattenedDNSMalformedStream.out"; format: line; suppress: captureTime; }
     () as DNSMalformedSink = FileSink(DNSMalformedStream) { param file: "debug.TestDNSPacketFileSourceFilter.DNSMalformedStream.out"; format: txt; hasDelayField: true; }
 
 }

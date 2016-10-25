@@ -274,7 +274,7 @@ class DNSPacketFlattener {
                                                      fieldDelimiter,
                                                      ( (headers.etherHeader->h_dest[4]<<8) + headers.etherHeader->h_dest[5] ), // field 22
                                                      fieldDelimiter,
-                                                     parser.incompatibleFlags(), // field 23
+                                                     parser.error ? parser.error : parser.incompatibleFlags(), // field 23
                                                      recordDelimiter );
                       
     // if there are no resource records in this DNS message, format an empty resource record

@@ -742,6 +742,24 @@ if it has one, or zero otherwise.
           * '1' for Authoritative flag but not Response flag
           * '2' for Truncated flag but not Response flag
           * '3' for Authoritative flag and Truncated flag
+          * '4' for Authoritative, Truncated, Recursion Desired, and Recursion Available flags
+          * '102' for label overruns packet
+          * '103' for label compression length overruns packet
+          * '104' for label compression offset underruns packet
+          * '105' for label compression offset overruns packet
+          * '106' for label compression offset loop
+          * '107' for label flags invalid
+          * '108' for label limit exceeded
+          * '109' for too many labels
+          * '110' for resource record missing
+          * '111' for question resource record truncated
+          * '112' for resource record truncated
+          * '113' for resource record data truncated
+          * '114' for invalid address family
+          * '115' for unexpected resource type
+          * '116' for message too short
+          * '117' for counts too large
+
         </function:description>
         <function:prototype>public int32 DNS_INCOMPATIBLE_FLAGS()</function:prototype>
       </function:function>

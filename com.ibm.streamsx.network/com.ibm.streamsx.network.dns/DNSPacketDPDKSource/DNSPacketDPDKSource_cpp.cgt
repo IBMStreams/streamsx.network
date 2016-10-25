@@ -214,7 +214,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
 
   // parse the DNS header and resource records in the packet payload
   parser.parseDNSMessage(headers.payload, headers.payloadLength);
-  if ( parser.error ) { SPLLOG(L_DEBUG, "error parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DNSPacketDPDKSource"); }
+  if ( parser.error ) { SPLLOG(L_DEBUG, "error " << parser.error << "parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.errorDescriptions.description[parser.error], "DNSPacketDPDKSource"); }
   if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketDPDKSource");  return; }
 
 
