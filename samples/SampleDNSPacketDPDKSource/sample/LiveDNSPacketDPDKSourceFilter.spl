@@ -82,8 +82,8 @@ composite LiveDNSPacketDPDKSourceFilter {
                            !parseError() && !DNS_RESPONSE_FLAG(), // selects messages for FlattenedDNSQuestionStream
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub, // selects messages for FlattenedDNSNormalResponseStream
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub, // selects messages for FlattenedDNSErrorResponseStream
-                           parseError(), // selects messages for FlattenedDNSMalformedStream
-                           parseError(), // selects messages for DNSMalformedStream
+                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSMalformedStream
+                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for DNSMalformedStream
                            metricsUpdated(); // selects messages for MetricsStream
             metricsInterval: $metricsInterval;
         output 

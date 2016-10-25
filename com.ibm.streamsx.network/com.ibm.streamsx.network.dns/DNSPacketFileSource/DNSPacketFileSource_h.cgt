@@ -187,6 +187,9 @@ public:
   SPL::boolean parseError() { return parser.error ? true : false; }
 
   inline __attribute__((always_inline))
+  SPL::int32 parseErrorCode() { return parser.error; }
+
+  inline __attribute__((always_inline))
   SPL::rstring parseErrorDescription() { return parser.errorDescriptions.description[parser.error]; }
 
   inline __attribute__((always_inline))

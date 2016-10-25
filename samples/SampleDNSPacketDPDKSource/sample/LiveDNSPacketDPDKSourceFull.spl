@@ -46,6 +46,7 @@ composite LiveDNSPacketDPDKSourceFull {
         uint16 UDP_SRC_PORT,                // UDP source port, or zero if not UDP packet
         uint16 UDP_DST_PORT,                // UDP destination port, or zero if not UDP packet
       boolean parseError,
+      int32 parseErrorCode,
       rstring parseErrorDescription,
       uint32 parseErrorOffset,
       uint16 DNS_IDENTIFIER,
@@ -140,6 +141,7 @@ composite LiveDNSPacketDPDKSourceFull {
             UDP_SRC_PORT = UDP_SRC_PORT(),
             UDP_DST_PORT = UDP_DST_PORT(),
           parseError = parseError(),
+          parseErrorCode = parseErrorCode(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
           DNS_IDENTIFIER = DNS_IDENTIFIER(),

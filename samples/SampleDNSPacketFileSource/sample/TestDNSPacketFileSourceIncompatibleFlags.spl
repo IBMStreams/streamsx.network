@@ -42,7 +42,9 @@ composite TestDNSPacketFileSourceIncompatibleFlags {
     DNSMalformedType =
       uint64 packetNumber,
       float64 captureTime, 
-      rstring error,
+      int32 errorCode,
+      rstring errorDescription,
+      int32 incompatibleFlags,
       blob dnsMessage;
 
     graph
@@ -52,13 +54,15 @@ composite TestDNSPacketFileSourceIncompatibleFlags {
  ( stream<DNSMessageType> DNSMessageStream ; 
    stream<FlattenedDNSMessageType> FlattenedDNSNormalResponseStream ;
    stream<FlattenedDNSMessageType> FlattenedDNSErrorResponseStream ;
+   stream<FlattenedDNSMessageType> FlattenedDNSMalformedStream ;
    stream<DNSMalformedType> DNSMalformedStream ) = DNSPacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-            outputFilters: !parseError() && DNS_RESPONSE_FLAG() && DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for DNSMessageStream
-                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSNormalResponseStream
-                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub && DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSErrorResponseStream
-                           parseError(); // selects messages for DNSMalformedStream
+            outputFilters: !parseError(), // selects messages for DNSMessageStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub, // selects messages for FlattenedDNSNormalResponseStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub, // selects messages for FlattenedDNSErrorResponseStream
+                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSMalformedStream
+                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0; // selects messages for DNSMalformedStream
             metricsInterval: 0.0;
         output 
         DNSMessageStream:
@@ -85,15 +89,22 @@ composite TestDNSPacketFileSourceIncompatibleFlags {
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+        FlattenedDNSMalformedStream:
+          packetNumber = packetsProcessed(),
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
         DNSMalformedStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
-          error = parseErrorDescription(),
+          errorCode = parseErrorCode(),
+          errorDescription = parseErrorDescription(),
+          incompatibleFlags = DNS_INCOMPATIBLE_FLAGS(),
           dnsMessage = PAYLOAD_DATA();
     }
     () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSPacketFileSourceIncompatibleFlags.DNSMessageStream.out"; format: txt; hasDelayField: true; }
     () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream) { param file: "debug.TestDNSPacketFileSourceIncompatibleFlags.FlattenedDNSNormalResponseStream.out"; format: line; suppress: packetNumber, captureTime; }
     () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream) { param file: "debug.TestDNSPacketFileSourceIncompatibleFlags.FlattenedDNSErrorResponseStream.out"; format: line; suppress: packetNumber, captureTime; }
+    () as FlattenedDNSMalformedSink = FileSink(FlattenedDNSMalformedStream) { param file: "debug.TestDNSPacketFileSourceIncompabibleFlags.FlattenedDNSMalformedStream.out"; format: line; suppress: packetNumber, captureTime; }
     () as DNSMalformedSink = FileSink(DNSMalformedStream) { param file: "debug.TestDNSPacketFileSourceIncompatibleFlags.DNSMalformedStream.out"; format: txt; }
 
 }

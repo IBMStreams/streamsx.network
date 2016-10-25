@@ -30,6 +30,7 @@ composite TestDNSMessageParserFull {
       rstring ipSourceAddress,          // IP source address
       rstring ipDestinationAddress,     // IP destination address
       boolean parseError,
+      int32 parseErrorCode,
       rstring parseErrorDescription,
       uint32 parseErrorOffset,
       uint64 messagesProcessed,
@@ -116,6 +117,7 @@ composite TestDNSMessageParserFull {
       output OutMessage:
           captureTime = formatEpochDateTime(captureTime),
           parseError = parseError(),
+          parseErrorCode = parseErrorCode(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
           messagesProcessed = messagesProcessed(),

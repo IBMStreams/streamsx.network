@@ -51,7 +51,8 @@ submitParameterList=(
 #pcapFilename=$HOME/data.yorktown/sample_raw_dns_only_500_packets.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns-only_one_minute.pcap
 pcapFilename=$HOME/data.yorktown/splanet02_dns-only_one_hour.pcap
-#pcapFilename=/tmp/$composite/splanet02_dns-only_one_hour.pcap
+#pcapFilename=$HOME/data.yorktown/splanet02_dns-only_malformed.pcap
+#pcapFilename=$HOME/data.yorktown/splanet02_dns-only_incompatible_flags.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

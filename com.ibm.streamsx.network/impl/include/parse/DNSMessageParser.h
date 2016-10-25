@@ -308,8 +308,8 @@ class DNSMessageParser {
   int error;
   DNSMessageParserErrorDescriptions errorDescriptions;
 
-  // This function decodes an encoded DNS name located at '*p', writes the
-  // decoded DNS name in 'nameBuffer', sets '*nameLength' to the number of bytes
+  // This function decodes an encoded DNS domain name located at '*p', writes the
+  // decoded name in 'nameBuffer', sets '*nameLength' to the number of bytes
   // written, and advances '*p' to the next field. The function does not write a
   // trailing null byte after the string (that is, it does not write an ASCIIZ
   // string). If an encoding problem is found, 'error' is set to a description
@@ -322,10 +322,13 @@ class DNSMessageParser {
     // alternate resource record pointer for '*p' (used for compressed DNS labels)
     uint8_t* pp;
 
-    // step through the labels in the DNS name at '*p' and reconstruct it in 'nameBuffer'
+    // step through the labels in the DNS domain name at '*p' and reconstruct it in 'nameBuffer'
     for (int32_t i = 0; i<255; i++) {
 
-      // no DNS name can have this many labels or be this long
+      // stop when the label encoding delimiter is reached
+      if (**p==0) { (*p)++; break; }
+
+      // no domain name can have this many labels or be this long
       if (i>253) { error = 109; break; }  // ... "too many labels"
       if (*nameLength>253) { error = 102; break; }  // ... "label overruns packet"
 
@@ -338,9 +341,8 @@ class DNSMessageParser {
       // next label until one with zero length is found
       if (flags==0x00) {
         if (*p+1+length>dnsEnd) { error = 102; break; } // ... "label overruns packet"
-        if (length==0 && *nameLength>0) { (*p)++; (*nameLength)--; break; }
         memcpy(&nameBuffer[*nameLength], (const char*)(*p+1), length); 
-        nameBuffer[*nameLength+length] = '.'; 
+        nameBuffer[(*nameLength)+length] = '.'; 
         *p += length + 1;
         *nameLength += length + 1;
       }
@@ -366,6 +368,9 @@ class DNSMessageParser {
         error = 107; break; // ... "label flags invalid"
       }
     }
+
+    // back up over the '.' character appended to the last label in the domain name, if there os one
+    if (*nameLength>0 && nameBuffer[(*nameLength)-1]=='.') (*nameLength)--;
   }
 
 
