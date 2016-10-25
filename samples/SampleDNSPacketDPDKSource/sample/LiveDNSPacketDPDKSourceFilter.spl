@@ -87,7 +87,7 @@ composite LiveDNSPacketDPDKSourceFilter {
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub, // selects messages for FlattenedDNSErrorResponseStream
                            parseErrorCode()!=0, // selects messages for FlattenedDNSMalformedStream
                            DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSIncompatibleStream
-                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0; // selects messages for DNSMalformedStream
+                           parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for DNSMalformedStream
                            metricsUpdated(); // selects messages for MetricsStream
             metricsInterval: $metricsInterval;
         output 
@@ -150,7 +150,6 @@ composite LiveDNSPacketDPDKSourceFilter {
     () as FlattenedDNSQuesstionSink = FileSink(FlattenedDNSQuestionStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSQuestionStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSNormalResponseStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSErrorResponseStream.out"; format: line; suppress: captureTime; }
-    () as FlattenedDNSMalformedSink = FileSink(FlattenedDNSMalformedStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.FlattenedDNSMalformedStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSMalformedSink = FileSink(FlattenedDNSMalformedStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.FlattenedDNSMalformedStream.out"; format: line; suppress: captureTime; }
     () as FlattenedDNSIncompatibleSink = FileSink(FlattenedDNSIncompatibleFlagsStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.FlattenedDNSIncompatibleFlagsStream.out"; format: line; suppress: captureTime; }
     () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.DNSErrorStream.out"; format: txt; hasDelayField: true; }
