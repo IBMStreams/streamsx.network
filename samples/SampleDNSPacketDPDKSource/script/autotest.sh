@@ -1,54 +1,55 @@
 #!/bin/bash
 
-## Copyright (C) 2011, 2015  International Business Machines Corporation
-## All Rights Reserved
+set -e
 
-################### parameters used in this script ##############################
+# verify that DPDK environment variables are set
 
-#set -o xtrace
-#set -o pipefail
+[[ -z $RTE_SDK ]] && echo "RTE_SDK not set" && exit 1 
+[[ -z $RTE_TARGET ]] && echo "RTE_TARGET not set" && exit 1 
 
-here=$( cd ${0%/*} ; pwd )
-projectDirectory=$( cd $here/.. ; pwd )
+# delete old directories and files, if necessary
 
-buildDirectory=$projectDirectory/output/build
-dataDirectory=$projectDirectory/data
-logDirectory=$projectDirectory/log
+[[ -d $RTE_SDK ]] && rm -rf $RTE_SDK
+[[ -f dpdk-2.2.0.tar.xz ]] && rm dpdk-2.2.0.tar.xz
 
-scripts=(
-$here/live*.sh
-)
+# get DPDK
 
-################### functions used in this script #############################
+wget http://fast.dpdk.org/rel/dpdk-2.2.0.tar.xz
+tar -xvf dpdk-2.2.0.tar.xz
 
-die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }
-step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
+# configure DPDK for this machine
 
-################################################################################
+cd $RTE_SDK
+make config T=$RTE_TARGET
+sed -i.bak s/CONFIG_RTE_BUILD_COMBINE_LIBS=n/CONFIG_RTE_BUILD_COMBINE_LIBS=y/ ./build/.config
+sed -i.bak s/CONFIG_RTE_LIBRTE_MLX4_PMD=n/CONFIG_RTE_LIBRTE_MLX4_PMD=y/ ./build/.config
 
-rm -rf $buildDirectory || die "sorry, could not clear directory '$buildDirectory', $!"
-rm -rf $logDirectory || die "sorry, could not clear directory '$logDirectory', $!"
-rm -f $dataDirectory/debug.*.out || die "sorry, could not clear directory '$dataDirectory', $!"
+# build DPDK tools and utilities
 
-mkdir -p $logDirectory || die "sorry, could not create directory '$logDirectory', $!"
+export EXTRA_CFLAGS=-fPIC 
+make
+make install T=$RTE_TARGET
 
-scriptCount=0
-successCount=0
-failureCount=0
+# get Streams network toolkit
 
-for script in ${scripts[*]} ; do 
-	scriptname=$( basename $script .sh )
-	echo $scriptname ...
-	logname=$logDirectory/$scriptname.log
-	$script 1>$logname 2>&1
-	exitcode=$?
-	[ $exitcode -eq 0 ] && echo "... OK" && (( successCount++ )) 
-	[ $exitcode -ne 0 ] && echo "... failed" && mv $logname $logname.failed && (( failureCount++ )) 
-	(( scriptCount++ ))
-done
+###[[ -d $HOME/git/streamsx.network ]] && rm -rf $HOME/git/streamsx.network
+###cd $HOME/git
+###git clone git@github.com:ejpring/streamsx.network.git
 
-echo -e "\n$successCount of $scriptCount tests succeeded"
+# index the toolkit's operators and sample applications
 
-[ $failureCount -ne 0 ] && echo -e "\n$failureCount tests failed:" && ( cd $logDirectory ; ls -1 *.failed )
+cd $HOME/git/streamsx.network
+ant
 
-exit $failureCount
+# build the toolkit's DPDK glue library
+cd $HOME/git/streamsx.network/com.ibm.streamsx.network/impl/src/source/dpdk
+make
+
+# run the DPDK sample applications
+
+cd $HOME/git/streamsx.network/samples/SampleDNSPacketDPDKSource/script
+for test in ./liveDNSPacketDPDKSource*.sh ; do $test ; done
+
+exit
+
+
