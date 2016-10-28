@@ -15,7 +15,7 @@
 	<property name="tkname" value="com.ibm.streamsx.network" />
 	<property name="tmp" location="tmp" />
 
-	<target name="all" depends="toolkit, samples" />
+	<target name="all" depends="toolkit, dpdkglue, samples" />
 
 	<target name="setcommitversion">
 		<!-- Create the time stamp -->
@@ -84,7 +84,23 @@
 		</subant>
 	</target>
 
+
+
+
+    <condition property="exists.dpdkEnvironmentVariable">
+      <isset property="env.RTE_SDK"/>
+    </condition>
+
+	<target name="dpdkglue" if="exists.dpdkEnvironmentVariable">
+		<echo message="DPDK glue library: ${basedir}/com.ibm.streamsx.network/impl/src/source/dpdk" />
+		<exec executable="make" dir="${basedir}/com.ibm.streamsx.network/impl/src/source/dpdk">
+		</exec>
+	</target>
+
+
+
 	<!-- Targets called on samples -->
+
 	<target name="indextoolkit">
 		<echo message="Tookit to index: ${basedir}" />
 		<exec executable="${streams.install}/bin/spl-make-toolkit">

@@ -7,7 +7,7 @@ set -e
 [[ -z $RTE_SDK ]] && echo "RTE_SDK not set" && exit 1 
 [[ -z $RTE_TARGET ]] && echo "RTE_TARGET not set" && exit 1 
 
-# delete old directories and files, if necessary
+# delete old DPDK directories and files, if necessary
 
 [[ -d $RTE_SDK ]] && rm -rf $RTE_SDK
 [[ -f dpdk-2.2.0.tar.xz ]] && rm dpdk-2.2.0.tar.xz
@@ -17,24 +17,26 @@ set -e
 wget http://fast.dpdk.org/rel/dpdk-2.2.0.tar.xz
 tar -xvf dpdk-2.2.0.tar.xz
 
-# configure DPDK for this machine
+# configure DPDK for build below
 
 cd $RTE_SDK
 make config T=$RTE_TARGET
 sed -i.bak s/CONFIG_RTE_BUILD_COMBINE_LIBS=n/CONFIG_RTE_BUILD_COMBINE_LIBS=y/ ./build/.config
-sed -i.bak s/CONFIG_RTE_LIBRTE_MLX4_PMD=n/CONFIG_RTE_LIBRTE_MLX4_PMD=y/ ./build/.config
+
+# configure DPDK for Mellanox ethernet adapter, if necessary
+
+[[ $( lspci | grep Mellanox ) ]] && sed -i.bak s/CONFIG_RTE_LIBRTE_MLX4_PMD=n/CONFIG_RTE_LIBRTE_MLX4_PMD=y/ ./build/.config
 
 # build DPDK tools and utilities
 
-export EXTRA_CFLAGS=-fPIC 
-make
-make install T=$RTE_TARGET
+EXTRA_CFLAGS=-fPIC make
+EXTRA_CFLAGS=-fPIC make install T=$RTE_TARGET
 
 # get Streams network toolkit
 
-###[[ -d $HOME/git/streamsx.network ]] && rm -rf $HOME/git/streamsx.network
-###cd $HOME/git
-###git clone git@github.com:ejpring/streamsx.network.git
+[[ -d $HOME/git/streamsx.network ]] && rm -rf $HOME/git/streamsx.network
+cd $HOME/git
+git clone git@github.com:ejpring/streamsx.network.git
 
 # index the toolkit's operators and sample applications
 

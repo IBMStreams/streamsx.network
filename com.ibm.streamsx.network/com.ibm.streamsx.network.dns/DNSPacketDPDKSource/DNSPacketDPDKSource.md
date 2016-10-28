@@ -122,6 +122,8 @@ Then, display a list of Linux network interfaces, and the ethernet adapters they
 
 Find the Linux network interface of the ethernet adapter by matching its PCI bus address to those listed, preding the string "/net/".
 
+For example, the 'lspci' list shows two Mellanox ethernet adapters with PCI bus addresses '0002:01:00.0' and '0005:01:00.0'. 
+The 'ls' list shows the adapters are assigned to Linx network interfaces 'enP2p1s0' and 'enP5p1s0', respectively.
 
 ### create a user group for DPDK
 
@@ -267,15 +269,18 @@ and insert these lines into the file:
 After making this change, log off your user account and log back in to put the change into effect.
 
 
-### compile the DPDK libraries
+### get Linux development libraries
 
-DPDK must be compiled from source code using the Gnu C/C++ compiler. 
-This requires libraries for GCC and the specific version of the Linux kernel your machine uses.
+DPDK must be compiled from source code, which depends on several Linux development libraries,
+some of which must match the specific version of the kernel your machine uses.
 To install these libraries, type these commands at a prompt:
 
     bash> sudo yum install glibc-devel
     bash> sudo yum install libibverbs-devel
     bash> sudo yum install "kernel-devel-$(uname -r)"
+
+
+### compile DPDK
 
 The DPDK source code needs to be downloaded,
 configured for your machine's architecture and ethernet adapter,
@@ -307,13 +312,17 @@ Then, compile DPDK by typing this command at a prompt:
     bash> EXTRA_CFLAGS=-fPIC make install T=$RTE_TARGET
 
 
-### compile Streams DPDK glue library
+### get the Streams network toolkit
 
 If you don't already have the Streams network toolkit, 
 get it by typing these commands at a prompt:
 
     bash> cd $HOME/git
     bash> git clone git@github.com:ejpring/streamsx.network.git
+
+
+### compile Streams DPDK glue library
+
     bash> cd $HOME/git/streamsx.network
     bash> ant
 
