@@ -280,7 +280,7 @@ To install these libraries, type these commands at a prompt:
     bash> sudo yum install "kernel-devel-$(uname -r)"
 
 
-### compile DPDK
+### get DPDK
 
 The DPDK source code needs to be downloaded,
 configured for your machine's architecture and ethernet adapter,
@@ -312,24 +312,19 @@ Then, compile DPDK by typing this command at a prompt:
     bash> EXTRA_CFLAGS=-fPIC make install T=$RTE_TARGET
 
 
-### get the Streams network toolkit
+### get Streams network toolkit
 
-If you don't already have the Streams network toolkit, 
-get it by typing these commands at a prompt:
+If you don't already have the Streams network toolkit, get it by typing these commands at a prompt:
 
     bash> cd $HOME/git
     bash> git clone git@github.com:ejpring/streamsx.network.git
-
-
-### compile Streams DPDK glue library
-
     bash> cd $HOME/git/streamsx.network
     bash> ant
 
-Compile the Streams DPDK glue library by typing these commands at a prompt:
 
-    bash> cd $HOME/git/streamsx.network/com.ibm.streamsx.network/impl/src/source/dpdk
-    bash> make
+
+
+
 
 
 
