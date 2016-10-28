@@ -4,7 +4,7 @@
     <context>
       <description>
 
-DNSPacketLiveSource is an operator for the IBM InfoSphere Streams product that
+DNSPacketLiveSource is an operator for the IBM Streams product that
 captures live DNS packets from an ethernet interface,
 parses their network headers and the fields of the DNS message, and emits
 tuples containing packet data. 

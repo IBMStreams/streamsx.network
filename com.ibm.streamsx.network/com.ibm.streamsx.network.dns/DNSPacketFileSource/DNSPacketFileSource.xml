@@ -4,7 +4,7 @@
     <context>
       <description>
 
-DNSPacketFileSource is an operator for the IBM InfoSphere Streams product that
+DNSPacketFileSource is an operator for the IBM Streams product that
 reads prerecorded DNS packets from 'packet capture (PCAP)' files, parses
 the network headers and the fields of the DNS message, and emits tuples containing packet data.  
 The operator may be configured with one or more output ports,
