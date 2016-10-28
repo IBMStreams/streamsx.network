@@ -66,7 +66,7 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 step "checking for DPDK libraries ..."
 [[ -d $dpdkDirectory ]] || die "sorry, could not find DPDK directory '$dpdkDirectory'"
-[[ -f $dpdkDirectory/libdpdk.a ]] || die "sorry, could not find DPDK library '$dpdkDirectory.libdpdk.a'"
+[[ -f $dpdkDirectory/libdpdk.a ]] || die "sorry, could not find DPDK library '$dpdkDirectory/libdpdk.a'"
 [[ -d $toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib ]] || die "sorry, could not find DPDK glue library directory '$toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib'"
 [[ -f $toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib/libstreams_source.a ]] || die "sorry, could not find DPDK glue library '$toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib/libstreams_source.a'"
 

@@ -29,7 +29,7 @@ application, include this statement in the SPL source file:
     use com.ibm.streamsx.network.dns::*;
 
 
-## promiscuous mode ............. does this apply to DPDK at all ???????????????
+## promiscuous mode 
 
 Network interfaces normally ignore packets that are not addressed to them.
 However, when 'promiscious' mode is enabled on a network interface, it can
@@ -63,6 +63,9 @@ on this machine.
 
 The [http://dpdk.org/doc/guides/linux_gsg/index.html|DPDK user guide] has detailed instructions for
 installing DPDK and configuring it for particular ethernet adapters. These notes are a summary of those instructions.
+They include many Linux commands that should be entered at a command prompt in a Terminal window.
+In the instructions below, these commands are prefixed with `bash> ...`.
+Many of the commands require 'root' privileges; they are prefixed with `bash> sudo ...`.
 
 
 ### determine your machine architecture
@@ -72,7 +75,7 @@ To compile and run the DPDK libraries, you will need to know which architecture 
 
 To determine your machine's architecture, open a Terminal window on the machine and type this at the command prompt:
 
-    uname -m
+    bash> uname -m
 
 The 'uname' command will display one of the following architecture types:
 
@@ -123,15 +126,14 @@ Find the Linux network interface of the ethernet adapter by matching its PCI bus
 ### create a user group for DPDK
 
 DPDK will lock the memory pages containing its buffers to prevent the kernel from swapping them out to disk while it is using them.
-Users who run the DNSPacketDPDKSource operator will need permission to do this. Granting this permission requires 'root' privileges.
+Users who run the DNSPacketDPDKSource operator will need permission to do this.
 
 To grant this permission, create a user group for DPDK and add the user account[s] that will run the DNSPacketDPDKSource operator to the group.
 
 For example, to create a user group 'dpdk' and add your own user account to it, open a Terminal window and type these commands at the prompt:
 
     bash> sudo groupadd dpdk
-
-    bash> usermod -a -G dpdk $USER
+    bash> sudo usermod -a -G dpdk $USER
 
 To verify that your user account is in the 'dpdk' group, type this at a command prompt:
 
@@ -140,7 +142,7 @@ To verify that your user account is in the 'dpdk' group, type this at a command 
 
 To grant permission to lock memory pages, edit the '/etc/security/limits.conf' system file:
 
-    sudo vi /etc/security/limits.conf
+    bash> sudo vi /etc/security/limits.conf
 
  and insert this line into the file:
 
@@ -197,7 +199,7 @@ For example, to set the 'vm.nr_hugepages' parameter to 10 when the system boots,
 
 To increase the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
 
-    sudo sysctl -w vm.nr_hugepages=1000
+    bash> sudo sysctl -w vm.nr_hugepages=1000
 
 To verify that the parameter has changed, type this at a command prompt:
 
@@ -272,6 +274,7 @@ This requires libraries for GCC and the specific version of the Linux kernel you
 To install these libraries, type these commands at a prompt:
 
     bash> sudo yum install glibc-devel
+    bash> sudo yum install libibverbs-devel
     bash> sudo yum install "kernel-devel-$(uname -r)"
 
 The DPDK source code needs to be downloaded,
@@ -290,16 +293,13 @@ Then, edit the DPDK configuration file by typing this command:
 
     bash> vi ./build/.config
 
-and, if your machine has a Mellanox ethernet adapter, change these parameters in the file:
+and change this parameter in the file:
 
-    CONFIG_RTE_BUILD_SHARED_LIB=n ................. not necessary ?????????????????
     CONFIG_RTE_BUILD_COMBINE_LIBS=y
+
+and, if your machine has a Mellanox ethernet adapter, change this parameter in the file, too:
+
     CONFIG_RTE_LIBRTE_MLX4_PMD=y 
-
-or, if your machine has an Intel e1000 or I350 ethernet adapter, change these parameters in the file:
-
-    CONFIG_RTE_BUILD_SHARED_LIB=y ............ but maybe 'n' ????????????
-    CONFIG_RTE_BUILD_COMBINE_LIBS=y
 
 Then, compile DPDK by typing this command at a prompt:
 
