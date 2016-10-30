@@ -37,7 +37,7 @@ class DNSMessageParserErrorDescriptions {
     description[106] = "label compression offset loop";
     description[107] = "label flags invalid";
     description[108] = "label limit exceeded";
-    description[109] = "too many labels";
+    description[109] = "";
     description[110] = "resource record missing";
     description[111] = "question resource record truncated";
     description[112] = "resource record truncated";
@@ -329,7 +329,7 @@ class DNSMessageParser {
       if (**p==0) { (*p)++; break; }
 
       // no domain name can have this many labels or be this long
-      if (i>253) { error = 109; break; }  // ... "too many labels"
+      if (i>253) { error = 108; break; }  // ... "label limit exceeded"
       if (*nameLength>253) { error = 102; break; }  // ... "label overruns packet"
 
       // get the length and compression flag from the first byte in the next label

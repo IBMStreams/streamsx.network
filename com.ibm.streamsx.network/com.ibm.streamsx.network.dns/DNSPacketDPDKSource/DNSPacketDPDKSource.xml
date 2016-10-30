@@ -4,14 +4,18 @@
     <context>
     <description>
 
-DNSPacketDPDKSource is an operator for the IBM InfoSphere Streams product that
+# introduction 
+
+DNSPacketDPDKSource is an operator for the IBM Streams product that
 captures live network packets from one of the network interfaces attached to the
-machine where it executes. The operator function and structure are very
-similar to PacketLiveSource; see that operator's documentation for details
-of common functions and general background.  The primary difference between
-these related operators is that DNSPacketDPDKSource leverages the DPDK libraries
-available at [http://www.dpdk.org] for higher performance and lower processing
-overhead.
+machine where it executes. The operator function and structure are
+similar to the PacketLiveSource and DNSMessageParser operators; 
+see the documentation for those for details
+of common functions and general background.  
+The primary difference between
+these related operators is that DNSPacketDPDKSource leverages 
+the [http://www.dpdk.org|data plane development kit (DPDK)]
+for higher performance.
 
 Output filters and attribute assignments are SPL expressions. They may use any
 of the built-in SPL functions, and any of these functions, which are specific to
@@ -27,189 +31,302 @@ application, include this statement in the SPL source file:
 
     use com.ibm.streamsx.network.dns::*;
 
-# Promiscuous Mode
+
+# promiscuous mode 
 
 Network interfaces normally ignore packets that are not addressed to them.
 However, when 'promiscious' mode is enabled on a network interface, it can
 capture all network packets on its ethernet segment, even those that are not
-addressed to it.  This is sometimes referred to as "network sniffing".  Modern
+addressed to it.  This is sometimes referred to as 'network sniffing'.  Modern
 ethernet switches normally send network interfaces only packets that are
 addressed to them; 'promiscious' mode is useful only when a switch has been
 specifically configured to send packets to a network interface that are not
-addressed to it. This is sometimes referred to as "mirroring".
+addressed to it. This is sometimes referred to as 'mirroring'.
 
 The DNSPacketDPDKSource operator will enable 'promiscuous' mode in a ethernet
 interface when its 'promiscous' parameter is set to `true`.
 
-# Dependencies
 
-The DNSPacketDPDKSource operator depends upon the DPDK libraries available from
-[http://dpdk.org]. The library must be installed on the machine where this
-operator is built.   It has been tested with the following versions:
-* DPDK 2.2
+# dependencies
 
-The base DPDK library supports a wide range of NICs as described at
-[http://dpdk.org].  For IBM Streams, we have tested the following:
-* Mellanox CX-3
-* Mellanox CX-3 Pro
+DPDK supports a variety of [http://www.dpdk.org/doc/nics|ethernet adapters]. 
+The DNSPacketDPDKSource operator has been tested with these adapters:
+
+* Mellanox ConnectX-3
+* Mellanox ConnectX-3 Pro
 * Intel e1000
+* Intel I350
 
-There are very good documents for DPDK build/install/use on the [http://dpdk.org/doc/guides/linux_gsg/index.html|DPDK website] that should be
-referenced.  Here are some notes of the steps that will help getting started
-on Streams:
+The [http://dpdk.org|DPDK libraries] must be compiled from source code and installed on the machine where
+the network adapter is installed. Streams processing elements (PEs) must be placed
+on this machine.
 
-* Download and untar the dpdk.tgz file from [http://dpdk.org].
 
-* Set environment variables (these are needed for DPDK and Streams builds and depend on 
-  your specific platform):
+# installing and configuring DPDK
 
-    export EXTRA_CFLAGS=-fPIC
-    export RTE_SDK=/home/&lt;userid&gt;/dpdk-2.2.0   # (point to install directory)
+The [http://dpdk.org/doc/guides/linux_gsg/index.html|DPDK user guide] has detailed instructions for
+installing DPDK and configuring it for particular ethernet adapters. These notes are a summary of those instructions.
+They include many Linux commands that should be entered at a command prompt in a Terminal window.
+In the instructions below, these commands are prefixed with 'bash&gt;'.
+Many of the commands require 'root' privileges; they are prefixed with 'bash&gt; sudo'.
 
-    export RTE_TARGET=x86_64-native-linuxapp-gcc
-       OR
-    export RTE_TARGET=ppc_64-default-linuxapp-gcc
 
-* Configure the DPDK build from the top directory
+*determine machine architecture*
 
-    cd $RTE_SDK
-    make config T=x86_64-native-linuxapp-gcc
-       OR
-    make config T=ppc_64-power8-linuxapp-gcc
+IBM Streams is supported on two types of machine architectures, 'x86 64-bit' and 'Power8 64-bit (little-endian)'.
+To compile and run the DPDK libraries, you will need to know which architecture your machine uses.
 
-* Change configuration as needed.  For example:
+To determine your machine's architecture, open a Terminal window on the machine and type this at the command prompt:
 
-    # Edit the .config files
-    vi ./build/.config
+    bash&gt; uname -m
 
-    # Set key parameters
-    CONFIG_RTE_BUILD_COMBINE_LIBS=y
-    CONFIG_RTE_LIBRTE_MLX4_PMD=y (MLX4 NIC)
-    CONFIG_RTE_BUILD_SHARED_LIB=y (e1000 NIC)
-       OR
-    CONFIG_RTE_BUILD_SHARED_LIB=n (MLX4 NIC)
+The 'uname' command will display one of the following architecture types:
 
-    # Build the library
-    make
+* `x86_64` _for x86 64-bit_
+* `ppc64le` _for Power8 64-bit (little-endian)_ 
 
-    # Complete the build
-    make install T=x86_64-native-linuxapp-gcc
-       OR
-    make install T=ppc_64-power8-linuxapp-gcc
+If the 'uname' command displays some other architecture type, the IBM Streams product is not supported.
 
-* There is also a Streams to DPDK glue library that must be built.  To
-  do this, make sure the RTE environment variables noted above are set and then
-  do the following:
 
-    cd &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/src/source/dpdk
-    make
+*identify ethernet adapter and network interface*
 
-* Build the Streams example application with the following steps:
+The DNSPacketDPDKSource operator is supported on several types of ethernet adapters.
+To compile the DPDK libraries, you will need to know which ethernet adapters your machine has,
+and which one you want to use with DPDK. 
+To use that adapter with DPDK, you will need to know which Linux network interface is assigned to it.
 
-    cd &lt;toolkit-directory&gt;/samples/SampleDNSPacketDPDKSource
+First, display a list of ethernet adapters installed in your machine by typing this at a command prompt:
 
-    # Update the sample Makefile to use the appropriate libraries for your adapter type
-    vi Makefile
+    bash&gt; lspci | grep ethernet
+    0002:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
+    0003:05:00.0 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+    0003:05:00.1 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+    0003:05:00.2 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+    0003:05:00.3 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+    0005:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
 
-    # Modify the operator parameters as needed for your NIC and environment
-    vi TestDNSPacketDPDKSource.spl
-    make
+If none of the supported ethernet adapters listed above is displayed, the DNSPacketDPDKSource operator is not supported.
 
-* Create a dpdk group for permisssions.
+If one of the supported ethernet adapters is listed, note the numbers preceding the word 'Ethernet'.
+This is the PCI bus address of the adapter.
 
-    groupadd dpdk
-    usermod -a -G dpdk &lt;userid&gt;
-    groups &lt;userid&gt;
+Then, display a list of Linux network interfaces, and the ethernet adapters they are assigned to, by typing this at a command prompt:
 
-    # You may need to log out and back in to make sure your user is actively in the group.
-    # Alternatively, you could use newgrp to change the current default group for the current shell session:
-    newgrp dpdk
+    bash&gt; ls -la /sys/class/net
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP2p1s0 -&gt; ../../devices/pci0002:00/0002:00:00.0/0002:01:00.0/net/enP2p1s0
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP2p1s0d1 -&gt; ../../devices/pci0002:00/0002:00:00.0/0002:01:00.0/net/enP2p1s0d1
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f0 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.0/net/enP3p5s0f0
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f1 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.1/net/enP3p5s0f1
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f2 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.2/net/enP3p5s0f2
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f3 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.3/net/enP3p5s0f3
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP5p1s0 -&gt; ../../devices/pci0005:00/0005:00:00.0/0005:01:00.0/net/enP5p1s0
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP5p1s0d1 -&gt; ../../devices/pci0005:00/0005:00:00.0/0005:01:00.0/net/enP5p1s0d1
+    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 lo -&gt; ../../devices/virtual/net/lo
 
-* Configure and enable access to hugepages (You'll need to be root to do most of these):
+Find the Linux network interface of the ethernet adapter by matching its PCI bus address to those listed, preding the string '/net/'.
 
-    # Make sure hugetlbfs is mounted, and the appropriate group owner and permissions are set:
-    # (May need to umount /dev/hugepages first, to make sure the right gid and mode settings take.)
-    mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
+For example, the 'lspci' list shows two Mellanox ethernet adapters with PCI bus addresses '0002:01:00.0' and '0005:01:00.0'. 
+The 'ls' list shows the adapters are assigned to Linx network interfaces 'enP2p1s0' and 'enP5p1s0', respectively.
 
-    # Enable a suitable number of huge pages of the appropriate size, on the appropriate NUMA nodes
-    # The exact number and size of hugepages will depend on your workload and packet rates.
-    # Note: Fewer, larger hugepages can be used if available, such as on POWER systems.
-    # The exact NUMA nodes that need huge pages will depend on adapter location and which CPUs the
-    # DPDK application threads will be running on.
-    echo 1000 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
 
-    # Ensure all users in the dpdk group can lock an unlimited amount of memory.
-    # Add a line to /etc/security/limits.conf like the following:
-    @dpdk - memlock unlimited
-    # This will take effect at next login.
+*create Linux user group for DPDK*
 
-    # An alternative to setting up huge pages after booting each time, you could add
-    # the mount options to /etc/fstab or a systemd unit file, and add a line to
-    # /etc/sysctl.conf with the number of huge pages to reserve:
+DPDK will lock the memory pages containing its buffers to prevent the kernel from swapping them out to disk while it is using them.
+Users who run the DNSPacketDPDKSource operator will need permission to do this.
+
+To grant this permission, create a Linux user group for DPDK and add the user accounts that will run the DNSPacketDPDKSource operator to the group.
+
+For example, to create a Linux user group 'dpdk' and add your own user account to it, open a Terminal window and type these commands at the prompt:
+
+    bash&gt; sudo groupadd dpdk
+    bash&gt; sudo usermod -a -G dpdk $USER
+
+To verify that your user account is in the 'dpdk' group, type this at a command prompt:
+
+    bash&gt; groups $USER
+    streamsdpdk : streamsdpdk dpdk
+
+To grant permission to lock memory pages, edit the '/etc/security/limits.conf' system file:
+
+    bash&gt; sudo vi /etc/security/limits.conf
+
+ and insert this line into the file:
+
+    \@dpdk - memlock unlimited
+
+After making these changes, log off your user account and log back in to put the changes into effect.
+
+
+*configure Linux 'hugepages'*
+
+DPDK uses [https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt|Linux kernel 'hugepages' support] 
+to allocate large buffers with minimal 'translation lookaside buffer (TLB)' overhead.
+The size and number of 'hugepages' available for DPDK must be configured in the Linux kernel. 
+This requires 'root' access, and may require rebooting the machine.
+
+Note that the memory allocated for hugepages will reduce the memory available for Streams and other applications.
+
+To display the amount of memory installed in your machine, and the amount of memory available, type this at a a command prompt:
+
+    bash&gt; cat /proc/meminfo | grep -i mem
+    MemTotal:       263636096 kB
+    MemFree:        226797632 kB
+    MemAvailable:   249287680 kB
+    Shmem:            131776 kB
+
+To display the size and number of hugepages currently allocated, type this at a command prompt:
+
+    bash&gt; cat /proc/meminfo | grep -i hugepages
+    AnonHugePages:         0 kB
+    HugePages_Total:      10
+    HugePages_Free:        0
+    HugePages_Rsvd:        0
+    HugePages_Surp:        0
+    Hugepagesize:      16384 kB
+
+The supported sizes of hugepages depend upon the machine architecture. 
+Typical sizes for the architectures supported by IBM Streams include: 
+
+* 4KB, 8KB, 64KB, 256KB, 1MB, 4MB, 16MB, or 256MB _... for 'x86_64' (x86_64 machines) ..._
+* 4KB, 16MB, or 16GB _... for 'ppc64le' (Power8 little-endian machines) ..._
+
+The size of hugepages on your machine is set by Linux kernel parameters when the machine is booted.
+If you want to change the size of hugepages on your machine, please refer to these documents for details:
+
+* https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+* https://www.kernel.org/doc/Documentation/kernel-parameters.txt
+
+The number of hugepages is determined by the 'vm.nr_hugepages' system control parameter.
+This parameter can be set when the system is booted, and it can be changed later while the system is running.
+
+For example, to set the 'vm.nr_hugepages' parameter to 10 when the system boots, edit the '/etc/sysctl.conf' system file and set the parameter like this:
+
+    vm.nr_hugepages=10
+
+To increase the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
+
+    bash&gt; sudo sysctl -w vm.nr_hugepages=1000
+
+To verify that the parameter has changed, type this at a command prompt:
+
+    bash&gt; sysctl vm.nr_hugepages
     vm.nr_hugepages = 1000
-    # These will be spread over the NUMA nodes, and be of the default size for the system.
-    # If you change these files, you will not need to run the explicit mount or echo 1000
-    # commands, above, before running the DPDK applications (provided you have rebooted
-    # the system after making the changes).
 
-* Additional Items for e1000 Adapters (RHEL7):
+To verify that the number of hugepages has actually increased, type this at a command prompt:
 
-    # Bring the interface down
-    ifconfig &lt;eth-interface&gt; down
-      OR
-    ip link set dev &lt;eth-interface&gt; down
+    bash&gt; cat /proc/meminfo | grep -i hugepages
+    AnonHugePages:         0 kB
+    HugePages_Total:    1000
+    HugePages_Free:        0
+    HugePages_Rsvd:        0
+    HugePages_Surp:        0
+    Hugepagesize:      16384 kB
 
-    # Load the intel DPDK uio driver:
-    modprobe uio
-    insmod &lt;dpdk-path&gt;/dpdk-2.2.0/build/kmod/igb_uio.ko
+If the number of hugepages has not actually been increased to 1000, memory may be too fragemented.
+In this case, you will need to reboot the machine and then increase the number of hugepages.
 
-    # Bind the interface to the intel DPDK uio driver:
-    &lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --bind=igb_uio &lt;eth-interface&gt;
-    &lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --status
+To make the hugepages accessible to the user accounts that will run the DNSPacketDPDKSource operator,
+create and mount a directory for them by typing these commands at a prompt:
 
-    # Ensure the dpdk group has full access to the new uio device:
-    chown root:dpdk /dev/uio0
-    chmod 660 /dev/uio0
+    bash&gt; sudo mkdir /dev/hugepages
+    bash&gt; sudo mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
 
-    # Ensure the dpdk group has full access to config and resources for the new uio device:
-    chown root:dpdk /sys/class/uio/uio0/device/config
-    cdmod 660 /sys/class/uio/uio0/device/config
-    chown root:dpdk /sys/class/uio/uio0/device/resource*
-    chmod 660 /sys/class/uio/uio0/device/resource*
+To ensure the hugepages are mounted in the '/dev/hugepages' directory when the machine is rebooted, 
+edit the '/etc/fstab' system file by typing this command at a prompt:
 
-    # Alternatively, a system-level udev rule could be used to ensure the dpdk group had access to
-    # any new uio device by adding a file at /etc/udev/rules.d/10-dpdk.rules with content like:
-    SUBSYSTEM=="uio", GROUP="dpdk", MODE="0660"
-    # but note that this will not give access to the config and resource files, so that step would still
-    # need to be done manually (or in a script).  If you do add a udev rule, it will take effect at the
-    # next reboot, or, after forcing udev to reload rules (but then only at the time of the next uio bind):
-    udevadm control --reload
+    bash&gt; sudo vi /etc/fstab
 
-    # If you need a particular interface to always be bound to the uio driver, at boot
-    # time, the easiest way is to add the ifconfig down, modprobe/insmod,
-    # dpdk_nic_bind.py, and chown/chmod commands to a simple startup script.
+and inserting this line into the file:
 
-* Additional Items for Mellanox Adapters (RHEL7).  Assumes OFED packages have been installed.
-  (See [http://www.mellanox.com/page/products_dyn?product_family=209&amp;mtag=pmd_for_dpdk|Mellanox Poll Mode Driver for DPDK] and [http://www.mellanox.com/page/products_dyn?product_family=26&amp;mtag=linux_sw_drivers|Mellanox OFED] for more information.)
-  
-    # Configure IB module.
-    # Add a line to (or create) /etc/modprobe.d/mlnx.conf:
-    options ib_uverbs disable_raw_qp_enforcement=1
+    nodev  /dev/hugepages  hugetlbfs  gid=dpdk,mode=1770  0  0
 
-    # Make sure the mlx4 driver is re-loaded and uses the above settings:
-    modprobe mlx4_en
-    /etc/init.d/openibd restart
-    # "ibstat" and "/etc/init.d/openibd status" are useful commands to verify things worked.
 
-* Other Adapters may require other additional items.  See the DPDK documentation for more details.
+*prepare Linux user account for DPDK*
 
-# Sample Applications
+You will need some environment variables when you compile the DPDK libraries, 
+and whenever you compile Streams applications that use the DNSPacketDPDKSource operator.
+
+To set these variables permanently, edit the '$HOME/.bashrc' script by typing this at a command prompt:
+
+    vi $HOME/.bashrc
+
+and insert these lines into the file: 
+
+    export RTE_SDK=$HOME/dpdk-2.2.0
+    [[ $( uname -m ) == "x86_64" ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
+    [[ $( uname -m ) == "ppc64le" ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
+
+After making this change, log off your user account and log back in to put the change into effect.
+
+
+*get Linux development libraries*
+
+DPDK must be compiled from source code, which depends on several Linux development libraries,
+some of which must match the specific version of the kernel your machine uses.
+To install these libraries, type these commands at a prompt:
+
+    bash&gt; sudo yum install glibc-devel
+    bash&gt; sudo yum install libibverbs-devel
+    bash&gt; sudo yum install "kernel-devel-$(uname -r)"
+
+
+*get DPDK library and utilities*
+
+The DPDK source code needs to be downloaded,
+configured for your machine's architecture and ethernet adapter,
+and compiled into libraries and utilities.
+
+First, download the DPDK source code and configure it for your machine's architecture
+by typing these commands at a prompt:
+
+    bash&gt; wget http://fast.dpdk.org/rel/dpdk-2.2.0.tar.xz
+    bash&gt; tar -xvf dpdk-2.2.0.tar.xz
+    bash&gt; cd $RTE_SDK
+    bash&gt; make config T=$RTE_TARGET
+
+Then, edit the DPDK configuration file by typing this command:
+
+    bash&gt; vi ./build/.config
+
+and change these parameters in the file:
+
+    CONFIG_RTE_BUILD_COMBINE_LIBS=y
+    CONFIG_RTE_MAX_MEMSEG=1024
+
+and, if your machine has a Mellanox ethernet adapter, change this parameter in the file, too:
+
+    CONFIG_RTE_LIBRTE_MLX4_PMD=y 
+
+Then, compile DPDK by typing this command at a prompt:
+
+    bash&gt; EXTRA_CFLAGS=-fPIC make                
+    bash&gt; EXTRA_CFLAGS=-fPIC make install T=$RTE_TARGET
+
+
+*re-compile Streams network toolkit*
+
+If you don't already have the Streams network toolkit, get it by typing these commands at a prompt:
+
+    bash&gt; cd $HOME/git
+    bash&gt; git clone git@github.com:ejpring/streamsx.network.git
+
+In any case, you will need to compile the Streams DPDK glue library.
+To do this, type these commands at a prompt:
+
+    bash&gt; cd $HOME/git/streamsx.network
+    bash&gt; ant
+
+
+*more to come...*
+
+
+# sample applications
 
 The network toolkit includes several
 [https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
 that illustrate how to use this operator.
 
-# References
+# references
 
 The ethernet frame format is described here:
 
@@ -238,12 +355,6 @@ The UDP header and the fields it contains are described here:
 * [http://en.wikipedia.org/wiki/User_Datagram_Protocol]
 * [http://tools.ietf.org/html/rfc768]
 * [http://linux.die.net/include/netinet/udp.h]
-
-The TCP header and the fields it contains are described here:
-
-* [http://en.wikipedia.org/wiki/Transmission_Control_Protocol]
-* [http://tools.ietf.org/html/rfc793]
-* [http://linux.die.net/include/netinet/tcp.h]
 
 DNS messages and the fields they contain are described here:
   
@@ -289,8 +400,8 @@ and in output attribute assignment expressions are described here:
 
 * [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header and DNS parser result functions].  
 
-
     </description>
+
 
     <metrics>
        <metric>
@@ -298,7 +409,7 @@ and in output attribute assignment expressions are described here:
           <description>
 
 This metric counts the number of packets received by the network interface,
-as counted by `dpdk`
+as counted by DPDK.
 
 	  </description>
           <kind>Counter</kind>
@@ -309,7 +420,7 @@ as counted by `dpdk`
           <description>
 	  
 This metric counts the number of packets dropped by the network interface,
-as counted by `dpdk`
+as counted by DPDK.
 
 	  </description>
           <kind>Counter</kind>

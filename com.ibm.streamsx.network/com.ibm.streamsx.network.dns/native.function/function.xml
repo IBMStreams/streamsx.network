@@ -22,23 +22,38 @@
           This DNS parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,
           or zero if no enoding errors were found. The error codes are:
 
-          * '102' for label overruns packet
-          * '103' for label compression length overruns packet
-          * '104' for label compression offset underruns packet
-          * '105' for label compression offset overruns packet
-          * '106' for label compression offset loop
-          * '107' for label flags invalid
-          * '108' for label limit exceeded
-          * '109' for too many labels
-          * '110' for resource record missing
-          * '111' for question resource record truncated
-          * '112' for resource record truncated
-          * '113' for resource record data truncated
-          * '114' for invalid address family
-          * '115' for unexpected resource type
-          * '116' for message too short
-          * '117' for counts too large
+          * 102 for 'label overruns packet': The length of an uncompressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
 
+          * 103 for 'label compression length overruns packet': The length field of a compressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+
+          * 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
+
+          * 105 for 'label compression offset overruns packet': The offset of a compressed domain name label points beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+
+          * 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
+
+          * 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the DNS message.
+
+          * 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the DNS message.
+
+          * 110 for 'resource record missing': The DNS message contains fewer resource records than the 'count' fields in the message header indicate. The DNS message may have been truncated.
+
+          * 111 for 'question resource record truncated': The DNS 'question' resource record was truncated. The packet containing the message was probably truncated.
+
+          * 112 for 'resource record truncated': A DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+
+          * 113 for 'resource record data truncated': The 'rdata' field of a DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+
+          * 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
+
+          * 115 for 'unexpected resource type': The 'type' field of a DNS resource record is not of the values listed in the RFC standards. Please see the 'references' section of the DNSMessageParser operator for a list of DNS RFCs.
+
+          * 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
+
+          * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
+
+          *Note:* [https://www.ietf.org/rfc/rfc1035.txt|RFC 1035] explains the format of DNS messages; 
+          in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
         </function:description>
         <function:prototype>public int32 parseErrorCode()</function:prototype>
       </function:function>
@@ -765,11 +780,13 @@ if it has one, or zero otherwise.
           This DNS parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,
           or zero if no enoding errors were found. The error codes are:
 
-          * '1' for Authoritative flag but not Response flag
-          * '2' for Truncated flag but not Response flag
-          * '3' for Authoritative flag and Truncated flag
-          * '4' for Authoritative, Truncated, Recursion Desired, and Recursion Available flags
+          * 1 indicates that the Authoritative flag is set in the DNS header but the Response flag is not set.
 
+          * 2 indicates taht the Truncated flag is set in the DNS header but not the Response flag is not set.
+
+          * 3 indicates that the Authoritative and Truncated flags in the DNS header are both set.
+
+          * 4 indicates that the Authoritative, Truncated, Recursion Desired, and Recursion Available flags in the DNS header are all set.
         </function:description>
         <function:prototype>public int32 DNS_INCOMPATIBLE_FLAGS()</function:prototype>
       </function:function>

@@ -1,4 +1,4 @@
-#Fri Sep 30 16:15:50 EDT 2016
+#Sun Oct 30 13:20:37 EDT 2016
 copytosourcelist=
 hreftargetslist=dita/tk$SampleDHCPMessageParser/spl$sample$LiveDHCPMessageParserBasic.xml,dita/tk$SampleDHCPMessageParser/ix$Function.xml,dita/tk$SampleDHCPMessageParser/spl$sample$TestDHCPMessageParserFull.xml,dita/tk$SampleDHCPMessageParser/ix$Namespace.xml,dita/toolkits/ix$Function.xml,dita/toolkits/ix$Namespace.xml,dita/toolkits/ix$Operator.xml,dita/tk$SampleDHCPMessageParser/spl$sample$TestDHCPMessageParserLeases.xml,dita/tk$SampleDHCPMessageParser/ns$sample.xml,dita/tk$SampleDHCPMessageParser/tk$SampleDHCPMessageParser.xml,dita/tk$SampleDHCPMessageParser/spl$sample$TestDHCPMessageParserBasic.xml,dita/toolkits/toolkits.xml,dita/tk$SampleDHCPMessageParser/ix$Operator.xml,dita/tk$SampleDHCPMessageParser/spl$sample$Functions.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/streamsdev/git/streamsx.network/samples/SampleDHCPMessageParser/doc/spldoc
+user.input.dir=/home/pring/git/streamsx.network/samples/SampleDHCPMessageParser/doc/spldoc
 uplevels=../
 tempdirToinputmapdir.relative.value=dita/
 conrefpushfile=conrefpush.list

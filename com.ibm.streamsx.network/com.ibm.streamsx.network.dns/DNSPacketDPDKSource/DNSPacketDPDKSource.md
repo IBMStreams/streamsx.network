@@ -221,20 +221,6 @@ To verify that the number of hugepages has actually increased, type this at a co
 If the number of hugepages has not actually been increased to 1000, memory may be too fragemented.
 In this case, you will need to reboot the machine and then increase the number of hugepages.
 
-To decrease the 'vm.nr_hugepages' parameter to 100 while the system is running, type this at a command prompt:
-
-    sudo sysctl -w vm.nr_hugepages=100
-
-To verify that the number of hugepages has actually increased, type this at a command prompt:
-
-    bash> cat /proc/meminfo | grep -i hugepages
-    AnonHugePages:         0 kB
-    HugePages_Total:     100
-    HugePages_Free:        0
-    HugePages_Rsvd:        0
-    HugePages_Surp:        0
-    Hugepagesize:      16384 kB
-
 To make the hugepages accessible to the user accounts that will run the DNSPacketDPDKSource operator,
 create and mount a directory for them by typing these commands at a prompt:
 
@@ -280,7 +266,7 @@ To install these libraries, type these commands at a prompt:
     bash> sudo yum install "kernel-devel-$(uname -r)"
 
 
-### get DPDK
+### get DPDK library and utilities
 
 The DPDK source code needs to be downloaded,
 configured for your machine's architecture and ethernet adapter,
@@ -298,9 +284,10 @@ Then, edit the DPDK configuration file by typing this command:
 
     bash> vi ./build/.config
 
-and change this parameter in the file:
+and change these parameters in the file:
 
     CONFIG_RTE_BUILD_COMBINE_LIBS=y
+    CONFIG_RTE_MAX_MEMSEG=1024
 
 and, if your machine has a Mellanox ethernet adapter, change this parameter in the file, too:
 
@@ -312,16 +299,20 @@ Then, compile DPDK by typing this command at a prompt:
     bash> EXTRA_CFLAGS=-fPIC make install T=$RTE_TARGET
 
 
-### get Streams network toolkit
+### re-compile Streams network toolkit
 
 If you don't already have the Streams network toolkit, get it by typing these commands at a prompt:
 
     bash> cd $HOME/git
     bash> git clone git@github.com:ejpring/streamsx.network.git
+
+In any case, re-compile the Streams network toolkit with the DPDK libraries by typing these commands at a prompt:
+
     bash> cd $HOME/git/streamsx.network
     bash> ant
 
 
+### more to come ........
 
 
 

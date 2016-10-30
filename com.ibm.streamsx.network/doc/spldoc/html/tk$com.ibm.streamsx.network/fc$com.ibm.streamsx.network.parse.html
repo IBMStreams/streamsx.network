@@ -72,6 +72,54 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorCode"><tt class="ph tt">      public int32 parseErrorCode()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '102' for label overruns packet</li>
+
+<li class="li"> '103' for label compression length overruns packet</li>
+
+<li class="li"> '104' for label compression offset underruns packet</li>
+
+<li class="li"> '105' for label compression offset overruns packet</li>
+
+<li class="li"> '106' for label compression offset loop</li>
+
+<li class="li"> '107' for label flags invalid</li>
+
+<li class="li"> '108' for label limit exceeded</li>
+
+<li class="li"> '109' for too many labels</li>
+
+<li class="li"> '110' for resource record missing</li>
+
+<li class="li"> '111' for question resource record truncated</li>
+
+<li class="li"> '112' for resource record truncated</li>
+
+<li class="li"> '113' for resource record data truncated</li>
+
+<li class="li"> '114' for invalid address family</li>
+
+<li class="li"> '115' for unexpected resource type</li>
+
+<li class="li"> '116' for message too short</li>
+
+<li class="li"> '117' for counts too large</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorDescription"><tt class="ph tt">      public rstring parseErrorDescription()      </tt>   </dt>
 
    <dd class="dd">
@@ -1239,6 +1287,30 @@ This page documents native functions that can be invoked from SPL, including the
    <dd class="dd">
 <p class="p">          This parser result function returns the DNS client's request correlator in the current message, and returned by the server in its response.
 </p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_INCOMPATIBLE_FLAGS"><tt class="ph tt">      public int32 DNS_INCOMPATIBLE_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This DNS parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '1' for Authoritative flag but not Response flag</li>
+
+<li class="li"> '2' for Truncated flag but not Response flag</li>
+
+<li class="li"> '3' for Authoritative flag and Truncated flag</li>
+
+<li class="li"> '4' for Authoritative, Truncated, Recursion Desired, and Recursion Available flags</li>
+
+</ul>
+
+</div>
 
    </dd>
 

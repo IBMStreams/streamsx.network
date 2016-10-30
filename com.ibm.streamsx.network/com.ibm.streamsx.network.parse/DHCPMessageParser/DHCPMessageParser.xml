@@ -16,7 +16,7 @@ specified by output attribute assignments.
 The DHCPMessageParser operator expects only DHCP messages in its input tuples,
 without any of the headers that precede them in network packets.  
 The [PacketLiveSource] and [PacketFileSource] operators can produce tuples that contain
-DNS messages with the [PAYLOAD_DATA()] output attribute assignment function.
+DNS messages with the PAYLOAD_DATA() output attribute assignment function.
 
 The DHCPMessageParser operator consumes input tuples containing DHCP messages,
 parses individual fields in the messages, 
@@ -164,7 +164,7 @@ of type `blob` and must contain a DHCP message, excluding the network headers th
 proceed them in network packets, as specified by the required parameter
 `messageAttribute`.
 
-The [PAYLOAD_DATA()] output assignment function of the [PacketLiveSource] and
+The PAYLOAD_DATA() output assignment function of the [PacketLiveSource] and
 [PacketFileSource] operators produces attributes that
 can be consumed by the DHCPMessageParser operator.
 

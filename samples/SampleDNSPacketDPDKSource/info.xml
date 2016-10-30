@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
-    <info:name>SamplePacketLiveSource</info:name>
-    <info:description>Sample applications that illustrate use of the PacketLiveSource operator.</info:description>
+    <info:name>SampleDNSPacketDPDKSource</info:name>
+    <info:description>Sample applications that illustrate use of the DNSPacketDPDKSource operator.</info:description>
     <info:version>2.0.0</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
