@@ -157,60 +157,8 @@ composite LiveDNSPacketDPDKSourceFilter {
     () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSPacketDPDKSourceFilter.DNSErrorStream.out"; format: txt; hasDelayField: true; }
     () as MetricsSink = FileSink(MetricsStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.MetricsStream.out"; format: txt; hasDelayField: true; }
 
-
-
-    // Write all streams to output files asynchronously, on separate threads.
-/*
-    () as DNSMessageSink = FileSink(DNSMessageStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.DNSMessageStream.out"; format: txt; hasDelayField: true; config threadedPort: queue(In, Sys.Wait, 1000); }
-    () as FlattenedDNSQuesstionSink = FileSink(FlattenedDNSQuestionStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSQuestionStream.out"; format: line; suppress: captureTime; config threadedPort: queue(In, Sys.Wait, 1000); }
-    () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSNormalResponseStream.out"; format: line; suppress: captureTime; config threadedPort: queue(In, Sys.Wait, 1000); }
-    () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSErrorResponseStream.out"; format: line; suppress: captureTime; config threadedPort: queue(In, Sys.Wait, 1000); }
-    () as DNSMalformedSink = FileSink(DNSMalformedStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.DNSMalformedStream.out"; format: txt; hasDelayField: true; config threadedPort: queue(In, Sys.Wait, 1000); }
-    () as MetricsSink = FileSink(MetricsStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.MetricsStream.out"; format: txt; hasDelayField: true; config threadedPort: queue(In, Sys.Wait, 1000); }
-*/
-
-
-    // Write all streams to output files synchronously, using file I/O functions
-    // instead of FileSink operator for "flattened" DNS messages
-/*
-    //() as DNSMessageSink = FileSink(DNSMessageStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.DNSMessageStream.out"; format: txt; hasDelayField: true; }
-    () as FlattenedDNSQuesstionSink = FileOutput(FlattenedDNSQuestionStream as In) { param filename: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSQuestionStream.out"; }
-    () as FlattenedDNSNormalResponseSink = FileOutput(FlattenedDNSNormalResponseStream as In) { param filename: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSNormalResponseStream.out"; }
-    () as FlattenedDNSErrorResponseSink = FileOutput(FlattenedDNSErrorResponseStream as In) { param filename: "debug.LiveDNSPacketDPDKSourceFilter.FlattenedDNSErrorResponseStream.out"; }
-    () as DNSMalformedSink = FileSink(DNSMalformedStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.DNSMalformedStream.out"; format: txt; hasDelayField: true; }
-    () as MetricsSink = FileSink(MetricsStream as In) { param file: "debug.LiveDNSPacketDPDKSourceFilter.MetricsStream.out"; format: txt; hasDelayField: true; }
-*/
-
-
     // Shut down this application when timer expires.
 
-    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down due to timeout"); shutdownPE(); } }
 }
 
-
-
-/*
-composite FileOutput (input stream<FlattenedDNSMessageType> FlattenedDNSMessageType) {
-
-  param expression<rstring> $filename;
-
-  graph
-
-    () as FileOutput = Custom(FlattenedDNSMessageType as In) {
-    logic state: { mutable uint64 fileHandle = 0; }
-    onTuple In: {
-      mutable int32 error = 0;
-      if (fileHandle==0ul) { 
-        fileHandle = fopen($filename, "w", error);
-        assert(error==0, "sorry, could not open file '" + $filename + "', " + strerror(error));
-      }
-      fwriteString(flattenedDNSMessage, fileHandle, error);
-      assert(error==0, "sorry, could not write to file '" + $filename + "', " + strerror(error));
-    }
-    onPunct In: {
-      mutable int32 error = 0;
-      if (currentPunct()==Sys.FinalMarker && fileHandle!=0ul) { fclose(fileHandle, error); }
-    }
-  }
-}
-*/

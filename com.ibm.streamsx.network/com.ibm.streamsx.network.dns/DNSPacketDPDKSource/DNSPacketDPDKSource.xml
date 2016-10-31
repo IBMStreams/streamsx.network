@@ -90,7 +90,7 @@ and which Linux network interface is assigned to it.
 
 First, display a list of ethernet devices installed in your machine by typing this at a command prompt:
 
-    bash&gt; lspci | grep ethernet
+    bash&gt; lspci | grep -i ethernet
     0002:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
     0003:05:00.0 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
     0003:05:00.1 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
@@ -98,7 +98,7 @@ First, display a list of ethernet devices installed in your machine by typing th
     0003:05:00.3 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
     0005:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
 
-If none of the supported ethernet devices listed above is displayed, the DNSPacketDPDKSource operator is not supported.
+If none of the supported ethernet devices listed above under 'hardware dependencies' is displayed, the DNSPacketDPDKSource operator is not supported.
 
 Otherwise, note the numbers preceding the word 'Ethernet' for the device you intend to use with DPDK.
 These numbers are the PCI 'bus:slot.function' address of the device: 
@@ -119,13 +119,21 @@ Then, display a list of Linux network interfaces, and the ethernet devices they 
     lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP5p1s0d1 -&gt; ../../devices/pci0005:00/0005:00:00.0/0005:01:00.0/net/enP5p1s0d1
     lrwxrwxrwx.  1 root root 0 Sep 28 09:49 lo -&gt; ../../devices/virtual/net/lo
 
-Find the Linux network interface of your ethernet device by matching its PCI 'bus:slot:function' address to those listed, preding the string '/net/'.
+Find the Linux network interface of your ethernet device by matching its PCI 'bus:slot:function' address to those listed, preceding the string '/net/'.
 
 For example, the 'lspci' list shows two Mellanox ethernet devices with PCI addresses '0002:01:00.0' and '0005:01:00.0'. 
 The 'ls' list shows the adapters are assigned to network interfaces 'enP2p1s0' and 'enP5p1s0', respectively.
 
-Note the PCI 'bus:slot.function' address and Linux network interface of the ethernet device you intend to use with DPDK.
-You will need these values in subsequent steps.
+Select the Linux network interface and PCI 'bus:slot.function' address of the ethernet device you intend to use with DPDK,
+and remember them for use below under 'prepare Linux user account for DPDK'.
+To verify your selection, type this command at a prompt, substituting your network interface name, and verify that 'bus-info:' shows the PCI address of your ethernet device:
+
+    bash&gt; ethtool -i enP2p1s0
+    driver: mlx4_en
+    version: 3.3-2.0.0 (28 Jul 2016)
+    firmware-version: 2.36.5150
+    bus-info: 0002:01:00.0
+
 
 
 *create Linux user group for DPDK*
@@ -169,7 +177,7 @@ PCI 'bus:slot.function' address of the ethernet device you intend to use with DP
     [[ $( uname -m ) == "x86_64" ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
     [[ $( uname -m ) == "ppc64le" ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
     export DPDK_INTERFACE=network-interface-name
-    export DPDK_DEVICE=ethernet-device-address
+    export DPDK_DEVICE=$( ethtool -i $DPDK_INTERFACE | gawk '/bus-info:/ { print $2 }' )
 
 
 *log off and log back on*
@@ -208,8 +216,8 @@ To display the size and number of hugepages currently allocated, type this at a 
 The supported sizes of hugepages depend upon the machine architecture. 
 Typical sizes for the architectures supported by IBM Streams include: 
 
-* 4KB, 8KB, 64KB, 256KB, 1MB, 4MB, 16MB, or 256MB _... for 'x86_64' (x86_64 machines) ..._
-* 4KB, 16MB, or 16GB _... for 'ppc64le' (Power8 little-endian machines) ..._
+* 4KB, 8KB, 64KB, 256KB, 1MB, 4MB, 16MB, or 256MB *for 'x86_64' (x86_64 machines)*
+* 4KB, 16MB, or 16GB *for 'ppc64le' (Power8 little-endian machines)*
 
 The size of hugepages on your machine is set by Linux kernel parameters when the machine is booted.
 If you want to change the size of hugepages on your machine, please refer to these documents for details:
@@ -309,7 +317,18 @@ To do this, type these commands at a prompt:
     bash&gt; ant
 
 
-*more to come...*
+# bind ethernet device to DPDK
+
+
+
+
+
+
+# unbind ethernet device from DPDK
+
+
+
+
 
 
 # sample applications

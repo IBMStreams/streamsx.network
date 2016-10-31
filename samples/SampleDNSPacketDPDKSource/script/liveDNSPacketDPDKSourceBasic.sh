@@ -72,6 +72,9 @@ step "checking for DPDK libraries ..."
 [[ -d $toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib ]] || die "sorry, could not find DPDK glue library directory '$toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib'"
 [[ -f $toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib/libstreams_source.a ]] || die "sorry, could not find DPDK glue library '$toolkitDirectory/com.ibm.streamsx.network/impl/src/source/dpdk/build/lib/libstreams_source.a'"
 
+step "checking for 'dpdk' user group ..."
+[[ $( groups ) =~ dpdk ]] || die "sorry, user '$USER' no in group 'dpdk'"
+
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
 

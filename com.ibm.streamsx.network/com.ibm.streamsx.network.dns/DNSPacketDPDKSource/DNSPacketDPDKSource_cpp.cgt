@@ -72,7 +72,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 // Function called from the DPDK library as each packet arrives.
 static void dpdkCallback(void *correlator, void *data, uint32_t length, uint64_t tscTimestamp) {
     MY_OPERATOR* self = (MY_OPERATOR*)correlator;
-    self->packetProcess((uint8_t *)data, length, tscTimestamp);
+    if (!(self->getPE().getShutdownRequested())) self->packetProcess((uint8_t *)data, length, tscTimestamp);
 }
 
 

@@ -96,7 +96,7 @@ step "deleting old '/dev/hugepages/rtemap_*' files, if necessary ..."
 
 step "executing standalone application '$namespace.$composite' ..."
 executable=$buildDirectory/bin/$namespace.$composite
-$executable -t $traceLevel ${submitParameterList[*]}
+$here/debugthis.sh $executable -t $traceLevel ${submitParameterList[*]}
 
 step "deleting '/dev/hugepages/rtemap_*' files ..."
 [[ ! -f /dev/hugepages/rtemap_* ]] || sudo rm /dev/hugepages/rtemap_* || die "sorry, could not delete /dev/hugepages/rtemap_* files, $?"
