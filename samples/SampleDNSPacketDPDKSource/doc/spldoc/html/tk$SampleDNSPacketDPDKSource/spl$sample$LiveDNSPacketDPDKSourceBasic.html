@@ -60,6 +60,12 @@
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
+<li class="sli"><strong class="ph b">nicPort</strong>
+</li>
+
+<li class="sli"><strong class="ph b">nicQueue</strong>
+</li>
+
 <li class="sli"><strong class="ph b">timeoutInterval</strong>
 </li>
 
@@ -92,6 +98,8 @@
  composite LiveDNSPacketDPDKSourceBasic {
  
      param
+     expression&lt;int32&gt; $nicPort: (int32)getSubmissionTimeValue("nicPort", "0" );
+     expression&lt;int32&gt; $nicQueue: (int32)getSubmissionTimeValue("nicQueue", "0" );
      expression&lt;float64&gt; $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
  
      type 
@@ -125,8 +133,8 @@
          param
              lcoreMaster: 0; // run the master thread on core 0.
              lcore: 1; // run this ingest thread on core 1.
-             nicPort: 0; // bind to NIC port 0
-             nicQueue: 0; // bind to NIC queue 0
+             nicPort: $nicPort; // bind to specified NIC port
+             nicQueue: $nicQueue; // bind to specified NIC queue
              promiscuous: true;
              metricsInterval: 0.0;
          output 
@@ -150,7 +158,7 @@
      () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
      () as FlattenedDNSMessageSink = FileSink(FlattenedDNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.FlattenedDNSMessageStream.out"; format: csv; hasDelayField: false; quoteStrings: false; flush: 1u; }
  
-     () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+     () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down after " + (rstring)$timeoutInterval + " second timeout"); shutdownPE(); } }
  }
 
    </pre>

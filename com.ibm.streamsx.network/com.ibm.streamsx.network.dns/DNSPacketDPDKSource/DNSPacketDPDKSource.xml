@@ -228,20 +228,20 @@ If you want to change the size of hugepages on your machine, please refer to the
 The number of hugepages is determined by the 'vm.nr_hugepages' system control parameter.
 This parameter can be set when the system is booted, and it can be changed later while the system is running.
 
-For example, to set the 'vm.nr_hugepages' parameter to 10 when the system boots, edit the '/etc/sysctl.conf' system file and set the parameter like this:
+For example, to set the 'vm.nr_hugepages' parameter to 1000 when the system boots, edit the '/etc/sysctl.conf' system file and set the parameter like this:
 
-    vm.nr_hugepages=10
+    vm.nr_hugepages=1000
 
-To increase the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
+To set the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
 
     bash&gt; sudo sysctl -w vm.nr_hugepages=1000
 
-To verify that the parameter has changed, type this at a command prompt:
+To verify that the 'vm.nr_hugepages' parameter is set to 1000, type this at a command prompt:
 
     bash&gt; sysctl vm.nr_hugepages
     vm.nr_hugepages = 1000
 
-To verify that the number of hugepages has actually increased, type this at a command prompt:
+To verify that the number of hugepages available is actually 1000, type this at a command prompt:
 
     bash&gt; cat /proc/meminfo | grep -i hugepages
     AnonHugePages:         0 kB
@@ -251,8 +251,8 @@ To verify that the number of hugepages has actually increased, type this at a co
     HugePages_Surp:        0
     Hugepagesize:      16384 kB
 
-If the number of hugepages has not actually been increased to 1000, memory may be too fragemented.
-In this case, you will need to reboot the machine and then increase the number of hugepages.
+If the number of hugepages has not 1000, memory may be too fragemented.
+In this case, you will need to reboot the machine and then set the number of hugepages.
 
 To make the hugepages accessible to the user accounts that will run the DNSPacketDPDKSource operator,
 create and mount a directory for them by typing these commands at a prompt:
@@ -317,18 +317,58 @@ To do this, type these commands at a prompt:
     bash&gt; ant
 
 
-# bind ethernet device to DPDK
+# bind 'e1000' ethernet device to DPDK
+
+Before Streams can use an ethernet device with DPDK, it must be bound to a DPDK device driver.
+
+For the 'e1000' family of devices, load the DPDK device driver into the Linux kernel by typing these commands at a prompt:
+
+    bash&gt; sudo modprobe uio
+    bash&gt; sudo insmod $RTE_SDK/build/kmod/igb_uio.ko || true
+
+The DPDK device driver requires exclusive use of the ethernet device.
+To stop the Linux device driver, type these commands at a prompt:
+
+    bash&gt; sudo ip link set dev $DPDK_INTERFACE down
+    bash&gt; ip link show dev $DPDK_INTERFACE
+
+To bind an ethernet device of the 'e1000' family to the DPDK device drier, type these commands at a prompt:
+
+    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb_uio $DPDK_DEVICE
+    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
+
+Then grant read/write access to the DPDK device driver's files to the 'dpdk' user group by typing these commands at a prompt:
+
+    bash&gt; sudo chown root:dpdk /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
+    bash&gt; sudo chmod 664 /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
+
+You can now run one of the sample applications that use DPDK, or run your own SPL application.
 
 
+# unbind 'e1000' ethernet device from DPDK
+
+After Streams has finished using an ethernet device with DPDK, it should be rebound to the Linux device driver.
+
+To bind an ethernet device of the 'e1000' family to the Linux device driver, type these commands at a prompt:
+
+    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb $DPDK_DEVICE
+    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
+
+Then start the Linux device driver by typing these commands at a prompt:
+
+    bash&gt; sudo ip link set dev $DPDK_INTERFACE up
+    bash&gt; ip link show dev $DPDK_INTERFACE
 
 
+# bind 'Mellanox' ethernet device to DPDK
+
+To be done ...
 
 
-# unbind ethernet device from DPDK
+# unbind 'Mellanox' ethernet device from DPDK
 
 
-
-
+To be done ...
 
 
 # sample applications
@@ -336,6 +376,7 @@ To do this, type these commands at a prompt:
 The network toolkit includes several
 [https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
 that illustrate how to use this operator.
+
 
 # references
 

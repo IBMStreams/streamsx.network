@@ -198,5 +198,5 @@ composite LiveDNSPacketDPDKSourceFull {
     }
     () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.LiveDNSPacketDPDKSourceFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down after " + (rstring)$timeoutInterval + " second timeout"); shutdownPE(); } }
 }

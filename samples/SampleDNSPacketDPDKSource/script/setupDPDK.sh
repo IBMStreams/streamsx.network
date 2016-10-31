@@ -30,7 +30,7 @@ device=""
 
 [[ $( sysctl vm.nr_hugepages | gawk '{print $3}' ) == 0 ]] && sudo sysctl -w vm.nr_hugepages=1000
 [[ ! -d /dev/hugepages ]] && sudo mkdir /dev/hugepages
-[[ ! $( mount | grep "/dev/hugepages" ) ]] || sudo mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
+[[ ! $( mount | grep "/dev/hugepages" ) ]] && sudo mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
 
 # unpack a fresh copy of the DPDK distribution package
 

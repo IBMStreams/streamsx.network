@@ -70,7 +70,7 @@ use com.ibm.streamsx.network.dns::*;
 <div class="section"><h2 class="title sectiontitle">promiscuous mode 
 </h2>
 
-<p class="p">Network interfaces normally ignore packets that are not addressed to them. However, when 'promiscious' mode is enabled on a network interface, it can capture all network packets on its ethernet segment, even those that are not addressed to it.  This is sometimes referred to as 'network sniffing'.  Modern ethernet switches normally send network interfaces only packets that are addressed to them; 'promiscious' mode is useful only when a switch has been specifically configured to send packets to a network interface that are not addressed to it. This is sometimes referred to as 'mirroring'.
+<p class="p">Ethernet interfaces normally ignore packets that are not addressed to them. However, when 'promiscious' mode is enabled, they can capture all network packets on their ethernet segment, even those that are not addressed to them.  This is sometimes referred to as 'network sniffing'.   However, modern ethernet routers normally send only packets that are addressed to the ethernet device; 'promiscious' mode is useful only when a switch has been specifically configured to send packets to an ethernet interface that are not addressed to it. This is sometimes referred to as 'mirroring'.
 </p>
 
 <p class="p">The DNSPacketDPDKSource operator will enable 'promiscuous' mode in a ethernet interface when its 'promiscous' parameter is set to <tt class="ph tt">true</tt>.
@@ -78,10 +78,10 @@ use com.ibm.streamsx.network.dns::*;
 
 </div>
 
-<div class="section"><h2 class="title sectiontitle">dependencies
+<div class="section"><h2 class="title sectiontitle">hardware dependencies
 </h2>
 
-<p class="p">DPDK supports a variety of <a class="xref" href="http://www.dpdk.org/doc/nics">ethernet adapters</a>.  The DNSPacketDPDKSource operator has been tested with these adapters:
+<p class="p">DPDK supports a variety of <a class="xref" href="http://www.dpdk.org/doc/nics">ethernet devices</a>.  The DNSPacketDPDKSource operator has been tested with these adapters:
 </p>
 
 <div class="p">
@@ -103,57 +103,42 @@ use com.ibm.streamsx.network.dns::*;
 
 </div>
 
-<div class="section"><h2 class="title sectiontitle">installing and configuring DPDK
+<div class="section"><h2 class="title sectiontitle">software dependencies
 </h2>
 
-<p class="p">The <a class="xref" href="http://dpdk.org/doc/guides/linux_gsg/index.html">DPDK user guide</a> has detailed instructions for installing DPDK and configuring it for particular ethernet adapters. These notes are a summary of those instructions. They include many Linux commands that should be entered at a command prompt in a Terminal window. In the instructions below, these commands are prefixed with 'bash&gt;'. Many of the commands require 'root' privileges; they are prefixed with 'bash&gt; sudo'.
-</p>
-
-<p class="p"><em class="ph i">determine machine architecture</em>
-</p>
-
-<p class="p">IBM Streams is supported on two types of machine architectures, 'x86 64-bit' and 'Power8 64-bit (little-endian)'. To compile and run the DPDK libraries, you will need to know which architecture your machine uses.
-</p>
-
-<p class="p">To determine your machine's architecture, open a Terminal window on the machine and type this at the command prompt:
+<p class="p">DPDK depends upon additional Linux software packages, beyond those required for Streams. In particular, it requires libraries that match the specific version of the kernel your machine uses. To install these libraries, type these commands at a prompt:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-bash&gt; uname -m
+bash&gt; sudo yum install glibc-devel
+bash&gt; sudo yum install libibverbs-devel
+bash&gt; sudo yum install "kernel-devel-$(uname -r)"
 </pre>
 
 
 </div>
 
-<p class="p">The 'uname' command will display one of the following architecture types:
-</p>
-
-<div class="p">
-<ul class="ul">
-<li class="li"> <tt class="ph tt">x86_64</tt> _for x86 64-bit_</li>
-
-<li class="li"> <tt class="ph tt">ppc64le</tt> _for Power8 64-bit (little-endian)_ </li>
-
-</ul>
-
 </div>
 
-<p class="p">If the 'uname' command displays some other architecture type, the IBM Streams product is not supported.
+<div class="section"><h2 class="title sectiontitle">installing and configuring DPDK
+</h2>
+
+<p class="p">The <a class="xref" href="http://dpdk.org/doc/guides/linux_gsg/index.html">DPDK user guide</a> has detailed instructions for installing DPDK and configuring it for particular ethernet devices. These notes are a summary of those instructions. They include many Linux commands that should be entered at a command prompt in a Terminal window. In the instructions below, these commands are prefixed with 'bash&gt;'. Many of the commands require 'root' privileges; they are prefixed with 'bash&gt; sudo'.
 </p>
 
-<p class="p"><em class="ph i">identify ethernet adapter and network interface</em>
+<p class="p"><em class="ph i">identify ethernet device and network interface</em>
 </p>
 
-<p class="p">The DNSPacketDPDKSource operator is supported on several types of ethernet adapters. To compile the DPDK libraries, you will need to know which ethernet adapters your machine has, and which one you want to use with DPDK.  To use that adapter with DPDK, you will need to know which Linux network interface is assigned to it.
+<p class="p">Your machine probably has multiple ethernet interfaces. To configure the DPDK device driver, you will need to specify which ethernet device you intend to use with DPDK,  and which Linux network interface is assigned to it.
 </p>
 
-<p class="p">First, display a list of ethernet adapters installed in your machine by typing this at a command prompt:
+<p class="p">First, display a list of ethernet devices installed in your machine by typing this at a command prompt:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-bash&gt; lspci | grep ethernet
+bash&gt; lspci | grep -i ethernet
 0002:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
 0003:05:00.0 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
 0003:05:00.1 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
@@ -165,13 +150,13 @@ bash&gt; lspci | grep ethernet
 
 </div>
 
-<p class="p">If none of the supported ethernet adapters listed above is displayed, the DNSPacketDPDKSource operator is not supported.
+<p class="p">If none of the supported ethernet devices listed above under 'hardware dependencies' is displayed, the DNSPacketDPDKSource operator is not supported.
 </p>
 
-<p class="p">If one of the supported ethernet adapters is listed, note the numbers preceding the word 'Ethernet'. This is the PCI bus address of the adapter.
+<p class="p">Otherwise, note the numbers preceding the word 'Ethernet' for the device you intend to use with DPDK. These numbers are the PCI 'bus:slot.function' address of the device:  they identify the PCI bus the device uses, the physical slot the device is installed in,  and the function number (the port number, for cards with multiple ethernet ports).
 </p>
 
-<p class="p">Then, display a list of Linux network interfaces, and the ethernet adapters they are assigned to, by typing this at a command prompt:
+<p class="p">Then, display a list of Linux network interfaces, and the ethernet devices they are assigned to, by typing this at a command prompt:
 </p>
 
 <div class="p">
@@ -191,11 +176,26 @@ lrwxrwxrwx.  1 root root 0 Sep 28 09:49 lo -&gt; ../../devices/virtual/net/lo
 
 </div>
 
-<p class="p">Find the Linux network interface of the ethernet adapter by matching its PCI bus address to those listed, preding the string '/net/'.
+<p class="p">Find the Linux network interface of your ethernet device by matching its PCI 'bus:slot:function' address to those listed, preceding the string '/net/'.
 </p>
 
-<p class="p">For example, the 'lspci' list shows two Mellanox ethernet adapters with PCI bus addresses '0002:01:00.0' and '0005:01:00.0'.  The 'ls' list shows the adapters are assigned to Linx network interfaces 'enP2p1s0' and 'enP5p1s0', respectively.
+<p class="p">For example, the 'lspci' list shows two Mellanox ethernet devices with PCI addresses '0002:01:00.0' and '0005:01:00.0'.  The 'ls' list shows the adapters are assigned to network interfaces 'enP2p1s0' and 'enP5p1s0', respectively.
 </p>
+
+<p class="p">Select the Linux network interface and PCI 'bus:slot.function' address of the ethernet device you intend to use with DPDK, and remember them for use below under 'prepare Linux user account for DPDK'. To verify your selection, type this command at a prompt, substituting your network interface name, and verify that 'bus-info:' shows the PCI address of your ethernet device:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; ethtool -i enP2p1s0
+driver: mlx4_en
+version: 3.3-2.0.0 (28 Jul 2016)
+firmware-version: 2.36.5150
+bus-info: 0002:01:00.0
+</pre>
+
+
+</div>
 
 <p class="p"><em class="ph i">create Linux user group for DPDK</em>
 </p>
@@ -241,7 +241,7 @@ bash&gt; sudo vi /etc/security/limits.conf
 
 </div>
 
-<p class="p"> and insert this line into the file:
+<p class="p"> and insert this line into the 'limits.conf' file:
 </p>
 
 <div class="p">
@@ -252,7 +252,39 @@ bash&gt; sudo vi /etc/security/limits.conf
 
 </div>
 
-<p class="p">After making these changes, log off your user account and log back in to put the changes into effect.
+<p class="p"><em class="ph i">prepare Linux user account for DPDK</em>
+</p>
+
+<p class="p">You will need some environment variables whenever you use DPDK. To set these variables permanently, edit the '$HOME/.bashrc' script by typing this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+vi $HOME/.bashrc
+</pre>
+
+
+</div>
+
+<p class="p">and insert these lines into the '.bashrc' file,  substituting the Linux network interface and PCI 'bus:slot.function' address of the ethernet device you intend to use with DPDK:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+export RTE_SDK=$HOME/dpdk-2.2.0
+[[ $( uname -m ) == "x86_64" ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
+[[ $( uname -m ) == "ppc64le" ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
+export DPDK_INTERFACE=network-interface-name
+export DPDK_DEVICE=$( ethtool -i $DPDK_INTERFACE | gawk '/bus-info:/ { print $2 }' )
+</pre>
+
+
+</div>
+
+<p class="p"><em class="ph i">log off and log back on</em>
+</p>
+
+<p class="p">After creating the 'dpdk' user group and making the changes to $HOME/.bashrc described above,  log off your user account and log back in to put the changes into effect.
 </p>
 
 <p class="p"><em class="ph i">configure Linux 'hugepages'</em>
@@ -301,9 +333,9 @@ Hugepagesize:      16384 kB
 
 <div class="p">
 <ul class="ul">
-<li class="li"> 4KB, 8KB, 64KB, 256KB, 1MB, 4MB, 16MB, or 256MB _... for 'x86_64' (x86_64 machines) ..._</li>
+<li class="li"> 4KB, 8KB, 64KB, 256KB, 1MB, 4MB, 16MB, or 256MB <em class="ph i">for 'x86_64' (x86_64 machines)</em></li>
 
-<li class="li"> 4KB, 16MB, or 16GB _... for 'ppc64le' (Power8 little-endian machines) ..._</li>
+<li class="li"> 4KB, 16MB, or 16GB <em class="ph i">for 'ppc64le' (Power8 little-endian machines)</em></li>
 
 </ul>
 
@@ -325,18 +357,18 @@ Hugepagesize:      16384 kB
 <p class="p">The number of hugepages is determined by the 'vm.nr_hugepages' system control parameter. This parameter can be set when the system is booted, and it can be changed later while the system is running.
 </p>
 
-<p class="p">For example, to set the 'vm.nr_hugepages' parameter to 10 when the system boots, edit the '/etc/sysctl.conf' system file and set the parameter like this:
+<p class="p">For example, to set the 'vm.nr_hugepages' parameter to 1000 when the system boots, edit the '/etc/sysctl.conf' system file and set the parameter like this:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-vm.nr_hugepages=10
+vm.nr_hugepages=1000
 </pre>
 
 
 </div>
 
-<p class="p">To increase the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
+<p class="p">To set the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
 </p>
 
 <div class="p">
@@ -347,7 +379,7 @@ bash&gt; sudo sysctl -w vm.nr_hugepages=1000
 
 </div>
 
-<p class="p">To verify that the parameter has changed, type this at a command prompt:
+<p class="p">To verify that the 'vm.nr_hugepages' parameter is set to 1000, type this at a command prompt:
 </p>
 
 <div class="p">
@@ -359,7 +391,7 @@ vm.nr_hugepages = 1000
 
 </div>
 
-<p class="p">To verify that the number of hugepages has actually increased, type this at a command prompt:
+<p class="p">To verify that the number of hugepages available is actually 1000, type this at a command prompt:
 </p>
 
 <div class="p">
@@ -376,7 +408,7 @@ Hugepagesize:      16384 kB
 
 </div>
 
-<p class="p">If the number of hugepages has not actually been increased to 1000, memory may be too fragemented. In this case, you will need to reboot the machine and then increase the number of hugepages.
+<p class="p">If the number of hugepages has not 1000, memory may be too fragemented. In this case, you will need to reboot the machine and then set the number of hugepages.
 </p>
 
 <p class="p">To make the hugepages accessible to the user accounts that will run the DNSPacketDPDKSource operator, create and mount a directory for them by typing these commands at a prompt:
@@ -413,59 +445,10 @@ nodev  /dev/hugepages  hugetlbfs  gid=dpdk,mode=1770  0  0
 
 </div>
 
-<p class="p"><em class="ph i">prepare Linux user account for DPDK</em>
-</p>
-
-<p class="p">You will need some environment variables when you compile the DPDK libraries,  and whenever you compile Streams applications that use the DNSPacketDPDKSource operator.
-</p>
-
-<p class="p">To set these variables permanently, edit the '$HOME/.bashrc' script by typing this at a command prompt:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-vi $HOME/.bashrc
-</pre>
-
-
-</div>
-
-<p class="p">and insert these lines into the file: 
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-export RTE_SDK=$HOME/dpdk-2.2.0
-[[ $( uname -m ) == "x86_64" ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
-[[ $( uname -m ) == "ppc64le" ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
-</pre>
-
-
-</div>
-
-<p class="p">After making this change, log off your user account and log back in to put the change into effect.
-</p>
-
-<p class="p"><em class="ph i">get Linux development libraries</em>
-</p>
-
-<p class="p">DPDK must be compiled from source code, which depends on several Linux development libraries, some of which must match the specific version of the kernel your machine uses. To install these libraries, type these commands at a prompt:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-bash&gt; sudo yum install glibc-devel
-bash&gt; sudo yum install libibverbs-devel
-bash&gt; sudo yum install "kernel-devel-$(uname -r)"
-</pre>
-
-
-</div>
-
 <p class="p"><em class="ph i">get DPDK library and utilities</em>
 </p>
 
-<p class="p">The DPDK source code needs to be downloaded, configured for your machine's architecture and ethernet adapter, and compiled into libraries and utilities.
+<p class="p">The DPDK source code needs to be downloaded, configured for your machine's architecture and ethernet device, and compiled into libraries and utilities.
 </p>
 
 <p class="p">First, download the DPDK source code and configure it for your machine's architecture by typing these commands at a prompt:
@@ -493,7 +476,7 @@ bash&gt; vi ./build/.config
 
 </div>
 
-<p class="p">and change these parameters in the file:
+<p class="p">and change these parameters in the '.config' file:
 </p>
 
 <div class="p">
@@ -505,7 +488,7 @@ CONFIG_RTE_MAX_MEMSEG=1024
 
 </div>
 
-<p class="p">and, if your machine has a Mellanox ethernet adapter, change this parameter in the file, too:
+<p class="p">and, if your machine has a Mellanox ethernet device, change this parameter in the '.config' file, too:
 </p>
 
 <div class="p">
@@ -555,7 +538,111 @@ bash&gt; ant
 
 </div>
 
-<p class="p"><em class="ph i">more to come...</em>
+</div>
+
+<div class="section"><h2 class="title sectiontitle">bind 'e1000' ethernet device to DPDK
+</h2>
+
+<p class="p">Before Streams can use an ethernet device with DPDK, it must be bound to a DPDK device driver.
+</p>
+
+<p class="p">For the 'e1000' family of devices, load the DPDK device driver into the Linux kernel by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo modprobe uio
+bash&gt; sudo insmod $RTE_SDK/build/kmod/igb_uio.ko || true
+</pre>
+
+
+</div>
+
+<p class="p">The DPDK device driver requires exclusive use of the ethernet device. To stop the Linux device driver, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo ip link set dev $DPDK_INTERFACE down
+bash&gt; ip link show dev $DPDK_INTERFACE
+</pre>
+
+
+</div>
+
+<p class="p">To bind an ethernet device of the 'e1000' family to the DPDK device drier, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb_uio $DPDK_DEVICE
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
+</pre>
+
+
+</div>
+
+<p class="p">Then grant read/write access to the DPDK device driver's files to the 'dpdk' user group by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo chown root:dpdk /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
+bash&gt; sudo chmod 664 /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
+</pre>
+
+
+</div>
+
+<p class="p">You can now run one of the sample applications that use DPDK, or run your own SPL application.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">unbind 'e1000' ethernet device from DPDK
+</h2>
+
+<p class="p">After Streams has finished using an ethernet device with DPDK, it should be rebound to the Linux device driver.
+</p>
+
+<p class="p">To bind an ethernet device of the 'e1000' family to the Linux device driver, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb $DPDK_DEVICE
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
+</pre>
+
+
+</div>
+
+<p class="p">Then start the Linux device driver by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo ip link set dev $DPDK_INTERFACE up
+bash&gt; ip link show dev $DPDK_INTERFACE
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">bind 'Mellanox' ethernet device to DPDK
+</h2>
+
+<p class="p">To be done ...
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">unbind 'Mellanox' ethernet device from DPDK
+</h2>
+
+<p class="p">To be done ...
 </p>
 
 </div>

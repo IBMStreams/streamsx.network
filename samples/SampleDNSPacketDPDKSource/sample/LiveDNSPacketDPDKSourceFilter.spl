@@ -159,6 +159,6 @@ composite LiveDNSPacketDPDKSourceFilter {
 
     // Shut down this application when timer expires.
 
-    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down due to timeout"); shutdownPE(); } }
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down after " + (rstring)$timeoutInterval + " second timeout"); shutdownPE(); } }
 }
 
