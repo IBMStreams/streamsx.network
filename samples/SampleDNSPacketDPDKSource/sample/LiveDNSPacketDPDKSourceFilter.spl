@@ -15,6 +15,8 @@ use com.ibm.streamsx.network.dns::*;
 composite LiveDNSPacketDPDKSourceFilter {
 
     param
+    expression<int32> $nicPort: (int32)getSubmissionTimeValue("nicPort", "0" );
+    expression<int32> $nicQueue: (int32)getSubmissionTimeValue("nicQueue", "0" );
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 
@@ -78,8 +80,8 @@ composite LiveDNSPacketDPDKSourceFilter {
         param
             lcoreMaster: 0; // run the master thread on core 0.
             lcore: 1; // run this ingest thread on core 1.
-            nicPort: 0; // bind to NIC port 0
-            nicQueue: 0; // bind to NIC queue 0
+            nicPort: $nicPort; // bind to specified NIC port
+            nicQueue: $nicQueue; // bind to specified NIC queue
             promiscuous: true;
             outputFilters: !parseError(), // selects messages for DNSMessageStream
                            !parseError() && !DNS_RESPONSE_FLAG(), // selects messages for FlattenedDNSQuestionStream

@@ -12,6 +12,8 @@ use com.ibm.streamsx.network.dns::*;
 composite LiveDNSPacketDPDKSourceBasic {
 
     param
+    expression<int32> $nicPort: (int32)getSubmissionTimeValue("nicPort", "0" );
+    expression<int32> $nicQueue: (int32)getSubmissionTimeValue("nicQueue", "0" );
     expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
 
     type 
@@ -45,8 +47,8 @@ composite LiveDNSPacketDPDKSourceBasic {
         param
             lcoreMaster: 0; // run the master thread on core 0.
             lcore: 1; // run this ingest thread on core 1.
-            nicPort: 0; // bind to NIC port 0
-            nicQueue: 0; // bind to NIC queue 0
+            nicPort: $nicPort; // bind to specified NIC port
+            nicQueue: $nicQueue; // bind to specified NIC queue
             promiscuous: true;
             metricsInterval: 0.0;
         output 

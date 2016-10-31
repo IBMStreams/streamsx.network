@@ -50,6 +50,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
+nicPort=0
+nicQueue=0
 metricsInterval=1.0
 timeoutInterval=30.0
 )
