@@ -559,7 +559,7 @@ class DNSMessageParser {
   SPL::rstring convertResourceDataToString(const struct Record& record, const SPL::rstring fieldDelimiter = SPL::rstring()) {
 
     switch(record.type) {
-      /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); break;
+        /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); break;
         /* NS */         case   2: return convertDNSEncodedNameToString(record.rdata); break;
         /* CNAME */      case   5: return convertDNSEncodedNameToString(record.rdata); break;
         /* SOA */        case   6: return convertSOAResourceDataToString(record.rdata, fieldDelimiter.c_str()); break; // 7 subfields
@@ -590,11 +590,9 @@ class DNSMessageParser {
         /* SPF */        case  99: return SPL::rstring((char*)record.rdata, record.rdlength); break;
         /* TKEY */       case 249: return SPL::rstring("[TKEY data]"); break;
         /* TSIG */       case 250: return SPL::rstring("[TSIG data]"); break;
-                         default:  break;
+        /* unknown */    default:  return SPL::rstring((char*)record.rdata, record.rdlength); break;
     }
-
-    error = 115; // ... "unexpected resource type"
-    return SPL::rstring();
+    return SPL::rstring(); // never reached
   }
 
 

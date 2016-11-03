@@ -46,8 +46,6 @@
 
           * 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
 
-          * 115 for 'unexpected resource type': The 'type' field of a DNS resource record is not of the values listed in the RFC standards. Please see the 'references' section of the DNSMessageParser operator for a list of DNS RFCs.
-
           * 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
 
           * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
