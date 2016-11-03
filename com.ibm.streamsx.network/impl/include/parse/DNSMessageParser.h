@@ -559,10 +559,11 @@ class DNSMessageParser {
   SPL::rstring convertResourceDataToString(const struct Record& record, const SPL::rstring fieldDelimiter = SPL::rstring()) {
 
     switch(record.type) {
-        /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); 
+      /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); break;
         /* NS */         case   2: return convertDNSEncodedNameToString(record.rdata); break;
         /* CNAME */      case   5: return convertDNSEncodedNameToString(record.rdata); break;
         /* SOA */        case   6: return convertSOAResourceDataToString(record.rdata, fieldDelimiter.c_str()); break; // 7 subfields
+        /* NULL */       case  10: return SPL::rstring((char*)record.rdata, record.rdlength); break;
         /* WKS */        case  11: return SPL::rstring("[WKS data]"); break; // multiple subfields
         /* PTR */        case  12: return convertDNSEncodedNameToString(record.rdata); break;
         /* HINFO */      case  13: return SPL::rstring("[HINFO data]"); break; // multiple subfields
@@ -572,7 +573,7 @@ class DNSMessageParser {
         /* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
         /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
-        /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); 
+        /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); break;
         /* SRV */        case  33: return convertDNSEncodedNameToString(record.rdata + 6); break; // 4 subfields
         /* NAPTR */      case  35: return SPL::rstring("[NAPTR data]"); break; // 6 subfields
         /* EDNS0 */      case  41: return SPL::rstring(""); break; // variable subfields
