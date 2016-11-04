@@ -15,6 +15,8 @@
 #include <streams_boost/lexical_cast.hpp>
 #include <arpa/inet.h>
 
+#include "NetworkResources.h"
+
 #define IP_ASN "IP_ASN"
 
 <%
@@ -385,7 +387,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 			{
 				if(lineTokens.size() != ASN4FILE_FIELD_COUNT)
 				{
-					SPLAPPLOG(L_ERROR, "Unknown error while parsing asnIPv4 record: " << line, IP_ASN);
+					SPLAPPLOG(L_ERROR, NETWORK_UNKNOWN_ERROR_PARSING_RECORD("asnIPv6", line), IP_ASN);
 					continue;
 				}
 
@@ -400,7 +402,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 			{
 				if(lineTokens.size() != ASN6FILE_FIELD_COUNT)
 				{
-					SPLAPPLOG(L_ERROR, "Unknown error while parsing asnIPv6 record: " << line, IP_ASN);
+					SPLAPPLOG(L_ERROR, NETWORK_UNKNOWN_ERROR_PARSING_RECORD("asnIPv6", line), IP_ASN);
 					continue;
 				}
 				
@@ -409,7 +411,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 					uint32_t ipStart[4];
 					if(inet_pton(AF_INET6, lineTokens[1].c_str(), ipStart) == 0)
 					{
-						SPLAPPLOG(L_ERROR, "Unable to convert start IPv6 to decimal: " << lineTokens[1], IP_ASN);
+						SPLAPPLOG(L_ERROR, NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", lineTokens[1]), IP_ASN);
 						continue;
 					}
 					ntohl6(ipStart);
@@ -417,7 +419,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 					uint32_t ipEnd[4];
 					if(inet_pton(AF_INET6, lineTokens[2].c_str(), ipEnd) == 0)
 					{
-						SPLAPPLOG(L_ERROR, "Unable to convert start IPv6 to decimal: " << lineTokens[2], IP_ASN);
+						SPLAPPLOG(L_ERROR, NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", lineTokens[2]), IP_ASN);
 						continue;
 					}
 					ntohl6(ipEnd);
@@ -433,7 +435,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 		}
 		catch (streams_boost::bad_lexical_cast &e)
 		{
-			SPLAPPLOG(L_ERROR, "(" << e.what() << ") - Error parsing ASN record: " << line, IP_ASN);
+			SPLAPPLOG(L_ERROR, NETWORK_ERROR_PARSING_RECORD("ASN", line, e.what()), IP_ASN);
 		} 
 	}
 	
@@ -481,7 +483,7 @@ rstring MY_OPERATOR::convertToAbsolutePath(rstring filename)
 	{
 		// TODO - fix error handling
 		string const msg = "File does not exist: " + pathName;
-		SPLAPPLOG(L_ERROR, msg, IP_ASN);
+		SPLAPPLOG(L_ERROR, NETWORK_FILE_NOT_FOUND(pathName), IP_ASN);
 		throw new SPLRuntimeException("parseLocationFile", msg);
 	}
 	
