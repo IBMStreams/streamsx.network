@@ -60,30 +60,58 @@
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0250E"
 		extraData="NETWORK_NO_OUTPUT_PORTS" resname="CDIST0250E">
         	<source>Sorry, no output ports specified.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid operator configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Add an output port to the operator declaration.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0251E"
 		extraData="NETWORK_NOT_ENOUGH_OUTPUT_FILTERS" resname="CDIST0251E">
         	<source>Sorry, not enough output filters, must specify one for each output port.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0252E"
 		extraData="NETWORK_TOO_MANY_OUTPUT_FILTERS" resname="CDIST0252E">
         	<source>Sorry, too many output filters, must specify one for each output port.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0253E"
 		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME_OR_INPUT_PORT" resname="CDIST0253E">
         	<source>Sorry, either ''pcapFilename'' parameter or an input port must be specified.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>The pcap source was not specified.</EXPLANATION>
+       		 <USER_RESPONSE>Either add the input port or add the parameter.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0254E"
 		extraData="NETWORK_INVALID_PARAMETER_PCAP_FILENAME" resname="CDIST0254E">
         	<source>Sorry, ''pcapFilename'' parameter and an input port cannot both be specified.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Either remove the input port or the parameter.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0255E"
 		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME" resname="CDIST0255E">
         	<source>Sorry, ''initDelay'' can only be specified when ''pcapFilename'' is also specified</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0256E"
 		extraData="NETWORK_CONSISTENT_REGION_INPUT_PORT_ERROR" resname="CDIST0256E">
         	<source>Sorry, an input port cannot be specified when starting a consistent region</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid annotation was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Either remove the input port or the consistent region annotation.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0257E"
 		extraData="NETWORK_CONSISTENT_REGION_START_ERROR" resname="CDIST30257E">
@@ -97,46 +125,111 @@
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0258E"
 		extraData="NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE" resname="CDIST0258E">
         	<source>Output attribute {0} must be a {1} type.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="attribute_name"/>
+	         <REPLACEMENT arg="{1}" value="spl_type"/>
+        	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Change the attribute type in the output stream.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0259E"
 		extraData="NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE" resname="CDIST0259E">
         	<source>The ''{0}'' parameter must refer to an attribute of type: {1}. Found {2}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name"/>
+	         <REPLACEMENT arg="{1}" value="required_spl_type"/>
+	         <REPLACEMENT arg="{2}" value="spl_type"/>
+        	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Change the attribute type in the input stream.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0260E"
 		extraData="NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED" resname="CDIST0260E">
         	<source>The ''{0}'' parameter cannot be specified when input port 1 is defined.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name"/>
+        	 <EXPLANATION>An invalid parameter was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Remove the parameter from the parameter section.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0261E"
 		extraData="NETWORK_EITHER_PARAMETER_A_OR_B_MUST_BE_SPECIFIED" resname="CDIST0261E">
         	<source>Either the ''{0}'' parameter or the ''{1}'' parameter or input port 1 must be specified.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name_a"/>
+	         <REPLACEMENT arg="{1}" value="parameter_name_b"/>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0262E"
 		extraData="NETWORK_EITHER_PARAMETER_OR_INPUT_PORT_1_MUST_BE_SPECIFIED" resname="CDIST0262E">
         	<source>Either the ''{0}'' parameter or input port 1 must be specified.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name"/>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0263E"
 		extraData="NETWORK_LESS_FIELDS_IN_RECORD" resname="CDIST0263E">
         	<source>Number of fields in record is less than expected (found: {0}, min_expected: {1}, line: {2}).</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="number_of_fields"/>
+	         <REPLACEMENT arg="{1}" value="expected_number_of_fields"/>
+	         <REPLACEMENT arg="{2}" value="line_number"/>
+        	 <EXPLANATION>An invalid csv file was detected.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0264E"
 		extraData="NETWORK_UNABLE_TO_PARSE_CIDR" resname="CDIST0264E">
         	<source>Unable to parse network CIDR from blocks file: {0}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_name"/>
+        	 <EXPLANATION>The network CIDR field could not be determined.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0265E"
 		extraData="NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL" resname="CDIST0265E">
         	<source>Unable to convert start {0} to decimal: {1}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="field_name"/>
+	         <REPLACEMENT arg="{1}" value="token_value"/>
+        	 <EXPLANATION>The IP address could not be converted.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0266E"
 		extraData="NETWORK_ERROR_PARSING_RECORD" resname="CDIST0266E">
         	<source>Error parsing {0} record: {1} ({2})</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_type"/>
+	         <REPLACEMENT arg="{1}" value="line_number"/>
+	         <REPLACEMENT arg="{2}" value="exception_message"/>
+        	 <EXPLANATION>An exception is observed during parsing the csv file.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0267E"
 		extraData="NETWORK_UNKNOWN_ERROR_PARSING_RECORD" resname="CDIST0267E">
         	<source>Unknown error while parsing {0} record: {1}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_type"/>
+	         <REPLACEMENT arg="{1}" value="line_number"/>
+        	 <EXPLANATION>An error is observed during parsing the csv file.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0268E"
 		extraData="NETWORK_FILE_NOT_FOUND" resname="CDIST0268E">
         	<source>File does not exist: {0}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_name"/>
+        	 <EXPLANATION>File could not be found.</EXPLANATION>
+       		 <USER_RESPONSE>Change the parameter to the file location.</USER_RESPONSE>
+       		</MSGDOC -->
         </trans-unit>
       </group>
     </body>
