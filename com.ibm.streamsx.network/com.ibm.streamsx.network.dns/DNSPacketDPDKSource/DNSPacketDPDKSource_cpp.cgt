@@ -263,6 +263,7 @@ void MY_OPERATOR::metricsThread() {
     OperatorMetrics& opm = getContext().getMetrics();
     Metric* totalPacketsReceived = &opm.getCustomMetricByName("nPacketsReceivedCurrent");
     Metric* totalPacketsDropped = &opm.getCustomMetricByName("nPacketsDroppedCurrent");
+    Metric* totalBytesReceived = &opm.getCustomMetricByName("nBytesReceivedCurrent");
     Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
     Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
 
@@ -282,10 +283,11 @@ void MY_OPERATOR::metricsThread() {
       then = now;
       packetCounterThen = packetCounterNow;
       byteCounterThen = byteCounterNow;
-      statsThen.received = statsNow.received;
-      statsThen.dropped = statsNow.dropped;
+      statsThen.received = statsNow.received; // Packets RX
+      statsThen.dropped  = statsNow.dropped;  // All errors and drops
+      statsThen.bytes    = statsNow.bytes;    // Bytes RX
       
-      // get the current interval's counters from 'libpcap'
+      // get the current interval's counters from the DPDK library
       now = SPL::Functions::Time::getTimestampInSecs();
       streams_port_stats(nicPort, &statsNow);
       packetCounterNow = packetCounter;
@@ -294,6 +296,7 @@ void MY_OPERATOR::metricsThread() {
       // expose the operator's statistics as metrics
       totalPacketsReceived->setValue(statsNow.received);
       totalPacketsDropped->setValue(statsNow.dropped); 
+      totalBytesReceived->setValue(statsNow.bytes); 
       totalPacketsProcessed->setValue(packetCounter);
       totalBytesProcessed->setValue(byteCounter);
       

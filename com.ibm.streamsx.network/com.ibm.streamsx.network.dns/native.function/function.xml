@@ -91,6 +91,7 @@ since the operator started, as of the most recent metrics interval, if there is 
             </function:description>
             <function:prototype>public uint64 packetsReceived()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -99,6 +100,16 @@ since the operator started, as of the most recent metrics interval, if there is 
 
             </function:description>
             <function:prototype>public uint64 packetsDropped()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of bytes received from the network interface
+since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+
+            </function:description>
+            <function:prototype>public uint64 bytesReceived()</function:prototype>
           </function:function>
 
           <function:function>
@@ -119,6 +130,16 @@ during the most recent metrics interval, if there is one, or zero if not.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsDropped()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of bytes received from the network interface 
+during the most recent metrics interval, if there is one, or zero if not.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalBytesReceived()</function:prototype>
           </function:function>
 
     </function:functions>

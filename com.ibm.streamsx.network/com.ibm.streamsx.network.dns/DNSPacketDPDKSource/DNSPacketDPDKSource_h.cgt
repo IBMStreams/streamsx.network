@@ -117,6 +117,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   SPL::uint64 packetsDropped() { return statsNow.dropped; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 bytesReceived() { return statsNow.bytes; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
   inline __attribute__((always_inline))
@@ -130,6 +133,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsDropped() { return then ? statsNow.dropped - statsThen.dropped : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesReceived() { return then ? statsNow.bytes - statsThen.bytes : 0; }
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }

@@ -479,6 +479,17 @@ as counted by DPDK.
        </metric>
 
        <metric>
+          <name>nBytesReceivedCurrent</name>
+          <description>
+	  
+This metric counts the number of bytes received by the network interface,
+as counted by DPDK.
+
+	  </description>
+          <kind>Counter</kind>
+       </metric>
+
+       <metric>
           <name>nPacketsProcessedCurrent</name>
           <description>
 	  
