@@ -21,9 +21,7 @@ unbundleDirectory=$projectDirectory/output/unbundle/$composite
 
 dataDirectory=$projectDirectory/data
 
-libpcapDirectory=$HOME/libpcap-1.7.4
-
-libpamDirectory=$HOME/workspace/com.ibm.iss.pam
+libpamDirectory=$HOME/com.ibm.iss.pam
 
 networkInterface=$( ifconfig ens6f1 1>/dev/null 2>&1 && echo ens6f1 || echo eth0 ) 
 
@@ -70,8 +68,6 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 [ -d $libpamDirectory ] && export STREAMS_ADAPTERS_ISS_PAM_DIRECTORY=$libpamDirectory
 
 step "configuration for standalone application '$namespace.$composite' ..."

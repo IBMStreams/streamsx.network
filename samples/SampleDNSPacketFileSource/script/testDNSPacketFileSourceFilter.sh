@@ -20,8 +20,6 @@ buildDirectory=$projectDirectory/output/build/$composite
 dataDirectory=$projectDirectory/data
 #dataDirectory=/tmp/$composite/data
 
-libpcapDirectory=$HOME/libpcap-1.7.4
-
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
@@ -47,10 +45,10 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
+pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
 #pcapFilename=$HOME/data.yorktown/sample_raw_dns_only_500_packets.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns-only_one_minute.pcap
-pcapFilename=$HOME/data.yorktown/splanet02_dns-only_one_hour.pcap
+#pcapFilename=$HOME/data.yorktown/splanet02_dns-only_one_hour.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns-only_malformed.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns-only_incompatible_flags.pcap
 )
@@ -68,8 +66,6 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
 step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
