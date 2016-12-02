@@ -220,7 +220,7 @@ static void configurationErrorCallback(const char *module,
                             void *userData) {
   //MY_OPERATOR* self = reinterpret_cast<MY_OPERATOR*>(userData);
 
-  SPLLOG(L_ERROR, "PAM configuration error" <<
+  SPLAPPTRC(L_ERROR, "PAM configuration error" <<
            ": module=" << module <<
            ", event=" << eventId <<
            ", tuneName=" << tuneName <<
@@ -272,7 +272,7 @@ void MY_OPERATOR::processEvent(const pam2XpfHeader* eventHeader, void* connectio
     // basic sanity checks
     if (eventPointer->msgLen < messageSize) THROW(SPLRuntimeOperator, "processEvent failed, event body truncated");
 
-    SPLLOG(L_TRACE, "XPF event callback" <<
+    SPLAPPTRC(L_TRACE, "XPF event callback" <<
            ": event=" << xpfEventNames.event2name(eventPointer->msgId) <<
            ", frame=" << eventHeader->frameId <<
            ", flowid=" << eventHeader->flowId <<
@@ -353,7 +353,7 @@ void MY_OPERATOR::processEvent(const pam2XpfHeader* eventHeader, void* connectio
       processDNSResponseEvent(*eventHeader, *(pam2XpfDnsResponse*)eventPointer);
       break;
     default:
-      SPLLOG(L_DEBUG, "unsupported XPF event " << xpfEventNames.event2name(eventPointer->msgId) << " ignored", "PacketContentAssembler");
+      SPLAPPTRC(L_DEBUG, "unsupported XPF event " << xpfEventNames.event2name(eventPointer->msgId) << " ignored", "PacketContentAssembler");
       break;
     }
   }
@@ -395,7 +395,7 @@ void MY_OPERATOR::processConnectionOpenedEvent(const pam2XpfHeader& eventHeader,
 
   // store the address of the file state structure
   flowState = flowStates[flowID];
-  SPLLOG(L_TRACE, "processConnectionOpenedEvent() entered, flowID=" << flowID << ", connectionStart=" << connectionStart << ", flowStarted=" << flowStarted, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "processConnectionOpenedEvent() entered, flowID=" << flowID << ", connectionStart=" << connectionStart << ", flowStarted=" << flowStarted, "PacketContentAssembler");
 
   // initialize flow state structure, if necessary
   if (!flowStarted) {
@@ -486,7 +486,7 @@ void MY_OPERATOR::processConnectionClosedEvent(const pam2XpfHeader& eventHeader,
   case XPF_MSG_ICMP_CONN_CLOSED: flowID += 3; break;
   default: THROW(SPLRuntimeOperator, "this should never happen");
   }
-  SPLLOG(L_TRACE, "processConnectionClosedEvent entered, flowID=" << flowID, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "processConnectionClosedEvent entered, flowID=" << flowID, "PacketContentAssembler");
 
   // get the FlowState structure for this flow
   if ( ! flowStates.count(flowID) ) return;
@@ -526,14 +526,14 @@ void MY_OPERATOR::processConnectionClosedEvent(const pam2XpfHeader& eventHeader,
   %> ;
 
   // close any files left open in this flow
-  SPLLOG(L_TRACE, "flowID=" << flowID << " left " << flowState->activeFileIDs.size() << " files open", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "flowID=" << flowID << " left " << flowState->activeFileIDs.size() << " files open", "PacketContentAssembler");
   while ( ! flowState->activeFileIDs.empty() ) {
 
     // find any one of the files left open by this flow
     //???std::tr1::unordered_map<uint64, int32>::iterator i = flowState->activeFileIDs.begin();
     //???const uint64 fileID = i->first;
     const uint64 fileID = flowState->activeFileIDs.begin()->first;
-    SPLLOG(L_TRACE, "closing file left open when connection closed, flowID=" << flowID << ", fileID=" << fileID, "PacketContentAssembler");
+    SPLAPPTRC(L_TRACE, "closing file left open when connection closed, flowID=" << flowID << ", fileID=" << fileID, "PacketContentAssembler");
     if ( !fileStates.count(fileID) ) THROW(SPLRuntimeOperator, "processConnectionClosedEvent failed, flowID=" << flowID << " fileID=" << fileID << " not allocated");
     fileState = fileStates[fileID];
     if (!fileState) THROW(SPLRuntimeOperator, "processConnectionClosedEvent failed, flowID=" << flowID << " fileID=" << fileID << " is null");
@@ -822,7 +822,7 @@ FileState* MY_OPERATOR::allocateFileState(const uint64 fileID) { // note that fl
   flowState->activeFileIDs[fileID] = 1;
 
   // return the address of the new FileState structure
-  SPLLOG(L_TRACE, "allocated FileState for flowID=" << flowState->FLOW_ID << ", fileID=" << fileID, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "allocated FileState for flowID=" << flowState->FLOW_ID << ", fileID=" << fileID, "PacketContentAssembler");
   return fileState;
 }
 
@@ -843,7 +843,7 @@ void MY_OPERATOR::freeFileState(const uint64 fileID) { // note that file's flowS
   // free the old FileState structure and remove it from the hash table
   delete fileStates[fileID];
   fileStates.erase(fileID);
-  SPLLOG(L_TRACE, "freed FileState for flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "freed FileState for flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
 }
 
 
@@ -863,11 +863,11 @@ void MY_OPERATOR::processFileStartEvent(const pam2XpfHeader& eventHeader, const 
 
   // get the identifier for the new file
   const uint64 fileID = eventPointer.streamKey;
-  SPLLOG(L_TRACE, "processFileStartEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "processFileStartEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
 
   // if maximum number of open files is limited, check that limit before opening this file
   if (maximumFilesPerFlow && flowState->activeFileIDs.size()>=maximumFilesPerFlow) {
-    SPLLOG(L_TRACE, "flowID=" << flowID << " reached maximum open file limit of " << flowState->activeFileIDs.size(), "PacketContentAssembler");
+    SPLAPPTRC(L_TRACE, "flowID=" << flowID << " reached maximum open file limit of " << flowState->activeFileIDs.size(), "PacketContentAssembler");
     return;
   }
 
@@ -929,7 +929,7 @@ void MY_OPERATOR::processFileDataEvent(const pam2XpfHeader& eventHeader, const p
   if ( ! flowStates.count(flowID) ) return;
   if ( flowStates[flowID]->FLOW_ID != flowID ) THROW(SPLRuntimeOperator, "processFileDataEvent failed, found wrong FlowState structure");
   flowState = flowStates[flowID];
-  SPLLOG(L_TRACE, "processFileDataEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "processFileDataEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
 
   // keep track of how much data we have accumulated for this file
   fileState->FILE_CHUNK_LENGTH += eventPointer.dataLen;
@@ -937,7 +937,7 @@ void MY_OPERATOR::processFileDataEvent(const pam2XpfHeader& eventHeader, const p
 
   // submit whatever file data is already in buffer if this fragment doesn't fit in it
   if ( fileState->FILE_CHUNK_BUFFER.size() + eventPointer.dataLen > fileState->FILE_CHUNK_BUFFER.capacity() && !fileState->FILE_CHUNK_BUFFER.empty() ) {
-    SPLLOG(L_TRACE, "file " << fileState->FILE_ID << " buffer " << fileState->FILE_CHUNK_COUNTER << " submitted with " << fileState->FILE_CHUNK_BUFFER.size() << " bytes", "PacketContentAssembler");
+    SPLAPPTRC(L_TRACE, "file " << fileState->FILE_ID << " buffer " << fileState->FILE_CHUNK_COUNTER << " submitted with " << fileState->FILE_CHUNK_BUFFER.size() << " bytes", "PacketContentAssembler");
     submitOutputTuple(EventFileChunk, fileState->FILE_CHUNK_BUFFER);
     fileState->FILE_CHUNK_BUFFER.clear();
     fileState->FILE_CHUNK_LENGTH = 0;
@@ -945,7 +945,7 @@ void MY_OPERATOR::processFileDataEvent(const pam2XpfHeader& eventHeader, const p
 
   // submit this file data fragement by itself it it doesn't fit in empty buffer of maximum size
   if ( fileState->FILE_CHUNK_BUFFER.size() + eventPointer.dataLen > fileState->FILE_CHUNK_BUFFER.capacity() ) {
-    SPLLOG(L_TRACE, "file " << fileState->FILE_ID << " fragment submitted with " << eventPointer.dataLen << " bytes", "PacketContentAssembler");
+    SPLAPPTRC(L_TRACE, "file " << fileState->FILE_ID << " fragment submitted with " << eventPointer.dataLen << " bytes", "PacketContentAssembler");
     submitOutputTuple(EventFileChunk, eventPointer.data, eventPointer.dataLen);
     fileState->FILE_CHUNK_COUNTER++;
     return; }
@@ -970,7 +970,7 @@ void MY_OPERATOR::processFileEndEvent(const pam2XpfHeader& eventHeader, const pa
 
   // get the flowID for the file
   const uint64 flowID = fileState->FLOW_ID;
-  SPLLOG(L_TRACE, "processFileEndEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "processFileEndEvent() entered, flowID=" << flowID << " fileID=" << fileID, "PacketContentAssembler");
 
   // if we have received any data at all for this file, send a chunk downstream
   // (even if the chunk buffer is empty), to make sure downstream operators get
@@ -995,7 +995,7 @@ void MY_OPERATOR::processFileEndEvent(const pam2XpfHeader& eventHeader, const pa
   // basic sanity checks on XPF event
   if (eventPointer.msgLen != sizeof(pam2XpfTlsRecord)) THROW(SPLRuntimeOperator, "processTLSProtocolEvent failed, TlsRecord message size mis-match");
 
-  SPLLOG(L_TRACE, "TLS " <<
+  SPLAPPTRC(L_TRACE, "TLS " <<
     tlsRecordNames.recordType2name(eventPointer.recordType) <<
     ( eventPointer.isRequest ? " request" : " response" ) <<
     ", recordLength=" << eventPointer.recordLen <<
@@ -1035,7 +1035,7 @@ void MY_OPERATOR::processDNSResponseEvent(const pam2XpfHeader& eventHeader, cons
 // submit an output tuple
 void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data, const uint32_t length ) {
 
-  SPLLOG(L_TRACE, "entering submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
 
   // store arguments for result functions
   outputEvent = event;
@@ -1051,7 +1051,7 @@ void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data
     {
       <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
       <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-      SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketContentAssembler");
+      SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketContentAssembler");
       submit(outTuple<%=$i%>, <%=$i%>);
     }
     <% } %> ;
@@ -1059,7 +1059,7 @@ void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data
   THIS_DATA_POINTER = NULL;
   THIS_DATA_LENGTH = 0;
 
-  SPLLOG(L_TRACE, "leaving submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
 }
 
 
@@ -1068,7 +1068,7 @@ void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
 
   // initialize operator parameters
   fileChunkSize = <%=$fileChunkSize%>;
@@ -1087,7 +1087,7 @@ MY_OPERATOR::MY_OPERATOR()
     <% } %> ;
 
   // load the PAM library
-  SPLLOG(L_INFO, "loading '" << pamLibrary << "' library", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "loading '" << pamLibrary << "' library", "PacketContentAssembler");
   pamLibraryHandle = dlopen(pamLibrary, RTLD_NOW);
   if (!pamLibraryHandle) THROW(SPLRuntimeOperator, "dlopen(pamLibrary) failed, " << dlerror());
 
@@ -1156,7 +1156,7 @@ MY_OPERATOR::MY_OPERATOR()
 
   // display the PAM library version
   const char* version = pam2GetVersion();
-  SPLLOG(L_INFO, "PAM library version is '" << version << "'", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "PAM library version is '" << version << "'", "PacketContentAssembler");
 
   // initialize the PAM library
   const bool manageHeap = true;
@@ -1181,11 +1181,11 @@ MY_OPERATOR::MY_OPERATOR()
   if (!pamConfigHandle) THROW(SPLRuntimeOperator, "pam2ConfigRetrieve failed");
 
   pam2ParameterStatus parameterStatus;
-  SPLLOG(L_INFO, "configuring PAM library with 'pam.sensor.type.hint=" << pamInstanceName << "'", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "configuring PAM library with 'pam.sensor.type.hint=" << pamInstanceName << "'", "PacketContentAssembler");
   parameterStatus = pam2ConfigSetParameter(pamConfigHandle, "pam.sensor.type.hint", pamInstanceName);
   if (parameterStatus != PARM_STATUS_OK) THROW(SPLRuntimeOperator, "pam2ConfigSetParameter(pam.sensor.type.hint," << pamInstanceName << ") failed");
 
-  SPLLOG(L_INFO, "configuring PAM library with 'pam.debug.fragroute=false'", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "configuring PAM library with 'pam.debug.fragroute=false'", "PacketContentAssembler");
   parameterStatus = pam2ConfigSetParameter(pamConfigHandle, "pam.debug.fragroute", "false");
   if (parameterStatus != PARM_STATUS_OK) THROW(SPLRuntimeOperator, "pam2ConfigSetParameter(pam.debug.fragroute,false) failed");
 
@@ -1196,7 +1196,7 @@ MY_OPERATOR::MY_OPERATOR()
     if (equals==std::string::npos) THROW(SPLRuntimeOperator, "pamTuning parameter '" << parameter << "' not of form 'name=value'");
     const std::string name(parameter.substr(0,equals));
     const std::string value(parameter.substr(equals+1));
-    SPLLOG(L_INFO, "configuring PAM library with '" << name << "=" << value << "'", "PacketContentAssembler");
+    SPLAPPTRC(L_INFO, "configuring PAM library with '" << name << "=" << value << "'", "PacketContentAssembler");
     parameterStatus = pam2ConfigSetParameter(pamConfigHandle, name.c_str(), value.c_str());
     if (parameterStatus!=PARM_STATUS_OK) THROW(SPLRuntimeOperator, "pam2ConfigSetParameter(" << name << "," << value << ") failed");
   }
@@ -1210,9 +1210,9 @@ MY_OPERATOR::MY_OPERATOR()
   if (!xpfInitialized) THROW(SPLRuntimeOperator, "pam2XpfInitialize failed");
 
   // log file data buffer size to be used
-  SPLLOG(L_INFO, "file data buffer size " << fileChunkSize << " bytes", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "file data buffer size " << fileChunkSize << " bytes", "PacketContentAssembler");
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketContentAssembler");
 }
 
 
@@ -1221,7 +1221,7 @@ MY_OPERATOR::MY_OPERATOR()
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "PacketContentAssembler");
 
   // close the PAM libary
   pam2XpfFinalize(pamInstanceHandle);
@@ -1240,39 +1240,39 @@ MY_OPERATOR::~MY_OPERATOR()
     struct FlowState* flowState = i->second;
 
     // delete all FileState structures in this flow
-    if ( ! flowState->activeFileIDs.empty() ) SPLLOG(L_TRACE, "deleting " << flowState->activeFileIDs.size() << " open files of flow " << flowID, "PacketContentAssembler");
+    if ( ! flowState->activeFileIDs.empty() ) SPLAPPTRC(L_TRACE, "deleting " << flowState->activeFileIDs.size() << " open files of flow " << flowID, "PacketContentAssembler");
     for (std::tr1::unordered_map<uint64, int32>::iterator j = flowState->activeFileIDs.begin(); j!=flowState->activeFileIDs.end(); ++j) {
       const uint64_t fileID = j->first;
       struct FileState* fileState = fileStates[fileID];
       delete fileState;
       fileStates.erase(fileID);
       openFiles++;
-      SPLLOG(L_TRACE, "deleted FileState for flowID=" << flowID << ", fileID=" << fileID, "PacketContentAssembler");
+      SPLAPPTRC(L_TRACE, "deleted FileState for flowID=" << flowID << ", fileID=" << fileID, "PacketContentAssembler");
     }
     flowState->activeFileIDs.clear();
 
     // delete this FlowState structure
     delete flowState;
     openFlows++;
-    SPLLOG(L_TRACE, "deleted orphan flowID=" << flowID, "PacketContentAssembler");
+    SPLAPPTRC(L_TRACE, "deleted orphan flowID=" << flowID, "PacketContentAssembler");
   }
   flowStates.clear();
 
-  SPLLOG(L_INFO, "PacketContentAssembler at shutdown: " << openFlows << " open flows containing " << openFiles << " open files", "PacketContentAssembler");
-  SPLLOG(L_INFO, "PacketContentAssembler high water marks: " << flowHighWaterMark << " flows, " << fileHighWaterMark << " files", "PacketContentAssembler");
-  SPLLOG(L_INFO, "PacketContentAssembler orphans: " << fileStates.size() << " open files without flows", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "PacketContentAssembler at shutdown: " << openFlows << " open flows containing " << openFiles << " open files", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "PacketContentAssembler high water marks: " << flowHighWaterMark << " flows, " << fileHighWaterMark << " files", "PacketContentAssembler");
+  SPLAPPTRC(L_INFO, "PacketContentAssembler orphans: " << fileStates.size() << " open files without flows", "PacketContentAssembler");
 
   // if any FileState structures are still allocated, delete them now
-  SPLLOG(L_TRACE, "deleting " << fileStates.size() << " orphaned files", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "deleting " << fileStates.size() << " orphaned files", "PacketContentAssembler");
   for (std::tr1::unordered_map<uint64, struct FileState*>::iterator i = fileStates.begin(); i!=fileStates.end(); ++i) {
     const uint64_t fileID = i->first;
     struct FileState* fileState = i->second;
     delete fileState;
-    SPLLOG(L_TRACE, "deleted orphaned file " << fileID << " left allocated by flow " << fileState->FLOW_ID, "PacketContentAssembler");
+    SPLAPPTRC(L_TRACE, "deleted orphaned file " << fileID << " left allocated by flow " << fileState->FLOW_ID, "PacketContentAssembler");
   }
   fileStates.clear();
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "PacketContentAssembler");
 }
 
 
@@ -1281,29 +1281,29 @@ MY_OPERATOR::~MY_OPERATOR()
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketContentAssembler");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketContentAssembler");
 }
 
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
 }
 
 // Processing for source and threaded operators
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketContentAssembler");
 }
 
 // Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
 }
 
 
@@ -1314,10 +1314,10 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
   SPL::AutoPortMutex automutex(processMutex, *this);
 
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
 
   // increment packet counter
-  if (!packetNumber) SPLLOG(L_INFO, "PacketContentAssembler processing started ...", "PacketContentAssembler");
+  if (!packetNumber) SPLAPPTRC(L_INFO, "PacketContentAssembler processing started ...", "PacketContentAssembler");
   packetNumber++;
 
   // save address of input tuple, in case we need to copy input attributes to output tuples
@@ -1330,7 +1330,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   // get a timestamp for the packet from an input tuple
   const double timestamp = <%=$timestampAttribute%>;
-  SPLLOG(L_TRACE, "processing packet, timestamp=" << timestamp << ", length=" << length, "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "processing packet, timestamp=" << timestamp << ", length=" << length, "PacketContentAssembler");
 
   // fill in the PAM packet content structure
   packetContent.originalSize = length;
@@ -1355,14 +1355,14 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   // keep track of how many flows are open
   if (flowHighWaterMark<flowStates.size()) {
     flowHighWaterMark = flowStates.size();
-    SPLLOG(L_TRACE, "flow high water mark " << flowHighWaterMark, "PacketContentAssembler"); }
+    SPLAPPTRC(L_TRACE, "flow high water mark " << flowHighWaterMark, "PacketContentAssembler"); }
 
   // keep track of how many files are open
   if (fileHighWaterMark<fileStates.size()) {
     fileHighWaterMark = fileStates.size();
-    SPLLOG(L_TRACE, "file high water mark " << fileHighWaterMark, "PacketContentAssembler"); }
+    SPLAPPTRC(L_TRACE, "file high water mark " << fileHighWaterMark, "PacketContentAssembler"); }
 
-  //SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+  //SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
 }
 
 
@@ -1370,11 +1370,11 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
 
   forwardWindowPunctuation(punct);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketContentAssembler");
 }
 
 
