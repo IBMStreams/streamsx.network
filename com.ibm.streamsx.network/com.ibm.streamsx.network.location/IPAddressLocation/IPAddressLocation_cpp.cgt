@@ -71,7 +71,7 @@ const char* MY_OPERATOR::parseIPv4cidrAddress(std::string token, uint32_t& addre
   if (maskSize<1 || maskSize>32) { return "CIDR address must have mask size between 0 and 32"; }
   mask = (int32_t)0x80000000 >> (maskSize-1);
 
-  SPLLOG(L_TRACE, "parseIPv4cidrAddress(" << token << ") returned address=" << address << " mask=" << mask, "IPAddressLocation"); 
+  SPLAPPTRC(L_TRACE, "parseIPv4cidrAddress(" << token << ") returned address=" << address << " mask=" << mask, "IPAddressLocation"); 
   return NULL;
 }
 
@@ -98,7 +98,7 @@ const char* MY_OPERATOR::parseIPv6cidrAddress(std::string token, SPL::blist<SPL:
   for (int i=0; i<maskSize/8; i++) mask[i] = 0xFF;
   if (maskSize%8) mask[maskSize/8] = (int8_t)0x80 >> ((maskSize%8)-1);
 
-  SPLLOG(L_TRACE, "parseIPv6cidrAddress(" << token << ") returned address=" << address << " mask=" << mask, "IPAddressLocation"); 
+  SPLAPPTRC(L_TRACE, "parseIPv6cidrAddress(" << token << ") returned address=" << address << " mask=" << mask, "IPAddressLocation"); 
   return NULL;
 }
 
@@ -179,7 +179,7 @@ geoname_id, locale_code, continent_code, continent_name,   country_iso_code, cou
 
 void MY_OPERATOR::loadCityLocations(std::string filename) {
 
-  SPLLOG(L_INFO, "loading geographical locations from " << filename << " ...", "IPAddressLocation");
+  SPLAPPTRC(L_INFO, "loading geographical locations from " << filename << " ...", "IPAddressLocation");
 
   // open the location file
   std::ifstream file(filename.c_str());
@@ -221,17 +221,17 @@ void MY_OPERATOR::loadCityLocations(std::string filename) {
     location->cityName = *k++;
     location->metroCode = *k++;
     location->timezone = *k++;
-    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for location " << location->locationID << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); }
+    if (k!=tokens.end()) { SPLAPPTRC(L_ERROR, "too many tokens for location " << location->locationID << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); }
    
     // insert this location structure into the hash table
-    SPLLOG(L_TRACE, "loading location " << location->locationID << ": continent=" << location->continentName << ", country=" << location->countryName << ", state=" << location->subdivision1Name << ", city=" << location->cityName , "IPAddressLocation");
+    SPLAPPTRC(L_TRACE, "loading location " << location->locationID << ": continent=" << location->continentName << ", country=" << location->countryName << ", state=" << location->subdivision1Name << ", city=" << location->cityName , "IPAddressLocation");
     cityLocations.insert( std::make_pair<std::string,CityLocation*>(location->locationID, location) );
     locationCount++;
   }				 
 
   // close the location file
   file.close();
-  SPLLOG(L_INFO, "... loaded " << locationCount << " of " << lineCount << " geographical locations", "IPAddressLocation");
+  SPLAPPTRC(L_INFO, "... loaded " << locationCount << " of " << lineCount << " geographical locations", "IPAddressLocation");
 }
 
 
@@ -262,7 +262,7 @@ network,          geoname_id, registered_country_geoname_id, represented_country
 
 void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
 
-  SPLLOG(L_INFO, "loading IPv4 subnets from " << filename << " ...", "IPAddressLocation");
+  SPLAPPTRC(L_INFO, "loading IPv4 subnets from " << filename << " ...", "IPAddressLocation");
 
   // open the IPv4 subnet file
   std::ifstream file(filename.c_str());
@@ -293,7 +293,7 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
 	IPv4Subnet subnet;
     subnet.subnet.cidrAddress = *k++;
     const char* error = parseIPv4cidrAddress(subnet.subnet.cidrAddress, subnet.subnet.ipv4Address, subnet.subnet.ipv4Mask);
-    if (error) { SPLLOG(L_ERROR, "sorry, " << error << ", not " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (error) { SPLAPPTRC(L_ERROR, "sorry, " << error << ", not " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
 
     // store the upper address of this subnet
     subnet.subnet.ipv4AddressUpper = subnet.subnet.ipv4Address | ~subnet.subnet.ipv4Mask;
@@ -307,7 +307,7 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
     std::string locationID(*k++);
     if (!locationID.length()) { continue; }
     std::tr1::unordered_map<std::string, CityLocation*>::iterator l = cityLocations.find(locationID);
-    if (l==cityLocations.end()) { SPLLOG(L_ERROR, "location " << locationID << " not found for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (l==cityLocations.end()) { SPLAPPTRC(L_ERROR, "location " << locationID << " not found for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
     subnet.subnet.location = l->second;
     
     // ignore the next four tokens
@@ -318,11 +318,11 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
     subnet.subnet.latitude = atof((*k++).c_str());
     subnet.subnet.longitude = atof((*k++).c_str());
     subnet.subnet.radius = atof((*k++).c_str());
-    if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLLOG(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
-    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLAPPTRC(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (k!=tokens.end()) { SPLAPPTRC(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
 
     // put this subnet structure into the table
-    SPLLOG(L_TRACE, "loading IPv4 subnet " << subnet.subnet.cidrAddress << " as " << formatIPv4cidrAddress(subnet.subnet.ipv4Address, subnet.subnet.ipv4Mask) << " at latitude " << subnet.subnet.latitude << " longitude " << subnet.subnet.longitude << " in " << subnet.subnet.location->countryName << ", " << subnet.subnet.location->subdivision1Name << ", " << subnet.subnet.location->cityName, "IPAddressLocation");
+    SPLAPPTRC(L_TRACE, "loading IPv4 subnet " << subnet.subnet.cidrAddress << " as " << formatIPv4cidrAddress(subnet.subnet.ipv4Address, subnet.subnet.ipv4Mask) << " at latitude " << subnet.subnet.latitude << " longitude " << subnet.subnet.longitude << " in " << subnet.subnet.location->countryName << ", " << subnet.subnet.location->subdivision1Name << ", " << subnet.subnet.location->cityName, "IPAddressLocation");
     ipv4Subnets.push_back(subnet);
     addressCount++;
   }				 
@@ -335,9 +335,9 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
 
   // check for duplicate addresses
   for (int i=0; i<ipv4Subnets.size()-1; i++) {
-    if (ipv4Subnets[i].subnet.ipv4Address==ipv4Subnets[i+1].subnet.ipv4Address) SPLLOG(L_ERROR, "duplicate IPv4 address: " << formatIPv4cidrAddress(ipv4Subnets[i].subnet.ipv4Address, ipv4Subnets[i].subnet.ipv4Mask) << " and " << formatIPv4cidrAddress(ipv4Subnets[i+1].subnet.ipv4Address, ipv4Subnets[i+1].subnet.ipv4Mask), "IPAddressLocation"); }
+    if (ipv4Subnets[i].subnet.ipv4Address==ipv4Subnets[i+1].subnet.ipv4Address) SPLAPPTRC(L_ERROR, "duplicate IPv4 address: " << formatIPv4cidrAddress(ipv4Subnets[i].subnet.ipv4Address, ipv4Subnets[i].subnet.ipv4Mask) << " and " << formatIPv4cidrAddress(ipv4Subnets[i+1].subnet.ipv4Address, ipv4Subnets[i+1].subnet.ipv4Mask), "IPAddressLocation"); }
 
-  SPLLOG(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv4 subnets", "IPAddressLocation");
+  SPLAPPTRC(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv4 subnets", "IPAddressLocation");
 }
 
 
@@ -398,7 +398,7 @@ network,                 geoname_id,      registered_country_geoname_id, represe
 
 void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
 
-  SPLLOG(L_INFO, "loading IPv6 subnets from " << filename << " ...", "IPAddressLocation");
+  SPLAPPTRC(L_INFO, "loading IPv6 subnets from " << filename << " ...", "IPAddressLocation");
 
   // open the IPv6 address file
   std::ifstream file(filename.c_str());
@@ -428,7 +428,7 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
 	IPv6Subnet subnet;
     subnet.subnet.cidrAddress = *k++;
     const char* error = parseIPv6cidrAddress(subnet.subnet.cidrAddress, subnet.subnet.ipv6Address, subnet.subnet.ipv6Mask);
-    if (error) { SPLLOG(L_ERROR, "Sorry, " << error << ", not " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (error) { SPLAPPTRC(L_ERROR, "Sorry, " << error << ", not " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
 
     // we should store the upper address of this subnet here
     subnet.subnet.ipv6AddressUpper.clear();
@@ -442,7 +442,7 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
     std::string locationID(*k++);
     if (!locationID.length()) { continue; }
     std::tr1::unordered_map<std::string, CityLocation*>::iterator l = cityLocations.find(locationID);
-    if (l==cityLocations.end()) { SPLLOG(L_ERROR, "location " << locationID << " not found for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (l==cityLocations.end()) { SPLAPPTRC(L_ERROR, "location " << locationID << " not found for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
     subnet.subnet.location = l->second;
     
     // ignore the next four tokens
@@ -453,11 +453,11 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
     subnet.subnet.latitude = atof((*k++).c_str());
     subnet.subnet.longitude = atof((*k++).c_str());
     subnet.subnet.radius = atof((*k++).c_str());
-    if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLLOG(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
-    if (k!=tokens.end()) { SPLLOG(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (!subnet.subnet.latitude && !subnet.subnet.longitude) { SPLAPPTRC(L_ERROR, "no latitude/longitude for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
+    if (k!=tokens.end()) { SPLAPPTRC(L_ERROR, "too many tokens for network " << subnet.subnet.cidrAddress << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); continue; }
 
     // append this address structure into the table
-    SPLLOG(L_TRACE, "loading IPv6 address " << subnet.subnet.cidrAddress << " as " << formatIPv6cidrAddress(subnet.subnet.ipv6Address, subnet.subnet.ipv6Mask) << " at latitude " << subnet.subnet.latitude << " longitude " << subnet.subnet.longitude << " in " << subnet.subnet.location->countryName << ", " << subnet.subnet.location->subdivision1Name << ", " << subnet.subnet.location->cityName, "IPAddressLocation");
+    SPLAPPTRC(L_TRACE, "loading IPv6 address " << subnet.subnet.cidrAddress << " as " << formatIPv6cidrAddress(subnet.subnet.ipv6Address, subnet.subnet.ipv6Mask) << " at latitude " << subnet.subnet.latitude << " longitude " << subnet.subnet.longitude << " in " << subnet.subnet.location->countryName << ", " << subnet.subnet.location->subdivision1Name << ", " << subnet.subnet.location->cityName, "IPAddressLocation");
     ipv6Subnets.push_back(subnet);
     addressCount++;
   }				 
@@ -470,9 +470,9 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
 
   // check for duplicate addresses
   for (int i=0; i<ipv6Subnets.size()-1; i++) {
-    if (ipv6Subnets[i].subnet.ipv6Address==ipv6Subnets[i+1].subnet.ipv6Address) SPLLOG(L_ERROR, "duplicate IPv6 address: " << formatIPv6cidrAddress(ipv6Subnets[i].subnet.ipv6Address, ipv6Subnets[i].subnet.ipv6Mask) << " and " << formatIPv6cidrAddress(ipv6Subnets[i+1].subnet.ipv6Address, ipv6Subnets[i+1].subnet.ipv6Mask), "IPAddressLocation"); }
+    if (ipv6Subnets[i].subnet.ipv6Address==ipv6Subnets[i+1].subnet.ipv6Address) SPLAPPTRC(L_ERROR, "duplicate IPv6 address: " << formatIPv6cidrAddress(ipv6Subnets[i].subnet.ipv6Address, ipv6Subnets[i].subnet.ipv6Mask) << " and " << formatIPv6cidrAddress(ipv6Subnets[i+1].subnet.ipv6Address, ipv6Subnets[i+1].subnet.ipv6Mask), "IPAddressLocation"); }
 
-  SPLLOG(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv6 subnets", "IPAddressLocation");
+  SPLAPPTRC(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv6 subnets", "IPAddressLocation");
 }
 
 
@@ -499,7 +499,7 @@ MY_OPERATOR::IPSubnet* MY_OPERATOR::findIPv6Subnet(const SPL::blist<SPL::uint8,1
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
 
   // set operator parameters
   geographyDirectory = <%=$geographyDirectory%>;
@@ -556,48 +556,48 @@ MY_OPERATOR::MY_OPERATOR()
     THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Blocks-IPv6.csv' file");
   }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
 }
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "IPAddressLocation");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "IPAddressLocation");
 }
 
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "IPAddressLocation");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "IPAddressLocation");
 }
 
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
 }
 
 // Processing for source and threaded operators
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPAddressLocation");
 }
 
 // Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 }
 
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 
   SPL::AutoPortMutex automutex(processMutex, *this);
 
@@ -613,23 +613,23 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
     {
       <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
       <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-      SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPAddressLocation");
+      SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPAddressLocation");
       submit(outTuple<%=$i%>, <%=$i%>);
     }
     <% } %> ;
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 }
 
 
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 
   forwardWindowPunctuation(punct);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 }
 
 
