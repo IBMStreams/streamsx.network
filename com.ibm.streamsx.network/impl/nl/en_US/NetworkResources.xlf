@@ -114,7 +114,7 @@
        		</MSGDOC -->
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0257E"
-		extraData="NETWORK_CONSISTENT_REGION_START_ERROR" resname="CDIST30257E">
+		extraData="NETWORK_CONSISTENT_REGION_START_ERROR" resname="CDIST0257E">
        		<source>The following operator cannot be the start of a consistent region: {0}.</source>
 		<!-- MSGDOC>
 	         <REPLACEMENT arg="{0}" value="operator_name"/>
