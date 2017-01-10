@@ -15,7 +15,7 @@ use com.ibm.streamsx.network.datetimeformat::*;
 composite TestPacketContentAssemblerFull {
 
   param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_http+https.pcap");
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_http+https.pcap");
     expression<boolean> $consumeArchives: true;
     expression<boolean> $decompressOfficeDocuments: false;
 

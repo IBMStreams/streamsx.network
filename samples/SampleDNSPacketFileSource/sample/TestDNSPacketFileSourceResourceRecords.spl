@@ -23,7 +23,7 @@ boolean hasResourceRecordType(list<uint16> rrTypes, list<uint16> answerTypes, li
 composite TestDNSPacketFileSourceResourceRecords {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
     expression<list<uint16>> $rrTypes: [ 6uh, 15uh, 33uh ];
 
     type
@@ -58,32 +58,45 @@ composite TestDNSPacketFileSourceResourceRecords {
 
 
 
- ( stream<FlattenedDNSMessageType> FlattenedDNSNormalResponseStream ;
+ ( stream<FlattenedDNSMessageType> FlattenedDNSStream ;
+   stream<FlattenedDNSMessageType> FlattenedDNSNormalResponseStream ;
    stream<FlattenedDNSMessageType> FlattenedDNSErrorResponseStream ;
    stream<DNSMalformedType> DNSMalformedStream ) = DNSPacketFileSource() {
         param
             pcapFilename: $pcapFilename;
-            outputFilters: !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSNormalResponseStream
+            outputFilters: !parseError(), // selects messages for FlattenedDNSStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSNormalResponseStream
                            !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSErrorResponseStream
                            parseError(); // selects messages for DNSMalformedStream
             metricsInterval: 0.0;
         output 
+        FlattenedDNSStream:
+          packetNumber = packetsProcessed(),
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ","); 
         FlattenedDNSNormalResponseStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
-          flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ","); 
         FlattenedDNSErrorResponseStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
-          flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ","); 
         DNSMalformedStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
           error = parseErrorDescription(),
           dnsMessage = PAYLOAD_DATA();
     }
+    () as FlattenedDNSSink = FileSink(FlattenedDNSStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.FlattenedDNSStream.out"; format: line; suppress: packetNumber, captureTime; }
     () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.FlattenedDNSNormalResponseStream.out"; format: line; suppress: packetNumber, captureTime; }
     () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.FlattenedDNSErrorResponseStream.out"; format: line; suppress: packetNumber, captureTime; }
     () as DNSMalformedSink = FileSink(DNSMalformedStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.DNSMalformedStream.out"; format: txt; }
 
+
+    
+    () as Out = Custom(FlattenedDNSStream as In){
+      logic onTuple In: {
+        printStringLn((rstring)packetNumber + "\n" + flattenedDNSMessage + "\n");
+        } }
 }

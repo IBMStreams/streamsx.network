@@ -15,7 +15,7 @@ use com.ibm.streamsx.network.datetimeformat::*;
 composite TestNetflowMessageParserFullVersion5 {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow5_port9500.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_netflow5_port9500.pcap" );
     expression<rstring> $netflowPort: getSubmissionTimeValue("netflowPort", "2055" );
 
     type

@@ -1,5 +1,5 @@
 /*
-** Copyright (C) 2011, 2015  International Business Machines Corporation
+** Copyright (C) 2017  International Business Machines Corporation
 ** All Rights Reserved
 */
 
@@ -12,10 +12,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
+#include <time.h>
 #include <string>
+#include <cmath>
 
 #include <SPL/Runtime/Type/SPLType.h>
-//??? #include <SPL/Runtime/Utility/Mutex.h>
 
 #include "parse/NetworkHeaderParser.h"
 #include "parse/DNSMessageParser.h"
@@ -31,6 +32,19 @@ class DNSPacketFlattener {
 
 
  private:
+
+
+  // ?????????????????????????????????
+
+  char* formatTimestamp(const double timestamp, const char* format, char* buffer) {
+
+    struct tm *tmp;
+    time_t seconds = (time_t)timestamp;
+    tmp = localtime(&seconds);
+    size_t length = strftime(buffer, 100, format, tmp);
+    sprintf(buffer+length, ".%06d", (int)((timestamp-floor(timestamp))*1000000.0));
+    return buffer; }
+
 
   // This function converts a four-byte binary representation of an IPv4 address
   // in network byte order (that is, not in host byte order) into the
@@ -84,10 +98,106 @@ class DNSPacketFlattener {
 
 
 
+// this class converts DNS type codes into mnemonic names
+
+class DNSTypeNames {
+private:
+  std::vector<const char*> typeNames;
+public:
+  DNSTypeNames()  {
+    typeNames.resize(65536, "");
+    typeNames[1] = "A";
+    typeNames[2] = "NS";
+    typeNames[3] = "MD";
+    typeNames[4] = "MF";
+    typeNames[5] = "CNAME";
+    typeNames[6] = "SOA";
+    typeNames[7] = "MB";
+    typeNames[8] = "MG";
+    typeNames[9] = "MR";
+    typeNames[10] = "NULL";
+    typeNames[11] = "WKS";
+    typeNames[12] = "PTR";
+    typeNames[13] = "HINFO";
+    typeNames[14] = "MINFO";
+    typeNames[15] = "MX";
+    typeNames[16] = "TXT";
+    typeNames[17] = "RP";	
+    typeNames[18] = "AFSDB";	
+    typeNames[19] = "X25";	
+    typeNames[20] = "ISDN";	
+    typeNames[21] = "RT";	
+    typeNames[22] = "NSAP";	
+    typeNames[23] = "NSAP-PTR";	
+    typeNames[24] = "SIG";	
+    typeNames[25] = "KEY";	
+    typeNames[26] = "PX";	
+    typeNames[27] = "GPOS";	
+    typeNames[28] = "AAAA";	
+    typeNames[29] = "LOC";	
+    typeNames[30] = "NXT";	
+    typeNames[31] = "EID";	
+    typeNames[32] = "NIMLOC";	
+    typeNames[33] = "SRV";	
+    typeNames[34] = "ATMA";	
+    typeNames[35] = "NAPTR";	
+    typeNames[36] = "KX";	
+    typeNames[37] = "CERT";	
+    typeNames[38] = "A6";	
+    typeNames[39] = "DNAME";	
+    typeNames[40] = "SINK";	
+    typeNames[41] = "OPT";	
+    typeNames[42] = "APL";	
+    typeNames[43] = "DS";	
+    typeNames[44] = "SSHFP";	
+    typeNames[45] = "IPSECKEY";	
+    typeNames[46] = "RRSIG";	
+    typeNames[47] = "NSEC";	
+    typeNames[48] = "DNSKEY";	
+    typeNames[49] = "DHCID";	
+    typeNames[50] = "NSEC3";	
+    typeNames[51] = "NSEC3PARAM";	
+    typeNames[52] = "TLSA";	
+    typeNames[53] = "SMIMEA";	
+    typeNames[55] = "HIP";	
+    typeNames[56] = "NINFO";	
+    typeNames[57] = "RKEY";	
+    typeNames[58] = "TALINK";	
+    typeNames[59] = "CDS";	
+    typeNames[60] = "CDNSKEY";	
+    typeNames[61] = "OPENPGPKEY";	
+    typeNames[62] = "CSYNC";	
+    typeNames[99] = "SPF";		
+    typeNames[100] = "UINFO";		
+    typeNames[101] = "UID";		
+    typeNames[102] = "GID";		
+    typeNames[103] = "UNSPEC";		
+    typeNames[104] = "NID";		
+    typeNames[105] = "L32";		
+    typeNames[106] = "L64";		
+    typeNames[107] = "LP";		
+    typeNames[108] = "EUI48";	
+    typeNames[109] = "EUI64";	
+    typeNames[249] = "TKEY";	
+    typeNames[250] = "TSIG";	
+    typeNames[251] = "IXFR";	
+    typeNames[252] = "AXFR";	
+    typeNames[253] = "MAILB";	
+    typeNames[254] = "MAILA";	
+    typeNames[255] = "ALL";	
+    typeNames[256] = "URI";	
+    typeNames[257] = "CAA";	
+    typeNames[258] = "AVC";	
+    typeNames[32768] = "TA";	
+    typeNames[32769] = "DLV"; }
+  const char* code2name(uint16_t code) { return typeNames[code]; }
+};
+DNSTypeNames dnsTypeNames;
+
+
+
   // This function flattens the specified DNS-encoded domain name into the
-  // specified buffer, appends a trailing null character, and folds
-  // uppercase charaters to lowercase. If there is no domain name, it stores "."
-  // in the buffer.
+  // specified buffer, appends a trailing null character.
 
   const char* flattenDNSEncodedName(DNSMessageParser& parser, uint8_t* dnsEncodedName, uint8_t** dnsNextField, char* buffer) {
 
@@ -99,12 +209,6 @@ class DNSPacketFlattener {
 
     // return the address of the next field after the DNS-encoded name, if requested
     if (dnsNextField) *dnsNextField = p;
-
-    // fold decoded domain name to lowercase
-    for (char* q = buffer; *q!='\0'; q++) *q = tolower(*q);
-
-    // substitute "." for empty names
-    if (*buffer=='\0') strcpy(buffer, ".");
 
     return buffer;
   }
@@ -120,14 +224,16 @@ class DNSPacketFlattener {
 
     // decode the DNS-encoded domain names in the first two subfields of the resource record
     uint8_t* p = rdata;
-    flattenDNSEncodedName(parser, p, &p, buffer);
+    strcpy(buffer, "(mname=");
+    flattenDNSEncodedName(parser, p, &p, buffer+strlen(buffer));
     strcat(buffer, delimiter);
+    strcat(buffer, "rname=");
     flattenDNSEncodedName(parser, p, &p, buffer+strlen(buffer));
 
     // format the five unsigned integers in the remainder of the resource record
     const uint32_t* q = (uint32_t*)p;
     sprintf( buffer+strlen(buffer), 
-             "%s%u%s%u%s%u%s%u%s%u", 
+             "%sserial=%u%srefresh=%u%sretry=%u%sexpire=%u%sminimum=%u)", 
              delimiter,
              ntohl(q[0]),
              delimiter,
@@ -154,12 +260,13 @@ class DNSPacketFlattener {
     // format the unsigned integer in the first subfield of the resource record
     const uint16_t* p = (uint16_t*)rdata;
     int bufferLength = sprintf( buffer, 
-                                "%u%s",
+                                "(preference=%u%sexchange=",
                                 ntohs(*p),
                                 delimiter );
 
     // decode the DNS-encoded name in the second subfield of the resource record
     flattenDNSEncodedName(parser, rdata+2, NULL, buffer+bufferLength);
+    strcat(buffer, ")");
 
     return buffer;
   }
@@ -176,7 +283,7 @@ class DNSPacketFlattener {
     // format the unsigned integers in the first three subfields of the resource record
     const uint16_t* p = (uint16_t*)rdata;
     int bufferLength = sprintf( buffer, 
-                                "%u%s%u%s%u%s",
+                                "(priority=%u%sweight=%u%sport=%u%starget=",
                                 ntohs(p[0]),
                                 delimiter,
                                 ntohs(p[1]),
@@ -186,6 +293,7 @@ class DNSPacketFlattener {
 
     // decode the DNS-encoded name in the fourth subfield of the resource record
     flattenDNSEncodedName(parser, rdata+6, NULL, buffer+bufferLength);
+    strcat(buffer, ")");
 
     return buffer;
   }
@@ -218,7 +326,7 @@ class DNSPacketFlattener {
 
  public:
 
-  SPL::rstring dnsAllFields(uint32_t captureTime, uint32_t packetLength, NetworkHeaderParser& headers, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter) {
+  SPL::rstring dnsAllFields(double captureTime, uint32_t packetLength, NetworkHeaderParser& headers, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter) {
 
     // allocate a buffer large enough to hold the largest possible string representation of a DNS message
     char buffer[1024*1024];
@@ -227,140 +335,103 @@ class DNSPacketFlattener {
     // allocate buffers for converting names and addresses into strings
     char sourceAddressBuffer[100];
     char destinationAddressBuffer[100];
+    char timestampBuffer[100];
     char nameBuffer[4096];
     char rdataBuffer[4096];
 
     // format fields 1 through 14 once, to be copied below before each resource record
-    char fields1to14[10*1024];
-    const size_t fields1to14Length = snprintf( fields1to14, 
-                                               sizeof(fields1to14), 
-                                               "%u%s%s%s%s%s%hhu%s%hu%s%hu%s%hu%s%c%s%hhu%s%hhu%s%hu%s%s%s%hu%s%hu%s",
-                                               captureTime, // field 1
-                                               fieldDelimiter,
-                                               convertIPV4AddressToString(headers.ipv4Header->saddr, sourceAddressBuffer), // field 2
-                                               fieldDelimiter,
-                                               convertIPV4AddressToString(headers.ipv4Header->daddr, destinationAddressBuffer), // field 3
-                                               fieldDelimiter,
-                                               headers.ipv4Header->protocol, // field 4
-                                               fieldDelimiter,
-                                               ntohs(headers.udpHeader->source), // field 5
-                                               fieldDelimiter,
-                                               ntohs(headers.udpHeader->dest), // field 6
-                                               fieldDelimiter,
-                                               ntohs(parser.dnsHeader->identifier), // field 7
-                                               fieldDelimiter,
-                                               parser.dnsHeader->flags.indFlags.responseFlag ? 'R' : 'Q', // field 8
-                                               fieldDelimiter,
-                                               parser.dnsHeader->flags.indFlags.opcodeField, // field 9
-                                               fieldDelimiter,
-                                               parser.dnsHeader->flags.indFlags.responseCode, // field 10
-                                               fieldDelimiter,
-                                               ( ( ntohs(parser.dnsHeader->flags.allFlags) & 0x0780 ) >> 7 ), // field 11
-                                               fieldDelimiter,
-                                               parser.questionRecordCount>0 ? flattenDNSEncodedName(parser, parser.questionRecords[0].name, NULL, nameBuffer) : ".", // field 12
-                                               fieldDelimiter,
-                                               parser.questionRecordCount>0 ? parser.questionRecords[0].type : 0, // field 13
-                                               fieldDelimiter,
-                                               parser.questionRecordCount>0 ? parser.questionRecords[0].classs : 0, // field 14
-                                               fieldDelimiter );
 
-    // format fields 21 through 23 once, to be copied below after each resource record
-    char fields21through23[1024];
-    const size_t fields21through23Length = snprintf( fields21through23,
-                                                     sizeof(fields21through23),
-                                                     "%u%s%hu%s%d%s",
-                                                     packetLength, // field 21
-                                                     fieldDelimiter,
-                                                     ( (headers.etherHeader->h_dest[4]<<8) + headers.etherHeader->h_dest[5] ), // field 22
-                                                     fieldDelimiter,
-                                                     parser.error ? parser.error : parser.incompatibleFlags(), // field 23
-                                                     recordDelimiter );
-                      
-    // if there are no resource records in this DNS message, format an empty resource record
-    if ( parser.answerRecordCount==0 && parser.nameserverRecordCount==0 && parser.additionalRecordCount==0 ) {
-      memcpy(buffer+bufferLength, fields1to14, fields1to14Length);
-      bufferLength += fields1to14Length;
+    bufferLength += snprintf( buffer+bufferLength,
+                              sizeof(buffer)-bufferLength, 
+                              "%s%ssource=%s:%hu%sdestination=%s:%hu%sDNS%s%s[%hu]%sresponseCode=%hhu%sflags=0x%04x%squestionCount=%hu%sanswerCount=%hu%snameserverCount=%hu%sadditionalCount=%hu%s",
+                              formatTimestamp(captureTime, "%Y-%m-%d %H:%M:%S", timestampBuffer), 
+                              fieldDelimiter,
+                              convertIPV4AddressToString(headers.ipv4Header->saddr, sourceAddressBuffer),
+                              ntohs(headers.udpHeader->source), 
+                              fieldDelimiter,
+                              convertIPV4AddressToString(headers.ipv4Header->daddr, destinationAddressBuffer), 
+                              ntohs(headers.udpHeader->dest), 
+                              fieldDelimiter,
+                              fieldDelimiter,
+                              parser.dnsHeader->flags.indFlags.responseFlag ? "Response" : "Query",
+                              ntohs(parser.dnsHeader->identifier),
+                              fieldDelimiter,
+                              parser.dnsHeader->flags.indFlags.responseCode,
+                              fieldDelimiter,
+                              ntohs(parser.dnsHeader->flags.allFlags),
+                              fieldDelimiter,
+                              parser.questionRecordCount,
+                              fieldDelimiter,
+                              parser.answerRecordCount,
+                              fieldDelimiter,
+                              parser.nameserverRecordCount,
+                              fieldDelimiter,
+                              parser.additionalRecordCount,
+                              recordDelimiter );
+
+    // format 'question' resource records
+    for (int32_t i = 0; i<parser.questionRecordCount; i++) {
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
-                                "%s%s%s%s%s%s",
+                                "    question.%d%stype=%s[%hu]%sname=%s%s",
+                                i,
                                 fieldDelimiter,
+                                dnsTypeNames.code2name(parser.questionRecords[i].type), 
+                                parser.questionRecords[i].type, 
                                 fieldDelimiter,
-                                fieldDelimiter,
-                                fieldDelimiter,
-                                fieldDelimiter,
-                                fieldDelimiter );
-      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
-      bufferLength += fields21through23Length;
-    }
-    
+                                flattenDNSEncodedName(parser, parser.questionRecords[i].name, NULL, nameBuffer),
+                                recordDelimiter ); }
+
     // format 'answer' resource records
     for (int32_t i = 0; i<parser.answerRecordCount; i++) {
-      memcpy(buffer+bufferLength, fields1to14, fields1to14Length);
-      bufferLength += fields1to14Length;
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
-                                "N%s%s%s%hu%s%hu%s%u%s%s%s",
+                                "    answer.%d%stype=%s[%hu]%sname=%s%sttl=%u%srdata=%s%s",
+                                i,
                                 fieldDelimiter,
-                                flattenDNSEncodedName(parser, parser.answerRecords[i].name, NULL, nameBuffer), // field 16
+                                dnsTypeNames.code2name(parser.answerRecords[i].type), 
+                                parser.answerRecords[i].type, 
                                 fieldDelimiter,
-                                parser.answerRecords[i].type, // field 17
+                                flattenDNSEncodedName(parser, parser.answerRecords[i].name, NULL, nameBuffer), 
                                 fieldDelimiter,
-                                parser.answerRecords[i].classs, // field 18
+                                parser.answerRecords[i].ttl, 
                                 fieldDelimiter,
-                                parser.answerRecords[i].ttl, // field 19
-                                fieldDelimiter,
-                                flattenRdataField(parser, parser.answerRecords[i].type, parser.answerRecords[i].rdata, parser.answerRecords[i].rdlength, subfieldDelimiter, rdataBuffer), // field 20
-                                fieldDelimiter );
-
-      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
-      bufferLength += fields21through23Length;
-    }
+                                flattenRdataField(parser, parser.answerRecords[i].type, parser.answerRecords[i].rdata, parser.answerRecords[i].rdlength, subfieldDelimiter, rdataBuffer),
+                                recordDelimiter ); }
 
     // format 'nameserver' resource records
     for (int32_t i = 0; i<parser.nameserverRecordCount; i++) {
-      memcpy(buffer+bufferLength, fields1to14, fields1to14Length);
-      bufferLength += fields1to14Length;
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
-                                "T%s%s%s%hu%s%hu%s%u%s%s%s",
+                                "    nameserver.%d%stype=%s[%hu]%sname=%s%sttl=%u%srdata=%s%s",
+                                i,
                                 fieldDelimiter,
-                                flattenDNSEncodedName(parser, parser.nameserverRecords[i].name, NULL, nameBuffer), // field 16
+                                dnsTypeNames.code2name(parser.nameserverRecords[i].type), 
+                                parser.nameserverRecords[i].type, 
                                 fieldDelimiter,
-                                parser.nameserverRecords[i].type, // field 17
+                                flattenDNSEncodedName(parser, parser.nameserverRecords[i].name, NULL, nameBuffer), 
                                 fieldDelimiter,
-                                parser.nameserverRecords[i].classs, // field 18
+                                parser.nameserverRecords[i].ttl, 
                                 fieldDelimiter,
-                                parser.nameserverRecords[i].ttl, // field 19
-                                fieldDelimiter,
-                                flattenRdataField(parser, parser.nameserverRecords[i].type, parser.nameserverRecords[i].rdata, parser.nameserverRecords[i].rdlength, subfieldDelimiter, rdataBuffer), // field 20
-                                fieldDelimiter );
-
-      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
-      bufferLength += fields21through23Length;
-    }
+                                flattenRdataField(parser, parser.nameserverRecords[i].type, parser.nameserverRecords[i].rdata, parser.nameserverRecords[i].rdlength, subfieldDelimiter, rdataBuffer),
+                                recordDelimiter ); }
 
     // format 'additional' resource records
     for (int32_t i = 0; i<parser.additionalRecordCount; i++) {
-      memcpy(buffer+bufferLength, fields1to14, fields1to14Length);
-      bufferLength += fields1to14Length;
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
-                                "D%s%s%s%hu%s%hu%s%u%s%s%s",
+                                "    additional.%d%stype=%s[%hu]%sname=%s%sttl=%u%srdata=%s%s",
+                                i,
                                 fieldDelimiter,
-                                flattenDNSEncodedName(parser, parser.additionalRecords[i].name, NULL, nameBuffer), // field 16
+                                dnsTypeNames.code2name(parser.additionalRecords[i].type), 
+                                parser.additionalRecords[i].type, 
                                 fieldDelimiter,
-                                parser.additionalRecords[i].type, // field 17
+                                flattenDNSEncodedName(parser, parser.additionalRecords[i].name, NULL, nameBuffer), 
                                 fieldDelimiter,
-                                parser.additionalRecords[i].classs, // field 18
+                                parser.additionalRecords[i].ttl, 
                                 fieldDelimiter,
-                                parser.additionalRecords[i].ttl, // field 19
-                                fieldDelimiter,
-                                flattenRdataField(parser, parser.additionalRecords[i].type, parser.additionalRecords[i].rdata, parser.additionalRecords[i].rdlength, subfieldDelimiter, rdataBuffer), // field 20
-                                fieldDelimiter );
-
-      memcpy(buffer+bufferLength, fields21through23, fields21through23Length);
-      bufferLength += fields21through23Length;
-    }
+                                flattenRdataField(parser, parser.additionalRecords[i].type, parser.additionalRecords[i].rdata, parser.additionalRecords[i].rdlength, subfieldDelimiter, rdataBuffer), 
+                                recordDelimiter ); }
 
     // return the completed results as an SPL 'rstring' attribute
     return SPL::rstring(buffer, bufferLength-strlen(recordDelimiter));

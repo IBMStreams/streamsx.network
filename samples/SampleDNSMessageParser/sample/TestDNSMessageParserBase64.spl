@@ -13,7 +13,7 @@ use com.ibm.streamsx.network.datetimeformat::*;
 composite TestDNSMessageParserBase64 {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns_only_txt_base64.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns_only_txt_base64.pcap" );
 
     type
 

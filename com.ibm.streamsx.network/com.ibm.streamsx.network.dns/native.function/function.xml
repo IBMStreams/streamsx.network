@@ -801,7 +801,7 @@ if it has one, or zero otherwise.
 
           * 1 indicates that the Authoritative flag is set in the DNS header but the Response flag is not set.
 
-          * 2 indicates taht the Truncated flag is set in the DNS header but not the Response flag is not set.
+          * 2 indicates that the Truncated flag is set in the DNS header but not the Response flag is not set.
 
           * 3 indicates that the Authoritative and Truncated flags in the DNS header are both set.
 
