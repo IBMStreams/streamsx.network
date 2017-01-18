@@ -24,7 +24,7 @@
 // "textValue" array in "convertIPV4AddressNumericToString()" function
 // (RHEL/CentOS 6 only, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119)
 
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wmissing-braces"
 
 
 struct dec_network_range {
