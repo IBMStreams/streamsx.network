@@ -16,8 +16,7 @@ use com.ibm.streamsx.network.content::*;
 composite TestPacketContentAssemblerEvents {
 
   param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./firewallcontent_sample.pcap");
-    //expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./smtp_sample_with_attachment.pcap");
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../../samples/SampleNetworkToolkitData/data/sample_http+https.pcap");
 
   type
 

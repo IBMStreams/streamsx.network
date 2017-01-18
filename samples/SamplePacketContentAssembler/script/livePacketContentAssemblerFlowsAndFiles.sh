@@ -92,11 +92,11 @@ spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbu
 step "setting capabilities for standalone application '$namespace.$composite' ..."
 standalone=$unbundleDirectory/$composite/bin/standalone
 [ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
-sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
-/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
+###sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+###/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
 
 step "executing standalone application '$namespace.$composite' ..."
-$standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
+sudo STREAMS_INSTALL=$STREAMS_INSTALL $standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
 
 exit 0
 
