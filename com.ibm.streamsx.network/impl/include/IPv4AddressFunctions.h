@@ -19,6 +19,14 @@
 #include "SPL/Runtime/Function/SPLFunctions.h"
 #include <SPL/Runtime/Utility/Mutex.h>
 
+
+// ignore erroneous GCC warning "missing braces around initializer" for
+// "textValue" array in "convertIPV4AddressNumericToString()" function
+// (RHEL/CentOS 6 only, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119)
+
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
+
 struct dec_network_range {
     uint32_t network_start;
     uint32_t network_end;
