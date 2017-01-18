@@ -59,7 +59,7 @@ rstring formatMQTTMessage(rstring message) {
 composite TestPacketContentAssemblerMQTT {
 
   param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../../samples/SampleNetworkToolkitData/data/sample_mqtt_iot.pcap");
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_mqtt_iot.pcap");
 
   type
 

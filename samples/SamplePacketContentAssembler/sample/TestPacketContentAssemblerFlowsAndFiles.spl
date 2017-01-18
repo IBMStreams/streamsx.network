@@ -16,7 +16,7 @@ use com.ibm.streamsx.network.datetimeformat::*;
 composite TestPacketContentAssemblerFlowsAndFiles {
 
   param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../../samples/SampleNetworkToolkitData/data/sample_http+https.pcap");
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_http+https.pcap");
     expression<rstring> $connectionIdleTimeout: getSubmissionTimeValue("connectionIdleTimeout", "15");
 
   type
