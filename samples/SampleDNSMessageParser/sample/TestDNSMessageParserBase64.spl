@@ -52,7 +52,7 @@ composite TestDNSMessageParserBase64 {
     stream<DNSMessageType> DNSMessageStream as Out = DNSMessageParser(PacketStream) {
       param
           messageAttribute: dnsMessage;
-          outputFilters: DNS_QUESTION_TYPE()==16uh &&
+          outputFilters: DNS_QUESTION_TYPE()==16uh && // TXT request
                          DNS_RESPONSE_FLAG() &&
                          DNS_RESPONSE_CODE()==0ub &&
                          !isSPFAnswer(DNS_ANSWER_DATA()) &&

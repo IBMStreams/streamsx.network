@@ -46,6 +46,7 @@ class DNSMessageParserErrorDescriptions {
     description[115] = "unexpected resource type";
     description[116] = "message too short";
     description[117] = "counts too large";
+    description[118] = "text resource overruns resource record";
   }
 };
 
@@ -393,6 +394,24 @@ class DNSMessageParser {
   }
 
 
+  // This function converts the TXT resource record's data at '*p' into an SPL
+  // string.  If the length of the string exceeds the length of the resource
+  // data, the function sets a parsing error and truncates the string.
+
+  inline __attribute__((always_inline))
+  SPL::rstring convertTXTResourceDataToString(const uint8_t* rdata, const uint16_t rdlength) { 
+
+    // make sure the length of the text string does not exceed the length of the resource data
+    uint16_t txtlength = rdata[0];
+    if (txtlength+1>rdlength) {
+      error = 118;
+      txtlength = rdlength-1; }
+
+    // return the resource data as an SPL string
+    return SPL::rstring((char*)(rdata+1), txtlength);
+  }
+
+
   // This function converts the SOA resource record at '*p' into a string
   // representation. If 'fieldDelimiter' is a non-empty string, all fields of
   // the record are included in the string, separated by 'fieldDelimiter'. If
@@ -569,7 +588,7 @@ class DNSMessageParser {
         /* HINFO */      case  13: return SPL::rstring("[HINFO data]"); break; // multiple subfields
         /* MINFO */      case  14: return SPL::rstring("[MINFO data]"); break; // multiple subfields
         /* MX */         case  15: return convertDNSEncodedNameToString(record.rdata + 2); break; // 2 subfields
-        /* TXT */        case  16: return SPL::rstring((char*)record.rdata, record.rdlength); break;
+        /* TXT */        case  16: return convertTXTResourceDataToString(record.rdata, record.rdlength); break;
         /* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
         /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
