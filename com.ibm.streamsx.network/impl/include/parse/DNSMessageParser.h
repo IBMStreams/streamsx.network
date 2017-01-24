@@ -46,7 +46,7 @@ class DNSMessageParserErrorDescriptions {
     description[115] = "unexpected resource type";
     description[116] = "message too short";
     description[117] = "counts too large";
-    description[118] = "text resource overruns resource record";
+    description[118] = "text string overruns resource record";
   }
 };
 

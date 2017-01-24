@@ -50,6 +50,8 @@
 
           * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
 
+          * 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
+
           *Note:* [https://www.ietf.org/rfc/rfc1035.txt|RFC 1035] explains the format of DNS messages; 
           in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
         </function:description>
