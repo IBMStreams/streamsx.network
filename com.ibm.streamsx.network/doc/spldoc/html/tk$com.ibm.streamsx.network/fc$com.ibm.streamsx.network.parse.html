@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.6</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; C++ Native Functions</p>
 
 </div>
 
@@ -66,6 +66,97 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This parser result function returns <tt class="ph tt">true</tt> if an encoding error was detected while decoding the current packet,           or <tt class="ph tt">false</tt> otherwise. Note that a value of <tt class="ph tt">false</tt> does not necessarily mean the packet has           no encoding errors, since the operator only decodes the fields needed.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorCode"><tt class="ph tt">      public int32 parseErrorCode()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 102 for 'label overruns packet': The length of an uncompressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.</li>
+
+<li class="li">
+<p class="p"> 103 for 'label compression length overruns packet': The length field of a compressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 105 for 'label compression offset overruns packet': The offset of a compressed domain name label points beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 110 for 'resource record missing': The DNS message contains fewer resource records than the 'count' fields in the message header indicate. The DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 111 for 'question resource record truncated': The DNS 'question' resource record was truncated. The packet containing the message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 112 for 'resource record truncated': A DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 113 for 'resource record data truncated': The 'rdata' field of a DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
+</p>
+</li>
+
+</ul>
+
+</div>
+
+<p class="p">          <em class="ph i">Note:</em> <a class="xref" href="https://www.ietf.org/rfc/rfc1035.txt">RFC 1035</a> explains the format of DNS messages;            in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
 </p>
 
    </dd>
@@ -1239,6 +1330,39 @@ This page documents native functions that can be invoked from SPL, including the
    <dd class="dd">
 <p class="p">          This parser result function returns the DNS client's request correlator in the current message, and returned by the server in its response.
 </p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_INCOMPATIBLE_FLAGS"><tt class="ph tt">      public int32 DNS_INCOMPATIBLE_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 1 indicates that the Authoritative flag is set in the DNS header but the Response flag is not set.</li>
+
+<li class="li">
+<p class="p"> 2 indicates taht the Truncated flag is set in the DNS header but not the Response flag is not set.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 3 indicates that the Authoritative and Truncated flags in the DNS header are both set.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 4 indicates that the Authoritative, Truncated, Recursion Desired, and Recursion Available flags in the DNS header are all set.
+</p>
+</li>
+
+</ul>
+
+</div>
 
    </dd>
 

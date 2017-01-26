@@ -19,7 +19,7 @@ specified by output attribute assignments.
 The PacketContentAssembler operator expects raw ethernet packets in its input tuples,
 including all of their network headers.  The
 [PacketLiveSource] and [PacketFileSource] operators can produce tuples that contain
-DNS messages with the [PACKET_DATA()] output attribute assignment function.
+DNS messages with the PACKET_DATA() output attribute assignment function.
 
 The PacketContentAssembler operator 
 consumes network packets from tuples received by its input port 
@@ -317,7 +317,7 @@ of type `blob` and must contain a raw ethernet packet, including the network hea
 proceed them in network packets, as specified by the required parameter
 `packetAttribute`.
 
-The [PACKET_DATA()] output assignment function of the [PacketLiveSource] and
+The PACKET_DATA() output assignment function of the [PacketLiveSource] and
 [PacketFileSource] operators produces attributes that
 can be consumed by the PacketContentAssembler operator.
 

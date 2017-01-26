@@ -18,6 +18,40 @@
 #include <SPL/Runtime/Utility/Mutex.h>
 
 ////////////////////////////////////////////////////////////////////////////////
+// This class maps DNS parser error codes to error descriptions
+////////////////////////////////////////////////////////////////////////////////
+
+class DNSMessageParserErrorDescriptions {
+
+ public:
+
+  static const int maximumErrorCode = 200;
+  const char* description[maximumErrorCode];
+
+  DNSMessageParserErrorDescriptions() {
+    for (int i = 0; i<sizeof(maximumErrorCode); i++) description[i] = "";
+    description[102] = "label overruns packet";
+    description[103] = "label compression length overruns packet";
+    description[104] = "label compression offset underruns packet";
+    description[105] = "label compression offset overruns packet";
+    description[106] = "label compression offset loop";
+    description[107] = "label flags invalid";
+    description[108] = "label limit exceeded";
+    description[109] = "";
+    description[110] = "resource record missing";
+    description[111] = "question resource record truncated";
+    description[112] = "resource record truncated";
+    description[113] = "resource record data truncated";
+    description[114] = "invalid address family";
+    description[115] = "unexpected resource type";
+    description[116] = "message too short";
+    description[117] = "counts too large";
+    description[118] = "text string overruns resource record";
+  }
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
 // This class parses DNS fields within a DNS message
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -124,7 +158,7 @@ class DNSMessageParser {
         // for uncompressed labels, step over the label length byte and text, and then
         // continue with the next label
       case 0x00:
-        if (dnsPointer+1+length>dnsEnd) { error = "label overruns packet"; return false; }
+        if (dnsPointer+1+length>dnsEnd) { error = 102; return false; } // ... "label overruns packet"
         if (length==0) { dnsPointer++; return true; }
         dnsPointer += 1+length;
         break;
@@ -132,23 +166,23 @@ class DNSMessageParser {
         // for compressed labels, step over the offset and return, since compressed
         // labels are always the last in DNS name
       case 0xC0:
-        if (dnsPointer+2>dnsEnd) { error = "label compression length overruns packet"; return false; }
+        if (dnsPointer+2>dnsEnd) { error = 103; return false; } // ... "label compression length overruns packet"
         offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FF;
-        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; return false; }
-        if (offset==dnsPointer-dnsStart) { error = "label compression offset loop"; return false; }
-        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; return false; }
+        if (offset<sizeof(DNSHeader)) { error = 104; return false; } // ... "label compression offset underruns packet"
+        if (offset==dnsPointer-dnsStart) { error = 106; return false; } // ... "label compression offset loop"
+        if (dnsStart+offset>dnsEnd) { error = 105; return false; } // ... "label compression offset overruns packet"
         dnsPointer += 2;
         return true;
         break;
 
         // no DNS label should have other high-order bit settings in its length byte
       default:
-        error = "label flags invalid"; return false;
+        error = 107; return false; // ... "label flags invalid"
       }
     }
 
     // no DNS name can have have this many labels in it
-    error = "label limit exceeded";
+    error = 108; // ... "label limit exceeded"
     return false;
   }
 
@@ -167,7 +201,7 @@ class DNSMessageParser {
     if (error) return false;
 
     // don't proceed if we've reached the end of the DNS message
-    if (dnsPointer>=dnsEnd) { error = "resource record missing"; return false; }
+    if (dnsPointer>=dnsEnd) { error = 110; return false; } // ... "resource record missing"
 
     // copy the address of this resource's name into the fixed-size structure, and
     // then step over it
@@ -175,8 +209,8 @@ class DNSMessageParser {
     if (!skipDNSEncodedName()) return false;
 
     // check for truncated resource record
-    if (!fullResource && dnsPointer+4>dnsEnd) { error = "question resource record truncated"; return false; }
-    if (fullResource && dnsPointer+sizeof(DNSResourceRecord)>dnsEnd) { error = "resource record truncated"; return false; }
+    if (!fullResource && dnsPointer+4>dnsEnd) { error = 111; return false; } // ... "question resource record truncated"
+    if (fullResource && dnsPointer+sizeof(DNSResourceRecord)>dnsEnd) { error = 112; return false; } // ... "resource record truncated"
 
     // copy the type and class of this resource into the fixed-size structure
     struct DNSResourceRecord* rr = (struct DNSResourceRecord*)dnsPointer;
@@ -192,7 +226,7 @@ class DNSMessageParser {
     record.rdata = rr->rdata;
 
     // check for truncated resource record
-    if (record.rdata+record.rdlength>dnsEnd) { error = "resource record data truncated"; return false; }
+    if (record.rdata+record.rdlength>dnsEnd) { error = 113; return false; } // ... "resource record data truncated"
 
     // step over the remainder of this resource record
     dnsPointer += sizeof(struct DNSResourceRecord) + record.rdlength;
@@ -268,16 +302,19 @@ class DNSMessageParser {
   struct Record canonicalRecords[MAXIMUM_RRFIELDS];
   struct Record addressRecords[MAXIMUM_RRFIELDS];
 
-  // The parseDNSMessage() function below returns an error description in this
-  // variable, if an encoding error is found, or NULL, if no errors are found.
+  // The parseDNSMessage() function below returns an error code in this
+  // variable, if an encoding error is found, or 0, if no errors are
+  // found. Descriptions for the error codes are in the table.
 
-  char const* error;
+  int error;
+  DNSMessageParserErrorDescriptions errorDescriptions;
 
-
-  // This function decodes an encoded DNS name located at '*p'. If no problems
-  // are found, it puts the decoded DNS name in 'nameBuffer' and sets
-  // '*nameLength'.  If an encoding problem is found, 'error' is set to a
-  // description of the problem; a partially decoded DNS name may be left in
+  // This function decodes an encoded DNS domain name located at '*p', writes the
+  // decoded name in 'nameBuffer', sets '*nameLength' to the number of bytes
+  // written, and advances '*p' to the next field. The function does not write a
+  // trailing null byte after the string (that is, it does not write an ASCIIZ
+  // string). If an encoding problem is found, 'error' is set to a description
+  // of the problem, and a partially decoded DNS name may be left in
   // 'nameBuffer'.
 
   inline __attribute__((always_inline))
@@ -286,12 +323,15 @@ class DNSMessageParser {
     // alternate resource record pointer for '*p' (used for compressed DNS labels)
     uint8_t* pp;
 
-    // step through the labels in the DNS name at '*p' and reconstruct it in 'nameBuffer'
+    // step through the labels in the DNS domain name at '*p' and reconstruct it in 'nameBuffer'
     for (int32_t i = 0; i<255; i++) {
 
-      // no DNS name can have this many labels or be this long
-      if (i>253) { error = "too many labels"; break; } 
-      if (*nameLength>253) { error = "label overruns packet"; break; } 
+      // stop when the label encoding delimiter is reached
+      if (**p==0) { (*p)++; break; }
+
+      // no domain name can have this many labels or be this long
+      if (i>253) { error = 108; break; }  // ... "label limit exceeded"
+      if (*nameLength>253) { error = 102; break; }  // ... "label overruns packet"
 
       // get the length and compression flag from the first byte in the next label
       const uint8_t flags = **p & 0xC0;
@@ -301,10 +341,9 @@ class DNSMessageParser {
       // then step over the label length byte and text, and continue with the
       // next label until one with zero length is found
       if (flags==0x00) {
-        if (*p+1+length>dnsEnd) { error = "label overruns packet"; break; }
-        if (length==0 && *nameLength>0) { (*p)++; (*nameLength)--; break; }
+        if (*p+1+length>dnsEnd) { error = 102; break; } // ... "label overruns packet"
         memcpy(&nameBuffer[*nameLength], (const char*)(*p+1), length); 
-        nameBuffer[*nameLength+length] = '.'; 
+        nameBuffer[(*nameLength)+length] = '.'; 
         *p += length + 1;
         *nameLength += length + 1;
       }
@@ -315,11 +354,11 @@ class DNSMessageParser {
       // using an alternate '*p' for the remainder of this DNS name
 
       else if (flags==0xC0) { 
-        if (*p+2>dnsEnd) { error = "label compression length overruns packet"; break; }
+        if (*p+2>dnsEnd) { error = 103; break; } // ... "label compression length overruns packet"
         const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FF;
-        if (offset<sizeof(DNSHeader)) { error = "label compression offset underruns packet"; break; }
-        if (dnsStart+offset>dnsEnd) { error = "label compression offset overruns packet"; break; }
-        if (offset==*p-dnsStart) { error = "label compression offset loop"; break; }
+        if (offset<sizeof(DNSHeader)) { error = 104; break; } // ... "label compression offset underruns packet"
+        if (dnsStart+offset>dnsEnd) { error = 105; break; } // ... "label compression offset overruns packet"
+        if (offset==*p-dnsStart) { error = 106; break; } // ... "label compression offset loop"
         *p += 2;
         p = &pp;
         *p = dnsStart + offset;
@@ -327,9 +366,12 @@ class DNSMessageParser {
 
       // no DNS label should have other high-order bit settings in its length byte
       else {
-        error = "label flags invalid"; break;
+        error = 107; break; // ... "label flags invalid"
       }
     }
+
+    // back up over the '.' character appended to the last label in the domain name, if there os one
+    if (*nameLength>0 && nameBuffer[(*nameLength)-1]=='.') (*nameLength)--;
   }
 
 
@@ -349,6 +391,24 @@ class DNSMessageParser {
 
     // construct a string object containing the decoded DNS name and return it
     return SPL::rstring(nameBuffer, nameLength); 
+  }
+
+
+  // This function converts the TXT resource record's data at '*p' into an SPL
+  // string.  If the length of the string exceeds the length of the resource
+  // data, the function sets a parsing error and truncates the string.
+
+  inline __attribute__((always_inline))
+  SPL::rstring convertTXTResourceDataToString(const uint8_t* rdata, const uint16_t rdlength) { 
+
+    // make sure the length of the text string does not exceed the length of the resource data
+    uint16_t txtlength = rdata[0];
+    if (txtlength+1>rdlength) {
+      error = 118;
+      txtlength = rdlength-1; }
+
+    // return the resource data as an SPL string
+    return SPL::rstring((char*)(rdata+1), txtlength);
   }
 
 
@@ -502,7 +562,7 @@ class DNSMessageParser {
 
     // this should never happen
     else {
-      error = "invalid address family"; 
+      error = 114; // ... "invalid address family"
       return std::string(); 
     }
   }
@@ -518,38 +578,40 @@ class DNSMessageParser {
   SPL::rstring convertResourceDataToString(const struct Record& record, const SPL::rstring fieldDelimiter = SPL::rstring()) {
 
     switch(record.type) {
-        /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); 
+        /* A */          case   1: return convertIPAddressToString(AF_INET, record.rdata); break;
         /* NS */         case   2: return convertDNSEncodedNameToString(record.rdata); break;
         /* CNAME */      case   5: return convertDNSEncodedNameToString(record.rdata); break;
-        /* SOA */        case   6: return convertSOAResourceDataToString(record.rdata, fieldDelimiter.c_str()); break; // record has multiple fields
-        /* WKS */        case  11: return SPL::rstring("[WKS data]"); break; // record has multiple fields
+        /* SOA */        case   6: return convertSOAResourceDataToString(record.rdata, fieldDelimiter.c_str()); break; // 7 subfields
+        /* NULL */       case  10: return SPL::rstring((char*)record.rdata, record.rdlength); break;
+        /* WKS */        case  11: return SPL::rstring("[WKS data]"); break; // multiple subfields
         /* PTR */        case  12: return convertDNSEncodedNameToString(record.rdata); break;
-        /* HINFO */      case  13: return SPL::rstring("[HINFO data]"); break; // record has multiple fields
-        /* MINFO */      case  14: return SPL::rstring("[MINFO data]"); break; // record has multiple fields
-        /* MX */         case  15: return convertDNSEncodedNameToString(record.rdata + 2); break; // record has multiple fields
-        /* TXT */        case  16: return SPL::rstring((char*)record.rdata, record.rdlength); break;
+        /* HINFO */      case  13: return SPL::rstring("[HINFO data]"); break; // multiple subfields
+        /* MINFO */      case  14: return SPL::rstring("[MINFO data]"); break; // multiple subfields
+        /* MX */         case  15: return convertDNSEncodedNameToString(record.rdata + 2); break; // 2 subfields
+        /* TXT */        case  16: return convertTXTResourceDataToString(record.rdata, record.rdlength); break;
         /* AFSDB */      case  18: return convertDNSEncodedNameToString(record.rdata + 2); break;
         /* SIG */        case  24: return SPL::rstring("[SIG data]"); break;
         /* KEY */        case  25: return SPL::rstring("[KEY data]"); break;
-        /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); 
-        /* SRV */        case  33: return SPL::rstring("[SRV data]"); break;
-        /* EDNS0 */      case  41: return SPL::rstring(""); break;
+        /* AAAA */       case  28: return convertIPAddressToString(AF_INET6, record.rdata); break;
+        /* SRV */        case  33: return convertDNSEncodedNameToString(record.rdata + 6); break; // 4 subfields
+        /* NAPTR */      case  35: return SPL::rstring("[NAPTR data]"); break; // 6 subfields
+        /* EDNS0 */      case  41: return SPL::rstring(""); break; // variable subfields
+        /* DS */         case  43: return SPL::rstring("[DS data]"); break; // 4 subfields
         /* SSHFP */      case  44: return SPL::rstring("[SSHFP data]"); break;
         /* IPSECKEY */   case  45: return SPL::rstring("[IPSECKEY data]"); break;
-        /* RRSIG */      case  46: return SPL::rstring("[RRSIG data]"); break;
-        /* NSEC */       case  47: return SPL::rstring("[NSEC data]"); break;
-        /* DNSKEY */     case  48: return SPL::rstring("[DNSKEY data]"); break;
-        /* NSEC3 */      case  50: return SPL::rstring("[NSEC3 data]"); break;
-        /* NSEC3PARAM */ case  51: return SPL::rstring("[NSEC3PARAM data]"); break;
+        /* RRSIG */      case  46: return SPL::rstring("[RRSIG data]"); break; // 9 subfields
+        /* NSEC */       case  47: return SPL::rstring("[NSEC data]"); break; // 2 subfields
+        /* DNSKEY */     case  48: return SPL::rstring("[DNSKEY data]"); break; // 4 subfields
+        /* NSEC3 */      case  50: return SPL::rstring("[NSEC3 data]"); break; // 8 subfields
+        /* NSEC3PARAM */ case  51: return SPL::rstring("[NSEC3PARAM data]"); break; // 5 subfields
         /* TLSA */       case  52: return SPL::rstring("[TLSA data]"); break;
         /* CDNSKEY */    case  60: return SPL::rstring("[CDNSKEY data]"); break;
+        /* SPF */        case  99: return SPL::rstring((char*)record.rdata, record.rdlength); break;
         /* TKEY */       case 249: return SPL::rstring("[TKEY data]"); break;
         /* TSIG */       case 250: return SPL::rstring("[TSIG data]"); break;
-                         default:  break;
+        /* unknown */    default:  return SPL::rstring((char*)record.rdata, record.rdlength); break;
     }
-
-    error = "unexpected resource type";
-    return SPL::rstring();
+    return SPL::rstring(); // never reached
   }
 
 
@@ -577,6 +639,19 @@ class DNSMessageParser {
   }
 
 
+  // This function returns a non-zero error code if the DNS message contains
+  // incompatible flags, mainly for column 23 of the 'flattened' DNS format
+
+  inline __attribute__((always_inline))
+  int32_t incompatibleFlags() {
+    if (dnsHeader->flags.indFlags.authoritativeFlag && !dnsHeader->flags.indFlags.responseFlag) return 1;
+    if (dnsHeader->flags.indFlags.truncatedFlag && !dnsHeader->flags.indFlags.responseFlag) return 2;
+    if (dnsHeader->flags.indFlags.authoritativeFlag && dnsHeader->flags.indFlags.truncatedFlag) return 3;
+    if (dnsHeader->flags.indFlags.authoritativeFlag && dnsHeader->flags.indFlags.truncatedFlag && dnsHeader->flags.indFlags.recursionDesiredFlag && dnsHeader->flags.indFlags.recursionAvailableFlag) return 4;
+    return 0;
+  }
+
+
   // This function converts the DNS 'rdata' fields in the array of 'count'
   // resource records at 'records' into an SPL list of IP version 6 addresses.
 
@@ -601,7 +676,7 @@ class DNSMessageParser {
     dnsHeader = NULL;
     dnsStart = NULL;
     dnsEnd = NULL;
-    error = NULL;
+    error = 0;
     dnsPointer = NULL;
 
     questionCount = 0;
@@ -619,11 +694,11 @@ class DNSMessageParser {
     addressRecordCount = 0;
 
     // basic safety checks
-    if ( length < sizeof(struct DNSHeader) ) { error = "message too short"; return; }
+    if ( length < sizeof(struct DNSHeader) ) { error = 116; return; } // ... "message too short"
     if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS ||
-         ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = "counts too large"; return; }
+         ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = 117; return; } // ... "counts too large"
 
     // store pointers to the DNS message in the buffer
     dnsHeader = (struct DNSHeader*)buffer;

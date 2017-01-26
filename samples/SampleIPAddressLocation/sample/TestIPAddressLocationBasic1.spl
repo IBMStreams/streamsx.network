@@ -13,7 +13,7 @@ composite TestIPAddressLocationBasic1 {
 
     param
     expression<rstring> $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_locations_ipv4_only.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_locations_ipv4_only.pcap" );
 
     type
 

@@ -19,7 +19,7 @@ buildDirectory=$projectDirectory/output/build/$composite
 
 dataDirectory=$projectDirectory/data
 
-libpcapDirectory=$HOME/libpcap-1.7.4
+libpcapDirectory=$HOME/libpcap-1.8.1
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 

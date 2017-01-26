@@ -152,6 +152,7 @@ This operator has been tested with these versions of `libpcap`:
 * libpcap 1.6.1
 * libpcap 1.6.2
 * libpcap 1.7.4
+* libpcap 1.8.1
 
 # Tuning
 

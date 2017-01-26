@@ -1,0 +1,102 @@
+/*
+** Copyright (C) 2016  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.dns::*;
+
+boolean hasResourceRecordType(list<uint16> rrTypes, list<uint16> answerTypes, list<uint16> nameserverTypes, list<uint16> additionalTypes) {
+  for (uint16 rrType in rrTypes) {    
+    if (rrType in answerTypes) return true;
+    if (rrType in nameserverTypes) return true;
+    if (rrType in additionalTypes) return true;
+  }
+  return false;
+}
+
+
+composite TestDNSPacketFileSourceResourceRecords {
+
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
+    expression<list<uint16>> $rrTypes: [ 6uh, 15uh, 33uh ];
+
+    type
+
+    DNSMessageType =
+        uint64 packetNumber,            // sequence number of packet
+        float64 captureTime,             // time that packet was captured, in seconds since Unix epoch
+        uint32 ipv4ServerAddress,       // IPv4 address of DNS server
+        boolean isResponse,
+        uint8 opCode,
+        uint8 responseCode,
+        rstring questionName,
+        uint16 questionType,
+        list<rstring> answerNames,
+        list<uint16> answerTypes,
+        list<rstring> nameserverNames,
+        list<rstring> additionalNames,
+        list<rstring> additionalData;
+
+    FlattenedDNSMessageType = 
+        uint64 packetNumber,
+        float64 captureTime,
+        rstring flattenedDNSMessage;
+
+    DNSMalformedType =
+      uint64 packetNumber,
+      float64 captureTime, 
+      rstring error,
+      blob dnsMessage;
+
+    graph
+
+
+
+ ( stream<FlattenedDNSMessageType> FlattenedDNSStream ;
+   stream<FlattenedDNSMessageType> FlattenedDNSNormalResponseStream ;
+   stream<FlattenedDNSMessageType> FlattenedDNSErrorResponseStream ;
+   stream<DNSMalformedType> DNSMalformedStream ) = DNSPacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            outputFilters: !parseError(), // selects messages for FlattenedDNSStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSNormalResponseStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSErrorResponseStream
+                           parseError(); // selects messages for DNSMalformedStream
+            metricsInterval: 0.0;
+        output 
+        FlattenedDNSStream:
+          packetNumber = packetsProcessed(),
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ","); 
+        FlattenedDNSNormalResponseStream:
+          packetNumber = packetsProcessed(),
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ","); 
+        FlattenedDNSErrorResponseStream:
+          packetNumber = packetsProcessed(),
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ","); 
+        DNSMalformedStream:
+          packetNumber = packetsProcessed(),
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          error = parseErrorDescription(),
+          dnsMessage = PAYLOAD_DATA();
+    }
+    () as FlattenedDNSSink = FileSink(FlattenedDNSStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.FlattenedDNSStream.out"; format: line; suppress: packetNumber, captureTime; }
+    () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.FlattenedDNSNormalResponseStream.out"; format: line; suppress: packetNumber, captureTime; }
+    () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.FlattenedDNSErrorResponseStream.out"; format: line; suppress: packetNumber, captureTime; }
+    () as DNSMalformedSink = FileSink(DNSMalformedStream) { param file: "debug.TestDNSPacketFileSourceResourceRecords.DNSMalformedStream.out"; format: txt; }
+
+
+    
+    () as Out = Custom(FlattenedDNSStream as In){
+      logic onTuple In: {
+        printStringLn((rstring)packetNumber + "\n" + flattenedDNSMessage + "\n");
+        } }
+}

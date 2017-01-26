@@ -97,18 +97,12 @@ on Streams:
        OR
     make install T=ppc_64-power8-linuxapp-gcc
 
-    # Move the resulting library to your Streams application build location
-    # libdpdk.a will be libdpdk.so if CONFIG_RTE_BUILD_SHARED_LIB=y was used.
-    cp build/lib/libdpdk.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
-
 * There is also a Streams to DPDK glue library that must be built.  To
   do this, make sure the RTE environment variables noted above are set and then
   do the following:
 
     cd &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/src/source/dpdk
     make
-    cp streams_source.h &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/include/source/
-    cp build/lib/libstreams_source.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
 
 * Build the Streams example application with the following steps:
 
@@ -283,8 +277,8 @@ streams_source interface library to dpdk.
 	</cmn:description>
 	<cmn:managedLibrary>
 	<cmn:lib>streams_source</cmn:lib>
-	<cmn:libPath>../../impl/lib/source</cmn:libPath>
-	<cmn:includePath>../../impl/include/source</cmn:includePath>
+	<cmn:libPath>../../impl/src/source/dpdk/build/lib</cmn:libPath>
+	<cmn:includePath>../../impl/src/source/dpdk</cmn:includePath>
 	</cmn:managedLibrary>
 	</library>
 

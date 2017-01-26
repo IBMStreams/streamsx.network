@@ -4,9 +4,13 @@
 package IPASNEnricherCommon;
 
 use strict;
+use File::Basename;
 
 sub init($) {
 	my ($model) = @_;
+	
+	unshift @INC, dirname ($model->getContext()->getOperatorDirectory()) . "/../impl/nl/include";
+	require NetworkResources;
 	
 	## inputPort0
     $::inputPort0 = $model->getInputPortAt(0);
@@ -55,17 +59,17 @@ sub init($) {
 			
 			if($::isScalar && !isScalar($::outputAttributeSPLType))
 			{
-				SPL::CodeGen::exitln("Output attribute " . $name . " must be a scalar type.");
+				SPL::CodeGen::exitln(NetworkResources::NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE($name, "scalar"));
 			}
 			
 			if($::isVector && !isVector($::outputAttributeSPLType))
 			{
-				SPL::CodeGen::exitln("Output attribute " . $name . " must be a vector type.");
+				SPL::CodeGen::exitln(NetworkResources::NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE($name, "vector"));
 			}
 			
 			if($::isMatrix && !isMatrix($::outputAttributeSPLType))
 			{
-				SPL::CodeGen::exitln("Output attribute " . $name . " must be a matrix type.");
+				SPL::CodeGen::exitln(NetworkResources::NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE($name, "matrix"));
 			}
 		}
 	}
@@ -101,14 +105,16 @@ sub init($) {
 sub validate($) {
 	my ($model) = @_;
 
-	my $typeErrorMsg = "The 'inputIPAttr' parameter must refer to an attribute of type: 'rstring', 'list<rstring>' or 'list<list<rstring>>'. Found " . $::inputIPAttrParamSPLType;
+	unshift @INC, dirname ($model->getContext()->getOperatorDirectory()) . "/../impl/nl/include";
+	require NetworkResources;
+
 	## validate that the inputIPAttr parameter contains an attribute with one of the following types:
 	## - rstring
 	## - list<rstring>
 	## - list<list<rstring>>
 	if($::isScalar && !SPL::CodeGen::Type::isRString($::inputIPAttrParamSPLType))
 	{
-		SPL::CodeGen::exitln($typeErrorMsg);
+		SPL::CodeGen::exitln(NetworkResources::NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE("inputIPAttr", "'rstring', 'list<rstring>' or 'list<list<rstring>>'", $::inputIPAttrParamSPLType));
 	}
 	
 	if($::isVector)
@@ -116,7 +122,7 @@ sub validate($) {
 		my $elemType = SPL::CodeGen::Type::getElementType($::inputIPAttrParamSPLType);
 		if(!SPL::CodeGen::Type::isRString($elemType))
 		{
-			SPL::CodeGen::exitln($typeErrorMsg);
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE("inputIPAttr", "'rstring', 'list<rstring>' or 'list<list<rstring>>'", $::inputIPAttrParamSPLType));
 		}
 	}
 	
@@ -126,24 +132,23 @@ sub validate($) {
 		$elemType = SPL::CodeGen::Type::getElementType($elemType);
 		if(!SPL::CodeGen::Type::isRString($elemType))
 		{
-			SPL::CodeGen::exitln($typeErrorMsg);
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE("inputIPAttr", "'rstring', 'list<rstring>' or 'list<list<rstring>>'", $::inputIPAttrParamSPLType));
 		}
 	}
 
 	if(defined $::inputPort1) {
 		if(defined $::asnIPv6FileParam)
 		{
-			SPL::CodeGen::exitln("The 'asnIPv6File' parameter cannot be specified when input port 1 is defined.");	
-		}
-		
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED("asnIPv6File"));
+		}		
 		if(defined $::asnIPv4FileParam)
 		{
-			SPL::CodeGen::exitln("The 'asnIPv4File' parameter cannot be specified when input port 1 is defined.");
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED("asnIPv4File"));
 		}
 	}
 	
 	if(!defined $::inputPort1 && !defined $::asnIPv4FileParam && !defined $::asnIPv6FileParam) {
-		SPL::CodeGen::exitln("Either the 'asnIPv4File' parameter or the 'asnIPv6File' parameter or input port 1 must be specified.");
+		SPL::CodeGen::exitln(NetworkResources::NETWORK_EITHER_PARAMETER_A_OR_B_MUST_BE_SPECIFIED("asnIPv4File", "asnIPv6File"));
 	}
 }
 1;

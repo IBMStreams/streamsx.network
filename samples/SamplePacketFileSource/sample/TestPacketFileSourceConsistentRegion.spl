@@ -10,7 +10,7 @@ use com.ibm.streamsx.network.source::*;
 composite TestPacketFileSourceConsistentRegion {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap.pcap" );
 
     type
 

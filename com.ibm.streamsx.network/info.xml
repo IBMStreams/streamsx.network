@@ -3,8 +3,13 @@
   <info:identity>
     <info:name>com.ibm.streamsx.network</info:name>
     <info:description>Operators and functions for ingesting and parsing raw network data at the packet level.</info:description>
-    <info:version>2.8.6</info:version>
+    <info:version>3.0.0</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
+  <info:resources>
+    <info:messageSet name="NetworkResources">
+      <info:lang default="true">en_US/NetworkResources.xlf</info:lang>
+    </info:messageSet>
+  </info:resources>  
 </info:toolkitInfoModel>

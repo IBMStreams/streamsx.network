@@ -16,7 +16,7 @@ specified by output attribute assignments.
 The IPFIXMessageParser operator expects only IPFIX messages in its input tuples,
 without any of the headers that precede them in network packets.  The
 [PacketLiveSource] and [PacketFileSource] operators can produce tuples that contain
-IPFIX messages with the [PAYLOAD_DATA()] output attribute assignment function.
+IPFIX messages with the PAYLOAD_DATA() output attribute assignment function.
 
 The IPFIXMessageParser operator consumes input tuples containing IPFIX messages,
 parses indivdual fields in flow records within IPFIX messages, 
@@ -166,7 +166,7 @@ of type `blob` and must contain a IPFIX message, excluding the network headers t
 proceed them in network packets, as specified by the required parameter
 `messageAttribute`.
 
-The [PAYLOAD_DATA()] output assignment function of the [PacketLiveSource] and
+The PAYLOAD_DATA() output assignment function of the [PacketLiveSource] and
 [PacketFileSource] operators produces attributes that
 can be consumed by the IPFIXMessageParser operator.
 

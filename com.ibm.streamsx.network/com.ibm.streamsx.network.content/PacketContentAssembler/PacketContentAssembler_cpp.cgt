@@ -6,6 +6,9 @@
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require CodeGenX;
 
+# module for i18n messages
+require NetworkResources;
+
 # These fragments of Perl code get strings from the operator's declaration
 # in the SPL source code for use in generating C/C++ code for the operator's
 # implementation below
@@ -47,9 +50,9 @@ if ($outputFilterParameter) {
 }
 
 # basic safety checks on parameters
-SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NOT_ENOUGH_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
 
 # create a hash of result functions called by output filters and attribute assigments
 
@@ -136,6 +139,8 @@ public:
     eventNames[XPF_MSG_HTTP_PROXY] = "HTTP_PROXY";
     eventNames[XPF_MSG_HTTP_XFORWARDEDFOR] = "HTTP_XFORWARDEDFOR";
     eventNames[XPF_MSG_HTTP_RESPONSE] = "HTTP_RESPONSE";
+    eventNames[XPF_MSG_PACKET_TUNNELING] = "PACKET_TUNNELING";
+    eventNames[XPF_MSG_IPV6_OPTION_HOP_BY_HOP] = "IPV6_OPTION_HOP_BY_HOP";
     eventNames[XPF_MSG_LAST] = "LAST"; }
   const char* event2name(uint32_t event) { return eventNames[event]; }
 };
@@ -350,13 +355,7 @@ void MY_OPERATOR::processEvent(const pam2XpfHeader* eventHeader, void* connectio
     case XPF_MSG_APPL_DNS_RESPONSE:
       processDNSResponseEvent(*eventHeader, *(pam2XpfDnsResponse*)eventPointer);
       break;
-    case XPF_MSG_UDP_STATUS:
-    case XPF_MSG_TCP_STATUS:
-    case XPF_MSG_CONN_TAGGED:
-    case XPF_MSG_HTTP_PROXY:
-    case XPF_MSG_TLS_TUNNEL_ID:
-    case XPF_MSG_LAST:
-    case XPF_MSG_HTTP_XFORWARDEDFOR:
+    default:
       SPLAPPTRC(L_DEBUG, "unsupported XPF event " << xpfEventNames.event2name(eventPointer->msgId) << " ignored", "PacketContentAssembler");
       break;
     }

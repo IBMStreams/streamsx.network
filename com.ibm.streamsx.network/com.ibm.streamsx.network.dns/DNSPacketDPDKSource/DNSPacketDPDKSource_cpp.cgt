@@ -1,0 +1,312 @@
+/*********************************************************************
+ * Copyright (C) 2016  International Business Machines Corporation
+ * All Rights Reserved
+ ********************************************************************/
+
+<%
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's 
+# implementation below
+
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# check consistent region restrictions
+my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
+SPL::CodeGen::exitln("The " . $myOperatorKind . " operator cannot be the start of a consistent region.") if $crContext && $crContext->isStartOfRegion();
+
+# get Perl objects for output ports
+my @outputPortList = @{ $model->getOutputPorts() };
+
+# Get C++ expressions for getting the values of this operator's parameters.
+
+my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParameterByName("lcoreMaster")->getValueAt(0)->getCppExpression() : -1;
+my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
+my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
+my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
+my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
+my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+
+# special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
+my $outputFilterParameter = $model->getParameterByName("outputFilters");
+my @outputFilterList;
+if ($outputFilterParameter) {
+    foreach my $value ( @{ $outputFilterParameter->getValues() } ) {
+	my $expression = $value->getCppExpression();
+	push @outputFilterList, $expression;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::common_result_functions::") != -1;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::DNSPacketLiveSource_result_functions::") != -1;
+	$value->{xml_}->{hasStreamAttributes}->[0]="true" if index($expression, "::DNSPacketSource_result_functions::") != -1;
+    }
+}
+
+# basic safety checks
+SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+
+%>
+
+
+// This value is used to completely gate the code paths used for tracing.
+// Without this mechanism only the final output is supressed and most
+// of the pathlength remains.
+#define TRACELVL 1
+
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+
+// calls to SPL functions within expressions are generated with these
+// namespaces, which must be mapped to the operator's namespace so they
+// will invoke the functions defined in the DNSPacketDPDKSource_h.cgt file
+
+#define common_result_functions MY_OPERATOR
+#define DNSPacketLiveSource_result_functions MY_OPERATOR
+#define DNSPacketSource_result_functions MY_OPERATOR
+
+
+// Function called from the DPDK library as each packet arrives.
+static void dpdkCallback(void *correlator, void *data, uint32_t length, uint64_t tscTimestamp) {
+    MY_OPERATOR* self = (MY_OPERATOR*)correlator;
+    if (!(self->getPE().getShutdownRequested())) self->packetProcess((uint8_t *)data, length, tscTimestamp);
+}
+
+
+
+MY_OPERATOR::MY_OPERATOR() {
+
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> constructor ...", "DNSPacketDPDKSource");
+
+  // Get the operator's parameters into variables
+  lcoreMaster = <%=$lcoreMaster%>;
+  lcore = <%=$lcore%>;
+  nicPort = <%=$nicPort%>;
+  nicQueue = <%=$nicQueue%>;
+  const bool promiscuous = <%=$promiscuous%>;
+  metricsInterval = <%=$metricsInterval%>;
+
+  // initialize operator state variables
+  dpdkThreadID = metricsThreadID = 0;
+  packetCounter = packetCounterNow = packetCounterThen = 0;
+  byteCounter = byteCounterNow = byteCounterThen = 0;
+  now = then = 0;
+  metricsUpdate = false;
+
+  // clear the output tuples
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    outTuple<%=$i%>.clear();
+  <% } %> ;
+
+  // Initialize the DPDK subsystem.
+  int rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue, (int)promiscuous, &dpdkCallback, (void *)this);
+  
+  SPLLOG(L_TRACE, "streams_operator_init() for lcore = " << lcore <<
+         ", nicPort = " << nicPort <<
+         ", nicQueue = " << nicQueue <<
+         ", lcoreMaster = " << lcoreMaster <<
+         " completed.  Return code = " << rc,
+         "DNSPacketDPDKSource"); 
+  if (rc != 0) { THROW (SPLRuntimeOperator, "Error in streams_operator_init."); }
+
+    SPLLOG(L_INFO, "ignoring timestampType parameter", "DNSPacketDPDKSource");
+}
+
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() {
+
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "DNSPacketDPDKSource");
+
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "DNSPacketDPDKSource");
+}
+
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() { 
+    SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
+
+    int rc = streams_dpdk_init();
+    if (rc != 0) THROW (SPLRuntimeOperator, "Error in streams_dpdk_init.");
+
+    tscHz = streams_source_get_tsc_hz(); 
+    tscMicrosecondAdjust = (tscHz + 500000ul) / 1000000ul; 
+
+    createThreads(2);
+
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
+}
+
+
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() {
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketDPDKSource");
+
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketDPDKSource");
+}
+
+
+// Processing for source and threaded operators   
+void MY_OPERATOR::process(uint32_t idx) { 
+
+  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> process(" << idx << ")", "DNSPacketDPDKSource");
+
+  switch (idx) {
+  case 0: processDpdkLoop(); break;
+  case 1: if (metricsInterval>0) metricsThread(); break;
+  default: break; 
+  } 
+
+  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> process(" << idx << ")", "DNSPacketDPDKSource");
+}
+
+
+// Tuple processing for mutating ports 
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
+}
+
+
+// Tuple processing for mutating ports 
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
+}
+
+
+// This is the primary packet processing code and is called as each 
+// packet enters the Streams system.
+void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTimestamp) {
+
+  // save address and length of raw packet
+  packetPtr = packet;
+  packetLen = length;
+
+#if TRACELVL >= 1
+    SPLLOG(L_TRACE, "Entering <%=$myOperatorKind%> packetProcess. lcore = " 
+        << lcore << ", packetCounter = " << packetCounter <<
+	", packetLen = " << packetLen,
+	"DNSPacketDPDKSource");
+#endif
+
+  if(packetPtr == NULL || packetLen == 0) return;
+
+  // Start a prefetch of the packet data.  This was found to help
+  // in some situations, but results will vary.
+  __builtin_prefetch((void *)packet, 0, 0);
+  __builtin_prefetch((void *)((uint64_t)packet + packetLen), 0, 0);
+
+  // get current time in microseconds
+  struct timespec ts; 
+  clock_gettime(CLOCK_REALTIME, &ts); 
+  captureSeconds = (uint32)ts.tv_sec;
+  captureMicroseconds = (uint32)(ts.tv_nsec/1000);
+  tscMicroseconds = tscTimestamp / tscMicrosecondAdjust;
+  
+  // parse the network headers in the packet.
+  headers.parseNetworkHeaders((char*)packetPtr, packetLen);
+
+  // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
+  if ( ! headers.ipv4Header ) { return; }
+  if ( ! headers.udpHeader ) { return; }
+  if ( ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53 ) { return; }
+  if ( ! headers.payload ) { return; }
+
+  // parse the DNS header and resource records in the packet payload
+  parser.parseDNSMessage(headers.payload, headers.payloadLength);
+  if ( parser.error ) { SPLLOG(L_DEBUG, "error " << parser.error << "parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.errorDescriptions.description[parser.error], "DNSPacketDPDKSource"); }
+  if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketDPDKSource");  return; }
+
+
+  // count the packets and bytes processed so far
+  packetCounter++;
+  byteCounter += packetLen;
+
+  // fill in and submit output tuples to output ports, as selected by output filters, if specified
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+    {
+      <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+      //SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSPacketDPDKSource");
+      submit(outTuple<%=$i%>, <%=$i%>);
+    }
+    <% } %> ;
+
+  // reset the 'metrics updated' flag, in case one of the output filters or assignments references it
+  metricsUpdate = false;
+}
+
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
+} 
+
+
+void MY_OPERATOR::processDpdkLoop() {
+
+    // remember our thread identifer
+    dpdkThreadID = pthread_self();
+
+    int rc  = streams_source_start();
+    if (rc != 0) THROW (SPLRuntimeOperator, "Error in streams_source_start.");
+    while(!getPE().getShutdownRequested()) { usleep(100); }
+}
+
+
+void MY_OPERATOR::metricsThread() {
+    SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
+
+    // remember our thread identifer
+    metricsThreadID = pthread_self();
+
+    // expose the operator's statistics in these metrics
+    OperatorMetrics& opm = getContext().getMetrics();
+    Metric* totalPacketsReceived = &opm.getCustomMetricByName("nPacketsReceivedCurrent");
+    Metric* totalPacketsDropped = &opm.getCustomMetricByName("nPacketsDroppedCurrent");
+    Metric* totalBytesReceived = &opm.getCustomMetricByName("nBytesReceivedCurrent");
+    Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
+    Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
+
+    // get statistics periodically and send them to the runtime
+    while (!getPE().getShutdownRequested()) {
+      
+      // wait until the next interval or the PE is shutting down
+      const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
+      if (secondsToWait>0) {
+        SPLLOG(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
+        getPE().blockUntilShutdownRequest(secondsToWait);
+      } else {
+        SPLLOG(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "DNSPacketLiveSource");
+      }
+      
+      // store the previous interval's metrics for difference calculations
+      then = now;
+      packetCounterThen = packetCounterNow;
+      byteCounterThen = byteCounterNow;
+      statsThen.received = statsNow.received; // Packets RX
+      statsThen.dropped  = statsNow.dropped;  // All errors and drops
+      statsThen.bytes    = statsNow.bytes;    // Bytes RX
+      
+      // get the current interval's counters from the DPDK library
+      now = SPL::Functions::Time::getTimestampInSecs();
+      streams_port_stats(nicPort, &statsNow);
+      packetCounterNow = packetCounter;
+      byteCounterNow = byteCounter;
+      
+      // expose the operator's statistics as metrics
+      totalPacketsReceived->setValue(statsNow.received);
+      totalPacketsDropped->setValue(statsNow.dropped); 
+      totalBytesReceived->setValue(statsNow.bytes); 
+      totalPacketsProcessed->setValue(packetCounter);
+      totalBytesProcessed->setValue(byteCounter);
+      
+      // updated metrics will be available to the next output tuple emitted
+      metricsUpdate = true;
+    }
+
+    SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
+}
+
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

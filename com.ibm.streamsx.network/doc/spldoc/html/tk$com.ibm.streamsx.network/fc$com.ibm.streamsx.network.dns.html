@@ -1,0 +1,1050 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="C++ Native Functions: com.ibm.streamsx.network.dns"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_functions"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>C++ Native Functions: com.ibm.streamsx.network.dns</title>
+</head>
+<body id="spldoc_functions">
+
+
+<h1 class="title topictitle1">C++ Native Functions: <tt class="ph tt">com.ibm.streamsx.network.dns</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; C++ Native Functions</p>
+
+</div>
+
+<div class="section">
+This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> common_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseError"><tt class="ph tt">      public boolean parseError()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This DNS parser result function returns <tt class="ph tt">true</tt> if an encoding error was detected while decoding the current packet,           or <tt class="ph tt">false</tt> otherwise. Note that a value of <tt class="ph tt">false</tt> does not necessarily mean the packet has           no encoding errors, since the operator only decodes the fields needed.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorCode"><tt class="ph tt">      public int32 parseErrorCode()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This DNS parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 102 for 'label overruns packet': The length of an uncompressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.</li>
+
+<li class="li">
+<p class="p"> 103 for 'label compression length overruns packet': The length field of a compressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 105 for 'label compression offset overruns packet': The offset of a compressed domain name label points beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 110 for 'resource record missing': The DNS message contains fewer resource records than the 'count' fields in the message header indicate. The DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 111 for 'question resource record truncated': The DNS 'question' resource record was truncated. The packet containing the message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 112 for 'resource record truncated': A DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 113 for 'resource record data truncated': The 'rdata' field of a DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
+</p>
+</li>
+
+</ul>
+
+</div>
+
+<p class="p">          <em class="ph i">Note:</em> <a class="xref" href="https://www.ietf.org/rfc/rfc1035.txt">RFC 1035</a> explains the format of DNS messages;            in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorDescription"><tt class="ph tt">      public rstring parseErrorDescription()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This DNS parser result function returns a description of an encoding error found while decoding the current packet,           or an empty string if no enoding errors were found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorOffset"><tt class="ph tt">      public uint32 parseErrorOffset()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This DNS parser result function returns the offset from the beginning of the message to the encoding error found,           or zero if no encoding errors were found.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> DNSPacketLiveSource_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__bytesReceived"><tt class="ph tt">      public uint64 bytesReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalBytesReceived"><tt class="ph tt">      public uint64 metricsIntervalBytesReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes received from the network interface  during the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsDropped"><tt class="ph tt">      public uint64 metricsIntervalPacketsDropped()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsReceived"><tt class="ph tt">      public uint64 metricsIntervalPacketsReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets received from the network interface  during the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__packetsDropped"><tt class="ph tt">      public uint64 packetsDropped()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__packetsReceived"><tt class="ph tt">      public uint64 packetsReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
+
+  <dd class="dd">   </dd>
+
+</dl>
+
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
+
+  <dd class="dd"> DNSPacketSource_result_functions  </dd>
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__CAPTURE_MICROSECONDS"><tt class="ph tt">      public uint32 CAPTURE_MICROSECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of microseconds since the value of the CAPTURE_SECONDS() function until the current packet was captured, according to the system clock on the machine that captured it.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__CAPTURE_SECONDS"><tt class="ph tt">      public uint32 CAPTURE_SECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of seconds since the beginning of the Unix epoch (midnight on January 1st, 1970 in Greenwich, England) until the current packet was captured, according to the system clock on the machine that captured it.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__CAPTURE_TSC_MICROSECONDS"><tt class="ph tt">      public uint64 CAPTURE_TSC_MICROSECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the value of the machine's timestamp counter when the packet was  captured, that is, the number of microseconds since the machine was booted. Note that  unlike the CAPTURE_SECONDS() and CAPTURE_MICROSECONDS() functions, this function's value  is not relative to the Unix 'epoch'.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ADDITIONAL_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'additional' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_COUNT"><tt class="ph tt">      public uint16 DNS_ADDITIONAL_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'additional' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_DATA"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ADDITIONAL_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.           For resource records containing multiple fields, such as SOA records, only the first field is returned.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_DATA.rstring"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ADDITIONAL_DATA(rstring)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'additional' resource records in the current message.           For resource records containing multiple fields, such as SOA records, all fields are returned, in the order,            separated by the string specified as the function's argument.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ADDITIONAL_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'additional' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_TTLS"><tt class="ph tt">      public list&lt;uint32&gt; DNS_ADDITIONAL_TTLS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'time to live' fields in the 'additional' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ADDITIONAL_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'additional' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring"><tt class="ph tt">      public rstring DNS_ALL_FIELDS(rstring, rstring, rstring)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from all DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ALL_FLAGS"><tt class="ph tt">      public uint16 DNS_ALL_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.           The value is in host byte order, so, for example,            <tt class="ph tt">DNS_ALL_FLAGS()&amp; 0x8000 == 0x8000</tt> has the same value as DNS_RESPONSE_FLAG(),            <tt class="ph tt">DNS_ALL_FLAGS() &gt;&gt; 11 &amp; 0x000F</tt> has the same value as DNS_OPCODE(), and           <tt class="ph tt">DNS_ALL_FLAGS() &amp; 0x000F</tt> has the same value as DNS_RESPONSE_CODE().
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_ADDRESS"><tt class="ph tt">      public rstring DNS_ANSWER_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record,           if there is one with a 'type' value            of '1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),           as a string value,           or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_ADDRESSES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ANSWER_ADDRESSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'answer' resource records            that have a 'type' value of            '1' or '28' (meaning, the answer is an IP version 4 or version 6 address from a type 'A' or 'AAAA' record, respectively),           as string values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_CANONICAL"><tt class="ph tt">      public rstring DNS_ANSWER_CANONICAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record,           if there is one with           a 'type' value of '5' (meaning, the answer is a canonical domain name from a type 'CNAME' record),           or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ANSWER_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_COUNT"><tt class="ph tt">      public uint16 DNS_ANSWER_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_DATA"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ANSWER_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV4_ADDRESS"><tt class="ph tt">      public uint32 DNS_ANSWER_IPV4_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record, if            there is one with a           'type' value of '1' (meaning, the answer is an IP version 4 address from a type 'A' record),           as a binary value,           or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV4_ADDRESSES"><tt class="ph tt">      public list&lt;uint32&gt; DNS_ANSWER_IPV4_ADDRESSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' fields of the 'answer' resource records that have            'type' values of '1' (meaning, the answers are IP version 4 addresses from type 'A' records),           as a list of binary values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV6_ADDRESS"><tt class="ph tt">      public list&lt;uint8&gt;[16] DNS_ANSWER_IPV6_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' field of the first 'answer' resource record, if            there is one with a            'type' value of '28' (meaning, the answer is an IP version 6 address from a type 'AAAA' record),           as a binary value,           or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_IPV6_ADDRESSES"><tt class="ph tt">      public list&lt;list&lt;uint8&gt;[16]&gt; DNS_ANSWER_IPV6_ADDRESSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'data' fields of the 'answer' resource records that have            'type' values of '28' (meaning, the answers IP version 6 addresses from type 'AAAA' records),           as a binary values.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_ANSWER_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'answer' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_TTLS"><tt class="ph tt">      public list&lt;uint32&gt; DNS_ANSWER_TTLS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'time to live' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ANSWER_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ANSWER_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'answer' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_AUTHORITATIVE_FLAG"><tt class="ph tt">      public boolean DNS_AUTHORITATIVE_FLAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the 'authoritative' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_IDENTIFIER"><tt class="ph tt">      public uint16 DNS_IDENTIFIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the DNS client's request correlator in the current message, and returned by the server in its response.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_INCOMPATIBLE_FLAGS"><tt class="ph tt">      public int32 DNS_INCOMPATIBLE_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This DNS parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 1 indicates that the Authoritative flag is set in the DNS header but the Response flag is not set.</li>
+
+<li class="li">
+<p class="p"> 2 indicates that the Truncated flag is set in the DNS header but not the Response flag is not set.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 3 indicates that the Authoritative and Truncated flags in the DNS header are both set.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 4 indicates that the Authoritative, Truncated, Recursion Desired, and Recursion Available flags in the DNS header are all set.
+</p>
+</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_NAMESERVER_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_COUNT"><tt class="ph tt">      public uint16 DNS_NAMESERVER_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_DATA"><tt class="ph tt">      public list&lt;rstring&gt; DNS_NAMESERVER_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.           For resource records containing multiple fields, such as SOA records, only the first field is returned.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_DATA.rstring"><tt class="ph tt">      public list&lt;rstring&gt; DNS_NAMESERVER_DATA(rstring)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'data' fields in the 'name server' resource records in the current message.           For resource records containing multiple fields, such as SOA records, all fields are returned, in order,            separated by the string specified as the function's argument.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_NAMESERVER_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'name server' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_TTLS"><tt class="ph tt">      public list&lt;uint32&gt; DNS_NAMESERVER_TTLS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'time to live' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_NAMESERVER_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_NAMESERVER_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_OPCODE"><tt class="ph tt">      public uint8 DNS_OPCODE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the operation code requested by the DNS client in the current message, for example,
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '1' for standard queries, </li>
+
+<li class="li"> '2' for inverse queries, or</li>
+
+<li class="li"> '3' for server status requests.</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_CLASS"><tt class="ph tt">      public uint16 DNS_QUESTION_CLASS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records),
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_QUESTION_CLASSES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'class' fields in the 'question' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_COUNT"><tt class="ph tt">      public uint16 DNS_QUESTION_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of 'question' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_NAME"><tt class="ph tt">      public rstring DNS_QUESTION_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'name' field of the first 'question' resource record in the current message,           if there is one, or an empty string if not.           Note that if the DNS message does contain a 'question'           resource record, and the name is encoded incorrecty, this function may           return an empty or truncated string.  In this case, the <tt class="ph tt">parseError()</tt>           function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_NAMES"><tt class="ph tt">      public list&lt;rstring&gt; DNS_QUESTION_NAMES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'name' fields in the 'question' resource records in the current message.           Note that if any of the names are encoded           incorrectly, this function may return an empty or truncated list, and           some or all of the names may be empty or truncated. In this case, the           <tt class="ph tt">parseError()</tt> function will return <tt class="ph tt">true</tt>.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_TYPE"><tt class="ph tt">      public uint16 DNS_QUESTION_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '1' for IP version 4 address to domain name lookup ('A' records),</li>
+
+<li class="li"> '5' for domain name to canonical domain name lookup ('CNAME' records),</li>
+
+<li class="li"> '12' for domain name to IP address lookup ('TXT' records), or</li>
+
+<li class="li"> '28' for IP version 6 address to domain name lookup ('AAAA' records).</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_QUESTION_TYPES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_QUESTION_TYPES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a list of the 'type' fields in the 'question' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_RESPONSE_CODE"><tt class="ph tt">      public uint8 DNS_RESPONSE_CODE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the response code from the DNS server in the current message, for example,
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> '0' for OK, </li>
+
+<li class="li"> '1' for Format Error, </li>
+
+<li class="li"> '2' for Server Failure, </li>
+
+<li class="li"> '3' for Name Error, </li>
+
+<li class="li"> '4' for not implemented, or</li>
+
+<li class="li"> '5' for Server Refused.</li>
+
+</ul>
+
+</div>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_RESPONSE_FLAG"><tt class="ph tt">      public boolean DNS_RESPONSE_FLAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the current message is a response sent by a DNS server,           or <tt class="ph tt">false</tt> if it is a request sent by a DNS client.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_TRUNCATION_FLAG"><tt class="ph tt">      public boolean DNS_TRUNCATION_FLAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the 'truncation' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__ETHER_DST_ADDRESS"><tt class="ph tt">      public list&lt;uint8&gt;[6] ETHER_DST_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the ethernet destination address of the current packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__ETHER_PROTOCOL"><tt class="ph tt">      public uint16 ETHER_PROTOCOL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the ethernet protocol (that is, the EtherType) of the current packet, for example, '2048' for IP version 4, or '34,525' for IP version 6.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__ETHER_SRC_ADDRESS"><tt class="ph tt">      public list&lt;uint8&gt;[6] ETHER_SRC_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the ethernet source address of the current packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPV4_DST_ADDRESS"><tt class="ph tt">      public uint32 IPV4_DST_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP version 4 destination address of the current packet, if it has one, or zero otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPV4_SRC_ADDRESS"><tt class="ph tt">      public uint32 IPV4_SRC_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP version 4 source address of the current packet, if it has one, or zero otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPV6_DST_ADDRESS"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPV6_DST_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP version 6 destination address of the current packet, if it has one, or an empty list otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IPV6_SRC_ADDRESS"><tt class="ph tt">      public list&lt;uint8&gt;[16] IPV6_SRC_ADDRESS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP version 6 source address of the current packet, if it has one, or an empty list otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_PROTOCOL"><tt class="ph tt">      public uint8 IP_PROTOCOL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP protocol of the current packet, for example, '6' for TCP, or '17' for UDP, or zero if the ethernet packet does not contain an IP packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_VERSION"><tt class="ph tt">      public uint8 IP_VERSION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP version of the current packet ('4' for IP version 4, or '6' for IP version 6),  if the ethernet packet contains an IP packet, or zero otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__PACKET_DATA"><tt class="ph tt">      public blob PACKET_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the network data in the current packet, including all network headers. Note that the data may have been truncated when the packet was captured.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__PACKET_LENGTH"><tt class="ph tt">      public uint32 PACKET_LENGTH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes of network data in the current packet, including all network headers. Note that this value may be larger than the length of the binary data returned by the <tt class="ph tt">PACKET_DATA()</tt> function if the packet was truncated when it was captured.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__PAYLOAD_DATA"><tt class="ph tt">      public blob PAYLOAD_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the payload data in the current packet, excluding all network headers. Note that the data may have been truncated when the packet was captured.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__PAYLOAD_LENGTH"><tt class="ph tt">      public uint32 PAYLOAD_LENGTH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes of payload data in the current packet, excluding all network headers. Note that this value may be larger than the length of the binary data returned by the <tt class="ph tt">PAYLOAD_DATA()</tt> function if the packet was truncated when it was captured.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__UDP_DST_PORT"><tt class="ph tt">      public uint16 UDP_DST_PORT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the UDP destination port number of the current packet,  if it has one, or zero otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__UDP_PORT.uint16"><tt class="ph tt">      public boolean UDP_PORT(uint16)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns <tt class="ph tt">true</tt> if the current packet is a UDP packet and the argument matches its source or destination port, or <tt class="ph tt">false</tt> otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__UDP_SRC_PORT"><tt class="ph tt">      public uint16 UDP_SRC_PORT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the UDP source port number of the current packet,  if it has one, or zero otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__VLAN_TAGS"><tt class="ph tt">      public list&lt;uint16&gt; VLAN_TAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns a list of 0 to N VLAN tags found in the current packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__bytesProcessed"><tt class="ph tt">      public uint64 bytesProcessed()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes of network data processed by the operator since it started, including the current packet, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalBytesProcessed"><tt class="ph tt">      public uint64 metricsIntervalBytesProcessed()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes of network data processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalElapsed"><tt class="ph tt">      public float64 metricsIntervalElapsed()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the duration of the most recent metrics interval, in seconds with a resolution of at least microseconds, if there is one, or zero if not. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsProcessed"><tt class="ph tt">      public uint64 metricsIntervalPacketsProcessed()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of network packets processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsUpdated"><tt class="ph tt">      public boolean metricsUpdated()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns <tt class="ph tt">true</tt> for the first tuple produced after a new metrics interval begins, and returns <tt class="ph tt">false</tt> for all subsequent tuples produced in the same metrics interval.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__packetsProcessed"><tt class="ph tt">      public uint64 packetsProcessed()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of network packets processed by the operator since it started, including the current packet, but excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

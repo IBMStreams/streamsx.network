@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File LiveDNSPacketLiveSourceFilter.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File LiveDNSPacketLiveSourceFilter.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">LiveDNSPacketLiveSourceFilter.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleDNSPacketLiveSource.html">SampleDNSPacketLiveSource 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; LiveDNSPacketLiveSourceFilter.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$LiveDNSPacketLiveSourceFilter.html#spldoc_compilationunit__composite_operator__LiveDNSPacketLiveSourceFilter">LiveDNSPacketLiveSourceFilter</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__LiveDNSPacketLiveSourceFilter"><h2 class="title sectiontitle splpart">public composite LiveDNSPacketLiveSourceFilter</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleDNSPacketLiveSource/op$sample$LiveDNSPacketLiveSourceFilter.svg" width="262" height="425"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">networkInterface</strong>
+</li>
+
+<li class="sli"><strong class="ph b">processorAffinity</strong>
+</li>
+
+<li class="sli"><strong class="ph b">metricsInterval</strong>
+</li>
+
+<li class="sli"><strong class="ph b">timeoutInterval</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite LiveDNSPacketLiveSourceFilter {
+ 
+     param
+     expression&lt;rstring&gt; $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
+     expression&lt;uint32&gt; $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1" );
+     expression&lt;float64&gt; $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "10.0" );
+     expression&lt;float64&gt; $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "60.0" );
+ 
+     type
+ 
+     DNSMessageType =
+         uint64 packetNumber,            // sequence number of packet
+         float64 captureTime,             // time that packet was captured, in seconds since Unix epoch
+         uint32 ipv4ServerAddress,       // IPv4 address of DNS server
+         boolean isResponse,
+         uint8 opCode,
+         uint8 responseCode,
+         rstring questionName,
+         uint16 questionType,
+         list&lt;rstring&gt; answerNames,
+         list&lt;uint16&gt; answerTypes,
+         list&lt;rstring&gt; nameserverNames,
+         list&lt;rstring&gt; additionalNames,
+         list&lt;rstring&gt; additionalData;
+ 
+     FlattenedDNSMessageType = 
+         float64 captureTime,
+         rstring flattenedDNSMessage;
+ 
+     DNSErrorType =
+       uint64 packetNumber,
+       float64 captureTime, 
+       int32 errorCode,
+       rstring errorDescription,
+       int32 incompatibleFlags,
+       blob dnsMessage;
+ 
+     MetricsType =
+         float64 metricsTime,            // time that metrics were produced, in seconds since Unix epoch
+         boolean metricsUpdated,         // true if metrics have been updated since previous output tuple
+         uint64 packetNumber,            // sequence number of packet, as emitted by operator
+         uint64 packetsReceived,         // number of packets received by network interface in this interval
+         uint64 packetsDropped,          // number of packets dropped in this interval
+         uint64 packetsProcessed,        // number of packets emitted by operator in this interval
+         uint64 bytesProcessed,         // number of bytes emitted by operator in this interval
+         float64 intervalElapsed,        // elapsed time since last metrics interval, in seconds
+         uint64 intervalPacketsReceived, // number of packets received since last metrics interval
+         uint64 intervalPacketsDropped,  // number of packets dropped since last metrics interval
+         uint64 intervalPacketsProcessed,// number of packets processed since last metrics interval
+         uint64 intervalBytesProcessed; // number of bytes processed since last metrics interval
+ 
+     graph
+ 
+ 
+ 
+ ( stream&lt;DNSMessageType&gt; DNSMessageStream ; 
+    stream&lt;FlattenedDNSMessageType&gt; FlattenedDNSQuestionStream ;
+    stream&lt;FlattenedDNSMessageType&gt; FlattenedDNSNormalResponseStream ;
+    stream&lt;FlattenedDNSMessageType&gt; FlattenedDNSErrorResponseStream ;
+    stream&lt;FlattenedDNSMessageType&gt; FlattenedDNSMalformedStream ;
+    stream&lt;FlattenedDNSMessageType&gt; FlattenedDNSIncompatibleFlagsStream ;
+    stream&lt;DNSErrorType&gt; DNSErrorStream ;
+    stream&lt;MetricsType&gt; MetricsStream ) = DNSPacketLiveSource() {
+         param
+             networkInterface: $networkInterface;
+             promiscuous: true;
+             processorAffinity: $processorAffinity;
+             outputFilters: !parseError(), // selects messages for DNSMessageStream
+                            !parseError() &amp;&amp; !DNS_RESPONSE_FLAG(), // selects messages for FlattenedDNSQuestionStream
+                            !parseError() &amp;&amp; DNS_RESPONSE_FLAG() &amp;&amp; DNS_RESPONSE_CODE()==0ub, // selects messages for FlattenedDNSNormalResponseStream
+                            !parseError() &amp;&amp; DNS_RESPONSE_FLAG() &amp;&amp; DNS_RESPONSE_CODE()!=0ub, // selects messages for FlattenedDNSErrorResponseStream
+                            parseErrorCode()!=0, // selects messages for FlattenedDNSMalformedStream
+                            DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for FlattenedDNSIncompatibleStream
+                            parseErrorCode()!=0 || DNS_INCOMPATIBLE_FLAGS()!=0, // selects messages for DNSMalformedStream
+                            metricsUpdated(); // selects messages for MetricsStream
+             metricsInterval: $metricsInterval;
+         output 
+         DNSMessageStream:
+           packetNumber = packetsProcessed(),
+           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+           ipv4ServerAddress = DNS_RESPONSE_FLAG() ? IPV4_SRC_ADDRESS() : IPV4_DST_ADDRESS(), 
+           isResponse = DNS_RESPONSE_FLAG(),
+           opCode = DNS_OPCODE(),
+           responseCode = DNS_RESPONSE_CODE(),
+           questionName = DNS_QUESTION_NAME(),
+           questionType = DNS_QUESTION_TYPE(),
+           answerNames = DNS_ANSWER_NAMES(),
+           answerTypes = DNS_ANSWER_TYPES(),
+           nameserverNames = DNS_NAMESERVER_NAMES(),
+           additionalNames = DNS_ADDITIONAL_NAMES(),
+           additionalData = DNS_ADDITIONAL_DATA();
+         FlattenedDNSQuestionStream:
+           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+         FlattenedDNSNormalResponseStream:
+           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+         FlattenedDNSErrorResponseStream:
+           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+         FlattenedDNSMalformedStream:
+           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+         FlattenedDNSIncompatibleFlagsStream:
+           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+         DNSErrorStream:
+           packetNumber = packetsProcessed(),
+           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+           errorCode = parseErrorCode(),
+           errorDescription = parseErrorDescription(),
+           incompatibleFlags = DNS_INCOMPATIBLE_FLAGS(),
+           dnsMessage = PAYLOAD_DATA();
+         MetricsStream:
+             metricsTime = getTimestampInSecs(),
+             metricsUpdated = metricsUpdated(),
+             packetNumber = packetsProcessed() - 1ul,
+             packetsReceived = packetsReceived(),
+             packetsDropped = packetsDropped(),
+             packetsProcessed = packetsProcessed(),
+             bytesProcessed = bytesProcessed(),
+             intervalElapsed = metricsIntervalElapsed(),
+             intervalPacketsReceived = metricsIntervalPacketsReceived(),
+             intervalPacketsDropped = metricsIntervalPacketsDropped(),
+             intervalPacketsProcessed = metricsIntervalPacketsProcessed(),
+             intervalBytesProcessed = metricsIntervalBytesProcessed();
+     }
+     () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.LiveDNSPacketLiveSourceFilter.DNSMessageStream.out"; format: txt; hasDelayField: true; }
+     () as FlattenedDNSQuesstionSink = FileSink(FlattenedDNSQuestionStream) { param file: "debug.LiveDNSPacketLiveSourceFilter.FlattenedDNSQuestionStream.out"; format: line; suppress: captureTime; }
+     () as FlattenedDNSNormalResponseSink = FileSink(FlattenedDNSNormalResponseStream) { param file: "debug.LiveDNSPacketLiveSourceFilter.FlattenedDNSNormalResponseStream.out"; format: line; suppress: captureTime; }
+     () as FlattenedDNSErrorResponseSink = FileSink(FlattenedDNSErrorResponseStream) { param file: "debug.LiveDNSPacketLiveSourceFilter.FlattenedDNSErrorResponseStream.out"; format: line; suppress: captureTime; }
+     () as FlattenedDNSMalformedSink = FileSink(FlattenedDNSMalformedStream) { param file: "debug.TestDNSPacketLiveSourceFilter.FlattenedDNSMalformedStream.out"; format: line; suppress: captureTime; }
+     () as FlattenedDNSIncompatibleSink = FileSink(FlattenedDNSIncompatibleFlagsStream) { param file: "debug.TestDNSPacketLiveSourceFilter.FlattenedDNSIncompatibleFlagsStream.out"; format: line; suppress: captureTime; }
+     () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSPacketLiveSourceFilter.DNSErrorStream.out"; format: txt; hasDelayField: true; }
+     () as MetricsSink = FileSink(MetricsStream) { param file: "debug.LiveDNSPacketLiveSourceFilter.MetricsStream.out"; format: txt; hasDelayField: true; }
+ 
+     () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

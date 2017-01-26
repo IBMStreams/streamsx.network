@@ -12,7 +12,7 @@ use com.ibm.streamsx.network.parse::*;
 composite TestNetflowMessageParserParallelAnalysis {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_netflow9_new.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_netflow9_new.pcap" );
     expression<int32> $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
 
     type

@@ -4,13 +4,16 @@
  ********************************************************************/
 
 <%
+    # module for i18n messages
+    require NetworkResources;
+
     ### Consistent region ERROR message ###
 
     my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
     if($crContext) {
         my $opName = $model->getContext()->getKind() ;
         if($crContext->isStartOfRegion()) {
-            SPL::CodeGen::exitln("The " . $opName . " operator cannot be the start of a consistent region.");
+            SPL::CodeGen::exitln(NetworkResources::NETWORK_CONSISTENT_REGION_START_ERROR($opName));
         }
     }
 %>
@@ -51,7 +54,7 @@ if ($outputFilterParameter) {
 }
 
 # basic safety checks
-SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@outputPortList);
 
 %>
 
@@ -181,6 +184,12 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
     // in some situations, but results will vary.
     __builtin_prefetch((void *)packet, 0, 0);
     __builtin_prefetch((void *)((uint64_t)packet + packetLen), 0, 0);
+
+  // get current time in microseconds
+  struct timespec ts; 
+  clock_gettime(CLOCK_REALTIME, &ts); 
+  captureSeconds = (uint32)ts.tv_sec;
+  captureMicroseconds = (uint32)(ts.tv_nsec/1000);
 
     tscMicroseconds = tscTimestamp / tscMicrosecondAdjust;
 

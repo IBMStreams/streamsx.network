@@ -19,9 +19,7 @@ buildDirectory=$projectDirectory/output/build/$composite
 
 dataDirectory=$projectDirectory/data
 
-libpcapDirectory=$HOME/libpcap-1.7.4
-
-libpamDirectory=$HOME/workspace/com.ibm.iss.pam
+libpamDirectory=$HOME/com.ibm.iss.pam
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
@@ -49,7 +47,6 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_http+https.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_firewall_one_minute.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -65,8 +62,6 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 [ -d $libpamDirectory ] && export STREAMS_ADAPTERS_ISS_PAM_DIRECTORY=$libpamDirectory
 
 step "configuration for standalone application '$namespace.$composite' ..."

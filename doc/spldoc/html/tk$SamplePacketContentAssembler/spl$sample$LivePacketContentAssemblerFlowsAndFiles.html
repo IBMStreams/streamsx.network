@@ -57,6 +57,10 @@
   
 </div>
 
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$LivePacketContentAssemblerFlowsAndFiles.svg" width="342" height="243"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -80,14 +84,6 @@
 </div>
 
 <div class="section">
-</div>
-
-<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
-  
-</div>
-
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$LivePacketContentAssemblerFlowsAndFiles.svg" width="342" height="243"/>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
@@ -169,15 +165,15 @@
        "pam.ca.smb.enabled=false",
        "pam.ca.webmsn.enabled=false",
        "pam.cisco.sccp.enabled=false",
-       //"pam.content.consume.archives=on", dunno about this one ......
+       //"pam.content.consume.archives=on", // ... dunno about this one ...
        "pam.content.disable.application/pdf=on",
        "pam.content.disable.multipart/form-data=true",
        "pam.content.disable.text/html=true",
-       "pam.content.docx.decompress=false", 
+       //"pam.content.docx.decompress=false", // ... dropped from PAM ...
        "pam.content.encoded_script.parse=false",
        "pam.content.gif.enabled=true",
        "pam.content.java.parse=false",
-       "pam.content.pptx.decompress=false", 
+       //"pam.content.pptx.decompress=false", // ... dropped from PAM ...
        "pam.content.riff.parse=false",
        "pam.content.sami.parse=false",
        "pam.content.sdp.parse=false",
@@ -186,8 +182,8 @@
        "pam.content.soap.parse=false",
        "pam.content.text.maxbytes=1",
        "pam.content.text.parse=false",
-       "pam.content.wmz.decompress=false",
-       "pam.content.xlsx.decompress=false",
+       //"pam.content.wmz.decompress=false", // ... dropped from PAM ...
+       //"pam.content.xlsx.decompress=false", // ... dropped from PAM ...
        "pam.content.xml.parse=false",
        "pam.cvs.authenticate=false",
        "pam.dbt.enable=false",
