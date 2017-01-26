@@ -10,7 +10,7 @@ use com.ibm.streamsx.network.source::*;
 composite TestPacketFileSourceMinimalA {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
 
     type
 

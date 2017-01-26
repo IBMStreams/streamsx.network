@@ -1,6 +1,6 @@
 <%
 
-# Copyright (C) 2011, 2015  International Business Machines Corporation
+# Copyright (C) 2011, 2016  International Business Machines Corporation
 # All Rights Reserved
 
 %>
@@ -49,7 +49,10 @@ private:
   SPL::boolean parseError() { return parser.error ? true : false; }
 
   inline __attribute__((always_inline))
-  SPL::rstring parseErrorDescription() { return parser.error ? parser.error : ""; }
+  SPL::int32 parseErrorCode() { return parser.error; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring parseErrorDescription() { return parser.errorDescriptions.description[parser.error]; }
 
   inline __attribute__((always_inline))
   SPL::uint32 parseErrorOffset() { return parser.error ? ( parser.dnsPointer - parser.dnsStart ) : 0; }
@@ -78,7 +81,6 @@ private:
   inline __attribute__((always_inline))
   SPL::uint16 DNS_ALL_FLAGS() { return ntohs(parser.dnsHeader->flags.allFlags); }
   
-
   inline __attribute__((always_inline))
   SPL::uint16 DNS_QUESTION_COUNT() { return parser.questionCount; }
 
@@ -180,6 +182,9 @@ private:
 
   inline __attribute__((always_inline))
   SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
+
+  inline __attribute__((always_inline))
+  SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
 
 };
 

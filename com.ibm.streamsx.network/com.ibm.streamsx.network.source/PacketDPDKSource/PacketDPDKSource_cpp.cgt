@@ -182,6 +182,12 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
     __builtin_prefetch((void *)packet, 0, 0);
     __builtin_prefetch((void *)((uint64_t)packet + packetLen), 0, 0);
 
+  // get current time in microseconds
+  struct timespec ts; 
+  clock_gettime(CLOCK_REALTIME, &ts); 
+  captureSeconds = (uint32)ts.tv_sec;
+  captureMicroseconds = (uint32)(ts.tv_nsec/1000);
+
     tscMicroseconds = tscTimestamp / tscMicrosecondAdjust;
 
     // Optionally parse the network headers in the packet.

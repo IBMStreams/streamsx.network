@@ -16,8 +16,7 @@ use com.ibm.streamsx.network.content::*;
 composite TestPacketContentAssemblerEvents {
 
   param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./firewallcontent_sample.pcap");
-    //expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "./smtp_sample_with_attachment.pcap");
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_http+https.pcap");
 
   type
 
@@ -60,10 +59,10 @@ composite TestPacketContentAssemblerEvents {
     param
     timestampAttribute: captureTime;
     packetAttribute: rawPacket;
-    pamTuning: "pam.content.consume.archives=on",
-               "pam.content.docx.decompress=false",
-               "pam.content.pptx.decompress=false",
-               "pam.content.xlsx.decompress=false" ;
+    pamTuning: "pam.content.consume.archives=on";
+               //"pam.content.docx.decompress=false", // ... dropped from PAM ...
+               //"pam.content.pptx.decompress=false", // ... dropped from PAM ...
+               //"pam.content.xlsx.decompress=false" ; // ... dropped from PAM ...
     output Out:
       ipSource = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()) + ":" + (rstring)FLOW_SRC_PORT(),
       flowDirection = FLOW_DIRECTION(),

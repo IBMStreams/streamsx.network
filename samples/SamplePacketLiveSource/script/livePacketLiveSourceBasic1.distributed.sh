@@ -19,8 +19,6 @@ buildDirectory=$projectDirectory/output/build/$composite.distributed
 dataDirectory=$projectDirectory/data
 logDirectory=$projectDirectory/log
 
-libpcapDirectory=$HOME/libpcap-1.7.4
-
 networkInterface=$( ifconfig eno1 1>/dev/null 2>&1 && echo eno1 || echo eth0 ) 
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
@@ -70,8 +68,6 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
 step "configuration for distributed application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )

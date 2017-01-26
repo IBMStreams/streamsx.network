@@ -16,7 +16,7 @@ specified by output attribute assignments.
 The DNSMessageParser operator expects only DNS messages in its input tuples,
 without any of the headers that precede them in network packets.  The
 [PacketLiveSource] and [PacketFileSource] operators can produce tuples that contain
-DNS messages with the [PAYLOAD_DATA()] output attribute assignment function.
+DNS messages with the PAYLOAD_DATA() output attribute assignment function.
 
 The DNSMessageParser operator consumes input tuples containing DNS messages,
 parses individual fields in the messages, 
@@ -67,7 +67,18 @@ that illustrate how to use this operator.
 DNS messages and the fields they contain are described here:
   
 * [http://en.wikipedia.org/wiki/Domain_Name_System]
+* [http://en.wikipedia.org/wiki/List_of_DNS_record_types]
 * [http://tools.ietf.org/html/rfc1035]
+* [http://tools.ietf.org/html/rfc2308] for SOA resource records
+* [http://tools.ietf.org/html/rfc2872] for SRV resource records
+* [http://tools.ietf.org/html/rfc3403] for NAPTR resource records
+* [http://tools.ietf.org/html/rfc3596] for AAAA resource records
+* [http://tools.ietf.org/html/rfc4034] for DS, RRSIG, NSEC, and DNSKEY resource records
+* [http://tools.ietf.org/html/rfc4408] for SPF resource records
+* [http://tools.ietf.org/html/rfc5155] for NSEC3 and NSEC3PARAM resource records
+* [http://tools.ietf.org/html/rfc6891] for OPT resource records
+* [http://tools.ietf.org/html/rfc7208] for SPF resource records
+* [http://tools.ietf.org/html/rfc7505] for MX resource records
 
 The result functions that can be used in boolean
 expressions for the `outputFilters` parameter
@@ -167,7 +178,7 @@ of type `blob` and must contain a DNS message, excluding the network headers tha
 proceed them in network packets, as specified by the required parameter
 `messageAttribute`.
 
-The [PAYLOAD_DATA()] output assignment function of the [PacketLiveSource] and
+The PAYLOAD_DATA() output assignment function of the [PacketLiveSource] and
 [PacketFileSource] operators produces attributes that
 can be consumed by the DNSMessageParser operator.
 

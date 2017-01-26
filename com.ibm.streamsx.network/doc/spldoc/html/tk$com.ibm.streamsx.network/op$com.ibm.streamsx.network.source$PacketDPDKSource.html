@@ -160,10 +160,6 @@ make
 make install T=x86_64-native-linuxapp-gcc
    OR
 make install T=ppc_64-power8-linuxapp-gcc
-
-# Move the resulting library to your Streams application build location
-# libdpdk.a will be libdpdk.so if CONFIG_RTE_BUILD_SHARED_LIB=y was used.
-cp build/lib/libdpdk.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
 </pre>
 
 
@@ -178,8 +174,6 @@ cp build/lib/libdpdk.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/l
 <pre class="pre codeblock">
 cd &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/src/source/dpdk
 make
-cp streams_source.h &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/include/source/
-cp build/lib/libstreams_source.a &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/lib/source/
 </pre>
 
 
@@ -761,9 +755,9 @@ This operator supports 6 parameters.<dl class="dl">
 <dd class="dd"/>
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">streams_source</tt></dd>
 
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/source</tt></dd>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/src/source/dpdk/build/lib</tt></dd>
 
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/include/source</tt></dd>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/src/source/dpdk</tt></dd>
 
  
 </dl>

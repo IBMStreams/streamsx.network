@@ -136,6 +136,8 @@ public:
     eventNames[XPF_MSG_HTTP_PROXY] = "HTTP_PROXY";
     eventNames[XPF_MSG_HTTP_XFORWARDEDFOR] = "HTTP_XFORWARDEDFOR";
     eventNames[XPF_MSG_HTTP_RESPONSE] = "HTTP_RESPONSE";
+    eventNames[XPF_MSG_PACKET_TUNNELING] = "PACKET_TUNNELING";
+    eventNames[XPF_MSG_IPV6_OPTION_HOP_BY_HOP] = "IPV6_OPTION_HOP_BY_HOP";
     eventNames[XPF_MSG_LAST] = "LAST"; }
   const char* event2name(uint32_t event) { return eventNames[event]; }
 };
@@ -350,13 +352,7 @@ void MY_OPERATOR::processEvent(const pam2XpfHeader* eventHeader, void* connectio
     case XPF_MSG_APPL_DNS_RESPONSE:
       processDNSResponseEvent(*eventHeader, *(pam2XpfDnsResponse*)eventPointer);
       break;
-    case XPF_MSG_UDP_STATUS:
-    case XPF_MSG_TCP_STATUS:
-    case XPF_MSG_CONN_TAGGED:
-    case XPF_MSG_HTTP_PROXY:
-    case XPF_MSG_TLS_TUNNEL_ID:
-    case XPF_MSG_LAST:
-    case XPF_MSG_HTTP_XFORWARDEDFOR:
+    default:
       SPLAPPTRC(L_DEBUG, "unsupported XPF event " << xpfEventNames.event2name(eventPointer->msgId) << " ignored", "PacketContentAssembler");
       break;
     }

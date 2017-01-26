@@ -14,7 +14,7 @@ use com.ibm.streamsx.network.datetimeformat::*;
 composite TestDNSMessageParserFull {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
 
     type
 
@@ -30,6 +30,7 @@ composite TestDNSMessageParserFull {
       rstring ipSourceAddress,          // IP source address
       rstring ipDestinationAddress,     // IP destination address
       boolean parseError,
+      int32 parseErrorCode,
       rstring parseErrorDescription,
       uint32 parseErrorOffset,
       uint64 messagesProcessed,
@@ -75,7 +76,8 @@ composite TestDNSMessageParserFull {
       list<uint16> DNS_ADDITIONAL_TYPES,
       list<uint16> DNS_ADDITIONAL_CLASSES,
       list<uint32> DNS_ADDITIONAL_TTLS,
-      list<rstring> DNS_ADDITIONAL_DATA;
+      list<rstring> DNS_ADDITIONAL_DATA,
+      int32 DNS_INCOMPATIBLE_FLAGS;
 
     // error output from DNSMessageParser operator
     DNSErrorType =
@@ -115,6 +117,7 @@ composite TestDNSMessageParserFull {
       output OutMessage:
           captureTime = formatEpochDateTime(captureTime),
           parseError = parseError(),
+          parseErrorCode = parseErrorCode(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
           messagesProcessed = messagesProcessed(),
@@ -160,7 +163,9 @@ composite TestDNSMessageParserFull {
           DNS_ADDITIONAL_TYPES = DNS_ADDITIONAL_TYPES(),
           DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
           DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
-          DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA();
+          DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
+          DNS_INCOMPATIBLE_FLAGS = DNS_INCOMPATIBLE_FLAGS();
+
       OutError:
           captureTime = formatEpochTime(captureTime),
           parseErrorDescription = parseErrorDescription(),

@@ -372,6 +372,9 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_IDENTIFIER">DNS_IDENTIFIER()</a></strong>:           This parser result function returns the DNS client's request correlator in the current message, and returned by the server in its response.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_INCOMPATIBLE_FLAGS">DNS_INCOMPATIBLE_FLAGS()</a></strong>:           This DNS parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_CLASSES">DNS_NAMESERVER_CLASSES()</a></strong>:           This parser result function returns a list of the 'class' fields in the 'name server' resource records in the current message.
 </li>
 
@@ -1249,6 +1252,9 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__parseError">parseError()</a></strong>:           This parser result function returns <tt class="ph tt">true</tt> if an encoding error was detected while decoding the current packet,           or <tt class="ph tt">false</tt> otherwise.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__parseErrorCode">parseErrorCode()</a></strong>:           This parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__parseErrorDescription">parseErrorDescription()</a></strong>:           This parser result function returns a description of an encoding error found while decoding the current packet,           or an empty string if no enoding errors were found.

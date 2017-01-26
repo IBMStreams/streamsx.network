@@ -1,0 +1,339 @@
+<%
+## Copyright (C) 2011, 2016  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+
+#include <iostream>
+#include <iomanip>
+#include <limits>
+#include <locale>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <string.h>
+#include <sched.h>
+#include <pthread.h>
+#include <signal.h>
+#include <pcap.h>
+#include <pcap-bpf.h>
+#include <arpa/inet.h>
+
+#include <streams_boost/lexical_cast.hpp>
+
+#include <SPL/Runtime/Common/Metric.h>
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
+
+#include "parse/NetworkHeaderParser.h"
+#include "parse/DNSMessageParser.h"
+#include "dns/DNSPacketFlattener.h"
+
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR
+{
+public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR();
+  void allPortsReady();
+  void prepareToShutdown();
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+  // ----------- additional operator methods ----------
+
+  void metricsThread();
+  void pcapThread();
+  void processPCAPbuffer(const struct pcap_pkthdr* header, const u_char* buffer);
+
+
+private:
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+  std::string networkInterface;
+  std::string timestampType;
+  double initDelay;
+  int32_t processorAffinity;
+  int32_t maximumLength;
+  int32_t bufferSize;
+  bool promiscuous;
+  double timeout;
+  double metricsInterval;
+  std::string inputFilter;
+
+  // ----------- input and output tuples ----------
+
+  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+
+  // ----------- operator state variables ----------
+
+  pthread_t pcapThreadID;
+  pthread_t metricsThreadID;
+  double now, then;
+  uint64_t packetCounter, packetCounterNow, packetCounterThen;
+  uint64_t byteCounter, byteCounterNow, byteCounterThen;
+  bool metricsUpdate;
+
+  // ----------- libpcap-specific variables ----------
+
+  pcap_t* pcapDescriptor;
+  struct pcap_pkthdr* pcapHeader;
+  struct bpf_program inputFilterProgram;
+  struct pcap_stat pcapStatisticsNow, pcapStatisticsThen;
+
+  // ----------- packet header parser ----------
+
+  char* packetBuffer;
+  uint32_t packetBufferLength;
+  NetworkHeaderParser headers;
+
+  // ----------- DNS message parser and flattener ----------
+
+  DNSMessageParser parser;
+  DNSPacketFlattener flattener;
+
+  // ----------- assignment functions for output attributes ----------
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsReceived() { return pcapStatisticsNow.ps_recv; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDropped() { return pcapStatisticsNow.ps_drop; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsProcessed() { return packetCounter; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 bytesProcessed() { return byteCounter; }
+
+  inline __attribute__((always_inline))
+  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsReceived() { return then ? pcapStatisticsNow.ps_recv - pcapStatisticsThen.ps_recv : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDropped() { return then ? pcapStatisticsNow.ps_drop - pcapStatisticsThen.ps_drop : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesProcessed() { return then ? byteCounterNow - byteCounterThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 CAPTURE_MICROSECONDS() { return pcapHeader->ts.tv_usec; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 PACKET_LENGTH() { return pcapHeader->len; }
+
+  inline __attribute__((always_inline))
+  SPL::blob PACKET_DATA() { return SPL::blob((const unsigned char*)headers.packetBuffer, headers.packetLength); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 PAYLOAD_LENGTH() { return headers.payloadLength; }
+
+  inline __attribute__((always_inline))
+  SPL::blob PAYLOAD_DATA() { return headers.payload ? SPL::blob((const unsigned char*)headers.payload, headers.payloadLength) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IP_VERSION() { return headers.ipv4Header ? headers.ipv4Header->version : ( headers.ipv6Header ? headers.ipv6Header->ip6_vfc>>4 : 0 ); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 IPV4_DST_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->daddr) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPV6_SRC_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::boolean UDP_PORT(SPL::uint16 port) { return headers.udpHeader ? ( ntohs(headers.udpHeader->source)==port || ntohs(headers.udpHeader->dest)==port ) : false; }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 UDP_SRC_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->source) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 UDP_DST_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->dest) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean parseError() { return parser.error ? true : false; }
+
+  inline __attribute__((always_inline))
+  SPL::int32 parseErrorCode() { return parser.error; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring parseErrorDescription() { return parser.errorDescriptions.description[parser.error]; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 parseErrorOffset() { return parser.error ? ( parser.dnsPointer - parser.dnsStart ) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_IDENTIFIER() { return ntohs(parser.dnsHeader->identifier); }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 DNS_OPCODE() { return parser.dnsHeader->flags.indFlags.opcodeField; }
+
+  inline __attribute__((always_inline))
+  SPL::uint8 DNS_RESPONSE_CODE() { return parser.dnsHeader->flags.indFlags.responseCode; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean DNS_RESPONSE_FLAG() { return parser.dnsHeader->flags.indFlags.responseFlag; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean DNS_AUTHORITATIVE_FLAG() { return parser.dnsHeader->flags.indFlags.authoritativeFlag; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean DNS_TRUNCATION_FLAG() { return parser.dnsHeader->flags.indFlags.truncatedFlag; }
+  
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_ALL_FLAGS() { return ntohs(parser.dnsHeader->flags.allFlags); }
+  
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_QUESTION_COUNT() { return parser.questionCount; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring DNS_QUESTION_NAME() { return parser.questionRecordCount>0 ? parser.convertDNSEncodedNameToString(parser.questionRecords[0].name) : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_QUESTION_NAMES() { return parser.convertResourceNamesToStringList(parser.questionRecords, parser.questionRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_QUESTION_TYPE() { return parser.questionRecordCount>0 ? parser.questionRecords[0].type : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_QUESTION_TYPES() { return parser.convertResourceTypesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_QUESTION_CLASS() { return parser.questionRecordCount>0 ? parser.questionRecords[0].classs : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_QUESTION_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.questionRecords, parser.questionRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_ANSWER_COUNT() { return parser.answerCount; }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_ANSWER_NAMES() { return parser.convertResourceNamesToStringList(parser.answerRecords, parser.answerRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_ANSWER_TYPES() { return parser.convertResourceTypesToIntegerList(parser.answerRecords, parser.answerRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_ANSWER_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.answerRecords, parser.answerRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint32> DNS_ANSWER_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.answerRecords, parser.answerRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_ANSWER_DATA() { return parser.convertResourceDataToStringList(parser.answerRecords, parser.answerRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring DNS_ANSWER_CANONICAL() { return parser.canonicalRecordCount>0 ? parser.convertResourceDataToString(parser.canonicalRecords[0]) : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::rstring DNS_ANSWER_ADDRESS() { return parser.addressRecordCount>0 ? parser.convertResourceDataToString(parser.addressRecords[0]) : ""; }
+
+  inline __attribute__((always_inline))
+  SPL::uint32 DNS_ANSWER_IPV4_ADDRESS() { return parser.addressRecordCount>0 && parser.addressRecords[0].type==1 ? ntohl(*((uint32*)parser.addressRecords[0].rdata)) : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint8> DNS_ANSWER_IPV6_ADDRESS() { return parser.addressRecordCount>0 && parser.addressRecords[0].type==28 ? SPL::list<SPL::uint8>(parser.addressRecords[0].rdata,parser.addressRecords[0].rdata+16) : SPL::list<SPL::uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_ANSWER_ADDRESSES() { return parser.convertResourceDataToStringList(parser.addressRecords, parser.addressRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::uint32> DNS_ANSWER_IPV4_ADDRESSES() { return parser.convertResourceDataToIPv4AddressList(parser.addressRecords, parser.addressRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<SPL::list<SPL::uint8> > DNS_ANSWER_IPV6_ADDRESSES() { return parser.convertResourceDataToIPv6AddressList(parser.addressRecords, parser.addressRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_NAMESERVER_COUNT() { return parser.nameserverCount; }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_NAMESERVER_NAMES() { return parser.convertResourceNamesToStringList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_NAMESERVER_TYPES() { return parser.convertResourceTypesToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_NAMESERVER_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint32> DNS_NAMESERVER_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_NAMESERVER_DATA() { return parser.convertResourceDataToStringList(parser.nameserverRecords, parser.nameserverRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_NAMESERVER_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.nameserverRecords, parser.nameserverRecordCount, fieldDelimiter); }
+
+  inline __attribute__((always_inline))
+  SPL::uint16 DNS_ADDITIONAL_COUNT() { return parser.additionalCount; }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_ADDITIONAL_NAMES() { return parser.convertResourceNamesToStringList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_ADDITIONAL_TYPES() { return parser.convertResourceTypesToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint16> DNS_ADDITIONAL_CLASSES() { return parser.convertResourceClassesToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<uint32> DNS_ADDITIONAL_TTLS() { return parser.convertResourceTTLsToIntegerList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_ADDITIONAL_DATA() { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount); }
+
+  inline __attribute__((always_inline))
+  SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
+
+  inline __attribute__((always_inline))
+    SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { return flattener.dnsAllFields(pcapHeader->ts.tv_sec, pcapHeader->len, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str()); }
+
+  inline __attribute__((always_inline))
+  SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
+
+
+  // ------------------------------------------------------------------------------------------
+
+};
+
+<%SPL::CodeGen::headerEpilogue($model);%>
