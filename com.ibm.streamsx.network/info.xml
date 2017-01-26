@@ -7,4 +7,9 @@
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
+  <info:resources>
+    <info:messageSet name="NetworkResources">
+      <info:lang default="true">en_US/NetworkResources.xlf</info:lang>
+    </info:messageSet>
+  </info:resources>  
 </info:toolkitInfoModel>
