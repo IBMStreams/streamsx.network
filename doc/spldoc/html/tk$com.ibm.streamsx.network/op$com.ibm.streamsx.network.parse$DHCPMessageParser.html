@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.4</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; DHCPMessageParser</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; DHCPMessageParser</p>
 
 </div>
 
@@ -35,7 +35,7 @@
 <p class="p">DHCPMessageParser is an operator for the IBM InfoSphere Streams product that parses individual fields of DHCP messages received in input tuples,  and emits tuples containing message data.   The operator may be configured with one or more output ports, and each port may be configured to emit different tuples, as specified by output filters. The tuples contain individual fields from the input message, as specified by output attribute assignments.  
 </p>
 
-<p class="p">The DHCPMessageParser operator expects only DHCP messages in its input tuples, without any of the headers that precede them in network packets.   The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_DATA">PAYLOAD_DATA()</a> output attribute assignment function.
+<p class="p">The DHCPMessageParser operator expects only DHCP messages in its input tuples, without any of the headers that precede them in network packets.   The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the PAYLOAD_DATA() output attribute assignment function.
 </p>
 
 <p class="p">The DHCPMessageParser operator consumes input tuples containing DHCP messages, parses individual fields in the messages,  selects messages to emit as output tuples with output filter expressions, and assigns values to them with output attribute assignment expressions.
@@ -46,7 +46,7 @@
 
 <div class="p">
 <ul class="ul">
-<li class="li"> <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP parser result functions</a></li>
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP parser result functions</a></li>
 
 </ul>
 
@@ -100,7 +100,7 @@ specified does not match the number of output ports specified.
 <div class="section"><h2 class="title sectiontitle">Sample Applications
 </h2>
 
-<p class="p">The network toolkit includes several <a class="xref" href=".././tk$SampleDNSMessageParser/tk$SampleDNSMessageParser.html">sample applications</a> that illustrate how to use this operator.
+<p class="p">The network toolkit includes several <a class="xref" href="https://github.com/IBMStreams/streamsx.network/tree/master/samples">sample applications</a> that illustrate how to use this operator.
 </p>
 
 </div>
@@ -130,7 +130,7 @@ specified does not match the number of output ports specified.
 
 <div class="p">
 <ul class="ul">
-<li class="li"> <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP result functions</a>.  </li>
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP result functions</a>.  </li>
 
 </ul>
 
@@ -207,7 +207,7 @@ specified does not match the number of output ports specified.
 <p class="p">The DHCPMessageParser operator requires one input port.  One input attribute must be of type <tt class="ph tt">blob</tt> and must contain a DHCP message, excluding the network headers that proceed them in network packets, as specified by the required parameter <tt class="ph tt">messageAttribute</tt>.
 </p>
 
-<p class="p">The <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_DATA">PAYLOAD_DATA()</a> output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the DHCPMessageParser operator.
+<p class="p">The PAYLOAD_DATA() output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the DHCPMessageParser operator.
 </p>
 
    <dl class="dl">
@@ -270,7 +270,7 @@ specified does not match the number of output ports specified.
 <p class="p">Each output port will produce one output tuple for each input tuple if the corresponding expression in the <tt class="ph tt">outputFilters</tt> parameter evaluates <tt class="ph tt">true</tt>, or if no <tt class="ph tt">outputFilters</tt> parameter is specified. 
 </p>
 
-<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the  <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP result functions</a>.   Output attributes that match input attributes in name and type are copied automatically.
+<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the  <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP result functions</a>.   Output attributes that match input attributes in name and type are copied automatically.
 </p>
 
    <p class="p"/>
@@ -306,6 +306,16 @@ specified does not match the number of output ports specified.
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
 
+
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__messageAttribute">messageAttribute</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>
+
+</p>
 <dl class="dl">
   
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__messageAttribute"><!-- --></a><tt class="ph tt">messageAttribute</tt></dt>
@@ -346,7 +356,7 @@ specified does not match the number of output ports specified.
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes a list of SPL expressions that specify which DHCP messages should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP result functions</a>.  
+<p class="p">This optional parameter takes a list of SPL expressions that specify which DHCP messages should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.parse.html">DHCP result functions</a>.  
 </p>
 
 <p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all DHCP messages processed to be emitted by all output ports.

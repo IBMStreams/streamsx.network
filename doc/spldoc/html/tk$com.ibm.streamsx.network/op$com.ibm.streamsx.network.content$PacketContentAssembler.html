@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.4</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.content.html">com.ibm.streamsx.network.content</a> &gt; PacketContentAssembler</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.content.html">com.ibm.streamsx.network.content</a> &gt; PacketContentAssembler</p>
 
 </div>
 
@@ -35,7 +35,7 @@
 <p class="p">PacketContentAssembler is an operator for the IBM InfoSphere Streams product that reassembles application flows (such as SMTP, FTP, HTTP, and SIP) and files (such as GIF, JPEG, HTML, and and PDF) from raw network packets received in input tuples,  and emits tuples containing the reassembled content.  The operator may be configured with one or more output ports, and each port may be configured to emit different tuples, as specified by output filters. The tuples contain individual fields from flows and files, as specified by output attribute assignments.  
 </p>
 
-<p class="p">The PacketContentAssembler operator expects raw ethernet packets in its input tuples, including all of their network headers.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PACKET_DATA">PACKET_DATA()</a> output attribute assignment function.
+<p class="p">The PacketContentAssembler operator expects raw ethernet packets in its input tuples, including all of their network headers.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the PACKET_DATA() output attribute assignment function.
 </p>
 
 <p class="p">The PacketContentAssembler operator  consumes network packets from tuples received by its input port  and reassembles flows and files in internal buffers. It produces output tuples containing the results of its reassembly when one of the following events is detected:
@@ -70,7 +70,7 @@
 
 <div class="p">
 <ul class="ul">
-<li class="li"> <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html">content assembler result functions</a></li>
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html">content assembler result functions</a></li>
 
 </ul>
 
@@ -143,7 +143,7 @@ specified does not match the number of output ports specified.
 <div class="section"><h2 class="title sectiontitle">Sample Applications
 </h2>
 
-<p class="p">The network toolkit includes several <a class="xref" href=".././tk$SamplePacketContentAssembler/tk$SamplePacketContentAssembler.html">sample applications</a> that illustrate how to use this operator.
+<p class="p">The network toolkit includes several <a class="xref" href="https://github.com/IBMStreams/streamsx.network/tree/master/samples">sample applications</a> that illustrate how to use this operator.
 </p>
 
 </div>
@@ -156,7 +156,7 @@ specified does not match the number of output ports specified.
 
 <div class="p">
 <ul class="ul">
-<li class="li"> <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html">content assembler result functions</a>.  </li>
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html">content assembler result functions</a>.  </li>
 
 </ul>
 
@@ -189,7 +189,7 @@ specified does not match the number of output ports specified.
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__fileChunkSize">fileChunkSize</a>, <a class="xref" href="#spldoc_operator__parameter__maximumFilesPerFlow">maximumFilesPerFlow</a>, <a class="xref" href="#spldoc_operator__parameter__pamLibrary">pamLibrary</a>, <a class="xref" href="#spldoc_operator__parameter__pamTuning">pamTuning</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>
+<a class="xref" href="#spldoc_operator__parameter__fileChunkSize">fileChunkSize</a>, <a class="xref" href="#spldoc_operator__parameter__maximumFilesPerFlow">maximumFilesPerFlow</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pamLibrary">pamLibrary</a>, <a class="xref" href="#spldoc_operator__parameter__pamTuning">pamTuning</a>
 
 </p>
 </dd>
@@ -233,7 +233,7 @@ specified does not match the number of output ports specified.
 <p class="p">The PacketContentAssembler operator requires one input port.  One input attribute must be of type <tt class="ph tt">blob</tt> and must contain a raw ethernet packet, including the network headers that proceed them in network packets, as specified by the required parameter <tt class="ph tt">packetAttribute</tt>.
 </p>
 
-<p class="p">The <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PACKET_DATA">PACKET_DATA()</a> output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the PacketContentAssembler operator.
+<p class="p">The PACKET_DATA() output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the PacketContentAssembler operator.
 </p>
 
    <dl class="dl">
@@ -332,77 +332,17 @@ specified does not match the number of output ports specified.
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
 
+
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__packetAttribute">packetAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__timestampAttribute">timestampAttribute</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__fileChunkSize">fileChunkSize</a>, <a class="xref" href="#spldoc_operator__parameter__maximumFilesPerFlow">maximumFilesPerFlow</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pamLibrary">pamLibrary</a>, <a class="xref" href="#spldoc_operator__parameter__pamTuning">pamTuning</a>
+
+</p>
 <dl class="dl">
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__packetAttribute"><!-- --></a><tt class="ph tt">packetAttribute</tt></dt>
-
-     <dd class="dd">
-<p class="p">This required parameter specifies an input attribute of type 'blob' that contains an ethernet packet to be parsed by the operator.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: blob
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__timestampAttribute"><!-- --></a><tt class="ph tt">timestampAttribute</tt></dt>
-
-     <dd class="dd">
-<p class="p">This required parameter specifies an input attribute of type 'float64' that contains the time, in seconds relative to the begining of the Unix epoch (midnight on January 1st, 1970 in Greenwich, England) when the packet was originally received from an ethernet adapter.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
   
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__fileChunkSize"><!-- --></a><tt class="ph tt">fileChunkSize</tt></dt>
 
@@ -463,6 +403,76 @@ specified does not match the number of output ports specified.
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes a list of SPL expressions that specify which events should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html">content assembler result functions</a>.  
+</p>
+
+<p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all events to be emitted by all output ports.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__packetAttribute"><!-- --></a><tt class="ph tt">packetAttribute</tt></dt>
+
+     <dd class="dd">
+<p class="p">This required parameter specifies an input attribute of type 'blob' that contains an ethernet packet to be parsed by the operator.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: blob
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
      </li>
 
    </ul>
@@ -550,13 +560,10 @@ specified does not match the number of output ports specified.
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__timestampAttribute"><!-- --></a><tt class="ph tt">timestampAttribute</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes a list of SPL expressions that specify which events should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href=".././tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.content.html">content assembler result functions</a>.  
-</p>
-
-<p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all events to be emitted by all output ports.
+<p class="p">This required parameter specifies an input attribute of type 'float64' that contains the time, in seconds relative to the begining of the Unix epoch (midnight on January 1st, 1970 in Greenwich, England) when the packet was originally received from an ethernet adapter.
 </p>
 
   <dl class="dl">
@@ -564,13 +571,16 @@ specified does not match the number of output ports specified.
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
      </li>
 
    </ul>
