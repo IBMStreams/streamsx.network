@@ -541,7 +541,7 @@ void MY_OPERATOR::parseBlocksFile(rstring filename, protocol proto)
 		
 		if(lineTokens.size() < MIN_BLOCKSFILE_FIELD_COUNT)
 		{
-			SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_LESS_FIELDS_IN_RECORD(lineTokens.size(), MIN_BLOCKSFILE_FIELD_COUNT, line), IP_SPATIAL);
+			SPLAPPLOG(L_ERROR, NETWORK_LESS_FIELDS_IN_RECORD(lineTokens.size(), MIN_BLOCKSFILE_FIELD_COUNT, line), IP_SPATIAL);
 			continue;
 		}
 		
@@ -553,7 +553,7 @@ void MY_OPERATOR::parseBlocksFile(rstring filename, protocol proto)
 			SPL::list<rstring> netTokens = SPL::Functions::String::tokenize(networkCIDR, "/", false);
 			if(netTokens.size() != 2)
 			{
-				SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNABLE_TO_PARSE_CIDR(networkCIDR), IP_SPATIAL);
+				SPLAPPLOG(L_ERROR, NETWORK_UNABLE_TO_PARSE_CIDR(networkCIDR), IP_SPATIAL);
 				continue;					
 			}
 
@@ -563,7 +563,7 @@ void MY_OPERATOR::parseBlocksFile(rstring filename, protocol proto)
 				uint32_t networkIP;
 				if(inet_pton(AF_INET, netTokens[0].c_str(), &networkIP) == 0)
 				{
-					SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv4", netTokens[0]), IP_SPATIAL);
+					SPLAPPLOG(L_ERROR, NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv4", netTokens[0]), IP_SPATIAL);
 					continue;
 				}
 				
@@ -578,7 +578,7 @@ void MY_OPERATOR::parseBlocksFile(rstring filename, protocol proto)
 				uint32_t networkIP[4];
 				if(inet_pton(AF_INET6, netTokens[0].c_str(), &networkIP) == 0)
 				{
-					SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", netTokens[0]), IP_SPATIAL);
+					SPLAPPLOG(L_ERROR, NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", netTokens[0]), IP_SPATIAL);
 					continue;
 				}
 				ntohl6(networkIP);
@@ -611,7 +611,7 @@ void MY_OPERATOR::parseBlocksFile(rstring filename, protocol proto)
 		} 
 		catch (streams_boost::bad_lexical_cast &e)
 		{
-			SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_ERROR_PARSING_RECORD("blocks", line, e.what()), IP_SPATIAL);
+			SPLAPPLOG(L_ERROR, NETWORK_ERROR_PARSING_RECORD("blocks", line, e.what()), IP_SPATIAL);
 		} 	
 	}
 	
@@ -676,12 +676,12 @@ void MY_OPERATOR::parseLocationFile(rstring filename)
 			} 
 			catch (streams_boost::bad_lexical_cast &e)
 			{
-				SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_ERROR_PARSING_RECORD("location", line, e.what()), IP_SPATIAL);
+				SPLAPPLOG(L_ERROR, NETWORK_ERROR_PARSING_RECORD("location", line, e.what()), IP_SPATIAL);
 			} 
 		}
 		else
 		{
-			SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNKNOWN_ERROR_PARSING_RECORD("location", line), IP_SPATIAL);
+			SPLAPPLOG(L_ERROR, NETWORK_UNKNOWN_ERROR_PARSING_RECORD("location", line), IP_SPATIAL);
 		}		
 	}	
 	
@@ -702,7 +702,7 @@ rstring MY_OPERATOR::convertToAbsolutePath(rstring filename)
 	{
 		// TODO - fix error handling
 		string const msg = "File does not exist: " + pathName;
-		SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_FILE_NOT_FOUND(pathName), IP_SPATIAL);
+		SPLAPPLOG(L_ERROR, NETWORK_FILE_NOT_FOUND(pathName), IP_SPATIAL);
 		throw new SPLRuntimeException("parseLocationFile", msg);
 	}
 	

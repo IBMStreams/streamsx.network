@@ -387,7 +387,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 			{
 				if(lineTokens.size() != ASN4FILE_FIELD_COUNT)
 				{
-					SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNKNOWN_ERROR_PARSING_RECORD("asnIPv6", line), IP_ASN);
+					SPLAPPLOG(L_ERROR, NETWORK_UNKNOWN_ERROR_PARSING_RECORD("asnIPv6", line), IP_ASN);
 					continue;
 				}
 
@@ -402,7 +402,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 			{
 				if(lineTokens.size() != ASN6FILE_FIELD_COUNT)
 				{
-					SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNKNOWN_ERROR_PARSING_RECORD("asnIPv6", line), IP_ASN);
+					SPLAPPLOG(L_ERROR, NETWORK_UNKNOWN_ERROR_PARSING_RECORD("asnIPv6", line), IP_ASN);
 					continue;
 				}
 				
@@ -411,7 +411,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 					uint32_t ipStart[4];
 					if(inet_pton(AF_INET6, lineTokens[1].c_str(), ipStart) == 0)
 					{
-						SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", lineTokens[1]), IP_ASN);
+						SPLAPPLOG(L_ERROR, NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", lineTokens[1]), IP_ASN);
 						continue;
 					}
 					ntohl6(ipStart);
@@ -419,7 +419,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 					uint32_t ipEnd[4];
 					if(inet_pton(AF_INET6, lineTokens[2].c_str(), ipEnd) == 0)
 					{
-						SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", lineTokens[2]), IP_ASN);
+						SPLAPPLOG(L_ERROR, NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL("IPv6", lineTokens[2]), IP_ASN);
 						continue;
 					}
 					ntohl6(ipEnd);
@@ -435,7 +435,7 @@ void MY_OPERATOR::parseASNFile(rstring filename, protocol proto)
 		}
 		catch (streams_boost::bad_lexical_cast &e)
 		{
-			SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_ERROR_PARSING_RECORD("ASN", line, e.what()), IP_ASN);
+			SPLAPPLOG(L_ERROR, NETWORK_ERROR_PARSING_RECORD("ASN", line, e.what()), IP_ASN);
 		} 
 	}
 	
@@ -483,7 +483,7 @@ rstring MY_OPERATOR::convertToAbsolutePath(rstring filename)
 	{
 		// TODO - fix error handling
 		string const msg = "File does not exist: " + pathName;
-		SPLAPPLOG(L_ERROR, NetworkResources::NETWORK_FILE_NOT_FOUND(pathName), IP_ASN);
+		SPLAPPLOG(L_ERROR, NETWORK_FILE_NOT_FOUND(pathName), IP_ASN);
 		throw new SPLRuntimeException("parseLocationFile", msg);
 	}
 	
