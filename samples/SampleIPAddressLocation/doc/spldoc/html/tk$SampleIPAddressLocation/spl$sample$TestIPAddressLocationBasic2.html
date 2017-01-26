@@ -57,6 +57,10 @@
   
 </div>
 
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleIPAddressLocation/op$sample$TestIPAddressLocationBasic2.svg" width="342" height="175"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -79,14 +83,6 @@
 <div class="section">
 </div>
 
-<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
-  
-</div>
-
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SampleIPAddressLocation/op$sample$TestIPAddressLocationBasic2.svg" width="342" height="177"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
   
 </div>
@@ -99,7 +95,7 @@
  
      param
      expression&lt;rstring&gt; $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
-     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_locations_ipv4_only.pcap" );
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_locations_ipv4_only.pcap" );
      expression&lt;uint32&gt; $localSubnetAddress: 0x09000000u;
  
      type

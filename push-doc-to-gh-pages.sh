@@ -39,8 +39,8 @@ cd $clone/$repository || die "sorry, could not go to $clone/$repository"
 git checkout gh-pages || die "sorry, could not switch to 'gh-pages' branch of $url ..."
 
 step "copying documentation files from '$here/doc' to '$clone/$repository' ..."
-cp -r -p $here/doc $clone/$repository || die "sorry, could not copy from from $here/doc to $clone/$repository"
-git add $clone/$repository/doc --all || die "sorry, could not add files to git index"
+cp -r "$here/doc" "$clone/$repository" || die "sorry, could not copy from from $here/doc to $clone/$repository"
+git add "$clone/$repository/doc" --all || die "sorry, could not add files to git index"
 #count=$( git status -s | wc -l )
 echo $( git status -s | wc -l ) "new/changed/deleted documentation files"
 git commit -a -m "update toolkit documentation" || die "sorry, nothing to commit to git"

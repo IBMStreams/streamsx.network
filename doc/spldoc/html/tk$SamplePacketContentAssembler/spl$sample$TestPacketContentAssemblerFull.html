@@ -57,6 +57,10 @@
   
 </div>
 
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$TestPacketContentAssemblerFull.svg" width="337" height="107"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -79,14 +83,6 @@
 <div class="section">
 </div>
 
-<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
-  
-</div>
-
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$TestPacketContentAssemblerFull.svg" width="337" height="109"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
   
 </div>
@@ -98,7 +94,7 @@
  composite TestPacketContentAssemblerFull {
  
    param
-     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_http+https.pcap");
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_http+https.pcap");
      expression&lt;boolean&gt; $consumeArchives: true;
      expression&lt;boolean&gt; $decompressOfficeDocuments: false;
  
@@ -204,10 +200,10 @@
      timestampAttribute: captureTime;
      packetAttribute: rawPacket;
      fileChunkSize: 4096u;
-     pamTuning: "pam.content.consume.archives=" + ($consumeArchives ? "on" : "off"),
-                "pam.content.docx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
-                "pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
-                "pam.content.xlsx.decompress=" + ($decompressOfficeDocuments ? "true" : "false");
+     pamTuning: "pam.content.consume.archives=" + ($consumeArchives ? "on" : "off");
+                //"pam.content.docx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"), // ... dropped from PAM ...
+                //"pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"), // ... dropped from PAM ...
+                //"pam.content.xlsx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"); // ... dropped from PAM ...
    output Out:
      EVENT = EVENT(),
      EVENT_FLOW_START = EVENT_FLOW_START(),

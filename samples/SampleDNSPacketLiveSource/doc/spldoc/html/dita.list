@@ -1,4 +1,4 @@
-#Mon Oct 31 12:41:10 EDT 2016
+#Thu Jan 26 09:35:49 EST 2017
 copytosourcelist=
 hreftargetslist=dita/tk$SampleDNSPacketLiveSource/ns$sample.xml,dita/tk$SampleDNSPacketLiveSource/spl$sample$LiveDNSPacketLiveSourceFilter.xml,dita/tk$SampleDNSPacketLiveSource/ix$Operator.xml,dita/toolkits/ix$Namespace.xml,dita/tk$SampleDNSPacketLiveSource/spl$sample$LiveDNSPacketLiveSourceFull.xml,dita/toolkits/ix$Operator.xml,dita/tk$SampleDNSPacketLiveSource/ix$Namespace.xml,dita/toolkits/toolkits.xml,dita/tk$SampleDNSPacketLiveSource/tk$SampleDNSPacketLiveSource.xml,dita/tk$SampleDNSPacketLiveSource/spl$sample$LiveDNSPacketLiveSourceBasic.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/pring/git/streamsx.network/samples/SampleDNSPacketLiveSource/doc/spldoc
+user.input.dir=/home/streamsdev/git/streamsx.network/samples/SampleDNSPacketLiveSource/doc/spldoc
 uplevels=../
 tempdirToinputmapdir.relative.value=dita/
 conrefpushfile=conrefpush.list

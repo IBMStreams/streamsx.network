@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.6</a> &gt; com.ibm.streamsx.network.dns</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; com.ibm.streamsx.network.dns</p>
 
 </div>
 
@@ -150,10 +150,10 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_NAMESERVER_TYPES">DNS_NAMESERVER_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_OPCODE">DNS_OPCODE()</a></strong>:           This parser result function returns the operation code requested by the DNS client in the current message, for example,  '1' for standard queries,  '2' for inverse queries, or '3' for server status requests.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_OPCODE">DNS_OPCODE()</a></strong>:           This parser result function returns the operation code requested by the DNS client in the current message, for example, 
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_CLASS">DNS_QUESTION_CLASS()</a></strong>:           This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records),
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_CLASS">DNS_QUESTION_CLASS()</a></strong>:           This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records), 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_CLASSES">DNS_QUESTION_CLASSES()</a></strong>:           This parser result function returns a list of the 'class' fields in the 'question' resource records in the current message.
@@ -168,13 +168,13 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_NAMES">DNS_QUESTION_NAMES()</a></strong>:           This parser result function returns a list of the 'name' fields in the 'question' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_TYPE">DNS_QUESTION_TYPE()</a></strong>:           This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example:  '1' for IP version 4 address to domain name lookup ('A' records), '5' for domain name to canonical domain name lookup ('CNAME' records), '12' for domain name to IP address lookup ('TXT' records), or '28' for IP version 6 address to domain name lookup ('AAAA' records).
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_TYPE">DNS_QUESTION_TYPE()</a></strong>:           This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example: 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_TYPES">DNS_QUESTION_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'question' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_RESPONSE_CODE">DNS_RESPONSE_CODE()</a></strong>:           This parser result function returns the response code from the DNS server in the current message, for example,  '0' for OK,  '1' for Format Error,  '2' for Server Failure,  '3' for Name Error,  '4' for not implemented, or '5' for Server Refused.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_RESPONSE_CODE">DNS_RESPONSE_CODE()</a></strong>:           This parser result function returns the response code from the DNS server in the current message, for example, 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_RESPONSE_FLAG">DNS_RESPONSE_FLAG()</a></strong>:           This parser result function returns <tt class="ph tt">true</tt> if the current message is a response sent by a DNS server,           or <tt class="ph tt">false</tt> if it is a request sent by a DNS client.
@@ -237,7 +237,13 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__bytesProcessed">bytesProcessed()</a></strong>: This function returns the number of bytes of network data processed by the operator since it started, including the current packet, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__bytesReceived">bytesReceived()</a></strong>: This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalBytesProcessed">metricsIntervalBytesProcessed()</a></strong>: This function returns the number of bytes of network data processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalBytesReceived">metricsIntervalBytesReceived()</a></strong>: This function returns the number of bytes received from the network interface  during the most recent metrics interval, if there is one, or zero if not.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalElapsed">metricsIntervalElapsed()</a></strong>: This function returns the duration of the most recent metrics interval, in seconds with a resolution of at least microseconds, if there is one, or zero if not.

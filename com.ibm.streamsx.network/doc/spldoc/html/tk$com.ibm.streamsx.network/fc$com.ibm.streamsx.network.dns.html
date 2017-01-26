@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.6</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; C++ Native Functions</p>
 
 </div>
 
@@ -128,17 +128,17 @@ This page documents native functions that can be invoked from SPL, including the
 </li>
 
 <li class="li">
-<p class="p"> 115 for 'unexpected resource type': The 'type' field of a DNS resource record is not of the values listed in the RFC standards. Please see the 'references' section of the DNSMessageParser operator for a list of DNS RFCs.
-</p>
-</li>
-
-<li class="li">
 <p class="p"> 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
 </p>
 </li>
 
 <li class="li">
 <p class="p"> 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
 </p>
 </li>
 
@@ -197,6 +197,26 @@ This page documents native functions that can be invoked from SPL, including the
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
 <dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__bytesReceived"><tt class="ph tt">      public uint64 bytesReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalBytesReceived"><tt class="ph tt">      public uint64 metricsIntervalBytesReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes received from the network interface  during the most recent metrics interval, if there is one, or zero if not.
+</p>
+
+   </dd>
+
+ 
  
    <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsDropped"><tt class="ph tt">      public uint64 metricsIntervalPacketsDropped()      </tt>   </dt>
 
@@ -544,7 +564,7 @@ This page documents native functions that can be invoked from SPL, including the
 <li class="li"> 1 indicates that the Authoritative flag is set in the DNS header but the Response flag is not set.</li>
 
 <li class="li">
-<p class="p"> 2 indicates taht the Truncated flag is set in the DNS header but not the Response flag is not set.
+<p class="p"> 2 indicates that the Truncated flag is set in the DNS header but not the Response flag is not set.
 </p>
 </li>
 
