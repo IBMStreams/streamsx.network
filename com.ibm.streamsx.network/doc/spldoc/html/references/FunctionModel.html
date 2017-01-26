@@ -156,7 +156,7 @@ be rooted at the directory where the operator model XML document resides.
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
    xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/function functionModel.xsd"&gt; 
   &lt;functionSet&gt; 
-    &lt;!-- header ?le to include from within C++ code --&gt; 
+    &lt;!-- header file to include from within C++ code --&gt; 
     &lt;headerFileName&gt;Sample.h&lt;/headerFileName&gt; 
     &lt;!-- functions lists the SPL prototypes of the functions implemented in this library --&gt; 
     &lt;functions&gt; 
@@ -178,10 +178,10 @@ be rooted at the directory where the operator model XML document resides.
         &lt;cmn:managedLibrary&gt; 
           &lt;!-- the name of the library for linking. Will be used as -lSample --&gt; 
           &lt;cmn:lib&gt;Sample&lt;/cmn:lib&gt; 
-          &lt;!-- Where to ?nd the library. Relative to the current directory. 
+          &lt;!-- Where to find the library. Relative to the current directory. 
                Will be used as -L&lt;dir&gt;/lib --&gt; 
           &lt;cmn:libPath&gt;lib&lt;/cmn:libPath&gt; 
-          &lt;!-- Where to ?nd the include ?le. Relative to the current directory. 
+          &lt;!-- Where to find the include file. Relative to the current directory. 
                Will be used as -I&lt;dir&gt; --&gt; 
           &lt;cmn:includePath&gt;./&lt;/cmn:includePath&gt; 
         &lt;/cmn:managedLibrary&gt; 
