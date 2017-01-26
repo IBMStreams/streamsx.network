@@ -71,7 +71,7 @@ struct groupByThree : std::numpunct<char> {
 MY_OPERATOR::MY_OPERATOR()
 <% if ($consistentRegion) { %> : crContext(static_cast<ConsistentRegionContext *>(getContext().getOptionalContext(CONSISTENT_REGION))) <% } %>
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "PacketFileSource");
 
   // set operator parameters
   pcapFilename = <%= $pcapFilename ? $pcapFilename : '""' %>;
@@ -96,10 +96,10 @@ MY_OPERATOR::MY_OPERATOR()
 
 #if defined(lib_pcap_pcap_h)
   // log the 'libpcap' version that will be used
-  SPLLOG(L_INFO, "using " << pcap_lib_version(), "PacketFileSource");
+  SPLAPPTRC(L_INFO, "using " << pcap_lib_version(), "PacketFileSource");
 #endif
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketFileSource");
 }
 
 
@@ -107,8 +107,8 @@ MY_OPERATOR::MY_OPERATOR()
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "PacketFileSource");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "PacketFileSource");
 }
 
 
@@ -116,12 +116,12 @@ MY_OPERATOR::~MY_OPERATOR()
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketFileSource");
 
   const int threadCount = <%= $inputPort ? 1 : 2 %>;
   createThreads(threadCount);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketFileSource");
 }
 
 
@@ -140,13 +140,13 @@ void MY_OPERATOR::prepareToShutdown()
   // log packet and byte counters, average processing rates
   formattingStream.str("");
   formattingStream << "read " << packetCounter << " packets in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)packetCounter / elapsedSeconds) << " packets/second";
-  SPLLOG(L_INFO, formattingStream.str(), "PacketFileSource");
+  SPLAPPTRC(L_INFO, formattingStream.str(), "PacketFileSource");
   formattingStream.str("");
   formattingStream << "read " << byteCounter << " bytes in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)byteCounter / elapsedSeconds) << " bytes/second";
-  SPLLOG(L_INFO, formattingStream.str(), "PacketFileSource");
+  SPLAPPTRC(L_INFO, formattingStream.str(), "PacketFileSource");
   formattingStream.str("");
   formattingStream << "read " << byteCounter*8 << " bits in " << std::fixed << std::setprecision(3) << elapsedSeconds << " seconds, average " << ((double)byteCounter*8 / elapsedSeconds) << " bits/second";
-  SPLLOG(L_INFO, formattingStream.str(), "PacketFileSource");
+  SPLAPPTRC(L_INFO, formattingStream.str(), "PacketFileSource");
 }
 
 
@@ -154,14 +154,14 @@ void MY_OPERATOR::prepareToShutdown()
 // start processing threads
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process(" << idx << ") ...", "PacketFileSource");
 
     switch (idx) {
     case 0: if (metricsInterval>0) metricsThread(); break;
     case 1: fileThread(); break;
     default: break; }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "PacketFileSource");
 }
 
 
@@ -198,12 +198,12 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 // Punctuation processing for non-source operator (that is, where an input port is configured)
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
-  SPLLOG(L_INFO, "entering <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");
+  SPLAPPTRC(L_INFO, "entering <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");
 
   // tell statistics thread we're done, in case there is one
   if (punct==SPL::Punctuation::WindowMarker) done = true;
 
-  SPLLOG(L_INFO, "leaving <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");
+  SPLAPPTRC(L_INFO, "leaving <%=$myOperatorKind%> process(" << punct << ") ...", "PacketFileSource");
 }
 
 
@@ -231,7 +231,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
   <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
   if (processorAffinity>-1) {
-    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "PacketFileSource");
+    SPLAPPTRC(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "PacketFileSource");
     cpu_set_t cpumask; // CPU affinity bit mask
     CPU_ZERO(&cpumask);
     CPU_SET(processorAffinity, &cpumask);
@@ -241,7 +241,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
   }
  <% } %> ;
 
-  SPLLOG(L_INFO, "opening PCAP file '" << filename << "'", "PacketFileSource");
+  SPLAPPTRC(L_INFO, "opening PCAP file '" << filename << "'", "PacketFileSource");
   char pcapError[PCAP_ERRBUF_SIZE] = "\0";
   pcapDescriptor = pcap_open_offline(filename.c_str(), pcapError);
   if (!pcapDescriptor) THROW (SPLRuntimeOperator, "error opening PCAP file '" << filename << "', " << pcapError);
@@ -252,7 +252,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
   // remember whether or not packets in this PCAP file have ethernet headers
   const int linktype = pcap_datalink(pcapDescriptor);
-  SPLLOG(L_INFO, "PCAP linktype of file is " << linktype, "PacketFileSource");
+  SPLAPPTRC(L_INFO, "PCAP linktype of file is " << linktype, "PacketFileSource");
   bool isRawIP = false;
   switch(linktype) {
   case DLT_EN10MB: isRawIP = false; break;
@@ -262,13 +262,13 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
   // compile and activate the input filter, if there is one
   if (!inputFilter.empty()) {
-    SPLLOG(L_INFO, "filtering packets on input with '" << inputFilter << "'", "PacketFileSource");
+    SPLAPPTRC(L_INFO, "filtering packets on input with '" << inputFilter << "'", "PacketFileSource");
     int rc1 = pcap_compile(pcapDescriptor, &inputFilterProgram, inputFilter.c_str(), 0, 0);
     if (rc1) THROW (SPLRuntimeOperator, "error compiling input filter '" << inputFilter << "', rc=" << rc1 << ", " << pcap_geterr(pcapDescriptor));
     int rc2 = pcap_setfilter(pcapDescriptor, &inputFilterProgram);
     if (rc2) THROW (SPLRuntimeOperator, "error activating input filter '" << inputFilter << "', rc=" << rc2 << ", " << pcap_geterr(pcapDescriptor));
     struct bpf_insn* instruction = inputFilterProgram.bf_insns;
-    for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "PacketFileSource"); }
+    for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLAPPTRC(L_DEBUG, bpf_image(instruction, j), "PacketFileSource"); }
   }
 
   // process each packet in the PCAP file
@@ -299,7 +299,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
     // parse the network headers in the packet
     headers.parseNetworkHeaders(packetBuffer, packetBufferLength);
-    if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketFileSource");  continue; }
+    if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLAPPTRC(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketFileSource");  continue; }
 
     // point at the input tuple with the name used by the code generator, if there is one
     <% if ($inputPort) { print "IPort0Type& iport\$0 = (IPort0Type&)(*inTuple);"; } %> ;
@@ -310,7 +310,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
       {
         <% if ($inputPort) { CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); } %> ;
         <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-        SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketFileSource");
+        SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketFileSource");
         submit(outTuple<%=$i%>, <%=$i%>);
       }
       <% } %> ;
@@ -325,11 +325,11 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
   // submit punctuation mark to each output port
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-    SPLLOG(L_TRACE, "submitting punctuation to output port <%=$i%>", "PacketFileSource");
+    SPLAPPTRC(L_TRACE, "submitting punctuation to output port <%=$i%>", "PacketFileSource");
     submit(SPL::Punctuation::WindowMarker, <%=$i%>);
     <% } %> ;
 
-  SPLLOG(L_INFO, "closing PCAP file '" << filename << "'", "PacketFileSource");
+  SPLAPPTRC(L_INFO, "closing PCAP file '" << filename << "'", "PacketFileSource");
 }
 
 
@@ -342,11 +342,11 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
 
 void MY_OPERATOR::fileThread()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> fileThread()", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> fileThread()", "PacketFileSource");
 
   // wait for a while before starting, if necessary
   if (initDelay>0) {
-    SPLLOG(L_INFO, "waiting " << initDelay << " seconds before starting", "PacketFileSource");
+    SPLAPPTRC(L_INFO, "waiting " << initDelay << " seconds before starting", "PacketFileSource");
     getPE().blockUntilShutdownRequest(initDelay);
     if (getPE().getShutdownRequested()) return;
   }
@@ -367,7 +367,7 @@ void MY_OPERATOR::fileThread()
   // tell the metrics thread we're done
   done = true;
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> fileThread()", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> fileThread()", "PacketFileSource");
 }
 
 
@@ -381,7 +381,7 @@ void MY_OPERATOR::fileThread()
 
 void MY_OPERATOR::metricsThread()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> metricsThread()", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> metricsThread()", "PacketFileSource");
 
   // expose the operator's statistics in these metrics
   OperatorMetrics& opm = getContext().getMetrics();
@@ -394,10 +394,10 @@ void MY_OPERATOR::metricsThread()
     // wait until the next interval, or the 'file' thread finishes, or the PE is shutting down
     const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
     if (secondsToWait>0) {
-      SPLLOG(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "PacketLiveSource");
+      SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "PacketLiveSource");
       getPE().blockUntilShutdownRequest(secondsToWait);
     } else {
-        SPLLOG(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "PacketLiveSource");
+        SPLAPPTRC(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "PacketLiveSource");
     }
 
     // store the previous interval's metrics for difference calculations
@@ -409,7 +409,7 @@ void MY_OPERATOR::metricsThread()
     now = SPL::Functions::Time::getTimestampInSecs();
     packetCounterNow = packetCounter;
     byteCounterNow = byteCounter;
-    // ??? SPLLOG(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now)  << " processed=" << packetCounterNow, "PacketLiveSource");
+    // ??? SPLAPPTRC(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now)  << " processed=" << packetCounterNow, "PacketLiveSource");
 
     // send the operator's metrics to the runtime
     totalPacketsProcessed->setValue(packetCounterNow);
@@ -421,7 +421,7 @@ void MY_OPERATOR::metricsThread()
     if (done) break;
   }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread()", "PacketFileSource");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread()", "PacketFileSource");
 }
 
 

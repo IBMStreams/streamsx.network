@@ -12,7 +12,7 @@ use com.ibm.streamsx.network.source::*;
 composite TestPacketFileSourceBasic2 {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns+dhcp.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
     expression<uint32> $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1" );
     expression<float64> $metricsInterval: (float64)getSubmissionTimeValue("metricsInterval", "1.0" );
 

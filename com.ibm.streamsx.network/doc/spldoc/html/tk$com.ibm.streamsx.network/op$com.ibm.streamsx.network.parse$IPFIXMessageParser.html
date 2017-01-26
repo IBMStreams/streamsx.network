@@ -35,7 +35,7 @@
 <p class="p">IPFIXMessageParser is an operator for the IBM InfoSphere Streams product that  parses individual fields of IPFIX messages received in input tuples,  and emits tuples containing message data.   The operator may be configured with one or more output ports, and each port may be configured to emit different tuples, as specified by output filters. The tuples contain individual fields from the input message, as specified by output attribute assignments.  
 </p>
 
-<p class="p">The IPFIXMessageParser operator expects only IPFIX messages in its input tuples, without any of the headers that precede them in network packets.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain IPFIX messages with the <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_DATA">PAYLOAD_DATA()</a> output attribute assignment function.
+<p class="p">The IPFIXMessageParser operator expects only IPFIX messages in its input tuples, without any of the headers that precede them in network packets.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain IPFIX messages with the PAYLOAD_DATA() output attribute assignment function.
 </p>
 
 <p class="p">The IPFIXMessageParser operator consumes input tuples containing IPFIX messages, parses indivdual fields in flow records within IPFIX messages,  selects flows to emit as output tuples with filter expressions, and assigns values to them with output attribute assignment expressions.
@@ -185,7 +185,7 @@ use com.ibm.streamsx.network.parse::*;
 <p class="p">The IPFIXMessageParser operator requires one input port.  One input attribute must be of type <tt class="ph tt">blob</tt> and must contain a IPFIX message, excluding the network headers that proceed them in network packets, as specified by the required parameter <tt class="ph tt">messageAttribute</tt>.
 </p>
 
-<p class="p">The <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_DATA">PAYLOAD_DATA()</a> output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the IPFIXMessageParser operator.
+<p class="p">The PAYLOAD_DATA() output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the IPFIXMessageParser operator.
 </p>
 
    <dl class="dl">

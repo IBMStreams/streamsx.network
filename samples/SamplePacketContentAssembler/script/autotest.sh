@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Copyright (C) 2011, 2015  International Business Machines Corporation
+## Copyright (C) 2011, 2017  International Business Machines Corporation
 ## All Rights Reserved
 
 ################### parameters used in this script ##############################
@@ -11,6 +11,7 @@
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 
+pamLibrary=$HOME/com.ibm.iss.pam
 buildDirectory=$projectDirectory/output/build
 dataDirectory=$projectDirectory/data
 logDirectory=$projectDirectory/log
@@ -28,6 +29,12 @@ die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }
 step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
+
+[[ -d $pamLibrary ]] || die "sorry, PAM directory $pamLibrary not found"
+[[ -f $pamLibrary/pam.h ]] || die "sorry, header 'pam.h' not found in PAM directory $pamLibrary"
+[[ -f $pamLibrary/iss-pam1.so ]] || die "sorry, library 'iss-pam1.so' not found in PAM directory $pamLibrary"
+
+export STREAMS_ADAPTERS_ISS_PAM_DIRECTORY=$pamLibrary
 
 rm -rf $buildDirectory || die "sorry, could not clear directory '$buildDirectory', $!"
 rm -rf $logDirectory || die "sorry, could not clear directory '$logDirectory', $!"

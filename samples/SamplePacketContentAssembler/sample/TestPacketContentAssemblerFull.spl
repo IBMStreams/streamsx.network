@@ -15,7 +15,7 @@ use com.ibm.streamsx.network.datetimeformat::*;
 composite TestPacketContentAssemblerFull {
 
   param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_http+https.pcap");
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_http+https.pcap");
     expression<boolean> $consumeArchives: true;
     expression<boolean> $decompressOfficeDocuments: false;
 
@@ -121,10 +121,10 @@ composite TestPacketContentAssemblerFull {
     timestampAttribute: captureTime;
     packetAttribute: rawPacket;
     fileChunkSize: 4096u;
-    pamTuning: "pam.content.consume.archives=" + ($consumeArchives ? "on" : "off"),
-               "pam.content.docx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
-               "pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"),
-               "pam.content.xlsx.decompress=" + ($decompressOfficeDocuments ? "true" : "false");
+    pamTuning: "pam.content.consume.archives=" + ($consumeArchives ? "on" : "off");
+               //"pam.content.docx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"), // ... dropped from PAM ...
+               //"pam.content.pptx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"), // ... dropped from PAM ...
+               //"pam.content.xlsx.decompress=" + ($decompressOfficeDocuments ? "true" : "false"); // ... dropped from PAM ...
   output Out:
     EVENT = EVENT(),
     EVENT_FLOW_START = EVENT_FLOW_START(),

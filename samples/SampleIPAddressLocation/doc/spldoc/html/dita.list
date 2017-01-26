@@ -1,4 +1,4 @@
-#Fri Sep 30 16:16:19 EDT 2016
+#Mon Oct 31 12:41:19 EDT 2016
 copytosourcelist=
 hreftargetslist=dita/tk$SampleIPAddressLocation/spl$sample$TestIPAddressLocationBasic1.xml,dita/tk$SampleIPAddressLocation/ix$Namespace.xml,dita/tk$SampleIPAddressLocation/ix$Function.xml,dita/tk$SampleIPAddressLocation/spl$sample$TestIPAddressLocationBasicIPv6.xml,dita/toolkits/ix$Function.xml,dita/tk$SampleIPAddressLocation/ns$sample.xml,dita/toolkits/ix$Namespace.xml,dita/toolkits/ix$Operator.xml,dita/tk$SampleIPAddressLocation/tk$SampleIPAddressLocation.xml,dita/tk$SampleIPAddressLocation/spl$sample$TestIPAddressLocationList.xml,dita/tk$SampleIPAddressLocation/ix$Operator.xml,dita/toolkits/toolkits.xml,dita/tk$SampleIPAddressLocation/spl$sample$TestIPAddressLocationFull.xml,dita/tk$SampleIPAddressLocation/spl$sample$TestIPAddressLocationBasic2.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/streamsdev/git/streamsx.network/samples/SampleIPAddressLocation/doc/spldoc
+user.input.dir=/home/pring/git/streamsx.network/samples/SampleIPAddressLocation/doc/spldoc
 uplevels=../
 tempdirToinputmapdir.relative.value=dita/
 conrefpushfile=conrefpush.list

@@ -30,7 +30,7 @@ composite TestIPAddressLocationList {
 
     param
     expression<rstring> $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_ipv4+ipv6.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_ipv4+ipv6.pcap" );
 
     type
 

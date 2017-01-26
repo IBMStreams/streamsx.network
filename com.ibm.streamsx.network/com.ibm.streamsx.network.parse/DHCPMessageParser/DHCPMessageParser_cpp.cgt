@@ -57,7 +57,7 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scala
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "DHCPMessageParser");
 
   // set operator parameters
   processorAffinity = <%=$processorAffinity%>;
@@ -70,55 +70,55 @@ MY_OPERATOR::MY_OPERATOR()
     outTuple<%=$i%>.clear();
     <% } %> ;
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "DHCPMessageParser");
 }
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "DHCPMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "DHCPMessageParser");
 }
 
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DHCPMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DHCPMessageParser");
 }
 
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
 }
 
 // Processing for source and threaded operators
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DHCPMessageParser");
 }
 
 // Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
 }
 
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
 
   SPL::AutoPortMutex automutex(processMutex, *this);
 
   <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
   if (processorAffinity>-1) {
-    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "DHCPMessageParser");
+    SPLAPPTRC(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "DHCPMessageParser");
     cpu_set_t cpumask; // CPU affinity bit mask
     CPU_ZERO(&cpumask);
     CPU_SET(processorAffinity, &cpumask);
@@ -140,8 +140,8 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   // parse the DHCP message
   parser.parseDHCPMessage(buffer, bufferLength);
-  if ( parser.error ) { SPLLOG(L_DEBUG, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DHCPMessageParser"); }
-  if ( ! parser.dhcpHeader ) { SPLLOG(L_DEBUG, "ignoring tuple " << tupleCounter << ", no DHCP header found", "DHCPMessageParser");  return; }
+  if ( parser.error ) { SPLAPPTRC(L_DEBUG, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "DHCPMessageParser"); }
+  if ( ! parser.dhcpHeader ) { SPLAPPTRC(L_DEBUG, "ignoring tuple " << tupleCounter << ", no DHCP header found", "DHCPMessageParser");  return; }
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
@@ -149,23 +149,23 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
     { 
       <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
       <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-      SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DHCPMessageParser");
+      SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DHCPMessageParser");
       submit(outTuple<%=$i%>, <%=$i%>);
     } 
     <% } %> ;
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
 }
 
 
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
 
   forwardWindowPunctuation(punct);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "DHCPMessageParser");
 }
 
 

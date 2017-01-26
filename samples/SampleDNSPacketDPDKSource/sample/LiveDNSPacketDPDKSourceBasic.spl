@@ -1,0 +1,76 @@
+/*
+** Copyright (C) 2016  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.dns::*;
+
+composite LiveDNSPacketDPDKSourceBasic {
+
+    param
+    expression<int32> $nicPort: (int32)getSubmissionTimeValue("nicPort", "0" );
+    expression<int32> $nicQueue: (int32)getSubmissionTimeValue("nicQueue", "0" );
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+
+    type 
+
+    DNSMessageType =
+        uint64 packetNumber,            // sequence number of packet
+        float64 captureTime,             // time that packet was captured, in seconds since Unix epoch
+        rstring ipSourceAddress,         // IP source address
+        rstring ipDestinationAddress,    // IP destination address
+        boolean isResponse,
+        rstring responseCode,
+        rstring questionName,
+        rstring questionType,
+        list<rstring> answerNames,
+        list<uint32> answerTTLs,
+        list<rstring> answerData,
+        list<rstring> nameserverNames;
+
+    FlattenedDNSMessageType = 
+        uint64 packetNumber,            // sequence number of packet
+        rstring flattenedDNSMessage;
+
+
+    graph
+
+    ( stream<DNSMessageType> DNSMessageStream ; 
+      stream<FlattenedDNSMessageType> FlattenedDNSMessageStream )= DNSPacketDPDKSource() {
+        logic state: {
+            map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+            map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; }
+        param
+            lcoreMaster: 0; // run the master thread on core 0.
+            lcore: 1; // run this ingest thread on core 1.
+            nicPort: $nicPort; // bind to specified NIC port
+            nicQueue: $nicQueue; // bind to specified NIC queue
+            promiscuous: true;
+            metricsInterval: 0.0;
+        output 
+        DNSMessageStream:
+          packetNumber = packetsProcessed(),
+          captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+          ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+          ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+          isResponse = DNS_RESPONSE_FLAG(),
+          responseCode = DNS_RESPONSE_CODE() in dnsResponseCodes ? dnsResponseCodes[DNS_RESPONSE_CODE()] : (rstring)DNS_RESPONSE_CODE(),
+          questionName = DNS_QUESTION_NAME(),
+          questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
+          answerNames = DNS_ANSWER_NAMES(),
+          answerTTLs = DNS_ANSWER_TTLS(),
+          answerData = DNS_ANSWER_DATA(),
+          nameserverNames = DNS_NAMESERVER_NAMES();
+        FlattenedDNSMessageStream:
+          packetNumber = packetsProcessed(),
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
+    }
+    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as FlattenedDNSMessageSink = FileSink(FlattenedDNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.FlattenedDNSMessageStream.out"; format: csv; hasDelayField: false; quoteStrings: false; flush: 1u; }
+
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down after " + (rstring)$timeoutInterval + " second timeout"); shutdownPE(); } }
+}

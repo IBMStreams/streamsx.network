@@ -19,8 +19,6 @@ buildDirectory=$projectDirectory/output/build/$composite
 
 dataDirectory=$projectDirectory/data
 
-libpcapDirectory=$HOME/libpcap-1.7.4
-
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
@@ -48,7 +46,6 @@ compileTimeParameterList=(
 submitParameterList=(
 pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_netflow5_port9500.pcap
 netflowPort=9500
-#pcapFilename=$HOME/data.simpleweb.org/netflow183.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -64,8 +61,6 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 
 step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )

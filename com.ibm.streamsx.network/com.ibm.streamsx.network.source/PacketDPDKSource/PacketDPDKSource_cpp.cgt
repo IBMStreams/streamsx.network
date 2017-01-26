@@ -103,7 +103,7 @@ MY_OPERATOR::MY_OPERATOR() {
     rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue,
                                (int)promiscuous, &dpdkCallback, (void *)this);
 
-    SPLLOG(L_TRACE, "streams_operator_init() for lcore = " << lcore <<
+    SPLAPPTRC(L_TRACE, "streams_operator_init() for lcore = " << lcore <<
            ", nicPort = " << nicPort <<
            ", nicQueue = " << nicQueue <<
            ", lcoreMaster = " << lcoreMaster <<
@@ -121,7 +121,7 @@ MY_OPERATOR::~MY_OPERATOR() {
 
 // Notify port readiness
 void MY_OPERATOR::allPortsReady() { 
-    SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...",
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...",
             "PacketDPDKSource");
 
     int rc = streams_dpdk_init();
@@ -172,7 +172,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
     octetCounter += packetLen; 
 
 #if TRACELVL >= 1
-    SPLLOG(L_TRACE, "Entering <%=$myOperatorKind%> packetProcess. lcore = " 
+    SPLAPPTRC(L_TRACE, "Entering <%=$myOperatorKind%> packetProcess. lcore = " 
         << lcore << ", packetCounter = " << packetCounter <<
 	", packetLen = " << packetLen,
 	"PacketDPDKSource");
@@ -185,6 +185,12 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
     __builtin_prefetch((void *)packet, 0, 0);
     __builtin_prefetch((void *)((uint64_t)packet + packetLen), 0, 0);
 
+  // get current time in microseconds
+  struct timespec ts; 
+  clock_gettime(CLOCK_REALTIME, &ts); 
+  captureSeconds = (uint32)ts.tv_sec;
+  captureMicroseconds = (uint32)(ts.tv_nsec/1000);
+
     tscMicroseconds = tscTimestamp / tscMicrosecondAdjust;
 
     // Optionally parse the network headers in the packet.
@@ -192,7 +198,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
     // sending it downstream, and will drop other packet types.
     headers.parseNetworkHeaders((char*)packetPtr, packetLen);
     if (!(headers.ipv4Header || headers.ipv6Header)) { 
-        SPLLOG(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketDPDKSource");  
+        SPLAPPTRC(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketDPDKSource");  
 	return; 
     }
 
@@ -201,7 +207,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet,
     <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
        {
          <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-         SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketDPDKSource");
+         SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketDPDKSource");
          submit(outTuple<%=$i%>, <%=$i%>);
        }
     <% } %> ;
@@ -230,11 +236,11 @@ void MY_OPERATOR::metricsThread() {
 	now = SPL::Functions::Time::getTimestampInSecs();
 	const double secondsToWait = then + metricsInterval - now;
 	if (secondsToWait>0) {
-	    SPLLOG(L_DEBUG, "next statistics interval in " << secondsToWait << " seconds", "PacketDPDKSource");
+	    SPLAPPTRC(L_DEBUG, "next statistics interval in " << secondsToWait << " seconds", "PacketDPDKSource");
 	    getPE().blockUntilShutdownRequest(secondsToWait);
 	    now = SPL::Functions::Time::getTimestampInSecs();
 	} else {
-	    SPLLOG(L_DEBUG, "missed statistics interval by " << -secondsToWait << " seconds", "PacketDPDKSource");
+	    SPLAPPTRC(L_DEBUG, "missed statistics interval by " << -secondsToWait << " seconds", "PacketDPDKSource");
 	}
 
 	// get recieved and dropped statistics

@@ -58,7 +58,7 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scala
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "IPFIXMessageParser");
 
   // set operator parameters
   processorAffinity = <%=$processorAffinity%>;
@@ -71,55 +71,55 @@ MY_OPERATOR::MY_OPERATOR()
     outTuple<%=$i%>.clear();
     <% } %> ;
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPFIXMessageParser");
 }
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "IPFIXMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "IPFIXMessageParser");
 }
 
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "IPFIXMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "IPFIXMessageParser");
 }
 
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
 }
 
 // Processing for source and threaded operators
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "IPFIXMessageParser");
 }
 
 // Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
 }
 
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
 
   SPL::AutoPortMutex automutex(processMutex, *this);
 
   <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
   if (processorAffinity>-1) {
-    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "IPFIXMessageParser");
+    SPLAPPTRC(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "IPFIXMessageParser");
     cpu_set_t cpumask; // CPU affinity bit mask
     CPU_ZERO(&cpumask);
     CPU_SET(processorAffinity, &cpumask);
@@ -142,37 +142,37 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   // prepare the IPFIX message for parsing
   parser.prepareIPFIXMessage(buffer, length, source);
-  if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no IPFIX header found: " << parser.error, "IPFIXMessageParser"); }
+  if ( parser.error ) { SPLAPPTRC(L_INFO, "ignoring tuple " << tupleCounter << ", no IPFIX header found: " << parser.error, "IPFIXMessageParser"); }
 
   // parse the flow records in the IPFIX message, submitting output tuples to output ports, as selected by output filters, if specified
   while( !parser.error && !parser.done )
     {
       parser.nextFlowRecord();
-      if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "IPFIXMessageParser"); break; }
+      if ( parser.error ) { SPLAPPTRC(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "IPFIXMessageParser"); break; }
       if ( parser.done ) { break; }
       <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
         <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
         {
           <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
           <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-          SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPFIXMessageParser");
+          SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPFIXMessageParser");
           submit(outTuple<%=$i%>, <%=$i%>);
         }
         <% } %> ;
     }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
 }
 
 
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
 
   forwardWindowPunctuation(punct);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPFIXMessageParser");
 }
 
 

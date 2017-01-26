@@ -1,0 +1,1297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Operator DNSPacketDPDKSource"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_operator"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Operator DNSPacketDPDKSource</title>
+</head>
+<body id="spldoc_operator">
+
+
+<h1 class="title topictitle1">Operator <tt class="ph tt">DNSPacketDPDKSource</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.6</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketDPDKSource</p>
+
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketDPDKSource.svg" width="672" height="112"/>
+</div>
+
+<div class="section">
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">introduction 
+</h2>
+
+<p class="p">DNSPacketDPDKSource is an operator for the IBM Streams product that captures live network packets from one of the network interfaces attached to the machine where it executes. The operator function and structure are similar to the PacketLiveSource and DNSMessageParser operators;  see the documentation for those for details of common functions and general background.   The primary difference between these related operators is that DNSPacketDPDKSource leverages  the <a class="xref" href="http://www.dpdk.org">data plane development kit (DPDK)</a> for higher performance.
+</p>
+
+<p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions, and any of these functions, which are specific to the PacketFileSource operator:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">network header parser result functions</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The DNSPacketDPDKSource operator steps quietly over 'jmirror' headers prepended to packets by Juniper Networks 'mirror encapsulation'.
+</p>
+
+<p class="p">This operator is part of the network toolkit. To use it in an application, include this statement in the SPL source file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+use com.ibm.streamsx.network.dns::*;
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">promiscuous mode 
+</h2>
+
+<p class="p">Ethernet interfaces normally ignore packets that are not addressed to them. However, when 'promiscious' mode is enabled, they can capture all network packets on their ethernet segment, even those that are not addressed to them.  This is sometimes referred to as 'network sniffing'.   However, modern ethernet routers normally send only packets that are addressed to the ethernet device; 'promiscious' mode is useful only when a switch has been specifically configured to send packets to an ethernet interface that are not addressed to it. This is sometimes referred to as 'mirroring'.
+</p>
+
+<p class="p">The DNSPacketDPDKSource operator will enable 'promiscuous' mode in a ethernet interface when its 'promiscous' parameter is set to <tt class="ph tt">true</tt>.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">hardware dependencies
+</h2>
+
+<p class="p">DPDK supports a variety of <a class="xref" href="http://www.dpdk.org/doc/nics">ethernet devices</a>.  The DNSPacketDPDKSource operator has been tested with these adapters:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> Mellanox ConnectX-3</li>
+
+<li class="li"> Mellanox ConnectX-3 Pro</li>
+
+<li class="li"> Intel e1000</li>
+
+<li class="li"> Intel I350</li>
+
+</ul>
+
+</div>
+
+<p class="p">The <a class="xref" href="http://dpdk.org">DPDK libraries</a> must be compiled from source code and installed on the machine where the network adapter is installed. Streams processing elements (PEs) must be placed on this machine.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">software dependencies
+</h2>
+
+<p class="p">DPDK depends upon additional Linux software packages, beyond those required for Streams. In particular, it requires libraries that match the specific version of the kernel your machine uses. To install these libraries, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo yum install glibc-devel
+bash&gt; sudo yum install libibverbs-devel
+bash&gt; sudo yum install "kernel-devel-$(uname -r)"
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">installing and configuring DPDK
+</h2>
+
+<p class="p">The <a class="xref" href="http://dpdk.org/doc/guides/linux_gsg/index.html">DPDK user guide</a> has detailed instructions for installing DPDK and configuring it for particular ethernet devices. These notes are a summary of those instructions. They include many Linux commands that should be entered at a command prompt in a Terminal window. In the instructions below, these commands are prefixed with 'bash&gt;'. Many of the commands require 'root' privileges; they are prefixed with 'bash&gt; sudo'.
+</p>
+
+<p class="p"><em class="ph i">identify ethernet device and network interface</em>
+</p>
+
+<p class="p">Your machine probably has multiple ethernet interfaces. To configure the DPDK device driver, you will need to specify which ethernet device you intend to use with DPDK,  and which Linux network interface is assigned to it.
+</p>
+
+<p class="p">First, display a list of ethernet devices installed in your machine by typing this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; lspci | grep -i ethernet
+0002:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
+0003:05:00.0 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+0003:05:00.1 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+0003:05:00.2 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+0003:05:00.3 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
+0005:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
+</pre>
+
+
+</div>
+
+<p class="p">If none of the supported ethernet devices listed above under 'hardware dependencies' is displayed, the DNSPacketDPDKSource operator is not supported.
+</p>
+
+<p class="p">Otherwise, note the numbers preceding the word 'Ethernet' for the device you intend to use with DPDK. These numbers are the PCI 'bus:slot.function' address of the device:  they identify the PCI bus the device uses, the physical slot the device is installed in,  and the function number (the port number, for cards with multiple ethernet ports).
+</p>
+
+<p class="p">Then, display a list of Linux network interfaces, and the ethernet devices they are assigned to, by typing this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; ls -la /sys/class/net
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP2p1s0 -&gt; ../../devices/pci0002:00/0002:00:00.0/0002:01:00.0/net/enP2p1s0
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP2p1s0d1 -&gt; ../../devices/pci0002:00/0002:00:00.0/0002:01:00.0/net/enP2p1s0d1
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f0 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.0/net/enP3p5s0f0
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f1 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.1/net/enP3p5s0f1
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f2 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.2/net/enP3p5s0f2
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f3 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.3/net/enP3p5s0f3
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP5p1s0 -&gt; ../../devices/pci0005:00/0005:00:00.0/0005:01:00.0/net/enP5p1s0
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP5p1s0d1 -&gt; ../../devices/pci0005:00/0005:00:00.0/0005:01:00.0/net/enP5p1s0d1
+lrwxrwxrwx.  1 root root 0 Sep 28 09:49 lo -&gt; ../../devices/virtual/net/lo
+</pre>
+
+
+</div>
+
+<p class="p">Find the Linux network interface of your ethernet device by matching its PCI 'bus:slot:function' address to those listed, preceding the string '/net/'.
+</p>
+
+<p class="p">For example, the 'lspci' list shows two Mellanox ethernet devices with PCI addresses '0002:01:00.0' and '0005:01:00.0'.  The 'ls' list shows the adapters are assigned to network interfaces 'enP2p1s0' and 'enP5p1s0', respectively.
+</p>
+
+<p class="p">Select the Linux network interface and PCI 'bus:slot.function' address of the ethernet device you intend to use with DPDK, and remember them for use below under 'prepare Linux user account for DPDK'. To verify your selection, type this command at a prompt, substituting your network interface name, and verify that 'bus-info:' shows the PCI address of your ethernet device:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; ethtool -i enP2p1s0
+driver: mlx4_en
+version: 3.3-2.0.0 (28 Jul 2016)
+firmware-version: 2.36.5150
+bus-info: 0002:01:00.0
+</pre>
+
+
+</div>
+
+<p class="p"><em class="ph i">create Linux user group for DPDK</em>
+</p>
+
+<p class="p">DPDK will lock the memory pages containing its buffers to prevent the kernel from swapping them out to disk while it is using them. Users who run the DNSPacketDPDKSource operator will need permission to do this.
+</p>
+
+<p class="p">To grant this permission, create a Linux user group for DPDK and add the user accounts that will run the DNSPacketDPDKSource operator to the group.
+</p>
+
+<p class="p">For example, to create a Linux user group 'dpdk' and add your own user account to it, open a Terminal window and type these commands at the prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo groupadd dpdk
+bash&gt; sudo usermod -a -G dpdk $USER
+</pre>
+
+
+</div>
+
+<p class="p">To verify that your user account is in the 'dpdk' group, type this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; groups $USER
+streamsdpdk : streamsdpdk dpdk
+</pre>
+
+
+</div>
+
+<p class="p">To grant permission to lock memory pages, edit the '/etc/security/limits.conf' system file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo vi /etc/security/limits.conf
+</pre>
+
+
+</div>
+
+<p class="p"> and insert this line into the 'limits.conf' file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+@dpdk - memlock unlimited
+</pre>
+
+
+</div>
+
+<p class="p"><em class="ph i">prepare Linux user account for DPDK</em>
+</p>
+
+<p class="p">You will need some environment variables whenever you use DPDK. To set these variables permanently, edit the '$HOME/.bashrc' script by typing this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+vi $HOME/.bashrc
+</pre>
+
+
+</div>
+
+<p class="p">and insert these lines into the '.bashrc' file,  substituting the Linux network interface and PCI 'bus:slot.function' address of the ethernet device you intend to use with DPDK:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+export RTE_SDK=$HOME/dpdk-2.2.0
+[[ $( uname -m ) == "x86_64" ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
+[[ $( uname -m ) == "ppc64le" ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
+export DPDK_INTERFACE=network-interface-name
+export DPDK_DEVICE=$( ethtool -i $DPDK_INTERFACE | gawk '/bus-info:/ { print $2 }' )
+</pre>
+
+
+</div>
+
+<p class="p"><em class="ph i">log off and log back on</em>
+</p>
+
+<p class="p">After creating the 'dpdk' user group and making the changes to $HOME/.bashrc described above,  log off your user account and log back in to put the changes into effect.
+</p>
+
+<p class="p"><em class="ph i">configure Linux 'hugepages'</em>
+</p>
+
+<p class="p">DPDK uses <a class="xref" href="https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt">Linux kernel 'hugepages' support</a>  to allocate large buffers with minimal 'translation lookaside buffer (TLB)' overhead. The size and number of 'hugepages' available for DPDK must be configured in the Linux kernel.  This requires 'root' access, and may require rebooting the machine.
+</p>
+
+<p class="p">Note that the memory allocated for hugepages will reduce the memory available for Streams and other applications.
+</p>
+
+<p class="p">To display the amount of memory installed in your machine, and the amount of memory available, type this at a a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; cat /proc/meminfo | grep -i mem
+MemTotal:       263636096 kB
+MemFree:        226797632 kB
+MemAvailable:   249287680 kB
+Shmem:            131776 kB
+</pre>
+
+
+</div>
+
+<p class="p">To display the size and number of hugepages currently allocated, type this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; cat /proc/meminfo | grep -i hugepages
+AnonHugePages:         0 kB
+HugePages_Total:      10
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:      16384 kB
+</pre>
+
+
+</div>
+
+<p class="p">The supported sizes of hugepages depend upon the machine architecture.  Typical sizes for the architectures supported by IBM Streams include: 
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 4KB, 8KB, 64KB, 256KB, 1MB, 4MB, 16MB, or 256MB <em class="ph i">for 'x86_64' (x86_64 machines)</em></li>
+
+<li class="li"> 4KB, 16MB, or 16GB <em class="ph i">for 'ppc64le' (Power8 little-endian machines)</em></li>
+
+</ul>
+
+</div>
+
+<p class="p">The size of hugepages on your machine is set by Linux kernel parameters when the machine is booted. If you want to change the size of hugepages on your machine, please refer to these documents for details:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt</li>
+
+<li class="li"> https://www.kernel.org/doc/Documentation/kernel-parameters.txt</li>
+
+</ul>
+
+</div>
+
+<p class="p">The number of hugepages is determined by the 'vm.nr_hugepages' system control parameter. This parameter can be set when the system is booted, and it can be changed later while the system is running.
+</p>
+
+<p class="p">For example, to set the 'vm.nr_hugepages' parameter to 1000 when the system boots, edit the '/etc/sysctl.conf' system file and set the parameter like this:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+vm.nr_hugepages=1000
+</pre>
+
+
+</div>
+
+<p class="p">To set the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo sysctl -w vm.nr_hugepages=1000
+</pre>
+
+
+</div>
+
+<p class="p">To verify that the 'vm.nr_hugepages' parameter is set to 1000, type this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sysctl vm.nr_hugepages
+vm.nr_hugepages = 1000
+</pre>
+
+
+</div>
+
+<p class="p">To verify that the number of hugepages available is actually 1000, type this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; cat /proc/meminfo | grep -i hugepages
+AnonHugePages:         0 kB
+HugePages_Total:    1000
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:      16384 kB
+</pre>
+
+
+</div>
+
+<p class="p">If the number of hugepages has not 1000, memory may be too fragemented. In this case, you will need to reboot the machine and then set the number of hugepages.
+</p>
+
+<p class="p">To make the hugepages accessible to the user accounts that will run the DNSPacketDPDKSource operator, create and mount a directory for them by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo mkdir /dev/hugepages
+bash&gt; sudo mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
+</pre>
+
+
+</div>
+
+<p class="p">To ensure the hugepages are mounted in the '/dev/hugepages' directory when the machine is rebooted,  edit the '/etc/fstab' system file by typing this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo vi /etc/fstab
+</pre>
+
+
+</div>
+
+<p class="p">and inserting this line into the file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+nodev  /dev/hugepages  hugetlbfs  gid=dpdk,mode=1770  0  0
+</pre>
+
+
+</div>
+
+<p class="p"><em class="ph i">get DPDK library and utilities</em>
+</p>
+
+<p class="p">The DPDK source code needs to be downloaded, configured for your machine's architecture and ethernet device, and compiled into libraries and utilities.
+</p>
+
+<p class="p">First, download the DPDK source code and configure it for your machine's architecture by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; wget http://fast.dpdk.org/rel/dpdk-2.2.0.tar.xz
+bash&gt; tar -xvf dpdk-2.2.0.tar.xz
+bash&gt; cd $RTE_SDK
+bash&gt; make config T=$RTE_TARGET
+</pre>
+
+
+</div>
+
+<p class="p">Then, edit the DPDK configuration file by typing this command:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; vi ./build/.config
+</pre>
+
+
+</div>
+
+<p class="p">and change these parameters in the '.config' file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+CONFIG_RTE_BUILD_COMBINE_LIBS=y
+CONFIG_RTE_MAX_MEMSEG=1024
+</pre>
+
+
+</div>
+
+<p class="p">and, if your machine has a Mellanox ethernet device, change this parameter in the '.config' file, too:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+CONFIG_RTE_LIBRTE_MLX4_PMD=y 
+</pre>
+
+
+</div>
+
+<p class="p">Then, compile DPDK by typing this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; EXTRA_CFLAGS=-fPIC make                
+bash&gt; EXTRA_CFLAGS=-fPIC make install T=$RTE_TARGET
+</pre>
+
+
+</div>
+
+<p class="p"><em class="ph i">re-compile Streams network toolkit</em>
+</p>
+
+<p class="p">If you don't already have the Streams network toolkit, get it by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; cd $HOME/git
+bash&gt; git clone git@github.com:ejpring/streamsx.network.git
+</pre>
+
+
+</div>
+
+<p class="p">In any case, you will need to compile the Streams DPDK glue library. To do this, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; cd $HOME/git/streamsx.network
+bash&gt; ant
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">bind 'e1000' ethernet device to DPDK
+</h2>
+
+<p class="p">Before Streams can use an ethernet device with DPDK, it must be bound to a DPDK device driver.
+</p>
+
+<p class="p">For the 'e1000' family of devices, load the DPDK device driver into the Linux kernel by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo modprobe uio
+bash&gt; sudo insmod $RTE_SDK/build/kmod/igb_uio.ko || true
+</pre>
+
+
+</div>
+
+<p class="p">The DPDK device driver requires exclusive use of the ethernet device. To stop the Linux device driver, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo ip link set dev $DPDK_INTERFACE down
+bash&gt; ip link show dev $DPDK_INTERFACE
+</pre>
+
+
+</div>
+
+<p class="p">To bind an ethernet device of the 'e1000' family to the DPDK device drier, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb_uio $DPDK_DEVICE
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
+</pre>
+
+
+</div>
+
+<p class="p">Then grant read/write access to the DPDK device driver's files to the 'dpdk' user group by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo chown root:dpdk /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
+bash&gt; sudo chmod 664 /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
+</pre>
+
+
+</div>
+
+<p class="p">You can now run one of the sample applications that use DPDK, or run your own SPL application.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">unbind 'e1000' ethernet device from DPDK
+</h2>
+
+<p class="p">After Streams has finished using an ethernet device with DPDK, it should be rebound to the Linux device driver.
+</p>
+
+<p class="p">To bind an ethernet device of the 'e1000' family to the Linux device driver, type these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb $DPDK_DEVICE
+bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
+</pre>
+
+
+</div>
+
+<p class="p">Then start the Linux device driver by typing these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+bash&gt; sudo ip link set dev $DPDK_INTERFACE up
+bash&gt; ip link show dev $DPDK_INTERFACE
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">bind 'Mellanox' ethernet device to DPDK
+</h2>
+
+<p class="p">To be done ...
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">unbind 'Mellanox' ethernet device from DPDK
+</h2>
+
+<p class="p">To be done ...
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">sample applications
+</h2>
+
+<p class="p">The network toolkit includes several <a class="xref" href="https://github.com/IBMStreams/streamsx.network/tree/master/samples">sample applications</a> that illustrate how to use this operator.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">references
+</h2>
+
+<p class="p">The ethernet frame format is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Ethernet_frame">http://en.wikipedia.org/wiki/Ethernet_frame</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The ethernet header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://linux.die.net/include/net/ethernet.h">http://linux.die.net/include/net/ethernet.h</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/linux/if_ether.h">http://linux.die.net/include/linux/if_ether.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The IPv4 header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/IPv4">http://en.wikipedia.org/wiki/IPv4</a></li>
+
+<li class="li"> <a class="xref" href="http://www.ietf.org/rfc/rfc791.txt">http://www.ietf.org/rfc/rfc791.txt</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/in.h">http://linux.die.net/include/netinet/in.h</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip.h">http://linux.die.net/include/netinet/ip.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The IPv6 header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://en.wikipedia.org/wiki/IPv6_packet">https://en.wikipedia.org/wiki/IPv6_packet</a></li>
+
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc2460">https://tools.ietf.org/html/rfc2460</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip6.h">http://linux.die.net/include/netinet/ip6.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The UDP header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/User_Datagram_Protocol">http://en.wikipedia.org/wiki/User_Datagram_Protocol</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc768">http://tools.ietf.org/html/rfc768</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/udp.h">http://linux.die.net/include/netinet/udp.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">DNS messages and the fields they contain are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Domain_Name_System">http://en.wikipedia.org/wiki/Domain_Name_System</a></li>
+
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/List_of_DNS_record_types">http://en.wikipedia.org/wiki/List_of_DNS_record_types</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc1035">http://tools.ietf.org/html/rfc1035</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2308">http://tools.ietf.org/html/rfc2308</a> for SOA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2872">http://tools.ietf.org/html/rfc2872</a> for SRV resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3403">http://tools.ietf.org/html/rfc3403</a> for NAPTR resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3596">http://tools.ietf.org/html/rfc3596</a> for AAAA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4034">http://tools.ietf.org/html/rfc4034</a> for DS, RRSIG, NSEC, and DNSKEY resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4408">http://tools.ietf.org/html/rfc4408</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc5155">http://tools.ietf.org/html/rfc5155</a> for NSEC3 and NSEC3PARAM resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc6891">http://tools.ietf.org/html/rfc6891</a> for OPT resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7208">http://tools.ietf.org/html/rfc7208</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7505">http://tools.ietf.org/html/rfc7505</a> for MX resource records</li>
+
+</ul>
+
+</div>
+
+<p class="p">The Juniper Networks 'jmirror' encapsulation header is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://wiki.wireshark.org/jmirror">http://wiki.wireshark.org/jmirror</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The Cisco Systems ''Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/draft-foschiano-erspan-00">https://tools.ietf.org/html/draft-foschiano-erspan-00</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The 'Generic Route Encapsulation (GRE)' headers used by Cisco ERSPAN encapsulation are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc2784">https://tools.ietf.org/html/rfc2784</a></li>
+
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc1701">https://tools.ietf.org/html/rfc1701</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The Linux <tt class="ph tt">tcpdump</tt> command is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.tcpdump.org/">http://www.tcpdump.org/</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/man/8/tcpdump">http://linux.die.net/man/8/tcpdump</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The Wireshark tools are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.wireshark.org/">http://www.wireshark.org/</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The result functions that can be used in boolean expressions for the <tt class="ph tt">outputFilters</tt> parameter and in output attribute assignment expressions are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">network header and DNS parser result functions</a>.  </li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Ports</dt>
+
+  <dd class="dd">This operator has 0 input ports and 1 or more output ports.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Windowing</dt>
+
+  <dd class="dd">This operator does not accept any windowing configurations.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Parameters</dt>
+
+  <dd class="dd">This operator supports 7 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
+
+</p>
+</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Metrics</dt>
+
+  <dd class="dd">This operator reports 4 metrics.</dd>
+
+ 
+</dl>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Properties</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Implementation</dt>
+
+  <dd class="dd">C++</dd>
+
+ 
+ 
+  <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__providessinglethreadedexecutioncontext">Threading</a></dt>
+
+  <dd class="dd"><tt class="ph tt">Always</tt> - Operator always provides a single threaded execution context.</dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set">Output Ports</a></strong></p>
+<dl class="dl">
+  
+     <dt class="dt dlterm">Assignments</dt>
+
+     <dd class="dd">This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+
+  
+</dl>
+
+<dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0...)</dt>
+
+   <dd class="dd">
+
+<p class="p">The DNSPacketDPDKSource operator requires one or more output ports:
+</p>
+
+<p class="p">Each output port will produce one output tuple for each packet received if the corresponding expression in the <tt class="ph tt">outputFilters</tt> parameter evaluates <tt class="ph tt">true</tt>, or if no <tt class="ph tt">outputFilters</tt> parameter is specified.
+</p>
+
+<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">DNSPacketDPDKSource result functions</a>. Output attributes that match input attributes in name and type are copied automatically.
+</p>
+
+   <p class="p"/>
+
+    <p class="p"/>
+
+   <dl class="dl">
+    
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Generating
+     </li>
+
+   </ul>
+
+</dd>
+    
+   </dl>
+
+   <p class="p"/>
+
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
+This operator supports 7 parameters.<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcoreMaster"><!-- --></a><tt class="ph tt">lcoreMaster</tt></dt>
+
+     <dd class="dd">
+<p class="p">Logical core number to be used for the master DPDK thread.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcore"><!-- --></a><tt class="ph tt">lcore</tt></dt>
+
+     <dd class="dd">
+<p class="p">Logical core number on which this operator will run.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicPort"><!-- --></a><tt class="ph tt">nicPort</tt></dt>
+
+     <dd class="dd">
+<p class="p">NIC port of type uint32 which sources packets for this operator instance.  Obtaining the proper mapping may require use of multiple tools, and varies by NIC.  
+</p>
+
+<p class="p">Suggested tools to help identify NIC ports:
+</p>
+
+<p class="p">   - ifconfig
+</p>
+
+<p class="p">   - dpdk-*/tools/dpdk_nic_bind.py --status
+</p>
+
+<p class="p">   - ibstat (for Mellanox NICs)
+</p>
+
+<p class="p">   - lspci | grep -i net
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicQueue"><!-- --></a><tt class="ph tt">nicQueue</tt></dt>
+
+     <dd class="dd">
+<p class="p">NIC queue of type int32 which sources packets for this operator instance.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">DNSPacketDPDKSource result functions</a>.  
+</p>
+
+<p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all packets processed to be emitted by all output ports.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+</p>
+
+<p class="p">The default value is '10.0'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
+<dl class="dl">
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsReceivedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts the number of packets received by the network interface, as counted by DPDK.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsDroppedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts the number of packets dropped by the network interface, as counted by DPDK.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts number of bytes of packet data processed by the operator.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nBytesProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts number of bytes of packet data processed by the operator.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies">Libraries</a></strong></p>
+<dl class="dl">
+ 
+  <dt class="dt dlterm"><tt class="ph tt">General support functions.</tt>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/include</tt></dd>
+
+ 
+ 
+  <dt class="dt dlterm"><tt class="ph tt">streams_source interface library to dpdk.</tt>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">streams_source</tt></dd>
+
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/src/source/dpdk/build/lib</tt></dd>
+
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/src/source/dpdk</tt></dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

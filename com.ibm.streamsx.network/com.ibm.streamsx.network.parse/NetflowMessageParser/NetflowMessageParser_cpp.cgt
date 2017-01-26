@@ -58,7 +58,7 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scala
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
 
   // set operator parameters
   processorAffinity = <%=$processorAffinity%>;
@@ -71,55 +71,55 @@ MY_OPERATOR::MY_OPERATOR()
     outTuple<%=$i%>.clear();
     <% } %> ;
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "NetflowMessageParser");
 }
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> destructor ...", "NetflowMessageParser");
 }
 
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady() ...", "NetflowMessageParser");
 }
 
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown()
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
 }
 
 // Processing for source and threaded operators
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "NetflowMessageParser");
 }
 
 // Tuple processing for mutating ports
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 }
 
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 
   SPL::AutoPortMutex automutex(processMutex, *this);
 
   <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
   if (processorAffinity>-1) {
-    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "NetflowMessageParser");
+    SPLAPPTRC(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "NetflowMessageParser");
     cpu_set_t cpumask; // CPU affinity bit mask
     CPU_ZERO(&cpumask);
     CPU_SET(processorAffinity, &cpumask);
@@ -142,37 +142,37 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   // prepare the Netflow message for parsing
   parser.prepareNetflowMessage(buffer, length, source);
-  if ( parser.error ) { SPLLOG(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser"); }
+  if ( parser.error ) { SPLAPPTRC(L_INFO, "ignoring tuple " << tupleCounter << ", no Netflow header found: " << parser.error, "NetflowMessageParser"); }
 
   // parse the flow records in the Netflow message, submitting output tuples to output ports, as selected by output filters, if specified
   while( !parser.error && !parser.done )
     {
       parser.nextFlowRecord();
-      if ( parser.error ) { SPLLOG(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); break; }
+      if ( parser.error ) { SPLAPPTRC(L_INFO, "error parsing message " << tupleCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.error, "NetflowMessageParser"); break; }
       if ( parser.done ) { break; }
       <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
         <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
         {
           <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
           <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-          SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "NetflowMessageParser");
+          SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "NetflowMessageParser");
           submit(outTuple<%=$i%>, <%=$i%>);
         }
         <% } %> ;
     }
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 }
 
 
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
 {
-  SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 
   forwardWindowPunctuation(punct);
 
-  SPLLOG(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "NetflowMessageParser");
 }
 
 

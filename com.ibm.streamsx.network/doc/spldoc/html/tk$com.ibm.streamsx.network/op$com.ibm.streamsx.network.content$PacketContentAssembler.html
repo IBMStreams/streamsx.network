@@ -35,7 +35,7 @@
 <p class="p">PacketContentAssembler is an operator for the IBM InfoSphere Streams product that reassembles application flows (such as SMTP, FTP, HTTP, and SIP) and files (such as GIF, JPEG, HTML, and and PDF) from raw network packets received in input tuples,  and emits tuples containing the reassembled content.  The operator may be configured with one or more output ports, and each port may be configured to emit different tuples, as specified by output filters. The tuples contain individual fields from flows and files, as specified by output attribute assignments.  
 </p>
 
-<p class="p">The PacketContentAssembler operator expects raw ethernet packets in its input tuples, including all of their network headers.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PACKET_DATA">PACKET_DATA()</a> output attribute assignment function.
+<p class="p">The PacketContentAssembler operator expects raw ethernet packets in its input tuples, including all of their network headers.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the PACKET_DATA() output attribute assignment function.
 </p>
 
 <p class="p">The PacketContentAssembler operator  consumes network packets from tuples received by its input port  and reassembles flows and files in internal buffers. It produces output tuples containing the results of its reassembly when one of the following events is detected:
@@ -233,7 +233,7 @@ specified does not match the number of output ports specified.
 <p class="p">The PacketContentAssembler operator requires one input port.  One input attribute must be of type <tt class="ph tt">blob</tt> and must contain a raw ethernet packet, including the network headers that proceed them in network packets, as specified by the required parameter <tt class="ph tt">packetAttribute</tt>.
 </p>
 
-<p class="p">The <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PACKET_DATA">PACKET_DATA()</a> output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the PacketContentAssembler operator.
+<p class="p">The PACKET_DATA() output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the PacketContentAssembler operator.
 </p>
 
    <dl class="dl">

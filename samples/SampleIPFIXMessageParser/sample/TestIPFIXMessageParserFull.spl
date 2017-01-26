@@ -15,7 +15,7 @@ use com.ibm.streamsx.network.datetimeformat::*;
 composite TestIPFIXMessageParserFull {
 
     param
-    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_ipfix_juniper.pcap" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_ipfix_juniper.pcap" );
 
     type
 

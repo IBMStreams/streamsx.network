@@ -21,9 +21,7 @@ unbundleDirectory=$projectDirectory/output/unbundle/$composite
 
 dataDirectory=$projectDirectory/data
 
-libpcapDirectory=$HOME/libpcap-1.7.4
-
-libpamDirectory=$HOME/workspace/com.ibm.iss.pam
+libpamDirectory=$HOME/com.ibm.iss.pam
 
 networkInterface=$( ifconfig ens6f1 1>/dev/null 2>&1 && echo ens6f1 || echo eth0 ) 
 
@@ -70,8 +68,6 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
-[ -d $libpcapDirectory ] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
 [ -d $libpamDirectory ] && export STREAMS_ADAPTERS_ISS_PAM_DIRECTORY=$libpamDirectory
 
 step "configuration for standalone application '$namespace.$composite' ..."
@@ -96,11 +92,11 @@ spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbu
 step "setting capabilities for standalone application '$namespace.$composite' ..."
 standalone=$unbundleDirectory/$composite/bin/standalone
 [ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
-sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
-/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
+###sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+###/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
 
 step "executing standalone application '$namespace.$composite' ..."
-$standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
+sudo STREAMS_INSTALL=$STREAMS_INSTALL $standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
 
 exit 0
 

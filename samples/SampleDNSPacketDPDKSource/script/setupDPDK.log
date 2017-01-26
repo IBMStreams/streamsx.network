@@ -1,0 +1,3128 @@
+dpdk-2.2.0/.gitignore
+dpdk-2.2.0/GNUmakefile
+dpdk-2.2.0/LICENSE.GPL
+dpdk-2.2.0/LICENSE.LGPL
+dpdk-2.2.0/MAINTAINERS
+dpdk-2.2.0/Makefile
+dpdk-2.2.0/README
+dpdk-2.2.0/app/
+dpdk-2.2.0/app/Makefile
+dpdk-2.2.0/app/cmdline_test/
+dpdk-2.2.0/app/cmdline_test/Makefile
+dpdk-2.2.0/app/cmdline_test/cmdline_test.c
+dpdk-2.2.0/app/cmdline_test/cmdline_test.h
+dpdk-2.2.0/app/cmdline_test/cmdline_test.py
+dpdk-2.2.0/app/cmdline_test/cmdline_test_data.py
+dpdk-2.2.0/app/cmdline_test/commands.c
+dpdk-2.2.0/app/proc_info/
+dpdk-2.2.0/app/proc_info/Makefile
+dpdk-2.2.0/app/proc_info/main.c
+dpdk-2.2.0/app/test-acl/
+dpdk-2.2.0/app/test-acl/Makefile
+dpdk-2.2.0/app/test-acl/main.c
+dpdk-2.2.0/app/test-pipeline/
+dpdk-2.2.0/app/test-pipeline/Makefile
+dpdk-2.2.0/app/test-pipeline/config.c
+dpdk-2.2.0/app/test-pipeline/init.c
+dpdk-2.2.0/app/test-pipeline/main.c
+dpdk-2.2.0/app/test-pipeline/main.h
+dpdk-2.2.0/app/test-pipeline/pipeline_acl.c
+dpdk-2.2.0/app/test-pipeline/pipeline_hash.c
+dpdk-2.2.0/app/test-pipeline/pipeline_lpm.c
+dpdk-2.2.0/app/test-pipeline/pipeline_lpm_ipv6.c
+dpdk-2.2.0/app/test-pipeline/pipeline_stub.c
+dpdk-2.2.0/app/test-pipeline/runtime.c
+dpdk-2.2.0/app/test-pmd/
+dpdk-2.2.0/app/test-pmd/Makefile
+dpdk-2.2.0/app/test-pmd/cmdline.c
+dpdk-2.2.0/app/test-pmd/config.c
+dpdk-2.2.0/app/test-pmd/csumonly.c
+dpdk-2.2.0/app/test-pmd/flowgen.c
+dpdk-2.2.0/app/test-pmd/icmpecho.c
+dpdk-2.2.0/app/test-pmd/ieee1588fwd.c
+dpdk-2.2.0/app/test-pmd/iofwd.c
+dpdk-2.2.0/app/test-pmd/macfwd-retry.c
+dpdk-2.2.0/app/test-pmd/macfwd.c
+dpdk-2.2.0/app/test-pmd/macswap.c
+dpdk-2.2.0/app/test-pmd/mempool_anon.c
+dpdk-2.2.0/app/test-pmd/mempool_osdep.h
+dpdk-2.2.0/app/test-pmd/parameters.c
+dpdk-2.2.0/app/test-pmd/rxonly.c
+dpdk-2.2.0/app/test-pmd/testpmd.c
+dpdk-2.2.0/app/test-pmd/testpmd.h
+dpdk-2.2.0/app/test-pmd/txonly.c
+dpdk-2.2.0/app/test/
+dpdk-2.2.0/app/test/Makefile
+dpdk-2.2.0/app/test/autotest.py
+dpdk-2.2.0/app/test/autotest_data.py
+dpdk-2.2.0/app/test/autotest_runner.py
+dpdk-2.2.0/app/test/autotest_test_funcs.py
+dpdk-2.2.0/app/test/commands.c
+dpdk-2.2.0/app/test/packet_burst_generator.c
+dpdk-2.2.0/app/test/packet_burst_generator.h
+dpdk-2.2.0/app/test/process.h
+dpdk-2.2.0/app/test/test.c
+dpdk-2.2.0/app/test/test.h
+dpdk-2.2.0/app/test/test_acl.c
+dpdk-2.2.0/app/test/test_acl.h
+dpdk-2.2.0/app/test/test_alarm.c
+dpdk-2.2.0/app/test/test_atomic.c
+dpdk-2.2.0/app/test/test_byteorder.c
+dpdk-2.2.0/app/test/test_cmdline.c
+dpdk-2.2.0/app/test/test_cmdline.h
+dpdk-2.2.0/app/test/test_cmdline_cirbuf.c
+dpdk-2.2.0/app/test/test_cmdline_etheraddr.c
+dpdk-2.2.0/app/test/test_cmdline_ipaddr.c
+dpdk-2.2.0/app/test/test_cmdline_lib.c
+dpdk-2.2.0/app/test/test_cmdline_num.c
+dpdk-2.2.0/app/test/test_cmdline_portlist.c
+dpdk-2.2.0/app/test/test_cmdline_string.c
+dpdk-2.2.0/app/test/test_common.c
+dpdk-2.2.0/app/test/test_cpuflags.c
+dpdk-2.2.0/app/test/test_cryptodev.c
+dpdk-2.2.0/app/test/test_cryptodev.h
+dpdk-2.2.0/app/test/test_cryptodev_perf.c
+dpdk-2.2.0/app/test/test_cycles.c
+dpdk-2.2.0/app/test/test_debug.c
+dpdk-2.2.0/app/test/test_devargs.c
+dpdk-2.2.0/app/test/test_distributor.c
+dpdk-2.2.0/app/test/test_distributor_perf.c
+dpdk-2.2.0/app/test/test_eal_flags.c
+dpdk-2.2.0/app/test/test_eal_fs.c
+dpdk-2.2.0/app/test/test_errno.c
+dpdk-2.2.0/app/test/test_func_reentrancy.c
+dpdk-2.2.0/app/test/test_hash.c
+dpdk-2.2.0/app/test/test_hash_functions.c
+dpdk-2.2.0/app/test/test_hash_perf.c
+dpdk-2.2.0/app/test/test_hash_scaling.c
+dpdk-2.2.0/app/test/test_interrupts.c
+dpdk-2.2.0/app/test/test_ivshmem.c
+dpdk-2.2.0/app/test/test_kni.c
+dpdk-2.2.0/app/test/test_kvargs.c
+dpdk-2.2.0/app/test/test_link_bonding.c
+dpdk-2.2.0/app/test/test_link_bonding_mode4.c
+dpdk-2.2.0/app/test/test_link_bonding_rssconf.c
+dpdk-2.2.0/app/test/test_logs.c
+dpdk-2.2.0/app/test/test_lpm.c
+dpdk-2.2.0/app/test/test_lpm6.c
+dpdk-2.2.0/app/test/test_lpm6_routes.h
+dpdk-2.2.0/app/test/test_lpm_routes.h
+dpdk-2.2.0/app/test/test_malloc.c
+dpdk-2.2.0/app/test/test_mbuf.c
+dpdk-2.2.0/app/test/test_memcpy.c
+dpdk-2.2.0/app/test/test_memcpy_perf.c
+dpdk-2.2.0/app/test/test_memory.c
+dpdk-2.2.0/app/test/test_mempool.c
+dpdk-2.2.0/app/test/test_mempool_perf.c
+dpdk-2.2.0/app/test/test_memzone.c
+dpdk-2.2.0/app/test/test_meter.c
+dpdk-2.2.0/app/test/test_mp_secondary.c
+dpdk-2.2.0/app/test/test_pci.c
+dpdk-2.2.0/app/test/test_per_lcore.c
+dpdk-2.2.0/app/test/test_pmd_perf.c
+dpdk-2.2.0/app/test/test_pmd_ring.c
+dpdk-2.2.0/app/test/test_pmd_ring_perf.c
+dpdk-2.2.0/app/test/test_power.c
+dpdk-2.2.0/app/test/test_power_acpi_cpufreq.c
+dpdk-2.2.0/app/test/test_power_kvm_vm.c
+dpdk-2.2.0/app/test/test_prefetch.c
+dpdk-2.2.0/app/test/test_red.c
+dpdk-2.2.0/app/test/test_reorder.c
+dpdk-2.2.0/app/test/test_ring.c
+dpdk-2.2.0/app/test/test_ring_perf.c
+dpdk-2.2.0/app/test/test_rwlock.c
+dpdk-2.2.0/app/test/test_sched.c
+dpdk-2.2.0/app/test/test_spinlock.c
+dpdk-2.2.0/app/test/test_string_fns.c
+dpdk-2.2.0/app/test/test_table.c
+dpdk-2.2.0/app/test/test_table.h
+dpdk-2.2.0/app/test/test_table_acl.c
+dpdk-2.2.0/app/test/test_table_acl.h
+dpdk-2.2.0/app/test/test_table_combined.c
+dpdk-2.2.0/app/test/test_table_combined.h
+dpdk-2.2.0/app/test/test_table_pipeline.c
+dpdk-2.2.0/app/test/test_table_pipeline.h
+dpdk-2.2.0/app/test/test_table_ports.c
+dpdk-2.2.0/app/test/test_table_ports.h
+dpdk-2.2.0/app/test/test_table_tables.c
+dpdk-2.2.0/app/test/test_table_tables.h
+dpdk-2.2.0/app/test/test_tailq.c
+dpdk-2.2.0/app/test/test_thash.c
+dpdk-2.2.0/app/test/test_timer.c
+dpdk-2.2.0/app/test/test_timer_perf.c
+dpdk-2.2.0/app/test/test_timer_racecond.c
+dpdk-2.2.0/app/test/test_version.c
+dpdk-2.2.0/app/test/virtual_pmd.c
+dpdk-2.2.0/app/test/virtual_pmd.h
+dpdk-2.2.0/config/
+dpdk-2.2.0/config/common_bsdapp
+dpdk-2.2.0/config/common_linuxapp
+dpdk-2.2.0/config/defconfig_arm-armv7a-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_arm64-armv8a-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_arm64-thunderx-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_arm64-xgene1-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_i686-native-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_i686-native-linuxapp-icc
+dpdk-2.2.0/config/defconfig_ppc_64-power8-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_tile-tilegx-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_x86_64-ivshmem-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_x86_64-ivshmem-linuxapp-icc
+dpdk-2.2.0/config/defconfig_x86_64-native-bsdapp-clang
+dpdk-2.2.0/config/defconfig_x86_64-native-bsdapp-gcc
+dpdk-2.2.0/config/defconfig_x86_64-native-linuxapp-clang
+dpdk-2.2.0/config/defconfig_x86_64-native-linuxapp-gcc
+dpdk-2.2.0/config/defconfig_x86_64-native-linuxapp-icc
+dpdk-2.2.0/config/defconfig_x86_x32-native-linuxapp-gcc
+dpdk-2.2.0/doc/
+dpdk-2.2.0/doc/api/
+dpdk-2.2.0/doc/api/doxy-api-index.md
+dpdk-2.2.0/doc/api/doxy-api.conf
+dpdk-2.2.0/doc/api/doxy-html-custom.sh
+dpdk-2.2.0/doc/api/examples.dox
+dpdk-2.2.0/doc/build-sdk-quick.txt
+dpdk-2.2.0/doc/guides/
+dpdk-2.2.0/doc/guides/conf.py
+dpdk-2.2.0/doc/guides/contributing/
+dpdk-2.2.0/doc/guides/contributing/cheatsheet.rst
+dpdk-2.2.0/doc/guides/contributing/coding_style.rst
+dpdk-2.2.0/doc/guides/contributing/design.rst
+dpdk-2.2.0/doc/guides/contributing/documentation.rst
+dpdk-2.2.0/doc/guides/contributing/img/
+dpdk-2.2.0/doc/guides/contributing/img/patch_cheatsheet.svg
+dpdk-2.2.0/doc/guides/contributing/index.rst
+dpdk-2.2.0/doc/guides/contributing/patches.rst
+dpdk-2.2.0/doc/guides/contributing/versioning.rst
+dpdk-2.2.0/doc/guides/cryptodevs/
+dpdk-2.2.0/doc/guides/cryptodevs/aesni_mb.rst
+dpdk-2.2.0/doc/guides/cryptodevs/index.rst
+dpdk-2.2.0/doc/guides/cryptodevs/qat.rst
+dpdk-2.2.0/doc/guides/faq/
+dpdk-2.2.0/doc/guides/faq/faq.rst
+dpdk-2.2.0/doc/guides/faq/index.rst
+dpdk-2.2.0/doc/guides/freebsd_gsg/
+dpdk-2.2.0/doc/guides/freebsd_gsg/build_dpdk.rst
+dpdk-2.2.0/doc/guides/freebsd_gsg/build_sample_apps.rst
+dpdk-2.2.0/doc/guides/freebsd_gsg/index.rst
+dpdk-2.2.0/doc/guides/freebsd_gsg/install_from_ports.rst
+dpdk-2.2.0/doc/guides/freebsd_gsg/intro.rst
+dpdk-2.2.0/doc/guides/index.rst
+dpdk-2.2.0/doc/guides/linux_gsg/
+dpdk-2.2.0/doc/guides/linux_gsg/build_dpdk.rst
+dpdk-2.2.0/doc/guides/linux_gsg/build_sample_apps.rst
+dpdk-2.2.0/doc/guides/linux_gsg/enable_func.rst
+dpdk-2.2.0/doc/guides/linux_gsg/img/
+dpdk-2.2.0/doc/guides/linux_gsg/img/intel_perf_test_setup.svg
+dpdk-2.2.0/doc/guides/linux_gsg/index.rst
+dpdk-2.2.0/doc/guides/linux_gsg/intro.rst
+dpdk-2.2.0/doc/guides/linux_gsg/nic_perf_intel_platform.rst
+dpdk-2.2.0/doc/guides/linux_gsg/quick_start.rst
+dpdk-2.2.0/doc/guides/linux_gsg/sys_reqs.rst
+dpdk-2.2.0/doc/guides/nics/
+dpdk-2.2.0/doc/guides/nics/bnx2x.rst
+dpdk-2.2.0/doc/guides/nics/cxgbe.rst
+dpdk-2.2.0/doc/guides/nics/e1000em.rst
+dpdk-2.2.0/doc/guides/nics/enic.rst
+dpdk-2.2.0/doc/guides/nics/fm10k.rst
+dpdk-2.2.0/doc/guides/nics/img/
+dpdk-2.2.0/doc/guides/nics/img/console.png
+dpdk-2.2.0/doc/guides/nics/img/fast_pkt_proc.png
+dpdk-2.2.0/doc/guides/nics/img/forward_stats.png
+dpdk-2.2.0/doc/guides/nics/img/host_vm_comms.png
+dpdk-2.2.0/doc/guides/nics/img/host_vm_comms_qemu.png
+dpdk-2.2.0/doc/guides/nics/img/inter_vm_comms.png
+dpdk-2.2.0/doc/guides/nics/img/perf_benchmark.png
+dpdk-2.2.0/doc/guides/nics/img/single_port_nic.png
+dpdk-2.2.0/doc/guides/nics/img/vm_vm_comms.png
+dpdk-2.2.0/doc/guides/nics/img/vmxnet3_int.png
+dpdk-2.2.0/doc/guides/nics/img/vswitch_vm.png
+dpdk-2.2.0/doc/guides/nics/index.rst
+dpdk-2.2.0/doc/guides/nics/intel_vf.rst
+dpdk-2.2.0/doc/guides/nics/ixgbe.rst
+dpdk-2.2.0/doc/guides/nics/mlx4.rst
+dpdk-2.2.0/doc/guides/nics/mlx5.rst
+dpdk-2.2.0/doc/guides/nics/nfp.rst
+dpdk-2.2.0/doc/guides/nics/pcap_ring.rst
+dpdk-2.2.0/doc/guides/nics/szedata2.rst
+dpdk-2.2.0/doc/guides/nics/virtio.rst
+dpdk-2.2.0/doc/guides/nics/vmxnet3.rst
+dpdk-2.2.0/doc/guides/prog_guide/
+dpdk-2.2.0/doc/guides/prog_guide/build_app.rst
+dpdk-2.2.0/doc/guides/prog_guide/dev_kit_build_system.rst
+dpdk-2.2.0/doc/guides/prog_guide/dev_kit_root_make_help.rst
+dpdk-2.2.0/doc/guides/prog_guide/env_abstraction_layer.rst
+dpdk-2.2.0/doc/guides/prog_guide/ext_app_lib_make_help.rst
+dpdk-2.2.0/doc/guides/prog_guide/extend_intel_dpdk.rst
+dpdk-2.2.0/doc/guides/prog_guide/glossary.rst
+dpdk-2.2.0/doc/guides/prog_guide/hash_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/img/
+dpdk-2.2.0/doc/guides/prog_guide/img/architecture-overview.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/blk_diag_dropper.png
+dpdk-2.2.0/doc/guides/prog_guide/img/bond-mode-0.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/bond-mode-1.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/bond-mode-2.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/bond-mode-3.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/bond-mode-4.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/bond-mode-5.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/bond-overview.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/data_struct_per_port.png
+dpdk-2.2.0/doc/guides/prog_guide/img/drop_probability_eq3.png
+dpdk-2.2.0/doc/guides/prog_guide/img/drop_probability_eq4.png
+dpdk-2.2.0/doc/guides/prog_guide/img/drop_probability_graph.png
+dpdk-2.2.0/doc/guides/prog_guide/img/eq2_expression.png
+dpdk-2.2.0/doc/guides/prog_guide/img/eq2_factor.png
+dpdk-2.2.0/doc/guides/prog_guide/img/ewma_filter_eq_1.png
+dpdk-2.2.0/doc/guides/prog_guide/img/ewma_filter_eq_2.png
+dpdk-2.2.0/doc/guides/prog_guide/img/ex_data_flow_tru_dropper.png
+dpdk-2.2.0/doc/guides/prog_guide/img/figure32.png
+dpdk-2.2.0/doc/guides/prog_guide/img/figure33.png
+dpdk-2.2.0/doc/guides/prog_guide/img/figure34.png
+dpdk-2.2.0/doc/guides/prog_guide/img/figure35.png
+dpdk-2.2.0/doc/guides/prog_guide/img/figure37.png
+dpdk-2.2.0/doc/guides/prog_guide/img/figure38.png
+dpdk-2.2.0/doc/guides/prog_guide/img/figure39.png
+dpdk-2.2.0/doc/guides/prog_guide/img/flow_tru_droppper.png
+dpdk-2.2.0/doc/guides/prog_guide/img/hier_sched_blk.png
+dpdk-2.2.0/doc/guides/prog_guide/img/ivshmem.png
+dpdk-2.2.0/doc/guides/prog_guide/img/kernel_nic_intf.png
+dpdk-2.2.0/doc/guides/prog_guide/img/kni_traffic_flow.png
+dpdk-2.2.0/doc/guides/prog_guide/img/linuxapp_launch.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/m_definition.png
+dpdk-2.2.0/doc/guides/prog_guide/img/malloc_heap.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/mbuf1.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/mbuf2.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/memory-management.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/memory-management2.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/mempool.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/multi_process_memory.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/packet_distributor1.png
+dpdk-2.2.0/doc/guides/prog_guide/img/packet_distributor2.png
+dpdk-2.2.0/doc/guides/prog_guide/img/pipe_prefetch_sm.png
+dpdk-2.2.0/doc/guides/prog_guide/img/pkt_drop_probability.png
+dpdk-2.2.0/doc/guides/prog_guide/img/pkt_flow_kni.png
+dpdk-2.2.0/doc/guides/prog_guide/img/pkt_proc_pipeline_qos.png
+dpdk-2.2.0/doc/guides/prog_guide/img/prefetch_pipeline.png
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-dequeue1.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-dequeue2.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-dequeue3.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-enqueue1.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-enqueue2.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-enqueue3.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-modulo1.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-modulo2.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-mp-enqueue1.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-mp-enqueue2.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-mp-enqueue3.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-mp-enqueue4.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring-mp-enqueue5.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/ring1.svg
+dpdk-2.2.0/doc/guides/prog_guide/img/sched_hier_per_port.png
+dpdk-2.2.0/doc/guides/prog_guide/img/tbl24_tbl8.png
+dpdk-2.2.0/doc/guides/prog_guide/img/tbl24_tbl8_tbl8.png
+dpdk-2.2.0/doc/guides/prog_guide/img/vhost_net_arch.png
+dpdk-2.2.0/doc/guides/prog_guide/index.rst
+dpdk-2.2.0/doc/guides/prog_guide/intro.rst
+dpdk-2.2.0/doc/guides/prog_guide/ip_fragment_reassembly_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/ivshmem_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/kernel_nic_interface.rst
+dpdk-2.2.0/doc/guides/prog_guide/link_bonding_poll_mode_drv_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/lpm6_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/lpm_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/mbuf_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/mempool_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/multi_proc_support.rst
+dpdk-2.2.0/doc/guides/prog_guide/overview.rst
+dpdk-2.2.0/doc/guides/prog_guide/packet_classif_access_ctrl.rst
+dpdk-2.2.0/doc/guides/prog_guide/packet_distrib_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/packet_framework.rst
+dpdk-2.2.0/doc/guides/prog_guide/perf_opt_guidelines.rst
+dpdk-2.2.0/doc/guides/prog_guide/poll_mode_drv.rst
+dpdk-2.2.0/doc/guides/prog_guide/port_hotplug_framework.rst
+dpdk-2.2.0/doc/guides/prog_guide/power_man.rst
+dpdk-2.2.0/doc/guides/prog_guide/profile_app.rst
+dpdk-2.2.0/doc/guides/prog_guide/qos_framework.rst
+dpdk-2.2.0/doc/guides/prog_guide/reorder_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/ring_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/source_org.rst
+dpdk-2.2.0/doc/guides/prog_guide/thread_safety_intel_dpdk_functions.rst
+dpdk-2.2.0/doc/guides/prog_guide/timer_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/vhost_lib.rst
+dpdk-2.2.0/doc/guides/prog_guide/writing_efficient_code.rst
+dpdk-2.2.0/doc/guides/rel_notes/
+dpdk-2.2.0/doc/guides/rel_notes/deprecation.rst
+dpdk-2.2.0/doc/guides/rel_notes/index.rst
+dpdk-2.2.0/doc/guides/rel_notes/known_issues.rst
+dpdk-2.2.0/doc/guides/rel_notes/rel_description.rst
+dpdk-2.2.0/doc/guides/rel_notes/release_1_8.rst
+dpdk-2.2.0/doc/guides/rel_notes/release_2_0.rst
+dpdk-2.2.0/doc/guides/rel_notes/release_2_1.rst
+dpdk-2.2.0/doc/guides/rel_notes/release_2_2.rst
+dpdk-2.2.0/doc/guides/rel_notes/supported_os.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/
+dpdk-2.2.0/doc/guides/sample_app_ug/cmd_line.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/dist_app.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/ethtool.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/exception_path.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/hello_world.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/img/
+dpdk-2.2.0/doc/guides/sample_app_ug/img/client_svr_sym_multi_proc_app.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/dist_app.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/dist_perf.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/example_rules.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/exception_path_example.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/ip_pipelines_1.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/ip_pipelines_2.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/ip_pipelines_3.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/ipv4_acl_rule.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/kernel_nic.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/l2_fwd_benchmark_setup.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/l2_fwd_virtenv_benchmark_setup.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/load_bal_app_arch.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/master_slave_proc.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/overlay_networking.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/performance_thread_1.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/performance_thread_2.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/pipeline_overview.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/ptpclient.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/qemu_virtio_net.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/qos_sched_app_arch.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/quickassist_block_diagram.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/ring_pipeline_perf_setup.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/slave_proc_recov.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/sym_multi_proc_app.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/tep_termination_arch.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/test_pipeline_app.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/threads_pipelines.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/tx_dpdk_testpmd.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/vhost_net_arch.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/vhost_net_sample_app.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/virtio_linux_vhost.png
+dpdk-2.2.0/doc/guides/sample_app_ug/img/vm_power_mgr_highlevel.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/vm_power_mgr_vm_request_seq.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/img/vmdq_dcb_example.svg
+dpdk-2.2.0/doc/guides/sample_app_ug/index.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/intel_quickassist.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/intro.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/ip_frag.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/ip_pipeline.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/ip_reassembly.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/ipv4_multicast.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/keep_alive.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/kernel_nic_interface.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/l2_forward_job_stats.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/l2_forward_real_virtual.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/l3_forward.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/l3_forward_access_ctrl.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/l3_forward_power_man.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/l3_forward_virtual.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/link_status_intr.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/load_balancer.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/multi_process.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/netmap_compatibility.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/packet_ordering.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/performance_thread.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/proc_info.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/ptpclient.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/qos_metering.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/qos_scheduler.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/quota_watermark.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/rxtx_callbacks.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/skeleton.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/tep_termination.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/test_pipeline.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/timer.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/vhost.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/vm_power_management.rst
+dpdk-2.2.0/doc/guides/sample_app_ug/vmdq_dcb_forwarding.rst
+dpdk-2.2.0/doc/guides/testpmd_app_ug/
+dpdk-2.2.0/doc/guides/testpmd_app_ug/build_app.rst
+dpdk-2.2.0/doc/guides/testpmd_app_ug/index.rst
+dpdk-2.2.0/doc/guides/testpmd_app_ug/intro.rst
+dpdk-2.2.0/doc/guides/testpmd_app_ug/run_app.rst
+dpdk-2.2.0/doc/guides/testpmd_app_ug/testpmd_funcs.rst
+dpdk-2.2.0/doc/guides/xen/
+dpdk-2.2.0/doc/guides/xen/img/
+dpdk-2.2.0/doc/guides/xen/img/dpdk_xen_pkt_switch.png
+dpdk-2.2.0/doc/guides/xen/img/grant_refs.png
+dpdk-2.2.0/doc/guides/xen/img/grant_table.png
+dpdk-2.2.0/doc/guides/xen/index.rst
+dpdk-2.2.0/doc/guides/xen/pkt_switch.rst
+dpdk-2.2.0/doc/logo/
+dpdk-2.2.0/doc/logo/DPDK_logo_horizontal_tag.png
+dpdk-2.2.0/doc/logo/DPDK_logo_vertical_rev_small.png
+dpdk-2.2.0/drivers/
+dpdk-2.2.0/drivers/Makefile
+dpdk-2.2.0/drivers/crypto/
+dpdk-2.2.0/drivers/crypto/Makefile
+dpdk-2.2.0/drivers/crypto/aesni_mb/
+dpdk-2.2.0/drivers/crypto/aesni_mb/Makefile
+dpdk-2.2.0/drivers/crypto/aesni_mb/aesni_mb_ops.h
+dpdk-2.2.0/drivers/crypto/aesni_mb/rte_aesni_mb_pmd.c
+dpdk-2.2.0/drivers/crypto/aesni_mb/rte_aesni_mb_pmd_ops.c
+dpdk-2.2.0/drivers/crypto/aesni_mb/rte_aesni_mb_pmd_private.h
+dpdk-2.2.0/drivers/crypto/aesni_mb/rte_pmd_aesni_version.map
+dpdk-2.2.0/drivers/crypto/qat/
+dpdk-2.2.0/drivers/crypto/qat/Makefile
+dpdk-2.2.0/drivers/crypto/qat/qat_adf/
+dpdk-2.2.0/drivers/crypto/qat/qat_adf/adf_transport_access_macros.h
+dpdk-2.2.0/drivers/crypto/qat/qat_adf/icp_qat_fw.h
+dpdk-2.2.0/drivers/crypto/qat/qat_adf/icp_qat_fw_la.h
+dpdk-2.2.0/drivers/crypto/qat/qat_adf/icp_qat_hw.h
+dpdk-2.2.0/drivers/crypto/qat/qat_adf/qat_algs.h
+dpdk-2.2.0/drivers/crypto/qat/qat_adf/qat_algs_build_desc.c
+dpdk-2.2.0/drivers/crypto/qat/qat_crypto.c
+dpdk-2.2.0/drivers/crypto/qat/qat_crypto.h
+dpdk-2.2.0/drivers/crypto/qat/qat_logs.h
+dpdk-2.2.0/drivers/crypto/qat/qat_qp.c
+dpdk-2.2.0/drivers/crypto/qat/rte_pmd_qat_version.map
+dpdk-2.2.0/drivers/crypto/qat/rte_qat_cryptodev.c
+dpdk-2.2.0/drivers/net/
+dpdk-2.2.0/drivers/net/Makefile
+dpdk-2.2.0/drivers/net/af_packet/
+dpdk-2.2.0/drivers/net/af_packet/Makefile
+dpdk-2.2.0/drivers/net/af_packet/rte_eth_af_packet.c
+dpdk-2.2.0/drivers/net/af_packet/rte_eth_af_packet.h
+dpdk-2.2.0/drivers/net/af_packet/rte_pmd_af_packet_version.map
+dpdk-2.2.0/drivers/net/bnx2x/
+dpdk-2.2.0/drivers/net/bnx2x/LICENSE.bnx2x_pmd
+dpdk-2.2.0/drivers/net/bnx2x/Makefile
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x.c
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x.h
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_ethdev.c
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_ethdev.h
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_logs.h
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_rxtx.c
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_rxtx.h
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_stats.c
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_stats.h
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_vfpf.c
+dpdk-2.2.0/drivers/net/bnx2x/bnx2x_vfpf.h
+dpdk-2.2.0/drivers/net/bnx2x/debug.c
+dpdk-2.2.0/drivers/net/bnx2x/ecore_fw_defs.h
+dpdk-2.2.0/drivers/net/bnx2x/ecore_hsi.h
+dpdk-2.2.0/drivers/net/bnx2x/ecore_init.h
+dpdk-2.2.0/drivers/net/bnx2x/ecore_init_ops.h
+dpdk-2.2.0/drivers/net/bnx2x/ecore_mfw_req.h
+dpdk-2.2.0/drivers/net/bnx2x/ecore_reg.h
+dpdk-2.2.0/drivers/net/bnx2x/ecore_sp.c
+dpdk-2.2.0/drivers/net/bnx2x/ecore_sp.h
+dpdk-2.2.0/drivers/net/bnx2x/elink.c
+dpdk-2.2.0/drivers/net/bnx2x/elink.h
+dpdk-2.2.0/drivers/net/bnx2x/rte_pmd_bnx2x_version.map
+dpdk-2.2.0/drivers/net/bonding/
+dpdk-2.2.0/drivers/net/bonding/Makefile
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond.h
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_8023ad.c
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_8023ad.h
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_8023ad_private.h
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_alb.c
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_alb.h
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_api.c
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_args.c
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_pmd.c
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_private.h
+dpdk-2.2.0/drivers/net/bonding/rte_eth_bond_version.map
+dpdk-2.2.0/drivers/net/cxgbe/
+dpdk-2.2.0/drivers/net/cxgbe/Makefile
+dpdk-2.2.0/drivers/net/cxgbe/base/
+dpdk-2.2.0/drivers/net/cxgbe/base/adapter.h
+dpdk-2.2.0/drivers/net/cxgbe/base/common.h
+dpdk-2.2.0/drivers/net/cxgbe/base/t4_chip_type.h
+dpdk-2.2.0/drivers/net/cxgbe/base/t4_hw.c
+dpdk-2.2.0/drivers/net/cxgbe/base/t4_hw.h
+dpdk-2.2.0/drivers/net/cxgbe/base/t4_msg.h
+dpdk-2.2.0/drivers/net/cxgbe/base/t4_pci_id_tbl.h
+dpdk-2.2.0/drivers/net/cxgbe/base/t4_regs.h
+dpdk-2.2.0/drivers/net/cxgbe/base/t4_regs_values.h
+dpdk-2.2.0/drivers/net/cxgbe/base/t4fw_interface.h
+dpdk-2.2.0/drivers/net/cxgbe/cxgbe.h
+dpdk-2.2.0/drivers/net/cxgbe/cxgbe_compat.h
+dpdk-2.2.0/drivers/net/cxgbe/cxgbe_ethdev.c
+dpdk-2.2.0/drivers/net/cxgbe/cxgbe_main.c
+dpdk-2.2.0/drivers/net/cxgbe/rte_pmd_cxgbe_version.map
+dpdk-2.2.0/drivers/net/cxgbe/sge.c
+dpdk-2.2.0/drivers/net/e1000/
+dpdk-2.2.0/drivers/net/e1000/Makefile
+dpdk-2.2.0/drivers/net/e1000/base/
+dpdk-2.2.0/drivers/net/e1000/base/README
+dpdk-2.2.0/drivers/net/e1000/base/e1000_80003es2lan.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_80003es2lan.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82540.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82541.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82541.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82542.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82543.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82543.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82571.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82571.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82575.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_82575.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_api.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_api.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_defines.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_hw.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_i210.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_i210.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_ich8lan.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_ich8lan.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_mac.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_mac.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_manage.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_manage.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_mbx.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_mbx.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_nvm.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_nvm.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_osdep.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_osdep.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_phy.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_phy.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_regs.h
+dpdk-2.2.0/drivers/net/e1000/base/e1000_vf.c
+dpdk-2.2.0/drivers/net/e1000/base/e1000_vf.h
+dpdk-2.2.0/drivers/net/e1000/e1000_ethdev.h
+dpdk-2.2.0/drivers/net/e1000/e1000_logs.h
+dpdk-2.2.0/drivers/net/e1000/em_ethdev.c
+dpdk-2.2.0/drivers/net/e1000/em_rxtx.c
+dpdk-2.2.0/drivers/net/e1000/igb_ethdev.c
+dpdk-2.2.0/drivers/net/e1000/igb_pf.c
+dpdk-2.2.0/drivers/net/e1000/igb_regs.h
+dpdk-2.2.0/drivers/net/e1000/igb_rxtx.c
+dpdk-2.2.0/drivers/net/e1000/rte_pmd_e1000_version.map
+dpdk-2.2.0/drivers/net/enic/
+dpdk-2.2.0/drivers/net/enic/LICENSE
+dpdk-2.2.0/drivers/net/enic/Makefile
+dpdk-2.2.0/drivers/net/enic/base/
+dpdk-2.2.0/drivers/net/enic/base/cq_desc.h
+dpdk-2.2.0/drivers/net/enic/base/cq_enet_desc.h
+dpdk-2.2.0/drivers/net/enic/base/enic_vnic_wq.h
+dpdk-2.2.0/drivers/net/enic/base/rq_enet_desc.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_cq.c
+dpdk-2.2.0/drivers/net/enic/base/vnic_cq.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_dev.c
+dpdk-2.2.0/drivers/net/enic/base/vnic_dev.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_devcmd.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_enet.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_intr.c
+dpdk-2.2.0/drivers/net/enic/base/vnic_intr.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_nic.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_resource.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_rq.c
+dpdk-2.2.0/drivers/net/enic/base/vnic_rq.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_rss.c
+dpdk-2.2.0/drivers/net/enic/base/vnic_rss.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_stats.h
+dpdk-2.2.0/drivers/net/enic/base/vnic_wq.c
+dpdk-2.2.0/drivers/net/enic/base/vnic_wq.h
+dpdk-2.2.0/drivers/net/enic/base/wq_enet_desc.h
+dpdk-2.2.0/drivers/net/enic/enic.h
+dpdk-2.2.0/drivers/net/enic/enic_clsf.c
+dpdk-2.2.0/drivers/net/enic/enic_compat.h
+dpdk-2.2.0/drivers/net/enic/enic_ethdev.c
+dpdk-2.2.0/drivers/net/enic/enic_main.c
+dpdk-2.2.0/drivers/net/enic/enic_res.c
+dpdk-2.2.0/drivers/net/enic/enic_res.h
+dpdk-2.2.0/drivers/net/enic/rte_pmd_enic_version.map
+dpdk-2.2.0/drivers/net/fm10k/
+dpdk-2.2.0/drivers/net/fm10k/Makefile
+dpdk-2.2.0/drivers/net/fm10k/base/
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_api.c
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_api.h
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_common.c
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_common.h
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_mbx.c
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_mbx.h
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_osdep.h
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_pf.c
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_pf.h
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_tlv.c
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_tlv.h
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_type.h
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_vf.c
+dpdk-2.2.0/drivers/net/fm10k/base/fm10k_vf.h
+dpdk-2.2.0/drivers/net/fm10k/fm10k.h
+dpdk-2.2.0/drivers/net/fm10k/fm10k_ethdev.c
+dpdk-2.2.0/drivers/net/fm10k/fm10k_logs.h
+dpdk-2.2.0/drivers/net/fm10k/fm10k_rxtx.c
+dpdk-2.2.0/drivers/net/fm10k/fm10k_rxtx_vec.c
+dpdk-2.2.0/drivers/net/fm10k/rte_pmd_fm10k_version.map
+dpdk-2.2.0/drivers/net/i40e/
+dpdk-2.2.0/drivers/net/i40e/Makefile
+dpdk-2.2.0/drivers/net/i40e/base/
+dpdk-2.2.0/drivers/net/i40e/base/i40e_adminq.c
+dpdk-2.2.0/drivers/net/i40e/base/i40e_adminq.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_adminq_cmd.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_alloc.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_common.c
+dpdk-2.2.0/drivers/net/i40e/base/i40e_dcb.c
+dpdk-2.2.0/drivers/net/i40e/base/i40e_dcb.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_devids.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_diag.c
+dpdk-2.2.0/drivers/net/i40e/base/i40e_diag.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_hmc.c
+dpdk-2.2.0/drivers/net/i40e/base/i40e_hmc.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_lan_hmc.c
+dpdk-2.2.0/drivers/net/i40e/base/i40e_lan_hmc.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_nvm.c
+dpdk-2.2.0/drivers/net/i40e/base/i40e_osdep.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_prototype.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_register.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_status.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_type.h
+dpdk-2.2.0/drivers/net/i40e/base/i40e_virtchnl.h
+dpdk-2.2.0/drivers/net/i40e/i40e_ethdev.c
+dpdk-2.2.0/drivers/net/i40e/i40e_ethdev.h
+dpdk-2.2.0/drivers/net/i40e/i40e_ethdev_vf.c
+dpdk-2.2.0/drivers/net/i40e/i40e_fdir.c
+dpdk-2.2.0/drivers/net/i40e/i40e_logs.h
+dpdk-2.2.0/drivers/net/i40e/i40e_pf.c
+dpdk-2.2.0/drivers/net/i40e/i40e_pf.h
+dpdk-2.2.0/drivers/net/i40e/i40e_rxtx.c
+dpdk-2.2.0/drivers/net/i40e/i40e_rxtx.h
+dpdk-2.2.0/drivers/net/i40e/i40e_rxtx_vec.c
+dpdk-2.2.0/drivers/net/i40e/rte_pmd_i40e_version.map
+dpdk-2.2.0/drivers/net/ixgbe/
+dpdk-2.2.0/drivers/net/ixgbe/Makefile
+dpdk-2.2.0/drivers/net/ixgbe/base/
+dpdk-2.2.0/drivers/net/ixgbe/base/README
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_82598.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_82598.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_82599.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_82599.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_api.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_api.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_common.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_common.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_dcb.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_dcb.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_dcb_82598.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_dcb_82598.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_dcb_82599.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_dcb_82599.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_mbx.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_mbx.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_osdep.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_phy.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_phy.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_type.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_vf.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_vf.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_x540.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_x540.h
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_x550.c
+dpdk-2.2.0/drivers/net/ixgbe/base/ixgbe_x550.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_82599_bypass.c
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_bypass.c
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_bypass.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_bypass_api.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_bypass_defines.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_ethdev.c
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_ethdev.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_fdir.c
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_logs.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_pf.c
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_regs.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_rxtx.c
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_rxtx.h
+dpdk-2.2.0/drivers/net/ixgbe/ixgbe_rxtx_vec.c
+dpdk-2.2.0/drivers/net/ixgbe/rte_pmd_ixgbe_version.map
+dpdk-2.2.0/drivers/net/mlx4/
+dpdk-2.2.0/drivers/net/mlx4/Makefile
+dpdk-2.2.0/drivers/net/mlx4/mlx4.c
+dpdk-2.2.0/drivers/net/mlx4/mlx4.h
+dpdk-2.2.0/drivers/net/mlx4/rte_pmd_mlx4_version.map
+dpdk-2.2.0/drivers/net/mlx5/
+dpdk-2.2.0/drivers/net/mlx5/Makefile
+dpdk-2.2.0/drivers/net/mlx5/mlx5.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5.h
+dpdk-2.2.0/drivers/net/mlx5/mlx5_defs.h
+dpdk-2.2.0/drivers/net/mlx5/mlx5_ethdev.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_mac.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_rss.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_rxmode.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_rxq.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_rxtx.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_rxtx.h
+dpdk-2.2.0/drivers/net/mlx5/mlx5_stats.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_trigger.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_txq.c
+dpdk-2.2.0/drivers/net/mlx5/mlx5_utils.h
+dpdk-2.2.0/drivers/net/mlx5/mlx5_vlan.c
+dpdk-2.2.0/drivers/net/mlx5/rte_pmd_mlx5_version.map
+dpdk-2.2.0/drivers/net/mpipe/
+dpdk-2.2.0/drivers/net/mpipe/Makefile
+dpdk-2.2.0/drivers/net/mpipe/mpipe_tilegx.c
+dpdk-2.2.0/drivers/net/mpipe/rte_pmd_mpipe_version.map
+dpdk-2.2.0/drivers/net/nfp/
+dpdk-2.2.0/drivers/net/nfp/Makefile
+dpdk-2.2.0/drivers/net/nfp/nfp_net.c
+dpdk-2.2.0/drivers/net/nfp/nfp_net_ctrl.h
+dpdk-2.2.0/drivers/net/nfp/nfp_net_logs.h
+dpdk-2.2.0/drivers/net/nfp/nfp_net_pmd.h
+dpdk-2.2.0/drivers/net/nfp/rte_pmd_nfp_version.map
+dpdk-2.2.0/drivers/net/null/
+dpdk-2.2.0/drivers/net/null/Makefile
+dpdk-2.2.0/drivers/net/null/rte_eth_null.c
+dpdk-2.2.0/drivers/net/null/rte_eth_null.h
+dpdk-2.2.0/drivers/net/null/rte_pmd_null_version.map
+dpdk-2.2.0/drivers/net/pcap/
+dpdk-2.2.0/drivers/net/pcap/Makefile
+dpdk-2.2.0/drivers/net/pcap/rte_eth_pcap.c
+dpdk-2.2.0/drivers/net/pcap/rte_pmd_pcap_version.map
+dpdk-2.2.0/drivers/net/ring/
+dpdk-2.2.0/drivers/net/ring/Makefile
+dpdk-2.2.0/drivers/net/ring/rte_eth_ring.c
+dpdk-2.2.0/drivers/net/ring/rte_eth_ring.h
+dpdk-2.2.0/drivers/net/ring/rte_eth_ring_version.map
+dpdk-2.2.0/drivers/net/szedata2/
+dpdk-2.2.0/drivers/net/szedata2/Makefile
+dpdk-2.2.0/drivers/net/szedata2/rte_eth_szedata2.c
+dpdk-2.2.0/drivers/net/szedata2/rte_eth_szedata2.h
+dpdk-2.2.0/drivers/net/szedata2/rte_pmd_szedata2_version.map
+dpdk-2.2.0/drivers/net/virtio/
+dpdk-2.2.0/drivers/net/virtio/Makefile
+dpdk-2.2.0/drivers/net/virtio/rte_pmd_virtio_version.map
+dpdk-2.2.0/drivers/net/virtio/virtio_ethdev.c
+dpdk-2.2.0/drivers/net/virtio/virtio_ethdev.h
+dpdk-2.2.0/drivers/net/virtio/virtio_logs.h
+dpdk-2.2.0/drivers/net/virtio/virtio_pci.c
+dpdk-2.2.0/drivers/net/virtio/virtio_pci.h
+dpdk-2.2.0/drivers/net/virtio/virtio_ring.h
+dpdk-2.2.0/drivers/net/virtio/virtio_rxtx.c
+dpdk-2.2.0/drivers/net/virtio/virtio_rxtx.h
+dpdk-2.2.0/drivers/net/virtio/virtio_rxtx_simple.c
+dpdk-2.2.0/drivers/net/virtio/virtqueue.c
+dpdk-2.2.0/drivers/net/virtio/virtqueue.h
+dpdk-2.2.0/drivers/net/vmxnet3/
+dpdk-2.2.0/drivers/net/vmxnet3/Makefile
+dpdk-2.2.0/drivers/net/vmxnet3/base/
+dpdk-2.2.0/drivers/net/vmxnet3/base/README
+dpdk-2.2.0/drivers/net/vmxnet3/base/includeCheck.h
+dpdk-2.2.0/drivers/net/vmxnet3/base/upt1_defs.h
+dpdk-2.2.0/drivers/net/vmxnet3/base/vmware_pack_begin.h
+dpdk-2.2.0/drivers/net/vmxnet3/base/vmware_pack_end.h
+dpdk-2.2.0/drivers/net/vmxnet3/base/vmxnet3_defs.h
+dpdk-2.2.0/drivers/net/vmxnet3/base/vmxnet3_osdep.h
+dpdk-2.2.0/drivers/net/vmxnet3/rte_pmd_vmxnet3_version.map
+dpdk-2.2.0/drivers/net/vmxnet3/vmxnet3_ethdev.c
+dpdk-2.2.0/drivers/net/vmxnet3/vmxnet3_ethdev.h
+dpdk-2.2.0/drivers/net/vmxnet3/vmxnet3_logs.h
+dpdk-2.2.0/drivers/net/vmxnet3/vmxnet3_ring.h
+dpdk-2.2.0/drivers/net/vmxnet3/vmxnet3_rxtx.c
+dpdk-2.2.0/drivers/net/xenvirt/
+dpdk-2.2.0/drivers/net/xenvirt/Makefile
+dpdk-2.2.0/drivers/net/xenvirt/rte_eth_xenvirt.c
+dpdk-2.2.0/drivers/net/xenvirt/rte_eth_xenvirt.h
+dpdk-2.2.0/drivers/net/xenvirt/rte_eth_xenvirt_version.map
+dpdk-2.2.0/drivers/net/xenvirt/rte_mempool_gntalloc.c
+dpdk-2.2.0/drivers/net/xenvirt/rte_xen_lib.c
+dpdk-2.2.0/drivers/net/xenvirt/rte_xen_lib.h
+dpdk-2.2.0/drivers/net/xenvirt/virtio_logs.h
+dpdk-2.2.0/drivers/net/xenvirt/virtqueue.h
+dpdk-2.2.0/examples/
+dpdk-2.2.0/examples/Makefile
+dpdk-2.2.0/examples/bond/
+dpdk-2.2.0/examples/bond/Makefile
+dpdk-2.2.0/examples/bond/main.c
+dpdk-2.2.0/examples/bond/main.h
+dpdk-2.2.0/examples/cmdline/
+dpdk-2.2.0/examples/cmdline/Makefile
+dpdk-2.2.0/examples/cmdline/commands.c
+dpdk-2.2.0/examples/cmdline/commands.h
+dpdk-2.2.0/examples/cmdline/main.c
+dpdk-2.2.0/examples/cmdline/parse_obj_list.c
+dpdk-2.2.0/examples/cmdline/parse_obj_list.h
+dpdk-2.2.0/examples/distributor/
+dpdk-2.2.0/examples/distributor/Makefile
+dpdk-2.2.0/examples/distributor/main.c
+dpdk-2.2.0/examples/dpdk_qat/
+dpdk-2.2.0/examples/dpdk_qat/Makefile
+dpdk-2.2.0/examples/dpdk_qat/config_files/
+dpdk-2.2.0/examples/dpdk_qat/config_files/coleto/
+dpdk-2.2.0/examples/dpdk_qat/config_files/coleto/dh895xcc_qa_dev0.conf
+dpdk-2.2.0/examples/dpdk_qat/config_files/shumway/
+dpdk-2.2.0/examples/dpdk_qat/config_files/shumway/dh89xxcc_qa_dev0.conf
+dpdk-2.2.0/examples/dpdk_qat/config_files/shumway/dh89xxcc_qa_dev1.conf
+dpdk-2.2.0/examples/dpdk_qat/config_files/stargo/
+dpdk-2.2.0/examples/dpdk_qat/config_files/stargo/dh89xxcc_qa_dev0.conf
+dpdk-2.2.0/examples/dpdk_qat/crypto.c
+dpdk-2.2.0/examples/dpdk_qat/crypto.h
+dpdk-2.2.0/examples/dpdk_qat/main.c
+dpdk-2.2.0/examples/ethtool/
+dpdk-2.2.0/examples/ethtool/Makefile
+dpdk-2.2.0/examples/ethtool/ethtool-app/
+dpdk-2.2.0/examples/ethtool/ethtool-app/Makefile
+dpdk-2.2.0/examples/ethtool/ethtool-app/ethapp.c
+dpdk-2.2.0/examples/ethtool/ethtool-app/ethapp.h
+dpdk-2.2.0/examples/ethtool/ethtool-app/main.c
+dpdk-2.2.0/examples/ethtool/lib/
+dpdk-2.2.0/examples/ethtool/lib/Makefile
+dpdk-2.2.0/examples/ethtool/lib/rte_ethtool.c
+dpdk-2.2.0/examples/ethtool/lib/rte_ethtool.h
+dpdk-2.2.0/examples/exception_path/
+dpdk-2.2.0/examples/exception_path/Makefile
+dpdk-2.2.0/examples/exception_path/main.c
+dpdk-2.2.0/examples/helloworld/
+dpdk-2.2.0/examples/helloworld/Makefile
+dpdk-2.2.0/examples/helloworld/main.c
+dpdk-2.2.0/examples/ip_fragmentation/
+dpdk-2.2.0/examples/ip_fragmentation/Makefile
+dpdk-2.2.0/examples/ip_fragmentation/main.c
+dpdk-2.2.0/examples/ip_pipeline/
+dpdk-2.2.0/examples/ip_pipeline/Makefile
+dpdk-2.2.0/examples/ip_pipeline/app.h
+dpdk-2.2.0/examples/ip_pipeline/config/
+dpdk-2.2.0/examples/ip_pipeline/config/edge_router_downstream.cfg
+dpdk-2.2.0/examples/ip_pipeline/config/edge_router_downstream.sh
+dpdk-2.2.0/examples/ip_pipeline/config/edge_router_upstream.cfg
+dpdk-2.2.0/examples/ip_pipeline/config/edge_router_upstream.sh
+dpdk-2.2.0/examples/ip_pipeline/config/ip_pipeline.cfg
+dpdk-2.2.0/examples/ip_pipeline/config/ip_pipeline.sh
+dpdk-2.2.0/examples/ip_pipeline/config/l2fwd.cfg
+dpdk-2.2.0/examples/ip_pipeline/config/l3fwd.cfg
+dpdk-2.2.0/examples/ip_pipeline/config/l3fwd.sh
+dpdk-2.2.0/examples/ip_pipeline/config/tm_profile.cfg
+dpdk-2.2.0/examples/ip_pipeline/config_check.c
+dpdk-2.2.0/examples/ip_pipeline/config_parse.c
+dpdk-2.2.0/examples/ip_pipeline/config_parse_tm.c
+dpdk-2.2.0/examples/ip_pipeline/cpu_core_map.c
+dpdk-2.2.0/examples/ip_pipeline/cpu_core_map.h
+dpdk-2.2.0/examples/ip_pipeline/init.c
+dpdk-2.2.0/examples/ip_pipeline/main.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/
+dpdk-2.2.0/examples/ip_pipeline/pipeline/hash_func.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_actions_common.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_common_be.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_common_be.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_common_fe.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_common_fe.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_firewall.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_firewall.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_firewall_be.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_firewall_be.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_actions.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_actions.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_actions_be.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_actions_be.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_classification.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_classification.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_classification_be.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_flow_classification_be.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_master.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_master.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_master_be.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_master_be.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_passthrough.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_passthrough.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_passthrough_be.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_passthrough_be.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_routing.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_routing.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_routing_be.c
+dpdk-2.2.0/examples/ip_pipeline/pipeline/pipeline_routing_be.h
+dpdk-2.2.0/examples/ip_pipeline/pipeline_be.h
+dpdk-2.2.0/examples/ip_pipeline/thread.c
+dpdk-2.2.0/examples/ip_pipeline/thread.h
+dpdk-2.2.0/examples/ip_pipeline/thread_fe.c
+dpdk-2.2.0/examples/ip_pipeline/thread_fe.h
+dpdk-2.2.0/examples/ip_reassembly/
+dpdk-2.2.0/examples/ip_reassembly/Makefile
+dpdk-2.2.0/examples/ip_reassembly/main.c
+dpdk-2.2.0/examples/ipv4_multicast/
+dpdk-2.2.0/examples/ipv4_multicast/Makefile
+dpdk-2.2.0/examples/ipv4_multicast/main.c
+dpdk-2.2.0/examples/kni/
+dpdk-2.2.0/examples/kni/Makefile
+dpdk-2.2.0/examples/kni/main.c
+dpdk-2.2.0/examples/l2fwd-crypto/
+dpdk-2.2.0/examples/l2fwd-crypto/Makefile
+dpdk-2.2.0/examples/l2fwd-crypto/main.c
+dpdk-2.2.0/examples/l2fwd-ivshmem/
+dpdk-2.2.0/examples/l2fwd-ivshmem/Makefile
+dpdk-2.2.0/examples/l2fwd-ivshmem/guest/
+dpdk-2.2.0/examples/l2fwd-ivshmem/guest/Makefile
+dpdk-2.2.0/examples/l2fwd-ivshmem/guest/guest.c
+dpdk-2.2.0/examples/l2fwd-ivshmem/host/
+dpdk-2.2.0/examples/l2fwd-ivshmem/host/Makefile
+dpdk-2.2.0/examples/l2fwd-ivshmem/host/host.c
+dpdk-2.2.0/examples/l2fwd-ivshmem/include/
+dpdk-2.2.0/examples/l2fwd-ivshmem/include/common.h
+dpdk-2.2.0/examples/l2fwd-jobstats/
+dpdk-2.2.0/examples/l2fwd-jobstats/Makefile
+dpdk-2.2.0/examples/l2fwd-jobstats/main.c
+dpdk-2.2.0/examples/l2fwd-keepalive/
+dpdk-2.2.0/examples/l2fwd-keepalive/Makefile
+dpdk-2.2.0/examples/l2fwd-keepalive/main.c
+dpdk-2.2.0/examples/l2fwd/
+dpdk-2.2.0/examples/l2fwd/Makefile
+dpdk-2.2.0/examples/l2fwd/main.c
+dpdk-2.2.0/examples/l3fwd-acl/
+dpdk-2.2.0/examples/l3fwd-acl/Makefile
+dpdk-2.2.0/examples/l3fwd-acl/main.c
+dpdk-2.2.0/examples/l3fwd-power/
+dpdk-2.2.0/examples/l3fwd-power/Makefile
+dpdk-2.2.0/examples/l3fwd-power/main.c
+dpdk-2.2.0/examples/l3fwd-vf/
+dpdk-2.2.0/examples/l3fwd-vf/Makefile
+dpdk-2.2.0/examples/l3fwd-vf/main.c
+dpdk-2.2.0/examples/l3fwd/
+dpdk-2.2.0/examples/l3fwd/Makefile
+dpdk-2.2.0/examples/l3fwd/main.c
+dpdk-2.2.0/examples/link_status_interrupt/
+dpdk-2.2.0/examples/link_status_interrupt/Makefile
+dpdk-2.2.0/examples/link_status_interrupt/main.c
+dpdk-2.2.0/examples/load_balancer/
+dpdk-2.2.0/examples/load_balancer/Makefile
+dpdk-2.2.0/examples/load_balancer/config.c
+dpdk-2.2.0/examples/load_balancer/init.c
+dpdk-2.2.0/examples/load_balancer/main.c
+dpdk-2.2.0/examples/load_balancer/main.h
+dpdk-2.2.0/examples/load_balancer/runtime.c
+dpdk-2.2.0/examples/multi_process/
+dpdk-2.2.0/examples/multi_process/Makefile
+dpdk-2.2.0/examples/multi_process/client_server_mp/
+dpdk-2.2.0/examples/multi_process/client_server_mp/Makefile
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_client/
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_client/Makefile
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_client/client.c
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_server/
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_server/Makefile
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_server/args.c
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_server/args.h
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_server/init.c
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_server/init.h
+dpdk-2.2.0/examples/multi_process/client_server_mp/mp_server/main.c
+dpdk-2.2.0/examples/multi_process/client_server_mp/shared/
+dpdk-2.2.0/examples/multi_process/client_server_mp/shared/common.h
+dpdk-2.2.0/examples/multi_process/l2fwd_fork/
+dpdk-2.2.0/examples/multi_process/l2fwd_fork/Makefile
+dpdk-2.2.0/examples/multi_process/l2fwd_fork/flib.c
+dpdk-2.2.0/examples/multi_process/l2fwd_fork/flib.h
+dpdk-2.2.0/examples/multi_process/l2fwd_fork/main.c
+dpdk-2.2.0/examples/multi_process/simple_mp/
+dpdk-2.2.0/examples/multi_process/simple_mp/Makefile
+dpdk-2.2.0/examples/multi_process/simple_mp/main.c
+dpdk-2.2.0/examples/multi_process/simple_mp/mp_commands.c
+dpdk-2.2.0/examples/multi_process/simple_mp/mp_commands.h
+dpdk-2.2.0/examples/multi_process/symmetric_mp/
+dpdk-2.2.0/examples/multi_process/symmetric_mp/Makefile
+dpdk-2.2.0/examples/multi_process/symmetric_mp/main.c
+dpdk-2.2.0/examples/netmap_compat/
+dpdk-2.2.0/examples/netmap_compat/Makefile
+dpdk-2.2.0/examples/netmap_compat/bridge/
+dpdk-2.2.0/examples/netmap_compat/bridge/Makefile
+dpdk-2.2.0/examples/netmap_compat/bridge/bridge.c
+dpdk-2.2.0/examples/netmap_compat/lib/
+dpdk-2.2.0/examples/netmap_compat/lib/compat_netmap.c
+dpdk-2.2.0/examples/netmap_compat/lib/compat_netmap.h
+dpdk-2.2.0/examples/netmap_compat/netmap/
+dpdk-2.2.0/examples/netmap_compat/netmap/netmap.h
+dpdk-2.2.0/examples/netmap_compat/netmap/netmap_user.h
+dpdk-2.2.0/examples/packet_ordering/
+dpdk-2.2.0/examples/packet_ordering/Makefile
+dpdk-2.2.0/examples/packet_ordering/main.c
+dpdk-2.2.0/examples/performance-thread/
+dpdk-2.2.0/examples/performance-thread/Makefile
+dpdk-2.2.0/examples/performance-thread/common/
+dpdk-2.2.0/examples/performance-thread/common/arch/
+dpdk-2.2.0/examples/performance-thread/common/arch/x86/
+dpdk-2.2.0/examples/performance-thread/common/arch/x86/ctx.c
+dpdk-2.2.0/examples/performance-thread/common/arch/x86/ctx.h
+dpdk-2.2.0/examples/performance-thread/common/common.mk
+dpdk-2.2.0/examples/performance-thread/common/lthread.c
+dpdk-2.2.0/examples/performance-thread/common/lthread.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_api.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_cond.c
+dpdk-2.2.0/examples/performance-thread/common/lthread_cond.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_diag.c
+dpdk-2.2.0/examples/performance-thread/common/lthread_diag.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_diag_api.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_int.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_mutex.c
+dpdk-2.2.0/examples/performance-thread/common/lthread_mutex.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_objcache.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_pool.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_queue.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_sched.c
+dpdk-2.2.0/examples/performance-thread/common/lthread_sched.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_timer.h
+dpdk-2.2.0/examples/performance-thread/common/lthread_tls.c
+dpdk-2.2.0/examples/performance-thread/common/lthread_tls.h
+dpdk-2.2.0/examples/performance-thread/l3fwd-thread/
+dpdk-2.2.0/examples/performance-thread/l3fwd-thread/Makefile
+dpdk-2.2.0/examples/performance-thread/l3fwd-thread/main.c
+dpdk-2.2.0/examples/performance-thread/l3fwd-thread/test.sh
+dpdk-2.2.0/examples/performance-thread/pthread_shim/
+dpdk-2.2.0/examples/performance-thread/pthread_shim/Makefile
+dpdk-2.2.0/examples/performance-thread/pthread_shim/main.c
+dpdk-2.2.0/examples/performance-thread/pthread_shim/pthread_shim.c
+dpdk-2.2.0/examples/performance-thread/pthread_shim/pthread_shim.h
+dpdk-2.2.0/examples/ptpclient/
+dpdk-2.2.0/examples/ptpclient/Makefile
+dpdk-2.2.0/examples/ptpclient/ptpclient.c
+dpdk-2.2.0/examples/qos_meter/
+dpdk-2.2.0/examples/qos_meter/Makefile
+dpdk-2.2.0/examples/qos_meter/main.c
+dpdk-2.2.0/examples/qos_meter/main.h
+dpdk-2.2.0/examples/qos_meter/rte_policer.c
+dpdk-2.2.0/examples/qos_meter/rte_policer.h
+dpdk-2.2.0/examples/qos_sched/
+dpdk-2.2.0/examples/qos_sched/Makefile
+dpdk-2.2.0/examples/qos_sched/app_thread.c
+dpdk-2.2.0/examples/qos_sched/args.c
+dpdk-2.2.0/examples/qos_sched/cfg_file.c
+dpdk-2.2.0/examples/qos_sched/cfg_file.h
+dpdk-2.2.0/examples/qos_sched/cmdline.c
+dpdk-2.2.0/examples/qos_sched/init.c
+dpdk-2.2.0/examples/qos_sched/main.c
+dpdk-2.2.0/examples/qos_sched/main.h
+dpdk-2.2.0/examples/qos_sched/profile.cfg
+dpdk-2.2.0/examples/qos_sched/profile_ov.cfg
+dpdk-2.2.0/examples/qos_sched/stats.c
+dpdk-2.2.0/examples/quota_watermark/
+dpdk-2.2.0/examples/quota_watermark/Makefile
+dpdk-2.2.0/examples/quota_watermark/include/
+dpdk-2.2.0/examples/quota_watermark/include/conf.h
+dpdk-2.2.0/examples/quota_watermark/qw/
+dpdk-2.2.0/examples/quota_watermark/qw/Makefile
+dpdk-2.2.0/examples/quota_watermark/qw/args.c
+dpdk-2.2.0/examples/quota_watermark/qw/args.h
+dpdk-2.2.0/examples/quota_watermark/qw/init.c
+dpdk-2.2.0/examples/quota_watermark/qw/init.h
+dpdk-2.2.0/examples/quota_watermark/qw/main.c
+dpdk-2.2.0/examples/quota_watermark/qw/main.h
+dpdk-2.2.0/examples/quota_watermark/qwctl/
+dpdk-2.2.0/examples/quota_watermark/qwctl/Makefile
+dpdk-2.2.0/examples/quota_watermark/qwctl/commands.c
+dpdk-2.2.0/examples/quota_watermark/qwctl/commands.h
+dpdk-2.2.0/examples/quota_watermark/qwctl/qwctl.c
+dpdk-2.2.0/examples/quota_watermark/qwctl/qwctl.h
+dpdk-2.2.0/examples/rxtx_callbacks/
+dpdk-2.2.0/examples/rxtx_callbacks/Makefile
+dpdk-2.2.0/examples/rxtx_callbacks/main.c
+dpdk-2.2.0/examples/skeleton/
+dpdk-2.2.0/examples/skeleton/Makefile
+dpdk-2.2.0/examples/skeleton/basicfwd.c
+dpdk-2.2.0/examples/tep_termination/
+dpdk-2.2.0/examples/tep_termination/Makefile
+dpdk-2.2.0/examples/tep_termination/main.c
+dpdk-2.2.0/examples/tep_termination/main.h
+dpdk-2.2.0/examples/tep_termination/vxlan.c
+dpdk-2.2.0/examples/tep_termination/vxlan.h
+dpdk-2.2.0/examples/tep_termination/vxlan_setup.c
+dpdk-2.2.0/examples/tep_termination/vxlan_setup.h
+dpdk-2.2.0/examples/timer/
+dpdk-2.2.0/examples/timer/Makefile
+dpdk-2.2.0/examples/timer/main.c
+dpdk-2.2.0/examples/vhost/
+dpdk-2.2.0/examples/vhost/Makefile
+dpdk-2.2.0/examples/vhost/main.c
+dpdk-2.2.0/examples/vhost/main.h
+dpdk-2.2.0/examples/vhost_xen/
+dpdk-2.2.0/examples/vhost_xen/Makefile
+dpdk-2.2.0/examples/vhost_xen/main.c
+dpdk-2.2.0/examples/vhost_xen/main.h
+dpdk-2.2.0/examples/vhost_xen/vhost_monitor.c
+dpdk-2.2.0/examples/vhost_xen/virtio-net.h
+dpdk-2.2.0/examples/vhost_xen/xen_vhost.h
+dpdk-2.2.0/examples/vhost_xen/xenstore_parse.c
+dpdk-2.2.0/examples/vm_power_manager/
+dpdk-2.2.0/examples/vm_power_manager/Makefile
+dpdk-2.2.0/examples/vm_power_manager/channel_manager.c
+dpdk-2.2.0/examples/vm_power_manager/channel_manager.h
+dpdk-2.2.0/examples/vm_power_manager/channel_monitor.c
+dpdk-2.2.0/examples/vm_power_manager/channel_monitor.h
+dpdk-2.2.0/examples/vm_power_manager/guest_cli/
+dpdk-2.2.0/examples/vm_power_manager/guest_cli/Makefile
+dpdk-2.2.0/examples/vm_power_manager/guest_cli/main.c
+dpdk-2.2.0/examples/vm_power_manager/guest_cli/vm_power_cli_guest.c
+dpdk-2.2.0/examples/vm_power_manager/guest_cli/vm_power_cli_guest.h
+dpdk-2.2.0/examples/vm_power_manager/main.c
+dpdk-2.2.0/examples/vm_power_manager/power_manager.c
+dpdk-2.2.0/examples/vm_power_manager/power_manager.h
+dpdk-2.2.0/examples/vm_power_manager/vm_power_cli.c
+dpdk-2.2.0/examples/vm_power_manager/vm_power_cli.h
+dpdk-2.2.0/examples/vmdq/
+dpdk-2.2.0/examples/vmdq/Makefile
+dpdk-2.2.0/examples/vmdq/main.c
+dpdk-2.2.0/examples/vmdq_dcb/
+dpdk-2.2.0/examples/vmdq_dcb/Makefile
+dpdk-2.2.0/examples/vmdq_dcb/main.c
+dpdk-2.2.0/lib/
+dpdk-2.2.0/lib/Makefile
+dpdk-2.2.0/lib/librte_acl/
+dpdk-2.2.0/lib/librte_acl/Makefile
+dpdk-2.2.0/lib/librte_acl/acl.h
+dpdk-2.2.0/lib/librte_acl/acl_bld.c
+dpdk-2.2.0/lib/librte_acl/acl_gen.c
+dpdk-2.2.0/lib/librte_acl/acl_run.h
+dpdk-2.2.0/lib/librte_acl/acl_run_avx2.c
+dpdk-2.2.0/lib/librte_acl/acl_run_avx2.h
+dpdk-2.2.0/lib/librte_acl/acl_run_neon.c
+dpdk-2.2.0/lib/librte_acl/acl_run_neon.h
+dpdk-2.2.0/lib/librte_acl/acl_run_scalar.c
+dpdk-2.2.0/lib/librte_acl/acl_run_sse.c
+dpdk-2.2.0/lib/librte_acl/acl_run_sse.h
+dpdk-2.2.0/lib/librte_acl/acl_vect.h
+dpdk-2.2.0/lib/librte_acl/rte_acl.c
+dpdk-2.2.0/lib/librte_acl/rte_acl.h
+dpdk-2.2.0/lib/librte_acl/rte_acl_osdep.h
+dpdk-2.2.0/lib/librte_acl/rte_acl_version.map
+dpdk-2.2.0/lib/librte_acl/tb_mem.c
+dpdk-2.2.0/lib/librte_acl/tb_mem.h
+dpdk-2.2.0/lib/librte_cfgfile/
+dpdk-2.2.0/lib/librte_cfgfile/Makefile
+dpdk-2.2.0/lib/librte_cfgfile/rte_cfgfile.c
+dpdk-2.2.0/lib/librte_cfgfile/rte_cfgfile.h
+dpdk-2.2.0/lib/librte_cfgfile/rte_cfgfile_version.map
+dpdk-2.2.0/lib/librte_cmdline/
+dpdk-2.2.0/lib/librte_cmdline/Makefile
+dpdk-2.2.0/lib/librte_cmdline/cmdline.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_cirbuf.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_cirbuf.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_etheraddr.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_etheraddr.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_ipaddr.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_ipaddr.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_num.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_num.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_portlist.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_portlist.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_string.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_parse_string.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_rdline.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_rdline.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_socket.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_socket.h
+dpdk-2.2.0/lib/librte_cmdline/cmdline_vt100.c
+dpdk-2.2.0/lib/librte_cmdline/cmdline_vt100.h
+dpdk-2.2.0/lib/librte_cmdline/rte_cmdline_version.map
+dpdk-2.2.0/lib/librte_compat/
+dpdk-2.2.0/lib/librte_compat/Makefile
+dpdk-2.2.0/lib/librte_compat/rte_compat.h
+dpdk-2.2.0/lib/librte_cryptodev/
+dpdk-2.2.0/lib/librte_cryptodev/Makefile
+dpdk-2.2.0/lib/librte_cryptodev/rte_crypto.h
+dpdk-2.2.0/lib/librte_cryptodev/rte_cryptodev.c
+dpdk-2.2.0/lib/librte_cryptodev/rte_cryptodev.h
+dpdk-2.2.0/lib/librte_cryptodev/rte_cryptodev_pmd.h
+dpdk-2.2.0/lib/librte_cryptodev/rte_cryptodev_version.map
+dpdk-2.2.0/lib/librte_distributor/
+dpdk-2.2.0/lib/librte_distributor/Makefile
+dpdk-2.2.0/lib/librte_distributor/rte_distributor.c
+dpdk-2.2.0/lib/librte_distributor/rte_distributor.h
+dpdk-2.2.0/lib/librte_distributor/rte_distributor_version.map
+dpdk-2.2.0/lib/librte_eal/
+dpdk-2.2.0/lib/librte_eal/Makefile
+dpdk-2.2.0/lib/librte_eal/bsdapp/
+dpdk-2.2.0/lib/librte_eal/bsdapp/Makefile
+dpdk-2.2.0/lib/librte_eal/bsdapp/contigmem/
+dpdk-2.2.0/lib/librte_eal/bsdapp/contigmem/BSDmakefile
+dpdk-2.2.0/lib/librte_eal/bsdapp/contigmem/Makefile
+dpdk-2.2.0/lib/librte_eal/bsdapp/contigmem/contigmem.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/Makefile
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_alarm.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_debug.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_hugepage_info.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_interrupts.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_lcore.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_log.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_memory.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_pci.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_thread.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/eal_timer.c
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/include/
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/include/exec-env/
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/include/exec-env/rte_dom0_common.h
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/include/exec-env/rte_interrupts.h
+dpdk-2.2.0/lib/librte_eal/bsdapp/eal/rte_eal_version.map
+dpdk-2.2.0/lib/librte_eal/bsdapp/nic_uio/
+dpdk-2.2.0/lib/librte_eal/bsdapp/nic_uio/BSDmakefile
+dpdk-2.2.0/lib/librte_eal/bsdapp/nic_uio/Makefile
+dpdk-2.2.0/lib/librte_eal/bsdapp/nic_uio/nic_uio.c
+dpdk-2.2.0/lib/librte_eal/common/
+dpdk-2.2.0/lib/librte_eal/common/Makefile
+dpdk-2.2.0/lib/librte_eal/common/eal_common_cpuflags.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_dev.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_devargs.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_errno.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_hexdump.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_launch.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_lcore.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_log.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_memory.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_memzone.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_options.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_pci.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_pci_uio.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_string_fns.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_tailqs.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_thread.c
+dpdk-2.2.0/lib/librte_eal/common/eal_common_timer.c
+dpdk-2.2.0/lib/librte_eal/common/eal_filesystem.h
+dpdk-2.2.0/lib/librte_eal/common/eal_hugepages.h
+dpdk-2.2.0/lib/librte_eal/common/eal_internal_cfg.h
+dpdk-2.2.0/lib/librte_eal/common/eal_options.h
+dpdk-2.2.0/lib/librte_eal/common/eal_private.h
+dpdk-2.2.0/lib/librte_eal/common/eal_thread.h
+dpdk-2.2.0/lib/librte_eal/common/include/
+dpdk-2.2.0/lib/librte_eal/common/include/arch/
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_atomic.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_atomic_32.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_atomic_64.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_byteorder.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_cpuflags.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_cpuflags_32.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_cpuflags_64.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_cycles.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_cycles_32.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_cycles_64.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_memcpy.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_memcpy_32.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_memcpy_64.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_prefetch.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_prefetch_32.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_prefetch_64.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_rwlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_spinlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/arm/rte_vect.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_atomic.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_byteorder.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_cpuflags.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_cycles.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_memcpy.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_prefetch.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_rwlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/ppc_64/rte_spinlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_atomic.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_byteorder.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_cpuflags.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_cycles.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_memcpy.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_prefetch.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_rwlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/tile/rte_spinlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_atomic.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_atomic_32.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_atomic_64.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_byteorder.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_byteorder_32.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_byteorder_64.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_cpuflags.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_cycles.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_memcpy.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_prefetch.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_rtm.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_rwlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_spinlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/arch/x86/rte_vect.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_atomic.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_byteorder.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_cpuflags.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_cycles.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_memcpy.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_prefetch.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_rwlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/generic/rte_spinlock.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_alarm.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_branch_prediction.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_common.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_debug.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_dev.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_devargs.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_eal.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_eal_memconfig.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_errno.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_hexdump.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_interrupts.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_keepalive.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_launch.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_lcore.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_log.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_malloc.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_malloc_heap.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_memory.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_memzone.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_pci.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_pci_dev_feature_defs.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_pci_dev_features.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_pci_dev_ids.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_per_lcore.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_random.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_string_fns.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_tailq.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_time.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_version.h
+dpdk-2.2.0/lib/librte_eal/common/include/rte_warnings.h
+dpdk-2.2.0/lib/librte_eal/common/malloc_elem.c
+dpdk-2.2.0/lib/librte_eal/common/malloc_elem.h
+dpdk-2.2.0/lib/librte_eal/common/malloc_heap.c
+dpdk-2.2.0/lib/librte_eal/common/malloc_heap.h
+dpdk-2.2.0/lib/librte_eal/common/rte_keepalive.c
+dpdk-2.2.0/lib/librte_eal/common/rte_malloc.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/
+dpdk-2.2.0/lib/librte_eal/linuxapp/Makefile
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/Makefile
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_alarm.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_debug.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_hugepage_info.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_interrupts.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_ivshmem.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_lcore.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_log.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_memory.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_pci.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_pci_init.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_pci_uio.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_pci_vfio.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_pci_vfio_mp_sync.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_thread.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_timer.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_vfio.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/eal_xen_memory.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/include/
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/include/exec-env/
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/include/exec-env/rte_dom0_common.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/include/exec-env/rte_interrupts.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/include/exec-env/rte_kni_common.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/eal/rte_eal_version.map
+dpdk-2.2.0/lib/librte_eal/linuxapp/igb_uio/
+dpdk-2.2.0/lib/librte_eal/linuxapp/igb_uio/Makefile
+dpdk-2.2.0/lib/librte_eal/linuxapp/igb_uio/compat.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/igb_uio/igb_uio.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/Makefile
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/compat.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/README
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/COPYING
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_82575.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_82575.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_api.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_api.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_defines.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_hw.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_i210.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_i210.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_mac.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_mac.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_manage.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_manage.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_mbx.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_mbx.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_nvm.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_nvm.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_osdep.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_phy.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_phy.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/e1000_regs.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_debugfs.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_ethtool.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_hwmon.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_main.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_param.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_procfs.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_ptp.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_regtest.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_vmdq.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/igb_vmdq.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/kcompat.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/kcompat.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/igb/kcompat_ethtool.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/COPYING
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_82598.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_82598.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_82599.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_82599.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_api.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_api.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_common.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_common.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_dcb.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_ethtool.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_fcoe.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_main.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_mbx.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_osdep.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_phy.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_phy.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_sriov.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_type.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_x540.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/ixgbe_x540.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/kcompat.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/ethtool/ixgbe/kcompat.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/kni_dev.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/kni_ethtool.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/kni_fifo.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/kni_misc.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/kni_net.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/kni/kni_vhost.c
+dpdk-2.2.0/lib/librte_eal/linuxapp/xen_dom0/
+dpdk-2.2.0/lib/librte_eal/linuxapp/xen_dom0/Makefile
+dpdk-2.2.0/lib/librte_eal/linuxapp/xen_dom0/compat.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/xen_dom0/dom0_mm_dev.h
+dpdk-2.2.0/lib/librte_eal/linuxapp/xen_dom0/dom0_mm_misc.c
+dpdk-2.2.0/lib/librte_ether/
+dpdk-2.2.0/lib/librte_ether/Makefile
+dpdk-2.2.0/lib/librte_ether/rte_dev_info.h
+dpdk-2.2.0/lib/librte_ether/rte_eth_ctrl.h
+dpdk-2.2.0/lib/librte_ether/rte_ethdev.c
+dpdk-2.2.0/lib/librte_ether/rte_ethdev.h
+dpdk-2.2.0/lib/librte_ether/rte_ether.h
+dpdk-2.2.0/lib/librte_ether/rte_ether_version.map
+dpdk-2.2.0/lib/librte_hash/
+dpdk-2.2.0/lib/librte_hash/Makefile
+dpdk-2.2.0/lib/librte_hash/rte_cmp_arm64.h
+dpdk-2.2.0/lib/librte_hash/rte_cmp_x86.h
+dpdk-2.2.0/lib/librte_hash/rte_crc_arm64.h
+dpdk-2.2.0/lib/librte_hash/rte_cuckoo_hash.c
+dpdk-2.2.0/lib/librte_hash/rte_fbk_hash.c
+dpdk-2.2.0/lib/librte_hash/rte_fbk_hash.h
+dpdk-2.2.0/lib/librte_hash/rte_hash.h
+dpdk-2.2.0/lib/librte_hash/rte_hash_crc.h
+dpdk-2.2.0/lib/librte_hash/rte_hash_version.map
+dpdk-2.2.0/lib/librte_hash/rte_jhash.h
+dpdk-2.2.0/lib/librte_hash/rte_thash.h
+dpdk-2.2.0/lib/librte_ip_frag/
+dpdk-2.2.0/lib/librte_ip_frag/Makefile
+dpdk-2.2.0/lib/librte_ip_frag/ip_frag_common.h
+dpdk-2.2.0/lib/librte_ip_frag/ip_frag_internal.c
+dpdk-2.2.0/lib/librte_ip_frag/rte_ip_frag.h
+dpdk-2.2.0/lib/librte_ip_frag/rte_ip_frag_common.c
+dpdk-2.2.0/lib/librte_ip_frag/rte_ipfrag_version.map
+dpdk-2.2.0/lib/librte_ip_frag/rte_ipv4_fragmentation.c
+dpdk-2.2.0/lib/librte_ip_frag/rte_ipv4_reassembly.c
+dpdk-2.2.0/lib/librte_ip_frag/rte_ipv6_fragmentation.c
+dpdk-2.2.0/lib/librte_ip_frag/rte_ipv6_reassembly.c
+dpdk-2.2.0/lib/librte_ivshmem/
+dpdk-2.2.0/lib/librte_ivshmem/Makefile
+dpdk-2.2.0/lib/librte_ivshmem/rte_ivshmem.c
+dpdk-2.2.0/lib/librte_ivshmem/rte_ivshmem.h
+dpdk-2.2.0/lib/librte_ivshmem/rte_ivshmem_version.map
+dpdk-2.2.0/lib/librte_jobstats/
+dpdk-2.2.0/lib/librte_jobstats/Makefile
+dpdk-2.2.0/lib/librte_jobstats/rte_jobstats.c
+dpdk-2.2.0/lib/librte_jobstats/rte_jobstats.h
+dpdk-2.2.0/lib/librte_jobstats/rte_jobstats_version.map
+dpdk-2.2.0/lib/librte_kni/
+dpdk-2.2.0/lib/librte_kni/Makefile
+dpdk-2.2.0/lib/librte_kni/rte_kni.c
+dpdk-2.2.0/lib/librte_kni/rte_kni.h
+dpdk-2.2.0/lib/librte_kni/rte_kni_fifo.h
+dpdk-2.2.0/lib/librte_kni/rte_kni_version.map
+dpdk-2.2.0/lib/librte_kvargs/
+dpdk-2.2.0/lib/librte_kvargs/Makefile
+dpdk-2.2.0/lib/librte_kvargs/rte_kvargs.c
+dpdk-2.2.0/lib/librte_kvargs/rte_kvargs.h
+dpdk-2.2.0/lib/librte_kvargs/rte_kvargs_version.map
+dpdk-2.2.0/lib/librte_lpm/
+dpdk-2.2.0/lib/librte_lpm/Makefile
+dpdk-2.2.0/lib/librte_lpm/rte_lpm.c
+dpdk-2.2.0/lib/librte_lpm/rte_lpm.h
+dpdk-2.2.0/lib/librte_lpm/rte_lpm6.c
+dpdk-2.2.0/lib/librte_lpm/rte_lpm6.h
+dpdk-2.2.0/lib/librte_lpm/rte_lpm_version.map
+dpdk-2.2.0/lib/librte_mbuf/
+dpdk-2.2.0/lib/librte_mbuf/Makefile
+dpdk-2.2.0/lib/librte_mbuf/rte_mbuf.c
+dpdk-2.2.0/lib/librte_mbuf/rte_mbuf.h
+dpdk-2.2.0/lib/librte_mbuf/rte_mbuf_version.map
+dpdk-2.2.0/lib/librte_mbuf_offload/
+dpdk-2.2.0/lib/librte_mbuf_offload/Makefile
+dpdk-2.2.0/lib/librte_mbuf_offload/rte_mbuf_offload.c
+dpdk-2.2.0/lib/librte_mbuf_offload/rte_mbuf_offload.h
+dpdk-2.2.0/lib/librte_mbuf_offload/rte_mbuf_offload_version.map
+dpdk-2.2.0/lib/librte_mempool/
+dpdk-2.2.0/lib/librte_mempool/Makefile
+dpdk-2.2.0/lib/librte_mempool/rte_dom0_mempool.c
+dpdk-2.2.0/lib/librte_mempool/rte_mempool.c
+dpdk-2.2.0/lib/librte_mempool/rte_mempool.h
+dpdk-2.2.0/lib/librte_mempool/rte_mempool_version.map
+dpdk-2.2.0/lib/librte_meter/
+dpdk-2.2.0/lib/librte_meter/Makefile
+dpdk-2.2.0/lib/librte_meter/rte_meter.c
+dpdk-2.2.0/lib/librte_meter/rte_meter.h
+dpdk-2.2.0/lib/librte_meter/rte_meter_version.map
+dpdk-2.2.0/lib/librte_net/
+dpdk-2.2.0/lib/librte_net/Makefile
+dpdk-2.2.0/lib/librte_net/rte_arp.h
+dpdk-2.2.0/lib/librte_net/rte_icmp.h
+dpdk-2.2.0/lib/librte_net/rte_ip.h
+dpdk-2.2.0/lib/librte_net/rte_sctp.h
+dpdk-2.2.0/lib/librte_net/rte_tcp.h
+dpdk-2.2.0/lib/librte_net/rte_udp.h
+dpdk-2.2.0/lib/librte_pipeline/
+dpdk-2.2.0/lib/librte_pipeline/Makefile
+dpdk-2.2.0/lib/librte_pipeline/rte_pipeline.c
+dpdk-2.2.0/lib/librte_pipeline/rte_pipeline.h
+dpdk-2.2.0/lib/librte_pipeline/rte_pipeline_version.map
+dpdk-2.2.0/lib/librte_port/
+dpdk-2.2.0/lib/librte_port/Makefile
+dpdk-2.2.0/lib/librte_port/rte_port.h
+dpdk-2.2.0/lib/librte_port/rte_port_ethdev.c
+dpdk-2.2.0/lib/librte_port/rte_port_ethdev.h
+dpdk-2.2.0/lib/librte_port/rte_port_frag.c
+dpdk-2.2.0/lib/librte_port/rte_port_frag.h
+dpdk-2.2.0/lib/librte_port/rte_port_ras.c
+dpdk-2.2.0/lib/librte_port/rte_port_ras.h
+dpdk-2.2.0/lib/librte_port/rte_port_ring.c
+dpdk-2.2.0/lib/librte_port/rte_port_ring.h
+dpdk-2.2.0/lib/librte_port/rte_port_sched.c
+dpdk-2.2.0/lib/librte_port/rte_port_sched.h
+dpdk-2.2.0/lib/librte_port/rte_port_source_sink.c
+dpdk-2.2.0/lib/librte_port/rte_port_source_sink.h
+dpdk-2.2.0/lib/librte_port/rte_port_version.map
+dpdk-2.2.0/lib/librte_power/
+dpdk-2.2.0/lib/librte_power/Makefile
+dpdk-2.2.0/lib/librte_power/channel_commands.h
+dpdk-2.2.0/lib/librte_power/guest_channel.c
+dpdk-2.2.0/lib/librte_power/guest_channel.h
+dpdk-2.2.0/lib/librte_power/rte_power.c
+dpdk-2.2.0/lib/librte_power/rte_power.h
+dpdk-2.2.0/lib/librte_power/rte_power_acpi_cpufreq.c
+dpdk-2.2.0/lib/librte_power/rte_power_acpi_cpufreq.h
+dpdk-2.2.0/lib/librte_power/rte_power_common.h
+dpdk-2.2.0/lib/librte_power/rte_power_kvm_vm.c
+dpdk-2.2.0/lib/librte_power/rte_power_kvm_vm.h
+dpdk-2.2.0/lib/librte_power/rte_power_version.map
+dpdk-2.2.0/lib/librte_reorder/
+dpdk-2.2.0/lib/librte_reorder/Makefile
+dpdk-2.2.0/lib/librte_reorder/rte_reorder.c
+dpdk-2.2.0/lib/librte_reorder/rte_reorder.h
+dpdk-2.2.0/lib/librte_reorder/rte_reorder_version.map
+dpdk-2.2.0/lib/librte_ring/
+dpdk-2.2.0/lib/librte_ring/Makefile
+dpdk-2.2.0/lib/librte_ring/rte_ring.c
+dpdk-2.2.0/lib/librte_ring/rte_ring.h
+dpdk-2.2.0/lib/librte_ring/rte_ring_version.map
+dpdk-2.2.0/lib/librte_sched/
+dpdk-2.2.0/lib/librte_sched/Makefile
+dpdk-2.2.0/lib/librte_sched/rte_approx.c
+dpdk-2.2.0/lib/librte_sched/rte_approx.h
+dpdk-2.2.0/lib/librte_sched/rte_bitmap.h
+dpdk-2.2.0/lib/librte_sched/rte_red.c
+dpdk-2.2.0/lib/librte_sched/rte_red.h
+dpdk-2.2.0/lib/librte_sched/rte_sched.c
+dpdk-2.2.0/lib/librte_sched/rte_sched.h
+dpdk-2.2.0/lib/librte_sched/rte_sched_common.h
+dpdk-2.2.0/lib/librte_sched/rte_sched_version.map
+dpdk-2.2.0/lib/librte_table/
+dpdk-2.2.0/lib/librte_table/Makefile
+dpdk-2.2.0/lib/librte_table/rte_lru.h
+dpdk-2.2.0/lib/librte_table/rte_table.h
+dpdk-2.2.0/lib/librte_table/rte_table_acl.c
+dpdk-2.2.0/lib/librte_table/rte_table_acl.h
+dpdk-2.2.0/lib/librte_table/rte_table_array.c
+dpdk-2.2.0/lib/librte_table/rte_table_array.h
+dpdk-2.2.0/lib/librte_table/rte_table_hash.h
+dpdk-2.2.0/lib/librte_table/rte_table_hash_ext.c
+dpdk-2.2.0/lib/librte_table/rte_table_hash_key16.c
+dpdk-2.2.0/lib/librte_table/rte_table_hash_key32.c
+dpdk-2.2.0/lib/librte_table/rte_table_hash_key8.c
+dpdk-2.2.0/lib/librte_table/rte_table_hash_lru.c
+dpdk-2.2.0/lib/librte_table/rte_table_lpm.c
+dpdk-2.2.0/lib/librte_table/rte_table_lpm.h
+dpdk-2.2.0/lib/librte_table/rte_table_lpm_ipv6.c
+dpdk-2.2.0/lib/librte_table/rte_table_lpm_ipv6.h
+dpdk-2.2.0/lib/librte_table/rte_table_stub.c
+dpdk-2.2.0/lib/librte_table/rte_table_stub.h
+dpdk-2.2.0/lib/librte_table/rte_table_version.map
+dpdk-2.2.0/lib/librte_timer/
+dpdk-2.2.0/lib/librte_timer/Makefile
+dpdk-2.2.0/lib/librte_timer/rte_timer.c
+dpdk-2.2.0/lib/librte_timer/rte_timer.h
+dpdk-2.2.0/lib/librte_timer/rte_timer_version.map
+dpdk-2.2.0/lib/librte_vhost/
+dpdk-2.2.0/lib/librte_vhost/Makefile
+dpdk-2.2.0/lib/librte_vhost/eventfd_link/
+dpdk-2.2.0/lib/librte_vhost/eventfd_link/Makefile
+dpdk-2.2.0/lib/librte_vhost/eventfd_link/eventfd_link.c
+dpdk-2.2.0/lib/librte_vhost/eventfd_link/eventfd_link.h
+dpdk-2.2.0/lib/librte_vhost/libvirt/
+dpdk-2.2.0/lib/librte_vhost/libvirt/qemu-wrap.py
+dpdk-2.2.0/lib/librte_vhost/rte_vhost_version.map
+dpdk-2.2.0/lib/librte_vhost/rte_virtio_net.h
+dpdk-2.2.0/lib/librte_vhost/vhost-net.h
+dpdk-2.2.0/lib/librte_vhost/vhost_cuse/
+dpdk-2.2.0/lib/librte_vhost/vhost_cuse/eventfd_copy.c
+dpdk-2.2.0/lib/librte_vhost/vhost_cuse/eventfd_copy.h
+dpdk-2.2.0/lib/librte_vhost/vhost_cuse/vhost-net-cdev.c
+dpdk-2.2.0/lib/librte_vhost/vhost_cuse/virtio-net-cdev.c
+dpdk-2.2.0/lib/librte_vhost/vhost_cuse/virtio-net-cdev.h
+dpdk-2.2.0/lib/librte_vhost/vhost_rxtx.c
+dpdk-2.2.0/lib/librte_vhost/vhost_user/
+dpdk-2.2.0/lib/librte_vhost/vhost_user/fd_man.c
+dpdk-2.2.0/lib/librte_vhost/vhost_user/fd_man.h
+dpdk-2.2.0/lib/librte_vhost/vhost_user/vhost-net-user.c
+dpdk-2.2.0/lib/librte_vhost/vhost_user/vhost-net-user.h
+dpdk-2.2.0/lib/librte_vhost/vhost_user/virtio-net-user.c
+dpdk-2.2.0/lib/librte_vhost/vhost_user/virtio-net-user.h
+dpdk-2.2.0/lib/librte_vhost/virtio-net.c
+dpdk-2.2.0/lib/librte_vhost/virtio-net.h
+dpdk-2.2.0/mk/
+dpdk-2.2.0/mk/arch/
+dpdk-2.2.0/mk/arch/arm/
+dpdk-2.2.0/mk/arch/arm/rte.vars.mk
+dpdk-2.2.0/mk/arch/arm64/
+dpdk-2.2.0/mk/arch/arm64/rte.vars.mk
+dpdk-2.2.0/mk/arch/i686/
+dpdk-2.2.0/mk/arch/i686/rte.vars.mk
+dpdk-2.2.0/mk/arch/ppc_64/
+dpdk-2.2.0/mk/arch/ppc_64/rte.vars.mk
+dpdk-2.2.0/mk/arch/tile/
+dpdk-2.2.0/mk/arch/tile/rte.vars.mk
+dpdk-2.2.0/mk/arch/x86_64/
+dpdk-2.2.0/mk/arch/x86_64/rte.vars.mk
+dpdk-2.2.0/mk/arch/x86_x32/
+dpdk-2.2.0/mk/arch/x86_x32/rte.vars.mk
+dpdk-2.2.0/mk/exec-env/
+dpdk-2.2.0/mk/exec-env/bsdapp/
+dpdk-2.2.0/mk/exec-env/bsdapp/rte.app.mk
+dpdk-2.2.0/mk/exec-env/bsdapp/rte.vars.mk
+dpdk-2.2.0/mk/exec-env/linuxapp/
+dpdk-2.2.0/mk/exec-env/linuxapp/rte.app.mk
+dpdk-2.2.0/mk/exec-env/linuxapp/rte.vars.mk
+dpdk-2.2.0/mk/internal/
+dpdk-2.2.0/mk/internal/rte.build-post.mk
+dpdk-2.2.0/mk/internal/rte.build-pre.mk
+dpdk-2.2.0/mk/internal/rte.clean-post.mk
+dpdk-2.2.0/mk/internal/rte.clean-pre.mk
+dpdk-2.2.0/mk/internal/rte.compile-post.mk
+dpdk-2.2.0/mk/internal/rte.compile-pre.mk
+dpdk-2.2.0/mk/internal/rte.depdirs-post.mk
+dpdk-2.2.0/mk/internal/rte.depdirs-pre.mk
+dpdk-2.2.0/mk/internal/rte.extvars.mk
+dpdk-2.2.0/mk/internal/rte.install-post.mk
+dpdk-2.2.0/mk/internal/rte.install-pre.mk
+dpdk-2.2.0/mk/machine/
+dpdk-2.2.0/mk/machine/armv7-a/
+dpdk-2.2.0/mk/machine/armv7-a/rte.vars.mk
+dpdk-2.2.0/mk/machine/armv8a/
+dpdk-2.2.0/mk/machine/armv8a/rte.vars.mk
+dpdk-2.2.0/mk/machine/atm/
+dpdk-2.2.0/mk/machine/atm/rte.vars.mk
+dpdk-2.2.0/mk/machine/default/
+dpdk-2.2.0/mk/machine/default/rte.vars.mk
+dpdk-2.2.0/mk/machine/hsw/
+dpdk-2.2.0/mk/machine/hsw/rte.vars.mk
+dpdk-2.2.0/mk/machine/ivb/
+dpdk-2.2.0/mk/machine/ivb/rte.vars.mk
+dpdk-2.2.0/mk/machine/native/
+dpdk-2.2.0/mk/machine/native/rte.vars.mk
+dpdk-2.2.0/mk/machine/nhm/
+dpdk-2.2.0/mk/machine/nhm/rte.vars.mk
+dpdk-2.2.0/mk/machine/power8/
+dpdk-2.2.0/mk/machine/power8/rte.vars.mk
+dpdk-2.2.0/mk/machine/snb/
+dpdk-2.2.0/mk/machine/snb/rte.vars.mk
+dpdk-2.2.0/mk/machine/thunderx/
+dpdk-2.2.0/mk/machine/thunderx/rte.vars.mk
+dpdk-2.2.0/mk/machine/tilegx/
+dpdk-2.2.0/mk/machine/tilegx/rte.vars.mk
+dpdk-2.2.0/mk/machine/wsm/
+dpdk-2.2.0/mk/machine/wsm/rte.vars.mk
+dpdk-2.2.0/mk/machine/xgene1/
+dpdk-2.2.0/mk/machine/xgene1/rte.vars.mk
+dpdk-2.2.0/mk/rte.app.mk
+dpdk-2.2.0/mk/rte.bsdmodule.mk
+dpdk-2.2.0/mk/rte.cpuflags.mk
+dpdk-2.2.0/mk/rte.extapp.mk
+dpdk-2.2.0/mk/rte.extlib.mk
+dpdk-2.2.0/mk/rte.extobj.mk
+dpdk-2.2.0/mk/rte.extshared.mk
+dpdk-2.2.0/mk/rte.extsubdir.mk
+dpdk-2.2.0/mk/rte.gnuconfigure.mk
+dpdk-2.2.0/mk/rte.hostapp.mk
+dpdk-2.2.0/mk/rte.hostlib.mk
+dpdk-2.2.0/mk/rte.install.mk
+dpdk-2.2.0/mk/rte.lib.mk
+dpdk-2.2.0/mk/rte.module.mk
+dpdk-2.2.0/mk/rte.obj.mk
+dpdk-2.2.0/mk/rte.sdkbuild.mk
+dpdk-2.2.0/mk/rte.sdkconfig.mk
+dpdk-2.2.0/mk/rte.sdkdepdirs.mk
+dpdk-2.2.0/mk/rte.sdkdoc.mk
+dpdk-2.2.0/mk/rte.sdkexamples.mk
+dpdk-2.2.0/mk/rte.sdkgcov.mk
+dpdk-2.2.0/mk/rte.sdkinstall.mk
+dpdk-2.2.0/mk/rte.sdkroot.mk
+dpdk-2.2.0/mk/rte.sdktest.mk
+dpdk-2.2.0/mk/rte.shared.mk
+dpdk-2.2.0/mk/rte.sharelib.mk
+dpdk-2.2.0/mk/rte.subdir.mk
+dpdk-2.2.0/mk/rte.vars.mk
+dpdk-2.2.0/mk/target/
+dpdk-2.2.0/mk/target/generic/
+dpdk-2.2.0/mk/target/generic/rte.app.mk
+dpdk-2.2.0/mk/target/generic/rte.vars.mk
+dpdk-2.2.0/mk/toolchain/
+dpdk-2.2.0/mk/toolchain/clang/
+dpdk-2.2.0/mk/toolchain/clang/rte.toolchain-compat.mk
+dpdk-2.2.0/mk/toolchain/clang/rte.vars.mk
+dpdk-2.2.0/mk/toolchain/gcc/
+dpdk-2.2.0/mk/toolchain/gcc/rte.toolchain-compat.mk
+dpdk-2.2.0/mk/toolchain/gcc/rte.vars.mk
+dpdk-2.2.0/mk/toolchain/icc/
+dpdk-2.2.0/mk/toolchain/icc/rte.toolchain-compat.mk
+dpdk-2.2.0/mk/toolchain/icc/rte.vars.mk
+dpdk-2.2.0/pkg/
+dpdk-2.2.0/pkg/dpdk.spec
+dpdk-2.2.0/scripts/
+dpdk-2.2.0/scripts/auto-config-h.sh
+dpdk-2.2.0/scripts/check-maintainers.sh
+dpdk-2.2.0/scripts/checkpatches.sh
+dpdk-2.2.0/scripts/cocci.sh
+dpdk-2.2.0/scripts/cocci/
+dpdk-2.2.0/scripts/cocci/mtod-offset.cocci
+dpdk-2.2.0/scripts/depdirs-rule.sh
+dpdk-2.2.0/scripts/gen-build-mk.sh
+dpdk-2.2.0/scripts/gen-config-h.sh
+dpdk-2.2.0/scripts/load-devel-config.sh
+dpdk-2.2.0/scripts/merge-maps.sh
+dpdk-2.2.0/scripts/relpath.sh
+dpdk-2.2.0/scripts/test-build.sh
+dpdk-2.2.0/scripts/test-null.sh
+dpdk-2.2.0/scripts/validate-abi.sh
+dpdk-2.2.0/tools/
+dpdk-2.2.0/tools/cpu_layout.py
+dpdk-2.2.0/tools/dpdk_nic_bind.py
+dpdk-2.2.0/tools/setup.sh
+Configuration done
+== Build lib
+== Build lib/librte_compat
+  SYMLINK-FILE include/rte_compat.h
+== Build lib/librte_eal
+== Build lib/librte_eal/common
+  SYMLINK-FILE include/generic/rte_atomic.h
+  SYMLINK-FILE include/generic/rte_byteorder.h
+  SYMLINK-FILE include/generic/rte_cycles.h
+  SYMLINK-FILE include/generic/rte_prefetch.h
+  SYMLINK-FILE include/generic/rte_spinlock.h
+  SYMLINK-FILE include/generic/rte_memcpy.h
+  SYMLINK-FILE include/generic/rte_cpuflags.h
+  SYMLINK-FILE include/generic/rte_rwlock.h
+  SYMLINK-FILE include/rte_branch_prediction.h
+  SYMLINK-FILE include/rte_common.h
+  SYMLINK-FILE include/rte_debug.h
+  SYMLINK-FILE include/rte_eal.h
+  SYMLINK-FILE include/rte_errno.h
+  SYMLINK-FILE include/rte_launch.h
+  SYMLINK-FILE include/rte_lcore.h
+  SYMLINK-FILE include/rte_log.h
+  SYMLINK-FILE include/rte_memory.h
+  SYMLINK-FILE include/rte_memzone.h
+  SYMLINK-FILE include/rte_pci.h
+  SYMLINK-FILE include/rte_pci_dev_ids.h
+  SYMLINK-FILE include/rte_per_lcore.h
+  SYMLINK-FILE include/rte_random.h
+  SYMLINK-FILE include/rte_tailq.h
+  SYMLINK-FILE include/rte_interrupts.h
+  SYMLINK-FILE include/rte_alarm.h
+  SYMLINK-FILE include/rte_string_fns.h
+  SYMLINK-FILE include/rte_version.h
+  SYMLINK-FILE include/rte_eal_memconfig.h
+  SYMLINK-FILE include/rte_malloc_heap.h
+  SYMLINK-FILE include/rte_hexdump.h
+  SYMLINK-FILE include/rte_devargs.h
+  SYMLINK-FILE include/rte_dev.h
+  SYMLINK-FILE include/rte_pci_dev_feature_defs.h
+  SYMLINK-FILE include/rte_pci_dev_features.h
+  SYMLINK-FILE include/rte_malloc.h
+  SYMLINK-FILE include/rte_keepalive.h
+  SYMLINK-FILE include/rte_time.h
+  SYMLINK-FILE include/rte_rwlock.h
+  SYMLINK-FILE include/rte_memcpy.h
+  SYMLINK-FILE include/rte_cycles.h
+  SYMLINK-FILE include/rte_spinlock.h
+  SYMLINK-FILE include/rte_atomic_32.h
+  SYMLINK-FILE include/rte_vect.h
+  SYMLINK-FILE include/rte_prefetch.h
+  SYMLINK-FILE include/rte_byteorder_32.h
+  SYMLINK-FILE include/rte_atomic_64.h
+  SYMLINK-FILE include/rte_rtm.h
+  SYMLINK-FILE include/rte_cpuflags.h
+  SYMLINK-FILE include/rte_byteorder_64.h
+  SYMLINK-FILE include/rte_atomic.h
+  SYMLINK-FILE include/rte_byteorder.h
+== Build lib/librte_eal/linuxapp
+== Build lib/librte_eal/linuxapp/igb_uio
+  LD      /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/igb_uio/built-in.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.o
+(cat /dev/null;   echo kernel//home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.ko;) > /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/igb_uio/modules.order
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.mod.o
+  LD [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.ko
+INSTALL-MODULE igb_uio.ko
+== Build lib/librte_eal/linuxapp/eal
+  CC eal.o
+  CC eal_hugepage_info.o
+  CC eal_memory.o
+  CC eal_thread.o
+  CC eal_log.o
+  CC eal_pci.o
+  CC eal_pci_uio.o
+  CC eal_pci_vfio.o
+  CC eal_pci_vfio_mp_sync.o
+  CC eal_debug.o
+  CC eal_lcore.o
+  CC eal_timer.o
+  CC eal_interrupts.o
+  CC eal_alarm.o
+  CC eal_common_lcore.o
+  CC eal_common_timer.o
+  CC eal_common_memzone.o
+  CC eal_common_log.o
+  CC eal_common_launch.o
+  CC eal_common_pci.o
+  CC eal_common_pci_uio.o
+  CC eal_common_memory.o
+  CC eal_common_tailqs.o
+  CC eal_common_errno.o
+  CC eal_common_cpuflags.o
+  CC eal_common_string_fns.o
+  CC eal_common_hexdump.o
+  CC eal_common_devargs.o
+  CC eal_common_dev.o
+  CC eal_common_options.o
+  CC eal_common_thread.o
+  CC rte_malloc.o
+  CC malloc_elem.o
+  CC malloc_heap.o
+  CC rte_keepalive.o
+  AR librte_eal.a
+  SYMLINK-FILE include/exec-env/rte_interrupts.h
+  SYMLINK-FILE include/exec-env/rte_kni_common.h
+  SYMLINK-FILE include/exec-env/rte_dom0_common.h
+  INSTALL-LIB librte_eal.a
+== Build lib/librte_eal/linuxapp/kni
+  LD      /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/built-in.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_main.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_api.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_common.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_ethtool.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_82599.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_82598.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_x540.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/ixgbe_phy.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/kcompat.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_82575.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_i210.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_api.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_mac.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_manage.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_mbx.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_nvm.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/e1000_phy.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/igb_ethtool.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/igb_hwmon.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/igb_main.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/igb_debugfs.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/igb_param.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/igb_procfs.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/igb_vmdq.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/kni_misc.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/kni_net.o
+  CC [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/kni_ethtool.o
+  LD [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/rte_kni.o
+(cat /dev/null;   echo kernel//home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/rte_kni.ko;) > /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/modules.order
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/rte_kni.mod.o
+  LD [M]  /home/pring/dpdk-2.2.0/build/build/lib/librte_eal/linuxapp/kni/rte_kni.ko
+INSTALL-MODULE rte_kni.ko
+== Build lib/librte_ring
+  CC rte_ring.o
+  AR librte_ring.a
+  SYMLINK-FILE include/rte_ring.h
+  INSTALL-LIB librte_ring.a
+== Build lib/librte_mempool
+  CC rte_mempool.o
+  AR librte_mempool.a
+  SYMLINK-FILE include/rte_mempool.h
+  INSTALL-LIB librte_mempool.a
+== Build lib/librte_mbuf
+  CC rte_mbuf.o
+  AR librte_mbuf.a
+  SYMLINK-FILE include/rte_mbuf.h
+  INSTALL-LIB librte_mbuf.a
+== Build lib/librte_cryptodev
+  CC rte_cryptodev.o
+  AR librte_cryptodev.a
+  SYMLINK-FILE include/rte_crypto.h
+  SYMLINK-FILE include/rte_cryptodev.h
+  SYMLINK-FILE include/rte_cryptodev_pmd.h
+  INSTALL-LIB librte_cryptodev.a
+== Build lib/librte_mbuf_offload
+  CC rte_mbuf_offload.o
+  AR librte_mbuf_offload.a
+  SYMLINK-FILE include/rte_mbuf_offload.h
+  INSTALL-LIB librte_mbuf_offload.a
+== Build lib/librte_timer
+  CC rte_timer.o
+  AR librte_timer.a
+  SYMLINK-FILE include/rte_timer.h
+  INSTALL-LIB librte_timer.a
+== Build lib/librte_cfgfile
+  CC rte_cfgfile.o
+  AR librte_cfgfile.a
+  SYMLINK-FILE include/rte_cfgfile.h
+  INSTALL-LIB librte_cfgfile.a
+== Build lib/librte_cmdline
+  CC cmdline.o
+  CC cmdline_cirbuf.o
+  CC cmdline_parse.o
+  CC cmdline_parse_etheraddr.o
+  CC cmdline_parse_ipaddr.o
+  CC cmdline_parse_num.o
+  CC cmdline_parse_string.o
+  CC cmdline_rdline.o
+  CC cmdline_vt100.o
+  CC cmdline_socket.o
+  CC cmdline_parse_portlist.o
+  AR librte_cmdline.a
+  SYMLINK-FILE include/cmdline.h
+  SYMLINK-FILE include/cmdline_parse.h
+  SYMLINK-FILE include/cmdline_parse_num.h
+  SYMLINK-FILE include/cmdline_parse_ipaddr.h
+  SYMLINK-FILE include/cmdline_parse_etheraddr.h
+  SYMLINK-FILE include/cmdline_parse_string.h
+  SYMLINK-FILE include/cmdline_rdline.h
+  SYMLINK-FILE include/cmdline_vt100.h
+  SYMLINK-FILE include/cmdline_socket.h
+  SYMLINK-FILE include/cmdline_cirbuf.h
+  SYMLINK-FILE include/cmdline_parse_portlist.h
+  INSTALL-LIB librte_cmdline.a
+== Build lib/librte_ether
+  CC rte_ethdev.o
+  AR libethdev.a
+  SYMLINK-FILE include/rte_ether.h
+  SYMLINK-FILE include/rte_ethdev.h
+  SYMLINK-FILE include/rte_eth_ctrl.h
+  SYMLINK-FILE include/rte_dev_info.h
+  INSTALL-LIB libethdev.a
+== Build lib/librte_vhost
+  CC virtio-net.o
+  CC vhost_rxtx.o
+  CC vhost_user/vhost-net-user.o
+  CC vhost_user/virtio-net-user.o
+  CC vhost_user/fd_man.o
+  AR librte_vhost.a
+  SYMLINK-FILE include/rte_virtio_net.h
+  INSTALL-LIB librte_vhost.a
+== Build lib/librte_hash
+  CC rte_cuckoo_hash.o
+  CC rte_fbk_hash.o
+  AR librte_hash.a
+  SYMLINK-FILE include/rte_hash.h
+  SYMLINK-FILE include/rte_hash_crc.h
+  SYMLINK-FILE include/rte_jhash.h
+  SYMLINK-FILE include/rte_thash.h
+  SYMLINK-FILE include/rte_fbk_hash.h
+  INSTALL-LIB librte_hash.a
+== Build lib/librte_lpm
+  CC rte_lpm.o
+  CC rte_lpm6.o
+  AR librte_lpm.a
+  SYMLINK-FILE include/rte_lpm.h
+  SYMLINK-FILE include/rte_lpm6.h
+  INSTALL-LIB librte_lpm.a
+== Build lib/librte_acl
+  CC tb_mem.o
+  CC rte_acl.o
+  CC acl_bld.o
+  CC acl_gen.o
+  CC acl_run_scalar.o
+  CC acl_run_sse.o
+  CC acl_run_avx2.o
+  AR librte_acl.a
+  SYMLINK-FILE include/rte_acl_osdep.h
+  SYMLINK-FILE include/rte_acl.h
+  INSTALL-LIB librte_acl.a
+== Build lib/librte_net
+  SYMLINK-FILE include/rte_ip.h
+  SYMLINK-FILE include/rte_tcp.h
+  SYMLINK-FILE include/rte_udp.h
+  SYMLINK-FILE include/rte_sctp.h
+  SYMLINK-FILE include/rte_icmp.h
+  SYMLINK-FILE include/rte_arp.h
+== Build lib/librte_ip_frag
+  CC rte_ipv4_fragmentation.o
+  CC rte_ipv6_fragmentation.o
+  CC rte_ipv4_reassembly.o
+  CC rte_ipv6_reassembly.o
+  CC rte_ip_frag_common.o
+  CC ip_frag_internal.o
+  AR librte_ip_frag.a
+  SYMLINK-FILE include/rte_ip_frag.h
+  INSTALL-LIB librte_ip_frag.a
+== Build lib/librte_jobstats
+  CC rte_jobstats.o
+  AR librte_jobstats.a
+  SYMLINK-FILE include/rte_jobstats.h
+  INSTALL-LIB librte_jobstats.a
+== Build lib/librte_power
+  CC rte_power.o
+  CC rte_power_acpi_cpufreq.o
+  CC rte_power_kvm_vm.o
+  CC guest_channel.o
+  AR librte_power.a
+  SYMLINK-FILE include/rte_power.h
+  INSTALL-LIB librte_power.a
+== Build lib/librte_meter
+  CC rte_meter.o
+  AR librte_meter.a
+  SYMLINK-FILE include/rte_meter.h
+  INSTALL-LIB librte_meter.a
+== Build lib/librte_sched
+  CC rte_sched.o
+  CC rte_red.o
+  CC rte_approx.o
+  AR librte_sched.a
+  SYMLINK-FILE include/rte_sched.h
+  SYMLINK-FILE include/rte_bitmap.h
+  SYMLINK-FILE include/rte_sched_common.h
+  SYMLINK-FILE include/rte_red.h
+  SYMLINK-FILE include/rte_approx.h
+  INSTALL-LIB librte_sched.a
+== Build lib/librte_kvargs
+  CC rte_kvargs.o
+  AR librte_kvargs.a
+  SYMLINK-FILE include/rte_kvargs.h
+  INSTALL-LIB librte_kvargs.a
+== Build lib/librte_distributor
+  CC rte_distributor.o
+  AR librte_distributor.a
+  SYMLINK-FILE include/rte_distributor.h
+  INSTALL-LIB librte_distributor.a
+== Build lib/librte_port
+  CC rte_port_ethdev.o
+  CC rte_port_ring.o
+  CC rte_port_frag.o
+  CC rte_port_ras.o
+  CC rte_port_sched.o
+  CC rte_port_source_sink.o
+  AR librte_port.a
+  SYMLINK-FILE include/rte_port.h
+  SYMLINK-FILE include/rte_port_ethdev.h
+  SYMLINK-FILE include/rte_port_ring.h
+  SYMLINK-FILE include/rte_port_frag.h
+  SYMLINK-FILE include/rte_port_ras.h
+  SYMLINK-FILE include/rte_port_sched.h
+  SYMLINK-FILE include/rte_port_source_sink.h
+  INSTALL-LIB librte_port.a
+== Build lib/librte_table
+  CC rte_table_lpm.o
+  CC rte_table_lpm_ipv6.o
+  CC rte_table_acl.o
+  CC rte_table_hash_key8.o
+  CC rte_table_hash_key16.o
+  CC rte_table_hash_key32.o
+  CC rte_table_hash_ext.o
+  CC rte_table_hash_lru.o
+  CC rte_table_array.o
+  CC rte_table_stub.o
+  AR librte_table.a
+  SYMLINK-FILE include/rte_table.h
+  SYMLINK-FILE include/rte_table_lpm.h
+  SYMLINK-FILE include/rte_table_lpm_ipv6.h
+  SYMLINK-FILE include/rte_table_acl.h
+  SYMLINK-FILE include/rte_table_hash.h
+  SYMLINK-FILE include/rte_lru.h
+  SYMLINK-FILE include/rte_table_array.h
+  SYMLINK-FILE include/rte_table_stub.h
+  INSTALL-LIB librte_table.a
+== Build lib/librte_pipeline
+  CC rte_pipeline.o
+  AR librte_pipeline.a
+  SYMLINK-FILE include/rte_pipeline.h
+  INSTALL-LIB librte_pipeline.a
+== Build lib/librte_reorder
+  CC rte_reorder.o
+  AR librte_reorder.a
+  SYMLINK-FILE include/rte_reorder.h
+  INSTALL-LIB librte_reorder.a
+== Build lib/librte_kni
+  CC rte_kni.o
+  AR librte_kni.a
+  SYMLINK-FILE include/rte_kni.h
+  INSTALL-LIB librte_kni.a
+== Build drivers
+== Build drivers/net
+== Build drivers/net/af_packet
+  CC rte_eth_af_packet.o
+  AR librte_pmd_af_packet.a
+  SYMLINK-FILE include/rte_eth_af_packet.h
+  INSTALL-LIB librte_pmd_af_packet.a
+== Build drivers/net/bonding
+  CC rte_eth_bond_api.o
+  CC rte_eth_bond_pmd.o
+  CC rte_eth_bond_args.o
+  CC rte_eth_bond_8023ad.o
+  CC rte_eth_bond_alb.o
+  AR librte_pmd_bond.a
+  SYMLINK-FILE include/rte_eth_bond.h
+  SYMLINK-FILE include/rte_eth_bond_8023ad.h
+  INSTALL-LIB librte_pmd_bond.a
+== Build drivers/net/cxgbe
+  CC cxgbe_ethdev.o
+  CC cxgbe_main.o
+  CC sge.o
+  CC t4_hw.o
+  AR librte_pmd_cxgbe.a
+  INSTALL-LIB librte_pmd_cxgbe.a
+== Build drivers/net/e1000
+  CC e1000_80003es2lan.o
+  CC e1000_82540.o
+  CC e1000_82541.o
+  CC e1000_82542.o
+  CC e1000_82543.o
+  CC e1000_82571.o
+  CC e1000_82575.o
+  CC e1000_i210.o
+  CC e1000_api.o
+  CC e1000_ich8lan.o
+  CC e1000_mac.o
+  CC e1000_manage.o
+  CC e1000_mbx.o
+  CC e1000_nvm.o
+  CC e1000_osdep.o
+  CC e1000_phy.o
+  CC e1000_vf.o
+  CC igb_ethdev.o
+  CC igb_rxtx.o
+  CC igb_pf.o
+  CC em_ethdev.o
+  CC em_rxtx.o
+  AR librte_pmd_e1000.a
+  INSTALL-LIB librte_pmd_e1000.a
+== Build drivers/net/enic
+  CC enic_ethdev.o
+  CC enic_main.o
+  CC enic_clsf.o
+  CC enic_res.o
+  CC base/vnic_cq.o
+  CC base/vnic_wq.o
+  CC base/vnic_dev.o
+  CC base/vnic_intr.o
+  CC base/vnic_rq.o
+  CC base/vnic_rss.o
+  AR librte_pmd_enic.a
+  INSTALL-LIB librte_pmd_enic.a
+== Build drivers/net/fm10k
+  CC fm10k_ethdev.o
+  CC fm10k_rxtx.o
+  CC fm10k_pf.o
+  CC fm10k_tlv.o
+  CC fm10k_common.o
+  CC fm10k_mbx.o
+  CC fm10k_vf.o
+  CC fm10k_api.o
+  CC fm10k_rxtx_vec.o
+  AR librte_pmd_fm10k.a
+  INSTALL-LIB librte_pmd_fm10k.a
+== Build drivers/net/i40e
+  CC i40e_adminq.o
+  CC i40e_common.o
+  CC i40e_diag.o
+  CC i40e_hmc.o
+  CC i40e_lan_hmc.o
+  CC i40e_nvm.o
+  CC i40e_dcb.o
+  CC i40e_ethdev.o
+  CC i40e_rxtx.o
+  CC i40e_ethdev_vf.o
+  CC i40e_pf.o
+  CC i40e_fdir.o
+  AR librte_pmd_i40e.a
+  INSTALL-LIB librte_pmd_i40e.a
+== Build drivers/net/ixgbe
+  CC ixgbe_common.o
+  CC ixgbe_82598.o
+  CC ixgbe_82599.o
+  CC ixgbe_x540.o
+  CC ixgbe_x550.o
+  CC ixgbe_phy.o
+  CC ixgbe_api.o
+  CC ixgbe_vf.o
+  CC ixgbe_dcb.o
+  CC ixgbe_dcb_82599.o
+  CC ixgbe_dcb_82598.o
+  CC ixgbe_mbx.o
+  CC ixgbe_rxtx.o
+  CC ixgbe_ethdev.o
+  CC ixgbe_fdir.o
+  CC ixgbe_pf.o
+  CC ixgbe_rxtx_vec.o
+  AR librte_pmd_ixgbe.a
+  INSTALL-LIB librte_pmd_ixgbe.a
+== Build drivers/net/null
+  CC rte_eth_null.o
+  AR librte_pmd_null.a
+  SYMLINK-FILE include/rte_eth_null.h
+  INSTALL-LIB librte_pmd_null.a
+== Build drivers/net/ring
+  CC rte_eth_ring.o
+  AR librte_pmd_ring.a
+  SYMLINK-FILE include/rte_eth_ring.h
+  INSTALL-LIB librte_pmd_ring.a
+== Build drivers/net/virtio
+  CC virtqueue.o
+  CC virtio_pci.o
+  CC virtio_rxtx.o
+  CC virtio_ethdev.o
+  CC virtio_rxtx_simple.o
+  AR librte_pmd_virtio.a
+  INSTALL-LIB librte_pmd_virtio.a
+== Build drivers/net/vmxnet3
+  CC vmxnet3_rxtx.o
+  CC vmxnet3_ethdev.o
+  AR librte_pmd_vmxnet3_uio.a
+  INSTALL-LIB librte_pmd_vmxnet3_uio.a
+== Build drivers/crypto
+  LD libdpdk.a
+== Build app
+== Build app/test
+  CC commands.o
+  CC test.o
+  CC test_pci.o
+  CC test_prefetch.o
+  CC test_byteorder.o
+  CC test_per_lcore.o
+  CC test_atomic.o
+  CC test_malloc.o
+  CC test_cycles.o
+  CC test_spinlock.o
+  CC test_memory.o
+  CC test_memzone.o
+  CC test_ring.o
+  CC test_ring_perf.o
+  CC test_pmd_perf.o
+  CC test_table.o
+  CC test_table_pipeline.o
+  CC test_table_tables.o
+  CC test_table_ports.o
+  CC test_table_combined.o
+  CC test_table_acl.o
+  CC test_rwlock.o
+  CC test_timer.o
+  CC test_timer_perf.o
+  CC test_timer_racecond.o
+  CC test_mempool.o
+  CC test_mempool_perf.o
+  CC test_mbuf.o
+  CC test_logs.o
+  CC test_memcpy.o
+  CC test_memcpy_perf.o
+  CC test_hash.o
+  CC test_thash.o
+  CC test_hash_perf.o
+  CC test_hash_functions.o
+  CC test_hash_scaling.o
+  CC test_lpm.o
+  CC test_lpm6.o
+  CC test_debug.o
+  CC test_errno.o
+  CC test_tailq.o
+  CC test_string_fns.o
+  CC test_cpuflags.o
+  CC test_mp_secondary.o
+  CC test_eal_flags.o
+  CC test_eal_fs.o
+  CC test_alarm.o
+  CC test_interrupts.o
+  CC test_version.o
+  CC test_func_reentrancy.o
+  CC test_cmdline.o
+  CC test_cmdline_num.o
+  CC test_cmdline_etheraddr.o
+  CC test_cmdline_portlist.o
+  CC test_cmdline_ipaddr.o
+  CC test_cmdline_cirbuf.o
+  CC test_cmdline_string.o
+  CC test_cmdline_lib.o
+  CC test_red.o
+  CC test_sched.o
+  CC test_meter.o
+  CC test_kni.o
+  CC test_power.o
+  CC test_power_acpi_cpufreq.o
+  CC test_power_kvm_vm.o
+  CC test_common.o
+  CC test_distributor.o
+  CC test_distributor_perf.o
+  CC test_reorder.o
+  CC test_devargs.o
+  CC virtual_pmd.o
+  CC packet_burst_generator.o
+  CC test_acl.o
+  CC test_link_bonding.o
+  CC test_link_bonding_mode4.o
+  CC test_link_bonding_rssconf.o
+  CC test_pmd_ring.o
+  CC test_pmd_ring_perf.o
+  CC test_cryptodev_perf.o
+  CC test_cryptodev.o
+  CC test_kvargs.o
+  LD test
+  INSTALL-APP test
+  INSTALL-MAP test.map
+== Build app/test-acl
+  CC main.o
+  LD testacl
+  INSTALL-APP testacl
+  INSTALL-MAP testacl.map
+== Build app/test-pipeline
+  CC main.o
+  CC config.o
+  CC init.o
+  CC runtime.o
+  CC pipeline_stub.o
+  CC pipeline_hash.o
+  CC pipeline_lpm.o
+  CC pipeline_lpm_ipv6.o
+  CC pipeline_acl.o
+  LD testpipeline
+  INSTALL-APP testpipeline
+  INSTALL-MAP testpipeline.map
+== Build app/test-pmd
+  CC testpmd.o
+  CC parameters.o
+  CC cmdline.o
+  CC config.o
+  CC iofwd.o
+  CC macfwd.o
+  CC macfwd-retry.o
+  CC macswap.o
+  CC flowgen.o
+  CC rxonly.o
+  CC txonly.o
+  CC csumonly.o
+  CC icmpecho.o
+  CC mempool_anon.o
+  LD testpmd
+  INSTALL-APP testpmd
+  INSTALL-MAP testpmd.map
+== Build app/cmdline_test
+  CC cmdline_test.o
+  CC commands.o
+  LD cmdline_test
+  INSTALL-APP cmdline_test
+  INSTALL-MAP cmdline_test.map
+== Build app/proc_info
+  CC main.o
+  LD dpdk_proc_info
+  INSTALL-APP dpdk_proc_info
+  INSTALL-MAP dpdk_proc_info.map
+Build complete [x86_64-native-linuxapp-gcc]
+Configuration done
+== Build lib
+== Build lib/librte_compat
+  SYMLINK-FILE include/rte_compat.h
+== Build lib/librte_eal
+== Build lib/librte_eal/common
+  SYMLINK-FILE include/generic/rte_atomic.h
+  SYMLINK-FILE include/generic/rte_byteorder.h
+  SYMLINK-FILE include/generic/rte_cycles.h
+  SYMLINK-FILE include/generic/rte_prefetch.h
+  SYMLINK-FILE include/generic/rte_spinlock.h
+  SYMLINK-FILE include/generic/rte_memcpy.h
+  SYMLINK-FILE include/generic/rte_cpuflags.h
+  SYMLINK-FILE include/generic/rte_rwlock.h
+  SYMLINK-FILE include/rte_branch_prediction.h
+  SYMLINK-FILE include/rte_common.h
+  SYMLINK-FILE include/rte_debug.h
+  SYMLINK-FILE include/rte_eal.h
+  SYMLINK-FILE include/rte_errno.h
+  SYMLINK-FILE include/rte_launch.h
+  SYMLINK-FILE include/rte_lcore.h
+  SYMLINK-FILE include/rte_log.h
+  SYMLINK-FILE include/rte_memory.h
+  SYMLINK-FILE include/rte_memzone.h
+  SYMLINK-FILE include/rte_pci.h
+  SYMLINK-FILE include/rte_pci_dev_ids.h
+  SYMLINK-FILE include/rte_per_lcore.h
+  SYMLINK-FILE include/rte_random.h
+  SYMLINK-FILE include/rte_tailq.h
+  SYMLINK-FILE include/rte_interrupts.h
+  SYMLINK-FILE include/rte_alarm.h
+  SYMLINK-FILE include/rte_string_fns.h
+  SYMLINK-FILE include/rte_version.h
+  SYMLINK-FILE include/rte_eal_memconfig.h
+  SYMLINK-FILE include/rte_malloc_heap.h
+  SYMLINK-FILE include/rte_hexdump.h
+  SYMLINK-FILE include/rte_devargs.h
+  SYMLINK-FILE include/rte_dev.h
+  SYMLINK-FILE include/rte_pci_dev_feature_defs.h
+  SYMLINK-FILE include/rte_pci_dev_features.h
+  SYMLINK-FILE include/rte_malloc.h
+  SYMLINK-FILE include/rte_keepalive.h
+  SYMLINK-FILE include/rte_time.h
+  SYMLINK-FILE include/rte_rwlock.h
+  SYMLINK-FILE include/rte_memcpy.h
+  SYMLINK-FILE include/rte_cycles.h
+  SYMLINK-FILE include/rte_spinlock.h
+  SYMLINK-FILE include/rte_atomic_32.h
+  SYMLINK-FILE include/rte_vect.h
+  SYMLINK-FILE include/rte_prefetch.h
+  SYMLINK-FILE include/rte_byteorder_32.h
+  SYMLINK-FILE include/rte_atomic_64.h
+  SYMLINK-FILE include/rte_rtm.h
+  SYMLINK-FILE include/rte_cpuflags.h
+  SYMLINK-FILE include/rte_byteorder_64.h
+  SYMLINK-FILE include/rte_atomic.h
+  SYMLINK-FILE include/rte_byteorder.h
+== Build lib/librte_eal/linuxapp
+== Build lib/librte_eal/linuxapp/igb_uio
+  LD      /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/igb_uio/built-in.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.o
+(cat /dev/null;   echo kernel//home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.ko;) > /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/igb_uio/modules.order
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.mod.o
+  LD [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/igb_uio/igb_uio.ko
+INSTALL-MODULE igb_uio.ko
+== Build lib/librte_eal/linuxapp/eal
+  CC eal.o
+  CC eal_hugepage_info.o
+  CC eal_memory.o
+  CC eal_thread.o
+  CC eal_log.o
+  CC eal_pci.o
+  CC eal_pci_uio.o
+  CC eal_pci_vfio.o
+  CC eal_pci_vfio_mp_sync.o
+  CC eal_debug.o
+  CC eal_lcore.o
+  CC eal_timer.o
+  CC eal_interrupts.o
+  CC eal_alarm.o
+  CC eal_common_lcore.o
+  CC eal_common_timer.o
+  CC eal_common_memzone.o
+  CC eal_common_log.o
+  CC eal_common_launch.o
+  CC eal_common_pci.o
+  CC eal_common_pci_uio.o
+  CC eal_common_memory.o
+  CC eal_common_tailqs.o
+  CC eal_common_errno.o
+  CC eal_common_cpuflags.o
+  CC eal_common_string_fns.o
+  CC eal_common_hexdump.o
+  CC eal_common_devargs.o
+  CC eal_common_dev.o
+  CC eal_common_options.o
+  CC eal_common_thread.o
+  CC rte_malloc.o
+  CC malloc_elem.o
+  CC malloc_heap.o
+  CC rte_keepalive.o
+  AR librte_eal.a
+  SYMLINK-FILE include/exec-env/rte_interrupts.h
+  SYMLINK-FILE include/exec-env/rte_kni_common.h
+  SYMLINK-FILE include/exec-env/rte_dom0_common.h
+  INSTALL-LIB librte_eal.a
+== Build lib/librte_eal/linuxapp/kni
+  LD      /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/built-in.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_main.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_api.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_common.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_ethtool.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_82599.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_82598.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_x540.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/ixgbe_phy.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/kcompat.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_82575.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_i210.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_api.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_mac.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_manage.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_mbx.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_nvm.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/e1000_phy.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/igb_ethtool.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/igb_hwmon.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/igb_main.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/igb_debugfs.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/igb_param.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/igb_procfs.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/igb_vmdq.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/kni_misc.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/kni_net.o
+  CC [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/kni_ethtool.o
+  LD [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/rte_kni.o
+(cat /dev/null;   echo kernel//home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/rte_kni.ko;) > /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/modules.order
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/rte_kni.mod.o
+  LD [M]  /home/pring/dpdk-2.2.0/x86_64-native-linuxapp-gcc/build/lib/librte_eal/linuxapp/kni/rte_kni.ko
+INSTALL-MODULE rte_kni.ko
+== Build lib/librte_ring
+  CC rte_ring.o
+  AR librte_ring.a
+  SYMLINK-FILE include/rte_ring.h
+  INSTALL-LIB librte_ring.a
+== Build lib/librte_mempool
+  CC rte_mempool.o
+  AR librte_mempool.a
+  SYMLINK-FILE include/rte_mempool.h
+  INSTALL-LIB librte_mempool.a
+== Build lib/librte_mbuf
+  CC rte_mbuf.o
+  AR librte_mbuf.a
+  SYMLINK-FILE include/rte_mbuf.h
+  INSTALL-LIB librte_mbuf.a
+== Build lib/librte_cryptodev
+  CC rte_cryptodev.o
+  AR librte_cryptodev.a
+  SYMLINK-FILE include/rte_crypto.h
+  SYMLINK-FILE include/rte_cryptodev.h
+  SYMLINK-FILE include/rte_cryptodev_pmd.h
+  INSTALL-LIB librte_cryptodev.a
+== Build lib/librte_mbuf_offload
+  CC rte_mbuf_offload.o
+  AR librte_mbuf_offload.a
+  SYMLINK-FILE include/rte_mbuf_offload.h
+  INSTALL-LIB librte_mbuf_offload.a
+== Build lib/librte_timer
+  CC rte_timer.o
+  AR librte_timer.a
+  SYMLINK-FILE include/rte_timer.h
+  INSTALL-LIB librte_timer.a
+== Build lib/librte_cfgfile
+  CC rte_cfgfile.o
+  AR librte_cfgfile.a
+  SYMLINK-FILE include/rte_cfgfile.h
+  INSTALL-LIB librte_cfgfile.a
+== Build lib/librte_cmdline
+  CC cmdline.o
+  CC cmdline_cirbuf.o
+  CC cmdline_parse.o
+  CC cmdline_parse_etheraddr.o
+  CC cmdline_parse_ipaddr.o
+  CC cmdline_parse_num.o
+  CC cmdline_parse_string.o
+  CC cmdline_rdline.o
+  CC cmdline_vt100.o
+  CC cmdline_socket.o
+  CC cmdline_parse_portlist.o
+  AR librte_cmdline.a
+  SYMLINK-FILE include/cmdline.h
+  SYMLINK-FILE include/cmdline_parse.h
+  SYMLINK-FILE include/cmdline_parse_num.h
+  SYMLINK-FILE include/cmdline_parse_ipaddr.h
+  SYMLINK-FILE include/cmdline_parse_etheraddr.h
+  SYMLINK-FILE include/cmdline_parse_string.h
+  SYMLINK-FILE include/cmdline_rdline.h
+  SYMLINK-FILE include/cmdline_vt100.h
+  SYMLINK-FILE include/cmdline_socket.h
+  SYMLINK-FILE include/cmdline_cirbuf.h
+  SYMLINK-FILE include/cmdline_parse_portlist.h
+  INSTALL-LIB librte_cmdline.a
+== Build lib/librte_ether
+  CC rte_ethdev.o
+  AR libethdev.a
+  SYMLINK-FILE include/rte_ether.h
+  SYMLINK-FILE include/rte_ethdev.h
+  SYMLINK-FILE include/rte_eth_ctrl.h
+  SYMLINK-FILE include/rte_dev_info.h
+  INSTALL-LIB libethdev.a
+== Build lib/librte_vhost
+  CC virtio-net.o
+  CC vhost_rxtx.o
+  CC vhost_user/vhost-net-user.o
+  CC vhost_user/virtio-net-user.o
+  CC vhost_user/fd_man.o
+  AR librte_vhost.a
+  SYMLINK-FILE include/rte_virtio_net.h
+  INSTALL-LIB librte_vhost.a
+== Build lib/librte_hash
+  CC rte_cuckoo_hash.o
+  CC rte_fbk_hash.o
+  AR librte_hash.a
+  SYMLINK-FILE include/rte_hash.h
+  SYMLINK-FILE include/rte_hash_crc.h
+  SYMLINK-FILE include/rte_jhash.h
+  SYMLINK-FILE include/rte_thash.h
+  SYMLINK-FILE include/rte_fbk_hash.h
+  INSTALL-LIB librte_hash.a
+== Build lib/librte_lpm
+  CC rte_lpm.o
+  CC rte_lpm6.o
+  AR librte_lpm.a
+  SYMLINK-FILE include/rte_lpm.h
+  SYMLINK-FILE include/rte_lpm6.h
+  INSTALL-LIB librte_lpm.a
+== Build lib/librte_acl
+  CC tb_mem.o
+  CC rte_acl.o
+  CC acl_bld.o
+  CC acl_gen.o
+  CC acl_run_scalar.o
+  CC acl_run_sse.o
+  CC acl_run_avx2.o
+  AR librte_acl.a
+  SYMLINK-FILE include/rte_acl_osdep.h
+  SYMLINK-FILE include/rte_acl.h
+  INSTALL-LIB librte_acl.a
+== Build lib/librte_net
+  SYMLINK-FILE include/rte_ip.h
+  SYMLINK-FILE include/rte_tcp.h
+  SYMLINK-FILE include/rte_udp.h
+  SYMLINK-FILE include/rte_sctp.h
+  SYMLINK-FILE include/rte_icmp.h
+  SYMLINK-FILE include/rte_arp.h
+== Build lib/librte_ip_frag
+  CC rte_ipv4_fragmentation.o
+  CC rte_ipv6_fragmentation.o
+  CC rte_ipv4_reassembly.o
+  CC rte_ipv6_reassembly.o
+  CC rte_ip_frag_common.o
+  CC ip_frag_internal.o
+  AR librte_ip_frag.a
+  SYMLINK-FILE include/rte_ip_frag.h
+  INSTALL-LIB librte_ip_frag.a
+== Build lib/librte_jobstats
+  CC rte_jobstats.o
+  AR librte_jobstats.a
+  SYMLINK-FILE include/rte_jobstats.h
+  INSTALL-LIB librte_jobstats.a
+== Build lib/librte_power
+  CC rte_power.o
+  CC rte_power_acpi_cpufreq.o
+  CC rte_power_kvm_vm.o
+  CC guest_channel.o
+  AR librte_power.a
+  SYMLINK-FILE include/rte_power.h
+  INSTALL-LIB librte_power.a
+== Build lib/librte_meter
+  CC rte_meter.o
+  AR librte_meter.a
+  SYMLINK-FILE include/rte_meter.h
+  INSTALL-LIB librte_meter.a
+== Build lib/librte_sched
+  CC rte_sched.o
+  CC rte_red.o
+  CC rte_approx.o
+  AR librte_sched.a
+  SYMLINK-FILE include/rte_sched.h
+  SYMLINK-FILE include/rte_bitmap.h
+  SYMLINK-FILE include/rte_sched_common.h
+  SYMLINK-FILE include/rte_red.h
+  SYMLINK-FILE include/rte_approx.h
+  INSTALL-LIB librte_sched.a
+== Build lib/librte_kvargs
+  CC rte_kvargs.o
+  AR librte_kvargs.a
+  SYMLINK-FILE include/rte_kvargs.h
+  INSTALL-LIB librte_kvargs.a
+== Build lib/librte_distributor
+  CC rte_distributor.o
+  AR librte_distributor.a
+  SYMLINK-FILE include/rte_distributor.h
+  INSTALL-LIB librte_distributor.a
+== Build lib/librte_port
+  CC rte_port_ethdev.o
+  CC rte_port_ring.o
+  CC rte_port_frag.o
+  CC rte_port_ras.o
+  CC rte_port_sched.o
+  CC rte_port_source_sink.o
+  AR librte_port.a
+  SYMLINK-FILE include/rte_port.h
+  SYMLINK-FILE include/rte_port_ethdev.h
+  SYMLINK-FILE include/rte_port_ring.h
+  SYMLINK-FILE include/rte_port_frag.h
+  SYMLINK-FILE include/rte_port_ras.h
+  SYMLINK-FILE include/rte_port_sched.h
+  SYMLINK-FILE include/rte_port_source_sink.h
+  INSTALL-LIB librte_port.a
+== Build lib/librte_table
+  CC rte_table_lpm.o
+  CC rte_table_lpm_ipv6.o
+  CC rte_table_acl.o
+  CC rte_table_hash_key8.o
+  CC rte_table_hash_key16.o
+  CC rte_table_hash_key32.o
+  CC rte_table_hash_ext.o
+  CC rte_table_hash_lru.o
+  CC rte_table_array.o
+  CC rte_table_stub.o
+  AR librte_table.a
+  SYMLINK-FILE include/rte_table.h
+  SYMLINK-FILE include/rte_table_lpm.h
+  SYMLINK-FILE include/rte_table_lpm_ipv6.h
+  SYMLINK-FILE include/rte_table_acl.h
+  SYMLINK-FILE include/rte_table_hash.h
+  SYMLINK-FILE include/rte_lru.h
+  SYMLINK-FILE include/rte_table_array.h
+  SYMLINK-FILE include/rte_table_stub.h
+  INSTALL-LIB librte_table.a
+== Build lib/librte_pipeline
+  CC rte_pipeline.o
+  AR librte_pipeline.a
+  SYMLINK-FILE include/rte_pipeline.h
+  INSTALL-LIB librte_pipeline.a
+== Build lib/librte_reorder
+  CC rte_reorder.o
+  AR librte_reorder.a
+  SYMLINK-FILE include/rte_reorder.h
+  INSTALL-LIB librte_reorder.a
+== Build lib/librte_kni
+  CC rte_kni.o
+  AR librte_kni.a
+  SYMLINK-FILE include/rte_kni.h
+  INSTALL-LIB librte_kni.a
+== Build drivers
+== Build drivers/net
+== Build drivers/net/af_packet
+  CC rte_eth_af_packet.o
+  AR librte_pmd_af_packet.a
+  SYMLINK-FILE include/rte_eth_af_packet.h
+  INSTALL-LIB librte_pmd_af_packet.a
+== Build drivers/net/bonding
+  CC rte_eth_bond_api.o
+  CC rte_eth_bond_pmd.o
+  CC rte_eth_bond_args.o
+  CC rte_eth_bond_8023ad.o
+  CC rte_eth_bond_alb.o
+  AR librte_pmd_bond.a
+  SYMLINK-FILE include/rte_eth_bond.h
+  SYMLINK-FILE include/rte_eth_bond_8023ad.h
+  INSTALL-LIB librte_pmd_bond.a
+== Build drivers/net/cxgbe
+  CC cxgbe_ethdev.o
+  CC cxgbe_main.o
+  CC sge.o
+  CC t4_hw.o
+  AR librte_pmd_cxgbe.a
+  INSTALL-LIB librte_pmd_cxgbe.a
+== Build drivers/net/e1000
+  CC e1000_80003es2lan.o
+  CC e1000_82540.o
+  CC e1000_82541.o
+  CC e1000_82542.o
+  CC e1000_82543.o
+  CC e1000_82571.o
+  CC e1000_82575.o
+  CC e1000_i210.o
+  CC e1000_api.o
+  CC e1000_ich8lan.o
+  CC e1000_mac.o
+  CC e1000_manage.o
+  CC e1000_mbx.o
+  CC e1000_nvm.o
+  CC e1000_osdep.o
+  CC e1000_phy.o
+  CC e1000_vf.o
+  CC igb_ethdev.o
+  CC igb_rxtx.o
+  CC igb_pf.o
+  CC em_ethdev.o
+  CC em_rxtx.o
+  AR librte_pmd_e1000.a
+  INSTALL-LIB librte_pmd_e1000.a
+== Build drivers/net/enic
+  CC enic_ethdev.o
+  CC enic_main.o
+  CC enic_clsf.o
+  CC enic_res.o
+  CC base/vnic_cq.o
+  CC base/vnic_wq.o
+  CC base/vnic_dev.o
+  CC base/vnic_intr.o
+  CC base/vnic_rq.o
+  CC base/vnic_rss.o
+  AR librte_pmd_enic.a
+  INSTALL-LIB librte_pmd_enic.a
+== Build drivers/net/fm10k
+  CC fm10k_ethdev.o
+  CC fm10k_rxtx.o
+  CC fm10k_pf.o
+  CC fm10k_tlv.o
+  CC fm10k_common.o
+  CC fm10k_mbx.o
+  CC fm10k_vf.o
+  CC fm10k_api.o
+  CC fm10k_rxtx_vec.o
+  AR librte_pmd_fm10k.a
+  INSTALL-LIB librte_pmd_fm10k.a
+== Build drivers/net/i40e
+  CC i40e_adminq.o
+  CC i40e_common.o
+  CC i40e_diag.o
+  CC i40e_hmc.o
+  CC i40e_lan_hmc.o
+  CC i40e_nvm.o
+  CC i40e_dcb.o
+  CC i40e_ethdev.o
+  CC i40e_rxtx.o
+  CC i40e_ethdev_vf.o
+  CC i40e_pf.o
+  CC i40e_fdir.o
+  AR librte_pmd_i40e.a
+  INSTALL-LIB librte_pmd_i40e.a
+== Build drivers/net/ixgbe
+  CC ixgbe_common.o
+  CC ixgbe_82598.o
+  CC ixgbe_82599.o
+  CC ixgbe_x540.o
+  CC ixgbe_x550.o
+  CC ixgbe_phy.o
+  CC ixgbe_api.o
+  CC ixgbe_vf.o
+  CC ixgbe_dcb.o
+  CC ixgbe_dcb_82599.o
+  CC ixgbe_dcb_82598.o
+  CC ixgbe_mbx.o
+  CC ixgbe_rxtx.o
+  CC ixgbe_ethdev.o
+  CC ixgbe_fdir.o
+  CC ixgbe_pf.o
+  CC ixgbe_rxtx_vec.o
+  AR librte_pmd_ixgbe.a
+  INSTALL-LIB librte_pmd_ixgbe.a
+== Build drivers/net/null
+  CC rte_eth_null.o
+  AR librte_pmd_null.a
+  SYMLINK-FILE include/rte_eth_null.h
+  INSTALL-LIB librte_pmd_null.a
+== Build drivers/net/ring
+  CC rte_eth_ring.o
+  AR librte_pmd_ring.a
+  SYMLINK-FILE include/rte_eth_ring.h
+  INSTALL-LIB librte_pmd_ring.a
+== Build drivers/net/virtio
+  CC virtqueue.o
+  CC virtio_pci.o
+  CC virtio_rxtx.o
+  CC virtio_ethdev.o
+  CC virtio_rxtx_simple.o
+  AR librte_pmd_virtio.a
+  INSTALL-LIB librte_pmd_virtio.a
+== Build drivers/net/vmxnet3
+  CC vmxnet3_rxtx.o
+  CC vmxnet3_ethdev.o
+  AR librte_pmd_vmxnet3_uio.a
+  INSTALL-LIB librte_pmd_vmxnet3_uio.a
+== Build drivers/crypto
+== Build app
+== Build app/test
+  CC commands.o
+  CC test.o
+  CC test_pci.o
+  CC test_prefetch.o
+  CC test_byteorder.o
+  CC test_per_lcore.o
+  CC test_atomic.o
+  CC test_malloc.o
+  CC test_cycles.o
+  CC test_spinlock.o
+  CC test_memory.o
+  CC test_memzone.o
+  CC test_ring.o
+  CC test_ring_perf.o
+  CC test_pmd_perf.o
+  CC test_table.o
+  CC test_table_pipeline.o
+  CC test_table_tables.o
+  CC test_table_ports.o
+  CC test_table_combined.o
+  CC test_table_acl.o
+  CC test_rwlock.o
+  CC test_timer.o
+  CC test_timer_perf.o
+  CC test_timer_racecond.o
+  CC test_mempool.o
+  CC test_mempool_perf.o
+  CC test_mbuf.o
+  CC test_logs.o
+  CC test_memcpy.o
+  CC test_memcpy_perf.o
+  CC test_hash.o
+  CC test_thash.o
+  CC test_hash_perf.o
+  CC test_hash_functions.o
+  CC test_hash_scaling.o
+  CC test_lpm.o
+  CC test_lpm6.o
+  CC test_debug.o
+  CC test_errno.o
+  CC test_tailq.o
+  CC test_string_fns.o
+  CC test_cpuflags.o
+  CC test_mp_secondary.o
+  CC test_eal_flags.o
+  CC test_eal_fs.o
+  CC test_alarm.o
+  CC test_interrupts.o
+  CC test_version.o
+  CC test_func_reentrancy.o
+  CC test_cmdline.o
+  CC test_cmdline_num.o
+  CC test_cmdline_etheraddr.o
+  CC test_cmdline_portlist.o
+  CC test_cmdline_ipaddr.o
+  CC test_cmdline_cirbuf.o
+  CC test_cmdline_string.o
+  CC test_cmdline_lib.o
+  CC test_red.o
+  CC test_sched.o
+  CC test_meter.o
+  CC test_kni.o
+  CC test_power.o
+  CC test_power_acpi_cpufreq.o
+  CC test_power_kvm_vm.o
+  CC test_common.o
+  CC test_distributor.o
+  CC test_distributor_perf.o
+  CC test_reorder.o
+  CC test_devargs.o
+  CC virtual_pmd.o
+  CC packet_burst_generator.o
+  CC test_acl.o
+  CC test_link_bonding.o
+  CC test_link_bonding_mode4.o
+  CC test_link_bonding_rssconf.o
+  CC test_pmd_ring.o
+  CC test_pmd_ring_perf.o
+  CC test_cryptodev_perf.o
+  CC test_cryptodev.o
+  CC test_kvargs.o
+  LD test
+  INSTALL-APP test
+  INSTALL-MAP test.map
+== Build app/test-acl
+  CC main.o
+  LD testacl
+  INSTALL-APP testacl
+  INSTALL-MAP testacl.map
+== Build app/test-pipeline
+  CC main.o
+  CC config.o
+  CC init.o
+  CC runtime.o
+  CC pipeline_stub.o
+  CC pipeline_hash.o
+  CC pipeline_lpm.o
+  CC pipeline_lpm_ipv6.o
+  CC pipeline_acl.o
+  LD testpipeline
+  INSTALL-APP testpipeline
+  INSTALL-MAP testpipeline.map
+== Build app/test-pmd
+  CC testpmd.o
+  CC parameters.o
+  CC cmdline.o
+  CC config.o
+  CC iofwd.o
+  CC macfwd.o
+  CC macfwd-retry.o
+  CC macswap.o
+  CC flowgen.o
+  CC rxonly.o
+  CC txonly.o
+  CC csumonly.o
+  CC icmpecho.o
+  CC mempool_anon.o
+  LD testpmd
+  INSTALL-APP testpmd
+  INSTALL-MAP testpmd.map
+== Build app/cmdline_test
+  CC cmdline_test.o
+  CC commands.o
+  LD cmdline_test
+  INSTALL-APP cmdline_test
+  INSTALL-MAP cmdline_test.map
+== Build app/proc_info
+  CC main.o
+  LD dpdk_proc_info
+  INSTALL-APP dpdk_proc_info
+  INSTALL-MAP dpdk_proc_info.map
+Build complete [x86_64-native-linuxapp-gcc]
+Installation cannot run with T defined and DESTDIR undefined
+Buildfile: /home/pring/git/streamsx.network/build.xml
+
+toolkit:
+
+init:
+
+indexToolkit:
+
+all:
+
+dpdkglue:
+     [echo] DPDK glue library: /home/pring/git/streamsx.network/com.ibm.streamsx.network/impl/src/source/dpdk
+     [exec]   CC streams_source.o
+     [exec]   CC init.o
+     [exec]   CC rxtx.o
+     [exec]   AR libstreams_source.a
+     [exec]   INSTALL-LIB libstreams_source.a
+
+samples:
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleAddressFunctions
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleDHCPMessageParser
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleDNSMessageParser
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleDNSPacketDPDKSource
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleDNSPacketFileSource
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleDNSPacketLiveSource
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleIPAddressLocation
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleIPFIXMessageParser
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleNetflowMessageParser
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SampleNetworkToolkitData
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SamplePacketContentAssembler
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SamplePacketDPDKSource
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SamplePacketFileSource
+
+indextoolkit:
+     [echo] Tookit to index: /home/pring/git/streamsx.network/samples/SamplePacketLiveSource
+
+all:
+
+BUILD SUCCESSFUL
+Total time: 14 seconds

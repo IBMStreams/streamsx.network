@@ -17,6 +17,11 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
+#libpcapDirectory=$HOME/libpcap-1.7.4
+#libpcapDirectory=$HOME/libpcap-1.8.1
+[[ -d $libpcapDirectory ]] && export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=$libpcapDirectory
+[[ -d $libpcapDirectory ]] && export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=$libpcapDirectory
+
 scripts=( $( find $here -name "autotest.sh" ) )
 
 step "executing all sample applications ..."
