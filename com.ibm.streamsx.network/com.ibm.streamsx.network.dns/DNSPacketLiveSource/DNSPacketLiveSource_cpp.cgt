@@ -5,6 +5,9 @@
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require CodeGenX;
 
+# module for i18n messages
+require NetworkResources;
+
 # These fragments of Perl code get strings from the operator's declaration
 # in the SPL source code for use in generating C/C++ code for the operator's
 # implementation below
@@ -43,9 +46,9 @@ if ($outputFilterParameter) {
 }
 
 # basic safety checks
-SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NOT_ENOUGH_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
 
 %>
 
