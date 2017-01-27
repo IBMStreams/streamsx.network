@@ -79,7 +79,7 @@ static void dpdkCallback(void *correlator, void *data, uint32_t length, uint64_t
 
 MY_OPERATOR::MY_OPERATOR() {
 
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> constructor ...", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> constructor ...", "DNSPacketDPDKSource");
 
   // Get the operator's parameters into variables
   lcoreMaster = <%=$lcoreMaster%>;
@@ -104,7 +104,7 @@ MY_OPERATOR::MY_OPERATOR() {
   // Initialize the DPDK subsystem.
   int rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue, (int)promiscuous, &dpdkCallback, (void *)this);
   
-  SPLLOG(L_TRACE, "streams_operator_init() for lcore = " << lcore <<
+  SPLAPPTRC(L_TRACE, "streams_operator_init() for lcore = " << lcore <<
          ", nicPort = " << nicPort <<
          ", nicQueue = " << nicQueue <<
          ", lcoreMaster = " << lcoreMaster <<
@@ -112,22 +112,22 @@ MY_OPERATOR::MY_OPERATOR() {
          "DNSPacketDPDKSource"); 
   if (rc != 0) { THROW (SPLRuntimeOperator, "Error in streams_operator_init."); }
 
-    SPLLOG(L_INFO, "ignoring timestampType parameter", "DNSPacketDPDKSource");
+    SPLAPPTRC(L_INFO, "ignoring timestampType parameter", "DNSPacketDPDKSource");
 }
 
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR() {
 
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "DNSPacketDPDKSource");
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "DNSPacketDPDKSource");
 }
 
 
 // Notify port readiness
 void MY_OPERATOR::allPortsReady() { 
-    SPLLOG(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
 
     int rc = streams_dpdk_init();
     if (rc != 0) THROW (SPLRuntimeOperator, "Error in streams_dpdk_init.");
@@ -137,22 +137,22 @@ void MY_OPERATOR::allPortsReady() {
 
     createThreads(2);
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
 }
 
 
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown() {
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketDPDKSource");
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketDPDKSource");
 }
 
 
 // Processing for source and threaded operators   
 void MY_OPERATOR::process(uint32_t idx) { 
 
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> process(" << idx << ")", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> process(" << idx << ")", "DNSPacketDPDKSource");
 
   switch (idx) {
   case 0: processDpdkLoop(); break;
@@ -160,7 +160,7 @@ void MY_OPERATOR::process(uint32_t idx) {
   default: break; 
   } 
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> process(" << idx << ")", "DNSPacketDPDKSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> process(" << idx << ")", "DNSPacketDPDKSource");
 }
 
 
@@ -183,7 +183,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
   packetLen = length;
 
 #if TRACELVL >= 1
-    SPLLOG(L_TRACE, "Entering <%=$myOperatorKind%> packetProcess. lcore = " 
+    SPLAPPTRC(L_TRACE, "Entering <%=$myOperatorKind%> packetProcess. lcore = " 
         << lcore << ", packetCounter = " << packetCounter <<
 	", packetLen = " << packetLen,
 	"DNSPacketDPDKSource");
@@ -214,8 +214,8 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
 
   // parse the DNS header and resource records in the packet payload
   parser.parseDNSMessage(headers.payload, headers.payloadLength);
-  if ( parser.error ) { SPLLOG(L_DEBUG, "error " << parser.error << "parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.errorDescriptions.description[parser.error], "DNSPacketDPDKSource"); }
-  if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketDPDKSource");  return; }
+  if ( parser.error ) { SPLAPPTRC(L_DEBUG, "error " << parser.error << "parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.errorDescriptions.description[parser.error], "DNSPacketDPDKSource"); }
+  if ( ! parser.dnsHeader ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketDPDKSource");  return; }
 
 
   // count the packets and bytes processed so far
@@ -227,7 +227,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
     <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
     {
       <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-      //SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSPacketDPDKSource");
+      //SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSPacketDPDKSource");
       submit(outTuple<%=$i%>, <%=$i%>);
     }
     <% } %> ;
@@ -254,7 +254,7 @@ void MY_OPERATOR::processDpdkLoop() {
 
 
 void MY_OPERATOR::metricsThread() {
-    SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
+    SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
 
     // remember our thread identifer
     metricsThreadID = pthread_self();
@@ -273,10 +273,10 @@ void MY_OPERATOR::metricsThread() {
       // wait until the next interval or the PE is shutting down
       const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
       if (secondsToWait>0) {
-        SPLLOG(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
+        SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
         getPE().blockUntilShutdownRequest(secondsToWait);
       } else {
-        SPLLOG(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "DNSPacketLiveSource");
+        SPLAPPTRC(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "DNSPacketLiveSource");
       }
       
       // store the previous interval's metrics for difference calculations
@@ -304,7 +304,7 @@ void MY_OPERATOR::metricsThread() {
       metricsUpdate = true;
     }
 
-    SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
+    SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
 }
 
 
