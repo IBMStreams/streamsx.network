@@ -11,6 +11,9 @@
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require CodeGenX;
 
+# module for i18n messages
+require NetworkResources;
+
 # get the name of this operator's template
 my $myOperatorKind = $model->getContext()->getKind();
 
@@ -44,9 +47,9 @@ if ($outputFilterParameter) {
 }
 
 # basic safety checks
-SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NOT_ENOUGH_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
 
 %>
 
