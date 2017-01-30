@@ -198,6 +198,7 @@ composite TestPacketContentAssemblerFlowsAndFiles {
 
   () as FlowDataStore = Custom(FlowDataStream as In) {
     logic state: {
+      mutable boolean res=createDir(dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles");
       map<rstring,rstring> directionFlags = {
         "?"        : "????????",
         ""         : "--------",

@@ -74,9 +74,9 @@ echo -e "\ntrace level: $traceLevel"
 step "building standalone application '$namespace.$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
 
-step "creating directory for files and flows ..."
+#step "creating directory for files and flows ..."
 [ ! -d $dataDirectory/debug.$composite ] || rm -rf $dataDirectory/debug.$composite || die "sorry, could not delete old directory $dataDirectory/debug.$composite, $?"
-mkdir -p $dataDirectory/debug.$composite || die "sorry, could not create directory $dataDirectory/debug.$composite, $?"
+#mkdir -p $dataDirectory/debug.$composite || die "sorry, could not create directory $dataDirectory/debug.$composite, $?"
 
 step "executing standalone application '$namespace.$composite' ..."
 executable=$buildDirectory/bin/$namespace.$composite
