@@ -21,7 +21,7 @@
 #include "parse/NetworkHeaderParser.h"
 #include "parse/DNSMessageParser.h"
 
-
+#pragma GCC diagnostic ignored "-Wmissing-braces"
 
 ////////////////////////////////////////////////////////////////////////////////
 // This class parses DNS fields within a DNS packet
