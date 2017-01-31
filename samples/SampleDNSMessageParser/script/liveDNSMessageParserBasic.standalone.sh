@@ -93,18 +93,22 @@ bundle=$buildDirectory/$namespace.$composite.sab
 [ -f $bundle ] || die "sorry, bundle '$bundle' not found"
 spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
 
-step "setting capabilities for standalone application '$namespace.$composite' ..."
-standalone=$unbundleDirectory/$composite.standalone/bin/standalone
-[ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
-sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
-/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
+#step "setting capabilities for standalone application '$namespace.$composite' ..."
+#standalone=$unbundleDirectory/$composite.standalone/bin/standalone
+#[ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
+#sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+#/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
 
 step "opening window for TCP stream from standalone application '$namespace.$composite' ..."
 ( xterm "${lookupWindowOptions[@]}" -e " while [ true ] ; do ncat --recv-only localhost $lookupPort && break ; sleep 1 ; done " ) &
 
 step "executing standalone application '$namespace.$composite' ..."
-$standalone -t $traceLevel "${submitParameterList[@]}"
-rc=$?
+executable=$buildDirectory/bin/standalone.exe
+sudo STREAMS_INSTALL=$STREAMS_INSTALL $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+
+#step "executing standalone application '$namespace.$composite' ..."
+#$standalone -t $traceLevel "${submitParameterList[@]}"
+#rc=$?
 
 step "closing window for TCP stream, if necessary ..."
 pids=$( ps -ef | grep "ncat .* $lookupPort" | grep -v grep | awk '{print $2}' | tr '\n' ' ' )

@@ -84,19 +84,23 @@ step "creating directory for files and flows ..."
 [ ! -d $dataDirectory/debug.$composite ] || rm -rf $dataDirectory/debug.$composite || die "sorry, could not delete old directory $dataDirectory/debug.$composite, $?"
 mkdir -p $dataDirectory/debug.$composite || die "sorry, could not create directory $dataDirectory/debug.$composite, $?"
 
-step "unbundling standalone application '$namespace.$composite' ..."
-bundle=$buildDirectory/$namespace.$composite.sab
-[ -f $bundle ] || die "sorry, bundle '$bundle' not found"
-spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
-
-step "setting capabilities for standalone application '$namespace.$composite' ..."
-standalone=$unbundleDirectory/$composite/bin/standalone
-[ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
-###sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
-###/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
-
 step "executing standalone application '$namespace.$composite' ..."
-sudo STREAMS_INSTALL=$STREAMS_INSTALL $standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
+executable=$buildDirectory/bin/standalone.exe
+sudo STREAMS_INSTALL=$STREAMS_INSTALL $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+
+#step "unbundling standalone application '$namespace.$composite' ..."
+#bundle=$buildDirectory/$namespace.$composite.sab
+#[ -f $bundle ] || die "sorry, bundle '$bundle' not found"
+#spl-app-info $bundle --unbundle $unbundleDirectory || die "sorry, could not unbundle '$bundle', $?"
+
+#step "setting capabilities for standalone application '$namespace.$composite' ..."
+#standalone=$unbundleDirectory/$composite/bin/standalone
+#[ -f $standalone ] || die "sorry, standalone application '$standalone' not found"
+#sudo /usr/sbin/setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $standalone || die "sorry, could not set capabilities for application '$composite', $?"
+#/usr/sbin/getcap -v $standalone || die "sorry, could not get capabilities for application '$composite', $?"
+
+#step "executing standalone application '$namespace.$composite' ..."
+#sudo STREAMS_INSTALL=$STREAMS_INSTALL $standalone -t $traceLevel "${submitParameterList[@]}" || die "sorry, application '$composite' failed, $?"
 
 exit 0
 
