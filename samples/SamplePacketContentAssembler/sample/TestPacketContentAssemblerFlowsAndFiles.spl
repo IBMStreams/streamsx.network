@@ -204,34 +204,34 @@ composite TestPacketContentAssemblerFlowsAndFiles {
         "SrcToDst" : ">>>>>>>>",
         "DstToSrc" : "<<<<<<<<" }; }
     onTuple In: {
-      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles/debug.flow_" + leadingZeros(flowID,6) + "." + flowProtocol;
+      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + leadingZeros(flowID,6) + "." + flowProtocol;
       rstring filemode = flowDataInitial ? "w" : "a";
       mutable int32 error = 0;
       uint64 handle = fopen(filename, filemode, error);
-      assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+      if (error!=0) { appTrc(Trace.error, "Sorry, could not open output file '" + filename + "', " + strerror(error)); abort(); shutdownPE(); }
       if (tlsEvent) {
         fwriteString("TLS " + tlsRecordType + " " + tlsRecordDirection + " (bytes " + (rstring)tlsRecordOffset + " to " + (rstring)(tlsRecordOffset+(uint32)length(flowData)) + (tlsRecordMore ? ", more..." : "") + ")\n", handle, error);
-        assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+        if (error!=0) { appTrc(Trace.error, "Sorry, could not write output file '" + filename + "', " + strerror(error)); shutdownPE(); }
       } else {
         fwriteString("\n" + flowEventTime + " -- " + ipSource + " " + directionFlags[flowDirection] + " " + ipDestination + " (" + (rstring)length(flowData) + " bytes of " + flowProtocol + ")\n", handle, error);
-        assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+        if (error!=0) { appTrc(Trace.error, "Sorry, could not open output file '" + filename + "', " + strerror(error)); shutdownPE(); }
         fwriteString(trancateNonASCII(flowData) + "\n", handle, error);
-        assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+        if (error!=0) { appTrc(Trace.error, "Sorry, could not write output file '" + filename + "', " + strerror(error)); shutdownPE(); }
       }
       fclose(handle, error);
-      assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error)); } }
+      if (error!=0) { appTrc(Trace.error, "Sorry, could not close output file '" + filename + "', " + strerror(error));  shutdownPE(); } } }
 
   () as FileChunkStore = Custom(FileChunkStream as In) {
     logic onTuple In: {
-      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles/debug.flow_" + leadingZeros(flowID,6) + "_file_" + leadingZeros(fileID,6) + "." + fileExtension;
+      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + leadingZeros(flowID,6) + "_file_" + leadingZeros(fileID,6) + "." + fileExtension;
       rstring filemode = fileChunkInitial ? "w" : "a";
       mutable int32 error = 0;
       uint64 handle = fopen(filename, filemode, error);
-      assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+      if (error!=0) { appTrc(Trace.error, "Sorry, could not open output file '" + filename + "', " + strerror(error)); shutdownPE(); }
       fwriteblob(fileChunk, handle, error);
-      assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+      if (error!=0) { appTrc(Trace.error, "Sorry, could not write output file '" + filename + "', " + strerror(error)); shutdownPE(); }
       fclose(handle, error);
-      assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error));
+      if (error!=0) { appTrc(Trace.error, "Sorry, could not close output file '" + filename + "', " + strerror(error)); shutdownPE(); }
     } }
 
 }
