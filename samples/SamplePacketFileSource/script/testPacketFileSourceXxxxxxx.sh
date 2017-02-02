@@ -3,7 +3,7 @@
 ## Copyright (C) 2011, 2017  International Business Machines Corporation
 ## All Rights Reserved
 
-#set -o xtrace
+set -o xtrace
 #set -o pipefail
 
 ################### functions used in this script #############################
@@ -19,10 +19,12 @@ composite=TestPacketFileSourceBasic1
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 
+[[ -f $STREAMS_INSTALL/toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$STREAMS_INSTALL/toolkits
 [[ -f $here/../../../../toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../../../toolkits ; pwd )
 [[ -f $here/../../../com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../.. ; pwd )
 [[ $toolkitDirectory ]] || die "sorry, could not find 'toolkits' directory" 
 
+[[ -f $STREAMS_INSTALL/samples/com.ibm.streamsx.network/SampleNetworkToolkitData/info.xml ]] && sampleDirectory=$STREAMS_INSTALL/samples
 [[ -f $here/../../SampleNetworkToolkitData/info.xml ]] && sampleDirectory=$( cd $here/../.. ; pwd )
 [[ $sampleDirectory ]] || die "sorry, could not find 'samples' directory" 
 
