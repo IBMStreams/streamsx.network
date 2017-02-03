@@ -36,7 +36,7 @@ unique identifier, which will be
 used with all subsequent events related to the flow, allowing
 downstream operators to correlate tuples related to the flow.
 
- **FlowEnd** The operator emits this event
+**FlowEnd** The operator emits this event
 whenever it detects the end of a 'flow' of packets.  The
 number of packets and bytes exchanged between the endpoints are
 available from result functions. The flow's identifier will not be used again in any
@@ -46,7 +46,7 @@ subsequent event.
 with the payload data from packets related to a flow, excluding
 the network headers, which is available from result functions.
 
-  **FlowTLS** The operator emits this event for flows that 
+**FlowTLS** The operator emits this event for flows that 
 are encrypted with 'transport layer security (TLS)'.
 The individual fields of the TLS headers and the encrypted data
 are available from result functions.

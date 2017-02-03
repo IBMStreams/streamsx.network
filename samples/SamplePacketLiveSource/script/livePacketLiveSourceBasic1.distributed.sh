@@ -81,8 +81,8 @@ echo -e "\ntracing: $tracing"
 step "building distributed application '$namespace.$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
-step "granting read permission for instance '$instance' log directory to user '$USER' ..."
-sudo chmod o+r -R /tmp/Streams-$domain/logs/$HOSTNAME/instances
+#step "granting read permission for instance '$instance' log directory to user '$USER' ..."
+#sudo chmod o+r -R /tmp/Streams-$domain/logs/$HOSTNAME/instances
 
 step "submitting distributed application '$namespace.$composite' ..."
 bundle=$buildDirectory/$namespace.$composite.sab

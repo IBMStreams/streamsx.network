@@ -305,15 +305,16 @@ Then, compile DPDK by typing this command at a prompt:
 
 *re-compile Streams network toolkit*
 
-If you don't already have the Streams network toolkit, get it by typing these commands at a prompt:
+
+If you don't already have the Streams network toolkit installed in the $STREAMS_INSTALL/toolkits directory, get it by typing these commands at a prompt:
 
     bash&gt; cd $HOME/git
-    bash&gt; git clone git@github.com:ejpring/streamsx.network.git
+    bash&gt; git clone git@github.com:IBMStreams/streamsx.network.git
 
 In any case, you will need to compile the Streams DPDK glue library.
 To do this, type these commands at a prompt:
 
-    bash&gt; cd $HOME/git/streamsx.network
+    bash&gt; .../streamsx.network
     bash&gt; ant
 
 
@@ -358,17 +359,6 @@ Then start the Linux device driver by typing these commands at a prompt:
 
     bash&gt; sudo ip link set dev $DPDK_INTERFACE up
     bash&gt; ip link show dev $DPDK_INTERFACE
-
-
-# bind 'Mellanox' ethernet device to DPDK
-
-To be done ...
-
-
-# unbind 'Mellanox' ethernet device from DPDK
-
-
-To be done ...
 
 
 # sample applications

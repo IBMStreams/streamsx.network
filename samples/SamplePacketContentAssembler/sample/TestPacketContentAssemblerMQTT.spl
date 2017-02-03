@@ -126,7 +126,7 @@ composite TestPacketContentAssemblerMQTT {
         "SrcToDst" : "-->",
         "DstToSrc" : "<--" }; }
     onTuple In: {
-      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerMQTT/debug.flow_" + leadingZeros(flowID,6) + "." + flowProtocol;
+      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerMQTT.flow_" + leadingZeros(flowID,6) + "." + flowProtocol;
       rstring filemode = flowDataInitial ? "w" : "a";
       mutable int32 error = 0;
       uint64 handle = fopen(filename, filemode, error);
