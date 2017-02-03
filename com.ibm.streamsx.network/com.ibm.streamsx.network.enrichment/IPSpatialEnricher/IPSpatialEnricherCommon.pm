@@ -4,9 +4,13 @@
 package IPSpatialEnricherCommon;
 
 use strict;
+use File::Basename;
 
 sub init($) {
 	my ($model) = @_;
+	
+	unshift @INC, dirname ($model->getContext()->getOperatorDirectory()) . "/../impl/nl/include";
+	require NetworkResources;
 	
 	## inputPort0
     $::inputPort0 = $model->getInputPortAt(0);
@@ -63,17 +67,17 @@ sub init($) {
 			
 			if($::isScalar && !isScalar($::outputAttributeSPLType))
 			{
-				SPL::CodeGen::exitln("Output attribute " . $name . " must be a scalar type.");
+				SPL::CodeGen::exitln(NetworkResources::NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE($name, "scalar"));
 			}
 			
 			if($::isVector && !isVector($::outputAttributeSPLType))
 			{
-				SPL::CodeGen::exitln("Output attribute " . $name . " must be a vector type.");
+				SPL::CodeGen::exitln(NetworkResources::NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE($name, "vector"));
 			}
 			
 			if($::isMatrix && !isMatrix($::outputAttributeSPLType))
 			{
-				SPL::CodeGen::exitln("Output attribute " . $name . " must be a matrix type.");
+				SPL::CodeGen::exitln(NetworkResources::NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE($name, "matrix"));
 			}
 			
 			## use these variables to determine what data to retrieve from lookup table
@@ -136,14 +140,16 @@ sub init($) {
 sub validate($) {
 	my ($model) = @_;
 	
-	my $typeErrorMsg = "The 'inputIPAttr' parameter must refer to an attribute of type: 'rstring', 'list<rstring>' or 'list<list<rstring>>'. Found " . $::inputIPAttrParamSPLType;
+	unshift @INC, dirname ($model->getContext()->getOperatorDirectory()) . "/../impl/nl/include";
+	require NetworkResources;
+
 	## validate that the inputIPAttr parameter contains an attribute with one of the following types:
 	## - rstring
 	## - list<rstring>
 	## - list<list<rstring>>
 	if($::isScalar && !SPL::CodeGen::Type::isRString($::inputIPAttrParamSPLType))
 	{
-		SPL::CodeGen::exitln($typeErrorMsg);
+		SPL::CodeGen::exitln(NetworkResources::NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE("inputIPAttr", "'rstring', 'list<rstring>' or 'list<list<rstring>>'", $::inputIPAttrParamSPLType));
 	}
 	
 	if($::isVector)
@@ -151,7 +157,7 @@ sub validate($) {
 		my $elemType = SPL::CodeGen::Type::getElementType($::inputIPAttrParamSPLType);
 		if(!SPL::CodeGen::Type::isRString($elemType))
 		{
-			SPL::CodeGen::exitln($typeErrorMsg);
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE("inputIPAttr", "'rstring', 'list<rstring>' or 'list<list<rstring>>'", $::inputIPAttrParamSPLType));
 		}
 	}
 	
@@ -161,7 +167,7 @@ sub validate($) {
 		$elemType = SPL::CodeGen::Type::getElementType($elemType);
 		if(!SPL::CodeGen::Type::isRString($elemType))
 		{
-			SPL::CodeGen::exitln($typeErrorMsg);
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE("inputIPAttr", "'rstring', 'list<rstring>' or 'list<list<rstring>>'", $::inputIPAttrParamSPLType));
 		}
 	}
 	
@@ -169,29 +175,29 @@ sub validate($) {
 	if(defined $::inputPort1) {
 		if(defined $::blocksIPv4FileParam)
 		{
-			SPL::CodeGen::exitln("The 'blocksIPv4File' parameter cannot be specified when input port 1 is defined.");	
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED("blocksIPv4File"));
 		}
 		
 		if(defined $::blocksIPv6FileParam)
 		{
-			SPL::CodeGen::exitln("The 'blocksIPv6File' parameter cannot be specified when input port 1 is defined.");	
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED("blocksIPv6File"));
 		}
 		
 		if(defined $::locationFileParam)
 		{
-			SPL::CodeGen::exitln("The 'locationFile' parameter cannot be specified when input port 1 is defined.");
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED("locationFile"));
 		}
 	}
 	
 	if(!defined $::inputPort1) {
 		if(!defined $::blocksIPv4FileParam && !defined $::blocksIPv6FileParam)
 		{
-			SPL::CodeGen::exitln("Either the 'blocksIPv4File' parameter, 'blcocksIPv6File' parameter or input port 1 must be specified.");
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_EITHER_PARAMETER_A_OR_B_MUST_BE_SPECIFIED("blocksIPv4File", "blocksIPv6File"));
 		}
 		
 		if(!defined $::locationFileParam)
 		{
-			SPL::CodeGen::exitln("Either the 'locationFile' parameter or input port 1 must be specified.");
+			SPL::CodeGen::exitln(NetworkResources::NETWORK_EITHER_PARAMETER_OR_INPUT_PORT_1_MUST_BE_SPECIFIED("locationFile"));
 		}
 	}
 }

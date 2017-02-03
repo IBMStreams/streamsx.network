@@ -5,6 +5,9 @@
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
 require CodeGenX;
 
+# module for i18n messages
+require NetworkResources;
+
 # These fragments of Perl code get strings from the operator's declaration
 # in the SPL source code for use in generating C/C++ code for the operator's
 # implementation below
@@ -43,9 +46,9 @@ if ($outputFilterParameter) {
 }
 
 # basic safety checks
-SPL::CodeGen::exit("Sorry, no output ports specified") unless scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, not enough output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
-SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each output port") if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_NOT_ENOUGH_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
+SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
 
 %>
 
@@ -66,7 +69,7 @@ SPL::CodeGen::exit("Sorry, too many output filters, must specify one for each ou
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> constructor ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> constructor ...", "DNSPacketLiveSource");
 
   // set operator parameters
   networkInterface = <%=$networkInterface%>;
@@ -97,10 +100,10 @@ MY_OPERATOR::MY_OPERATOR()
 #if defined(lib_pcap_pcap_h)
 
   // log the 'libpcap' version that will be used
-  SPLLOG(L_INFO, "using " << pcap_lib_version(), "DNSPacketLiveSource");
+  SPLAPPTRC(L_INFO, "using " << pcap_lib_version(), "DNSPacketLiveSource");
 
   // open the network interface with 'libpcap' version 1.0 or later (for RHEL 6)
-  SPLLOG(L_INFO, "opening network interface '" << networkInterface << "'", "DNSPacketLiveSource");
+  SPLAPPTRC(L_INFO, "opening network interface '" << networkInterface << "'", "DNSPacketLiveSource");
 
   // create 'libpcap' descriptor for network interface
   char pcapError[PCAP_ERRBUF_SIZE] = "\0";
@@ -113,22 +116,22 @@ MY_OPERATOR::MY_OPERATOR()
     int * timestampTypes;
     int rc = pcap_list_tstamp_types(pcapDescriptor, &timestampTypes);
     if (rc == PCAP_ERROR) THROW (SPLRuntimeOperator, "error getting timestamp types, " << pcap_geterr(pcapDescriptor));
-    SPLLOG(L_INFO, rc << " values available for timestampType parameter", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, rc << " values available for timestampType parameter", "DNSPacketLiveSource");
     for (int i = 0; i < rc; i++) {
-      SPLLOG(L_INFO, "timestampType value '" << pcap_tstamp_type_val_to_name(timestampTypes[i]) << "' available", "DNSPacketLiveSource"); }
+      SPLAPPTRC(L_INFO, "timestampType value '" << pcap_tstamp_type_val_to_name(timestampTypes[i]) << "' available", "DNSPacketLiveSource"); }
     pcap_free_tstamp_types(timestampTypes);
   }
 #endif
 
   // put network interface into promiscuous mode, if specified
   if (promiscuous) {
-    SPLLOG(L_INFO, "putting network interface '" << networkInterface << "' into promiscuous mode", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "putting network interface '" << networkInterface << "' into promiscuous mode", "DNSPacketLiveSource");
     int rc = pcap_set_promisc(pcapDescriptor, 1);
     if (rc) THROW (SPLRuntimeOperator, "error setting promiscuous mode, " << pcap_geterr(pcapDescriptor)); }
 
   // set maximum packet capture length
   {
-    SPLLOG(L_INFO, "setting maximum packet capture length to " << maximumLength << " bytes", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "setting maximum packet capture length to " << maximumLength << " bytes", "DNSPacketLiveSource");
     int rc = pcap_set_snaplen(pcapDescriptor, maximumLength);
     if (rc) THROW (SPLRuntimeOperator, "error setting maxmum capture length to " << maximumLength << " bytes, " << pcap_geterr(pcapDescriptor));
   }
@@ -136,26 +139,26 @@ MY_OPERATOR::MY_OPERATOR()
   // set receive timeout, if specified
   if (timeout) {
     const int milliseconds = (int)(timeout*1000.0);
-    SPLLOG(L_INFO, "setting receive timeout to " << timeout << " seconds", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "setting receive timeout to " << timeout << " seconds", "DNSPacketLiveSource");
     int rc = pcap_set_timeout(pcapDescriptor, milliseconds);
     if (rc) THROW (SPLRuntimeOperator, "error setting receive timeout to " << timeout << " seconds, " << pcap_geterr(pcapDescriptor)); }
 
   // set receive buffer size, if specified
   if (bufferSize) {
-    SPLLOG(L_INFO, "setting receive buffer size to " << bufferSize << " bytes", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "setting receive buffer size to " << bufferSize << " bytes", "DNSPacketLiveSource");
     int rc = pcap_set_buffer_size(pcapDescriptor, bufferSize);
     if (rc) THROW (SPLRuntimeOperator, "error setting receive buffer size to " << bufferSize << " bytes, " << pcap_geterr(pcapDescriptor)); }
 
   // set timestamp type, if specified
   if (!timestampType.empty()) {
 #if defined(PCAP_TSTAMP_HOST)
-    SPLLOG(L_INFO, "setting timestamp type to '" << timestampType << "'", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "setting timestamp type to '" << timestampType << "'", "DNSPacketLiveSource");
     const int tt = pcap_tstamp_type_name_to_val(timestampType.c_str());
     if (tt==PCAP_ERROR) THROW (SPLRuntimeOperator, "error converting '" << timestampType << "' to timestamp type, " << pcap_geterr(pcapDescriptor));
     int rc = pcap_set_tstamp_type(pcapDescriptor, tt);
     if (rc) THROW (SPLRuntimeOperator, "error setting timestamp type to '" << timestampType << "', " << pcap_geterr(pcapDescriptor));
 #else
-    SPLLOG(L_INFO, "ignoring timestampType parameter", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "ignoring timestampType parameter", "DNSPacketLiveSource");
 #endif
   }
 
@@ -168,7 +171,7 @@ MY_OPERATOR::MY_OPERATOR()
 #elif defined(lib_pcap_h)
 
   // open the network interface with 'libpcap' version 0.9 or earlier (for RHEL 5)
-  SPLLOG(L_INFO, "opening network interface '" << networkInterface << "' with old 'libpcap' API", "DNSPacketLiveSource");
+  SPLAPPTRC(L_INFO, "opening network interface '" << networkInterface << "' with old 'libpcap' API", "DNSPacketLiveSource");
   pcapDescriptor = pcap_open_live(networkInterface, maximumLength, promiscuous, 0, pcapError);
   if (!pcapDescriptor) THROW (SPLRuntimeOperator, "error opening network interface '" << networkInterface << "', " << pcapError);
 
@@ -183,23 +186,23 @@ MY_OPERATOR::MY_OPERATOR()
     char ipSubnetString[INET_ADDRSTRLEN];
     char ipMaskString[INET_ADDRSTRLEN];
     int rc = pcap_lookupnet(networkInterface.c_str(), &ipSubnet, &ipMask, pcapError);
-    if (rc) SPLLOG(L_INFO, "could not get subnet and mask for network interface '" << networkInterface << "', " << pcapError, "DNSPacketLiveSource");
-    else SPLLOG(L_INFO, "capturing packets on subnet=" << inet_ntop(AF_INET, &ipSubnet, ipSubnetString, sizeof(ipSubnetString)) <<
+    if (rc) SPLAPPTRC(L_INFO, "could not get subnet and mask for network interface '" << networkInterface << "', " << pcapError, "DNSPacketLiveSource");
+    else SPLAPPTRC(L_INFO, "capturing packets on subnet=" << inet_ntop(AF_INET, &ipSubnet, ipSubnetString, sizeof(ipSubnetString)) <<
                 ", mask=" << inet_ntop(AF_INET, &ipMask, ipMaskString, sizeof(ipMaskString)), "DNSPacketLiveSource");
   }
 
   // compile and activate input filter, if there is one
   if (!inputFilter.empty()) {
-    SPLLOG(L_INFO, "filtering packets on input with '" << inputFilter << "'", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "filtering packets on input with '" << inputFilter << "'", "DNSPacketLiveSource");
     int rc1 = pcap_compile(pcapDescriptor, &inputFilterProgram, inputFilter.c_str(), 0, ipMask);
     if (rc1) THROW (SPLRuntimeOperator, "error compiling input filter '" << inputFilter << "', rc=" << rc1 << ", " << pcap_geterr(pcapDescriptor));
     int rc2 = pcap_setfilter(pcapDescriptor, &inputFilterProgram);
     if (rc2) THROW (SPLRuntimeOperator, "error activating input filter '" << inputFilter << "', rc=" << rc2 << ", " << pcap_geterr(pcapDescriptor));
     struct bpf_insn* instruction = inputFilterProgram.bf_insns;
-    for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLLOG(L_DEBUG, bpf_image(instruction, j), "DNSPacketLiveSource"); }
+    for (int j = 0; j<inputFilterProgram.bf_len; ++instruction, ++j) { SPLAPPTRC(L_DEBUG, bpf_image(instruction, j), "DNSPacketLiveSource"); }
   }
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> constructor ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> constructor ...", "DNSPacketLiveSource");
 }
 
 
@@ -207,11 +210,11 @@ MY_OPERATOR::MY_OPERATOR()
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
 {
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "DNSPacketLiveSource");
 
   if (pcapDescriptor) { pcap_close(pcapDescriptor); }
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "DNSPacketLiveSource");
 }
 
 
@@ -219,12 +222,12 @@ MY_OPERATOR::~MY_OPERATOR()
 // Notify port readiness
 void MY_OPERATOR::allPortsReady()
 {
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketLiveSource");
 
   const int threadCount = 2;
   createThreads(threadCount);
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketLiveSource");
 }
 
 
@@ -232,28 +235,28 @@ void MY_OPERATOR::allPortsReady()
 // Notify pending shutdown
 void MY_OPERATOR::prepareToShutdown()
 {
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketLiveSource");
 
   // tell libpcap to stop reading packets
   if (pcapDescriptor) pcap_breakloop(pcapDescriptor);
   if (pcapThreadID) pthread_kill(pcapThreadID, SIGCONT);
   if (metricsThreadID) pthread_kill(metricsThreadID, SIGCONT);
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "DNSPacketLiveSource");
 
 }
 
 
 void MY_OPERATOR::process(uint32_t idx)
 {
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "DNSPacketLiveSource");
 
   switch (idx) {
   case 0: pcapThread(); break;
   case 1: if (metricsInterval>0) metricsThread(); break;
   default: break; }
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> process(" << idx << ") for " << networkInterface, "DNSPacketLiveSource");
 }
 
 
@@ -297,15 +300,15 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   headers.parseNetworkHeaders((char*)buffer, header->caplen);
 
   // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
-  if ( ! headers.ipv4Header ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 header found", "DNSPacketLiveSource");  return; }
-  if ( ! headers.udpHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not UDP protocol", "DNSPacketLiveSource");  return; }
-  if ( ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53 ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", not to/from UDP port 53", "DNSPacketLiveSource");  return; }
-  if ( ! headers.payload ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no payload", "DNSPacketLiveSource");  return; }
+  if ( ! headers.ipv4Header ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 header found", "DNSPacketLiveSource");  return; }
+  if ( ! headers.udpHeader ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", not UDP protocol", "DNSPacketLiveSource");  return; }
+  if ( ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53 ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", not to/from UDP port 53", "DNSPacketLiveSource");  return; }
+  if ( ! headers.payload ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", no payload", "DNSPacketLiveSource");  return; }
 
   // parse the DNS header and resource records in the packet payload
   parser.parseDNSMessage(headers.payload, headers.payloadLength);
-  if ( parser.error ) { SPLLOG(L_DEBUG, "error " << parser.error << " parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.errorDescriptions.description[parser.error], "DNSPacketLiveSource"); }
-  if ( ! parser.dnsHeader ) { SPLLOG(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketLiveSource");  return; }
+  if ( parser.error ) { SPLAPPTRC(L_DEBUG, "error " << parser.error << " parsing packet " << packetCounter << " at offset 0x" << std::hex << parseErrorOffset() << ", " << parser.errorDescriptions.description[parser.error], "DNSPacketLiveSource"); }
+  if ( ! parser.dnsHeader ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", no DNS header found", "DNSPacketLiveSource");  return; }
 
   // count the packets and bytes processed so far
   packetCounter++;
@@ -316,7 +319,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
     <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
     {
       <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-      SPLLOG(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSPacketLiveSource");
+      SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "DNSPacketLiveSource");
       submit(outTuple<%=$i%>, <%=$i%>);
     }
     <% } %> ;
@@ -333,7 +336,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
 
 void MY_OPERATOR::pcapThread()
 {
-  SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> pcapThread() for " << networkInterface, "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> pcapThread() for " << networkInterface, "DNSPacketLiveSource");
 
   // remember our thread identifer
   pcapThreadID = pthread_self();
@@ -341,7 +344,7 @@ void MY_OPERATOR::pcapThread()
   <% if ($processorAffinity>-1) { %> ;
   // assign caller's thread to a particular processor core, if specified
   if (processorAffinity>-1) {
-    SPLLOG(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "assigning thread " << gettid() << " to processor core " << processorAffinity, "DNSPacketLiveSource");
     cpu_set_t cpumask; // CPU affinity bit mask
     CPU_ZERO(&cpumask);
     CPU_SET(processorAffinity, &cpumask);
@@ -353,16 +356,16 @@ void MY_OPERATOR::pcapThread()
 
   // wait for a while before starting, if specified
   if (initDelay>0) {
-    SPLLOG(L_INFO, "waiting " << initDelay << " seconds before starting", "DNSPacketLiveSource");
+    SPLAPPTRC(L_INFO, "waiting " << initDelay << " seconds before starting", "DNSPacketLiveSource");
     getPE().blockUntilShutdownRequest(initDelay); }
 
   // call into 'libpcap' and wait in there for callbacks with packets to process
   while(!getPE().getShutdownRequested()) {
-    SPLLOG(L_TRACE, "pcap_loop() called", "DNSPacketLiveSource");
+    SPLAPPTRC(L_TRACE, "pcap_loop() called", "DNSPacketLiveSource");
     const int rc = pcap_loop(pcapDescriptor, -1, &pcapCallback, (u_char*)this);
-    SPLLOG(L_TRACE, "pcap_loop() returned " << rc, "DNSPacketLiveSource"); }
+    SPLAPPTRC(L_TRACE, "pcap_loop() returned " << rc, "DNSPacketLiveSource"); }
 
-  SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> pcapThread() for " << networkInterface, "DNSPacketLiveSource");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> pcapThread() for " << networkInterface, "DNSPacketLiveSource");
 }
 
 
@@ -372,7 +375,7 @@ void MY_OPERATOR::pcapThread()
 
   void MY_OPERATOR::metricsThread()
   {
-    SPLLOG(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread() for " << networkInterface, "DNSPacketLiveSource");
+    SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread() for " << networkInterface, "DNSPacketLiveSource");
     
     // remember our thread identifer
     metricsThreadID = pthread_self();
@@ -390,10 +393,10 @@ void MY_OPERATOR::pcapThread()
       // wait until the next interval or the PE is shutting down
       const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
       if (secondsToWait>0) {
-        SPLLOG(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
+        SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
         getPE().blockUntilShutdownRequest(secondsToWait);
       } else {
-        SPLLOG(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "DNSPacketLiveSource");
+        SPLAPPTRC(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "DNSPacketLiveSource");
       }
 
       // store the previous interval's metrics for difference calculations
@@ -408,7 +411,7 @@ void MY_OPERATOR::pcapThread()
       pcap_stats(pcapDescriptor, &pcapStatisticsNow);
       packetCounterNow = packetCounter;
       byteCounterNow = byteCounter;
-      // ??? SPLLOG(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now) << " received=" << pcapStatisticsNow.ps_recv << " processed=" << packetCounterNow, "DNSPacketLiveSource");
+      // ??? SPLAPPTRC(L_INFO, "then=" << streams_boost::lexical_cast<std::string>(then) << " now=" << streams_boost::lexical_cast<std::string>(now) << " received=" << pcapStatisticsNow.ps_recv << " processed=" << packetCounterNow, "DNSPacketLiveSource");
 
       // send the operator's metrics to the runtime
       totalPacketsReceived->setValue(pcapStatisticsNow.ps_recv);
@@ -420,7 +423,7 @@ void MY_OPERATOR::pcapThread()
       metricsUpdate = true;
     }
 
-    SPLLOG(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread() for " << networkInterface, "DNSPacketLiveSource");
+    SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread() for " << networkInterface, "DNSPacketLiveSource");
   }
 
 
