@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Copyright (C) 2011, 2015  International Business Machines Corporation
+## Copyright (C) 2016  International Business Machines Corporation
 ## All Rights Reserved
 
 ################### parameters used in this script ##############################
@@ -10,11 +10,22 @@
 
 here=$( cd ${0%/*} ; pwd )
 
-administrator=streamsadmin
-domain=CapabilitiesDomain
-instance=CapabilitiesInstance
+export STREAMS_DOMAIN_ID=CapabilitiesDomain
+export STREAMS_INSTANCE_ID=CapabilitiesInstance
 
-hostname=$( hostname )
+domainPropertyList=(
+--property sws.startTimeout=240
+)
+
+instancePropertyList=(
+--hosts $( hostname )
+--property instanceTrace.defaultLevel=info
+--property instanceTrace.maximumFileCount=10
+--property instanceTrace.maximumFileSize=1000000
+--property instance.canSetPeOSCapabilities=true \
+--property instance.runAsUser=$USER \
+--property instance.applicationBundlesPath=/tmp/Streamsg-$instance\@$USER \
+)
 
 ################### functions used in this script #############################
 
@@ -23,52 +34,47 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
-step "getting zookeeper connection string ..."
-zkconnect=$( streamtool getzk --short )
-[ -n "$zkconnect" ] || die "sorry, could not get zookeeper connection string"
-export STREAMS_ZKCONNECT=$zkconnect
+[[ -v STREAMS_ZKCONNECT ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
+[[ ! -v STREAMS_ZKCONNECT ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 
 
-step "checking zookeeper at '$zkconnect' ..."
-streamtool getzkstate || die "sorry, could not connect to zookeeper at '$zkconnect', $?"
+streamtool lsdomain $zookeeper $STREAMS_DOMAIN_ID 1>/dev/null 2>/dev/null
+if [[ $? == 0 ]] ; then 
+    step "Streams domain '$STREAMS_DOMAIN_ID' already created ..."
+else
+    step "creating Streams domain '$STREAMS_DOMAIN_ID' ..."
+    ( IFS=$'\n' ; echo -e "domain properties:\n${domainPropertyList[*]}" )
+    streamtool mkdomain -d $STREAMS_DOMAIN_ID ${domainPropertyList[*]} $zookeeper || die "sorry, could not make Streams domain '$STREAMS_DOMAIN_ID', $?"
+    streamtool genkey -d $STREAMS_DOMAIN_ID $zookeeper || die "sorry, could not generate keys for Streams domain '$STREAMS_DOMAIN_ID', $?"
+fi
 
-$here/teardownCapabilities.sh
+streamtool lsdomain --started $zookeeper $STREAMS_DOMAIN_ID 1>/dev/null 2>/dev/null
+if [[ $? == 0 ]] ; then 
+    step "Streams domain '$STREAMS_DOMAIN_ID' already started ..."
+else
+    step "starting Streams domain '$STREAMS_DOMAIN_ID' ..."
+    streamtool startdomain -d $STREAMS_DOMAIN_ID $zookeeper || die "sorry, could not start Streams domain '$STREAMS_DOMAIN_ID', $?"
+fi
 
-step "making Streams domain '$domain' ..."
-streamtool mkdomain -d $domain || die "sorry, could not make Streams domain '$domain', $?"
-streamtool genkey -d $domain || die "sorry, could not generate keys for Streams domain '$domain', $?"
+streamtool lsinstance $zookeeper $STREAMS_INSTANCE_ID 1>/dev/null 2>/dev/null
+if [[ $? == 0 ]] ; then 
+    step "Streams instance '$STREAMS_INSTANCE_ID' already created ..."
+else
+    step "creating Streams instance '$STREAMS_INSTANCE_ID' ..."
+    ( IFS=$'\n' ; echo -e "instance properties:\n${instancePropertyList[*]}" )
+    streamtool mkinstance -i $STREAMS_INSTANCE_ID -d $STREAMS_DOMAIN_ID ${instancePropertyList[*]} $zookeeper || die "Sorry, could not create Streams instance '$STREAMS_INSTANCE_ID', $?"
+fi 
 
-step "setting dynamic service ports for Streams domain '$domain' ..."
-streamtool setdomainproperty -d $domain jmx.port=0 jmx.startTimeout=60 || die "sorry, could not set JMX properties for Streams domain '$domain', $?"
-streamtool setdomainproperty -d $domain sws.port=0 sws.startTimeout=60 || die "sorry, could not set SWS properties for Streams domain '$domain', $?"
+started=$( streamtool lsinstance --started $STREAMS_INSTANCE_ID 2>/dev/null )
+if [[ -z $started ]] ; then 
+    step "starting Streams instance '$STREAMS_INSTANCE_ID' ..."
+    streamtool startinstance -i $STREAMS_INSTANCE_ID -d $STREAMS_DOMAIN_ID $zookeeper || die "Sorry, could not start Streams instance '$STREAMS_INSTANCE_ID', $?" 
+else
+    step "Streams instance '$STREAMS_INSTANCE_ID' already started ..."
+fi
 
-step "registering Streams domain as a Linux system service ..."
-sudo STREAMS_INSTALL=$STREAMS_INSTALL $STREAMS_INSTALL/bin/streamtool registerdomainhost -d $domain --application --management --zkconnect $zkconnect || die "sorry, could not register Streams domain '$domain', $?"
-
-step "starting Streams domain '$domain' ..."
-streamtool startdomain -d $domain || die "sorry, could not start Streams domain '$domain', $?"
-
-step "adding users to Streams domain '$domain' ..."
-streamtool adduserdomainrole -d $domain DomainAdministrator $administrator || die "sorry, could not add administrator to Streams domain '$domain', $?"
-streamtool adduserdomainrole -d $domain DomainUser $USER || die "sorry, could not add user to Streams domain '$domain', $?"
-streamtool lsdomainrole -d $domain
-
-step "getting service URLs for Streams domain '$domain' ..."
-streamtool getjmxconnect -d $domain || die "sorry, could not domain service URL for Streams domain '$domain', $?"
-streamtool geturl -d $domain || die "sorry, could not get Streams console URL for Streams domain '$domain', $?"
-
-step "making Streams instance '$instance' ..."
-streamtool mkinstance -i $instance -d $domain \
---hosts "$hostname" \
---property instanceTrace.defaultLevel=info \
---property instanceTrace.maximumFileCount=10 \
---property instanceTrace.maximumFileSize=1000000 \
---property instance.canSetPeOSCapabilities=true \
---property instance.runAsUser=$USER \
---property instance.applicationBundlesPath=/tmp/Streams-$instance\@$USER \
-|| die "Sorry, could not create Streams instance '$instance', $?"
-
-step "starting Streams instance '$instance' ..."
-streamtool startinstance -i $instance -d $domain || die "Sorry, could not start Streams instance '$instance', $?" 
+step "getting service URLs for Streams domain '$STREAMS_DOMAIN_ID' ..."
+streamtool getjmxconnect -d $STREAMS_DOMAIN_ID $zookeeper || die "sorry, could not domain service URL for Streams domain '$STREAMS_DOMAIN_ID', $?"
+streamtool geturl -d $STREAMS_DOMAIN_ID $zookeeper || die "sorry, could not get Streams console URL for Streams domain '$STREAMS_DOMAIN_ID', $?"
 
 exit 0
 

@@ -46,14 +46,16 @@ application, include this statement in the SPL source file:
 
 # Capabilities
 
-The PacketLiveSource operator requires these Linux capabilities to receive
-'raw' network packets from an ethernet interface:
+The PacketLiveSource operator requires special privileges to receive 'raw' network packets from an ethernet interface.
+
+On machines where 'extended file attributes' (see [https://en.wikipedia.org/wiki/Extended_file_attributes])
+are enabled in the Linux kernel, these Linux capabilities should be granted to a PE that includes the 
+PacketLiveSource operator:
 
 * CAP_NET_RAW+eip
 * CAP_NET_ADMIN+eip
 
-Linux capabilities can only be granted to an executable that resides on a local
-disk volume such as /tmp.
+Linux capabilities can only be granted to an executable that resides on a local disk volume such as /tmp.
 
 For 'standalone' Streams applications (that is, SPL source files compiled with a
 'standalone' configuration), the user must grant these capabilities to the
@@ -65,7 +67,7 @@ program before executing it. This requires 'root' privileges. To do this:
 
 * Linux capabilities must be granted to the unbundled program with this command:
  
-    sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /tmp/.../bin/standalone.exe
+    sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
 
 For 'distributed' Streams applications, (that is, SPL source files compiled with
 a 'distributed' configuration), the Streams runtime must grant these capabilities to
@@ -83,9 +85,10 @@ the program before executing it. This requires 'root' privileges.  To do this:
 
 * the SPL source must be compiled with the '--static-link' option
 
-The sample applications included in the toolkit have scripts that illustrate all
-of the steps needed to build and run applications containing the
-PacketLiveSource operator in both 'standalone' and 'distributed' mode.
+On machines where 'extended file attributes' are not enabled in the Linux kernel, 'standalone' PEs that include the PacketLiveSource operator can be executed with 'root' privileges like this:
+
+    sudo STREAMS_INSTALL=$STREAMS_INSTALL .../bin/standalone.exe
+
 
 # Promiscuous Mode
 

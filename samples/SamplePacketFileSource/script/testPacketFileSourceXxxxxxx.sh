@@ -1,19 +1,32 @@
 #!/bin/bash
 
-## Copyright (C) 2011, 2015  International Business Machines Corporation
+## Copyright (C) 2011, 2017  International Business Machines Corporation
 ## All Rights Reserved
+
+set -o xtrace
+#set -o pipefail
+
+################### functions used in this script #############################
+
+die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }
+step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################### parameters used in this script ##############################
 
-#set -o xtrace
-#set -o pipefail
-
 namespace=sample
-composite=TestDNSMessageParserFull
+composite=TestPacketFileSourceBasic1
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-toolkitDirectory=$( cd $here/../../.. ; pwd )
+
+[[ -f $STREAMS_INSTALL/toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$STREAMS_INSTALL/toolkits
+[[ -f $here/../../../../toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../../../toolkits ; pwd )
+[[ -f $here/../../../com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ $toolkitDirectory ]] || die "sorry, could not find 'toolkits' directory" 
+
+[[ -f $STREAMS_INSTALL/samples/com.ibm.streamsx.network/SampleNetworkToolkitData/info.xml ]] && sampleDirectory=$STREAMS_INSTALL/samples
+[[ -f $here/../../SampleNetworkToolkitData/info.xml ]] && sampleDirectory=$( cd $here/../.. ; pwd )
+[[ $sampleDirectory ]] || die "sorry, could not find 'samples' directory" 
 
 buildDirectory=$projectDirectory/output/build/$composite
 
@@ -22,8 +35,8 @@ dataDirectory=$projectDirectory/data
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
-$toolkitDirectory/com.ibm.streamsx.network
-$toolkitDirectory/samples/SampleNetworkToolkitData
+    $toolkitDirectory/com.ibm.streamsx.network
+    $sampleDirectory/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -44,25 +57,16 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_one_second.pcap
-#pcapFilename=$HOME/data.haifa/dns_tunneling_long_errors.pcap
-#pcapFilename=$HOME/FromBruceBrown-Neustar-sample.pcap
+    pcapFilename=$sampleDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
-
-################### functions used in this script #############################
-
-die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }
-step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
 cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
-#[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
-[ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
+[[ -d $dataDirectory ]] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
 
 step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
