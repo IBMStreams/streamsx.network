@@ -120,7 +120,6 @@ composite TestPacketContentAssemblerMQTT {
 
   () as FlowDataStore = Custom(FlowDataStream as In) {
     logic state: {
-      mutable boolean res=createDir(dataDirectory() + "/debug.TestPacketContentAssemblerMQTT");
       map<rstring,rstring> directionFlags = {
         "?"        : "???",
         ""         : "---",

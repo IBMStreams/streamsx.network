@@ -59,17 +59,3 @@ rstring leadingZeros(uint64 number, int32 width) {
   return substring("0000000000000000000000000000000000000", 0, padding) + string;
 }
 
-/**
- * It creates a directory by path name
- * @param path The directory path
- * @return `true` if created else `false`
- */
-public stateful boolean createDir(rstring path) {
-  mutable boolean result = true;
-  mutable int32 errorCode = 0;
-  spl.file::mkdir(path, 999u, errorCode);
-  if (errorCode != 0) {
-    result = false;
-  }
-  return result;
-}

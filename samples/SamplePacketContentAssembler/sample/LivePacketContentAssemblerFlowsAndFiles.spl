@@ -202,7 +202,6 @@ composite LivePacketContentAssemblerFlowsAndFiles {
 
   () as FlowDataStore = Custom(FlowDataStream as In) {
     logic state: {
-      mutable boolean res=createDir(dataDirectory() + "/debug.LivePacketContentAssemblerFlowsAndFiles");
       map<rstring,rstring> directionFlags = {
         "?"        : "????????",
         ""         : "--------",
