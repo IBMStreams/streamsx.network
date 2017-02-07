@@ -14,7 +14,14 @@ composite=LiveDNSMessageParserParallelAnalysis
 self=$( basename $0 .sh )
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ -f $STREAMS_INSTALL/toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$STREAMS_INSTALL/toolkits
+[[ -f $here/../../../../toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../../../toolkits ; pwd )
+[[ -f $here/../../../com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ $toolkitDirectory ]] || die "sorry, could not find 'toolkits' directory"
+
+[[ -f $STREAMS_INSTALL/samples/com.ibm.streamsx.network/SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$STREAMS_INSTALL/samples/com.ibm.streamsx.network
+[[ -f $here/../../SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$( cd $here/../.. ; pwd )
+[[ $samplesDirectory ]] || die "sorry, could not find 'samples' directory"
 
 buildDirectory=$projectDirectory/output/build/$composite.distributed
 dataDirectory=$projectDirectory/data
@@ -32,7 +39,7 @@ instance=CapabilitiesInstance
 
 toolkitList=(
 $toolkitDirectory/com.ibm.streamsx.network
-$toolkitDirectory/samples/SampleNetworkToolkitData
+$samplesDirectory/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(

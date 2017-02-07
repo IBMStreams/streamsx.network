@@ -13,7 +13,14 @@ composite=TestDNSMessageParserERSPAN
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ -f $STREAMS_INSTALL/toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$STREAMS_INSTALL/toolkits
+[[ -f $here/../../../../toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../../../toolkits ; pwd )
+[[ -f $here/../../../com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ $toolkitDirectory ]] || die "sorry, could not find 'toolkits' directory"
+
+[[ -f $STREAMS_INSTALL/samples/com.ibm.streamsx.network/SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$STREAMS_INSTALL/samples/com.ibm.streamsx.network
+[[ -f $here/../../SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$( cd $here/../.. ; pwd )
+[[ $samplesDirectory ]] || die "sorry, could not find 'samples' directory"
 
 buildDirectory=$projectDirectory/output/build/$composite
 
@@ -23,7 +30,7 @@ coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
 $toolkitDirectory/com.ibm.streamsx.network
-$toolkitDirectory/samples/SampleNetworkToolkitData
+$samplesDirectory/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -44,8 +51,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_erspan_dns_only.pcap
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_erspan_dns+dhcp.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_erspan_dns_only.pcap
+pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_erspan_dns+dhcp.pcap
 processorAffinity=1
 )
 
