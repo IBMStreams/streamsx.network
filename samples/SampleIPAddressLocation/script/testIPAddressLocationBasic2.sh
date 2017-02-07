@@ -13,7 +13,14 @@ composite=TestIPAddressLocationBasic2
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ -f $STREAMS_INSTALL/toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$STREAMS_INSTALL/toolkits
+[[ -f $here/../../../../toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../../../toolkits ; pwd )
+[[ -f $here/../../../com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ $toolkitDirectory ]] || die "sorry, could not find 'toolkits' directory"
+
+[[ -f $STREAMS_INSTALL/samples/com.ibm.streamsx.network/SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$STREAMS_INSTALL/samples/com.ibm.streamsx.network
+[[ -f $here/../../SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$( cd $here/../.. ; pwd )
+[[ $samplesDirectory ]] || die "sorry, could not find 'samples' directory"
 
 buildDirectory=$projectDirectory/output/build/$composite
 
@@ -23,7 +30,7 @@ coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
 toolkitList=(
 $toolkitDirectory/com.ibm.streamsx.network
-$toolkitDirectory/samples/SampleNetworkToolkitData
+$samplesDirectory/SampleNetworkToolkitData
 )
 
 compilerOptionsList=(
@@ -45,7 +52,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 geographyDirectory=$projectDirectory/data/www.maxmind.com
-pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_locations_ipv4_only.pcap
+pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_locations_ipv4_only.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

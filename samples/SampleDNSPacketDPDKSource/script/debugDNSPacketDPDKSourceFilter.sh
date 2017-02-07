@@ -13,7 +13,10 @@ composite=LiveDNSPacketDPDKSourceFilter
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
-toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ -f $STREAMS_INSTALL/toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$STREAMS_INSTALL/toolkits
+[[ -f $here/../../../../toolkits/com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../../../toolkits ; pwd )
+[[ -f $here/../../../com.ibm.streamsx.network/info.xml ]] && toolkitDirectory=$( cd $here/../../.. ; pwd )
+[[ $toolkitDirectory ]] || die "sorry, could not find 'toolkits' directory"
 
 buildDirectory=$projectDirectory/output/build/$composite
 
