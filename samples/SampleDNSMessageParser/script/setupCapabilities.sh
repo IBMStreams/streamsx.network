@@ -34,8 +34,8 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
-[[ -v STREAMS_ZKCONNECT ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
-[[ ! -v STREAMS_ZKCONNECT ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 
+[[ $STREAMS_ZKCONNECT ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
+[[ ! $STREAMS_ZKCONNECT ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 
 
 streamtool lsdomain $zookeeper $STREAMS_DOMAIN_ID 1>/dev/null 2>/dev/null
 if [[ $? == 0 ]] ; then 

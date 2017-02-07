@@ -74,7 +74,6 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@o
 // namespaces, which must be mapped to the operator's namespace so they
 // will invoke the functions defined in the PacketLiveSource_h.cgt file
 
-#define PacketLiveSource_result_functions MY_OPERATOR
 #define PacketSource_result_functions MY_OPERATOR
 
 // Function called from the DPDK library as each packet arrives.

@@ -59,7 +59,6 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scala
 // namespaces, which must be mapped to the operator's namespace so they
 // will invoke the functions defined in the PacketLiveSource_h.cgt file
 
-#define PacketLiveSource_result_functions MY_OPERATOR
 #define PacketSource_result_functions MY_OPERATOR
 
 

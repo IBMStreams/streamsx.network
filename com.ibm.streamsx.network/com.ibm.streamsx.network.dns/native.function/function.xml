@@ -81,7 +81,7 @@
 
   <function:functionSet>
     <function:headerFileName></function:headerFileName>
-    <function:cppNamespaceName>DNSPacketLiveSource_result_functions</function:cppNamespaceName>
+    <function:cppNamespaceName>DNSPacketSource_result_functions</function:cppNamespaceName>
     <function:functions>
 
           <function:function>
@@ -89,6 +89,7 @@
 
 This function returns the number of packets received from the network interface
 since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the DNSPacketFileSource operator.
 
             </function:description>
             <function:prototype>public uint64 packetsReceived()</function:prototype>
@@ -99,6 +100,7 @@ since the operator started, as of the most recent metrics interval, if there is 
 
 This function returns the number of packets dropped by the network interface
 since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the DNSPacketFileSource operator.
 
             </function:description>
             <function:prototype>public uint64 packetsDropped()</function:prototype>
@@ -109,6 +111,7 @@ since the operator started, as of the most recent metrics interval, if there is 
 
 This function returns the number of bytes received from the network interface
 since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the DNSPacketLiveSource and DNSPacketFileSource operators.
 
             </function:description>
             <function:prototype>public uint64 bytesReceived()</function:prototype>
@@ -119,6 +122,7 @@ since the operator started, as of the most recent metrics interval, if there is 
 
 This function returns the number of packets received from the network interface 
 during the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the DNSPacketFileSource operator.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsReceived()</function:prototype>
@@ -129,6 +133,7 @@ during the most recent metrics interval, if there is one, or zero if not.
 
 This function returns the number of packets dropped by the network interface
 during the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the DNSPacketFileSource operator.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsDropped()</function:prototype>
@@ -139,21 +144,11 @@ during the most recent metrics interval, if there is one, or zero if not.
 
 This function returns the number of bytes received from the network interface 
 during the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the DNSPacketLiveSource and DNSPacketFileSource operators.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalBytesReceived()</function:prototype>
           </function:function>
-
-    </function:functions>
-  </function:functionSet>
-
-
-
-
-  <function:functionSet>
-    <function:headerFileName></function:headerFileName>
-    <function:cppNamespaceName>DNSPacketSource_result_functions</function:cppNamespaceName>
-    <function:functions>
 
           <function:function>
             <function:description>
