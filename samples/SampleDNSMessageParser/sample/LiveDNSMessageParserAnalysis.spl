@@ -154,5 +154,5 @@ composite LiveDNSMessageParserAnalysis {
     () as ShortDNSResponseMessageSink = FileSink(ShortDNSResponseMessageStream) { param file: "debug.LiveDNSMessageParserAnalysis.ShortDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
     () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.LiveDNSMessageParserAnalysis.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); abort(); } }
 }

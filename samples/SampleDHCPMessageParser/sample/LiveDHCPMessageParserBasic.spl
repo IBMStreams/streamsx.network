@@ -153,6 +153,6 @@ composite LiveDHCPMessageParserBasic {
       format: line;
       flush: 1u; }
 
-    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); abort(); } }
 
 }

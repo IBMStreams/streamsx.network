@@ -47,6 +47,9 @@ else
     streamtool genkey -d $STREAMS_DOMAIN_ID $zookeeper || die "sorry, could not generate keys for Streams domain '$STREAMS_DOMAIN_ID', $?"
 fi
 
+step "registering Streams domain as a Linux system service ..."
+sudo STREAMS_INSTALL=$STREAMS_INSTALL STREAMS_ZKCONNECT=$STREAMS_ZKCONNECT $STREAMS_INSTALL/bin/streamtool registerdomainhost -d $STREAMS_DOMAIN_ID --application --management $zookeeper 
+
 streamtool lsdomain --started $zookeeper $STREAMS_DOMAIN_ID 1>/dev/null 2>/dev/null
 if [[ $? == 0 ]] ; then 
     step "Streams domain '$STREAMS_DOMAIN_ID' already started ..."
