@@ -10,6 +10,14 @@
   <info:resources>
     <info:messageSet name="NetworkResources">
       <info:lang default="true">en_US/NetworkResources.xlf</info:lang>
+      <info:lang>fr_FR/NetworkResources.xlf</info:lang>
+      <info:lang>it_IT/NetworkResources.xlf</info:lang>
+      <info:lang>ja_JP/NetworkResources.xlf</info:lang>
+      <info:lang>ko_KR/NetworkResources.xlf</info:lang>
+      <info:lang>pt_BR/NetworkResources.xlf</info:lang>
+      <info:lang>ru_RU/NetworkResources.xlf</info:lang>
+      <info:lang>zh_CN/NetworkResources.xlf</info:lang>
+      <info:lang>zh_TW/NetworkResources.xlf</info:lang>
     </info:messageSet>
   </info:resources>  
 </info:toolkitInfoModel>

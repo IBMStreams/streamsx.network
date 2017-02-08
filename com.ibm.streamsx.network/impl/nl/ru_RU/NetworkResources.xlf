@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- begin_generated_IBM_copyright_prolog -->
+<!-- -->
+<!-- This is an automatically generated copyright prolog. -->
+<!-- After initializing, DO NOT MODIFY OR MOVE -->
+<!-- **************************************************************** -->
+<!-- Licensed Materials - Property of IBM -->
+<!-- 5724-Y95 -->
+<!-- (C) Copyright IBM Corp. 2012, 2015 All Rights Reserved. -->
+<!-- US Government Users Restricted Rights - Use, duplication or -->
+<!-- disclosure restricted by GSA ADP Schedule Contract with -->
+<!-- IBM Corp. -->
+<!-- -->
+<!-- end_generated_IBM_copyright_prolog -->
+<!-- -->
+<xliff version="1.1" xmlns="urn:oasis:names:tc:xliff:document:1.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.1 _path_/xliff-core-1.1.xsd">
+	<file datatype="plaintext" original="root.txt" source-language="en"
+		target-language="ru" xml:space="preserve">
+    <body>
+      <!-- =============================================================== -->
+      <!-- TRNOTE Please refer to the "XML Localization Interchange File   -->
+      <!-- Format (.xlf) files" section in the translation instructions    -->
+      <!-- file for more information on this file.                         -->
+      <!--                                                                 -->
+      <!-- NLS_ENCODING=UTF-8                                              -->
+      <!-- TRNOTE Return this file using the UTF-8 encoding.               -->
+      <!--                                                                 -->
+      <!-- NLS_MESSAGEFORMAT_ALL                                           -->
+      <!-- TRNOTE Because of a behavior with the Java MessageFormat class, -->
+      <!-- any message in the Java Resource Bundle that has a {0} string   -->
+      <!-- in it, must escape all single quotes in that message. To escape -->
+      <!-- the single quote, just insert another single quote before it.   -->
+      <!-- For example, the following message                              -->
+      <!--    "Can't find card with name [{0}]"                            -->
+      <!-- would be changed to                                             -->
+      <!--    "Can''t find card with name [{0}]"                           -->
+      <!--                                                                 -->
+      <!-- TRNOTE Do not translate the text between the curly braces. This -->
+      <!-- text is reserved and should not be translated. For example,     -->
+      <!-- the text in the following curly braces should not be translated:-->
+      <!--    {0,number} {0,number,percent} {0,date} {0,time}              -->
+      <!--                                                                 -->
+      <!-- TRNOTE For the target language setting, please use the          -->
+      <!-- appropriate value for your locale as indicated in parenthesis:  -->
+      <!--   Danish (da), Dutch (nl), Finnish (fi), French (fr),           -->
+      <!--   German (de), Italian (it), Norwegian - Bokmal (no),           -->
+      <!--   Brazilian Portuguese (pt-BR), Portuguese (pt-PT),             -->
+      <!--   Spanish (es), Swedish (sv), Czech (cs), Hungarian (hu),       -->
+      <!--   Polish (pl), Russian (ru), Simplified Chinese (zh),           -->
+      <!--   Traditional Chinese (zh-TW), Japanese (ja), Korean (ko),      -->
+      <!--   Arabic (ar), Hebrew (he), Slovakian (sk), Slovenian (sl),     -->
+      <!--   Thai (th), Turkish (tr)                                       -->
+      <!--                                                                 -->
+      <!-- TRNOTE Please start translating the following entries.          -->
+      <!-- =============================================================== --> 
+      <group>
+        <!-- Level: L_ERROR, L_WARN, Range: 0250 to 0299-->       
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0250E"
+		extraData="NETWORK_NO_OUTPUT_PORTS" resname="CDIST0250E">
+        	<source>Sorry, no output ports specified.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid operator configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Add an output port to the operator declaration.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Не определены порты вывода. </target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0251E"
+		extraData="NETWORK_NOT_ENOUGH_OUTPUT_FILTERS" resname="CDIST0251E">
+        	<source>Sorry, not enough output filters, must specify one for each output port.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Извините, недостаточно выходных фильтров; нужно задать по одному для каждого выходного порта.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0252E"
+		extraData="NETWORK_TOO_MANY_OUTPUT_FILTERS" resname="CDIST0252E">
+        	<source>Sorry, too many output filters, must specify one for each output port.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Извините, слишком много выходных фильтров; нужно задать по одному для каждого выходного порта.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0253E"
+		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME_OR_INPUT_PORT" resname="CDIST0253E">
+        	<source>Sorry, either ''pcapFilename'' parameter or an input port must be specified.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>The pcap source was not specified.</EXPLANATION>
+       		 <USER_RESPONSE>Either add the input port or add the parameter.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Извините, нужно задать параметр ''pcapFilename'' или входной порт.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0254E"
+		extraData="NETWORK_INVALID_PARAMETER_PCAP_FILENAME" resname="CDIST0254E">
+        	<source>Sorry, ''pcapFilename'' parameter and an input port cannot both be specified.</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Either remove the input port or the parameter.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Извините, задать и параметр ''pcapFilename'', и входной порт одновременно нельзя.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0255E"
+		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME" resname="CDIST0255E">
+        	<source>Sorry, ''initDelay'' can only be specified when ''pcapFilename'' is also specified</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Извините, задать ''initDelay'' можно, только если также задан параметр ''pcapFilename''.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0256E"
+		extraData="NETWORK_CONSISTENT_REGION_INPUT_PORT_ERROR" resname="CDIST0256E">
+        	<source>Sorry, an input port cannot be specified when starting a consistent region</source>
+		<!-- MSGDOC>
+        	 <EXPLANATION>An invalid annotation was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Either remove the input port or the consistent region annotation.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Извините, задать входной порт при запуске непрерывной области нельзя.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0257E"
+		extraData="NETWORK_CONSISTENT_REGION_START_ERROR" resname="CDIST0257E">
+       		<source>The following operator cannot be the start of a consistent region: {0}.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="operator_name"/>
+        	 <EXPLANATION>An invalid annotation was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Указанный ниже оператор не может быть началом непротиворечивой области: {0}.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0258E"
+		extraData="NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE" resname="CDIST0258E">
+        	<source>Output attribute {0} must be a {1} type.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="attribute_name"/>
+	         <REPLACEMENT arg="{1}" value="spl_type"/>
+        	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Change the attribute type in the output stream.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Атрибут вывода {0} должен иметь тип {1}.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0259E"
+		extraData="NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE" resname="CDIST0259E">
+        	<source>The ''{0}'' parameter must refer to an attribute of type: {1}. Found {2}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name"/>
+	         <REPLACEMENT arg="{1}" value="required_spl_type"/>
+	         <REPLACEMENT arg="{2}" value="spl_type"/>
+        	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Change the attribute type in the input stream.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Параметр ''{0}'' должен ссылаться на атрибут типа: {1}. Найдено {2}</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0260E"
+		extraData="NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED" resname="CDIST0260E">
+        	<source>The ''{0}'' parameter cannot be specified when input port 1 is defined.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name"/>
+        	 <EXPLANATION>An invalid parameter was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Remove the parameter from the parameter section.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Параметр ''{0}'' нельзя задать, если задан входной порт 1.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0261E"
+		extraData="NETWORK_EITHER_PARAMETER_A_OR_B_MUST_BE_SPECIFIED" resname="CDIST0261E">
+        	<source>Either the ''{0}'' parameter or the ''{1}'' parameter or input port 1 must be specified.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name_a"/>
+	         <REPLACEMENT arg="{1}" value="parameter_name_b"/>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Нужно задать либо параметр ''{0}'', либо параметр ''{1}'', либо входной порт 1.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0262E"
+		extraData="NETWORK_EITHER_PARAMETER_OR_INPUT_PORT_1_MUST_BE_SPECIFIED" resname="CDIST0262E">
+        	<source>Either the ''{0}'' parameter or input port 1 must be specified.</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="parameter_name"/>
+        	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
+       		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Нужно задать либо параметр ''{0}'', либо входной порт.</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0263E"
+		extraData="NETWORK_LESS_FIELDS_IN_RECORD" resname="CDIST0263E">
+        	<source>Number of fields in record is less than expected (found: {0}, min_expected: {1}, line: {2}).</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="number_of_fields"/>
+	         <REPLACEMENT arg="{1}" value="expected_number_of_fields"/>
+	         <REPLACEMENT arg="{2}" value="line_number"/>
+        	 <EXPLANATION>An invalid csv file was detected.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Число полей в записи меньше ожидаемого (найдено: {0}, ожидаемый минимум: {1}, строка: {2}).</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0264E"
+		extraData="NETWORK_UNABLE_TO_PARSE_CIDR" resname="CDIST0264E">
+        	<source>Unable to parse network CIDR from blocks file: {0}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_name"/>
+        	 <EXPLANATION>The network CIDR field could not be determined.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Не удается синтаксически проанализировать сетевой CIDR из файла блоков: {0}</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0265E"
+		extraData="NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL" resname="CDIST0265E">
+        	<source>Unable to convert start {0} to decimal: {1}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="field_name"/>
+	         <REPLACEMENT arg="{1}" value="token_value"/>
+        	 <EXPLANATION>The IP address could not be converted.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Не удается преобразовать начальный элемент {0} в десятичное число: {1}</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0266E"
+		extraData="NETWORK_ERROR_PARSING_RECORD" resname="CDIST0266E">
+        	<source>Error parsing {0} record: {1} ({2})</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_type"/>
+	         <REPLACEMENT arg="{1}" value="line_number"/>
+	         <REPLACEMENT arg="{2}" value="exception_message"/>
+        	 <EXPLANATION>An exception is observed during parsing the csv file.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Ошибка при анализе записи {0}: {1} ({2})</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0267E"
+		extraData="NETWORK_UNKNOWN_ERROR_PARSING_RECORD" resname="CDIST0267E">
+        	<source>Unknown error while parsing {0} record: {1}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_type"/>
+	         <REPLACEMENT arg="{1}" value="line_number"/>
+        	 <EXPLANATION>An error is observed during parsing the csv file.</EXPLANATION>
+       		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Неизвестная ошибка при анализе записи {0}: {1}</target>
+        </trans-unit>
+        <trans-unit id="StreamsNetworkToolkitMessages_CDIST0268E"
+		extraData="NETWORK_FILE_NOT_FOUND" resname="CDIST0268E">
+        	<source>File does not exist: {0}</source>
+		<!-- MSGDOC>
+	         <REPLACEMENT arg="{0}" value="file_name"/>
+        	 <EXPLANATION>File could not be found.</EXPLANATION>
+       		 <USER_RESPONSE>Change the parameter to the file location.</USER_RESPONSE>
+       		</MSGDOC -->
+         <target>Файл не существует: {0}</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>
