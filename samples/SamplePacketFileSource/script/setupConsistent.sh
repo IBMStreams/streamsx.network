@@ -16,6 +16,9 @@ export STREAMS_INSTANCE_ID=ConsistentInstance
 checkpointDirectory=$HOME/checkpoint
 
 domainPropertyList=(
+--property jmx.port=0
+--property sws.port=0
+--property jmx.startTimeout=60
 --property sws.startTimeout=240
 )
 
@@ -35,8 +38,8 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
-[[ -v STREAMS_ZKCONNECT ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
-[[ ! -v STREAMS_ZKCONNECT ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 
+[[ -n "$STREAMS_ZKCONNECT" ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
+[[ -z "$STREAMS_ZKCONNECT" ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 
 
 streamtool lsdomain $zookeeper $STREAMS_DOMAIN_ID 1>/dev/null 2>/dev/null
 if [[ $? == 0 ]] ; then 
