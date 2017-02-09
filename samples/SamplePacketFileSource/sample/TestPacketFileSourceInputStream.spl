@@ -10,9 +10,9 @@ use com.ibm.streamsx.network.source::*;
 composite TestPacketFileSourceInputStream {
 
     param
-    expression<rstring> $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "data" );
+    expression<rstring> $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "." /* default is data-directory */ );
     expression<uint32> $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1" );
-    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "1.0" );
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "5.0" );
 
     type
 
