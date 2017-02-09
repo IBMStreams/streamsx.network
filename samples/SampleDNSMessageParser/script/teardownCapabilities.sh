@@ -20,8 +20,8 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
 
-[[ -v STREAMS_ZKCONNECT ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
-[[ ! -v STREAMS_ZKCONNECT ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 
+[[ -n "$STREAMS_ZKCONNECT" ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
+[[ -z "$STREAMS_ZKCONNECT" ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 
 
 step "stopping and removing Streams instance $STREAMS_INSTANCE_ID ..."
 streamtool stopinstance -i $STREAMS_INSTANCE_ID -d $STREAMS_DOMAIN_ID --force $zookeeper
