@@ -33,8 +33,8 @@ composite TestPacketFileSourceMinimalA {
             ipv4DestinationAddress = IPV4_DST_ADDRESS(),
             dnsMessage = PAYLOAD_DATA();
     }
-    //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalA.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalA.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-    stream<PacketType> FilteredPacketStream = Filter(PacketStream) { param filter: true; }
+    //stream<PacketType> FilteredPacketStream = Filter(PacketStream) { param filter: true; }
 
 }
