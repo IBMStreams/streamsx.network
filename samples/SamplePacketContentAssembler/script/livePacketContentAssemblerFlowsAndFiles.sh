@@ -22,13 +22,15 @@ projectDirectory=$( cd $here/.. ; pwd )
 [[ -f $here/../../SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$( cd $here/../.. ; pwd )
 [[ $samplesDirectory ]] || die "sorry, could not find 'samples' directory"
 
+[[ -f $HOME/com.ibm.iss.pam/pam.h ]] && libpamDirectory=$( cd $HOME/com.ibm.iss.pam ; pwd )
+[[ -f $here/../../../../com.ibm.iss.pam/com.ibm.iss.pam/pam.h ]] && libpamDirectory=$( cd $here/../../../../com.ibm.iss.pam/com.ibm.iss.pam ; pwd )
+[[ $libpamDirectory ]] || die "sorry, could not find 'libpam' directory"
+
 buildDirectory=$projectDirectory/output/build/$composite
 
 unbundleDirectory=$projectDirectory/output/unbundle/$composite
 
 dataDirectory=$projectDirectory/data
-
-libpamDirectory=$HOME/com.ibm.iss.pam
 
 networkInterface=$( ifconfig ens6f1 1>/dev/null 2>&1 && echo ens6f1 || echo eth0 ) 
 
