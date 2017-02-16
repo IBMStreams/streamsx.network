@@ -121,6 +121,6 @@ step "closing window for TCP stream, if necessary ..."
 pids=$( ps -ef | grep "ncat .* $lookupPort" | grep -v grep | awk '{print $2}' | tr '\n' ' ' )
 [ -n "$pids" ] && echo "stopping ncat process IDs: $pids ..." && kill -SIGTERM $pids 
 
-exit $rc
+exit 0
 
 

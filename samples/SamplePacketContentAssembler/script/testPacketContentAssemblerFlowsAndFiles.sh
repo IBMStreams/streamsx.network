@@ -22,11 +22,13 @@ projectDirectory=$( cd $here/.. ; pwd )
 [[ -f $here/../../SampleNetworkToolkitData/info.xml ]] && samplesDirectory=$( cd $here/../.. ; pwd )
 [[ $samplesDirectory ]] || die "sorry, could not find 'samples' directory"
 
+[[ -f $HOME/com.ibm.iss.pam/pam.h ]] && libpamDirectory=$( cd $HOME/com.ibm.iss.pam ; pwd )
+[[ -f $here/../../../../com.ibm.iss.pam/com.ibm.iss.pam/pam.h ]] && libpamDirectory=$( cd $here/../../../../com.ibm.iss.pam/com.ibm.iss.pam ; pwd )
+[[ $libpamDirectory ]] || die "sorry, could not find 'libpam' directory"
+
 buildDirectory=$projectDirectory/output/build/$composite
 
 dataDirectory=$projectDirectory/data
-
-libpamDirectory=$HOME/git/com.ibm.iss.pam/com.ibm.iss.pam
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
