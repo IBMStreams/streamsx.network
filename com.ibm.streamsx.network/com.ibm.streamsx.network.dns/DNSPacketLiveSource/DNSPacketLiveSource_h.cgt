@@ -110,6 +110,9 @@ private:
   SPL::uint64 packetsDropped() { return pcapStatisticsNow.ps_drop; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 bytesReceived() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
   inline __attribute__((always_inline))
@@ -123,6 +126,9 @@ private:
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsDropped() { return then ? pcapStatisticsNow.ps_drop - pcapStatisticsThen.ps_drop : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesReceived() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
