@@ -54,12 +54,10 @@ streamtool lsdomain --started $zookeeper $STREAMS_DOMAIN_ID 1>/dev/null 2>/dev/n
 if [[ $? == 0 ]] ; then 
     step "Streams domain '$STREAMS_DOMAIN_ID' already started ..."
 else
+    step "registering Streams domain as a Linux system service ..."
+    sudo STREAMS_INSTALL=$STREAMS_INSTALL STREAMS_ZKCONNECT=$STREAMS_ZKCONNECT $STREAMS_INSTALL/bin/streamtool registerdomainhost -d $STREAMS_DOMAIN_ID --application --management $zookeeper
     step "starting Streams domain '$STREAMS_DOMAIN_ID' ..."
     streamtool startdomain -d $STREAMS_DOMAIN_ID $zookeeper || die "sorry, could not start Streams domain '$STREAMS_DOMAIN_ID', $?"
-    step "registering the domain host controller as system service ..."
-    sudo -E $STREAMS_INSTALL/bin/streamtool registerdomainhost -d $STREAMS_DOMAIN_ID $zookeeper || die "sorry, could not register domainhost for domain '$STREAMS_DOMAIN_ID', $?"
-    sleep 15
-    streamtool getdomainstate -d $STREAMS_DOMAIN_ID -l  $zookeeper || die "sorry, could not domainstate for domain '$STREAMS_DOMAIN_ID', $?"
 fi
 
 streamtool lsinstance $zookeeper $STREAMS_INSTANCE_ID 1>/dev/null 2>/dev/null

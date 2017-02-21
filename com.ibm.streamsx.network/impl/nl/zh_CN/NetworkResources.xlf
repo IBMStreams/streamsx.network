@@ -215,7 +215,7 @@
         	 <EXPLANATION>The IP address could not be converted.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>无法将起始 {0} 转换为十进制：{1}</target>
+         <target>无法将 {0} 转换为十进制：{1}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0266E"
 		extraData="NETWORK_ERROR_PARSING_RECORD" resname="CDIST0266E">

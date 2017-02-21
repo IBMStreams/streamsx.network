@@ -102,6 +102,12 @@ public:
   // ----------- assignment functions for output attributes ----------
 
   inline __attribute__((always_inline))
+  SPL::uint64 packetsReceived() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDropped() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
   inline __attribute__((always_inline))
@@ -109,6 +115,12 @@ public:
 
   inline __attribute__((always_inline))
   SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsReceived() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDropped() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }

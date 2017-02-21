@@ -13,7 +13,7 @@ here=$( cd ${0%/*} ; pwd )
 export STREAMS_DOMAIN_ID=ConsistentDomain
 export STREAMS_INSTANCE_ID=ConsistentInstance
 
-checkpointDirectory=$HOME/checkpoint
+checkpointDirectory=/tmp/Streams-checkpoint
 
 domainPropertyList=(
 --property jmx.port=0
@@ -37,6 +37,9 @@ die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }
 step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 
 ################################################################################
+
+[[ ! -d $checkpointDirectory ]] || rm -rf $checkpointDirectory || die "sorry, could not remove old checkpoint directory $checkpointDirectory, $?"
+mkdir -p $checkpointDirectory || die "sorry, could not create new checkpoint directory $checkpointDirectory, $?"
 
 [[ -n "$STREAMS_ZKCONNECT" ]] && step "using zookeeper at $STREAMS_ZKCONNECT ..."
 [[ -z "$STREAMS_ZKCONNECT" ]] && step "using embedded zookeeper ..." && zookeeper="--embeddedzk" 

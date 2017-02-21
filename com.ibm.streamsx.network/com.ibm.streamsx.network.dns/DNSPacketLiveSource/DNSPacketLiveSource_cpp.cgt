@@ -61,7 +61,6 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scala
 // will invoke the functions defined in the DNSPacketLiveSource_h.cgt file
 
 #define common_result_functions MY_OPERATOR
-#define DNSPacketLiveSource_result_functions MY_OPERATOR
 #define DNSPacketSource_result_functions MY_OPERATOR
 
 
