@@ -1,1 +1,4 @@
-**/doc/ linguist-documentation
+doc/spldoc/html/* linguist-documentation
+doc/spldoc/html/toolkits/* linguist-documentation
+doc/spldoc/html/references/* linguist-documentation
+doc/spldoc/html/tk*/* linguist-documentation
