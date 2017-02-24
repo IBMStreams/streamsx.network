@@ -11,6 +11,7 @@
     <info:messageSet name="NetworkResources">
       <info:lang default="true">en_US/NetworkResources.xlf</info:lang>
       <info:lang>de_DE/NetworkResources.xlf</info:lang>
+      <info:lang>es_ES/NetworkResources.xlf</info:lang>
       <info:lang>fr_FR/NetworkResources.xlf</info:lang>
       <info:lang>it_IT/NetworkResources.xlf</info:lang>
       <info:lang>ja_JP/NetworkResources.xlf</info:lang>
