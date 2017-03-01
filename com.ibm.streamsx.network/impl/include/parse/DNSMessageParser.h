@@ -17,6 +17,9 @@
 #include <SPL/Runtime/Type/SPLType.h>
 #include <SPL/Runtime/Utility/Mutex.h>
 
+#include "MiscFunctions.h"
+using namespace com::ibm::streamsx::network::misc;
+
 ////////////////////////////////////////////////////////////////////////////////
 // This class maps DNS parser error codes to error descriptions
 ////////////////////////////////////////////////////////////////////////////////
@@ -316,9 +319,12 @@ class DNSMessageParser {
   // string). If an encoding problem is found, 'error' is set to a description
   // of the problem, and a partially decoded DNS name may be left in
   // 'nameBuffer'.
+  // If escapeNonPrintable is set to true, non printable characters are escaped,
+  // as well as any non-zero delimX characters passed in.
 
   inline __attribute__((always_inline))
-  void decodeDNSEncodedName(uint8_t** p, char* nameBuffer, int* nameLength) { 
+  void decodeDNSEncodedName(uint8_t** p, char* nameBuffer, int* nameLength, bool escapeNonPrintable = false,
+	 const uint8_t delim1 = 0, const uint8_t delim2 = 0, const uint8_t delim3 = 0 ) { 
 
     // alternate resource record pointer for '*p' (used for compressed DNS labels)
     uint8_t* pp;
@@ -342,10 +348,15 @@ class DNSMessageParser {
       // next label until one with zero length is found
       if (flags==0x00) {
         if (*p+1+length>dnsEnd) { error = 102; break; } // ... "label overruns packet"
-        memcpy(&nameBuffer[*nameLength], (const char*)(*p+1), length); 
-        nameBuffer[(*nameLength)+length] = '.'; 
+        size_t bytes_formatted = length;
+        if(escapeNonPrintable) {
+            bytes_formatted = moveEscaped(&nameBuffer[*nameLength], -1, (const uint8_t *)(*p + 1), length, delim1, delim2, delim3);
+        } else {
+            memcpy(&nameBuffer[*nameLength], (const char*)(*p+1), length); 
+        }
+        nameBuffer[(*nameLength)+bytes_formatted] = '.'; 
         *p += length + 1;
-        *nameLength += length + 1;
+        *nameLength += bytes_formatted + 1;
       }
 
       // for compressed labels, get the offset from the beginning of the DNS
