@@ -59,6 +59,7 @@ pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only.pca
 #pcapFilename=$HOME/data.yorktown/splanet02_dns-only_one_hour.pcap
 #pcapFilename=/tmp/$composite/splanet02_dns-only_one_hour.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns-only_resource_records_6_15_33.pcap
+rrTypes=6,12,15,33 # SOA==6, PTR==12, MX==15, SRV==33
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
