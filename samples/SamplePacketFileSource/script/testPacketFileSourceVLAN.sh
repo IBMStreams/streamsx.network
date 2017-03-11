@@ -51,7 +51,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_vlan.pcap
+pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_vlan_1000_packets.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
