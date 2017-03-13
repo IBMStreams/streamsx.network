@@ -17,7 +17,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.1 _path_/xliff-core-1.1.xsd">
 	<file datatype="plaintext" original="root.txt" source-language="en"
-		target-language="zh-CN" xml:space="preserve">
+		target-language="es" xml:space="preserve">
     <body>
       <!-- =============================================================== -->
       <!-- TRNOTE Please refer to the "XML Localization Interchange File   -->
@@ -64,7 +64,7 @@
         	 <EXPLANATION>An invalid operator configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Add an output port to the operator declaration.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>抱歉，未指定输出端口。</target>
+         <target>Lo sentimos, no se han especificado puertos de salida.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0251E"
 		extraData="NETWORK_NOT_ENOUGH_OUTPUT_FILTERS" resname="CDIST0251E">
@@ -73,7 +73,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>抱歉，没有足够多的输出过滤器，必须为每个输出端口指定一个输出过滤器。</target>
+         <target>Lo sentimos, no hay filtros de salida suficientes, debe especificar uno para cada puerto de salida.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0252E"
 		extraData="NETWORK_TOO_MANY_OUTPUT_FILTERS" resname="CDIST0252E">
@@ -82,7 +82,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>抱歉，输出过滤器过多，必须为每个输出端口指定一个输出过滤器。</target>
+         <target>Lo sentimos, hay demasiados filtros de salida, debe especificar uno para cada puerto de salida.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0253E"
 		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME_OR_INPUT_PORT" resname="CDIST0253E">
@@ -91,7 +91,7 @@
         	 <EXPLANATION>The pcap source was not specified.</EXPLANATION>
        		 <USER_RESPONSE>Either add the input port or add the parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>抱歉，必须指定“pcapFilename”参数或输入端口。</target>
+         <target>Lo sentimos, se debe especificar ''pcapFilename'' o un puerto de entrada.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0254E"
 		extraData="NETWORK_INVALID_PARAMETER_PCAP_FILENAME" resname="CDIST0254E">
@@ -100,7 +100,7 @@
         	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
        		 <USER_RESPONSE>Either remove the input port or the parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>抱歉，不能同时指定“pcapFilename”参数和输入端口。</target>
+         <target>Lo sentimos, no se puede especificar el parámetro ''pcapFilename'' y un puerto de entrada.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0255E"
 		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME" resname="CDIST0255E">
@@ -109,7 +109,7 @@
         	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>抱歉，只有在还指定了“pcapFilename”时，才能指定“initDelay”</target>
+         <target>Lo sentimos, ''initDelay'' sólo se puede especificar cuando se especifica también ''pcapFilename''</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0256E"
 		extraData="NETWORK_CONSISTENT_REGION_INPUT_PORT_ERROR" resname="CDIST0256E">
@@ -118,7 +118,7 @@
         	 <EXPLANATION>An invalid annotation was specified.</EXPLANATION>
        		 <USER_RESPONSE>Either remove the input port or the consistent region annotation.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>抱歉，在启动一致区域时，不能指定输入端口。</target>
+         <target>Lo sentimos, no se puede especificar un puerto de entrada cuando se inicia una región coherente</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0257E"
 		extraData="NETWORK_CONSISTENT_REGION_START_ERROR" resname="CDIST0257E">
@@ -128,7 +128,7 @@
         	 <EXPLANATION>An invalid annotation was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>以下运算符不能是一致区域的开头：{0}。</target>
+         <target>El operador siguiente no puede ser el inicio de una región coherente: {0}.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0258E"
 		extraData="NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE" resname="CDIST0258E">
@@ -139,7 +139,7 @@
         	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
        		 <USER_RESPONSE>Change the attribute type in the output stream.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>输出属性 {0} 必须为 {1} 类型。</target>
+         <target>El atributo de salida {0} debe ser un tipo {1}.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0259E"
 		extraData="NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE" resname="CDIST0259E">
@@ -151,7 +151,7 @@
         	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
        		 <USER_RESPONSE>Change the attribute type in the input stream.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>“{0}”参数必须引用 {1} 类型的属性。找到 {2}</target>
+         <target>El parámetro ''{0}'' debe hacer referencia a un atributo de tipo: {1}. Se ha encontrado {2}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0260E"
 		extraData="NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED" resname="CDIST0260E">
@@ -161,7 +161,7 @@
         	 <EXPLANATION>An invalid parameter was specified.</EXPLANATION>
        		 <USER_RESPONSE>Remove the parameter from the parameter section.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>定义了输入端口 1 时，不能指定“{0}”参数。</target>
+         <target>No se puede especificar el parámetro ''{0}'' cuando está definido el puerto de entrada 1.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0261E"
 		extraData="NETWORK_EITHER_PARAMETER_A_OR_B_MUST_BE_SPECIFIED" resname="CDIST0261E">
@@ -172,7 +172,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>必须指定“{0}”参数，或者指定“{1}”参数或输入端口 1。</target>
+         <target>Se debe especificar el parámetro ''{0}'' o el parámetro ''{1}'' o el puerto de entrada 1.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0262E"
 		extraData="NETWORK_EITHER_PARAMETER_OR_INPUT_PORT_1_MUST_BE_SPECIFIED" resname="CDIST0262E">
@@ -182,7 +182,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>必须指定“{0}”参数或输入端口 1。</target>
+         <target>Se debe especificar el parámetro ''{0}'' o el puerto de entrada 1.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0263E"
 		extraData="NETWORK_LESS_FIELDS_IN_RECORD" resname="CDIST0263E">
@@ -194,7 +194,7 @@
         	 <EXPLANATION>An invalid csv file was detected.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>记录中的字段数少于预期数目（找到的字段数：{0}，期望的最少字段数：{1}，行：{2}）。</target>
+         <target>El número de campos en el registro es inferior al esperado (encontrados: {0}, mín. esperado: {1}, línea: {2}).</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0264E"
 		extraData="NETWORK_UNABLE_TO_PARSE_CIDR" resname="CDIST0264E">
@@ -204,7 +204,7 @@
         	 <EXPLANATION>The network CIDR field could not be determined.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>无法根据块文件 {0} 解析网络 CIDR</target>
+         <target>No se puede analizar el CIDR de red desde el archivo de bloques: {0}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0265E"
 		extraData="NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL" resname="CDIST0265E">
@@ -215,7 +215,7 @@
         	 <EXPLANATION>The IP address could not be converted.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>无法将 {0} 转换为十进制：{1}</target>
+         <target>No se puede convertir el inicio {0} a decimal: {1}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0266E"
 		extraData="NETWORK_ERROR_PARSING_RECORD" resname="CDIST0266E">
@@ -227,7 +227,7 @@
         	 <EXPLANATION>An exception is observed during parsing the csv file.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>解析 {0} 记录时出错：{1} ({2})</target>
+         <target>Error al analizar el registro {0}: {1} ({2})</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0267E"
 		extraData="NETWORK_UNKNOWN_ERROR_PARSING_RECORD" resname="CDIST0267E">
@@ -238,7 +238,7 @@
         	 <EXPLANATION>An error is observed during parsing the csv file.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>解析 {0} 记录时发生未知错误：{1}</target>
+         <target>Error desconocido al analizar el registro {0}: {1}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0268E"
 		extraData="NETWORK_FILE_NOT_FOUND" resname="CDIST0268E">
@@ -248,7 +248,7 @@
         	 <EXPLANATION>File could not be found.</EXPLANATION>
        		 <USER_RESPONSE>Change the parameter to the file location.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>文件 {0} 不存在</target>
+         <target>El archivo no existe: {0}</target>
         </trans-unit>
       </group>
     </body>

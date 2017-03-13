@@ -15,6 +15,7 @@
 #include <time.h>
 #include <string>
 #include <cmath>
+#include <algorithm> 
 
 #include <SPL/Runtime/Type/SPLType.h>
 
@@ -30,11 +31,13 @@
 class DNSPacketFlattener {
 
 
-
  private:
 
 
-  // ?????????????????????????????????
+  // This function formats a specified 'Unix epoch' timestamp from an
+  // SPL::float64 variable as specified Linux time format in a specified buffer,
+  // appends the microsecond portion of the timestamp to the buffer, and returns
+  // the address of the buffer.
 
   char* formatTimestamp(const double timestamp, const char* format, char* buffer) {
 
@@ -326,7 +329,7 @@ DNSTypeNames dnsTypeNames;
 
  public:
 
-  SPL::rstring dnsAllFields(double captureTime, uint32_t packetLength, NetworkHeaderParser& headers, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter) {
+  SPL::rstring dnsAllFields(double captureTime, uint32_t packetLength, NetworkHeaderParser& headers, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter, SPL::list<SPL::uint16>& rrTypes) {
 
     // allocate a buffer large enough to hold the largest possible string representation of a DNS message
     char buffer[1024*1024];
@@ -339,8 +342,7 @@ DNSTypeNames dnsTypeNames;
     char nameBuffer[4096];
     char rdataBuffer[4096];
 
-    // format fields 1 through 14 once, to be copied below before each resource record
-
+    // format the network headers
     bufferLength += snprintf( buffer+bufferLength,
                               sizeof(buffer)-bufferLength, 
                               "%s%ssource=%s:%hu%sdestination=%s:%hu%sDNS%s%s[%hu]%sresponseCode=%hhu%sflags=0x%04x%squestionCount=%hu%sanswerCount=%hu%snameserverCount=%hu%sadditionalCount=%hu%s",
@@ -371,6 +373,7 @@ DNSTypeNames dnsTypeNames;
 
     // format 'question' resource records
     for (int32_t i = 0; i<parser.questionRecordCount; i++) {
+      if ( !rrTypes.empty() && std::find(rrTypes.begin(), rrTypes.end(), parser.questionRecords[i].type) == rrTypes.end() ) continue;
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
                                 "    question.%d%stype=%s[%hu]%sname=%s%s",
@@ -384,6 +387,7 @@ DNSTypeNames dnsTypeNames;
 
     // format 'answer' resource records
     for (int32_t i = 0; i<parser.answerRecordCount; i++) {
+      if ( !rrTypes.empty() && std::find(rrTypes.begin(), rrTypes.end(), parser.answerRecords[i].type) == rrTypes.end() ) continue;
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
                                 "    answer.%d%stype=%s[%hu]%sname=%s%sttl=%u%srdata=%s%s",
@@ -401,6 +405,7 @@ DNSTypeNames dnsTypeNames;
 
     // format 'nameserver' resource records
     for (int32_t i = 0; i<parser.nameserverRecordCount; i++) {
+      if ( !rrTypes.empty() && std::find(rrTypes.begin(), rrTypes.end(), parser.nameserverRecords[i].type) == rrTypes.end() ) continue;
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
                                 "    nameserver.%d%stype=%s[%hu]%sname=%s%sttl=%u%srdata=%s%s",
@@ -418,6 +423,7 @@ DNSTypeNames dnsTypeNames;
 
     // format 'additional' resource records
     for (int32_t i = 0; i<parser.additionalRecordCount; i++) {
+      if ( !rrTypes.empty() && std::find(rrTypes.begin(), rrTypes.end(), parser.additionalRecords[i].type) == rrTypes.end() ) continue;
       bufferLength += snprintf( buffer+bufferLength,
                                 sizeof(buffer)-bufferLength,
                                 "    additional.%d%stype=%s[%hu]%sname=%s%sttl=%u%srdata=%s%s",

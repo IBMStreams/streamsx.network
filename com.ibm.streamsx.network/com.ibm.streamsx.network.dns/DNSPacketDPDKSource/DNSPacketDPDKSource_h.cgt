@@ -342,7 +342,10 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
 
   inline __attribute__((always_inline))
-  SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { return flattener.dnsAllFields(captureSeconds, packetLen, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str()); }
+  SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { SPL::list<SPL::uint16> empty = SPL::list<SPL::uint16>(); return flattener.dnsAllFields(captureSeconds, packetLen, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str(), empty); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter, SPL::list<SPL::uint16> rrTypes) { return flattener.dnsAllFields(captureSeconds, packetLen, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str(), rrTypes); }
 
   inline __attribute__((always_inline))
   SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }

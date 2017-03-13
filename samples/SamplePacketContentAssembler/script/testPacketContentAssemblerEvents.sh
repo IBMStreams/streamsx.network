@@ -24,6 +24,7 @@ projectDirectory=$( cd $here/.. ; pwd )
 
 [[ -f $HOME/com.ibm.iss.pam/pam.h ]] && libpamDirectory=$( cd $HOME/com.ibm.iss.pam ; pwd )
 [[ -f $here/../../../../com.ibm.iss.pam/com.ibm.iss.pam/pam.h ]] && libpamDirectory=$( cd $here/../../../../com.ibm.iss.pam/com.ibm.iss.pam ; pwd )
+[[ -f $STREAMS_ADAPTERS_ISS_PAM_DIRECTORY/pam.h ]] && libpamDirectory=$( cd $STREAMS_ADAPTERS_ISS_PAM_DIRECTORY ; pwd )
 [[ $libpamDirectory ]] || die "sorry, could not find 'libpam' directory"
 
 buildDirectory=$projectDirectory/output/build/$composite
