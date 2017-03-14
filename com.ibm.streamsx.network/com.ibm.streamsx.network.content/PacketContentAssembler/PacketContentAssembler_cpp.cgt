@@ -1038,7 +1038,7 @@ void MY_OPERATOR::processDNSResponseEvent(const pam2XpfHeader& eventHeader, cons
 // submit an output tuple
 void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data, const uint32_t length ) {
 
-  SPLAPPTRC(L_TRACE, "entering submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "entering submitOutputTuple(" << outputEventNames.event2name(event) << ",," << length << ") ...", "PacketContentAssembler");
 
   // store arguments for result functions
   outputEvent = event;
@@ -1062,7 +1062,7 @@ void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data
   THIS_DATA_POINTER = NULL;
   THIS_DATA_LENGTH = 0;
 
-  SPLAPPTRC(L_TRACE, "leaving submitOutputTuple(" << outputEventNames.event2name(event) << ") ...", "PacketContentAssembler");
+  SPLAPPTRC(L_TRACE, "leaving submitOutputTuple(" << outputEventNames.event2name(event) << ",," << length << ") ...", "PacketContentAssembler");
 }
 
 
