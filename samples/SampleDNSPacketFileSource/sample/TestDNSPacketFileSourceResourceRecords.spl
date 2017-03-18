@@ -24,7 +24,7 @@ composite TestDNSPacketFileSourceResourceRecords {
 
     param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
-    expression<list<uint16>> $rrTypes: (list<uint16>)getSubmissionTimeListValue("rrTypes", [ "6", "15", "33" ]); // SOA==6, MX==15, SRV==33
+    expression<list<uint16>> $rrTypeListParameter: (list<uint16>)getSubmissionTimeListValue("rrTypes", [ "6", "15", "33" ]); // SOA==6, MX==15, SRV==33
 
     type
 
@@ -60,7 +60,7 @@ composite TestDNSPacketFileSourceResourceRecords {
  () as LogParameters = Custom() {
       logic onProcess: {
         printStringLn("submission-time parameter pcapFilename: " + $pcapFilename);
-        printStringLn("submission-time parameter rrTypes: " + (rstring)$rrTypes);
+        printStringLn("submission-time parameter rrTypes: " + (rstring)$rrTypeListParameter);
       } }
 
 
@@ -69,12 +69,13 @@ composite TestDNSPacketFileSourceResourceRecords {
    stream<FlattenedDNSMessageType> FlattenedDNSNormalResponseSelectedRRsStream ;
    stream<FlattenedDNSMessageType> FlattenedDNSErrorResponseStream ;
    stream<DNSMalformedType> DNSMalformedStream ) = DNSPacketFileSource() {
+        logic state: { list<uint16> rrTypeList = $rrTypeListParameter; }
         param
             pcapFilename: $pcapFilename;
             outputFilters: !parseError(), // selects messages for FlattenedDNSStream
-                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSNormalResponseAllRRsStream
-                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSNormalResponseSelectedRRsStream
-                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub && hasResourceRecordType($rrTypes, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSErrorResponseStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && hasResourceRecordType(rrTypeList, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSNormalResponseAllRRsStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()==0ub && hasResourceRecordType(rrTypeList, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSNormalResponseSelectedRRsStream
+                           !parseError() && DNS_RESPONSE_FLAG() && DNS_RESPONSE_CODE()!=0ub && hasResourceRecordType(rrTypeList, DNS_ANSWER_TYPES(), DNS_NAMESERVER_TYPES(), DNS_ADDITIONAL_TYPES()), // selects messages for FlattenedDNSErrorResponseStream
                            parseError(); // selects messages for DNSMalformedStream
             metricsInterval: 0.0;
         output 
@@ -89,7 +90,7 @@ composite TestDNSPacketFileSourceResourceRecords {
         FlattenedDNSNormalResponseSelectedRRsStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
-          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ",", $rrTypes); 
+          flattenedDNSMessage = DNS_ALL_FIELDS("\n", " ", ",", rrTypeList); 
         FlattenedDNSErrorResponseStream:
           packetNumber = packetsProcessed(),
           captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
