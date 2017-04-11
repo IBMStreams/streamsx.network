@@ -14,7 +14,8 @@ The [Network toolkit for IBM Streams](http://ibmstreams.github.io/streamsx.netwo
 
 This version of the toolkit is intended for use with IBM Streams release 4.1 and later.
 
-This toolkit implements the NLS feature. Use the guidelines for the message bundle that are described in [https://github.com/IBMStreams/administration/wiki/The-messages-and-the-NLS-for-toolkits](https://github.com/IBMStreams/administration/wiki/The-messages-and-the-NLS-for-toolkits)
+This toolkit implements the NLS feature. Use the guidelines for the message bundle that are described in 
+[Messages and National Language Support for toolkits](https://github.com/IBMStreams/administration/wiki/Messages-and-National-Language-Support-for-toolkits)
 
 For the toolkit's documentation, please see [http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/](http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/).
 
