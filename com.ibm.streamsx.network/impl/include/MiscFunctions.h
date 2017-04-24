@@ -28,7 +28,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
 					lNibble = (ch & 0xF); 
 					dest[offset++] = (uNibble <= 9) ? '0' + uNibble : 'A' - 10 + uNibble; 
 					dest[offset++] = (lNibble <= 9) ? '0' + lNibble : 'A' - 10 + lNibble; 
-					bytes_formatted += 4;
+					bytes_formatted += 3;
 				} else {
 					dest[offset++] = ch;
 					bytes_formatted++;
