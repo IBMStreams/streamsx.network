@@ -86,14 +86,18 @@ static void init_pools(void) {
     struct rte_mempool *mp;
     char s[64];
 
+    for (i = 0; i < MAX_SOCKETS; ++i) {
+        socket_mempool_[i] = NULL;
+    }
+
     for (i = 0; i < RTE_MAX_LCORE; ++i) {
 	if (rte_lcore_is_enabled(i) == 0) {
 	    continue;
         }
 
 	socket_id = rte_lcore_to_socket_id(i);
-	if (socket_id > MAX_SOCKETS) {
-	    rte_exit(EXIT_FAILURE, "socket_id %d > MAX_SOCKETS\n",
+	if (socket_id >= MAX_SOCKETS) {
+	    rte_exit(EXIT_FAILURE, "socket_id %d >= MAX_SOCKETS\n",
 		    socket_id);
         }
 
@@ -101,6 +105,7 @@ static void init_pools(void) {
 	    continue;
         }
 
+        sprintf(s, "%d", socket_id);
 	mp = rte_mempool_create(s, NB_MBUF, MBUF_SIZE, MEMPOOL_CACHE_SIZE,
 		sizeof(struct rte_pktmbuf_pool_private),
 		rte_pktmbuf_pool_init, NULL,

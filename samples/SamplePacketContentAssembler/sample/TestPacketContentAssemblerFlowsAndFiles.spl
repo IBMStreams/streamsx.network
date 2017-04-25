@@ -67,8 +67,11 @@ composite TestPacketContentAssemblerFlowsAndFiles {
     param
     timestampAttribute: captureTime;
     packetAttribute: rawPacket;
-    outputFilters: ( EVENT_FLOW_DATA() && FLOW_PROTOCOL()!="unknown" && FLOW_PROTOCOL()!="" ) || EVENT_FLOW_TLS(), 
-                   EVENT_FILE_CHUNK() && mimetype2extension(FILE_CONTENT_TYPE())!="";
+    outputFilters: 
+      //( EVENT_FLOW_DATA() && FLOW_PROTOCOL()!="unknown" && FLOW_PROTOCOL()!="" ) || EVENT_FLOW_TLS(), // send flow data for known protocols to FlowDataStream 
+      //EVENT_FILE_CHUNK() && mimetype2extension(FILE_CONTENT_TYPE())!=""; // send file data for known protocols to FileChunkStream
+      EVENT_FLOW_DATA(), // send all flow data to FlowDataStream
+      EVENT_FILE_CHUNK(); // send all file data to FileChunkStream
     pamTuning: 
       "pam.bodetect.autodecrypt=false",
       "pam.ca.aim.enabled=false",
@@ -193,8 +196,8 @@ composite TestPacketContentAssemblerFlowsAndFiles {
       fileChunkInitial = FILE_CHUNK_INITIAL(),
       fileChunk = FILE_CHUNK_BINARY();
   }
-  () as FlowDataSink = FileSink(FlowDataStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FlowDataStream.out" ; suppress: flowData; format: txt ; hasDelayField: true ; }
-  () as FileChunkSink = FileSink(FileChunkStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FileChunkStream.out" ; suppress: fileChunk; format: txt ; hasDelayField: true ; }
+  () as FlowDataSink = FileSink(FlowDataStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FlowDataStream.out" ; suppress: flowData; format: txt; hasDelayField: true; flush: 1u; }
+  () as FileChunkSink = FileSink(FileChunkStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FileChunkStream.out" ; suppress: fileChunk; format: txt; hasDelayField: true; flush: 1u; }
 
   () as FlowDataStore = Custom(FlowDataStream as In) {
     logic state: {
@@ -204,7 +207,8 @@ composite TestPacketContentAssemblerFlowsAndFiles {
         "SrcToDst" : ">>>>>>>>",
         "DstToSrc" : "<<<<<<<<" }; }
     onTuple In: {
-      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + leadingZeros(flowID,6) + "." + flowProtocol;
+      rstring extension = flowProtocol!="" ? "."+flowProtocol : ".unknown";
+      rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + leadingZeros(flowID,6) + extension;
       rstring filemode = flowDataInitial ? "w" : "a";
       mutable int32 error = 0;
       uint64 handle = fopen(filename, filemode, error);
@@ -215,7 +219,7 @@ composite TestPacketContentAssemblerFlowsAndFiles {
       } else {
         fwriteString("\n" + flowEventTime + " -- " + ipSource + " " + directionFlags[flowDirection] + " " + ipDestination + " (" + (rstring)length(flowData) + " bytes of " + flowProtocol + ")\n", handle, error);
         if (error!=0) { appTrc(Trace.error, "Sorry, could not open output file '" + filename + "', " + strerror(error)); shutdownPE(); }
-        fwriteString(trancateNonASCII(flowData) + "\n", handle, error);
+        fwriteString(elideNonASCII(flowData) + "\n", handle, error); // ... use either truncateNonASCII() or elideNonASCII()
         if (error!=0) { appTrc(Trace.error, "Sorry, could not write output file '" + filename + "', " + strerror(error)); shutdownPE(); }
       }
       fclose(handle, error);
