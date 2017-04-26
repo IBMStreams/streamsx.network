@@ -59,6 +59,35 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
                 return strings;
         }
 
+        static SPL::rstring stringEscapeConcat(SPL::list<SPL::rstring> inputString,
+                                               const uint8_t subfieldDelim,
+                                               const uint8_t delim1 = 0,
+                                               const uint8_t delim2 = 0,
+                                               const uint8_t delim3 = 0) {
+                SPL::rstring stringOut;
+                SPL::list<SPL::rstring>::const_iterator it;
+                char dstBuffer[4096];
+                uint32_t dstOffset = 0;
+                SPL::boolean isFirst = true;
+                for(it = inputString.begin(); it != inputString.end(); ++it) {
+                        const uint8_t *srcData = (uint8_t *)((*it).data());
+                        uint16_t srcSize = (*it).size();
+                        if(isFirst) {
+                                isFirst = false;
+                        } else {
+                                if(subfieldDelim) {
+                                       dstBuffer[dstOffset++] = subfieldDelim;
+                                }
+                        }
+
+                        size_t cnt = moveEscaped(&dstBuffer[dstOffset], 4096, srcData, srcSize,
+                                                 delim1, delim2, delim3);
+                        dstOffset += cnt;
+                }
+
+                return SPL::rstring(dstBuffer, dstOffset);
+        }
+
 } } } } }
 
 #endif /* MISC_NETWORK_FUNCTIONS_H_ */
