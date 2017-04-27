@@ -12,6 +12,10 @@
         <function:description>TODO: Describe.</function:description>
         <function:prototype cppName="stringEscape">public list&lt;rstring> stringEscape(list&lt;rstring> inputString, uint8 delim1, uint8 delim2, uint8 delim3)</function:prototype>
       </function:function>
+      <function:function>
+        <function:description>TODO: Describe.</function:description>
+        <function:prototype cppName="stringEscapeConcat">public rstring stringEscapeConcat(list&lt;rstring> inputString, uint8  subfieldDelim, uint8 delim1, uint8 delim2, uint8 delim3)</function:prototype>
+      </function:function>
     </function:functions>
     <function:dependencies>
       <function:library>
