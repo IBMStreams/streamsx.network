@@ -131,8 +131,17 @@ MY_OPERATOR::~MY_OPERATOR() {
 void MY_OPERATOR::allPortsReady() { 
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
 
+    // Retreive the pinnings before we call into the DPDK library
+    cpu_set_t cpumask;
+    CPU_ZERO(&cpumask);
+    pid_t mytid = (pid_t)syscall(SYS_gettid);
+    sched_getaffinity(mytid, sizeof(cpumask), &cpumask);
+
     int rc = streams_dpdk_init();
     if (rc != 0) THROW (SPLRuntimeOperator, "Error in streams_dpdk_init.");
+
+    // Restore the pinning of this thread after DPDK library may have messed it up
+    sched_setaffinity(mytid, sizeof(cpumask), &cpumask);
 
     tscHz = streams_source_get_tsc_hz(); 
     tscMicrosecondAdjust = (tscHz + 500000ul) / 1000000ul; 
