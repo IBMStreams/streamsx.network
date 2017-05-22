@@ -1,0 +1,52 @@
+<%
+## Copyright (C) 2015  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/* Additional includes go here */
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+    
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+  
+private:
+  // ----------- output tuples ----------
+  OPort0Type outTuple;
+
+  typedef std::tr1::unordered_set<uint32_t> IPList;
+
+  // Members
+  SPL::Mutex mutex_ ;
+  IPList *ip4List_[2];
+  int32_t ip4ListSel_;
+
+  void parseIPFile(rstring filename);
+  rstring convertToAbsolutePath(rstring filename);
+
+  bool lookupIPv4(const SPL::list<uint32> &numIPList);
+  bool lookupIPv4(const uint32 &numIP);
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

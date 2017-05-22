@@ -1,0 +1,221 @@
+<%
+## Copyright (C) 2017  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/* Additional includes go here */
+#include <fstream>
+#include <string>
+#include <streams_boost/filesystem.hpp>
+#include <streams_boost/tokenizer.hpp>
+#include <streams_boost/token_iterator.hpp>
+#include <streams_boost/algorithm/string/replace.hpp>
+#include <streams_boost/algorithm/string/trim.hpp>
+#include <streams_boost/algorithm/string/classification.hpp>
+#include <streams_boost/lexical_cast.hpp>
+#include <arpa/inet.h>
+
+#include "NetworkResources.h"
+#include "IPv4AddressFunctions.h"
+
+#define IP_FILTER "IP_FILTER"
+
+using namespace SPL;
+using namespace std;
+using namespace com::ibm::streamsx::network::ipv4;
+
+/*
+ * This code is modeled after the IPASNEnricher operator.  Future updates to add IPv6
+ * support could leverage examples from that code.
+ */
+<%
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort0 = $model->getInputPortAt(0);
+my $inputPort1 = $model->getInputPortAt(1);
+my @outputPortList = @{ $model->getOutputPorts() };
+
+# get C++ expressions for getting the values of this operator's parameters
+my $inputIPAttrParamCppValue = $model->getParameterByName("inputIPAttr")->getValueAt(0)->getCppExpression();
+my $filterIPv4FileParam = $model->getParameterByName("filterIPv4File");
+my $filterIPv4FileParamCppValue = $filterIPv4FileParam ? $filterIPv4FileParam->getValueAt(0)->getCppExpression() : "";
+if(defined $filterIPv4FileParam) {
+    my $filterIPv4FileParamCppValue = $filterIPv4FileParam->getValueAt(0)->getCppExpression();
+}
+
+%>
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR() {
+	ip4List_[0] = new IPList();
+	ip4List_[1] = new IPList();
+    ip4ListSel_ = -1;
+	
+	<% if(defined $filterIPv4FileParamCppValue) {%>
+		parseIPFile(<%=$filterIPv4FileParamCppValue%>);
+	<%}%>
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() {
+	delete ip4List_[0];
+	delete ip4List_[1];
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() {
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() {
+    // This is an asynchronous call
+}
+
+// Tuple processing for mutating ports
+// Because this operator only filters tuples & does not modify them, this 
+// function does not get called.
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
+    SPLAPPTRC(L_ERROR, "entering <%=$myOperatorKind%> process() mutating.", IP_FILTER);
+    SPLAPPTRC(L_ERROR, "leaving <%=$myOperatorKind%> process() mutating.", IP_FILTER);
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
+    SPLAPPTRC(L_ERROR, "entering <%=$myOperatorKind%> process() non-mutating.", IP_FILTER);
+
+	if(port == 0) {
+    	const IPort0Type& iport$0 = tuple;
+		 
+        bool ipAddrMatch = false;
+		{
+			AutoPortMutex am(mutex_, *this); // TODO review locking 
+			ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
+		}
+			
+	    SPLAPPTRC(L_ERROR, "Process non-mutating. ipAddrMatch: " << ipAddrMatch, IP_FILTER);
+        if(ipAddrMatch) {	
+            <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
+            <% CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
+            SPLAPPTRC(L_ERROR, "submitting outTuple=" << outTuple, IP_FILTER);
+            submit(outTuple, 0);
+        }
+	}
+	<% if(defined $::inputPort1) {%>
+	else if(port == 1) {
+		const IPort1Type& iport$1 = tuple;
+    	
+    	streams_boost::filesystem::path filePath(<%=$::inputPort1CppName%>.get_<%=$::filenameAttribute%>());
+		
+        AutoPortMutex am(mutex_, *this);
+        // TODO need to clear the previous list & recreate asn4List_->clear();
+        parseIPFile(filePath.string());
+        return;
+	}
+	<%}%>
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
+    /*
+      if(punct==Punctuation::WindowMarker) {
+        // ...;
+      } else if(punct==Punctuation::FinalMarker) {
+        // ...;
+      }
+    */
+}
+
+void MY_OPERATOR::parseIPFile(rstring filename) {
+	rstring absPath = convertToAbsolutePath(filename);
+	SPLAPPTRC(L_ERROR, "Parsing " << " IP file: " << filename, IP_FILTER);
+	
+	// parse file and store in list
+	ifstream ipFile;
+	ipFile.open(absPath.c_str());
+	std::string line;
+ 
+	int32_t sel = ip4ListSel_ + 1;
+    if(sel > 1) sel = 0;
+     
+	while(std::getline(ipFile, line)) {
+        const SPL::rstring ipv4Addr = (SPL::rstring)line;
+        SPL::list<SPL::uint32> addrList = getAllAddressesInNetworkInt(ipv4Addr);
+        SPL::list<SPL::uint32>::const_iterator it;
+        for(it = addrList.begin(); it != addrList.end(); ++it)
+        {
+            ip4List_[sel]->insert(*it);
+            SPLAPPTRC(L_ERROR, "IPv4 list adding: " << *it, IP_FILTER);
+        }
+	}
+
+    ip4ListSel_ = sel; // TODO need any better locking here ?
+	
+	SPLAPPTRC(L_ERROR, "IPv4 list size = " << ip4List_[sel]->size(), IP_FILTER);
+
+    ipFile.close(); 
+}
+
+rstring MY_OPERATOR::convertToAbsolutePath(rstring filename) {
+	// Check file path
+	streams_boost::filesystem::path absPath(filename);
+	if(!absPath.is_absolute()) {
+		absPath = getPE().getDataDirectory();
+		absPath /= filename.string();
+	}
+	string pathName = absPath.string();
+	
+	if(!streams_boost::filesystem::exists(pathName)) {
+		// TODO - fix error handling
+		string const msg = "File does not exist: " + pathName;
+		SPLAPPLOG(L_ERROR, NETWORK_FILE_NOT_FOUND(pathName), IP_FILTER);
+		throw new SPLRuntimeException("parseLocationFile", msg);
+	}
+	
+	return pathName;	
+}
+
+bool inline MY_OPERATOR::lookupIPv4(const SPL::list<uint32> &numIPList) {
+    bool addrMatch = false;
+
+    if(ip4ListSel_ == -1) return false;
+
+    SPL::list<SPL::uint32>::const_iterator it;
+    for(it = numIPList.begin(); it != numIPList.end(); ++it) {
+        addrMatch = lookupIPv4(*it); 
+        if(addrMatch) return (addrMatch);
+    }
+
+    return addrMatch;
+}
+
+bool inline MY_OPERATOR::lookupIPv4(const uint32 &numIP) {
+    if(ip4ListSel_ == -1) return false;
+
+    size_t keyCount = ip4List_[ip4ListSel_]->count(numIP); 
+
+    if(keyCount) {
+        return true; 
+    } else {
+        return false; 
+    }
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+
