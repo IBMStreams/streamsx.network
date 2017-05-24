@@ -3,6 +3,14 @@
 ## All Rights Reserved
 %>
 
+/*
+ * test close of current file when new filter is applied
+ * test optional filename param
+ * review locking
+ * fix and test error handling cases
+ * TODOs
+ */
+
 /* Additional includes go here */
 #include <fstream>
 #include <string>
@@ -44,12 +52,20 @@ my $inputPort0 = $model->getInputPortAt(0);
 my $inputPort1 = $model->getInputPortAt(1);
 my @outputPortList = @{ $model->getOutputPorts() };
 
+my $inputPort1CppName = "";
+my $filenameAttribute = "";
+if(defined $inputPort1) {
+    $inputPort1CppName = $inputPort1->getCppTupleName();
+    $filenameAttribute = $inputPort1->getAttributeAt(0)->getName();
+}
+
 # get C++ expressions for getting the values of this operator's parameters
 my $inputIPAttrParamCppValue = $model->getParameterByName("inputIPAttr")->getValueAt(0)->getCppExpression();
 my $filterIPv4FileParam = $model->getParameterByName("filterIPv4File");
-my $filterIPv4FileParamCppValue = $filterIPv4FileParam ? $filterIPv4FileParam->getValueAt(0)->getCppExpression() : "";
+
+my $filterIPv4FileParamCppValue = "";
 if(defined $filterIPv4FileParam) {
-    my $filterIPv4FileParamCppValue = $filterIPv4FileParam->getValueAt(0)->getCppExpression();
+    $filterIPv4FileParamCppValue = $filterIPv4FileParam->getValueAt(0)->getCppExpression();
 }
 
 %>
@@ -60,11 +76,18 @@ if(defined $filterIPv4FileParam) {
 MY_OPERATOR::MY_OPERATOR() {
 	ip4List_[0] = new IPList();
 	ip4List_[1] = new IPList();
-    ip4ListSel_ = -1;
+    ip4ListRSel_ = 0;
+    ip4ListWSel_ = 0;
+    newListAvail = false; 
 	
-	<% if(defined $filterIPv4FileParamCppValue) {%>
+	// Single threaded at this point so no mutex is needed.
+	// Any file specified as a param is read & stored into ip4List_[0]
+	<% if(defined $filterIPv4FileParam) {%>
 		parseIPFile(<%=$filterIPv4FileParamCppValue%>);
 	<%}%>
+
+    // The next input file goes into ip4List_[1].
+    ip4ListWSel_ = 1;
 }
 
 // Destructor
@@ -98,33 +121,48 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
 
 // Tuple processing for non-mutating ports
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
-    SPLAPPTRC(L_ERROR, "entering <%=$myOperatorKind%> process() non-mutating.", IP_FILTER);
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() non-mutating.", IP_FILTER);
 
 	if(port == 0) {
     	const IPort0Type& iport$0 = tuple;
 		 
         bool ipAddrMatch = false;
 		{
-			AutoPortMutex am(mutex_, *this); // TODO review locking 
+			AutoPortMutex amR(mutex_[ip4ListRSel_], *this); // TODO review & comment on locking 
 			ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
 		}
 			
-	    SPLAPPTRC(L_ERROR, "Process non-mutating. ipAddrMatch: " << ipAddrMatch, IP_FILTER);
+	    SPLAPPTRC(L_TRACE, "Process non-mutating. ipAddrMatch: " << ipAddrMatch, IP_FILTER);
         if(ipAddrMatch) {	
             <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
             <% CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
-            SPLAPPTRC(L_ERROR, "submitting outTuple=" << outTuple, IP_FILTER);
+            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, IP_FILTER);
             submit(outTuple, 0);
         }
+
+        // Check if a new IP list has been completely built and is now available.
+        if(newListAvail) {
+            // Take both the R & W mutexes so we can close out the current file
+            // and swap lists atomically.
+            AutoPortMutex amR(mutex_[ip4ListWSel_], *this);
+			AutoPortMutex amW(mutex_[ip4ListRSel_], *this);
+            submit(Punctuation::WindowMarker, 0);
+
+            uint32_t tmpList = ip4ListWSel_;
+            ip4ListWSel_ = ip4ListRSel_;
+            ip4ListRSel_ = tmpList;
+
+            newListAvail = false;
+        }
 	}
-	<% if(defined $::inputPort1) {%>
+	<% if(defined $inputPort1) {%>
 	else if(port == 1) {
 		const IPort1Type& iport$1 = tuple;
-    	
-    	streams_boost::filesystem::path filePath(<%=$::inputPort1CppName%>.get_<%=$::filenameAttribute%>());
+    	streams_boost::filesystem::path filePath(<%=$inputPort1CppName%>.get_<%=$filenameAttribute%>());
 		
-        AutoPortMutex am(mutex_, *this);
-        // TODO need to clear the previous list & recreate asn4List_->clear();
+        SPLAPPTRC(L_ERROR, "Process non-mutating, port 1.  filePath = " << filePath, IP_FILTER);
+
+        AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
         parseIPFile(filePath.string());
         return;
 	}
@@ -142,6 +180,16 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
     */
 }
 
+/*
+ * This method takes in a filename, reads it, parses the content for IPv4 addresses,
+ * and inserts them into a set containing all addresses to filter through the operator.
+ *
+ * There are two set data structures maintained so that one can be used while the other
+ * is concurrently updated.  Once the new set is ready, we atomically swap to it.
+ *
+ * This method  must be called under a mutex to ensure the set is updated by a single
+ * thread and that the set toggle is updated correctly.
+ */
 void MY_OPERATOR::parseIPFile(rstring filename) {
 	rstring absPath = convertToAbsolutePath(filename);
 	SPLAPPTRC(L_ERROR, "Parsing " << " IP file: " << filename, IP_FILTER);
@@ -151,23 +199,24 @@ void MY_OPERATOR::parseIPFile(rstring filename) {
 	ipFile.open(absPath.c_str());
 	std::string line;
  
-	int32_t sel = ip4ListSel_ + 1;
-    if(sel > 1) sel = 0;
-     
+    newListAvail = false; 
+    ip4List_[ip4ListWSel_]->clear();
+
 	while(std::getline(ipFile, line)) {
         const SPL::rstring ipv4Addr = (SPL::rstring)line;
         SPL::list<SPL::uint32> addrList = getAllAddressesInNetworkInt(ipv4Addr);
         SPL::list<SPL::uint32>::const_iterator it;
-        for(it = addrList.begin(); it != addrList.end(); ++it)
-        {
-            ip4List_[sel]->insert(*it);
-            SPLAPPTRC(L_ERROR, "IPv4 list adding: " << *it, IP_FILTER);
+        for(it = addrList.begin(); it != addrList.end(); ++it) {
+            ip4List_[ip4ListWSel_]->insert(*it);
+            SPLAPPTRC(L_ERROR, "IPv4 filter: " << line << ", adding: " << 
+                                convertIPV4AddressNumericToString(*it) << 
+                                "(" << *it << ")", IP_FILTER);
         }
 	}
 
-    ip4ListSel_ = sel; // TODO need any better locking here ?
+    newListAvail = true; 
 	
-	SPLAPPTRC(L_ERROR, "IPv4 list size = " << ip4List_[sel]->size(), IP_FILTER);
+	SPLAPPTRC(L_ERROR, "IPv4 list size = " << ip4List_[ip4ListWSel_]->size(), IP_FILTER);
 
     ipFile.close(); 
 }
@@ -194,8 +243,6 @@ rstring MY_OPERATOR::convertToAbsolutePath(rstring filename) {
 bool inline MY_OPERATOR::lookupIPv4(const SPL::list<uint32> &numIPList) {
     bool addrMatch = false;
 
-    if(ip4ListSel_ == -1) return false;
-
     SPL::list<SPL::uint32>::const_iterator it;
     for(it = numIPList.begin(); it != numIPList.end(); ++it) {
         addrMatch = lookupIPv4(*it); 
@@ -206,9 +253,7 @@ bool inline MY_OPERATOR::lookupIPv4(const SPL::list<uint32> &numIPList) {
 }
 
 bool inline MY_OPERATOR::lookupIPv4(const uint32 &numIP) {
-    if(ip4ListSel_ == -1) return false;
-
-    size_t keyCount = ip4List_[ip4ListSel_]->count(numIP); 
+    size_t keyCount = ip4List_[ip4ListRSel_]->count(numIP); 
 
     if(keyCount) {
         return true; 

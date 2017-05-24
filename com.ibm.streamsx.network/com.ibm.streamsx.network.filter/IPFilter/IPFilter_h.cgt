@@ -1,5 +1,5 @@
 <%
-## Copyright (C) 2015  International Business Machines Corporation
+## Copyright (C) 2017  International Business Machines Corporation
 ## All Rights Reserved
 %>
 
@@ -37,9 +37,11 @@ private:
   typedef std::tr1::unordered_set<uint32_t> IPList;
 
   // Members
-  SPL::Mutex mutex_ ;
+  SPL::Mutex mutex_[2] ;
   IPList *ip4List_[2];
-  int32_t ip4ListSel_;
+  int32_t ip4ListRSel_;
+  int32_t ip4ListWSel_;
+  bool    newListAvail; 
 
   void parseIPFile(rstring filename);
   rstring convertToAbsolutePath(rstring filename);
