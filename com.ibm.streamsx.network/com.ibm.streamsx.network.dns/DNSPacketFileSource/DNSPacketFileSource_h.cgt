@@ -169,6 +169,9 @@ public:
   SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
 
   inline __attribute__((always_inline))
+  SPL::uint64 ETHER_DST_ADDRESS_64() { return headers.etherHeader ? (((uint64_t)headers.etherHeader->h_dest[0] << 40) | ((uint64_t)headers.etherHeader->h_dest[1] << 32) | ((uint64_t)headers.etherHeader->h_dest[2] << 24) | ((uint64_t)headers.etherHeader->h_dest[3] << 16) | ((uint64_t)headers.etherHeader->h_dest[4] << 8) | ((uint64_t)headers.etherHeader->h_dest[5] << 0)) : 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
 
   inline __attribute__((always_inline))
