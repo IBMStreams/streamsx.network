@@ -4,11 +4,11 @@
 %>
 
 /*
- * test close of current file when new filter is applied
- * test optional filename param
- * review locking
- * fix and test error handling cases
  * TODOs
+ *   test error handling cases
+ *   test close of current file when new filter is applied
+ *   test optional filename param
+ *   TRACE -> ERROR
  */
 
 /* Additional includes go here */
@@ -84,6 +84,7 @@ MY_OPERATOR::MY_OPERATOR() {
 	// Any file specified as a param is read & stored into ip4List_[0]
 	<% if(defined $filterIPv4FileParam) {%>
 		parseIPFile(<%=$filterIPv4FileParamCppValue%>);
+        newListAvail = false; 
 	<%}%>
 
     // The next input file goes into ip4List_[1].
@@ -125,10 +126,34 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
 
 	if(port == 0) {
     	const IPort0Type& iport$0 = tuple;
-		 
         bool ipAddrMatch = false;
+		
+        // Check if a new IP list has been completely built and is now available.
+        // Note: newListAvail does not need to be atomic or volatile given locking structure.
+        if(newListAvail) {
+            // Take both the R & W mutexes so we can close out the current file
+            // and swap lists atomically. This is the very uncommon case
+            // so the locking overhead is not important.
+            AutoPortMutex amR(mutex_[ip4ListWSel_], *this);
+			AutoPortMutex amW(mutex_[ip4ListRSel_], *this);
+
+            // Recheck the state variable under the locks to cover the small hole
+            // where 2 threads do the initial test and then go after the locks.
+            // The second thread will now see no newListAvail is false, so it does
+            // not need to do the list swap work.
+            if(newListAvail == true) {
+                submit(Punctuation::WindowMarker, 0);
+
+                uint32_t tmpList = ip4ListWSel_;
+                ip4ListWSel_ = ip4ListRSel_;
+                ip4ListRSel_ = tmpList;
+
+                newListAvail = false;
+            }
+        }
+
 		{
-			AutoPortMutex amR(mutex_[ip4ListRSel_], *this); // TODO review & comment on locking 
+			AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
 			ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
 		}
 			
@@ -138,21 +163,6 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
             <% CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
             SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, IP_FILTER);
             submit(outTuple, 0);
-        }
-
-        // Check if a new IP list has been completely built and is now available.
-        if(newListAvail) {
-            // Take both the R & W mutexes so we can close out the current file
-            // and swap lists atomically.
-            AutoPortMutex amR(mutex_[ip4ListWSel_], *this);
-			AutoPortMutex amW(mutex_[ip4ListRSel_], *this);
-            submit(Punctuation::WindowMarker, 0);
-
-            uint32_t tmpList = ip4ListWSel_;
-            ip4ListWSel_ = ip4ListRSel_;
-            ip4ListRSel_ = tmpList;
-
-            newListAvail = false;
         }
 	}
 	<% if(defined $inputPort1) {%>
@@ -164,6 +174,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
 
         AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
         parseIPFile(filePath.string());
+        newListAvail = true;
         return;
 	}
 	<%}%>
@@ -199,7 +210,6 @@ void MY_OPERATOR::parseIPFile(rstring filename) {
 	ipFile.open(absPath.c_str());
 	std::string line;
  
-    newListAvail = false; 
     ip4List_[ip4ListWSel_]->clear();
 
 	while(std::getline(ipFile, line)) {
@@ -214,8 +224,6 @@ void MY_OPERATOR::parseIPFile(rstring filename) {
         }
 	}
 
-    newListAvail = true; 
-	
 	SPLAPPTRC(L_ERROR, "IPv4 list size = " << ip4List_[ip4ListWSel_]->size(), IP_FILTER);
 
     ipFile.close(); 
@@ -231,7 +239,6 @@ rstring MY_OPERATOR::convertToAbsolutePath(rstring filename) {
 	string pathName = absPath.string();
 	
 	if(!streams_boost::filesystem::exists(pathName)) {
-		// TODO - fix error handling
 		string const msg = "File does not exist: " + pathName;
 		SPLAPPLOG(L_ERROR, NETWORK_FILE_NOT_FOUND(pathName), IP_FILTER);
 		throw new SPLRuntimeException("parseLocationFile", msg);
