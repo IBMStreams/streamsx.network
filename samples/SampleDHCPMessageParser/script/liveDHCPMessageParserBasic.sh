@@ -38,6 +38,7 @@ leaseWindowOptions=(
 )
 
 networkInterface=$( ifconfig ens6f3 1>/dev/null 2>&1 && echo ens6f3 || echo eth0 ) 
+networkInterface=$( ifconfig ens6f3 1>/dev/null 2>&1 && echo ens6f3 || echo eno1 ) 
 
 coreCount=$( cat /proc/cpuinfo | grep processor | wc -l )
 
@@ -82,7 +83,9 @@ step() { echo ; echo -e "\e[1;34m$*\e[0m" ; }
 cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 
 #[ ! -d $buildDirectory ] || rm -rf $buildDirectory || die "Sorry, could not delete old '$buildDirectory', $?"
-[ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
+[[ -d $dataDirectory ]] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
+[[ $( which xterm ) ]] || die "Sorry, could not find 'xterm' command, $?"
+[[ $( which ncat ) ]] || die "Sorry, could not find 'ncat' command, $?"
 
 step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
@@ -110,7 +113,7 @@ step "opening window for TCP stream from standalone application '$namespace.$com
 
 step "executing standalone application '$namespace.$composite' ..."
 executable=$buildDirectory/bin/standalone.exe
-sudo STREAMS_INSTALL=$STREAMS_INSTALL $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+sudo STREAMS_INSTALL=$STREAMS_INSTALL $executable -t $traceLevel ${submitParameterList[*]} || echo "sorry, application '$composite' failed, $?"
 rc=$?
 
 #step "executing standalone application '$namespace.$composite' ..."
@@ -119,7 +122,7 @@ rc=$?
 
 step "closing window for TCP stream, if necessary ..."
 pids=$( ps -ef | grep "ncat .* $leasePort" | grep -v grep | awk '{print $2}' | tr '\n' ' ' )
-[ -n "$pids" ] && echo "stopping ncat process IDs: $pids ..." && kill -SIGTERM $pids 
+[[ -n $pids ]] && echo "stopping ncat process IDs: $pids ..." && kill -SIGTERM $pids 
 
 exit $rc
 

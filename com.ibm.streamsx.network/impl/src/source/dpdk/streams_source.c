@@ -81,7 +81,7 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
                           int promiscuous, streams_packet_cb_t dpdkCallback, void *user) {
 
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_operator_init starting.\n"); 
+    printf("STREAMS_SOURCE: streams_operator_init(lcoreMaster=%d, lcore=%d, nicPort=%d, nicQueue=%d, promiscuous=%d, ...) starting ...\n", lcoreMaster, lcore, nicPort, nicQueue, promiscuous); 
     
     if(firstInitComplete == 0) {
         const char *homeDir = getenv("HOME");
@@ -197,6 +197,9 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
     printf("STREAMS_SOURCE: lcoreList = %s\n", lcoreList); 
 
     numOperators++;  // Keep a count of the number of operators that are constructed.
+
+    printf("STREAMS_SOURCE: ... streams_operator_init(...) finished\n"); 
+
     pthread_mutex_unlock(&mutexInit); 
     return(0); 
 }
@@ -206,7 +209,7 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
  */
 int streams_dpdk_init() {
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_dpdk_init starting.\n"); 
+    printf("STREAMS_SOURCE: streams_dpdk_init() starting ...\n"); 
 
     if(dpdkInitComplete != 0) {
 	// Not the first thread through the init code so just return.
@@ -246,7 +249,7 @@ int streams_dpdk_init() {
 
     printf("STREAMS_SOURCE: Queues per port = %d, Number of operators = %d.\n", 
            numQueues_, numOperators);
-    printf("STREAMS_SOURCE: args = %s %s %s %s %s %s %s.\n", 
+    printf("STREAMS_SOURCE: streams_dpdk_init() calling rte_eal_init(%s %s %s %s %s %s %s)\n", 
            arg0, arg1, arg2, arg3, arg4, arg5, arg6);
 
     optind = 0; // Reset getopt state as it is called again in rte_eal_init.
@@ -257,7 +260,7 @@ int streams_dpdk_init() {
     unsigned int ret = rte_eal_init(ARGN, rte_arg);
     if (ret < 0) {
         pthread_mutex_unlock(&mutexInit);
-	rte_panic("Cannot init EAL\n");
+	rte_panic("Cannot init EAL ....... rte_eal_init() failed\n");
         return(-1);
     }
 
@@ -278,6 +281,8 @@ int streams_dpdk_init() {
         RTE_LOG(ERR, STREAMS_SOURCE, "A PacketDPDKSource operator specified an invalid port.\n");
         return(-1);
     }
+
+    printf("STREAMS_SOURCE: ... streams_dpdk_init() finished\n"); 
 
     dpdkInitComplete = 1;
     pthread_mutex_unlock(&mutexInit);
