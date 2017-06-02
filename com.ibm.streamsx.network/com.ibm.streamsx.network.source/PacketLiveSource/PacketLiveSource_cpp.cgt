@@ -1,5 +1,5 @@
 <%
-# Copyright (C) 2011, 2015  International Business Machines Corporation
+# Copyright (C) 2011, 2017  International Business Machines Corporation
 # All Rights Reserved
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
@@ -309,7 +309,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
       SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketLiveSource");
       submit(outTuple<%=$i%>, <%=$i%>);
     }
-    <% } %> ;
+  <% } %> ;
 
   // reset the 'metrics updated' flag, in case one of the output filters or assignments references it
   metricsUpdate = false;

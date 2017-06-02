@@ -257,31 +257,41 @@ operator.
        </metric>
     </metrics>
 
-      <libraryDependencies>
-	<library>
-	<cmn:description>
+    <libraryDependencies>
 
-General support functions.
+	  <library>
+	    <cmn:description>
+          General support functions ...
+	    </cmn:description>
+	    <cmn:managedLibrary>
+	      <cmn:includePath>../../impl/include</cmn:includePath>
+	    </cmn:managedLibrary>
+	  </library>
+      
+	  <library>
+	    <cmn:description>
+          Path to Streams libstreams_source.a library (interface for DPDK libdpdk.a library) ...
+	    </cmn:description>
+	    <cmn:managedLibrary>
+	      <cmn:lib>streams_source</cmn:lib>
+	      <cmn:libPath>../../impl/src/source/dpdk/build/lib</cmn:libPath>
+	      <cmn:includePath>../../impl/src/source/dpdk</cmn:includePath>
+	    </cmn:managedLibrary>
+	  </library>
 
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:includePath>../../impl/include</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
 
-	<library>
-	<cmn:description>
-	
-streams_source interface library to dpdk.
-	
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:lib>streams_source</cmn:lib>
-	<cmn:libPath>../../impl/src/source/dpdk/build/lib</cmn:libPath>
-	<cmn:includePath>../../impl/src/source/dpdk</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
+<!--
+	  <library>
+	    <cmn:description>
+          Path to DPDK 'libdpdk.a' library ...
+	    </cmn:description>
+	    <cmn:managedLibrary>
+            <cmn:command>../../impl/bin/libdpdkPath.pl</cmn:command>
+	    </cmn:managedLibrary>
+	  </library>
+-->
 
+      
       </libraryDependencies>
 
       <providesSingleThreadedContext>Always</providesSingleThreadedContext>
@@ -373,6 +383,28 @@ network interface.
       <type>boolean</type>
       <cardinality>-1</cardinality>
     </parameter>
+
+      <parameter>
+        <name>outputFilters</name>
+        <description>
+
+This optional parameter takes a list of SPL expressions that specify which packets
+should be emitted by the corresponding output port. The number of
+expressions in the list must match the number of output ports, and each
+expression must evaluate to a `boolean` value.  The output filter expressions may include any
+of the
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|PacketDPDKSource result functions].  
+
+The default value of the `outputFilters` parameter is an empty list, which
+causes all packets processed to be emitted by all output ports.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
 
     <parameter>
       <name>metricsInterval</name>

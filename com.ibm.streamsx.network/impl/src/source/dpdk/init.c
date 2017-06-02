@@ -86,6 +86,8 @@ static void init_pools(void) {
     struct rte_mempool *mp;
     char s[64];
 
+    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() starting ...\n");
+
     for (i = 0; i < MAX_SOCKETS; ++i) {
         socket_mempool_[i] = NULL;
     }
@@ -105,18 +107,22 @@ static void init_pools(void) {
 	    continue;
         }
 
-        sprintf(s, "%d", socket_id);
+    sprintf(s, "%d", socket_id);
+    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_mempool_create(name='%s', elementCount=%d, elementSize=%d, cacheSize=%d, privateDataSize=%d, ,,,, numaSocket=%d, flags=0)\n", s, NB_MBUF, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), socket_id);
 	mp = rte_mempool_create(s, NB_MBUF, MBUF_SIZE, MEMPOOL_CACHE_SIZE,
 		sizeof(struct rte_pktmbuf_pool_private),
 		rte_pktmbuf_pool_init, NULL,
 		rte_pktmbuf_init, NULL, socket_id, 0);
 
 	if (mp == NULL) {
-	    rte_exit(EXIT_FAILURE, "Error on rte_mempool_create");
-        }
-
+      rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_mempool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno));
+    }
+    
 	socket_mempool_[socket_id] = mp;
     }
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "... init.c init_pools() finished\n");
+
 }
 
 static void init_ports(void) {
@@ -127,6 +133,9 @@ static void init_ports(void) {
     struct rte_eth_link link;
     struct rte_eth_dev_info dev_info;
     struct ether_addr eth_addr;
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_ports() starting ...\n");
+
     uint32_t num_ports = rte_eth_dev_count();
     uint32_t if_index;
     char     ifname[IF_NAMESIZE];
@@ -261,10 +270,14 @@ static void init_ports(void) {
 
 	if (port_info_[port_id].promiscuous) rte_eth_promiscuous_enable(port_id);
     }
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "... init.c init_ports() finished\n");
 }
 
 int init(void) {
     int i;
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init() starting ...\n");
 
     /* Assign socket id's */
     for(i = 0; i < RTE_MAX_LCORE; ++i) {
@@ -278,6 +291,8 @@ int init(void) {
 
     init_pools();
     init_ports();
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "... init.c init() finished\n");
 
     return(0);
 }

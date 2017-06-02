@@ -69,8 +69,8 @@ composite LiveDNSPacketDPDKSourceBasic {
           packetNumber = packetsProcessed(),
           flattenedDNSMessage = DNS_ALL_FIELDS("\n", "|", "^"); 
     }
-    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
-    () as FlattenedDNSMessageSink = FileSink(FlattenedDNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.FlattenedDNSMessageStream.out"; format: csv; hasDelayField: false; quoteStrings: false; flush: 1u; }
+    //() as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    //() as FlattenedDNSMessageSink = FileSink(FlattenedDNSMessageStream) { param file: "debug.LiveDNSPacketDPDKSourceBasic.FlattenedDNSMessageStream.out"; format: csv; hasDelayField: false; quoteStrings: false; flush: 1u; }
 
-    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down after " + (rstring)$timeoutInterval + " second timeout"); shutdownPE(); } }
+    //() as Timeout = Custom() { logic onProcess: { block($timeoutInterval); log(Sys.info, "shutting down after " + (rstring)$timeoutInterval + " second timeout"); shutdownPE(); } }
 }
