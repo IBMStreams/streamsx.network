@@ -7,8 +7,7 @@
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
-class MY_OPERATOR : public MY_BASE_OPERATOR 
-{
+class MY_OPERATOR : public MY_BASE_OPERATOR {
 public:
   // Constructor
   MY_OPERATOR();
