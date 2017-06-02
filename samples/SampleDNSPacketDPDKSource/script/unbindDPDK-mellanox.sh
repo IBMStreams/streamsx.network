@@ -9,7 +9,7 @@ set -e
 [[ -z $DPDK_INTERFACE ]] && echo "DPDK_INTERFACE environment variable not set" && exit 1 
 [[ -z $DPDK_DEVICE ]] && echo "DPDK_DEVICE environment variable not set" && exit 1 
 
-# bind ethernet device to Linux device driver
+# bind ethernet device to Linux device driver (for PowerPC only?)
 
 sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb $DPDK_DEVICE
 sudo $RTE_SDK/tools/dpdk_nic_bind.py --status

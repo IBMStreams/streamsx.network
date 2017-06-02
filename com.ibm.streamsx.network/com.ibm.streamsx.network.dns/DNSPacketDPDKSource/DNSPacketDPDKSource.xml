@@ -251,7 +251,7 @@ To verify that the number of hugepages available is actually 1000, type this at 
     HugePages_Surp:        0
     Hugepagesize:      16384 kB
 
-If the number of hugepages has not 1000, memory may be too fragemented.
+If the number of hugepages is not 1000, memory may be too fragemented.
 In this case, you will need to reboot the machine and then set the number of hugepages.
 
 To make the hugepages accessible to the user accounts that will run the DNSPacketDPDKSource operator,
@@ -283,6 +283,11 @@ by typing these commands at a prompt:
     bash&gt; tar -xvf dpdk-2.2.0.tar.xz
     bash&gt; cd $RTE_SDK
     bash&gt; make config T=$RTE_TARGET
+
+and, if your machine is running RHEL/CentOS 7.3, download and apply patch 15911 to the DPDK source code:
+
+    wget http://dpdk.org/dev/patchwork/patch/15911/raw/ -o dpdk-dev-v2-kni-support-RHEL-7.3.patch
+    patch -p1 &lt;dpdk-dev-v2-kni-support-RHEL-7.3.patch
 
 Then, edit the DPDK configuration file by typing this command:
 
