@@ -11,6 +11,8 @@
 #include <string.h>
 #include <set> 
 #include <iomanip> 
+#include <string>
+#include <sstream>
 
 #include <linux/if_ether.h>
 #include <arpa/inet.h>

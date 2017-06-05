@@ -38,8 +38,19 @@ my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParamet
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
+my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParameterByName("buffersizes")->getValues() : 0;
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+
+# special handling for 'buffersizes' paramter, which may include a list of expressions
+
+my $buffersizesParameter = $model->getParameterByName("buffersizes");
+my @buffersizesList;
+if ($buffersizesParameter) {
+    foreach my $value ( @{ $buffersizesParameter->getValues() } ) {
+      push @buffersizesList, $value->getCppExpression();
+    } 
+}
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -97,13 +108,13 @@ MY_OPERATOR::MY_OPERATOR() {
   metricsUpdate = false;
 
   // Get the operator's parameters into variables.
-    lcoreMaster = <%=$lcoreMaster%>;
+  lcoreMaster = <%=$lcoreMaster%>;
   lcore = <%=$lcore%>;
   nicPort = <%=$nicPort%>;
   nicQueue = <%=$nicQueue%>;
   const bool promiscuous = <%=$promiscuous%>;
   metricsInterval = <%=$metricsInterval%>;
-  
+
   // Initialize the DPDK subsystem.
   int rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue, (int)promiscuous, &dpdkCallback, (void *)this);
   SPLAPPTRC(L_TRACE, "streams_operator_init() for lcore = " << lcore <<
@@ -126,8 +137,14 @@ void MY_OPERATOR::allPortsReady() {
 
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady()", "PacketDPDKSource");
 
+  // construct a list of numeric buffer sizes in a string
+  std::stringstream temp;
+  <% for my $buffersize ( @buffersizesList ) { print("temp << $buffersize << ',';\n"); } %>
+  std::string buffersizes(temp.str());
+  if (buffersizes.size()) buffersizes.erase(buffersizes.size()-1, 1);
+
     // initialize DPDK
-    int rc = streams_dpdk_init();
+    int rc = streams_dpdk_init(buffersizes.c_str());
     if (rc != 0) { THROW (SPLRuntimeOperator, "Error in streams_dpdk_init."); }
 
     // get system clock rate
