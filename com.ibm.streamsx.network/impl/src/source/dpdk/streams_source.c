@@ -22,6 +22,7 @@
 #include <rte_ethdev.h>
 #include <rte_ip.h>
 #include <rte_lcore.h>
+#include <rte_errno.h>
 
 #include "init.h"
 #include "rxtx.h"
@@ -29,7 +30,6 @@
 
 #include "streams_source.h"
 
-#define ARGN 7
 
 // TODO : make the port# use the interface name
 
@@ -207,9 +207,9 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
 /*
  *  Initialize the DPDK library.
  */
-int streams_dpdk_init() {
+int streams_dpdk_init(const char* buffersizes) {
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_dpdk_init() starting ...\n"); 
+    printf("STREAMS_SOURCE: streams_dpdk_init('%s') starting ...\n", buffersizes); 
 
     if(dpdkInitComplete != 0) {
 	// Not the first thread through the init code so just return.
@@ -226,19 +226,28 @@ int streams_dpdk_init() {
         return(-1);
     }
 
-    uint32_t nb_ports;
+    printf("STREAMS_SOURCE: Queues per port = %d, Number of operators = %d.\n", numQueues_, numOperators);
+
+    int memoryChannelCount = 4; // what is this?
+
+    optind = 0; // Reset getopt state as it is called again in rte_eal_init.
+
+#if 0
+
+#define ARGN 8
+
     char *rte_arg[ARGN];
 
     char arg0[]="dpdk";
     char arg1[]="-l";
     char arg2[MAX_CORESTRING];
     strcpy(arg2, lcoreList); 
-    char arg3[]="-n";
+    char arg3[]="-n"; // Number of memory channels per processor socket
     char arg4[]="4";
     char arg5[]="--master-lcore";
     char arg6[16];
     sprintf(arg6, "%d", coreMaster_); 
-
+    char arg7[] = "--socket-mem=0,50"; // Memory to allocate from hugepages on specific sockets, in megabytes
     rte_arg[0]=arg0;
     rte_arg[1]=arg1;
     rte_arg[2]=arg2;
@@ -246,13 +255,10 @@ int streams_dpdk_init() {
     rte_arg[4]=arg4;
     rte_arg[5]=arg5;
     rte_arg[6]=arg6;
+    rte_arg[7]=arg7;
 
-    printf("STREAMS_SOURCE: Queues per port = %d, Number of operators = %d.\n", 
-           numQueues_, numOperators);
-    printf("STREAMS_SOURCE: streams_dpdk_init() calling rte_eal_init(%s %s %s %s %s %s %s)\n", 
-           arg0, arg1, arg2, arg3, arg4, arg5, arg6);
-
-    optind = 0; // Reset getopt state as it is called again in rte_eal_init.
+    printf("STREAMS_SOURCE: old streams_dpdk_init() calling rte_eal_init(%s %s %s %s %s %s %s %s)\n", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    int i; for (i=0; i<ARGN; i++) printf("old argv[%d] '%s'\n", i, rte_arg[i]);
 
     // This function is to be executed on the master lcore only.
     // Because no master core is specified, the default master_lcore is set by
@@ -260,9 +266,42 @@ int streams_dpdk_init() {
     unsigned int ret = rte_eal_init(ARGN, rte_arg);
     if (ret < 0) {
         pthread_mutex_unlock(&mutexInit);
-	rte_panic("Cannot init EAL ....... rte_eal_init() failed\n");
+        rte_panic("Cannot initialize DPDK, rte_eal_init() failed, rte_errno=%d, %s\n", rte_errno, rte_strerror(rte_errno));
         return(-1);
     }
+
+#endif
+
+
+
+    // initialize DPDK by executing a command with rte_eal_init() using arguments defined here:
+    // see: http://dpdk.org/doc/api-2.2/rte__eal_8h.html#a5c3f4dddc25e38c5a186ecd8a69260e3
+    // see: http://dpdk.org/doc/guides/testpmd_app_ug/run_app.html#eal-command-line-options
+
+    // format a command to initialize DPDK
+    char command[1000];
+    sprintf(command, "dpdk -l %s -n %d --master-lcore %d %s%s", lcoreList, memoryChannelCount, coreMaster_, (strlen(buffersizes) ? "--socket-mem=" : ""), buffersizes);
+    printf("STREAMS_SOURCE: streams_dpdk_init() calling rte_eal_init('%s')\n", command);
+
+    // convert command into argc&argv format
+    int argc = 0;
+    char *argv[100];
+    char *a = strtok(command, " ");
+    while (a) { argv[argc++] = a; a = strtok(0, " "); }
+    argv[argc] = NULL;
+    //int i; for (i=0; i<argc; i++) printf("new argv[%d] '%s'\n", i, argv[i]);
+
+    // initialize DPDK
+    int rc = rte_eal_init(argc, argv);
+    printf("STREAMS_SOURCE: rte_eal_init() returned %d\n", rc);
+    if (rc < 0) {
+      pthread_mutex_unlock(&mutexInit);
+      printf("STREAMS_SOURCE: rte_eal_init() failed, rte_errno=%d, %s\n", rte_errno, rte_strerror(rte_errno));
+      rte_panic("Cannot init EAL, rte_eal_init() failed\n");
+      return(-1);
+    }
+
+
 
 #ifdef RTE_LIBRTE_TIMER
     rte_timer_subsystem_init();
@@ -270,7 +309,7 @@ int streams_dpdk_init() {
 
     rte_set_log_level(8); 
 
-    nb_ports = rte_eth_dev_count();
+    uint32_t nb_ports = rte_eth_dev_count();
     if (nb_ports == 0) {
         pthread_mutex_unlock(&mutexInit);
         RTE_LOG(ERR, STREAMS_SOURCE, "No ethernet device found.\n");
