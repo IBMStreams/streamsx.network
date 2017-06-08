@@ -33,16 +33,19 @@ private:
   // ----------- output tuples ----------
   OPort0Type outTuple;
 
-  typedef std::tr1::unordered_set<uint32_t> IPList;
+  typedef SPL::rstring TextList; // TODO need correct data type rstring? remove this line
 
   // Members
   SPL::Mutex mutex_[2] ;
-  IPList *ip4List_[2];
-  int32_t ip4ListRSel_;
-  int32_t ip4ListWSel_;
+  TextList textList_[2];
+  bool       textListValid_[2];
 
-  bool lookupIPv4(const SPL::list<uint32> &numIPList);
-  bool lookupIPv4(const uint32 &numIP);
+  int32_t textListRSel_;
+  int32_t textListWSel_;
+  bool    firstInGroup;
+
+  bool lookupText(const SPL::list<rstring> &textList);
+  bool lookupText(const rstring &text);
 }; 
 
 <%SPL::CodeGen::headerEpilogue($model);%>
