@@ -209,7 +209,7 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
  */
 int streams_dpdk_init(const char* buffersizes) {
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_dpdk_init('%s') starting ...\n", buffersizes); 
+    printf("STREAMS_SOURCE: streams_dpdk_init(buffersizes='%s') starting ...\n", buffersizes); 
 
     if(dpdkInitComplete != 0) {
 	// Not the first thread through the init code so just return.
@@ -228,11 +228,13 @@ int streams_dpdk_init(const char* buffersizes) {
 
     printf("STREAMS_SOURCE: Queues per port = %d, Number of operators = %d.\n", numQueues_, numOperators);
 
-    int memoryChannelCount = 4; // what is this?
+    //int memoryChannelCount = 4; // what is this for?
 
     optind = 0; // Reset getopt state as it is called again in rte_eal_init.
 
 #if 0
+
+    // original rte_eal_init() code, superceded below ........
 
 #define ARGN 8
 
@@ -280,7 +282,8 @@ int streams_dpdk_init(const char* buffersizes) {
 
     // format a command to initialize DPDK
     char command[1000];
-    sprintf(command, "dpdk -l %s -n %d --master-lcore %d %s%s", lcoreList, memoryChannelCount, coreMaster_, (strlen(buffersizes) ? "--socket-mem=" : ""), buffersizes);
+    //sprintf(command, "dpdk -l %s -n %d --master-lcore %d %s%s", lcoreList, memoryChannelCount, coreMaster_, (strlen(buffersizes) ? "--socket-mem=" : ""), buffersizes);
+    sprintf(command, "dpdk -l %s --master-lcore %d %s%s", lcoreList, coreMaster_, (strlen(buffersizes) ? "--socket-mem=" : ""), buffersizes);
     printf("STREAMS_SOURCE: streams_dpdk_init() calling rte_eal_init('%s')\n", command);
 
     // convert command into argc&argv format
