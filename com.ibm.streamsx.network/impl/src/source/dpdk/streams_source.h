@@ -23,7 +23,7 @@ extern "C" {
     int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue, 
                               int promiscuous, streams_packet_cb_t callback, void *user);
 
-    int streams_dpdk_init(); 
+    int streams_dpdk_init(const char* buffersizes); 
 
     int streams_source_start(void);
 
