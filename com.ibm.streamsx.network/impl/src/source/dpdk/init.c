@@ -37,7 +37,7 @@ static const struct rte_eth_conf port_conf_ = {
 	.split_hdr_size = 0,
 	.header_split   = 0, /**< Header Split disabled */
 	.hw_ip_checksum = 1, /**< IP checksum offload enabled */
-	.hw_vlan_filter = 1, /**< VLAN filtering disabled */
+	.hw_vlan_filter = 0, /**< VLAN filtering disabled */
 	.hw_vlan_extend = 0, /**< Extended VLAN disabled. */
 	.jumbo_frame    = 0, /**< Jumbo frame support disabled */
 	.hw_strip_crc   = 0, /**< CRC stripped by hardware */
@@ -118,7 +118,7 @@ static void init_pools(void) {
 
         // allocate the buffer pool
         RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_mempool_create(name='%s', bufferCount=%d, bufferSize=%d, cacheSize=%d, privateDataSize=%d, ,,,, numaSocket=%d, flags=0)\n", s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), socket_id);
-        mp = rte_mempool_create(s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), rte_pktmbuf_pool_init, NULL, rte_pktmbuf_init, NULL, socket_id, 0);
+        mp = rte_pktmbuf_pool_create(s, bufferCount, MEMPOOL_CACHE_SIZE, 0, MBUF_SIZE, socket_id);
         if (mp == NULL) {
             rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_mempool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno));
         }
