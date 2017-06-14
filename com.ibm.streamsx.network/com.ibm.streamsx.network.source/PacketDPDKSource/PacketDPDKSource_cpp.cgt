@@ -143,9 +143,26 @@ void MY_OPERATOR::allPortsReady() {
   std::string buffersizes(temp.str());
   if (buffersizes.size()) buffersizes.erase(buffersizes.size()-1, 1);
 
+    // Retreive the pinnings before we call into the DPDK library
+    cpu_set_t cpumask;
+    CPU_ZERO(&cpumask);
+    pid_t mytid = (pid_t)syscall(SYS_gettid);
+    bool restore_affinity = true;
+    if(sched_getaffinity(mytid, sizeof(cpumask), &cpumask) != 0) {
+        SPLAPPTRC(L_ERROR, "sched_getaffinity() returned errno = " << errno, "PacketDPDKSource");
+        restore_affinity = false;
+    }
+
     // initialize DPDK
     int rc = streams_dpdk_init(buffersizes.c_str());
     if (rc != 0) { THROW (SPLRuntimeOperator, "Error in streams_dpdk_init."); }
+
+    // Restore the pinning of this thread after DPDK library may have messed it up
+    if(restore_affinity) {
+        if(sched_setaffinity(mytid, sizeof(cpumask), &cpumask) != 0) {
+            SPLAPPTRC(L_ERROR, "sched_setaffinity() returned errno = " << errno, "PacketDPDKSource");
+        }
+    }
 
     // get system clock rate
     tscHz = streams_source_get_tsc_hz(); 
