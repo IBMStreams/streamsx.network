@@ -21,7 +21,7 @@
 
 #define RTE_LOGTYPE_STREAMS_SOURCE RTE_LOGTYPE_USER1
 #define MEMPOOL_CACHE_SIZE 512
-#define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
+#define MBUF_SIZE (4096 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 #define NB_MBUF   (unsigned)6384
 
 /*
@@ -46,7 +46,7 @@
 #define EM_TX_WTHRESH 8  /**< Default values of TX write-back threshold reg. */
 
 #define MAX_RX_QUEUE_PER_LCORE 4
-#define MAX_PKT_BURST  8
+#define MAX_PKT_BURST  32
 #define BURST_TX_DRAIN 220000ULL /* around 100us at 2.2 Ghz */
 
 /*

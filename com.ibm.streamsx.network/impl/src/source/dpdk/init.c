@@ -37,7 +37,7 @@ static const struct rte_eth_conf port_conf_ = {
 	.split_hdr_size = 0,
 	.header_split   = 0, /**< Header Split disabled */
 	.hw_ip_checksum = 1, /**< IP checksum offload enabled */
-	.hw_vlan_filter = 1, /**< VLAN filtering disabled */
+	.hw_vlan_filter = 0, /**< VLAN filtering disabled */
 	.hw_vlan_extend = 0, /**< Extended VLAN disabled. */
 	.jumbo_frame    = 0, /**< Jumbo frame support disabled */
 	.hw_strip_crc   = 0, /**< CRC stripped by hardware */
@@ -78,7 +78,7 @@ static struct rte_eth_txconf tx_conf_ = {
  * Create a memory pool for every enabled socket.
  */
 static void init_pools(void) {
-    unsigned i;
+    unsigned i, j;
     unsigned socket_id;
     struct rte_mempool *mp;
 
@@ -89,41 +89,41 @@ static void init_pools(void) {
     }
 
     for (i = 0; i < RTE_MAX_LCORE; ++i) {
-	if (rte_lcore_is_enabled(i) == 0) {
-	    continue;
+        if (rte_lcore_is_enabled(i) == 0) {
+            continue;
         }
 
-	socket_id = rte_lcore_to_socket_id(i);
-	if (socket_id >= MAX_SOCKETS) {
-	    rte_exit(EXIT_FAILURE, "socket_id %d >= MAX_SOCKETS\n",
-		    socket_id);
+        socket_id = rte_lcore_to_socket_id(i);
+        if (socket_id >= MAX_SOCKETS) {
+            rte_exit(EXIT_FAILURE, "socket_id %d >= MAX_SOCKETS\n",
+                    socket_id);
         }
 
-	if (socket_mempool_[socket_id] != NULL) {
-	    continue;
+        if (socket_mempool_[socket_id] != NULL) {
+            continue;
         }
 
-    // format a name for the buffer pool
-    char s[64];
-    sprintf(s, "%d", socket_id);
+        // format a name for the buffer pool
+        char s[64];
+        sprintf(s, "%d", socket_id);
 
-    // calculate the number of buffers the pool will need
-    int queueCount = 0; 
-    for (i = 0; i<RTE_MAX_LCORE; i++) {
-      if (rte_lcore_is_enabled(i)==0) continue;
-      struct lcore_conf *conf = &lcore_conf_[i];
-      queueCount += conf->num_rx_queue;
-    }
-    int bufferCount = 2 * queueCount * STREAMS_SOURCE_RX_DESC_DEFAULT; // ... was ... NB_MBUF;
+        // calculate the number of buffers the pool will need
+        int queueCount = 0; 
+        for (j = 0; j<RTE_MAX_LCORE; j++) {
+            if (rte_lcore_is_enabled(j)==0) continue;
+            struct lcore_conf *conf = &lcore_conf_[j];
+            queueCount += conf->num_rx_queue;
+        }
+        int bufferCount = 2 * queueCount * STREAMS_SOURCE_RX_DESC_DEFAULT; // ... was ... NB_MBUF;
 
-    // allocate the buffer pool
-    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_mempool_create(name='%s', bufferCount=%d, bufferSize=%d, cacheSize=%d, privateDataSize=%d, ,,,, numaSocket=%d, flags=0)\n", s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), socket_id);
-	mp = rte_mempool_create(s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), rte_pktmbuf_pool_init, NULL, rte_pktmbuf_init, NULL, socket_id, 0);
-	if (mp == NULL) {
-      rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_mempool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno));
-    }
-    
-	socket_mempool_[socket_id] = mp;
+        // allocate the buffer pool
+        RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_mempool_create(name='%s', bufferCount=%d, bufferSize=%d, cacheSize=%d, privateDataSize=%d, ,,,, numaSocket=%d, flags=0)\n", s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), socket_id);
+        mp = rte_pktmbuf_pool_create(s, bufferCount, MEMPOOL_CACHE_SIZE, 0, MBUF_SIZE, socket_id);
+        if (mp == NULL) {
+            rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_mempool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno));
+        }
+
+        socket_mempool_[socket_id] = mp;
     }
 
     RTE_LOG(INFO, STREAMS_SOURCE, "... init.c init_pools() finished\n");
