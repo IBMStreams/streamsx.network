@@ -30,8 +30,19 @@ my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParamet
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
+my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParameterByName("buffersizes")->getValues() : 0;
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+
+# special handling for 'buffersizes' paramter, which may include a list of expressions
+
+my $buffersizesParameter = $model->getParameterByName("buffersizes");
+my @buffersizesList;
+if ($buffersizesParameter) {
+    foreach my $value ( @{ $buffersizesParameter->getValues() } ) {
+      push @buffersizesList, $value->getCppExpression();
+    }
+}
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -131,6 +142,12 @@ MY_OPERATOR::~MY_OPERATOR() {
 void MY_OPERATOR::allPortsReady() { 
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
 
+    // construct a list of numeric buffer sizes in a string
+    std::stringstream temp;
+    <% for my $buffersize ( @buffersizesList ) { print("temp << $buffersize << ',';\n"); } %>
+    std::string buffersizes(temp.str());
+    if (buffersizes.size()) buffersizes.erase(buffersizes.size()-1, 1);
+  
     // Retreive the pinnings before we call into the DPDK library
     cpu_set_t cpumask;
     CPU_ZERO(&cpumask);
@@ -141,7 +158,7 @@ void MY_OPERATOR::allPortsReady() {
         restore_affinity = false;
     }
 
-    int rc = streams_dpdk_init();
+    int rc = streams_dpdk_init(buffersizes.c_str());
     if (rc != 0) THROW (SPLRuntimeOperator, "Error in streams_dpdk_init.");
 
     // Restore the pinning of this thread after DPDK library may have messed it up
