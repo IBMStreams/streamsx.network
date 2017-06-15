@@ -608,6 +608,32 @@ NIC queue of type int32 which sources packets for this operator instance.
       <cardinality>-1</cardinality>
     </parameter>
 
+    <parameter>
+      <name>buffersizes</name>
+      <description>
+
+How much buffer space, in megabytes, to allocate from available 2MB Linux 'hugepages',
+specified as a list with a separate value for each NUMA socket.
+For NUMA sockets with NICs used by this operator, specify an even number of megabytes.
+For NUMA sockets without NICs, specify zero.
+For example, on a machine with two NUMA sockets and one NIC in the second socket, specify "buffersizes: 0, 50;" 50MB of buffer space on 25 2MB Linux 'hugepages'.
+If multiple operators are configured to use the same NIC, all operators should specify the same values for their 'buffersizes' parameter.
+If this parameter is not specified, DPDK will attempt to allocate all available 2MB Linux 'hugepages' for its buffer space.
+
+Linux system commands can be used to determine how many NUMA sockets a machine has,
+which sockets have NICs supported by DPDK,
+and how many 2MB 'hugepages' are available for buffer space.
+See the 'setup.sh' script in the 'samples' directory for examples of these Linux commands.
+Note that some of these commands require 'root' privileges.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>AttributeFree</expressionMode>
+      <type>int32</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
       <parameter>
         <name>outputFilters</name>
         <description>
