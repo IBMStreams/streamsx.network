@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  
+Copyright (C)2017, International Business Machines Corporation and  
+others. All Rights Reserved. 
+-->
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>This operator filters text (e.g. domain names) based on a list of text input.</description>
+      <libraryDependencies>
+        <library>
+          <cmn:description>   </cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Never</providesSingleThreadedContext>
+      <allowCustomLogic>false</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>inputTextAttr</name>
+        <description>Specifies the input attribute(s) containing the text that the filter will be applied against.
+The supported data types for this attribute are `rstring` and `list&lt;rstring>`.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <cardinality>1</cardinality>
+      </parameter>
+   </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description>Ingests tuples containing text and filters the data based on the text. The `inputTextAttr` parameter specifies the attribute containing the text.</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>false</controlPort>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+      <inputPortSet>
+        <description>Control port that takes in tuples containing IPv4 addresses in CIDR format for use in the filter operation.  All packets that match one of the input address ranges are passed through the filter.
+
+This control port can be used to dynamically update the list of addresses being filtered. Each time a tuple is received containing an address it is saved in a temporary list that is applied after a window punctuation is received.  This input port expects a tuple containing a single attribute of type `rstring` which is an IPv4 address in CIDR format (e.g. 192.168.0.0/24).</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>true</controlPort>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortSet>
+        <description>Submits a tuple for each input tuple received on input port 0 if one or more of the attributes defined in the inputIPAttr paramater match an IPv4 address that has been input on the control port.</description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>true</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Preserving</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>0</windowPunctuationInputPort>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

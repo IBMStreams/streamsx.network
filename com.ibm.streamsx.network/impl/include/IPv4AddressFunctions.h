@@ -38,7 +38,7 @@ struct network_cidr {
 };
 
 #define GET_DEC_NET_RANGE(cidr, range) { \
-    range.network_start = cidr.ip; \
+    range.network_start = ((cidr.ip >> (32-cidr.prefix)) << (32-cidr.prefix)); \
     range.network_end = range.network_start + (uint32_t)(1 << (32-cidr.prefix)); \
 }
 
@@ -474,6 +474,24 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
             for(uint32_t i = range.network_start; i < range.network_end; ++i)
             {
                 addresses.push_back(convertIPV4AddressNumericToString((SPL::uint32)i));
+            }
+
+            return addresses;
+      }
+
+      static SPL::list<SPL::uint32> getAllAddressesInNetworkInt(SPL::rstring const & networkCIDR)
+      {
+            SPL::list<SPL::uint32> addresses;
+
+            network_cidr resultCIDR;
+            if(parseNetworkCIDR_(networkCIDR, resultCIDR) == false) return addresses; //empty list
+
+            dec_network_range range;
+            GET_DEC_NET_RANGE(resultCIDR, range);
+
+            for(uint32_t i = range.network_start; i < range.network_end; ++i)
+            {
+                addresses.push_back((SPL::uint32)i);
             }
 
             return addresses;
