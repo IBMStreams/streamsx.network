@@ -116,13 +116,16 @@ static void init_pools(void) {
         }
         int bufferCount = 2 * queueCount * STREAMS_SOURCE_RX_DESC_DEFAULT; // ... was ... NB_MBUF;
 
-        // allocate the buffer pool
+        // allocate the buffer pool using either rte_pktmbuf_pool_create() or rte_mempool_create()
+#if 1
         RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_pktmbuf_pool_create(name='%s', bufferCount=%d, cacheSize=%d, privateSize=%d, bufferSize=%d, numaSocket=%d)\n", s, bufferCount, MEMPOOL_CACHE_SIZE, 0, MBUF_SIZE, socket_id);
         mp = rte_pktmbuf_pool_create(s, bufferCount, MEMPOOL_CACHE_SIZE, 0, MBUF_SIZE, socket_id);
-        if (mp == NULL) {
-          rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_pktmbuf_pool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno));
-        }
-
+        if (mp == NULL) { rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_pktmbuf_pool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno)); }
+#else
+        RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_mempool_create(name='%s', bufferCount=%d, bufferSize=%d, cacheSize=%d, privateDataSize=%d, ,,,, numaSocket=%d, flags=0)\n", s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), socket_id);
+        mp = rte_mempool_create(s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), rte_pktmbuf_pool_init, NULL, rte_pktmbuf_init, NULL, socket_id, 0);
+        if (mp == NULL) { rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_mempool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno)); }
+#endif
         socket_mempool_[socket_id] = mp;
     }
 
