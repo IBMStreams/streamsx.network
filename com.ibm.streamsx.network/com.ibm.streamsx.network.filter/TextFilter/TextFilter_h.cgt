@@ -1,0 +1,52 @@
+<%
+## Copyright (C) 2017  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/* Additional includes go here */
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR {
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+    
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+  
+private:
+  // ----------- output tuples ----------
+  OPort0Type outTuple;
+
+  typedef SPL::rstring TextList; // TODO need correct data type rstring? remove this line
+
+  // Members
+  SPL::Mutex mutex_[2] ;
+  TextList textList_[2];
+  bool       textListValid_[2];
+
+  int32_t textListRSel_;
+  int32_t textListWSel_;
+  bool    firstInGroup;
+
+  bool lookupText(const SPL::list<rstring> &textList);
+  bool lookupText(const rstring &text);
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+
