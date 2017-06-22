@@ -297,7 +297,9 @@ class DNSMessageParser {
   // in these variables. The number of records of each type is returned in the
   // variables above.
 
-  static const uint32_t MAXIMUM_RRFIELDS = 64;
+  // Assuming 11 bytes for the smallest resource record, and 9K jumbo packets
+  // we should only need ~ 816 RR fields; 1024 should cover any case we hit.
+  static const uint32_t MAXIMUM_RRFIELDS = 1024;
   struct Record questionRecords[MAXIMUM_RRFIELDS];
   struct Record answerRecords[MAXIMUM_RRFIELDS];
   struct Record nameserverRecords[MAXIMUM_RRFIELDS];
