@@ -308,7 +308,7 @@ DNSTypeNames dnsTypeNames;
   // converted to strings as appropriate, and included in the buffer, separated
   // by the specified delimiter.
 
-  const char* flattenRdataField(DNSMessageParser& parser, uint16_t recordType, uint8_t* rdata, int32_t rdataLength, const char* delimiter, char* buffer) {
+  const char* flattenRdataField(DNSMessageParser& parser, uint16_t recordType, uint8_t* rdata, int32_t rdataLength, const char* delimiter, char* buffer, size_t *length = NULL) {
 
     if( rdataLength == 0 ) { *buffer = '\0'; if(length) *length = 0; return buffer; }
 
