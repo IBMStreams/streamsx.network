@@ -170,7 +170,7 @@ class DNSMessageParser {
         // labels are always the last in DNS name
       case 0xC0:
         if (dnsPointer+2>dnsEnd) { error = 103; return false; } // ... "label compression length overruns packet"
-        offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FF;
+        offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FFF;
         if (offset<sizeof(DNSHeader)) { error = 104; return false; } // ... "label compression offset underruns packet"
         if (offset==dnsPointer-dnsStart) { error = 106; return false; } // ... "label compression offset loop"
         if (dnsStart+offset>dnsEnd) { error = 105; return false; } // ... "label compression offset overruns packet"
@@ -366,7 +366,7 @@ class DNSMessageParser {
 
       else if (flags==0xC0) { 
         if (*p+2>dnsEnd) { error = 103; break; } // ... "label compression length overruns packet"
-        const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FF;
+        const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FFF;
         if (offset<sizeof(DNSHeader)) { error = 104; break; } // ... "label compression offset underruns packet"
         if (dnsStart+offset>dnsEnd) { error = 105; break; } // ... "label compression offset overruns packet"
         if (offset==*p-dnsStart) { error = 106; break; } // ... "label compression offset loop"
