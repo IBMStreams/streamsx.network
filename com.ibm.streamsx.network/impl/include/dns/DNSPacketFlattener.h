@@ -323,6 +323,8 @@ DNSTypeNames dnsTypeNames;
         /* AFSDB */      case  18: flattenDNSEncodedName(parser, rdata+2, NULL, buffer);  break;
         /* AAAA */       case  28: inet_ntop(AF_INET6, rdata, buffer, 100);  if(length) *length = strlen(buffer); break;
         /* SRV */        case  33: flattenSRVResourceRecord(parser, rdata, rdataLength, delimiter, buffer);  break;
+        /* OPT */        case  41: memcpy(buffer, rdata, rdataLength); *(buffer+rdataLength) = '\0'; break;
+        /* SPF */        case  99: memcpy(buffer, rdata, rdataLength); *(buffer+rdataLength) = '\0'; break;
                          default: *buffer = '\0'; break;
     }
     return buffer;
