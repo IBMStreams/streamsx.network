@@ -1,0 +1,104 @@
+/* Additional includes go here */
+
+// Rtp
+/* Type sizes */
+typedef int int32;
+typedef short int int16;
+typedef signed char int8;
+
+typedef unsigned int u_int32;
+typedef unsigned short int u_int16;
+typedef unsigned char u_int8;
+
+#define BITFIELD(field, mask, shift) \
+   (((field) & (mask)) >> (shift))
+
+/* Protocol version */
+#define RTP_VERSION(hdr) BITFIELD((hdr).flags, 0xC0, 6)
+#define SET_RTP_VERSION(hdr, val) SET_BITFIELD((hdr).flags, (val), 0xC0, 6)
+
+/* Padding flag */
+#define RTP_P(hdr) BITFIELD((hdr).flags, 0x20, 5)
+#define SET_RTP_P(hdr, val) SET_BITFIELD((hdr).flags, (val), 0x20, 5)
+
+/* Extension flag */
+#define RTP_X(hdr) BITFIELD((hdr).flags, 0x10, 4)
+#define SET_RTP_X(hdr, val) SET_BITFIELD((hdr).flags, (val), 0x10, 4)
+
+/* CSRC Count */
+#define RTP_CC(hdr) BITFIELD((hdr).flags, 0x0F, 0)
+#define SET_RTP_CC(hdr, val) SET_BITFIELD((hdr).flags, (val), 0x0F, 0)
+
+/* Marker bit */
+#define RTP_M(hdr) BITFIELD((hdr).mpt, 0x80, 7)
+#define SET_RTP_M(hdr, val) SET_BITFIELD((hdr).mpt, (val), 0x80, 7)
+
+/* Marker bit */
+#define RTP_PT(hdr) BITFIELD((hdr).mpt, 0x7F, 0)
+#define SET_RTP_PT(hdr, val) SET_BITFIELD((hdr).mpt, (val), 0x7F, 0)
+
+typedef struct { /* RTP Header Extension */
+	u_int16 etype; /* extension type */
+	u_int16 elen; /* extension length */
+	char epayload[1]; /* extension payload */
+} rtp_hdr_ext;
+
+typedef struct {
+	u_int8 flags; /* Protocol version, padding flag, extension flag,
+	 and CSRC count */
+	u_int8 mpt; /* marker bit and payload type */
+	u_int16 seq; /* sequence number */
+	u_int32 ts; /* timestamp */
+	u_int32 ssrc; /* synchronization source */
+	u_int32 csrc[1]; /* CSRC list */
+} rtp_hdr_t;
+
+typedef struct {
+	rtp_hdr_t *RTP_header;
+	rtp_hdr_ext *RTP_extension;
+	unsigned char *payload; /* payload portion of RTP packet */
+	long payload_len; /* The length of the payload */
+} rtp_packet;
+
+
+#define AUDIO_INBUF_SIZE 100
+#define MAX_SAMPLE_COUNT_IN_ONE_PACKET 300
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+
+  // Processing for source and threaded operators   
+  void process(uint32_t idx);
+    
+  // Tuple processing for mutating ports 
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+private:
+  // Members
+  
+  // Other
+  int utteranceNumber;
+  float samples_data[MAX_SAMPLE_COUNT_IN_ONE_PACKET];
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

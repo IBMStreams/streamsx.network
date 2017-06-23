@@ -1,0 +1,119 @@
+/*******************************************************************************
+ * Copyright (C) 2016, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
+/* Additional includes go here */
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{ 
+    // Initialization code goes here
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() 
+{
+    // Finalization code goes here
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() 
+{
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() 
+{
+    // This is an asynchronous call
+}
+
+// Processing for source and threaded operators   
+void MY_OPERATOR::process(uint32_t idx)
+{
+    // A typical implementation will loop until shutdown
+    /*
+      while(!getPE().getShutdownRequested()) {
+          // do work ...
+      }
+    */
+}
+
+int16_t  MY_OPERATOR::MuLaw_Decode(int8_t number)
+{
+   const uint16_t MULAW_BIAS = 33;
+   uint8_t sign = 0, position = 0;
+   int16_t decoded = 0;
+   number = ~number;
+   if (number & 0x80)
+   {
+      number &= ~(1 << 7);
+      sign = -1;
+   }
+   position = ((number & 0xF0) >> 4) + 5;
+   decoded = ((1 << position) | ((number & 0x0F) << (position - 4))
+             | (1 << (position - 5))) - MULAW_BIAS;
+   return (sign == 0) ? (decoded) : (-(decoded));
+} 
+
+// Tuple processing for mutating ports 
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{ 
+	IPort0Type const & ituple = static_cast<IPort0Type const&>(tuple);
+	char * incomingPayload = (char *)ituple.get_payload().getData(); 
+	unsigned char * decompressed = (unsigned char *)malloc(5000);  
+   
+	int length = ituple.get_payloadLength(); 
+//	       std::cout << "gggg " <<  length << std::endl; 
+for ( int i = 0; i < length; i++ ) 
+	{  
+	   int8_t oneByte = (int8_t)incomingPayload[i]; 	
+	   int16_t twoBytes =  MuLaw_Decode(oneByte);         
+//	   float tempFloat = (float)twoBytes;
+	   *(int16_t *)(decompressed+(i*2)) = twoBytes;         
+	}
+	OPort0Type otuple;
+	otuple.set_ssrc(ituple.get_ssrc());
+ 	otuple.set_ts(ituple.get_ts()); 
+  	otuple.set_seq(ituple.get_seq()); 
+       otuple.set_ipSrc_addr(ituple.get_ipSrc_addr());
+        otuple.set_captureSeconds(ituple.get_captureSeconds());
+
+	otuple.set_payloadLength(length);
+	otuple.set_payload(blob(decompressed, length * sizeof(int16_t)));
+	submit(otuple, 0);
+       free(decompressed);
+
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+    // Sample submit code
+    /* 
+      OPort0Type otuple;
+      submit(otuple, 0); // submit to output port 0
+    */
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+    /*
+      if(punct==Punctuation::WindowMarker) {
+        // ...;
+      } else if(punct==Punctuation::FinalMarker) {
+        // ...;
+      }
+    */
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

@@ -1,0 +1,135 @@
+/*******************************************************************************
+ * Copyright (C) 2016, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{ 
+ xxx = 0;
+    // Initialization code goes here
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() 
+{
+    // Finalization code goes here
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() 
+{
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() 
+{
+    // This is an asynchronous call
+}
+
+// Processing for source and threaded operators   
+void MY_OPERATOR::process(uint32_t idx)
+{
+    // A typical implementation will loop until shutdown
+    /*
+      while(!getPE().getShutdownRequested()) {
+          // do work ...
+      }
+    */
+}
+
+// Tuple processing for mutating ports 
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{   
+        xxx = xxx + 1; 
+	IPort0Type const & ituple = static_cast<IPort0Type const&>(tuple);
+	int dstPort = ituple.get_dstPort();
+  const unsigned char *packet = ituple.get_netflowMessage().getData();
+  int payloadLength = ituple.get_payloadLength(); 
+
+
+/*
+    if ( ituple.get_ipSrc_addr().compare("10.191.98.158") )  
+       return; 
+*/
+
+/* 
+     if (! ( ituple.get_ipSrc_addr().compare("10.170.147.119") == 0)  )  
+       return; 
+*/ 
+
+    int protocol = ituple.get_protocol(); 
+    if ( protocol != 17 ) 
+       return; 
+      
+  //fprintf(stderr, "payload length: %d\n", payloadLength);
+    
+  if (payloadLength < RTP_MIN_SIZE) // Minimum size according to RFC
+  	return;
+       
+ // if ((dstPort & 1) == 1) // According to the specification an RTP port should be even
+ // 	return;
+   	
+//  if (dstPort >= 32768) // RTP port when transmitting the audio should be in the range [0, 32767]
+  //	return;	
+    	
+	int rtpVersion = RTP_VERSION(*packet);
+	int payloadType = RTP_PAYLOAD_TYPE(*(packet+1));
+
+//	fprintf(stderr, "RTP_VERSION: %d\n", rtpVersion);
+//	fprintf(stderr, "RTP_PAYLOAD_TYPE: %d\n", payloadType);
+
+ //  if (rtpVersion == RTP_CURRENT_VERSION && payloadType == G711U && payloadLength >= PAYLOAD_LENGTH) {  
+   if (rtpVersion == RTP_CURRENT_VERSION && payloadType == G711U ) {  
+
+  // std::cout << "xxx  " << xxx << std::endl; 
+  //  std::cout <<  "destination port " << dstPort << std::endl; 
+  
+        // std::cout << "payload length " << payloadLength << std::endl;
+
+    	OPort0Type otuple;
+    	otuple.set_dstPort(dstPort);
+    	otuple.set_ipSrc_addr(ituple.get_ipSrc_addr()); 
+        otuple.set_captureSeconds(ituple.get_captureSeconds() ); 
+
+    	otuple.set_netflowMessage(ituple.get_netflowMessage());
+
+    	otuple.set_payloadLength(payloadLength);
+
+    	submit(otuple, 0); // submit to output port 0
+}       
+    
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+    // Sample submit code
+    /* 
+      OPort0Type otuple;
+      submit(otuple, 0); // submit to output port 0
+    */
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+    /*
+      if(punct==Punctuation::WindowMarker) {
+        // ...;
+      } else if(punct==Punctuation::FinalMarker) {
+        // ...;
+      }
+    */
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

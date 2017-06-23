@@ -1,0 +1,164 @@
+/* Additional includes go here */
+ 
+#include<iostream>
+#include<sstream> 
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{	
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() 
+{
+    // Finalization code goes here
+    
+    //free(samples_data);    
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() 
+{
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() 
+{
+    // This is an asynchronous call
+}
+
+// Processing for source and threaded operators   
+void MY_OPERATOR::process(uint32_t idx)
+{
+    // A typical implementation will loop until shutdown
+    /*
+      while(!getPE().getShutdownRequested()) {
+          // do work ...
+      }
+    */
+}
+
+rtp_packet RTPGetRTPPacket(const unsigned char *rtppacket, long pktlen) {
+	rtp_packet the_packet;
+
+	/* If packet is encrypted, then the extra 32-bit header used
+	 for encryption should have already been stripped off */
+	the_packet.RTP_header = (rtp_hdr_t*) rtppacket;
+	the_packet.RTP_header->seq = __bswap_16(the_packet.RTP_header->seq);
+	the_packet.RTP_header->ts = __bswap_32(the_packet.RTP_header->ts);
+	the_packet.RTP_header->ssrc = __bswap_32(the_packet.RTP_header->ssrc);
+
+
+	if (RTP_X(*the_packet.RTP_header) == 1) { /* Is there an extension? */ 
+   
+            std::cout << "extension" << std::endl; 
+
+		/* if so, then set up RTP_extension field. */
+
+		the_packet.RTP_extension = (rtp_hdr_ext*) ((char*) rtppacket
+				+ sizeof(rtp_hdr_t) + (RTP_CC(*the_packet.RTP_header) - 1) * 4);
+
+		/* Note that if the packet has not yet been converted to host-byte-
+		 ordering, then the extension length will be wrong, and so
+		 the packet payload will point to the wrong place. */
+
+		the_packet.payload = ((unsigned char*) the_packet.RTP_extension
+				+ (the_packet.RTP_extension->elen + 1) * 4);
+	}
+
+	/* Otherwise, set extension field to NULL */
+	else {
+		the_packet.RTP_extension = NULL;
+		the_packet.payload = ((unsigned char*) rtppacket + sizeof(rtp_hdr_t)
+				+ (RTP_CC(*the_packet.RTP_header) - 1) * 4);
+	}
+	the_packet.payload_len = pktlen + (long) (rtppacket - the_packet.payload);
+
+
+	if (RTP_P(*the_packet.RTP_header) == 1) {
+	
+            std::cout << "padding" << std::endl;  
+
+	/* There is padding on this packet.  The # of bytes of padding
+		 (stored in the last byte of the packet = where we currently
+		 point to as the last byte in the payload) must be subtracted
+		 from our current payload estimate. */
+   
+                // jms this is gotta be wron
+		// the_packet.payload_len -=
+				(int) the_packet.payload[the_packet.payload_len - 1];
+	}
+
+	return the_packet;
+}
+
+// Tuple processing for mutating ports 
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{
+    IPort0Type const & ituple = static_cast<IPort0Type const&>(tuple);
+	  int dstPort = ituple.get_dstPort();
+    const unsigned char *packet = ituple.get_netflowMessage().getData();
+    int payloadLength = ituple.get_payloadLength();
+   
+    // Extract RTP payload
+    rtp_packet the_packet = RTPGetRTPPacket(packet, payloadLength);
+   // fprintf(stderr, "%s RTP packet decoded, the payload length: %ld\n", the_packet.payload, the_packet.payload_len);
+
+
+/*
+    if ( (  the_packet.payload_len > 0 ) &
+       ( the_packet.payload_len > 2000 ) ) 
+    {
+*/ 
+ 
+    OPort0Type otuple; 
+
+
+    otuple.set_ssrc(the_packet.RTP_header->ssrc); 
+    otuple.set_ts(the_packet.RTP_header->ts); 
+    otuple.set_seq(the_packet.RTP_header->seq); 
+    otuple.set_ipSrc_addr(ituple.get_ipSrc_addr() ); 
+    otuple.set_captureSeconds(ituple.get_captureSeconds() ); 
+
+
+    otuple.set_payloadLength(the_packet.payload_len);
+    // jms i dont get this 
+   // otuple.set_payload(blob(the_packet.payload, the_packet.payload_len*sizeof(float)));
+    otuple.set_payload(blob(the_packet.payload, the_packet.payload_len)); 
+    submit(otuple, 0); // submit to output port 0        	    
+   
+  /*  } */ 
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+    // Sample submit code
+    /* 
+      OPort0Type otuple;
+      submit(otuple, 0); // submit to output port 0
+    */
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+    /*
+      if(punct==Punctuation::WindowMarker) {
+        // ...;
+      } else if(punct==Punctuation::FinalMarker) {
+        // ...;
+      }
+    */
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+
