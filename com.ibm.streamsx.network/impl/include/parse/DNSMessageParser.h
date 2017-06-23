@@ -297,10 +297,12 @@ class DNSMessageParser {
   // in these variables. The number of records of each type is returned in the
   // variables above.
 
-  // Assuming 11 bytes for the smallest resource record, and 9K jumbo packets
-  // we should only need ~ 816 RR fields; 1024 should cover any case we hit.
-  static const uint32_t MAXIMUM_RRFIELDS = 1024;
-  struct Record questionRecords[MAXIMUM_RRFIELDS];
+  // Assuming 11 bytes for the smallest resource record, and 1500B packets
+  // we should only need ~ 135 RR fields; 150 should cover any case we hit.
+  // Questions typically will have just one record, so set that value lower.
+  static const uint32_t MAXIMUM_RRFIELDS   = 150;
+  static const uint32_t MAXIMUM_RRFIELDS_Q =  10;
+  struct Record questionRecords[MAXIMUM_RRFIELDS_Q];
   struct Record answerRecords[MAXIMUM_RRFIELDS];
   struct Record nameserverRecords[MAXIMUM_RRFIELDS];
   struct Record additionalRecords[MAXIMUM_RRFIELDS];
@@ -708,7 +710,7 @@ class DNSMessageParser {
 
     // basic safety checks
     if ( length < sizeof(struct DNSHeader) ) { error = 116; return; } // ... "message too short"
-    if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS ||
+    if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS_Q ||
          ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = 117; return; } // ... "counts too large"
