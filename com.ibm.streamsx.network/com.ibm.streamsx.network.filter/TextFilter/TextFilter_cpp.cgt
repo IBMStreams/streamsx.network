@@ -80,8 +80,7 @@ void MY_OPERATOR::prepareToShutdown() {
 // Because this operator only filters tuples & does not modify them, this 
 // function does not get called.
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
-    SPLAPPTRC(L_ERROR, "entering <%=$myOperatorKind%> process() mutating.", TEXT_FILTER);
-    SPLAPPTRC(L_ERROR, "leaving <%=$myOperatorKind%> process() mutating.", TEXT_FILTER);
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() mutating.", TEXT_FILTER);
 }
 
 // Tuple processing for non-mutating ports
@@ -92,6 +91,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
     	const IPort0Type& iport$0 = tuple;
         bool textMatch = false;
 		
+        SPLAPPTRC(L_TRACE, "Process non-mutating, port 0.", TEXT_FILTER);
 		{
 			AutoPortMutex amR(mutex_[textListRSel_], *this);
 			textMatch = lookupText(<%=$inputTextAttrParamCppValue%>);
@@ -108,6 +108,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
         else if(port == 1) {
             const IPort1Type& iport$1 = tuple;
 
+            SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.", TEXT_FILTER);
             rstring text = firstInGroup ? 
                 SPL::Functions::String::concat("(", <%=$inputPort1CppName%>.get_<%=$textFilterAttribute%>()) :
                 SPL::Functions::String::concat("|", <%=$inputPort1CppName%>.get_<%=$textFilterAttribute%>());
@@ -124,7 +125,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
 
 // Punctuation processing
 void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
-    SPLAPPTRC(L_ERROR, "entering <%=$myOperatorKind%> process() punctuation.", TEXT_FILTER);
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() punctuation.", TEXT_FILTER);
 
 	if(port == 1) {
         if(punct==Punctuation::WindowMarker) {
