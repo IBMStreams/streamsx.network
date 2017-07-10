@@ -3,11 +3,17 @@
 #include<iostream>
 #include<sstream> 
 
+#define RTP_EXTRACT_OPER "RtpExtract"
+
 <%SPL::CodeGen::implementationPrologue($model);%>
 
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {	
+    // Setup custom metrics
+    OperatorMetrics  & opm = getContext().getMetrics();
+    numPacketsDropped = & opm.createCustomMetric("totalMalformedPacketsDropped", "Gives the total number of malformed packets that have been dropped.", Metric::Gauge);
+    numPacketsDropped -> setValue(0);
 }
 
 // Destructor
@@ -59,10 +65,9 @@ rtp_packet RTPGetRTPPacket(const unsigned char *rtppacket, long pktlen) {
 
 	if (RTP_X(*the_packet.RTP_header) == 1) { /* Is there an extension? */ 
    
-            std::cout << "extension" << std::endl; 
+		SPLAPPTRC(L_TRACE,"Extension found.", RTP_EXTRACT_OPER); 
 
 		/* if so, then set up RTP_extension field. */
-
 		the_packet.RTP_extension = (rtp_hdr_ext*) ((char*) rtppacket
 				+ sizeof(rtp_hdr_t) + (RTP_CC(*the_packet.RTP_header) - 1) * 4);
 
@@ -84,17 +89,19 @@ rtp_packet RTPGetRTPPacket(const unsigned char *rtppacket, long pktlen) {
 
 
 	if (RTP_P(*the_packet.RTP_header) == 1) {
-	
-            std::cout << "padding" << std::endl;  
-
-	/* There is padding on this packet.  The # of bytes of padding
+	    SPLAPPTRC(L_TRACE,"Padding found.", RTP_EXTRACT_OPER); 
+	    /* There is padding on this packet.  The # of bytes of padding
 		 (stored in the last byte of the packet = where we currently
 		 point to as the last byte in the payload) must be subtracted
 		 from our current payload estimate. */
    
-                // jms this is gotta be wron
-		// the_packet.payload_len -=
-				(int) the_packet.payload[the_packet.payload_len - 1];
+		// jms this is gotta be wron
+	    SPLAPPTRC(L_TRACE,"Payload length after: " << the_packet.payload_len , RTP_EXTRACT_OPER); 
+		if (the_packet.payload_len > 0){
+			the_packet.payload_len -= (int) the_packet.payload[the_packet.payload_len - 1];
+		} else {
+			// the packet hasn't been handled correctly
+		}
 	}
 
 	return the_packet;
@@ -106,10 +113,19 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
     IPort0Type const & ituple = static_cast<IPort0Type const&>(tuple);
 	  int dstPort = ituple.get_dstPort();
     const unsigned char *packet = ituple.get_netflowMessage().getData();
+    int actualSize = ituple.get_netflowMessage().getSize(); 
     int payloadLength = ituple.get_payloadLength();
-   
+
     // Extract RTP payload
     rtp_packet the_packet = RTPGetRTPPacket(packet, payloadLength);
+    if (the_packet.payload_len <= 0){
+    	// we haven't handled it correctly. May not actually be RTP? 
+    	static int droppedPacketCount = 0; 
+    	droppedPacketCount++;
+    	SPLAPPTRC(L_ERROR, "Dropping malformed packet number " << droppedPacketCount << " IpSrc Address: " << ituple.get_ipSrc_addr(), RTP_EXTRACT_OPER);
+    	numPacketsDropped -> incrementValue(1); 
+    	return; 
+    }
    // fprintf(stderr, "%s RTP packet decoded, the payload length: %ld\n", the_packet.payload, the_packet.payload_len);
 
 

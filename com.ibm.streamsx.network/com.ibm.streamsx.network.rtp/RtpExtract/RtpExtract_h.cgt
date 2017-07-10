@@ -97,6 +97,7 @@ private:
   
   // Other
   int utteranceNumber;
+  Metric * numPacketsDropped;
   float samples_data[MAX_SAMPLE_COUNT_IN_ONE_PACKET];
 }; 
 
