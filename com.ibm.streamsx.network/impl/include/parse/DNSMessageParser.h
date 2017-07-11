@@ -170,7 +170,7 @@ class DNSMessageParser {
         // labels are always the last in DNS name
       case 0xC0:
         if (dnsPointer+2>dnsEnd) { error = 103; return false; } // ... "label compression length overruns packet"
-        offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FF;
+        offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FFF;
         if (offset<sizeof(DNSHeader)) { error = 104; return false; } // ... "label compression offset underruns packet"
         if (offset==dnsPointer-dnsStart) { error = 106; return false; } // ... "label compression offset loop"
         if (dnsStart+offset>dnsEnd) { error = 105; return false; } // ... "label compression offset overruns packet"
@@ -297,8 +297,12 @@ class DNSMessageParser {
   // in these variables. The number of records of each type is returned in the
   // variables above.
 
-  static const uint32_t MAXIMUM_RRFIELDS = 64;
-  struct Record questionRecords[MAXIMUM_RRFIELDS];
+  // Assuming 11 bytes for the smallest resource record, and 1500B packets
+  // we should only need ~ 135 RR fields; 150 should cover any case we hit.
+  // Questions typically will have just one record, so set that value lower.
+  static const uint32_t MAXIMUM_RRFIELDS   = 150;
+  static const uint32_t MAXIMUM_RRFIELDS_Q =  10;
+  struct Record questionRecords[MAXIMUM_RRFIELDS_Q];
   struct Record answerRecords[MAXIMUM_RRFIELDS];
   struct Record nameserverRecords[MAXIMUM_RRFIELDS];
   struct Record additionalRecords[MAXIMUM_RRFIELDS];
@@ -366,7 +370,7 @@ class DNSMessageParser {
 
       else if (flags==0xC0) { 
         if (*p+2>dnsEnd) { error = 103; break; } // ... "label compression length overruns packet"
-        const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FF;
+        const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FFF;
         if (offset<sizeof(DNSHeader)) { error = 104; break; } // ... "label compression offset underruns packet"
         if (dnsStart+offset>dnsEnd) { error = 105; break; } // ... "label compression offset overruns packet"
         if (offset==*p-dnsStart) { error = 106; break; } // ... "label compression offset loop"
@@ -706,7 +710,7 @@ class DNSMessageParser {
 
     // basic safety checks
     if ( length < sizeof(struct DNSHeader) ) { error = 116; return; } // ... "message too short"
-    if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS ||
+    if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS_Q ||
          ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = 117; return; } // ... "counts too large"

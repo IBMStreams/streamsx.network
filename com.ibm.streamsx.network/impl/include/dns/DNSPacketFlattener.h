@@ -308,7 +308,9 @@ DNSTypeNames dnsTypeNames;
   // converted to strings as appropriate, and included in the buffer, separated
   // by the specified delimiter.
 
-  const char* flattenRdataField(DNSMessageParser& parser, uint16_t recordType, uint8_t* rdata, int32_t rdataLength, const char* delimiter, char* buffer) {
+  const char* flattenRdataField(DNSMessageParser& parser, uint16_t recordType, uint8_t* rdata, int32_t rdataLength, const char* delimiter, char* buffer, size_t *length = NULL) {
+
+    if( rdataLength == 0 ) { *buffer = '\0'; if(length) *length = 0; return buffer; }
 
     switch(recordType) {
         /* A */          case   1: convertIPV4AddressToString(*((uint32_t*)rdata), buffer); break;
@@ -319,8 +321,10 @@ DNSTypeNames dnsTypeNames;
         /* MX */         case  15: flattenMXResourceRecord(parser, rdata, rdataLength, delimiter, buffer);  break;
         /* TXT */        case  16: memcpy(buffer, rdata, rdataLength); *(buffer+rdataLength) = '\0'; break;
         /* AFSDB */      case  18: flattenDNSEncodedName(parser, rdata+2, NULL, buffer);  break;
-        /* AAAA */       case  28: inet_ntop(AF_INET6, rdata, buffer, 100);  break;
+        /* AAAA */       case  28: inet_ntop(AF_INET6, rdata, buffer, 100);  if(length) *length = strlen(buffer); break;
         /* SRV */        case  33: flattenSRVResourceRecord(parser, rdata, rdataLength, delimiter, buffer);  break;
+        /* OPT */        case  41: memcpy(buffer, rdata, rdataLength); *(buffer+rdataLength) = '\0'; break;
+        /* SPF */        case  99: memcpy(buffer, rdata, rdataLength); *(buffer+rdataLength) = '\0'; break;
                          default: *buffer = '\0'; break;
     }
     return buffer;

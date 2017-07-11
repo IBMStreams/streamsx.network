@@ -214,6 +214,10 @@ static void init_ports(void) {
 		    port_id, ret);
 	}
 
+    uint16_t mtu = STREAMS_SOURCE_MTU_DEFAULT;
+    ret = rte_eth_dev_set_mtu(port_id, mtu);
+    RTE_LOG(INFO, STREAMS_SOURCE, " Set MTU to %d, status : %d\n", mtu, ret);
+
 	/* Initialize tx queues for the port */
 	queue_id = 0;
 	ret = rte_eth_tx_queue_setup(port_id, queue_id, STREAMS_SOURCE_TX_DESC_DEFAULT, socket_id, &tx_conf_);
