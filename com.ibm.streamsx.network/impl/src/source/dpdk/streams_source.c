@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <time.h>
 #include <getopt.h>
 #include <semaphore.h>
 #include <pwd.h>
@@ -84,6 +85,26 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
     printf("STREAMS_SOURCE: streams_operator_init(lcoreMaster=%d, lcore=%d, nicPort=%d, nicQueue=%d, promiscuous=%d, ...) starting ...\n", lcoreMaster, lcore, nicPort, nicQueue, promiscuous); 
     
     if(firstInitComplete == 0) {
+
+        int time_ok = 0;
+        struct timespec now_ts;
+        memset(&now_ts, 0, sizeof(struct timespec));
+        if(clock_gettime(CLOCK_REALTIME, &now_ts) == 0) {
+            struct tm now_struct;
+            memset(&now_struct, 0, sizeof(struct tm));
+            if(gmtime_r(&now_ts.tv_sec, &now_struct) != NULL) {
+                char now_string[64];
+                memset(now_string, 0, 64);
+                if(strftime(now_string, 64, "%Y-%m-%d %H:%M:%S", &now_struct) > 0) {
+                    printf("STREAMS_SOURCE: streams_operator_init() entered for first time, at %sZ\n", now_string);
+                    time_ok = 1;
+                }
+            }
+        }
+        if(!time_ok) {
+            printf("STREAMS_SOURCE: streams_operator_init() entered for first time, but not sure when.\n");
+        }
+
         const char *homeDir = getenv("HOME");
         const uid_t uid = getuid(); 
         const char *newHomeDir = getpwuid(getuid())->pw_dir;
