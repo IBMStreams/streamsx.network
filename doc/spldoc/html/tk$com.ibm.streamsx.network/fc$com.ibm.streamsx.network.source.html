@@ -22,77 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; C++ Native Functions</p>
 
 </div>
 
 <div class="section">
 This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> PacketLiveSource_result_functions  </dd>
-
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
-<dl class="dl" compact="compact">
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsDropped"><tt class="ph tt">      public uint64 metricsIntervalPacketsDropped()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsReceived"><tt class="ph tt">      public uint64 metricsIntervalPacketsReceived()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets received from the network interface  during the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__packetsDropped"><tt class="ph tt">      public uint64 packetsDropped()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__packetsReceived"><tt class="ph tt">      public uint64 packetsReceived()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
-</dl>
-
 </div>
 
 <div class="section">
@@ -567,10 +502,30 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsDropped"><tt class="ph tt">      public uint64 metricsIntervalPacketsDropped()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the PacketFileSource operator.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsProcessed"><tt class="ph tt">      public uint64 metricsIntervalPacketsProcessed()      </tt>   </dt>
 
    <dd class="dd">
 <p class="p">This function returns the number of network packets processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsReceived"><tt class="ph tt">      public uint64 metricsIntervalPacketsReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets received from the network interface  during the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the PacketFileSource operator.
 </p>
 
    </dd>
@@ -587,10 +542,30 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__packetsDropped"><tt class="ph tt">      public uint64 packetsDropped()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the PacketFileSource operator.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__packetsProcessed"><tt class="ph tt">      public uint64 packetsProcessed()      </tt>   </dt>
 
    <dd class="dd">
 <p class="p">This function returns the number of network packets processed by the operator since it started, including the current packet, but excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__packetsReceived"><tt class="ph tt">      public uint64 packetsReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the PacketFileSource operator.
 </p>
 
    </dd>

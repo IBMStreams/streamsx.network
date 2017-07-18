@@ -13,7 +13,7 @@ composite LivePacketLiveSourceBasic1 {
 
     param
     expression<rstring> $networkInterface: getSubmissionTimeValue("networkInterface", "eth0");
-    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "30.0" );
 
     type
 

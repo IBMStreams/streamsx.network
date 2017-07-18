@@ -64,6 +64,7 @@ private:
   int32_t maximumLength;
   int32_t bufferSize;
   bool promiscuous;
+  bool jMirrorCheck;
   double timeout;
   double metricsInterval;
   std::string inputFilter;

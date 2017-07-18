@@ -57,10 +57,6 @@
   
 </div>
 
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SamplePacketFileSource/op$sample$TestPacketFileSourceFull.svg" width="232" height="107"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -75,6 +71,14 @@
 </div>
 
 <div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketFileSource/op$sample$TestPacketFileSourceFull.svg" width="232" height="107"/>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
@@ -93,9 +97,13 @@
      type
  
      PacketType =
+         uint64 packetsReceived,             // total number of packet received, as of last metrics interval
+         uint64 packetsDropped,              // total number of packet dropped, as of last metrics interval
          uint64 packetsProcessed,            // total number of packets processed by operator, so far
          uint64 bytesProcessed,             // total number of bytes of packet data processed by operator, so far
          float64 metricsIntervalElapsed,     // elapsed time since last metrics interval, in seconds
+         uint64 metricsIntervalPacketsReceived,  // number of packets received since last metrics interval
+         uint64 metricsIntervalPacketsDropped,   // number of packets dropped since last metrics interval
          uint64 metricsIntervalPacketsProcessed, // number of packets processed since last metrics interval
          uint64 metricsIntervalBytesProcessed,  // number of bytes processed since last metrics interval
          boolean metricsUpdated,             // true if metrics have been updated since previous output tuple
@@ -153,9 +161,13 @@
          param
              pcapFilename: $pcapFilename;
          output Out:
+             packetsReceived = packetsReceived(),
+             packetsDropped = packetsDropped(),
              packetsProcessed = packetsProcessed(),
              bytesProcessed = bytesProcessed(),
              metricsIntervalElapsed = metricsIntervalElapsed(),
+             metricsIntervalPacketsReceived = metricsIntervalPacketsReceived(),
+             metricsIntervalPacketsDropped = metricsIntervalPacketsDropped(),
              metricsIntervalPacketsProcessed = metricsIntervalPacketsProcessed(),
              metricsIntervalBytesProcessed = metricsIntervalBytesProcessed(),
              metricsUpdated = metricsUpdated(),

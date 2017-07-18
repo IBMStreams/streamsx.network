@@ -78,6 +78,8 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
       
   // ----------- operator parameters (constant after constructor executes) ----------
 
+  std::string buffersizes;
+  bool jMirrorCheck;
   double metricsInterval;
 
   // ----------- operator state variables ----------

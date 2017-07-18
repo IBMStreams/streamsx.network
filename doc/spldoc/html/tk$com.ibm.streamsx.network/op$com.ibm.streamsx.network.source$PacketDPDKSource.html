@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketDPDKSource</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; PacketDPDKSource</p>
 
 </div>
 
@@ -32,7 +32,32 @@
 
 <div class="section">
 
-<p class="p">PacketDPDKSource is an operator for the IBM InfoSphere Streams product that captures live network packets from one of the network interfaces attached to the machine where it executes. The operator function and structure are very similar to PacketLiveSource; see that operator's documentation for details of common functions and general background.  The primary difference between these related operators is that PacketDPDKSource leverages the DPDK libraries available at <a class="xref" href="http://www.dpdk.org">http://www.dpdk.org</a> for higher performance and lower processing overhead.
+</div>
+
+<div class="section"><h2 class="title sectiontitle">introduction 
+</h2>
+
+<p class="p">PacketDPDKSource is an operator for the IBM InfoSphere Streams product that receives network packets from a supported ethernet adapter. The operator function and structure are similar to PacketLiveSource; see that operator's documentation for details of common functions and general background.  The primary difference between these related operators is that PacketDPDKSource leverages the  <a class="xref" href="http://www.dpdk.org">DPDK library</a> for higher performance.
+</p>
+
+<p class="p">DPDK supports a variety of <a class="xref" href="http://www.dpdk.org/doc/nics">ethernet adapters</a>.  The PacketDPDKSource operator has been tested with these adapters:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> Mellanox ConnectX-3</li>
+
+<li class="li"> Mellanox ConnectX-3 Pro</li>
+
+<li class="li"> Intel e1000</li>
+
+<li class="li"> Intel I350</li>
+
+</ul>
+
+</div>
+
+<p class="p">DPDK stores network packets received by a supported ethernet adapter in memory that is  directly accessible by the PacketDPDKSource operator, bypassing the Linux kernel. This reduces overhead and allows the PacketDPDKSource operator to ingest packets at a higher rate than the PacketLiveSource operator.  The PacketDPDKSource operator requires a dedicated processor core, which must be specified explicitly, and which runs at 100% CPU utilization.
 </p>
 
 <p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions, and any of these functions, which are specific to the PacketFileSource operator:
@@ -46,7 +71,7 @@
 
 </div>
 
-<p class="p">The PacketDPDKSource operator steps quietly over 'jmirror' headers prepended to packets by Juniper Networks 'mirror encapsulation'.
+<p class="p">The PacketDPDKSource operator can be configured to step quietly over 'jmirror' headers prepended to packets by Juniper Networks 'mirror encapsulation'.
 </p>
 
 <p class="p">This operator is part of the network toolkit. To use it in an application, include this statement in the SPL source file:
@@ -62,286 +87,338 @@ use com.ibm.streamsx.network.source::*;
 
 </div>
 
-<div class="section"><h2 class="title sectiontitle">Promiscuous Mode
+<div class="section"><h2 class="title sectiontitle">parallelization
 </h2>
 
-<p class="p">Network interfaces normally ignore packets that are not addressed to them. However, when 'promiscious' mode is enabled on a network interface, it can capture all network packets on its ethernet segment, even those that are not addressed to it.  This is sometimes referred to as "network sniffing".  Modern ethernet switches normally send network interfaces only packets that are addressed to them; 'promiscious' mode is useful only when a switch has been specifically configured to send packets to a network interface that are not addressed to it. This is sometimes referred to as "mirroring".
+<p class="p">DPDK can distribute network packets received by one ethernet adapter  across multiple PacketDPDKSource operators.  This can increase an application's packet rate by parallelizing its analytics. Note that each PacketDPDKSource operator requires a separate processor core, which runs at 100% CPU utiliziation.
 </p>
 
-<p class="p">The PacketDPDKSource operator will enable 'promiscuous' mode in a ethernet interface when its 'promiscous' parameter is set to <tt class="ph tt">true</tt>.
+<p class="p">DPDK requires that the total number of PacketDPDKSource operators be a power of 2, that is, the total number of PacketDPDKSource operators must be 1, 2, 4, 8, or 16. Packets received by the network adapter will be distributed across all of the operators, which will run in parallel.  Packets are distributed according to a hash of their source and destination addresses and ports, so request and response packets that belong to the same TCP transaction are all sent to  the same operator.
 </p>
 
 </div>
 
-<div class="section"><h2 class="title sectiontitle">Dependencies
+<div class="section"><h2 class="title sectiontitle">promiscuous mode
 </h2>
 
-<div class="p">The PacketDPDKSource operator depends upon the DPDK libraries available from <a class="xref" href="http://dpdk.org">http://dpdk.org</a>. The library must be installed on the machine where this operator is built.   It has been tested with the following versions:
-<ul class="ul">
-<li class="li"> DPDK 2.2</li>
-
-</ul>
-
-</div>
-
-<div class="p">The base DPDK library supports a wide range of NICs as described at <a class="xref" href="http://dpdk.org">http://dpdk.org</a>.  For IBM Streams, we have tested the following:
-<ul class="ul">
-<li class="li"> Mellanox CX-3</li>
-
-<li class="li"> Mellanox CX-3 Pro</li>
-
-<li class="li"> Intel e1000</li>
-
-</ul>
-
-</div>
-
-<p class="p">There are very good documents for DPDK build/install/use on the <a class="xref" href="http://dpdk.org/doc/guides/linux_gsg/index.html">DPDK website</a> that should be referenced.  Here are some notes of the steps that will help getting started on Streams:
+<p class="p">Ethernet adapters normally ignore packets that are not addressed to them. However, when 'promiscious' mode is enabled, and adapter can capture all network packets on its ethernet segment, even those that are not addressed to it.  This is sometimes referred to as "network sniffing".   However, ethernet switches normally send only packets that are addressed to the adapter; 'promiscious' mode is useful only when a switch has been specifically configured to send packets that are not addressed to the adapter. This is sometimes referred to as "mirroring".
 </p>
 
-<div class="p">
-<ul class="ul">
-<li class="li"> Download and untar the dpdk.tgz file from <a class="xref" href="http://dpdk.org">http://dpdk.org</a>.</li>
+<p class="p">The PacketDPDKSource operator will enable 'promiscuous' mode  when its 'promiscous' parameter is set to <tt class="ph tt">true</tt>.
+</p>
 
-<li class="li">
-<p class="p"> Set environment variables (these are needed for DPDK and Streams builds and depend on    your specific platform):
+</div>
+
+<div class="section"><h2 class="title sectiontitle">setup for DPDK
+</h2>
+
+<p class="p">The DPDK library requires some setup that is specific to the hardware and software configuration of your machine. The notes below offer general guidelines for this setup, and examples for an Intel processor with a Mellanox ethernet adapter. You will need to adapt the guidelines to match your configuration.
+</p>
+
+<p class="p">You will need 'root' privileges for some steps below. They are indicated by the <tt class="ph tt">sudo</tt> command in the examples.
+</p>
+
+<p class="p"><strong class="ph b">Linux dependencies</strong>
+</p>
+
+<p class="p">DPDK depends upon additional Linux software packages, beyond those required for Streams. In particular, it requires libraries that match the specific version of the Linux kernel. To install these libraries, type these commands at a prompt:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-export EXTRA_CFLAGS=-fPIC
-export RTE_SDK=/home/&lt;userid&gt;/dpdk-2.2.0   # (point to install directory)
-
-export RTE_TARGET=x86_64-native-linuxapp-gcc
-   OR
-export RTE_TARGET=ppc_64-default-linuxapp-gcc
+sudo yum install pciutils
+sudo yum install glibc-devel
+sudo yum install libibverbs-devel
+sudo yum install "kernel-devel-$( uname -r )"
 </pre>
 
 
 </div>
-</li>
 
-<li class="li">
-<p class="p"> Configure the DPDK build from the top directory
+<p class="p"><strong class="ph b">gathering system information for DPDK</strong>
+</p>
+
+<p class="p">To configure the PacketDPDKSource operator, you will need to know how many processors the machine has, and how they are distributed amoung the machine's NUMA nodes. Use this command to display that information:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+lscpu
+</pre>
+
+
+</div>
+
+<p class="p">You will also need the PCI bus address of the  adapter, the Linux interface names of the adapter's ports, and the NUMA node number the adapter is connected to.
+</p>
+
+<p class="p">For example, to determine the PCI bus address of a Mellanox adapter,  enter this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+/usr/sbin/lspci | grep -i mellanox | gawk '{print $1}'
+</pre>
+
+
+</div>
+
+<p class="p">and then, to determine the Linux interface names of the adapter's ports,  enter this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+ls -l /sys/class/net | grep $DPDK_DEVICE | gawk '{print $9}'
+</pre>
+
+
+</div>
+
+<p class="p">and then, to determine the NUMA node number the adapter is connected to,  enter this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+cat /sys/class/net/$DPDK_INTERFACE/device/numa_node
+</pre>
+
+
+</div>
+
+<p class="p"><strong class="ph b">configuring a Linux user group for DPDK</strong>
+</p>
+
+<p class="p">You will need a Linux user group for DPDK. To create the user group and add your own user account to it,  enter these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo groupadd dpdk
+sudo usermod -a -G dpdk $USER
+sudo cat "@dpdk - memlock unlimited" &gt;/etc/security/limits.conf
+</pre>
+
+
+</div>
+
+<p class="p">You will need to log off and log back on for this to take effect.  To verify that your user account is a member of the group, enter this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+id
+</pre>
+
+
+</div>
+
+<p class="p">The PacketDPDKSource operator will need read/write permission for the Linux interface for the adapter's port.  To grant that permission to all user accounts that are members of the 'dpdk' user group,  enter these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo chown root:dpdk /sys/class/infiniband/mlx4_0/device/net/$DPDK_INTERFACE/flags
+sudo chmod 666 /sys/class/infiniband/mlx4_0/device/net/$DPDK_INTERFACE/flags
+</pre>
+
+
+</div>
+
+<p class="p"><strong class="ph b">configuring Linux 'hugepages' for DPDK</strong>
+</p>
+
+<p class="p">DPDK uses Linux 'hugepages' for its buffers. These buffers must be allocated in the memory connected to the  same NUMA node as the ethernet adapter, and may use either 2MB or 1GB 'hugepages'. You must create mount points for the 'hugepages' in the Linux file system and grant DPDK read/write permissions for them.
+</p>
+
+<p class="p">For example, to allocate 500 2MB 'hugepages' for DPDK buffers, enter these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo mkdir /dev/hugepages-2MB 
+sudo mount -t hugetlbfs nodev /dev/hugepages-2MB -o pagesize=2MB
+sudo chmod 770 /dev/hugepages-2MB
+sudo chown root:dpdk /dev/hugepages-2MB
+sudo /usr/bin/bash -c "echo 500 &gt; /sys/devices/system/node/node$DPDK_NODE/hugepages/hugepages-2048kB/nr_hugepages"
+</pre>
+
+
+</div>
+
+<p class="p">For another example, to allocate one 1GB 'hugepages' for DPDK buffers, enter these commands at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo mkdir /dev/hugepages-1GB 
+sudo mount -t hugetlbfs nodev /dev/hugepages-1GB -o pagesize=1GB 
+sudo chmod 770 /dev/hugepages-1GB
+sudo chown root:dpdk /dev/hugepages-1GB
+sudo /usr/bin/bash -c "echo 1 &gt; /sys/devices/system/node/node$DPDK_NODE/hugepages/hugepages-1048576kB/nr_hugepages"
+</pre>
+
+
+</div>
+
+<p class="p">To verify that 'hugepages' have been allocated, enter this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+grep -i -h hugepages /sys/devices/system/node/node*/meminfo
+</pre>
+
+
+</div>
+
+<p class="p"><strong class="ph b">setting environment variables for DPDK</strong>
+</p>
+
+<p class="p">DPDK requires several environment variables.  To set them, enter these commands at a prompt, or append them to your $HOME/.bashrc script:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+export RTE_SDK=$HOME/dpdk-17.02.1
+[[ $( uname -m ) == "x86_64" ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
+[[ $( uname -m ) == "ppc64le" ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
+[[ -x /usr/sbin/lspci ]] &amp;&amp; export DPDK_DEVICE=$( /usr/sbin/lspci | grep -i mellanox | gawk '{print $1}' )
+[[ -n $DPDK_DEVICE ]] &amp;&amp; export DPDK_INTERFACES=( $( ls -l /sys/class/net | grep $DPDK_DEVICE | gawk '{print $9}' ) )
+[[ -n $DPDK_INTERFACES ]] &amp;&amp; export DPDK_INTERFACE=${DPDK_INTERFACES[0]}
+</pre>
+
+
+</div>
+
+<p class="p">After adding these commands to your $HOME/.bashrc file,  you will need to log off and log back on for them to take effect.  To verify that the environment variables are set, enter this command at a prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+export | grep -E 'RTE_|DPDK_'
+</pre>
+
+
+</div>
+
+<p class="p"><strong class="ph b">installing the DPDK library</strong>
+</p>
+
+<p class="p">The PacketDPDKSource operator depends upon DPDK library version 17.02.1, available from <a class="xref" href="http://dpdk.org">http://dpdk.org</a>. The library must be configured for your machine and ethernet adapter, and compiled from source code.
+</p>
+
+<p class="p">To get the DPDK source code, enter these lines at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+mkdir -p $RTE_SDK
+wget http://fast.dpdk.org/rel/dpdk-17.02.1.tar.xz
+tar -x -v -f dpdk-17.02.1.tar.xz -C $RTE_SDK --strip-components=1
+</pre>
+
+
+</div>
+
+<p class="p">To configure DPDK for your machine, enter these lines at a command prompt:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
 cd $RTE_SDK
-make config T=x86_64-native-linuxapp-gcc
-   OR
-make config T=ppc_64-power8-linuxapp-gcc
+make config T=$RTE_TARGET O=$RTE_TARGET
 </pre>
 
 
 </div>
-</li>
 
-<li class="li">
-<p class="p"> Change configuration as needed.  For example:
+<p class="p">To configure DPDK for a Mellonox ethernet adapter, enter these lines at a command prompt:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-# Edit the .config files
-vi ./build/.config
-
-# Set key parameters
-CONFIG_RTE_BUILD_COMBINE_LIBS=y
-CONFIG_RTE_LIBRTE_MLX4_PMD=y (MLX4 NIC)
-CONFIG_RTE_BUILD_SHARED_LIB=y (e1000 NIC)
-   OR
-CONFIG_RTE_BUILD_SHARED_LIB=n (MLX4 NIC)
-
-# Build the library
-make
-
-# Complete the build
-make install T=x86_64-native-linuxapp-gcc
-   OR
-make install T=ppc_64-power8-linuxapp-gcc
+cd $RTE_SDK/$RTE_TARGET
+sed -i.bak s/CONFIG_RTE_BUILD_SHARED_LIB=./CONFIG_RTE_BUILD_SHARED_LIB=n/ ./.config
+sed -i.bak s/CONFIG_RTE_LIBRTE_MLX4_PMD=./CONFIG_RTE_LIBRTE_MLX4_PMD=y/ ./.config
 </pre>
 
 
 </div>
-</li>
 
-<li class="li">
-<p class="p"> There is also a Streams to DPDK glue library that must be built.  To   do this, make sure the RTE environment variables noted above are set and then   do the following:
+<p class="p">To compile the DPDK source code into a library, enter these lines at a command prompt:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-cd &lt;toolkit-directory&gt;/com.ibm.streamsx.network/impl/src/source/dpdk
-make
+cd $RTE_SDK/$RTE_TARGET
+EXTRA_CFLAGS=-fPIC make
 </pre>
 
 
 </div>
-</li>
 
-<li class="li">
-<p class="p"> Build the Streams example application with the following steps:
+<p class="p"><strong class="ph b">installing the Streams DPDK 'glue' library</strong>
+</p>
+
+<p class="p">The PacketDPDKSource operator is part of the network toolkit for Streams, which contains a 'glue' library for DPDK.  To get the toolkit and compile the 'glue' library, enter these commands at a prompt:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-cd &lt;toolkit-directory&gt;/samples/SamplePacketDPDKSource
-
-# Update the sample Makefile to use the appropriate libraries for your adapter type
-vi Makefile
-
-# Modify the operator parameters as needed for your NIC and environment
-vi TestPacketDPDKSource.spl
-make
+mkdir -p $HOME/git
+cd $HOME/git
+git clone git@github.com:IBMStreams/streamsx.network.git
+cd $HOME/git/streamsx.network
+ant toolkit
+EXTRA_CFLAGS=-fPIC ant dpdkglue
 </pre>
 
 
 </div>
-</li>
 
-<li class="li">
-<p class="p"> Create a dpdk group for permisssions.
+<p class="p"><strong class="ph b">compiling SPL applications with DPDK</strong>
+</p>
+
+<p class="p">Streams SPL applications that include the PacketDPDKSource operator must be compiled with  additional options for the GNU compiler and linker, like this:
 </p>
 
 <div class="p">
 <pre class="pre codeblock">
-groupadd dpdk
-usermod -a -G dpdk &lt;userid&gt;
-groups &lt;userid&gt;
-
-# You may need to log out and back in to make sure your user is actively in the group.
-# Alternatively, you could use newgrp to change the current default group for the current shell session:
-newgrp dpdk
+sc *streams-compiler-options* "--cxx-flags=-fPIC -m64 -pthread -fopenmp" "--ld-flags=-Wl,-L -Wl,$RTE_SDK/$RTE_TARGET/lib -Wl,--no-as-needed -Wl,-export-dynamic -Wl,--whole-archive -Wl,-ldpdk -Wl,-libverbs -Wl,--start-group -Wl,-lrt -Wl,-lm -Wl,-ldl -Wl,--end-group -Wl,--no-whole-archive -Wl,-Map=app.map -Wl,--cref" *other-streams-compiler-options*
 </pre>
 
 
 </div>
-</li>
 
-<li class="li">
-<p class="p"> Configure and enable access to hugepages (You'll need to be root to do most of these):
+<p class="p"><strong class="ph b">loose ends</strong>
 </p>
 
-<div class="p">
-<pre class="pre codeblock">
-# Make sure hugetlbfs is mounted, and the appropriate group owner and permissions are set:
-# (May need to umount /dev/hugepages first, to make sure the right gid and mode settings take.)
-mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
-
-# Enable a suitable number of huge pages of the appropriate size, on the appropriate NUMA nodes
-# The exact number and size of hugepages will depend on your workload and packet rates.
-# Note: Fewer, larger hugepages can be used if available, such as on POWER systems.
-# The exact NUMA nodes that need huge pages will depend on adapter location and which CPUs the
-# DPDK application threads will be running on.
-echo 1000 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
-
-# Ensure all users in the dpdk group can lock an unlimited amount of memory.
-# Add a line to /etc/security/limits.conf like the following:
-@dpdk - memlock unlimited
-# This will take effect at next login.
-
-# An alternative to setting up huge pages after booting each time, you could add
-# the mount options to /etc/fstab or a systemd unit file, and add a line to
-# /etc/sysctl.conf with the number of huge pages to reserve:
-vm.nr_hugepages = 1000
-# These will be spread over the NUMA nodes, and be of the default size for the system.
-# If you change these files, you will not need to run the explicit mount or echo 1000
-# commands, above, before running the DPDK applications (provided you have rebooted
-# the system after making the changes).
-</pre>
-
-
-</div>
-</li>
-
-<li class="li">
-<p class="p"> Additional Items for e1000 Adapters (RHEL7):
+<p class="p">TODO: what kernel modules (besides ib_uverbs) need to be loaded for Mellanox devices?
 </p>
 
-<div class="p">
-<pre class="pre codeblock">
-# Bring the interface down
-ifconfig &lt;eth-interface&gt; down
-  OR
-ip link set dev &lt;eth-interface&gt; down
-
-# Load the intel DPDK uio driver:
-modprobe uio
-insmod &lt;dpdk-path&gt;/dpdk-2.2.0/build/kmod/igb_uio.ko
-
-# Bind the interface to the intel DPDK uio driver:
-&lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --bind=igb_uio &lt;eth-interface&gt;
-&lt;dpdk-path&gt;/dpdk-2.2.0/tools/dpdk_nic_bind.py --status
-
-# Ensure the dpdk group has full access to the new uio device:
-chown root:dpdk /dev/uio0
-chmod 660 /dev/uio0
-
-# Ensure the dpdk group has full access to config and resources for the new uio device:
-chown root:dpdk /sys/class/uio/uio0/device/config
-cdmod 660 /sys/class/uio/uio0/device/config
-chown root:dpdk /sys/class/uio/uio0/device/resource*
-chmod 660 /sys/class/uio/uio0/device/resource*
-
-# Alternatively, a system-level udev rule could be used to ensure the dpdk group had access to
-# any new uio device by adding a file at /etc/udev/rules.d/10-dpdk.rules with content like:
-SUBSYSTEM=="uio", GROUP="dpdk", MODE="0660"
-# but note that this will not give access to the config and resource files, so that step would still
-# need to be done manually (or in a script).  If you do add a udev rule, it will take effect at the
-# next reboot, or, after forcing udev to reload rules (but then only at the time of the next uio bind):
-udevadm control --reload
-
-# If you need a particular interface to always be bound to the uio driver, at boot
-# time, the easiest way is to add the ifconfig down, modprobe/insmod,
-# dpdk_nic_bind.py, and chown/chmod commands to a simple startup script.
-</pre>
-
-
-</div>
-</li>
-
-<li class="li">
-<p class="p"> Additional Items for Mellanox Adapters (RHEL7).  Assumes OFED packages have been installed.   (See <a class="xref" href="http://www.mellanox.com/page/products_dyn?product_family=209&amp;mtag=pmd_for_dpdk">Mellanox Poll Mode Driver for DPDK</a> and <a class="xref" href="http://www.mellanox.com/page/products_dyn?product_family=26&amp;mtag=linux_sw_drivers">Mellanox OFED</a> for more information.)
+<p class="p">TODO: can master thread run on the 'other' NUMA core ?
 </p>
 
-<div class="p">
-<pre class="pre codeblock">
-# Configure IB module.
-# Add a line to (or create) /etc/modprobe.d/mlnx.conf:
-options ib_uverbs disable_raw_qp_enforcement=1
-
-# Make sure the mlx4 driver is re-loaded and uses the above settings:
-modprobe mlx4_en
-/etc/init.d/openibd restart
-# "ibstat" and "/etc/init.d/openibd status" are useful commands to verify things worked.
-</pre>
-
-
-</div>
-</li>
-
-<li class="li">
-<p class="p"> Other Adapters may require other additional items.  See the DPDK documentation for more details.
+<p class="p">TODO: default for 'lcoreMaster' parameter is '-1' ... what does that mean?
 </p>
-</li>
 
-<li class="li">
-<div class="p"> Running the Streams application
-<pre class="pre codeblock">
-# Submit normally:
-streamtool submitjob output/TestPacketDPDKSource.sab
+<p class="p">TODO: what value should be specified for parameter 'nicPort'?
+</p>
 
-# Packet output can be found in the "data" directory.
-</pre>
+<p class="p">TODO: DPDK fails if only one PacketDPDKSource operator is configured!
+</p>
 
+<p class="p">TODO: DPDK fails if not executed as 'root'!
+</p>
 
-</div>
-</li>
+<p class="p">TODO: DPDK fails to allocate contiguous bufferspace when plenty is available!
+</p>
 
-</ul>
+<p class="p">TODO: DPDK hangs or throws exception on termination!
+</p>
 
-</div>
+<p class="p">TODO: DPDK fails with 4.2, works with Streams 4.1!
+</p>
 
 </div>
 
@@ -363,14 +440,14 @@ streamtool submitjob output/TestPacketDPDKSource.sab
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 6 parameters.
+  <dd class="dd">This operator supports 9 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>
+<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__buffersizes">buffersizes</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
 
 </p>
 </dd>
@@ -397,7 +474,7 @@ streamtool submitjob output/TestPacketDPDKSource.sab
  
   <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__providessinglethreadedexecutioncontext">Threading</a></dt>
 
-  <dd class="dd"><tt class="ph tt">Always</tt> - Operator always provides a single threaded execution context.</dd>
+  <dd class="dd"><tt class="ph tt">Never</tt> - Operator never provides a single threaded execution context.</dd>
 
  
 </dl>
@@ -462,22 +539,18 @@ streamtool submitjob output/TestPacketDPDKSource.sab
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 6 parameters.
-<p class="p"> Required: 
-<a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>
-
-</p>
-
-<p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>
-
-</p>
-<dl class="dl">
+This operator supports 9 parameters.<dl class="dl">
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcore"><!-- --></a><tt class="ph tt">lcore</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcoreMaster"><!-- --></a><tt class="ph tt">lcoreMaster</tt></dt>
 
      <dd class="dd">
-<p class="p">Logical core number on which this operator will run.
+<p class="p">This optional parameter specifies a logical processor core for the DPDK master thread.  This thread is not used for receiving packets, and does not have high CPU utiliztion. If the machine has more than one NUMA node, specify a core on a node that does not have the ethernet adapter connected to it. 
+</p>
+
+<p class="p">When multiple PacketDPDKSource operators are configured for the same ethernet adapter, all operators must specify the same value with their 'lcoreMaster' parameters.
+</p>
+
+<p class="p">To determine how many processor cores your machine has, and which cores are connected to  which NUMA nodes, execute the <tt class="ph tt">lscpu</tt> command at a Linux prompt.
 </p>
 
   <dl class="dl">
@@ -486,6 +559,50 @@ This operator supports 6 parameters.
 
      <dd class="dd">   <ul class="sl simple">
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcore"><!-- --></a><tt class="ph tt">lcore</tt></dt>
+
+     <dd class="dd">
+<p class="p">This required parameter specifies a logical processor core for the DPDK packet receive thread. The core specified must belong to the NUMA node the ethernet adapter is connected to. The receive thread will run the specified core at 100% CPU utilization.
+</p>
+
+<p class="p">If multiple PacketDPDKSource operators are configured for the same ethernet adapter, each operator must specify a different value with its 'lcoreMaster' parameter.  The total number of PacketDPDKSource operators must be a power of 2, that is, the total number of PacketDPDKSource operators must be 1, 2, 4, 8, or 16. Packets received by the network adapter will be distributed across all of the operators, which will run in parallel.
+</p>
+
+<p class="p">To determine how many processor cores your machine has, and which cores are connected to  which NUMA nodes, execute the <tt class="ph tt">lscpu</tt> command at a Linux prompt.  To determine which NUMA node your ethernet adapter is connected to, look in the file '/sys/class/net/$DPDK_INTERFACE/device/numa_node'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
@@ -506,10 +623,13 @@ This operator supports 6 parameters.
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcoreMaster"><!-- --></a><tt class="ph tt">lcoreMaster</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicPort"><!-- --></a><tt class="ph tt">nicPort</tt></dt>
 
      <dd class="dd">
-<p class="p">Logical core number to be used for the master DPDK thread.
+<p class="p">This optional parameter specifies which port of the ethernet adapter  the operator will receive network packets from. This applies only to adapters with multiple ports. 
+</p>
+
+<p class="p">The default value is '0' if this parameter is not specified.
 </p>
 
   <dl class="dl">
@@ -518,6 +638,205 @@ This operator supports 6 parameters.
 
      <dd class="dd">   <ul class="sl simple">
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicQueue"><!-- --></a><tt class="ph tt">nicQueue</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies which queue of received packets the operator will receive. This applies only when multiple PacketDPDKSource operators are configured for the same ethernet adapter. The value must be between 0 and 'N-1', where N is the total number of operators, and each operator must specify a different queue, so that all queues are connected to an operator.
+</p>
+
+<p class="p">Note that DPDK requires the total number of queues and operators be a power of 2, that is, the total number of queues and operators must be 1, 2, 4, 8, or 16. DPDK will distribute packets across all of the queues, and therefore across all of the operators.
+</p>
+
+<p class="p">The default value is '0' if this parameter is not specified.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__buffersizes"><!-- --></a><tt class="ph tt">buffersizes</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies how much buffer space, in megabytes,  to allocate from available 2MB Linux 'hugepages' for each NUMA node, specified as a string containing comma-separated values.  For the NUMA node the ethernet adapter is connected to, specify an even number of megabytes. For other NUMA nodes, if any, specify zero.
+</p>
+
+<p class="p">For example, on a machine with one NUMA node, specify "100" to allocate 100 megabytes of buffer space. For another example, on a machine with two NUMA nodes,  where the ethernet adapter is connected to the second node, specify "0,100" to allocate 100 megabytes of buffer space on the second NUMA node. If multiple PacketDPDKSource operators are configured for the same network adapter,  all operators should specify the same values for their 'buffersizes' parameter.
+</p>
+
+<p class="p">To determine which NUMA node your ethernet adapter is connected to, enter the command <tt class="ph tt">cat /sys/class/net/$DPDK_INTERFACE/device/numa_node</tt> at a Linux prompt. To determine how much buffer space is available in the 'hugepages' for that NUMA node, enter the command <tt class="ph tt">grep -i -h hugepages /sys/devices/system/node/node*/meminfo</tt> at a Linux prompt.
+</p>
+
+<p class="p">If this parameter is not specified,  DPDK will allocate all available 2MB Linux 'hugepages' for its buffer space.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">PacketDPDKSource result functions</a>.  
+</p>
+
+<p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all packets processed to be emitted by all output ports.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
@@ -575,117 +894,6 @@ This operator supports 6 parameters.
      </dd>
 
   
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicPort"><!-- --></a><tt class="ph tt">nicPort</tt></dt>
-
-     <dd class="dd">
-<p class="p">NIC port of type uint32 which sources packets for this operator instance.  Obtaining the proper mapping may require use of multiple tools, and varies by NIC.  
-</p>
-
-<p class="p">Suggested tools to help identify NIC ports:
-</p>
-
-<p class="p">   - ifconfig
-</p>
-
-<p class="p">   - dpdk-*/tools/dpdk_nic_bind.py --status
-</p>
-
-<p class="p">   - ibstat (for Mellanox NICs)
-</p>
-
-<p class="p">   - lspci | grep -i net
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicQueue"><!-- --></a><tt class="ph tt">nicQueue</tt></dt>
-
-     <dd class="dd">
-<p class="p">NIC queue of type int32 which sources packets for this operator instance.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
 </dl>
 
 </div>
@@ -698,7 +906,7 @@ This operator supports 6 parameters.
 
     <dd class="dd">
 
-<p class="p">This metric counts the number of packets received by the network interface, as counted by <tt class="ph tt">dpdk</tt>
+<p class="p">This metric counts the number of packets received by the ethernet adapter, as counted by DPDK.
 </p>
 
      <p class="p"/>
@@ -711,7 +919,7 @@ This operator supports 6 parameters.
 
     <dd class="dd">
 
-<p class="p">This metric counts the number of packets dropped by the network interface, as counted by <tt class="ph tt">dpdk</tt>
+<p class="p">This metric counts the number of packets dropped by the ethernet adapter, as counted by DPDK.
 </p>
 
      <p class="p"/>
@@ -724,7 +932,7 @@ This operator supports 6 parameters.
 
     <dd class="dd">
 
-<p class="p">This metric counts number of bytes of packet data processed by the operator.
+<p class="p">This metric counts number of packets processed by the operator.
 </p>
 
      <p class="p"/>
@@ -753,14 +961,14 @@ This operator supports 6 parameters.
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies">Libraries</a></strong></p>
 <dl class="dl">
  
-  <dt class="dt dlterm"><tt class="ph tt">General support functions.</tt>  </dt>
+  <dt class="dt dlterm"><tt class="ph tt">          Functions for parsing network headers.</tt>  </dt>
 
 <dd class="dd"/>
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/include</tt></dd>
 
  
  
-  <dt class="dt dlterm"><tt class="ph tt">streams_source interface library to dpdk.</tt>  </dt>
+  <dt class="dt dlterm"><tt class="ph tt">          Streams DPDK 'glue' library 'libstreams_source.a'.</tt>  </dt>
 
 <dd class="dd"/>
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">streams_source</tt></dd>

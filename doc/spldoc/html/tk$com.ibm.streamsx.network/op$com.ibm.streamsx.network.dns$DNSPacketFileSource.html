@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketFileSource</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketFileSource</p>
 
 </div>
 
@@ -454,9 +454,9 @@ export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 6 parameters.
+  <dd class="dd">This operator supports 7 parameters.
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pcapFilename">pcapFilename</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>
+<a class="xref" href="#spldoc_operator__parameter__pcapFilename">pcapFilename</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
 
 </p>
 </dd>
@@ -608,23 +608,15 @@ export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
 
-
-<p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pcapFilename">pcapFilename</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>
-
-</p>
 <dl class="dl">
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__initDelay"><!-- --></a><tt class="ph tt">initDelay</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__pcapFilename"><!-- --></a><tt class="ph tt">pcapFilename</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the number of seconds the operator will wait before it begins to produce tuples.
+<p class="p">This parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies the pathname of a single input PCAP file for the operator to read. 
 </p>
 
-<p class="p">This parameter is allowed only when the <tt class="ph tt">pcapFilename</tt> parameter is also specified.  
-</p>
-
-<p class="p">The default value is '0.0'.
+<p class="p">If the operator is configured without an inport port, this parameter is required; if the operator has an input port, this parameter is not allowed.
 </p>
 
   <dl class="dl">
@@ -632,7 +624,7 @@ export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -704,44 +696,6 @@ export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
-</p>
-
-<p class="p">The default value is '10.0'.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
 
      <dd class="dd">
@@ -777,13 +731,16 @@ export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__pcapFilename"><!-- --></a><tt class="ph tt">pcapFilename</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__initDelay"><!-- --></a><tt class="ph tt">initDelay</tt></dt>
 
      <dd class="dd">
-<p class="p">This parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies the pathname of a single input PCAP file for the operator to read. 
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the number of seconds the operator will wait before it begins to produce tuples.
 </p>
 
-<p class="p">If the operator is configured without an inport port, this parameter is required; if the operator has an input port, this parameter is not allowed.
+<p class="p">This parameter is allowed only when the <tt class="ph tt">pcapFilename</tt> parameter is also specified.  
+</p>
+
+<p class="p">The default value is '0.0'.
 </p>
 
   <dl class="dl">
@@ -791,7 +748,7 @@ export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -836,6 +793,79 @@ export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
 
      <dd class="dd">   <ul class="sl simple">
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+</p>
+
+<p class="p">The default value is '10.0'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1

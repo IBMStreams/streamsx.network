@@ -1,4 +1,4 @@
-#Thu Jan 26 09:35:36 EST 2017
+#Tue Jul 18 14:08:59 EDT 2017
 copytosourcelist=
 hreftargetslist=dita/tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceIncompatibleFlags.xml,dita/toolkits/ix$Function.xml,dita/tk$SampleDNSPacketFileSource/ix$Function.xml,dita/tk$SampleDNSPacketFileSource/ix$Namespace.xml,dita/toolkits/ix$Namespace.xml,dita/tk$SampleDNSPacketFileSource/ix$Operator.xml,dita/toolkits/ix$Operator.xml,dita/tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceResourceRecords.xml,dita/tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceFull.xml,dita/tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceBasic.xml,dita/tk$SampleDNSPacketFileSource/tk$SampleDNSPacketFileSource.xml,dita/toolkits/toolkits.xml,dita/tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceFilter.xml,dita/tk$SampleDNSPacketFileSource/ns$sample.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/streamsdev/git/streamsx.network/samples/SampleDNSPacketFileSource/doc/spldoc
+user.input.dir=/homes/hny5/pring/git/streamsx.network/samples/SampleDNSPacketFileSource/doc/spldoc
 uplevels=../
 tempdirToinputmapdir.relative.value=dita/
 conrefpushfile=conrefpush.list

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestPacketDPDKSource.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestPacketDPDKSource.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestPacketDPDKSource.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SamplePacketDPDKSource.html">SamplePacketDPDKSource 1.0.0</a> &gt; <a class="xref" href="ns$.html">&lt;default&gt;</a> &gt; TestPacketDPDKSource.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$.$TestPacketDPDKSource.html#spldoc_compilationunit__composite_operator__TestPacketDPDKSource">TestPacketDPDKSource</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+    
+      <dt class="dt dlterm splhead-2">Types</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$.$TestPacketDPDKSource.html#spldoc_compilationunit__type__PacketData">PacketData</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestPacketDPDKSource"><h2 class="title sectiontitle splpart">composite TestPacketDPDKSource</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">timeoutInterval</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketDPDKSource/op$.$TestPacketDPDKSource.svg" width="232" height="197"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ public composite TestPacketDPDKSource {   
+ 
+   param
+         expression&lt;float64&gt; $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "10.0" );
+ 
+ 
+ 	graph   
+         // One DPDK operator per NIC port/queue.  In this example we have 1 port 
+         // with 2 queues, so 2 PacketDPDKSource operators are required.
+ 
+         (stream&lt;PacketData&gt;  PacketStream_0 ) = PacketDPDKSource() {
+             param
+                 // Parameters for the DPDK environment on this host.
+                 lcoreMaster: 0;     // Run the master operator on core 0.
+ 
+                 // Parameters for this specific operator.
+                 lcore   : 1;     // Run this ingest operator on core 1.
+                 nicPort : 0;     // Bind to NIC port 0
+                 nicQueue: 0;     // Bind to NIC queue 0
+                 promiscuous: true;
+                 metricsInterval: 1.0;
+             output
+                 PacketStream_0:
+                     timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
+                     packet = PACKET_DATA(),
+                     length = (uint64) PACKET_LENGTH();
+         }
+ 
+         (stream&lt;PacketData&gt;  PacketStream_1 ) = PacketDPDKSource() {
+             param
+                 // Parameters for this specific operator.
+                 lcore   : 2;     // Run this ingest operator on core 2.
+                 nicPort : 0;     // Bind to NIC port 0
+                 nicQueue: 1;     // Bind to NIC queue 1
+                 promiscuous: true;
+                 metricsInterval: 1.0;
+             output
+                 PacketStream_1:
+                     timestampMicroseconds = (uint64) CAPTURE_MICROSECONDS(),
+                     packet = PACKET_DATA(),
+                     length = (uint64) PACKET_LENGTH();
+         }
+ 
+         () as FS_PacketData_0 = FileSink( PacketStream_0 ) {
+             param
+                 file : "PacketStream0.out";
+         }
+ 
+         () as FS_PacketData_1 = FileSink( PacketStream_1 ) {
+             param
+                 file : "PacketStream1.out";
+         }
+ 
+     () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+ 
+         // All of the PacketDPDKSource operators must run in the same PE (process).
+ 	config
+ 	    placement : partitionColocation('SinglePE');
+ 	    tracing   : trace;
+ }
+
+   </pre>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Types</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__type__PacketData"><h2 class="title sectiontitle splpart">PacketData</h2>
+  
+</div>
+<div class="section">
+   <p class="p">
+<tt class="ph tt">PacketData = uint64 timestampMicroseconds, blob packet, uint64 length;</tt>
+   </p>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

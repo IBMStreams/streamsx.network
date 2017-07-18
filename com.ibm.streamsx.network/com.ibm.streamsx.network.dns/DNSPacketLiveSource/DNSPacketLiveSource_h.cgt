@@ -65,6 +65,7 @@ private:
   int32_t processorAffinity;
   int32_t maximumLength;
   int32_t bufferSize;
+  bool jMirrorCheck;
   bool promiscuous;
   double timeout;
   double metricsInterval;

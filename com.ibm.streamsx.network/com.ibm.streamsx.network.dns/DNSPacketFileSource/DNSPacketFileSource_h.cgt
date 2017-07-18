@@ -70,6 +70,7 @@ public:
   std::string pcapFilename;
   double initDelay;
   int32_t processorAffinity;
+  bool jMirrorCheck;
   double metricsInterval;
   std::string inputFilter;
 

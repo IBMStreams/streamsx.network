@@ -1,4 +1,4 @@
-#Thu Jan 26 09:36:37 EST 2017
+#Tue Jul 18 14:09:45 EDT 2017
 copytosourcelist=
 hreftargetslist=tk$SampleNetworkToolkitData/ns$dummy.xml,toolkits/ix$Function.xml,tk$SampleNetworkToolkitData/tk$SampleNetworkToolkitData.xml,toolkits/ix$Namespace.xml,tk$SampleNetworkToolkitData/spl$dummy$Dummy.xml,tk$SampleNetworkToolkitData/ix$Namespace.xml,toolkits/toolkits.xml,tk$SampleNetworkToolkitData/ix$Function.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/home/streamsdev/git/streamsx.network/samples/SampleNetworkToolkitData/doc/spldoc/dita
+user.input.dir=/homes/hny5/pring/git/streamsx.network/samples/SampleNetworkToolkitData/doc/spldoc/dita
 uplevels=
 tempdirToinputmapdir.relative.value=
 conrefpushfile=conrefpush.list

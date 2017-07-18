@@ -22,14 +22,14 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; com.ibm.streamsx.network.dns</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; com.ibm.streamsx.network.dns</p>
 
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Operators</h2>
   
 <ul class="sl simple">
-<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.network.dns$DNSPacketDPDKSource.html">DNSPacketDPDKSource</a></strong>: introduction : DNSPacketDPDKSource is an operator for the IBM Streams product that captures live network packets from one of the network interfaces attached to the machine where it executes.
+<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.network.dns$DNSPacketDPDKSource.html">DNSPacketDPDKSource</a></strong>: introduction : DNSPacketDPDKSource is an operator for the IBM Streams product that receives network packets from a supported ethernet adapter.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.network.dns$DNSPacketFileSource.html">DNSPacketFileSource</a></strong>: DNSPacketFileSource is an operator for the IBM Streams product that reads prerecorded DNS packets from 'packet capture (PCAP)' files, parses the network headers and the fields of the DNS message, and emits tuples containing packet data.
@@ -76,6 +76,9 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring">DNS_ALL_FIELDS(rstring, rstring, rstring)</a></strong>:           This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from all DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:">DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;)</a></strong>:           This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from seleccted DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></strong>:           This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.
@@ -150,10 +153,10 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_NAMESERVER_TYPES">DNS_NAMESERVER_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_OPCODE">DNS_OPCODE()</a></strong>:           This parser result function returns the operation code requested by the DNS client in the current message, for example, 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_OPCODE">DNS_OPCODE()</a></strong>:           This parser result function returns the operation code requested by the DNS client in the current message, for example,  '1' for standard queries,  '2' for inverse queries, or '3' for server status requests.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_CLASS">DNS_QUESTION_CLASS()</a></strong>:           This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records), 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_CLASS">DNS_QUESTION_CLASS()</a></strong>:           This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records),
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_CLASSES">DNS_QUESTION_CLASSES()</a></strong>:           This parser result function returns a list of the 'class' fields in the 'question' resource records in the current message.
@@ -168,13 +171,13 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_NAMES">DNS_QUESTION_NAMES()</a></strong>:           This parser result function returns a list of the 'name' fields in the 'question' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_TYPE">DNS_QUESTION_TYPE()</a></strong>:           This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example: 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_TYPE">DNS_QUESTION_TYPE()</a></strong>:           This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example:  '1' for IP version 4 address to domain name lookup ('A' records), '5' for domain name to canonical domain name lookup ('CNAME' records), '12' for domain name to IP address lookup ('TXT' records), or '28' for IP version 6 address to domain name lookup ('AAAA' records).
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_QUESTION_TYPES">DNS_QUESTION_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'question' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_RESPONSE_CODE">DNS_RESPONSE_CODE()</a></strong>:           This parser result function returns the response code from the DNS server in the current message, for example, 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_RESPONSE_CODE">DNS_RESPONSE_CODE()</a></strong>:           This parser result function returns the response code from the DNS server in the current message, for example,  '0' for OK,  '1' for Format Error,  '2' for Server Failure,  '3' for Name Error,  '4' for not implemented, or '5' for Server Refused.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_RESPONSE_FLAG">DNS_RESPONSE_FLAG()</a></strong>:           This parser result function returns <tt class="ph tt">true</tt> if the current message is a response sent by a DNS server,           or <tt class="ph tt">false</tt> if it is a request sent by a DNS client.
@@ -184,6 +187,9 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__ETHER_DST_ADDRESS">ETHER_DST_ADDRESS()</a></strong>: This function returns the ethernet destination address of the current packet.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__ETHER_DST_ADDRESS_64">ETHER_DST_ADDRESS_64()</a></strong>: This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__ETHER_PROTOCOL">ETHER_PROTOCOL()</a></strong>: This function returns the ethernet protocol (that is, the EtherType) of the current packet, for example, '2048' for IP version 4, or '34,525' for IP version 6.

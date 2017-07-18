@@ -588,6 +588,25 @@ The default value is 'host'.
         <type>TimestampType</type>
         <cardinality>1</cardinality>
       </parameter>
+
+    <parameter>
+      <name>jMirrorCheck</name>
+      <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on
+packets, and step over them when found.
+
+The default value is 'false'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>boolean</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
       <parameter>
         <name>metricsInterval</name>
         <description>
