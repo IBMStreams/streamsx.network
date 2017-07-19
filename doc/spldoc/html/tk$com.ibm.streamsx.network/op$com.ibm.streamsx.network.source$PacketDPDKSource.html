@@ -32,7 +32,7 @@
 
 <div class="section">
 
-<p class="p">PacketDPDKSource is an operator for the IBM InfoSphere Streams product that receives network packets from a supported ethernet adapter. The operator function and structure are similar to PacketLiveSource; see that operator's documentation for details of common functions and general background.  The primary difference between these related operators is that PacketDPDKSource leverages the  <a class="xref" href="http://www.dpdk.org">DPDK library</a> for higher performance.
+<p class="p">PacketDPDKSource is an operator for the IBM InfoSphere Streams product that receives network packets from a supported ethernet adapter. The operator function and structure are similar to  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a>;  see that operator's documentation for details of common functions and general background.  The primary difference between these related operators is that PacketDPDKSource leverages the  <a class="xref" href="http://www.dpdk.org">DPDK library</a> for higher performance.
 </p>
 
 <p class="p">DPDK supports a variety of <a class="xref" href="http://www.dpdk.org/doc/nics">ethernet adapters</a>.  The PacketDPDKSource operator has been tested with these adapters:
@@ -55,7 +55,7 @@
 <p class="p">DPDK stores network packets received by a supported ethernet adapter in memory that is  directly accessible by the PacketDPDKSource operator, bypassing the Linux kernel. This reduces overhead and allows the PacketDPDKSource operator to ingest packets at a higher rate than the PacketLiveSource operator.  The PacketDPDKSource operator requires a dedicated processor core, which must be specified explicitly, and which runs at 100% CPU utilization.
 </p>
 
-<p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions, and any of these functions, which are specific to the PacketFileSource operator:
+<p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions and any of these functions:
 </p>
 
 <div class="p">

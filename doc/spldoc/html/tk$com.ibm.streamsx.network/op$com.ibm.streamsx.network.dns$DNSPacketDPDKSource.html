@@ -32,12 +32,7 @@
 
 <div class="section">
 
-</div>
-
-<div class="section"><h2 class="title sectiontitle">introduction 
-</h2>
-
-<p class="p">DNSPacketDPDKSource is an operator for the IBM Streams product that receives network packets from a supported ethernet adapter. The operator function and structure are similar to the  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$DNSPacketLiveSource.html">PacketLiveSource</a> and  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSMessageParser.html">DNSMessageParser</a> operators; see the documentation for those for details of common functions and general background.   The primary difference between these related operators is that DNSPacketDPDKSource leverages  the <a class="xref" href="http://www.dpdk.org">data plane development kit (DPDK)</a> for higher performance.
+<p class="p">DNSPacketDPDKSource is an operator for the IBM Streams product that receives network packets from a supported ethernet adapter. The operator function and structure are similar to the  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.parse$DNSMessageParser.html">DNSMessageParser</a> operators; see the documentation for those for details of common functions and general background.   The primary difference between these related operators is that DNSPacketDPDKSource leverages  the <a class="xref" href="http://www.dpdk.org">data plane development kit (DPDK)</a> for higher performance.
 </p>
 
 <p class="p">DPDK supports a variety of <a class="xref" href="http://www.dpdk.org/doc/nics">ethernet adapters</a>.  The PacketDPDKSource operator has been tested with these adapters:
@@ -60,7 +55,7 @@
 <p class="p">DPDK stores network packets received by a supported ethernet adapter in memory that is  directly accessible by the DNSPacketDPDKSource operator, bypassing the Linux kernel. This reduces overhead and allows the PacketDPDKSource operator to ingest packets at a higher rate than the PacketLiveSource operator.  The DNSPacketDPDKSource operator requires a dedicated processor core, which must be specified explicitly, and which runs at 100% CPU utilization.
 </p>
 
-<p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions, and any of these functions, which are specific to the PacketFileSource operator:
+<p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions, and any of these functions:
 </p>
 
 <div class="p">
@@ -112,7 +107,7 @@ use com.ibm.streamsx.network.dns::*;
 <div class="section"><h2 class="title sectiontitle">setup for DPDK
 </h2>
 
-<p class="p">The DPDK library requires some setup that is specific to the hardware and software configuration of your machine. The documentation for the  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSMessageParser.html">PacketDPDKSource</a> operator offers guidelines for this setup,  and examples for an Intel processor with a Mellanox ethernet adapter. You will need to adapt the guidelines to match your configuration.
+<p class="p">The DPDK library requires some setup that is specific to the hardware and software configuration of your machine. The documentation for the  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketDPDKSource.html">PacketDPDKSource</a> operator offers guidelines for this setup,  and examples for an Intel processor with a Mellanox ethernet adapter. You will need to adapt the guidelines to match your configuration.
 </p>
 
 </div>
@@ -380,7 +375,7 @@ use com.ibm.streamsx.network.dns::*;
 <p class="p">Each output port will produce one output tuple for each packet received if the corresponding expression in the <tt class="ph tt">outputFilters</tt> parameter evaluates <tt class="ph tt">true</tt>, or if no <tt class="ph tt">outputFilters</tt> parameter is specified.
 </p>
 
-<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">DNSPacketDPDKSource result functions</a>. Output attributes that match input attributes in name and type are copied automatically.
+<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">network header parser result functions</a>. Output attributes that match input attributes in name and type are copied automatically.
 </p>
 
    <p class="p"/>
@@ -701,7 +696,7 @@ This operator supports 9 parameters.<dl class="dl">
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">DNSPacketDPDKSource result functions</a>.  
+<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">network header parser result functions</a>.  
 </p>
 
 <p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all packets processed to be emitted by all output ports.
