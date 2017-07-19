@@ -37,6 +37,7 @@ StreamsLogs*.tgz
 # ignore these files
 debug.*
 dpdk-*.tar.gz
+dpdk-*.tar.xz
 
 # ignore files added by MacOS
 .DS_Store
