@@ -6,6 +6,7 @@
 **/.settings/
 **/output/
 **/log/
+**/doc/
 **/data*/debug.*
 **/www.maxmind.com*/
 
