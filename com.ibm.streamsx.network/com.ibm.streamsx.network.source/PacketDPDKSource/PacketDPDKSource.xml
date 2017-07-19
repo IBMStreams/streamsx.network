@@ -6,7 +6,9 @@
 
 PacketDPDKSource is an operator for the IBM InfoSphere Streams product that
 receives network packets from a supported ethernet adapter. The operator function and structure are
-similar to PacketLiveSource; see that operator's documentation for details
+similar to 
+[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketLiveSource.html|PacketLiveSource]; 
+see that operator's documentation for details
 of common functions and general background.  The primary difference between
 these related operators is that PacketDPDKSource leverages the 
 [http://www.dpdk.org|DPDK library] for higher performance.
@@ -27,8 +29,7 @@ The PacketDPDKSource operator requires a dedicated processor core,
 which must be specified explicitly, and which runs at 100% CPU utilization.
 
 Output filters and attribute assignments are SPL expressions. They may use any
-of the built-in SPL functions, and any of these functions, which are specific to
-the PacketFileSource operator:
+of the built-in SPL functions and any of these functions:
 
 * [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions]
 

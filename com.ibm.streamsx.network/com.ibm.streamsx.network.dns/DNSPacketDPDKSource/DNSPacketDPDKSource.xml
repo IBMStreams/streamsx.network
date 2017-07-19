@@ -4,14 +4,12 @@
     <context>
     <description>
 
-# introduction 
-
 DNSPacketDPDKSource is an operator for the IBM Streams product that
 receives network packets from a supported ethernet adapter. The operator function and structure are
 similar to the 
-[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$DNSPacketLiveSource.html|PacketLiveSource]
+[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketLiveSource.html|PacketLiveSource]
 and 
-[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSMessageParser.html|DNSMessageParser]
+[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.parse$DNSMessageParser.html|DNSMessageParser]
 operators;
 see the documentation for those for details
 of common functions and general background.  
@@ -36,8 +34,7 @@ The DNSPacketDPDKSource operator requires a dedicated processor core,
 which must be specified explicitly, and which runs at 100% CPU utilization.
 
 Output filters and attribute assignments are SPL expressions. They may use any
-of the built-in SPL functions, and any of these functions, which are specific to
-the PacketFileSource operator:
+of the built-in SPL functions, and any of these functions:
 
 * [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header parser result functions]
 
@@ -86,7 +83,7 @@ when its 'promiscous' parameter is set to `true`.
 
 The DPDK library requires some setup that is specific to the hardware and software configuration
 of your machine. The documentation for the 
-[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSMessageParser.html|PacketDPDKSource] operator offers guidelines for this setup, 
+[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketDPDKSource.html|PacketDPDKSource] operator offers guidelines for this setup, 
 and examples for an
 Intel processor with a Mellanox ethernet adapter. You will need to adapt the guidelines to match
 your configuration.
@@ -431,7 +428,7 @@ should be emitted by the corresponding output port. The number of
 expressions in the list must match the number of output ports, and each
 expression must evaluate to a `boolean` value.  The output filter expressions may include any
 of the
-[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|DNSPacketDPDKSource result functions].  
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header parser result functions].  
 
 The default value of the `outputFilters` parameter is an empty list, which
 causes all packets processed to be emitted by all output ports.
@@ -483,7 +480,7 @@ or if no `outputFilters` parameter is specified.
 
 Output attributes can be assigned values with any SPL expression that evaluates
 to the proper type, and the expressions may include any of the
-[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|DNSPacketDPDKSource result functions].
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].
 Output attributes that match input attributes in name and
 type are copied automatically.
 
