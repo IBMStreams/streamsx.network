@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 2.8.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; DNSMessageParser</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; DNSMessageParser</p>
 
 </div>
 
@@ -35,7 +35,7 @@
 <p class="p">DNSMessageParser is an operator for the IBM InfoSphere Streams product that parses individual fields of DNS messages received in input tuples,  and emits tuples containing message data.   The operator may be configured with one or more output ports, and each port may be configured to emit different tuples, as specified by output filters. The tuples contain individual fields from the input message, as specified by output attribute assignments.  
 </p>
 
-<p class="p">The DNSMessageParser operator expects only DNS messages in its input tuples, without any of the headers that precede them in network packets.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_DATA">PAYLOAD_DATA()</a> output attribute assignment function.
+<p class="p">The DNSMessageParser operator expects only DNS messages in its input tuples, without any of the headers that precede them in network packets.  The <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators can produce tuples that contain DNS messages with the PAYLOAD_DATA() output attribute assignment function.
 </p>
 
 <p class="p">The DNSMessageParser operator consumes input tuples containing DNS messages, parses individual fields in the messages,  selects messages to emit as output tuples with filter expressions, and assigns values to them with output attribute assignment expressions.
@@ -115,7 +115,29 @@ specified does not match the number of output ports specified.
 <ul class="ul">
 <li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Domain_Name_System">http://en.wikipedia.org/wiki/Domain_Name_System</a></li>
 
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/List_of_DNS_record_types">http://en.wikipedia.org/wiki/List_of_DNS_record_types</a></li>
+
 <li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc1035">http://tools.ietf.org/html/rfc1035</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2308">http://tools.ietf.org/html/rfc2308</a> for SOA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2872">http://tools.ietf.org/html/rfc2872</a> for SRV resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3403">http://tools.ietf.org/html/rfc3403</a> for NAPTR resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3596">http://tools.ietf.org/html/rfc3596</a> for AAAA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4034">http://tools.ietf.org/html/rfc4034</a> for DS, RRSIG, NSEC, and DNSKEY resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4408">http://tools.ietf.org/html/rfc4408</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc5155">http://tools.ietf.org/html/rfc5155</a> for NSEC3 and NSEC3PARAM resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc6891">http://tools.ietf.org/html/rfc6891</a> for OPT resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7208">http://tools.ietf.org/html/rfc7208</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7505">http://tools.ietf.org/html/rfc7505</a> for MX resource records</li>
 
 </ul>
 
@@ -203,7 +225,7 @@ specified does not match the number of output ports specified.
 <p class="p">The DNSMessageParser operator requires one input port.  One input attribute must be of type <tt class="ph tt">blob</tt> and must contain a DNS message, excluding the network headers that proceed them in network packets, as specified by the required parameter <tt class="ph tt">messageAttribute</tt>.
 </p>
 
-<p class="p">The <a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_DATA">PAYLOAD_DATA()</a> output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the DNSMessageParser operator.
+<p class="p">The PAYLOAD_DATA() output assignment function of the <a class="xref" href="op$com.ibm.streamsx.network.source$PacketLiveSource.html">PacketLiveSource</a> and <a class="xref" href="op$com.ibm.streamsx.network.source$PacketFileSource.html">PacketFileSource</a> operators produces attributes that can be consumed by the DNSMessageParser operator.
 </p>
 
    <dl class="dl">
@@ -302,16 +324,6 @@ specified does not match the number of output ports specified.
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
 
-
-<p class="p"> Required: 
-<a class="xref" href="#spldoc_operator__parameter__messageAttribute">messageAttribute</a>
-
-</p>
-
-<p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>
-
-</p>
 <dl class="dl">
   
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__messageAttribute"><!-- --></a><tt class="ph tt">messageAttribute</tt></dt>

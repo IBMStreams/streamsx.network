@@ -57,10 +57,6 @@
   
 </div>
 
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SampleIPAddressLocation/op$sample$TestIPAddressLocationBasicIPv6.svg" width="342" height="154"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -80,6 +76,14 @@
 <div class="section">
 </div>
 
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleIPAddressLocation/op$sample$TestIPAddressLocationBasicIPv6.svg" width="342" height="152"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
   
 </div>
@@ -92,7 +96,7 @@
  
      param
      expression&lt;rstring&gt; $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
-     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_locations_ipv6_only.pcap" );
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_locations_ipv6_only.pcap" );
  
      type
  
@@ -138,7 +142,7 @@
      stream&lt;LocatedPacketType&gt; LocatedPacketStream as Out = IPAddressLocation(PacketStream) {
        param
          geographyDirectory: $geographyDirectory;
-         outputFilters: locationCityName(ipSourceAddress)!="" &amp;&amp; locationCityName(ipDestinationAddress)!="";
+         outputFilters: locationCityName(ipSourceAddress)!="" || locationCityName(ipDestinationAddress)!="";
        output Out:
          ipSourceAddress = convertIPV6AddressNumericToString(ipSourceAddress),
          ipSourceSubnet = locationSubnet(ipSourceAddress),

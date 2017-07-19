@@ -57,10 +57,6 @@
   
 </div>
 
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$TestPacketContentAssemblerEvents.svg" width="337" height="109"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -77,6 +73,14 @@
 <div class="section">
 </div>
 
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$TestPacketContentAssemblerEvents.svg" width="337" height="107"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
   
 </div>
@@ -88,8 +92,7 @@
  composite TestPacketContentAssemblerEvents {
  
    param
-     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "./firewallcontent_sample.pcap");
-     //expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "./smtp_sample_with_attachment.pcap");
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_http+https.pcap");
  
    type
  
@@ -132,10 +135,10 @@
      param
      timestampAttribute: captureTime;
      packetAttribute: rawPacket;
-     pamTuning: "pam.content.consume.archives=on",
-                "pam.content.docx.decompress=false",
-                "pam.content.pptx.decompress=false",
-                "pam.content.xlsx.decompress=false" ;
+     pamTuning: "pam.content.consume.archives=on";
+                //"pam.content.docx.decompress=false", // ... dropped from PAM ...
+                //"pam.content.pptx.decompress=false", // ... dropped from PAM ...
+                //"pam.content.xlsx.decompress=false" ; // ... dropped from PAM ...
      output Out:
        ipSource = convertIPV4AddressNumericToString(FLOW_IPV4_SRC_ADDRESS()) + ":" + (rstring)FLOW_SRC_PORT(),
        flowDirection = FLOW_DIRECTION(),

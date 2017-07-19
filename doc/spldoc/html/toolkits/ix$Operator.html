@@ -42,6 +42,24 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketDPDKSource.html">DNSPacketDPDKSource</a></dt>
+
+  <dd class="dd">introduction : DNSPacketDPDKSource is an operator for the IBM Streams product that receives network packets from a supported ethernet adapter.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketFileSource.html">DNSPacketFileSource</a></dt>
+
+  <dd class="dd">DNSPacketFileSource is an operator for the IBM Streams product that reads prerecorded DNS packets from 'packet capture (PCAP)' files, parses the network headers and the fields of the DNS message, and emits tuples containing packet data.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketLiveSource.html">DNSPacketLiveSource</a></dt>
+
+  <dd class="dd">DNSPacketLiveSource is an operator for the IBM Streams product that captures live DNS packets from an ethernet interface, parses their network headers and the fields of the DNS message, and emits tuples containing packet data.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.enrichment$IPASNEnricher.html">IPASNEnricher</a></dt>
 
   <dd class="dd">This operator enriches IPv4 and IPv6 addresses with ASN data.</dd>
@@ -60,9 +78,21 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.filter$IPFilter.html">IPFilter</a></dt>
+
+  <dd class="dd">This operator filters IPv4 addresses based on a list of IPv4 addresses input in CIDR format.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.enrichment$IPSpatialEnricher.html">IPSpatialEnricher</a></dt>
 
   <dd class="dd">This operator enriches IPv4 and IPv6 addresses with geospatial data.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SamplePacketDPDKSource/spl$sample$LivePacketDPDKSourceBasic.html#spldoc_compilationunit__composite_operator__IngestPackets">IngestPackets</a></dt>
+
+  <dd class="dd"/>
 
 
 
@@ -102,7 +132,49 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketDPDKSource/spl$sample$LiveDNSPacketDPDKSourceBasic.html#spldoc_compilationunit__composite_operator__LiveDNSPacketDPDKSourceBasic">LiveDNSPacketDPDKSourceBasic</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketDPDKSource/spl$sample$LiveDNSPacketDPDKSourceFilter.html#spldoc_compilationunit__composite_operator__LiveDNSPacketDPDKSourceFilter">LiveDNSPacketDPDKSourceFilter</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketDPDKSource/spl$sample$LiveDNSPacketDPDKSourceFull.html#spldoc_compilationunit__composite_operator__LiveDNSPacketDPDKSourceFull">LiveDNSPacketDPDKSourceFull</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketLiveSource/spl$sample$LiveDNSPacketLiveSourceBasic.html#spldoc_compilationunit__composite_operator__LiveDNSPacketLiveSourceBasic">LiveDNSPacketLiveSourceBasic</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketLiveSource/spl$sample$LiveDNSPacketLiveSourceFilter.html#spldoc_compilationunit__composite_operator__LiveDNSPacketLiveSourceFilter">LiveDNSPacketLiveSourceFilter</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketLiveSource/spl$sample$LiveDNSPacketLiveSourceFull.html#spldoc_compilationunit__composite_operator__LiveDNSPacketLiveSourceFull">LiveDNSPacketLiveSourceFull</a></dt>
+
+  <dd class="dd"/>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="../tk$SamplePacketContentAssembler/spl$sample$LivePacketContentAssemblerFlowsAndFiles.html#spldoc_compilationunit__composite_operator__LivePacketContentAssemblerFlowsAndFiles">LivePacketContentAssemblerFlowsAndFiles</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SamplePacketDPDKSource/spl$sample$LivePacketDPDKSourceBasic.html#spldoc_compilationunit__composite_operator__LivePacketDPDKSourceBasic">LivePacketDPDKSourceBasic</a></dt>
 
   <dd class="dd"/>
 
@@ -158,7 +230,7 @@
 
   <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketDPDKSource.html">PacketDPDKSource</a></dt>
 
-  <dd class="dd">PacketDPDKSource is an operator for the IBM InfoSphere Streams product that captures live network packets from one of the network interfaces attached to the machine where it executes.</dd>
+  <dd class="dd">PacketDPDKSource is an operator for the IBM InfoSphere Streams product that receives network packets from a supported ethernet adapter.</dd>
 
 
 
@@ -241,6 +313,36 @@
 
 
   <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSMessageParser/spl$sample$TestDNSMessageParserParallelAnalysis.html#spldoc_compilationunit__composite_operator__TestDNSMessageParserParallelAnalysis">TestDNSMessageParserParallelAnalysis</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceBasic.html#spldoc_compilationunit__composite_operator__TestDNSPacketFileSourceBasic">TestDNSPacketFileSourceBasic</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceFilter.html#spldoc_compilationunit__composite_operator__TestDNSPacketFileSourceFilter">TestDNSPacketFileSourceFilter</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceFull.html#spldoc_compilationunit__composite_operator__TestDNSPacketFileSourceFull">TestDNSPacketFileSourceFull</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceIncompatibleFlags.html#spldoc_compilationunit__composite_operator__TestDNSPacketFileSourceIncompatibleFlags">TestDNSPacketFileSourceIncompatibleFlags</a></dt>
+
+  <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$SampleDNSPacketFileSource/spl$sample$TestDNSPacketFileSourceResourceRecords.html#spldoc_compilationunit__composite_operator__TestDNSPacketFileSourceResourceRecords">TestDNSPacketFileSourceResourceRecords</a></dt>
 
   <dd class="dd"/>
 
@@ -354,6 +456,12 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="../tk$SamplePacketContentAssembler/spl$sample$TestPacketContentAssemblerMQTT.html#spldoc_compilationunit__composite_operator__TestPacketContentAssemblerMQTT">TestPacketContentAssemblerMQTT</a></dt>
+
+  <dd class="dd"/>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="../tk$SamplePacketFileSource/spl$sample$TestPacketFileSourceBasic1.html#spldoc_compilationunit__composite_operator__TestPacketFileSourceBasic1">TestPacketFileSourceBasic1</a></dt>
 
   <dd class="dd"/>
@@ -411,6 +519,12 @@
   <dt class="dt dlterm"><a class="xref" href="../tk$SamplePacketFileSource/spl$sample$TestPacketFileSourceVLAN.html#spldoc_compilationunit__composite_operator__TestPacketFileSourceVLAN">TestPacketFileSourceVLAN</a></dt>
 
   <dd class="dd"/>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.filter$TextFilter.html">TextFilter</a></dt>
+
+  <dd class="dd">This operator filters text (e.g. domain names) based on a list of text input.</dd>
 
 
 </dl>

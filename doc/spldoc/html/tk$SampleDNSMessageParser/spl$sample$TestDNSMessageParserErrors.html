@@ -57,10 +57,6 @@
   
 </div>
 
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SampleDNSMessageParser/op$sample$TestDNSMessageParserErrors.svg" width="342" height="154"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -77,6 +73,14 @@
 <div class="section">
 </div>
 
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleDNSMessageParser/op$sample$TestDNSMessageParserErrors.svg" width="342" height="152"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
   
 </div>
@@ -88,7 +92,7 @@
  composite TestDNSMessageParserErrors {
  
      param
-     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/sample_dns_only_errors.pcap" );
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns_only_errors.pcap" );
  
      type
  

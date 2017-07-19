@@ -1,0 +1,878 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Operator DNSPacketDPDKSource"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_operator"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Operator DNSPacketDPDKSource</title>
+</head>
+<body id="spldoc_operator">
+
+
+<h1 class="title topictitle1">Operator <tt class="ph tt">DNSPacketDPDKSource</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketDPDKSource</p>
+
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketDPDKSource.svg" width="672" height="112"/>
+</div>
+
+<div class="section">
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">introduction 
+</h2>
+
+<p class="p">DNSPacketDPDKSource is an operator for the IBM Streams product that receives network packets from a supported ethernet adapter. The operator function and structure are similar to the  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$DNSPacketLiveSource.html">PacketLiveSource</a> and  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSMessageParser.html">DNSMessageParser</a> operators; see the documentation for those for details of common functions and general background.   The primary difference between these related operators is that DNSPacketDPDKSource leverages  the <a class="xref" href="http://www.dpdk.org">data plane development kit (DPDK)</a> for higher performance.
+</p>
+
+<p class="p">DPDK supports a variety of <a class="xref" href="http://www.dpdk.org/doc/nics">ethernet adapters</a>.  The PacketDPDKSource operator has been tested with these adapters:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> Mellanox ConnectX-3</li>
+
+<li class="li"> Mellanox ConnectX-3 Pro</li>
+
+<li class="li"> Intel e1000</li>
+
+<li class="li"> Intel I350</li>
+
+</ul>
+
+</div>
+
+<p class="p">DPDK stores network packets received by a supported ethernet adapter in memory that is  directly accessible by the DNSPacketDPDKSource operator, bypassing the Linux kernel. This reduces overhead and allows the PacketDPDKSource operator to ingest packets at a higher rate than the PacketLiveSource operator.  The DNSPacketDPDKSource operator requires a dedicated processor core, which must be specified explicitly, and which runs at 100% CPU utilization.
+</p>
+
+<p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions, and any of these functions, which are specific to the PacketFileSource operator:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">network header parser result functions</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The DNSPacketDPDKSource operator can be configured to step quietly over 'jmirror' headers prepended to packets by Juniper Networks 'mirror encapsulation'.
+</p>
+
+<p class="p">This operator is part of the network toolkit. To use it in an application, include this statement in the SPL source file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+use com.ibm.streamsx.network.dns::*;
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">parallelization
+</h2>
+
+<p class="p">DPDK can distribute network packets received by one ethernet adapter  across multiple DNSPacketDPDKSource operators.  This can increase an application's packet rate by parallelizing its analytics. Note that each DNSPacketDPDKSource operator requires a separate processor core, which runs at 100% CPU utiliziation.
+</p>
+
+<p class="p">DPDK requires that the total number of DNSPacketDPDKSource operators be a power of 2, that is, the total number of DNSPacketDPDKSource operators must be 1, 2, 4, 8, or 16. Packets received by the network adapter will be distributed across all of the operators, which will run in parallel.  Packets are distributed according to a hash of their source and destination addresses and ports, so request and response packets that belong to the same TCP transaction are all sent to  the same operator.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">promiscuous mode
+</h2>
+
+<p class="p">Ethernet adapters normally ignore packets that are not addressed to them. However, when 'promiscious' mode is enabled, and adapter can capture all network packets on its ethernet segment, even those that are not addressed to it.  This is sometimes referred to as "network sniffing".   However, ethernet switches normally send only packets that are addressed to the adapter; 'promiscious' mode is useful only when a switch has been specifically configured to send packets that are not addressed to the adapter. This is sometimes referred to as "mirroring".
+</p>
+
+<p class="p">The DNSPacketDPDKSource operator will enable 'promiscuous' mode  when its 'promiscous' parameter is set to <tt class="ph tt">true</tt>.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">setup for DPDK
+</h2>
+
+<p class="p">The DPDK library requires some setup that is specific to the hardware and software configuration of your machine. The documentation for the  <a class="xref" href="../tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSMessageParser.html">PacketDPDKSource</a> operator offers guidelines for this setup,  and examples for an Intel processor with a Mellanox ethernet adapter. You will need to adapt the guidelines to match your configuration.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">references
+</h2>
+
+<p class="p">The ethernet frame format is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Ethernet_frame">http://en.wikipedia.org/wiki/Ethernet_frame</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The ethernet header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://linux.die.net/include/net/ethernet.h">http://linux.die.net/include/net/ethernet.h</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/linux/if_ether.h">http://linux.die.net/include/linux/if_ether.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The IPv4 header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/IPv4">http://en.wikipedia.org/wiki/IPv4</a></li>
+
+<li class="li"> <a class="xref" href="http://www.ietf.org/rfc/rfc791.txt">http://www.ietf.org/rfc/rfc791.txt</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/in.h">http://linux.die.net/include/netinet/in.h</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip.h">http://linux.die.net/include/netinet/ip.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The IPv6 header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://en.wikipedia.org/wiki/IPv6_packet">https://en.wikipedia.org/wiki/IPv6_packet</a></li>
+
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc2460">https://tools.ietf.org/html/rfc2460</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip6.h">http://linux.die.net/include/netinet/ip6.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The UDP header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/User_Datagram_Protocol">http://en.wikipedia.org/wiki/User_Datagram_Protocol</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc768">http://tools.ietf.org/html/rfc768</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/udp.h">http://linux.die.net/include/netinet/udp.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">DNS messages and the fields they contain are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Domain_Name_System">http://en.wikipedia.org/wiki/Domain_Name_System</a></li>
+
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/List_of_DNS_record_types">http://en.wikipedia.org/wiki/List_of_DNS_record_types</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc1035">http://tools.ietf.org/html/rfc1035</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2308">http://tools.ietf.org/html/rfc2308</a> for SOA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2872">http://tools.ietf.org/html/rfc2872</a> for SRV resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3403">http://tools.ietf.org/html/rfc3403</a> for NAPTR resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3596">http://tools.ietf.org/html/rfc3596</a> for AAAA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4034">http://tools.ietf.org/html/rfc4034</a> for DS, RRSIG, NSEC, and DNSKEY resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4408">http://tools.ietf.org/html/rfc4408</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc5155">http://tools.ietf.org/html/rfc5155</a> for NSEC3 and NSEC3PARAM resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc6891">http://tools.ietf.org/html/rfc6891</a> for OPT resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7208">http://tools.ietf.org/html/rfc7208</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7505">http://tools.ietf.org/html/rfc7505</a> for MX resource records</li>
+
+</ul>
+
+</div>
+
+<p class="p">The Juniper Networks 'jmirror' encapsulation header is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://wiki.wireshark.org/jmirror">http://wiki.wireshark.org/jmirror</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The Cisco Systems 'Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/draft-foschiano-erspan-00">https://tools.ietf.org/html/draft-foschiano-erspan-00</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The 'Generic Route Encapsulation (GRE)' headers used by Cisco ERSPAN encapsulation are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc2784">https://tools.ietf.org/html/rfc2784</a></li>
+
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc1701">https://tools.ietf.org/html/rfc1701</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The Linux <tt class="ph tt">tcpdump</tt> command is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.tcpdump.org/">http://www.tcpdump.org/</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/man/8/tcpdump">http://linux.die.net/man/8/tcpdump</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The Wireshark tools are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.wireshark.org/">http://www.wireshark.org/</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The result functions that can be used in boolean expressions for the <tt class="ph tt">outputFilters</tt> parameter and in output attribute assignment expressions are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">network header and DNS parser result functions</a>.  </li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Ports</dt>
+
+  <dd class="dd">This operator has 0 input ports and 1 or more output ports.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Windowing</dt>
+
+  <dd class="dd">This operator does not accept any windowing configurations.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Parameters</dt>
+
+  <dd class="dd">This operator supports 9 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__buffersizes">buffersizes</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
+
+</p>
+</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Metrics</dt>
+
+  <dd class="dd">This operator reports 5 metrics.</dd>
+
+ 
+</dl>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Properties</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Implementation</dt>
+
+  <dd class="dd">C++</dd>
+
+ 
+ 
+  <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__providessinglethreadedexecutioncontext">Threading</a></dt>
+
+  <dd class="dd"><tt class="ph tt">Never</tt> - Operator never provides a single threaded execution context.</dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set">Output Ports</a></strong></p>
+<dl class="dl">
+  
+     <dt class="dt dlterm">Assignments</dt>
+
+     <dd class="dd">This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+
+  
+</dl>
+
+<dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0...)</dt>
+
+   <dd class="dd">
+
+<p class="p">The DNSPacketDPDKSource operator requires one or more output ports:
+</p>
+
+<p class="p">Each output port will produce one output tuple for each packet received if the corresponding expression in the <tt class="ph tt">outputFilters</tt> parameter evaluates <tt class="ph tt">true</tt>, or if no <tt class="ph tt">outputFilters</tt> parameter is specified.
+</p>
+
+<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">DNSPacketDPDKSource result functions</a>. Output attributes that match input attributes in name and type are copied automatically.
+</p>
+
+   <p class="p"/>
+
+    <p class="p"/>
+
+   <dl class="dl">
+    
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Generating
+     </li>
+
+   </ul>
+
+</dd>
+    
+   </dl>
+
+   <p class="p"/>
+
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
+This operator supports 9 parameters.<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcoreMaster"><!-- --></a><tt class="ph tt">lcoreMaster</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies a logical processor core for the DPDK master thread.  This thread is not used for receiving packets, and does not have high CPU utiliztion. If the machine has more than one NUMA node, specify a core on a node that does not have the ethernet adapter connected to it. 
+</p>
+
+<p class="p">When multiple PacketDPDKSource operators are configured for the same ethernet adapter, all operators must specify the same value with their 'lcoreMaster' parameters.
+</p>
+
+<p class="p">To determine how many processor cores your machine has, and which cores are connected to  which NUMA nodes, execute the <tt class="ph tt">lscpu</tt> command at a Linux prompt.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcore"><!-- --></a><tt class="ph tt">lcore</tt></dt>
+
+     <dd class="dd">
+<p class="p">This required parameter specifies a logical processor core for the DPDK packet receive thread. The core specified must belong to the NUMA node the ethernet adapter is connected to. The receive thread will run the specified core at 100% CPU utilization.
+</p>
+
+<p class="p">If multiple PacketDPDKSource operators are configured for the same ethernet adapter, each operator must specify a different value with its 'lcoreMaster' parameter.  The total number of PacketDPDKSource operators must be a power of 2, that is, the total number of PacketDPDKSource operators must be 1, 2, 4, 8, or 16. Packets received by the network adapter will be distributed across all of the operators, which will run in parallel.
+</p>
+
+<p class="p">To determine how many processor cores your machine has, and which cores are connected to  which NUMA nodes, execute the <tt class="ph tt">lscpu</tt> command at a Linux prompt.  To determine which NUMA node your ethernet adapter is connected to, look in the file '/sys/class/net/$DPDK_INTERFACE/device/numa_node'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicPort"><!-- --></a><tt class="ph tt">nicPort</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies which port of the ethernet adapter  the operator will receive network packets from. This applies only to adapters with multiple ports. 
+</p>
+
+<p class="p">The default value is '0' if this parameter is not specified.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__nicQueue"><!-- --></a><tt class="ph tt">nicQueue</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies which queue of received packets the operator will receive. This applies only when multiple PacketDPDKSource operators are configured for the same ethernet adapter. The value must be between 0 and 'N-1', where N is the total number of operators, and each operator must specify a different queue, so that all queues are connected to an operator.
+</p>
+
+<p class="p">Note that DPDK requires the total number of queues and operators be a power of 2, that is, the total number of queues and operators must be 1, 2, 4, 8, or 16. DPDK will distribute packets across all of the queues, and therefore across all of the operators.
+</p>
+
+<p class="p">The default value is '0' if this parameter is not specified.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__buffersizes"><!-- --></a><tt class="ph tt">buffersizes</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies how much buffer space, in megabytes,  to allocate from available 2MB Linux 'hugepages' for each NUMA node, specified as a string containing comma-separated values.  For the NUMA node the ethernet adapter is connected to, specify an even number of megabytes. For other NUMA nodes, if any, specify zero.
+</p>
+
+<p class="p">For example, on a machine with one NUMA node, specify "100" to allocate 100 megabytes of buffer space. For another example, on a machine with two NUMA nodes,  where the ethernet adapter is connected to the second node, specify "0,100" to allocate 100 megabytes of buffer space on the second NUMA node. If multiple PacketDPDKSource operators are configured for the same network adapter,  all operators should specify the same values for their 'buffersizes' parameter.
+</p>
+
+<p class="p">To determine which NUMA node your ethernet adapter is connected to, enter the command <tt class="ph tt">cat /sys/class/net/$DPDK_INTERFACE/device/numa_node</tt> at a Linux prompt. To determine how much buffer space is available in the 'hugepages' for that NUMA node, enter the command <tt class="ph tt">grep -i -h hugepages /sys/devices/system/node/node*/meminfo</tt> at a Linux prompt.
+</p>
+
+<p class="p">If this parameter is not specified,  DPDK will allocate all available 2MB Linux 'hugepages' for its buffer space.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">DNSPacketDPDKSource result functions</a>.  
+</p>
+
+<p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all packets processed to be emitted by all output ports.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+</p>
+
+<p class="p">The default value is '10.0'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
+<dl class="dl">
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsReceivedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts the number of packets received by the ethernet adapter, as counted by DPDK.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsDroppedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts the number of packets dropped by the ethernet adapter, as counted by DPDK.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nBytesReceivedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts the number of bytes received by the ethernet adapter, as counted by DPDK.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts number of packets processed by the operator.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nBytesProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts number of bytes of packet data processed by the operator.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies">Libraries</a></strong></p>
+<dl class="dl">
+ 
+  <dt class="dt dlterm"><tt class="ph tt">          Functions for parsing network headers.</tt>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/include</tt></dd>
+
+ 
+ 
+  <dt class="dt dlterm"><tt class="ph tt">	      Streams DPDK 'glue' library 'libstreams_source.a'.</tt>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">streams_source</tt></dd>
+
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/src/source/dpdk/build/lib</tt></dd>
+
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/src/source/dpdk</tt></dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

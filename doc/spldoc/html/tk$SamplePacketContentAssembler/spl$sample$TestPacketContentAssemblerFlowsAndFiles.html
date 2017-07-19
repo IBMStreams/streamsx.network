@@ -57,10 +57,6 @@
   
 </div>
 
-<div class="section splgraph">
-  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$TestPacketContentAssemblerFlowsAndFiles.svg" width="342" height="245"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
 
 <ul class="sl simple">
@@ -80,6 +76,14 @@
 <div class="section">
 </div>
 
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SamplePacketContentAssembler/op$sample$TestPacketContentAssemblerFlowsAndFiles.svg" width="342" height="243"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
   
 </div>
@@ -91,7 +95,7 @@
  composite TestPacketContentAssemblerFlowsAndFiles {
  
    param
-     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "./firewallcontent_sample.pcap");
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_http+https.pcap");
      expression&lt;rstring&gt; $connectionIdleTimeout: getSubmissionTimeValue("connectionIdleTimeout", "15");
  
    type
@@ -142,8 +146,11 @@
      param
      timestampAttribute: captureTime;
      packetAttribute: rawPacket;
-     outputFilters: ( EVENT_FLOW_DATA() &amp;&amp; FLOW_PROTOCOL()!="unknown" &amp;&amp; FLOW_PROTOCOL()!="" ) || EVENT_FLOW_TLS(), 
-                    EVENT_FILE_CHUNK() &amp;&amp; mimetype2extension(FILE_CONTENT_TYPE())!="";
+     outputFilters: 
+       //( EVENT_FLOW_DATA() &amp;&amp; FLOW_PROTOCOL()!="unknown" &amp;&amp; FLOW_PROTOCOL()!="" ) || EVENT_FLOW_TLS(), // send flow data for known protocols to FlowDataStream 
+       //EVENT_FILE_CHUNK() &amp;&amp; mimetype2extension(FILE_CONTENT_TYPE())!=""; // send file data for known protocols to FileChunkStream
+       EVENT_FLOW_DATA(), // send all flow data to FlowDataStream
+       EVENT_FILE_CHUNK(); // send all file data to FileChunkStream
      pamTuning: 
        "pam.bodetect.autodecrypt=false",
        "pam.ca.aim.enabled=false",
@@ -159,11 +166,11 @@
        "pam.content.disable.application/pdf=on",
        "pam.content.disable.multipart/form-data=true",
        "pam.content.disable.text/html=true",
-       "pam.content.docx.decompress=false", 
+       //"pam.content.docx.decompress=false", // ... dropped from PAM ...
        "pam.content.encoded_script.parse=false",
        "pam.content.gif.enabled=true",
        "pam.content.java.parse=false",
-       "pam.content.pptx.decompress=false", 
+       //"pam.content.pptx.decompress=false", // ... dropped from PAM ...
        "pam.content.riff.parse=false",
        "pam.content.sami.parse=false",
        "pam.content.sdp.parse=false",
@@ -172,8 +179,8 @@
        "pam.content.soap.parse=false",
        "pam.content.text.maxbytes=1",
        "pam.content.text.parse=false",
-       "pam.content.wmz.decompress=false",
-       "pam.content.xlsx.decompress=false",
+       //"pam.content.wmz.decompress=false", // ... dropped from PAM ...
+       //"pam.content.xlsx.decompress=false", // ... dropped from PAM ...
        "pam.content.xml.parse=false",
        "pam.cvs.authenticate=false",
        "pam.dbt.enable=false",
@@ -268,8 +275,8 @@
        fileChunkInitial = FILE_CHUNK_INITIAL(),
        fileChunk = FILE_CHUNK_BINARY();
    }
-   () as FlowDataSink = FileSink(FlowDataStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FlowDataStream.out" ; suppress: flowData; format: txt ; hasDelayField: true ; }
-   () as FileChunkSink = FileSink(FileChunkStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FileChunkStream.out" ; suppress: fileChunk; format: txt ; hasDelayField: true ; }
+   () as FlowDataSink = FileSink(FlowDataStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FlowDataStream.out" ; suppress: flowData; format: txt; hasDelayField: true; flush: 1u; }
+   () as FileChunkSink = FileSink(FileChunkStream) { param file: "debug.TestPacketContentAssemblerFlowsAndFiles.FileChunkStream.out" ; suppress: fileChunk; format: txt; hasDelayField: true; flush: 1u; }
  
    () as FlowDataStore = Custom(FlowDataStream as In) {
      logic state: {
@@ -279,34 +286,35 @@
          "SrcToDst" : "&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;",
          "DstToSrc" : "&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;" }; }
      onTuple In: {
-       rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles/debug.flow_" + leadingZeros(flowID,6) + "." + flowProtocol;
+       rstring extension = flowProtocol!="" ? "."+flowProtocol : ".unknown";
+       rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + leadingZeros(flowID,6) + extension;
        rstring filemode = flowDataInitial ? "w" : "a";
        mutable int32 error = 0;
        uint64 handle = fopen(filename, filemode, error);
-       assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+       if (error!=0) { appTrc(Trace.error, "Sorry, could not open output file '" + filename + "', " + strerror(error)); shutdownPE(); }
        if (tlsEvent) {
          fwriteString("TLS " + tlsRecordType + " " + tlsRecordDirection + " (bytes " + (rstring)tlsRecordOffset + " to " + (rstring)(tlsRecordOffset+(uint32)length(flowData)) + (tlsRecordMore ? ", more..." : "") + ")\n", handle, error);
-         assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+         if (error!=0) { appTrc(Trace.error, "Sorry, could not write output file '" + filename + "', " + strerror(error)); shutdownPE(); }
        } else {
          fwriteString("\n" + flowEventTime + " -- " + ipSource + " " + directionFlags[flowDirection] + " " + ipDestination + " (" + (rstring)length(flowData) + " bytes of " + flowProtocol + ")\n", handle, error);
-         assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
-         fwriteString(trancateNonASCII(flowData) + "\n", handle, error);
-         assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+         if (error!=0) { appTrc(Trace.error, "Sorry, could not open output file '" + filename + "', " + strerror(error)); shutdownPE(); }
+         fwriteString(elideNonASCII(flowData) + "\n", handle, error); // ... use either truncateNonASCII() or elideNonASCII()
+         if (error!=0) { appTrc(Trace.error, "Sorry, could not write output file '" + filename + "', " + strerror(error)); shutdownPE(); }
        }
        fclose(handle, error);
-       assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error)); } }
+       if (error!=0) { appTrc(Trace.error, "Sorry, could not close output file '" + filename + "', " + strerror(error));  shutdownPE(); } } }
  
    () as FileChunkStore = Custom(FileChunkStream as In) {
      logic onTuple In: {
-       rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles/debug.flow_" + leadingZeros(flowID,6) + "_file_" + leadingZeros(fileID,6) + "." + fileExtension;
+       rstring filename = dataDirectory() + "/debug.TestPacketContentAssemblerFlowsAndFiles.flow_" + leadingZeros(flowID,6) + "_file_" + leadingZeros(fileID,6) + "." + fileExtension;
        rstring filemode = fileChunkInitial ? "w" : "a";
        mutable int32 error = 0;
        uint64 handle = fopen(filename, filemode, error);
-       assert(error==0, "Sorry, could not open output file '" + filename + "', " + strerror(error));
+       if (error!=0) { appTrc(Trace.error, "Sorry, could not open output file '" + filename + "', " + strerror(error)); shutdownPE(); }
        fwriteblob(fileChunk, handle, error);
-       assert(error==0, "Sorry, could not write output file '" + filename + "', " + strerror(error));
+       if (error!=0) { appTrc(Trace.error, "Sorry, could not write output file '" + filename + "', " + strerror(error)); shutdownPE(); }
        fclose(handle, error);
-       assert(error==0, "Sorry, could not close output file '" + filename + "', " + strerror(error));
+       if (error!=0) { appTrc(Trace.error, "Sorry, could not close output file '" + filename + "', " + strerror(error)); shutdownPE(); }
      } }
  
  }
