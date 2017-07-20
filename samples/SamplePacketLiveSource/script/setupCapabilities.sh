@@ -25,9 +25,9 @@ instancePropertyList=(
 --property instanceTrace.defaultLevel=info
 --property instanceTrace.maximumFileCount=10
 --property instanceTrace.maximumFileSize=1000000
---property instance.canSetPeOSCapabilities=true \
---property instance.runAsUser=$USER \
---property instance.applicationBundlesPath=/tmp/Streamsg-$instance\@$USER \
+--property instance.canSetPeOSCapabilities=true
+--property instance.runAsUser=$USER
+--property instance.applicationBundlesPath=/tmp/Streamsg-$instance\@$USER
 )
 
 ################### functions used in this script #############################
