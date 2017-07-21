@@ -36,7 +36,7 @@ class DNSMessageParserErrorDescriptions {
     description[102] = "label overruns packet";
     description[103] = "label compression length overruns packet";
     description[104] = "label compression offset underruns packet";
-    description[105] = "label compression offset overruns packet";
+    description[105] = "label compression forward reference";
     description[106] = "label compression offset loop";
     description[107] = "label flags invalid";
     description[108] = "label limit exceeded";
@@ -172,8 +172,8 @@ class DNSMessageParser {
         if (dnsPointer+2>dnsEnd) { error = 103; return false; } // ... "label compression length overruns packet"
         offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FFF;
         if (offset<sizeof(DNSHeader)) { error = 104; return false; } // ... "label compression offset underruns packet"
+        if (offset>dnsPointer-dnsStart) { error = 105; return false; } // ... "label compression forward reference"
         if (offset==dnsPointer-dnsStart) { error = 106; return false; } // ... "label compression offset loop"
-        if (dnsStart+offset>dnsEnd) { error = 105; return false; } // ... "label compression offset overruns packet"
         dnsPointer += 2;
         return true;
         break;
@@ -327,8 +327,7 @@ class DNSMessageParser {
   // as well as any non-zero delimX characters passed in.
 
   inline __attribute__((always_inline))
-  void decodeDNSEncodedName(uint8_t** p, char* nameBuffer, int* nameLength, bool escapeNonPrintable = false,
-	 const uint8_t delim1 = 0, const uint8_t delim2 = 0, const uint8_t delim3 = 0 ) { 
+  void decodeDNSEncodedName(uint8_t** p, char* nameBuffer, int* nameLength, bool escapeNonPrintable=false, const uint8_t delim1=0, const uint8_t delim2=0, const uint8_t delim3=0 ) { 
 
     // alternate resource record pointer for '*p' (used for compressed DNS labels)
     uint8_t* pp;
@@ -372,14 +371,14 @@ class DNSMessageParser {
         if (*p+2>dnsEnd) { error = 103; break; } // ... "label compression length overruns packet"
         const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FFF;
         if (offset<sizeof(DNSHeader)) { error = 104; break; } // ... "label compression offset underruns packet"
-        if (dnsStart+offset>dnsEnd) { error = 105; break; } // ... "label compression offset overruns packet"
+        if (offset>*p-dnsStart) { error = 105; break; } // ... "label compression forward reference"
         if (offset==*p-dnsStart) { error = 106; break; } // ... "label compression offset loop"
         *p += 2;
         p = &pp;
         *p = dnsStart + offset;
       }
 
-      // no DNS label should have other high-order bit settings in its length byte
+      // no DNS label should have any other high-order bit settings in its length byte
       else {
         error = 107; break; // ... "label flags invalid"
       }
@@ -416,7 +415,12 @@ class DNSMessageParser {
   inline __attribute__((always_inline))
   SPL::rstring convertTXTResourceDataToString(const uint8_t* rdata, const uint16_t rdlength) { 
 
-    // make sure the length of the text string does not exceed the length of the resource data
+    // if the RDATA field is empty, return an empty SPL string
+    if (!rdlength) return SPL::rstring();
+
+    // if the RDATA field is not empty, asume that the first byte is the length
+    // of the text string in the field, and make sure the length of the string
+    // does not exceed the length of the field
     uint16_t txtlength = rdata[0];
     if (txtlength+1>rdlength) {
       error = 118;
