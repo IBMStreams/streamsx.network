@@ -85,6 +85,7 @@ composite TestDNSMessageParserFull {
       rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
       rstring ipSourceAddress,          // binary representation of IP source address
       rstring ipDestinationAddress,     // IP destination address
+      int32 parseErrorCode,
       rstring parseErrorDescription,
       uint32 parseErrorOffset,
       rstring dnsMessage;
@@ -103,7 +104,7 @@ composite TestDNSMessageParserFull {
             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
             dnsMessage = PAYLOAD_DATA();
     }
-    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    //???????????() as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
     ( stream<DNSMessageType> DNSMessageStream as OutMessage ;
       stream<DNSErrorType> DNSErrorStream as OutError ) = DNSMessageParser(PacketStream) {
@@ -168,6 +169,7 @@ composite TestDNSMessageParserFull {
 
       OutError:
           captureTime = formatEpochTime(captureTime),
+          parseErrorCode = parseErrorCode(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
           dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
