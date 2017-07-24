@@ -28,7 +28,7 @@
 
           * 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
 
-          * 105 for 'label compression offset overruns packet': The offset of a compressed domain name label points beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+          * 105 for 'label compression offset forward reference': The offset of a compressed domain name label points beyond the current label. The sender misencoded the DNS message.
 
           * 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
 
