@@ -71,7 +71,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
         uint16_t lcoreMaster, lcore, nicPort, nicQueue;
         int32_t processorAffinity;
+        std::string buffersizes;
         double metricsInterval;
+        bool jMirrorCheck;
 
         // ----------- output tuples ----------
 

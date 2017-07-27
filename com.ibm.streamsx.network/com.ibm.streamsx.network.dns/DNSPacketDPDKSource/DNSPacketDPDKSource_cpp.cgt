@@ -30,19 +30,10 @@ my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParamet
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
-my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParameterByName("buffersizes")->getValues() : 0;
+my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParameterByName("buffersizes")->getValueAt(0)->getCppExpression() : '""';
+my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
-
-# special handling for 'buffersizes' paramter, which may include a list of expressions
-
-my $buffersizesParameter = $model->getParameterByName("buffersizes");
-my @buffersizesList;
-if ($buffersizesParameter) {
-    foreach my $value ( @{ $buffersizesParameter->getValues() } ) {
-      push @buffersizesList, $value->getCppExpression();
-    }
-}
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -99,7 +90,9 @@ MY_OPERATOR::MY_OPERATOR() {
   lcore = <%=$lcore%>;
   nicPort = <%=$nicPort%>;
   nicQueue = <%=$nicQueue%>;
+  buffersizes = <%=$buffersizes%>;
   const bool promiscuous = <%=$promiscuous%>;
+  jMirrorCheck = <%=$jMirrorCheck%>;
   metricsInterval = <%=$metricsInterval%>;
 
   // initialize operator state variables
@@ -142,12 +135,6 @@ MY_OPERATOR::~MY_OPERATOR() {
 void MY_OPERATOR::allPortsReady() { 
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
 
-    // construct a list of numeric buffer sizes in a string
-    std::stringstream temp;
-    <% for my $buffersize ( @buffersizesList ) { print("temp << $buffersize << ',';\n"); } %>
-    std::string buffersizes(temp.str());
-    if (buffersizes.size()) buffersizes.erase(buffersizes.size()-1, 1);
-  
     // Retreive the pinnings before we call into the DPDK library
     cpu_set_t cpumask;
     CPU_ZERO(&cpumask);
@@ -240,7 +227,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
   tscMicroseconds = tscTimestamp / tscMicrosecondAdjust;
   
   // parse the network headers in the packet.
-  headers.parseNetworkHeaders((char*)packetPtr, packetLen);
+  headers.parseNetworkHeaders((char*)packetPtr, packetLen, jMirrorCheck);
 
   // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
   if ( ! headers.ipv4Header ) { return; }

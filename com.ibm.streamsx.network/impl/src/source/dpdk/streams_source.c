@@ -253,58 +253,13 @@ int streams_dpdk_init(const char* buffersizes) {
 
     optind = 0; // Reset getopt state as it is called again in rte_eal_init.
 
-#if 0
-
-    // original rte_eal_init() code, superceded below ........
-
-#define ARGN 8
-
-    char *rte_arg[ARGN];
-
-    char arg0[]="dpdk";
-    char arg1[]="-l";
-    char arg2[MAX_CORESTRING];
-    strcpy(arg2, lcoreList); 
-    char arg3[]="-n"; // Number of memory channels per processor socket
-    char arg4[]="4";
-    char arg5[]="--master-lcore";
-    char arg6[16];
-    sprintf(arg6, "%d", coreMaster_); 
-    char arg7[] = "--socket-mem=0,50"; // Memory to allocate from hugepages on specific sockets, in megabytes
-    rte_arg[0]=arg0;
-    rte_arg[1]=arg1;
-    rte_arg[2]=arg2;
-    rte_arg[3]=arg3;
-    rte_arg[4]=arg4;
-    rte_arg[5]=arg5;
-    rte_arg[6]=arg6;
-    rte_arg[7]=arg7;
-
-    printf("STREAMS_SOURCE: old streams_dpdk_init() calling rte_eal_init(%s %s %s %s %s %s %s %s)\n", arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-    int i; for (i=0; i<ARGN; i++) printf("old argv[%d] '%s'\n", i, rte_arg[i]);
-
-    // This function is to be executed on the master lcore only.
-    // Because no master core is specified, the default master_lcore is set by
-    // the DPDK library to be the first core in the coremask.
-    unsigned int ret = rte_eal_init(ARGN, rte_arg);
-    if (ret < 0) {
-        pthread_mutex_unlock(&mutexInit);
-        rte_panic("Cannot initialize DPDK, rte_eal_init() failed, rte_errno=%d, %s\n", rte_errno, rte_strerror(rte_errno));
-        return(-1);
-    }
-
-#endif
-
-
-
     // initialize DPDK by executing a command with rte_eal_init() using arguments defined here:
     // see: http://dpdk.org/doc/api-2.2/rte__eal_8h.html#a5c3f4dddc25e38c5a186ecd8a69260e3
     // see: http://dpdk.org/doc/guides/testpmd_app_ug/run_app.html#eal-command-line-options
 
     // format a command to initialize DPDK
     char command[1000];
-    //sprintf(command, "dpdk -l %s -n %d --master-lcore %d %s%s", lcoreList, memoryChannelCount, coreMaster_, (strlen(buffersizes) ? "--socket-mem=" : ""), buffersizes);
-    sprintf(command, "dpdk -l %s --master-lcore %d %s%s", lcoreList, coreMaster_, (strlen(buffersizes) ? "--socket-mem=" : ""), buffersizes);
+    sprintf(command, "dpdk -l %s --master-lcore %d%s%s", lcoreList, coreMaster_, (strlen(buffersizes) ? " --socket-mem=" : ""), buffersizes);
     printf("STREAMS_SOURCE: streams_dpdk_init() calling rte_eal_init('%s')\n", command);
 
     // convert command into argc&argv format
