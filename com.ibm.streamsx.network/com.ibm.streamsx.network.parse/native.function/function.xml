@@ -52,6 +52,12 @@
 
           * 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
 
+          * 119 for 'missing data in resource record': The data field of a resoure record is too short; some fields may be truncated or missing entirely. The sender probably misencoded the DNS message.
+
+          * 120 for 'extraneous data in resource record': The data field of a resoure record is too long; there is unexpected data following the last field. The sender probably misencoded the DNS message.
+
+          * 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender probably misencoded the DNS message.
+
           *Note:* [https://www.ietf.org/rfc/rfc1035.txt|RFC 1035] explains the format of DNS messages; 
           in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
         </function:description>
@@ -1214,6 +1220,30 @@
           separated by the string specified as the function's argument.
         </function:description>
         <function:prototype>public list&lt;rstring> DNS_ADDITIONAL_DATA(rstring)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This parser result function returns a string containing 'flattened' representation
+          of the DNS packet, including selected fields from the IP and UDP headers, all 
+          fields from the DNS header, and all fields from all DNS resource records, 
+          represented as appropriate, separated by the specified
+          record and field delimiters, and for SOA resource records, 
+          a subfield delimiter.
+        </function:description>
+        <function:prototype>public rstring DNS_ALL_FIELDS(rstring, rstring, rstring)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This parser result function returns a string containing 'flattened' representation
+          of the DNS packet, including selected fields from the IP and UDP headers, all 
+          fields from the DNS header, and all fields from seleccted DNS resource records, 
+          represented as appropriate, separated by the specified
+          record and field delimiters, and for SOA resource records, 
+          a subfield delimiter. DNS resource records are selected by specifying DNS types in a list of unsigned 16-bit integers as the fourth parameter of the function.
+        </function:description>
+        <function:prototype>public rstring DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16>)</function:prototype>
       </function:function>
 
       <function:function>

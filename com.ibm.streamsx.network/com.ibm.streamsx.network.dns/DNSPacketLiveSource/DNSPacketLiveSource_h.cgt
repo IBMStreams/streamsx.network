@@ -341,7 +341,6 @@ private:
   inline __attribute__((always_inline))
   SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter, SPL::list<SPL::uint16> rrTypes) { return flattener.dnsAllFields( (double)pcapHeader->ts.tv_sec + ((double)pcapHeader->ts.tv_usec)/1000000.0, pcapHeader->len, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str(), rrTypes); }
 
-
   inline __attribute__((always_inline))
   SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
 
