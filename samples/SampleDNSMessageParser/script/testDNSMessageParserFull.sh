@@ -51,14 +51,19 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
+pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_errors.pcap
 #pcapFilename=$HOME/data.splanet02/splanet02_dns+dhcp_one_second.pcap
 #pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_minute.pcap
-pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_hour.pcap
-#pcapFilename=$HOME/data.splanet02/xxx.pcap
-#pcapFilename=$HOME/data.splanet02/yyy.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_107_b.pcap
+#pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_hour.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_102.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_105.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_107.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_110.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_111.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_112.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_113.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_121.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

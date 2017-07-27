@@ -174,7 +174,7 @@ composite TestDNSMessageParserFull {
           parseErrorOffset = parseErrorOffset(),
           dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
     }
-    ////////////////() as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserFull.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserFull.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
     () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSMessageParserFull.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
 
