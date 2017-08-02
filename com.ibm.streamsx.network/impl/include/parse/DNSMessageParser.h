@@ -275,6 +275,7 @@ class DNSMessageParser {
         if ( offset == dnsPointer-dnsStart ) { error = 106; return false; } // ... "label compression offset loop"
         //???printf("    at offset 0x%lx, pointer to label at offset 0x%x%s\n", 0x2a+dnsPointer-dnsStart, 0x2A+offset, dnsLabelOffsets[offset] ? "" : " ********* invalid offset ***********");
         if ( !dnsLabelOffsets[offset] ) { error = 121; return false; } // ... "label compression offset invalid"
+        dnsLabelOffsets[dnsPointer-dnsStart] = 1;
         dnsPointer += 2;
         return true;
         break;
