@@ -219,6 +219,7 @@ class DNSMessageParser {
           /* SRV   */      case  33: error = parseResourceRecordDataSRV  (record.rdlength); break;
           /* EDNS0 */      case  41: error = parseResourceRecordDataOPT  (record.rdlength); break;
           /* RRSIG */      case  46: error = parseResourceRecordDataRRSIG(record.rdlength); break;
+          /* NSEC  */      case  47: error = parseResourceRecordDataNSEC (record.rdlength); break;
           /* SPF   */      case  99: error = parseResourceRecordDataTXT  (record.rdlength); break;
                            default:  dnsPointer += record.rdlength; break;
       }
@@ -502,7 +503,7 @@ class DNSMessageParser {
 
 
   // This function checks the 'data' field of an RRSIG resource record for seven
-  // integers totaling xx bytes, followed by a domain name, followed by another
+  // integers totaling 18 bytes, followed by a domain name, followed by another
   // variable-length field that fills the remainder of the 'data' field. It
   // assumes that 'dnsPointer' has already been set to the beginning of the
   // 'data' field. If no problems are found, it advances 'dnsPointer' to the end
@@ -523,6 +524,33 @@ class DNSMessageParser {
     if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
 
     // step over the presumed variable-length field following the domain name to the end of the record
+    dnsPointer = rrEnd;
+    return 0;
+  }
+
+
+
+  // This function checks the 'data' field of an NSEC resource record for a
+  // domain name followed by a variable-length bit mask that fills the remainder
+  // of the 'data' field. It assumes that 'dnsPointer' has already been set to
+  // the beginning of the 'data' field. If no problems are found, it advances
+  // 'dnsPointer' to the end of the 'data' field and returns zero. If a problem
+  // is found, 'dnsPointer' is left at the problem and the 'error' code is
+  // returned.
+
+  int parseResourceRecordDataNSEC(uint16_t rdlength) { 
+
+    // check that record has space for at least one byte each of name field and bit mask
+    if (rdlength<1+1) return 119; // ... "missing data in resource record"
+
+    // remember where this resource record ends
+    uint8_t* rrEnd = dnsPointer + rdlength;
+
+    // step over the presumed domain name and make sure it fit the resource record
+    if ( !parseEncodedName() ) return error;
+    if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
+
+    // step over the presumed variable-length bit mask following the domain name to the end of the record
     dnsPointer = rrEnd;
     return 0;
   }
