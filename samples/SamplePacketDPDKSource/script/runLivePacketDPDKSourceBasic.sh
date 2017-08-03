@@ -65,7 +65,9 @@ step "configuration for standalone application '$namespace.$composite' ..."
 echo -e "\ntrace level: $traceLevel"
 
 step "running '$composite' on host $hostname with adapter $adapterType ..."
-executable=$buildDirectory/bin/standalone
-sudo -E $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+executable=$buildDirectory/bin/standalone.exe
+#executable=$buildDirectory/bin/standalone
+#sudo -E $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+$executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0

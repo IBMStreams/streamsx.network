@@ -19,46 +19,36 @@ composite=LivePacketDPDKSourceBasic
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
 
-parallelWidth=2
+parallelWidth=1
 
 buildDirectory=$projectDirectory/output/build/$composite
 
 dataDirectory=$projectDirectory/data
 
-# logical cores for two NUMA nodes with a total of 56 or 95 cores 
+# CPU core and memory assignments for DPDK operators
 
-node0CoresOf56=( $( seq  0 13 ; seq 28 41 ) )
-node1CoresOf56=( $( seq 14 27 ; seq 42 55 ) )
-
-node0CoresOf96=( $( seq  0 23 ; seq 48 71 ) )
-node1CoresOf96=( $( seq 24 47 ; seq 72 95 ) )
-
-# core assignments for DPDK on 56 and 96 core machines
-
-masterCoreOf56=${node1CoresOf56[0]}
-masterCoreOf96=${node1CoresOf96[0]} 
-
-ingestCoresOf56=( ${node1CoresOf56[@]:1:$parallelWidth} )
-ingestCoresOf96=( ${node1CoresOf96[@]:1:$parallelWidth} )
-
-# submission-time parameters for specific machines
-
+step "get NUMA cores for DPDK interface $DPDK_INTERFACE..."
 hostname=$( hostname -s )
-#[[ $hostname == "c0321" ]] && machineType=Broadwell && adapterType=ConnectX3Pro && masterCore=$masterCoreOf56 && ingestCores=( ${ingestCoresOf56[*]} ) 
-#[[ $hostname == "c0323" ]] && machineType=Broadwell && adapterType=ConnectX3    && masterCore=$masterCoreOf56 && ingestCores=( ${ingestCoresOf56[*]} ) 
-#[[ $hostname == "c0325" ]] && machineType=Broadwell && adapterType=ConnectX3    && masterCore=$masterCoreOf56 && ingestCores=( ${ingestCoresOf56[*]} ) 
- [[ $hostname == "c0327" ]] && machineType=Broadwell && adapterType=ConnectX3    && masterCore=$masterCoreOf56 && ingestCores=( ${ingestCoresOf56[*]} ) 
-#[[ $hostname == "c1221" ]] && machineType=Skylake   && adapterType=ConnectX3    && masterCore=$masterCoreOf96 && ingestCores=( ${ingestCoresOf96[*]} ) 
-#[[ $hostname == "c1224" ]] && machineType=Skylake   && adapterType=ConnectX3    && masterCore=$masterCoreOf96 && ingestCores=( ${ingestCoresOf96[*]} ) 
- [[ $hostname == "h0711" ]] && machineType=Haswell   && adapterType=ConnectX3    && masterCore=$masterCoreOf56 && ingestCores=( ${ingestCoresOf56[*]} )
- [[ -n $machineType ]] || die "sorry, host '$hostname' not recognized"
+numaNode=$( cat /sys/class/net/$DPDK_INTERFACE/device/numa_node )
+numaCPUs=( $( ls -1 /sys/devices/system/node/node$numaNode | grep -E "cpu[0-9]+" | tr -d "cpu" | sort -n ) )
+dpdkMasterCore=${numaCPUs[0]}
+dpdkIngestCores=( ${numaCPUs[@]:1:$parallelWidth} )
+echo "$hostname CPUs on NUMA node $numaNode: ${numaCPUs[@]}"
+echo "$hostname CPUs for $DPDK_INTERFACE: master $dpdkMasterCore, ingest ${dpdkIngestCores[@]}"
+
+step "get NUMA memory for DPDK interface $DPDK_INTERFACE..."
+numaNodes=( $( ls -1 /sys/devices/system/node | grep -E "node" ) ) 
+for node in ${numaNodes[@]} ; do dpdkBufferSizes="$dpdkBufferSizes$comma$( [[ $node == node$numaNode ]] && echo '200' || echo '0' )" ; comma=',' ; done
+grep -i -h hugepages /sys/devices/system/node/node*/meminfo
+echo "$hostname buffersizes for NUMA nodes: $dpdkBufferSizes"
 
 # submission-time parameters
+
 submitParameterList=(
     adapterPort=0
-    dpdkBufferSize=200
-    dpdkMasterCore=$masterCore
-    dpdkIngestCores=$( IFS=, ; echo -e "[${ingestCores[*]}]" )
+    dpdkMasterCore=$dpdkMasterCore
+    dpdkIngestCores=$( IFS=, ; echo -e "[${dpdkIngestCores[*]}]" )
+    dpdkBufferSizes=$dpdkBufferSizes
     parallelWidth=$parallelWidth
 )
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -67,6 +57,7 @@ traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 
 
 cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 [ -d $dataDirectory ] || mkdir -p $dataDirectory || die "Sorry, could not create '$dataDirectory, $?"
+rm -f $dataDirectory/debug.*.out || die "sorry, could not delete old debugging output files"
 chmod go+w $dataDirectory
 
 step "configuration for standalone application '$namespace.$composite' ..."
@@ -76,6 +67,7 @@ echo -e "\ntrace level: $traceLevel"
 step "debugging '$composite' on host $hostname ($machineType) with adapter $adapterType ..."
 executable=$buildDirectory/bin/standalone.exe
 #executable=$buildDirectory/bin/standalone
-sudo -E gdb --args $executable -t $traceLevel ${submitParameterList[*]} 
+#sudo -E ...
+gdb --args $executable -t $traceLevel ${submitParameterList[*]} 
 
 exit 0

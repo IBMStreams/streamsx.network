@@ -96,6 +96,11 @@ To install these libraries, type these commands at a prompt:
     sudo yum install libibverbs-devel
     sudo yum install &quot;kernel-devel-$( uname -r )&quot;
 
+If you will be using a Mellanox ethernet adapter, you will also need to
+[http://www.mellanox.com/page/mlnx_ofed_matrix?mtag=linux_sw_drivers|download]
+and
+[http://dpdk.org/doc/guides/nics/mlx4.html|install] OFED drivers from Mellanox.
+
 
 **gathering system information for DPDK**
 
@@ -109,12 +114,11 @@ You will also need the PCI bus address of the
 adapter, the Linux interface names of the adapter's ports, and the NUMA node number the adapter
 is connected to.
 
-For example, to determine the PCI bus address of a Mellanox adapter, 
-enter this command at a prompt:
+For example, ind the PCI bus address of a Mellanox ethernet adapter with this command:
 
     /usr/sbin/lspci | grep -i mellanox | gawk '{print $1}'
 
-and then, to determine the Linux interface names of the adapter's ports, 
+To determine the Linux interface names of the adapter's ports, 
 enter this command at a prompt:
 
     ls -l /sys/class/net | grep $DPDK_DEVICE | gawk '{print $9}'
