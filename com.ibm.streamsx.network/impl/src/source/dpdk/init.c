@@ -214,9 +214,16 @@ static void init_ports(void) {
 		    port_id, ret);
 	}
 
-    uint16_t mtu = STREAMS_SOURCE_MTU_DEFAULT;
-    ret = rte_eth_dev_set_mtu(port_id, mtu);
-    RTE_LOG(INFO, STREAMS_SOURCE, " Set MTU to %d, status : %d\n", mtu, ret);
+    // set the MTU size, if possible
+    RTE_LOG(INFO, STREAMS_SOURCE, "setting MTU size for port %d to %d\n", port_id, STREAMS_SOURCE_MTU_DEFAULT);
+    ret = rte_eth_dev_set_mtu(port_id, STREAMS_SOURCE_MTU_DEFAULT);
+    if (ret) { RTE_LOG(WARNING, STREAMS_SOURCE, "rte_eth_dev_set_mtu() failed to set MTU size, status %d\n", ret); }
+
+    // log the MTU size in any case
+    uint16_t mtu;
+    ret = rte_eth_dev_get_mtu(port_id, &mtu);
+    if (ret) { RTE_LOG(WARNING, STREAMS_SOURCE, "rte_eth_dev_get_mtu() failed to get MTU size, status %d\n", ret); }
+    else { RTE_LOG(INFO, STREAMS_SOURCE, "MTU size for port %d is %d\n", port_id, mtu); }
 
 	/* Initialize tx queues for the port */
 	queue_id = 0;
