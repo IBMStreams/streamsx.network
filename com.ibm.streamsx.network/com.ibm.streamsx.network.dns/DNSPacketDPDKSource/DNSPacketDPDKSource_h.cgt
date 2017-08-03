@@ -98,6 +98,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   struct port_stats statsNow, statsThen; 
   double now, then;  
   bool metricsUpdate;
+  bool realMetricsUpdate;
 
   // ----------- network header parser ----------
   
