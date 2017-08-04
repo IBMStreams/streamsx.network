@@ -217,6 +217,7 @@ class DNSMessageParser {
           /* AFSDB */      case  18: error = parseResourceRecordDataAFSDB(record.rdlength); break;
           /* AAAA  */      case  28: error = parseResourceRecordDataAAAA (record.rdlength); break;
           /* SRV   */      case  33: error = parseResourceRecordDataSRV  (record.rdlength); break;
+          /* DNAME */      case  39: error = parseResourceRecordDataCNAME(record.rdlength); break;
           /* EDNS0 */      case  41: error = parseResourceRecordDataOPT  (record.rdlength); break;
           /* RRSIG */      case  46: error = parseResourceRecordDataRRSIG(record.rdlength); break;
           /* NSEC  */      case  47: error = parseResourceRecordDataNSEC (record.rdlength); break;
