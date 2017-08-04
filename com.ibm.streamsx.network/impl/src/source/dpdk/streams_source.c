@@ -344,8 +344,14 @@ int streams_port_stats(int nicPort, struct port_stats *outStats) {
 
     rte_eth_stats_get(nicPort, &rteStats);
 
+    // The basic stats have RX metrics for:
+    //   ierror   : RX error packets
+    //   imissed  : RX packets dropped by the NIC
+    //   rx_nombuf: RX mbuf allocation failures
+    // For the dropped stat we current report, imissed is used as it indicates
+    // valid packets we were not able to receive quickly enough so they were dropped.
     outStats->received = rteStats.ipackets;
-    outStats->dropped  = rteStats.ierrors;
+    outStats->dropped  = rteStats.imissed;
     outStats->bytes    = rteStats.ibytes;
 
     return 0;
