@@ -217,6 +217,7 @@ class DNSMessageParser {
           /* AFSDB */      case  18: error = parseResourceRecordDataAFSDB(record.rdlength); break;
           /* AAAA  */      case  28: error = parseResourceRecordDataAAAA (record.rdlength); break;
           /* SRV   */      case  33: error = parseResourceRecordDataSRV  (record.rdlength); break;
+          /* NAPTR */      case  35: error = parseResourceRecordDataNAPTR(record.rdlength); break;
           /* DNAME */      case  39: error = parseResourceRecordDataCNAME(record.rdlength); break;
           /* EDNS0 */      case  41: error = parseResourceRecordDataOPT  (record.rdlength); break;
           /* RRSIG */      case  46: error = parseResourceRecordDataRRSIG(record.rdlength); break;
@@ -367,9 +368,14 @@ class DNSMessageParser {
     // check that record has space for five integer fields and at least two bytes for two name fields
     if (rdlength<5*4+1+1) return 119; // ... "missing data in resource record"
 
-    // step over twp preumed domain names
+    // remember where this resource record ends
+    uint8_t* rrEnd = dnsPointer + rdlength;
+
+    // step over two presumed domain names
     if ( !parseEncodedName() ) return error;
+    if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
     if ( !parseEncodedName() ) return error;
+    if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
 
     // step over presumed five integers and return for caller's length checks
     dnsPointer += 5*4;
@@ -470,6 +476,38 @@ class DNSMessageParser {
 
     // step over presumed integers and domain name 
     dnsPointer += 6;
+    if ( !parseEncodedName() ) return error;
+    return 0;
+  }
+
+
+
+  // This function checks the 'data' field of an NAPTR resource record for two
+  // 16-bit integers followed by three character strings and a domain name. It
+  // assumes that 'dnsPointer' has already been set to the beginning of the
+  // 'data' field. If no problems are found, it advances 'dnsPointer' to the end
+  // of the 'data' field and returns zero. If a problem is found, 'dnsPointer'
+  // is left at the problem and the 'error' code is returned.
+
+  int parseResourceRecordDataNAPTR(uint16_t rdlength) { 
+
+    // check that record has space for two integer fields, three strings, and a domain name
+    if (rdlength<2*2+1+1+1+1) return 119; // ... "missing data in resource record"
+
+    // remember where this resource record ends
+    uint8_t* rrEnd = dnsPointer + rdlength;
+
+    // step over two presumed integers 
+    dnsPointer += 2*2;
+
+    // step over three presumed character strings
+    for (int i=0; i<3; i++) {      
+      uint16_t txtlength = dnsPointer[0];
+      if ( dnsPointer+txtlength+1 >= rrEnd ) return 118; // ... "data overruns resource record"
+      dnsPointer += txtlength + 1;
+    }
+
+    // step over a presumed domain name
     if ( !parseEncodedName() ) return error;
     return 0;
   }
