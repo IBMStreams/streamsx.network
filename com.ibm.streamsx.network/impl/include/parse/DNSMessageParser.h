@@ -53,6 +53,7 @@ class DNSMessageParserErrorDescriptions {
     description[119] = "missing data in resource record";
     description[120] = "extraneous data in resource record";
     description[121] = "label compression offset invalid";
+    description[122] = "extra data following resource records";
   }
 };
 
@@ -1086,6 +1087,7 @@ void parseDNSMessage(char* buffer, int length) {
     if ( ( answerRecordCount     = parseResourceRecords(answerRecords,     answerCount,     true ) ) < answerCount)      return;
     if ( ( nameserverRecordCount = parseResourceRecords(nameserverRecords, nameserverCount, true ) ) < nameserverCount)  return;
     if ( ( additionalRecordCount = parseResourceRecords(additionalRecords, additionalCount, true ) ) < additionalCount)  return;
+    if (dnsPointer<dnsEnd) { error = 122; return; }
 
     // copy the CNAME and A/AAAA 'answer' records into separate arrays
     for (int i=0; i<answerRecordCount; i++) {
