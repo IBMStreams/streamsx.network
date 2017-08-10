@@ -100,6 +100,7 @@ composite LiveDNSPacketDPDKSourceFull {
       list<uint16> DNS_ADDITIONAL_CLASSES,
       list<uint32> DNS_ADDITIONAL_TTLS,
       list<rstring> DNS_ADDITIONAL_DATA,
+      blob DNS_EXTRA_DATA,
       rstring DNS_ALL_FIELDS,
       int32 DNS_INCOMPATIBLE_FLAGS,
         uint32 PACKET_LENGTH,               // original length of packet (not necessarily all captured)
@@ -201,6 +202,7 @@ composite LiveDNSPacketDPDKSourceFull {
           DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
           DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
           DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
+          DNS_EXTRA_DATA = DNS_EXTRA_DATA(),
           DNS_ALL_FIELDS = DNS_ALL_FIELDS("\n", "|", "^"),
           DNS_INCOMPATIBLE_FLAGS = DNS_INCOMPATIBLE_FLAGS(),
             PACKET_LENGTH = PACKET_LENGTH(),

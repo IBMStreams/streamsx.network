@@ -55,7 +55,7 @@ pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pca
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_errors.pcap
 #pcapFilename=$HOME/data.splanet02/splanet02_dns+dhcp_one_second.pcap
 #pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_minute.pcap
-pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_hour.pcap
+#pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_hour.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_102.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_105.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_107.pcap
@@ -68,6 +68,7 @@ pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_hour.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_yyy.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_RR_NAPTR_NSEC.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_RR_ZERO.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_EXTRA_DATA.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
