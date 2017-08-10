@@ -58,6 +58,8 @@
 
           * 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender probably misencoded the DNS message.
 
+          * 122 for 'extra data following resource records': There are extra bytes of data in the DNS message following the last resource record. The sender probably misencoded the DNS message.
+
           *Note:* [https://www.ietf.org/rfc/rfc1035.txt|RFC 1035] explains the format of DNS messages; 
           in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
         </function:description>
@@ -1232,6 +1234,16 @@
           a subfield delimiter.
         </function:description>
         <function:prototype>public rstring DNS_ALL_FIELDS(rstring, rstring, rstring)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This parser result function returns any extra data in the DNS message that follows the last resource record.
+          Note that the parseError() function returns 'true' if there is any extra data following the last resource record,
+          even though no errors were found in any resource record, 
+          and the parseErrorCode() function returns '122'.
+        </function:description>
+        <function:prototype>public blob DNS_EXTRA_DATA()</function:prototype>
       </function:function>
 
       <function:function>

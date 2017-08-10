@@ -610,6 +610,7 @@ class DNSMessageParser {
   uint8_t* dnsStart;
   uint8_t* dnsEnd;
   uint8_t* dnsPointer;
+  uint8_t* dnsExtra;
 
   // The parseDNSMessage() function below keeps track of the offsets to domain
   // name labels in this array so that it can validate 'compressed' labels
@@ -1043,6 +1044,7 @@ void parseDNSMessage(char* buffer, int length) {
     dnsHeader = NULL;
     dnsStart = NULL;
     dnsEnd = NULL;
+    dnsExtra = NULL;
     error = 0;
     dnsPointer = NULL;
 
@@ -1087,7 +1089,7 @@ void parseDNSMessage(char* buffer, int length) {
     if ( ( answerRecordCount     = parseResourceRecords(answerRecords,     answerCount,     true ) ) < answerCount)      return;
     if ( ( nameserverRecordCount = parseResourceRecords(nameserverRecords, nameserverCount, true ) ) < nameserverCount)  return;
     if ( ( additionalRecordCount = parseResourceRecords(additionalRecords, additionalCount, true ) ) < additionalCount)  return;
-    if (dnsPointer<dnsEnd) { error = 122; return; }
+    if (dnsPointer<dnsEnd) { error = 122; dnsExtra = dnsPointer; return; }
 
     // copy the CNAME and A/AAAA 'answer' records into separate arrays
     for (int i=0; i<answerRecordCount; i++) {

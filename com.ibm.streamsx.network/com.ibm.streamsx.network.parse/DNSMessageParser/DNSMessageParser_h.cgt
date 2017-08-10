@@ -184,6 +184,9 @@ private:
   SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
 
   inline __attribute__((always_inline))
+  SPL::blob DNS_EXTRA_DATA() { return parser.dnsExtra ? SPL::blob((const unsigned char*)parser.dnsExtra, (uint64_t)(parser.dnsEnd-parser.dnsExtra)) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
   SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
 
 };

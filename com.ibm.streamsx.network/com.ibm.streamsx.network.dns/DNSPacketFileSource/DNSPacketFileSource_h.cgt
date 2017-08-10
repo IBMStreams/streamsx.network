@@ -341,6 +341,9 @@ public:
   SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
 
   inline __attribute__((always_inline))
+  SPL::blob DNS_EXTRA_DATA() { return parser.dnsExtra ? SPL::blob((const unsigned char*)parser.dnsExtra, (uint64_t)(parser.dnsEnd-parser.dnsExtra)) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
   SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { SPL::list<SPL::uint16> empty = SPL::list<SPL::uint16>(); return flattener.dnsAllFields( (double)pcapHeader->ts.tv_sec + ((double)pcapHeader->ts.tv_usec)/1000000.0, pcapHeader->len, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str(), empty); }
 
   inline __attribute__((always_inline))
