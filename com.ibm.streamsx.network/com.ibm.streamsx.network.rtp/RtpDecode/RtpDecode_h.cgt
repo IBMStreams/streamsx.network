@@ -31,6 +31,9 @@ public:
 
   // Punctuation processing
   void process(Punctuation const & punct, uint32_t port);
+  
+  unsigned int getNumberOfSamples(unsigned int length);
+  SPL::blob getPcmPayload(unsigned char * decompressed, unsigned int length);
 private:
   // Members
   int16_t MuLaw_Decode(int8_t number);

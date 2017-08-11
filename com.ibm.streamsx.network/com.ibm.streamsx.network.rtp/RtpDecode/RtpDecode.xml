@@ -4,44 +4,25 @@
   xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
-  <cppOperatorModel>
+ <cppOperatorModel>
     <context>
-      <!-- some optional elements
-      <description>Brief description of the operator</description>
-      <metrics>
-        <metric>
-          <name>metricName</name>
-          <description>Metric description</description>
-          <kind>Counter</kind>
-        </metric>
-      </metrics>
-      <customLiterals>
-        <enumeration>
-          <name>CustomLiteralTypeName</name>
-          <value>enumLiteral1</value>
-          <value>enumLiteral2</value>
-        </enumeration>
-      </customLiterals>
-      <customOutputFunctions>
-        <customOutputFunction>
-          <name>CustomOutputFunctionTypeName</name>
-          <function>
-            <description>What does this sample function do?</description>
-            <prototype><![CDATA[int32 SampleFunc()]]></prototype>
-          </function>
-        </customOutputFunction>
+	  <customOutputFunctions>
+	      <customOutputFunction>
+	      	<name>DefaultFunctions</name>
+	      	<function>
+            	<description>The default function for output attributes. By default, this function assigns the output attribute to the value of the input attribute with the same name.</description>
+            	<prototype><![CDATA[<any T> T AsIs(T)]]></prototype> 
+         	 </function>
+	      	<function>
+	      		<description>Return number of PCM samples.</description>
+	      		<prototype><![CDATA[uint32 getNumberOfSamples()]]></prototype>
+	      	</function>
+	      	<function>
+	      		<description>Return PCM payload.</description>
+	      		<prototype><![CDATA[blob getPcmPayload()]]></prototype>
+	      	</function>
+	      </customOutputFunction>
       </customOutputFunctions>
-      <libraryDependencies>
-        <library>
-          <cmn:description>my-lib</cmn:description>
-          <cmn:managedLibrary>
-            <cmn:lib>mylib</cmn:lib>
-            <cmn:libPath>../../impl/lib</cmn:libPath>
-            <cmn:includePath>../../impl/mylib/include</cmn:includePath>
-          </cmn:managedLibrary>
-        </library>
-      </libraryDependencies>
-      -->
       <providesSingleThreadedContext>Never</providesSingleThreadedContext>
     </context>  
     <parameters>
@@ -75,18 +56,20 @@
       </inputPortOpenSet>
     </inputPorts>
     <outputPorts>
-      <!-- some optional elements
       <outputPortSet>
         <expressionMode>Expression</expressionMode> 
         <autoAssignment>true</autoAssignment>
         <completeAssignment>true</completeAssignment>
         <rewriteAllowed>true</rewriteAllowed>
+        <outputFunctions>
+			<default>AsIs</default>
+			<type>DefaultFunctions</type>
+		</outputFunctions>
         <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
         <tupleMutationAllowed>true</tupleMutationAllowed>
         <cardinality>1</cardinality>
         <optional>false</optional>
-      </outputPortSet>          
-      -->
+      </outputPortSet>
       <outputPortOpenSet>
         <expressionMode>Expression</expressionMode> 
         <autoAssignment>false</autoAssignment>

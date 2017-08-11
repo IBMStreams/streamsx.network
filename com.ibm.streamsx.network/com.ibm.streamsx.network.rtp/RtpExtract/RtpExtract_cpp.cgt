@@ -107,14 +107,39 @@ rtp_packet RTPGetRTPPacket(const unsigned char *rtppacket, long pktlen) {
 	return the_packet;
 }
 
+unsigned int MY_OPERATOR::getSSRC(rtp_packet the_packet){
+    return the_packet.RTP_header->ssrc;
+}
+
+unsigned int MY_OPERATOR::getRtpTimestamp(rtp_packet the_packet){
+    return the_packet.RTP_header->ts;
+}
+
+unsigned int MY_OPERATOR::getRtpSeq(rtp_packet the_packet){
+    return the_packet.RTP_header->seq;
+}
+
+unsigned int MY_OPERATOR::getRtpPayloadLength(rtp_packet the_packet){
+    return the_packet.payload_len;
+}
+
+SPL::blob MY_OPERATOR::getRtpPayload(rtp_packet the_packet){
+    return blob(the_packet.payload, the_packet.payload_len);
+}
+
 // Tuple processing for mutating ports 
 void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
 {
-    IPort0Type const & ituple = static_cast<IPort0Type const&>(tuple);
-	  int dstPort = ituple.get_dstPort();
-    const unsigned char *packet = ituple.get_netflowMessage().getData();
-    int actualSize = ituple.get_netflowMessage().getSize(); 
-    int payloadLength = ituple.get_payloadLength();
+	<% 
+	my $inputPort = $model->getInputPortAt(0);
+	my $inputTuple = $inputPort->getCppTupleName();
+	%>
+	IPort0Type const & <%=$inputTuple%> = static_cast<IPort0Type const&> (tuple); 
+
+//	  int dstPort = <%=$inputTuple%>.get_dstPort();
+    const unsigned char *packet = <%=$inputTuple%>.get_netflowMessage().getData();
+    int actualSize = <%=$inputTuple%>.get_netflowMessage().getSize(); 
+    int payloadLength = <%=$inputTuple%>.get_payloadLength();
 
     // Extract RTP payload
     rtp_packet the_packet = RTPGetRTPPacket(packet, payloadLength);
@@ -122,36 +147,33 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
     	// we haven't handled it correctly. May not actually be RTP? 
     	static int droppedPacketCount = 0; 
     	droppedPacketCount++;
-    	SPLAPPTRC(L_ERROR, "Dropping malformed packet number " << droppedPacketCount << " IpSrc Address: " << ituple.get_ipSrc_addr(), RTP_EXTRACT_OPER);
+    	SPLAPPTRC(L_ERROR, "Dropping malformed packet number " << droppedPacketCount << " IpSrc Address: " << <%=$inputTuple%>.get_ipSrc_addr(), RTP_EXTRACT_OPER);
     	numPacketsDropped -> incrementValue(1); 
     	return; 
     }
-   // fprintf(stderr, "%s RTP packet decoded, the payload length: %ld\n", the_packet.payload, the_packet.payload_len);
-
-
-/*
-    if ( (  the_packet.payload_len > 0 ) &
-       ( the_packet.payload_len > 2000 ) ) 
-    {
-*/ 
  
     OPort0Type otuple; 
 
-
-    otuple.set_ssrc(the_packet.RTP_header->ssrc); 
-    otuple.set_ts(the_packet.RTP_header->ts); 
-    otuple.set_seq(the_packet.RTP_header->seq); 
-    otuple.set_ipSrc_addr(ituple.get_ipSrc_addr() ); 
-    otuple.set_captureSeconds(ituple.get_captureSeconds() ); 
-
-
-    otuple.set_payloadLength(the_packet.payload_len);
-    // jms i dont get this 
-   // otuple.set_payload(blob(the_packet.payload, the_packet.payload_len*sizeof(float)));
-    otuple.set_payload(blob(the_packet.payload, the_packet.payload_len)); 
+    // Forward Tuples we have chosen
+    <% 
+      my $oport = $model->getOutputPortAt(0); 
+      foreach my $attribute (@{$oport->getAttributes()}) { 
+        my $name = $attribute->getName(); 
+        my $operation = $attribute->getAssignmentOutputFunctionName();  
+       
+        if ($operation eq "AsIs") { 
+        	
+          my $init = $attribute->getAssignmentOutputFunctionParameterValueAt(0)->getCppExpression();%> 
+          otuple.set_<%=$name%>(<%=$init%>); 
+         <%} else { %>
+          	  otuple.set_<%=$name%>( 
+          	  MY_OPERATOR::<%=$operation%>(the_packet)); 
+        <%}     
+      }%> 
+    
+    
     submit(otuple, 0); // submit to output port 0        	    
-   
-  /*  } */ 
+
 }
 
 // Tuple processing for non-mutating ports
