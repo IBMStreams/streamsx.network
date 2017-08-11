@@ -108,6 +108,7 @@ composite TestDNSPacketFileSourceFull {
 
     FlattenedDNSPacketType = 
         uint64 packetNumber,            // sequence number of packet
+        boolean parseError,
         rstring flattenedDNSPacket;
 
     graph
@@ -212,13 +213,15 @@ composite TestDNSPacketFileSourceFull {
             PAYLOAD_DATA = PAYLOAD_DATA();
     FlattenedDNSPacketStream:
           packetNumber = packetsProcessed(),
+          parseError = parseError(),
           flattenedDNSPacket = DNS_ALL_FIELDS("\n", " ", ", "); 
     }
-    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFull.DNSPacketStream.out"; format: txt; hasDelayField: false; }
-    () as FlattenedDNSPacketSink = FileSink(FlattenedDNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFull.FlattenedDNSPacketStream.out"; format: csv; hasDelayField: false; }
-    () as FlattenedDNSPacketLog = Custom(FlattenedDNSPacketStream as In){
-      logic onTuple In: {
-        printStringLn((rstring)packetNumber + "\n" + flattenedDNSPacket + "\n");
-      } }
+//    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFull.DNSPacketStream.out"; format: txt; hasDelayField: false; }
+
+
+    stream<rstring text> _FlattenedDNSPacketStream as Out = Functor(FlattenedDNSPacketStream) {
+      param filter: parseError;
+      output Out: text = "packet=" + (rstring)packetNumber + " " + flattenedDNSPacket + "\n"; }
+    () as FlattenedDNSPacketSink = FileSink(_FlattenedDNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFull.FlattenedDNSPacketStream.out"; format: line; }
 
 }
