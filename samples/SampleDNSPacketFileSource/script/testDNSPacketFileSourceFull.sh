@@ -51,12 +51,13 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
-#pcapFilename=$toolkitDirectory/samples/SampleNetworkToolkitData/data/sample_dns_only_null.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns-only_one_second.pcap
+pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_null.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_EXTRA_DATA.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_RR_ZERO.pcap
+#pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_second.pcap
 #pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_minute.pcap
-#pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_hour.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns-only_resource_records_6_15_33.pcap
+pcapFilename=$HOME/data.splanet02/splanet02_dns-only_one_hour.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

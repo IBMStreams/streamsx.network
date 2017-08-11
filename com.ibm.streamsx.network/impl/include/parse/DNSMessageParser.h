@@ -32,7 +32,8 @@ class DNSMessageParserErrorDescriptions {
   const char* description[maximumErrorCode];
 
   DNSMessageParserErrorDescriptions() {
-    for (int i = 0; i<sizeof(maximumErrorCode); i++) description[i] = "";
+    for (int i = 0; i<sizeof(maximumErrorCode); i++) description[i] = "?";
+    description[0]   = "OK";
     description[102] = "label overruns packet";
     description[103] = "label compression length overruns packet";
     description[104] = "label compression offset underruns packet";
