@@ -26,37 +26,37 @@
 
           * 103 for 'label compression length overruns packet': The length field of a compressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
 
-          * 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
+          * 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the domain name.
 
-          * 105 for 'label compression offset forward reference': The offset of a compressed domain name label points beyond the current label. The sender misencoded the DNS message.
+          * 105 for 'label compression offset forward reference': The offset of a compressed domain name label points beyond the current label. The sender misencoded the domain name.
 
-          * 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
+          * 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the domain name.
 
-          * 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the DNS message.
+          * 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the domain name.
 
-          * 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the DNS message.
+          * 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the domain name.
 
           * 110 for 'resource record missing': The DNS message contains fewer resource records than the 'count' fields in the message header indicate. The DNS message may have been truncated.
 
           * 111 for 'question resource record truncated': The DNS 'question' resource record was truncated. The packet containing the message was probably truncated.
 
-          * 112 for 'resource record truncated': A DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+          * 112 for 'resource record truncated': A DNS resource record was truncated. The packet containing the DNS message was probably truncated.
 
-          * 113 for 'resource record data truncated': The 'rdata' field of a DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+          * 113 for 'resource record data truncated': The 'rdata' field of a DNS resource record was truncated. The packet containing the DNS message was probably truncated.
 
           * 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
 
-          * 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
+          * 116 for 'message too short': The DNS message is shorter than the length of the DNS header. The packet containing the message was probably truncated.
 
-          * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
+          * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The packet probably does not contain a DNS message.
 
-          * 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
+          * 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resource record is larger than the record's data field. The sender misencoded the resource record.
 
-          * 119 for 'missing data in resource record': The data field of a resoure record is too short; some fields may be truncated or missing entirely. The sender probably misencoded the DNS message.
+          * 119 for 'missing data in resource record': The data field of a resource record is too short; some fields may be truncated or missing entirely. The sender misencoded the resource record.
 
-          * 120 for 'extraneous data in resource record': The data field of a resoure record is too long; there is unexpected data following the last field. The sender probably misencoded the DNS message.
+          * 120 for 'extra data in resource record': The data field of a resource record is too long; there is unexpected data following the last field. The sender misencoded the resource record.
 
-          * 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender probably misencoded the DNS message.
+          * 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender misencoded the domain name.
 
           * 122 for 'extra data following resource records': There are extra bytes of data in the DNS message following the last resource record. The sender probably misencoded the DNS message.
 

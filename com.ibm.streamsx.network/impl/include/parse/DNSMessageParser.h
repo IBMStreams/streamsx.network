@@ -46,13 +46,13 @@ class DNSMessageParserErrorDescriptions {
     description[111] = "question resource record truncated";
     description[112] = "resource record truncated";
     description[113] = "resource record data truncated";
-    description[114] = "invalid address family";
-    description[115] = "unexpected resource type";
+    description[114] = "invalid address family in resource record";
+    description[115] = "";
     description[116] = "message too short";
     description[117] = "counts too large";
     description[118] = "data overruns resource record";
     description[119] = "missing data in resource record";
-    description[120] = "extraneous data in resource record";
+    description[120] = "extra data in resource record";
     description[121] = "label compression offset invalid";
     description[122] = "extra data following resource records";
   }
