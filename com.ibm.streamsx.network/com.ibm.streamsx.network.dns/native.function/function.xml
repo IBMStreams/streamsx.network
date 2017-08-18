@@ -58,7 +58,7 @@
 
           * 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender misencoded the domain name.
 
-          * 122 for 'extra data following resource records': There are extra bytes of data in the DNS message following the last resource record. The sender probably misencoded the DNS message.
+          * 122 for 'extra data following resource records': There are extra bytes of data in the DNS message following the last resource record. The sender probably miscalculated the packet length.
 
           *Note:* [https://www.ietf.org/rfc/rfc1035.txt|RFC 1035] explains the format of DNS messages; 
           in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
