@@ -48,7 +48,7 @@
 
           * 116 for 'message too short': The DNS message is shorter than the length of the DNS header. The packet containing the message was probably truncated.
 
-          * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The packet probably does not contain a DNS message.
+          * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The packet probably does not contain a DNS message.
 
           * 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resource record is larger than the record's data field. The sender misencoded the resource record.
 
