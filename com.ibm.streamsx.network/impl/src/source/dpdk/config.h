@@ -51,11 +51,18 @@
 
 /*
  * Configurable number of RX/TX ring descriptors
+ *
+ * PPC64 is handled differently here as we have been unable to
+ * make a P8 + Mellanox CX-3 work with the full 4096 RX descriptors.
  */
-// Works on x520 #define STREAMS_SOURCE_RX_DESC_DEFAULT 4096
+#ifdef __PPC64__ 
 #define STREAMS_SOURCE_RX_DESC_DEFAULT 512
-// Works on x520 #define STREAMS_SOURCE_TX_DESC_DEFAULT 64
-#define STREAMS_SOURCE_TX_DESC_DEFAULT 512
+#define STREAMS_SOURCE_TX_DESC_DEFAULT 64
+#else
+#define STREAMS_SOURCE_RX_DESC_DEFAULT 4096
+#define STREAMS_SOURCE_TX_DESC_DEFAULT 64
+#endif
+
 #define STREAMS_SOURCE_MTU_DEFAULT     9000
 
 #define MAX_PORTS 32
