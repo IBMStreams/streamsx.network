@@ -12,28 +12,14 @@ sidebar:
 {% include editme %}
 
 
-Descripe on this page the general overview about the domain specific knowledge you want to explain further.
-Separate huge topics to own pages.
+The Network toolkit for IBM Streams enables SPL applications to process low-level network traffic.
 
-## Knowledge Heading level 2
+It includes operators and functions that can:
 
+* ingest raw ethernet packets from live network interfaces and recordings of network traffic
+* parse DHCP, DNS, Netflow, and IPFIX messages
+* reassemble application-level files from network packets
+* map IP addresses into city, state, and country locations
+* convert IP addresses betweeen binary and string representations
 
-**ProTip:** This is a Pro-Tip
-{: .notice--info}
-
-### Knowledge Heading level 3
-
-Some text
-
-Some shell command description
-
-```bash
-bundle install
-```
-
-### Knowledge Another level 3 Heading
-
-**Note:** This is a Notize.
-{: .notice--warning}
-
-
+This version of the toolkit is intended for use with IBM Streams release 4.1 and later.

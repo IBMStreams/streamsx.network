@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestNetflowMessageParserParallelAnalysis.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestNetflowMessageParserParallelAnalysis.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestNetflowMessageParserParallelAnalysis.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleNetflowMessageParser.html">SampleNetflowMessageParser 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestNetflowMessageParserParallelAnalysis.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestNetflowMessageParserParallelAnalysis.html#spldoc_compilationunit__composite_operator__NetflowAnalytic">NetflowAnalytic</a></strong>
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestNetflowMessageParserParallelAnalysis.html#spldoc_compilationunit__composite_operator__TestNetflowMessageParserParallelAnalysis">TestNetflowMessageParserParallelAnalysis</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+    
+      <dt class="dt dlterm splhead-2">Types</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestNetflowMessageParserParallelAnalysis.html#spldoc_compilationunit__composite_type__NetflowAnalytic.NetflowAnalyticResultType">NetflowAnalytic.NetflowAnalyticResultType</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestNetflowMessageParserParallelAnalysis"><h2 class="title sectiontitle splpart">public composite TestNetflowMessageParserParallelAnalysis</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+<li class="sli"><strong class="ph b">parallelChannels</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleNetflowMessageParser/op$sample$TestNetflowMessageParserParallelAnalysis.svg" width="347" height="175"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestNetflowMessageParserParallelAnalysis {
+ 
+     param
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_netflow9_new.pcap" );
+     expression&lt;int32&gt; $parallelChannels: (int32)getSubmissionTimeValue("parallelChannels", "1" );
+ 
+     type
+ 
+     PacketType =
+       int64 captureTime,    // time that packet was captured, relative to Unix epoch, in milliseconds, accurate to microseconds
+       uint32 netflowSource, // IP source address of Netflow message
+       blob netflowMessage;  // the Netflow message from a packet, excluding all network headers
+ 
+     netflow_t =
+       int64 endTime,        // time that flow ended, relative to Unix epoch, in milliseconds, according to capturing machine's clock
+       int64 startTime,      // time that flow started, relative to Unix epoch, in milliseconds, according to capturing machine's clock
+       uint8  protocol,      // IP protocol number of flow, usually 1 for "icmp", 6 for "tcp", or 17 for "udp"
+       uint32 srcAddress,    // IPv4 address of source of flow
+       uint16 srcPort,       // UDP/TCP port of source of flow
+       uint32 dstAddress,    // IPv4 address of destination of flow
+       uint16 dstPort,       // UDP/TCP port of destination of flow
+       uint64 packetCount,   // count of packets in flow
+       uint64 byteCount,     // count of bytes in flow
+       uint64 partitionKey;  // combination of addresses and ports, for downstream @parallel annotation
+ 
+     graph
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource() {
+         param
+             pcapFilename: $pcapFilename;
+             inputFilter: "udp port 2055";
+             metricsInterval: 0.0;
+         output Out:
+             captureTime = (int64)CAPTURE_SECONDS() * 1000l + (int64)CAPTURE_MICROSECONDS() / 1000l,
+             netflowSource = IPV4_SRC_ADDRESS(),
+             netflowMessage = PAYLOAD_DATA();
+     }
+     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     stream&lt;netflow_t&gt; NetflowMessageStream as Out = NetflowMessageParser(PacketStream) {
+       param
+           messageAttribute: netflowMessage;
+           sourceAttribute: netflowSource;
+           outputFilters: !parseError();
+       output Out:
+           endTime = captureTime - ( (int64)NETFLOW_SYSTEM_UPTIME() - (int64)NETFLOW_LAST_SWITCHED() ),
+           startTime = captureTime - ( (int64)NETFLOW_SYSTEM_UPTIME() - (int64)NETFLOW_FIRST_SWITCHED() ),
+           protocol = NETFLOW_PROTOCOL(),
+           srcAddress = NETFLOW_IPV4_SRC_ADDR(),
+           srcPort = NETFLOW_SRC_PORT(),
+           dstAddress = NETFLOW_IPV4_DST_ADDR(),
+           dstPort = NETFLOW_DST_PORT(),
+           byteCount = NETFLOW_IN_BYTES(),
+           packetCount = NETFLOW_IN_PKTS(),
+           partitionKey = hashCode(NETFLOW_IPV4_SRC_ADDR()) +
+                          hashCode(NETFLOW_IPV4_DST_ADDR()) +
+                          hashCode(NETFLOW_SRC_PORT()) +
+                          hashCode(NETFLOW_DST_PORT());
+     }
+     () as NetflowMessageSink = FileSink(NetflowMessageStream) { param file: "debug.TestNetflowMessageParserParallelAnalysis.NetflowMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     @parallel(width=$parallelChannels, partitionBy=[{port=NetflowMessageStream, attributes=[partitionKey]}])
+     stream&lt;NetflowAnalytic.NetflowAnalyticResultType&gt; NetflowAnalyticResultStream = NetflowAnalytic(NetflowMessageStream) {}
+ 
+ }
+
+   </pre>
+
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__NetflowAnalytic"><h2 class="title sectiontitle splpart">public composite NetflowAnalytic(output NetflowAnalyticResultStream; input NetflowMessageStream)</h2>
+  
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Input Ports</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">NetflowMessageStream</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Output Ports</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">NetflowAnalyticResultStream</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Static Types</h2>
+  
+</div>
+
+   <div class="section" id="spldoc_compilationunit__composite_type__NetflowAnalytic.NetflowAnalyticResultType">
+     <dl class="dl">
+       
+         <dt class="dt dlterm">NetflowAnalytic.NetflowAnalyticResultType = int32 result;</dt>
+
+         <dd class="dd"/>
+
+       
+     </dl>
+
+   </div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleNetflowMessageParser/op$sample$NetflowAnalytic.svg" width="142" height="107"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite NetflowAnalytic ( input NetflowMessageStream ; output NetflowAnalyticResultStream ) {
+ 
+   type
+ 
+     // output from Netflow analytic
+     static NetflowAnalyticResultType =
+       int32 result;
+ 
+   graph
+ 
+     // placeholder for Netflow analytic
+     stream&lt;NetflowAnalyticResultType&gt; NetflowAnalyticResultStream = Custom(NetflowMessageStream) {}
+ 
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

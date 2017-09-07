@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestDNSMessageParserAnalysis.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestDNSMessageParserAnalysis.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestDNSMessageParserAnalysis.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleDNSMessageParser.html">SampleDNSMessageParser 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestDNSMessageParserAnalysis.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestDNSMessageParserAnalysis.html#spldoc_compilationunit__composite_operator__TestDNSMessageParserAnalysis">TestDNSMessageParserAnalysis</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestDNSMessageParserAnalysis"><h2 class="title sectiontitle splpart">public composite TestDNSMessageParserAnalysis</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+<li class="sli"><strong class="ph b">processorAffinity</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleDNSMessageParser/op$sample$TestDNSMessageParserAnalysis.svg" width="337" height="152"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestDNSMessageParserAnalysis {
+ 
+     param
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
+     expression&lt;uint32&gt; $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1");
+ 
+     type
+ 
+     PacketType =
+         timestamp captureTime,          // time that packet was captured, in seconds since Unix epoch
+         rstring dstAddress,             // string representation of IP destination address
+         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
+ 
+     // input to 'predictive blacklisting' analytic
+     FullDNSResponseMessage_t =
+       timestamp captureTime,
+       rstring dstAddress,
+       rstring questionName,
+       rstring questionType,
+       uint8 responseCode,
+       uint16 answerCount,
+       list&lt;rstring&gt; answerNames,
+       list&lt;rstring&gt; answerData,
+       list&lt;uint16&gt; answerTypes,
+       list&lt;uint32&gt; answerTTLs,
+       uint16 nameserverCount,
+       list&lt;rstring&gt; nameserverNames,
+       list&lt;rstring&gt; nameserverData,
+       list&lt;uint16&gt; nameserverTypes,
+       list&lt;uint32&gt; nameserverTTLs,
+       uint16 additionalCount,
+       list&lt;rstring&gt; additionalNames,
+       list&lt;rstring&gt; additionalData,
+       list&lt;uint16&gt; additionalTypes,
+       list&lt;uint32&gt; additionalTTLs;
+ 
+     // input to 'domain profiling' and 'host profiling' analytics
+     ShortDNSResponseMessage_t =
+       timestamp captureTime,
+       rstring dstAddress,
+       rstring questionName,
+       uint8 responseCode,
+       list&lt;rstring&gt; answerData,
+       list&lt;rstring&gt; additionalData;
+ 
+     graph
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource() {
+         param
+             pcapFilename: $pcapFilename;
+             processorAffinity: $processorAffinity;
+             inputFilter: "udp port 53";
+             metricsInterval: 0.0;
+         output Out:
+             captureTime = createTimestamp( (int64)CAPTURE_SECONDS(), CAPTURE_MICROSECONDS() * 1000u ),
+             dstAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+             dnsMessage = PAYLOAD_DATA();
+     }
+     //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserAnalysis.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     ( stream&lt;FullDNSResponseMessage_t&gt; FullDNSResponseMessageStream as OutFull ;
+       stream&lt;ShortDNSResponseMessage_t&gt; ShortDNSResponseMessageStream as OutShort ) = DNSMessageParser(PacketStream) {
+       logic state: {
+         map&lt;uint16,rstring&gt; dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+         map&lt;uint16,boolean&gt; dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
+       }
+       param
+           messageAttribute: dnsMessage;
+           outputFilters: DNS_RESPONSE_FLAG() &amp;&amp; DNS_QUESTION_TYPE() in dnsAnalysisTypes &amp;&amp; !parseError(),
+                          DNS_RESPONSE_FLAG() &amp;&amp; DNS_QUESTION_TYPE() in dnsAnalysisTypes &amp;&amp; !parseError();
+       output
+       OutFull:
+           questionName = DNS_QUESTION_NAME(),
+           questionType = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
+           responseCode = DNS_RESPONSE_CODE(),
+           answerCount = DNS_ANSWER_COUNT(),
+           answerNames = DNS_ANSWER_NAMES(),
+           answerData = DNS_ANSWER_DATA(),
+           answerTypes = DNS_ANSWER_TYPES(),
+           answerTTLs = DNS_ANSWER_TTLS(),
+           nameserverCount = DNS_NAMESERVER_COUNT(),
+           nameserverNames = DNS_NAMESERVER_NAMES(),
+           nameserverData = DNS_NAMESERVER_DATA(),
+           nameserverTypes = DNS_NAMESERVER_TYPES(),
+           nameserverTTLs = DNS_NAMESERVER_TTLS(),
+           additionalCount = DNS_ADDITIONAL_COUNT(),
+           additionalNames = DNS_ADDITIONAL_NAMES(),
+           additionalData = DNS_ADDITIONAL_DATA(),
+           additionalTypes = DNS_ADDITIONAL_TYPES(),
+           additionalTTLs = DNS_ADDITIONAL_TTLS();
+       OutShort:
+           questionName = DNS_QUESTION_NAME(),
+           responseCode = DNS_RESPONSE_CODE(),
+           answerData = DNS_ANSWER_DATA(),
+           additionalData = DNS_ADDITIONAL_DATA();
+     }
+     () as FullDNSResponseMessageSink = FileSink(FullDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.FullDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as ShortDNSResponseMessageSink = FileSink(ShortDNSResponseMessageStream) { param file: "debug.TestDNSMessageParserAnalysis.ShortDNSResponseMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

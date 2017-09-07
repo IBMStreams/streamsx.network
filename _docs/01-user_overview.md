@@ -12,31 +12,35 @@ sidebar:
 {%include editme %}
 
 
-Place here an overview about the functionality of the toolkit.
-Don't repeat work by explaining things which are available in SPLDOC.
-SPLDOC shall be linked in this page 
+## SPLDOC
+
+[SPLDoc for the com.ibm.streamsx.network toolkit](https://ibmstreams.github.io/streamsx.network/doc/spldoc/html/index.html)
 
 
-## Overview Sample header level 2
+## Sample applications
 
-Your text related to this topic 
+The sample projects contain several SPL applications to demonstrate the usage of an operator.
 
-**ProTip:** This is a Pro-Tip
-{: .notice--info}
+* The sample applications for the "...File..." operators can be executed on any machine with ordinary user privileges.
+* The sample applications for the "...Live..." operators require root privileges to execute, and some of them require specially-configured routers and physical wiring, as described in their documentation.
+* The sample applications for the "...DPDK..." operators require special network adapters and system software to execute, as well as root privileges, specially-configured routers, and physical wiring.
 
-### Overview Sample header level 3
+### Building and launching the sample applications
 
-Some text in this level
+To build and launch the sample application you can launch a script.
 
-Some shell command description
+For example:
 
-```bash
-bundle install
-```
+    cd SamplePacketFileSource/script
+    ./testPacketFileSourceBasic1.sh
 
-### Overview Another Sample header level 3 
+* The `test...sh` scripts can be executed on any machine with ordinary user privileges.
+* The `live...sh` scripts require root privileges to execute.
 
-**Note:** This is a Notize.
-{: .notice--warning}
+## SampleNetworkToolkitData
 
+This project contains the sample (PCAP) input files for several sample applications.
 
+## Samples for the IPASNEnricher and IPSpatialEnricher operators
+
+Samples for the operators IPASNEnricher and IPSpatialEnricher will be available on github: https://github.com/IBMStreams/streamsx.cybersecurity.starterApps/tree/master/PredictiveBlacklistingSamples/com.ibm.streamsx.cybersecurity.sample

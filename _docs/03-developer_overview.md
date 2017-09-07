@@ -11,29 +11,17 @@ sidebar:
 {% include toc %}
 {% include editme %}
 
- Describe in this page the general development process. Refer for build setup and test setup to the appropriate pages
+For the toolkit's source code, please see [https://github.com/IBMStreams/streamsx.network/](https://github.com/IBMStreams/streamsx.network/).
+
+# Build the toolkit
+
+The toolkit needs to be build before you can use it in a SPL application.
+Run the following command in the `streamsx.shell` directory:
+
+    ant all
 
 
-## Development Heading level 2
+## Running the sample applications test
 
-Your text
-
-**ProTip:** This is a Pro-Tip
-{: .notice--info}
-
-### Development Heading level 3
-
-Some text
-
-Some shell command description
-
-```bash
-bundle install
-```
-
-### Development Another level 3 Heading
-
-**Note:** This is a Notize.
-{: .notice--warning}
-
+Call `./autotestAll.sh` in the `sample` directory to perform the regression test.
 

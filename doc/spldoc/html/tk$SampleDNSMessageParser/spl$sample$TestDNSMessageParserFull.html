@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestDNSMessageParserFull.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestDNSMessageParserFull.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestDNSMessageParserFull.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleDNSMessageParser.html">SampleDNSMessageParser 2.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestDNSMessageParserFull.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestDNSMessageParserFull.html#spldoc_compilationunit__composite_operator__TestDNSMessageParserFull">TestDNSMessageParserFull</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestDNSMessageParserFull"><h2 class="title sectiontitle splpart">public composite TestDNSMessageParserFull</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleDNSMessageParser/op$sample$TestDNSMessageParserFull.svg" width="342" height="175"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestDNSMessageParserFull {
+ 
+     param
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
+ 
+     type
+ 
+     PacketType =
+         uint64 packetNumber,            // sequence number of packet, as emitted by operator
+         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+         rstring ipSourceAddress,        // IP source address
+         rstring ipDestinationAddress,   // IP destination address
+         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
+ 
+     DNSMessageType =
+       rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
+       rstring ipSourceAddress,          // IP source address
+       rstring ipDestinationAddress,     // IP destination address
+       boolean parseError,
+       int32 parseErrorCode,
+       rstring parseErrorDescription,
+       uint32 parseErrorOffset,
+       uint64 messagesProcessed,
+       uint16 DNS_IDENTIFIER,
+       uint8 DNS_OPCODE,
+       boolean DNS_RESPONSE_FLAG,
+       uint8 DNS_RESPONSE_CODE,
+       rstring DNS_RESPONSE_CODE_AS_STRING,
+       boolean DNS_AUTHORITATIVE_FLAG,
+       boolean DNS_TRUNCATION_FLAG,
+       rstring DNS_ALL_FLAGS,
+       uint16 DNS_QUESTION_COUNT,
+       rstring DNS_QUESTION_NAME,
+       uint16 DNS_QUESTION_TYPE,
+       rstring DNS_QUESTION_TYPE_AS_STRING,
+       uint16 DNS_QUESTION_CLASS,
+       list&lt;rstring&gt; DNS_QUESTION_NAMES,
+       list&lt;uint16&gt; DNS_QUESTION_TYPES,
+       list&lt;uint16&gt; DNS_QUESTION_CLASSES,
+       uint16 DNS_ANSWER_COUNT,
+       list&lt;rstring&gt; DNS_ANSWER_NAMES,
+       list&lt;uint16&gt; DNS_ANSWER_TYPES,
+       list&lt;uint16&gt; DNS_ANSWER_CLASSES,
+       list&lt;uint32&gt; DNS_ANSWER_TTLS,
+       list&lt;rstring&gt; DNS_ANSWER_DATA,
+       rstring DNS_ANSWER_CANONICAL,
+       rstring DNS_ANSWER_ADDRESS,
+       uint32 DNS_ANSWER_IPV4_ADDRESS_AS_NUMBER,
+       rstring DNS_ANSWER_IPV4_ADDRESS_AS_STRING,
+       list&lt;uint8&gt;[16] DNS_ANSWER_IPV6_ADDRESS_AS_NUMBER,
+       rstring DNS_ANSWER_IPV6_ADDRESS_AS_STRING,
+       list&lt;rstring&gt; DNS_ANSWER_ADDRESSES,
+       list&lt;uint32&gt; DNS_ANSWER_IPV4_ADDRESSES,
+       list&lt;list&lt;uint8&gt;[16]&gt; DNS_ANSWER_IPV6_ADDRESSES,
+       uint16 DNS_NAMESERVER_COUNT,
+       list&lt;rstring&gt; DNS_NAMESERVER_NAMES,
+       list&lt;uint16&gt; DNS_NAMESERVER_TYPES,
+       list&lt;uint16&gt; DNS_NAMESERVER_CLASSES,
+       list&lt;uint32&gt; DNS_NAMESERVER_TTLS,
+       list&lt;rstring&gt; DNS_NAMESERVER_DATA,
+       uint16 DNS_ADDITIONAL_COUNT,
+       list&lt;rstring&gt; DNS_ADDITIONAL_NAMES,
+       list&lt;uint16&gt; DNS_ADDITIONAL_TYPES,
+       list&lt;uint16&gt; DNS_ADDITIONAL_CLASSES,
+       list&lt;uint32&gt; DNS_ADDITIONAL_TTLS,
+       list&lt;rstring&gt; DNS_ADDITIONAL_DATA,
+       int32 DNS_INCOMPATIBLE_FLAGS;
+ 
+     // error output from DNSMessageParser operator
+     DNSErrorType =
+       uint64 packetNumber,              // sequence number of packet, as emitted by operator
+       rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
+       rstring ipSourceAddress,          // binary representation of IP source address
+       rstring ipDestinationAddress,     // IP destination address
+       rstring parseErrorDescription,
+       uint32 parseErrorOffset,
+       rstring dnsMessage;
+ 
+     graph
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource() {
+         param
+             pcapFilename: $pcapFilename;
+             inputFilter: "udp port 53";
+             metricsInterval: 0.0;
+         output Out:
+             packetNumber = packetsProcessed(),
+             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
+             ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
+             dnsMessage = PAYLOAD_DATA();
+     }
+     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+     ( stream&lt;DNSMessageType&gt; DNSMessageStream as OutMessage ;
+       stream&lt;DNSErrorType&gt; DNSErrorStream as OutError ) = DNSMessageParser(PacketStream) {
+       logic state: {
+         map&lt;uint16,rstring&gt; dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+         map&lt;uint8,rstring&gt; dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" };
+       }
+       param
+           messageAttribute: dnsMessage;
+           outputFilters: true, parseError();
+       output OutMessage:
+           captureTime = formatEpochDateTime(captureTime),
+           parseError = parseError(),
+           parseErrorCode = parseErrorCode(),
+           parseErrorDescription = parseErrorDescription(),
+           parseErrorOffset = parseErrorOffset(),
+           messagesProcessed = messagesProcessed(),
+           DNS_IDENTIFIER = DNS_IDENTIFIER(),
+           DNS_OPCODE = DNS_OPCODE(),
+           DNS_RESPONSE_FLAG = DNS_RESPONSE_FLAG(),
+           DNS_RESPONSE_CODE = DNS_RESPONSE_CODE(),
+           DNS_RESPONSE_CODE_AS_STRING = DNS_RESPONSE_CODE() in dnsResponseCodes ? dnsResponseCodes[DNS_RESPONSE_CODE()] : (rstring)DNS_RESPONSE_CODE(),
+           DNS_AUTHORITATIVE_FLAG = DNS_AUTHORITATIVE_FLAG(),
+           DNS_TRUNCATION_FLAG = DNS_TRUNCATION_FLAG(),
+           DNS_ALL_FLAGS = (rstring)DNS_ALL_FLAGS(),
+           DNS_QUESTION_COUNT = DNS_QUESTION_COUNT(),
+           DNS_QUESTION_NAME = DNS_QUESTION_NAME(),
+           DNS_QUESTION_TYPE = DNS_QUESTION_TYPE(),
+           DNS_QUESTION_TYPE_AS_STRING = DNS_QUESTION_TYPE() in dnsTypes ? dnsTypes[DNS_QUESTION_TYPE()] : (rstring)DNS_QUESTION_TYPE(),
+           DNS_QUESTION_CLASS = DNS_QUESTION_CLASS(),
+           DNS_QUESTION_NAMES = DNS_QUESTION_NAMES(),
+           DNS_QUESTION_TYPES = DNS_QUESTION_TYPES(),
+           DNS_QUESTION_CLASSES = DNS_QUESTION_CLASSES(),
+           DNS_ANSWER_COUNT = DNS_ANSWER_COUNT(),
+           DNS_ANSWER_NAMES = DNS_ANSWER_NAMES(),
+           DNS_ANSWER_TYPES = DNS_ANSWER_TYPES(),
+           DNS_ANSWER_CLASSES = DNS_ANSWER_CLASSES(),
+           DNS_ANSWER_TTLS = DNS_ANSWER_TTLS(),
+           DNS_ANSWER_DATA = DNS_ANSWER_DATA(),
+           DNS_ANSWER_CANONICAL = DNS_ANSWER_CANONICAL(),
+           DNS_ANSWER_ADDRESS = DNS_ANSWER_ADDRESS(),
+           DNS_ANSWER_IPV4_ADDRESS_AS_NUMBER = DNS_ANSWER_IPV4_ADDRESS(),
+           DNS_ANSWER_IPV4_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(DNS_ANSWER_IPV4_ADDRESS()),
+           DNS_ANSWER_IPV6_ADDRESS_AS_NUMBER = DNS_ANSWER_IPV6_ADDRESS(),
+           DNS_ANSWER_IPV6_ADDRESS_AS_STRING = convertIPV6AddressNumericToString(DNS_ANSWER_IPV6_ADDRESS()),
+           DNS_ANSWER_ADDRESSES = DNS_ANSWER_ADDRESSES(),
+           DNS_ANSWER_IPV4_ADDRESSES = DNS_ANSWER_IPV4_ADDRESSES(),
+           DNS_ANSWER_IPV6_ADDRESSES = DNS_ANSWER_IPV6_ADDRESSES(),
+           DNS_NAMESERVER_COUNT = DNS_NAMESERVER_COUNT(),
+           DNS_NAMESERVER_NAMES = DNS_NAMESERVER_NAMES(),
+           DNS_NAMESERVER_TYPES = DNS_NAMESERVER_TYPES(),
+           DNS_NAMESERVER_CLASSES = DNS_NAMESERVER_CLASSES(),
+           DNS_NAMESERVER_TTLS = DNS_NAMESERVER_TTLS(),
+           DNS_NAMESERVER_DATA = DNS_NAMESERVER_DATA(),
+           DNS_ADDITIONAL_COUNT = DNS_ADDITIONAL_COUNT(),
+           DNS_ADDITIONAL_NAMES = DNS_ADDITIONAL_NAMES(),
+           DNS_ADDITIONAL_TYPES = DNS_ADDITIONAL_TYPES(),
+           DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
+           DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
+           DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
+           DNS_INCOMPATIBLE_FLAGS = DNS_INCOMPATIBLE_FLAGS();
+ 
+       OutError:
+           captureTime = formatEpochTime(captureTime),
+           parseErrorDescription = parseErrorDescription(),
+           parseErrorOffset = parseErrorOffset(),
+           dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
+     }
+     () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserFull.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSMessageParserFull.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ 
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

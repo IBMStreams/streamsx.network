@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="SPL File TestIPAddressLocationList.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>SPL File TestIPAddressLocationList.spl</title>
+</head>
+<body id="spldoc_compilationunit">
+
+
+<h1 class="title topictitle1">SPL File <tt class="ph tt">TestIPAddressLocationList.spl</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$SampleIPAddressLocation.html">SampleIPAddressLocation 1.0.0</a> &gt; <a class="xref" href="ns$sample.html">sample</a> &gt; TestIPAddressLocationList.spl</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
+  
+  <dl class="dl">
+    <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+    
+      <dt class="dt dlterm splhead-2">Operators</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestIPAddressLocationList.html#spldoc_compilationunit__composite_operator__TestIPAddressLocationList">TestIPAddressLocationList</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+    
+      <dt class="dt dlterm splhead-2">Functions</dt>
+
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestIPAddressLocationList.html#spldoc_compilationunit__function__convertIPV4AddressNumbersToStrings.list:.:uint32:.:">convertIPV4AddressNumbersToStrings(list&lt;uint32&gt;)</a></strong>
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$sample$TestIPAddressLocationList.html#spldoc_compilationunit__function__convertIPV4AddressStringsToNumbers.list:.:rstring:.:">convertIPV4AddressStringsToNumbers(list&lt;rstring&gt;)</a></strong>
+</li>
+
+</ul>
+
+      </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__composite_operator__TestIPAddressLocationList"><h2 class="title sectiontitle splpart">public composite TestIPAddressLocationList</h2>
+  
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+<ul class="sl simple">
+<li class="sli"><strong class="ph b">geographyDirectory</strong>
+</li>
+
+<li class="sli"><strong class="ph b">pcapFilename</strong>
+</li>
+
+</ul>
+
+</div>
+
+<div class="section">
+</div>
+
+<div class="section">
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">Composite Operator Graph</h2>
+  
+</div>
+
+<div class="section splgraph">
+  <embed class="image" src="../../image/tk$SampleIPAddressLocation/op$sample$TestIPAddressLocationList.svg" width="452" height="198"/>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ composite TestIPAddressLocationList {
+ 
+     param
+     expression&lt;rstring&gt; $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
+     expression&lt;rstring&gt; $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_ipv4+ipv6.pcap" );
+ 
+     type
+ 
+     PacketType =
+         uint64 packetNumber,            // sequence number of packet, as emitted by operator
+         float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+         uint32 ipv4SourceAddress,       // IPv4 source address
+         uint32 ipv4DestinationAddress,  // IPv4 destination address
+         blob dnsMessage;                // the DNS message from a packet, excluding all network headers
+ 
+     DNSMessageType =
+       uint64 packetNumber,              // sequence number of packet, as emitted by operator
+       float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+       uint32 ipv4SourceAddress,         // IPv4 source address
+       uint32 ipv4DestinationAddress,    // IPv4 destination address
+       rstring DNS_QUESTION_NAME,
+       list&lt;rstring&gt; DNS_ANSWER_NAMES,
+       list&lt;uint32&gt; DNS_ANSWER_IPV4_ADDRESSES,
+       list&lt;rstring&gt; DNS_ADDITIONAL_NAMES,
+       list&lt;rstring&gt; DNS_ADDITIONAL_DATA;
+ 
+     DNSLocationType =
+       uint64 packetNumber,               // sequence number of packet, as emitted by operator
+       rstring captureTime,               // time that packet was captured, in seconds since Unix epoch
+       rstring ipv4SourceAddress,         // IPv4 source address
+       rstring ipv4DestinationAddress,    // IPv4 destination address
+       rstring dns_question_name,
+       list&lt;rstring&gt; dnsAnswerNames,
+       list&lt;rstring&gt; dnsAnswerIPv4Addresses,
+       list&lt;rstring&gt; dnsAnswerCityNames,
+       list&lt;rstring&gt; dnsAnswerStateNames,
+       list&lt;rstring&gt; dnsAnswerCountryNames,
+       list&lt;float64&gt; dnsAnswerLatitudes,
+       list&lt;float64&gt; dnsAnswerLongitudes,
+       list&lt;float64&gt; dnsAnswerRadii,
+       list&lt;rstring&gt; dnsAdditionalNames,
+       list&lt;rstring&gt; dnsAdditionalData,
+       list&lt;rstring&gt; dnsAdditionalCityNames,
+       list&lt;rstring&gt; dnsAdditionalStateNames,
+       list&lt;rstring&gt; dnsAdditionalCountryNames,
+       list&lt;float64&gt; dnsAdditionalLatitudes,
+       list&lt;float64&gt; dnsAdditionalLongitudes,
+       list&lt;float64&gt; dnsAdditionalRadii;
+ 
+     DNSErrorType =
+       uint64 packetNumber,              // sequence number of packet, as emitted by operator
+       rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
+       rstring ipv4SourceAddress,        // IPv4 source address
+       rstring ipv4DestinationAddress,   // IPv4 destination address
+       rstring parseErrorDescription,
+       uint32 parseErrorOffset,
+       rstring dnsMessage;
+ 
+     graph
+ 
+ 
+     stream&lt;PacketType&gt; PacketStream as Out = PacketFileSource() {
+         param
+             pcapFilename: $pcapFilename;
+             inputFilter: "udp port 53";
+             metricsInterval: 0.0;
+         output Out:
+             packetNumber = packetsProcessed() - 1ul,
+             captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+             ipv4SourceAddress = IPV4_SRC_ADDRESS(),
+             ipv4DestinationAddress = IPV4_DST_ADDRESS(),
+             dnsMessage = PAYLOAD_DATA();
+     }
+     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPAddressLocationList.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ 
+     ( stream&lt;DNSMessageType&gt; DNSMessageStream as OutMessage ;
+       stream&lt;DNSErrorType&gt; DNSErrorStream as OutError ) = DNSMessageParser(PacketStream) {
+       logic state: {
+         map&lt;uint16,boolean&gt; dnsAnalysisTypes = { 1: true, 2: true, 5: true, 12: true, 28: true }; // analyze only types A, NS, CNAME, PTR, and AAAA
+       }
+       param
+           messageAttribute: dnsMessage;
+           outputFilters: DNS_RESPONSE_FLAG() &amp;&amp; DNS_QUESTION_TYPE() in dnsAnalysisTypes &amp;&amp; !parseError(), parseError();
+       output OutMessage:
+           DNS_QUESTION_NAME = DNS_QUESTION_NAME(),
+           DNS_ANSWER_NAMES = DNS_ANSWER_NAMES(),
+           DNS_ANSWER_IPV4_ADDRESSES = DNS_ANSWER_IPV4_ADDRESSES(),
+           DNS_ADDITIONAL_NAMES = DNS_ADDITIONAL_NAMES(),
+           DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA();
+       OutError:
+           captureTime = formatEpochTime(captureTime),
+           ipv4SourceAddress = convertIPV4AddressNumericToString(ipv4SourceAddress),
+           ipv4DestinationAddress = convertIPV4AddressNumericToString(ipv4DestinationAddress),
+           parseErrorDescription = parseErrorDescription(),
+           parseErrorOffset = parseErrorOffset(),
+           dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
+     }
+     () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestIPAddressLocationList.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestIPAddressLocationList.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ 
+     stream&lt;DNSLocationType&gt; DNSLocationStream as Out = IPAddressLocation(DNSMessageStream as In) {
+       param
+         geographyDirectory: $geographyDirectory;
+       output Out:
+         captureTime = formatEpochTime(captureTime),
+         ipv4SourceAddress = convertIPV4AddressNumericToString(ipv4SourceAddress),
+         ipv4DestinationAddress = convertIPV4AddressNumericToString(ipv4DestinationAddress),
+         dnsAnswerNames = DNS_ANSWER_NAMES,
+         dnsAnswerIPv4Addresses = convertIPV4AddressNumbersToStrings(DNS_ANSWER_IPV4_ADDRESSES),
+         dnsAnswerCityNames = locationCityNames(DNS_ANSWER_IPV4_ADDRESSES),
+         dnsAnswerStateNames = locationSubdivision1Names(DNS_ANSWER_IPV4_ADDRESSES),
+         dnsAnswerCountryNames = locationCountryNames(DNS_ANSWER_IPV4_ADDRESSES),
+         dnsAnswerLatitudes = locationLatitudes(DNS_ANSWER_IPV4_ADDRESSES),
+         dnsAnswerLongitudes = locationLongitudes(DNS_ANSWER_IPV4_ADDRESSES),
+         dnsAnswerRadii = locationRadii(DNS_ANSWER_IPV4_ADDRESSES),
+         dnsAdditionalNames = DNS_ADDITIONAL_NAMES,
+         dnsAdditionalData = DNS_ADDITIONAL_DATA,
+         dnsAdditionalCityNames = locationCityNames(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+         dnsAdditionalStateNames = locationSubdivision1Names(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+         dnsAdditionalCountryNames = locationCountryNames(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+         dnsAdditionalLatitudes = locationLatitudes(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+         dnsAdditionalLongitudes = locationLongitudes(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA)),
+         dnsAdditionalRadii = locationRadii(convertIPV4AddressStringsToNumbers(DNS_ADDITIONAL_DATA));
+     }
+     () as DNSLocationStreamSink = FileSink(DNSLocationStream) { param file: "debug.TestIPAddressLocationList.DNSLocationStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+ 
+ }
+
+   </pre>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Functions</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__function__convertIPV4AddressStringsToNumbers.list:.:rstring:.:"><h2 class="title sectiontitle splpart">list&lt;uint32&gt; convertIPV4AddressStringsToNumbers(list&lt;rstring&gt; ipv4AddressStrings)</h2>
+  
+</div>
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+ <ul class="sl simple">
+   <li class="sli">
+<strong class="ph b">ipv4AddressStrings</strong>
+   </li>
+
+ </ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Returns</h2>
+
+<ul class="sl simple"><li class="sli">
+<tt class="ph tt">list&lt;uint32&gt;</tt>
+</li>
+</ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ list&lt;uint32&gt; convertIPV4AddressStringsToNumbers(list&lt;rstring&gt; ipv4AddressStrings) {
+     mutable list&lt;uint32&gt; ipv4AddressNumbers = [];
+     for (rstring ipv4AddressString in ipv4AddressStrings) {
+         appendM(ipv4AddressNumbers, convertIPV4AddressStringToNumeric(ipv4AddressString)); }
+     return ipv4AddressNumbers;
+ }
+
+   </pre>
+
+</div>
+
+<div class="section" id="spldoc_compilationunit__function__convertIPV4AddressNumbersToStrings.list:.:uint32:.:"><h2 class="title sectiontitle splpart">list&lt;rstring&gt; convertIPV4AddressNumbersToStrings(list&lt;uint32&gt; ipv4AddressNumbers)</h2>
+  
+</div>
+<div class="section"><h2 class="title sectiontitle">Parameters</h2>
+
+ <ul class="sl simple">
+   <li class="sli">
+<strong class="ph b">ipv4AddressNumbers</strong>
+   </li>
+
+ </ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Returns</h2>
+
+<ul class="sl simple"><li class="sli">
+<tt class="ph tt">list&lt;rstring&gt;</tt>
+</li>
+</ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-2">SPL Source Code</h2>
+  
+</div>
+
+<div class="section">
+   <pre class="pre codeblock">
+
+ list&lt;rstring&gt; convertIPV4AddressNumbersToStrings(list&lt;uint32&gt; ipv4AddressNumbers) {
+     mutable list&lt;rstring&gt; ipv4AddressStrings = [];
+     for (uint32 ipv4AddressNumber in ipv4AddressNumbers) {
+         appendM(ipv4AddressStrings, convertIPV4AddressNumericToString(ipv4AddressNumber)); }
+     return ipv4AddressStrings;
+ }
+
+   </pre>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

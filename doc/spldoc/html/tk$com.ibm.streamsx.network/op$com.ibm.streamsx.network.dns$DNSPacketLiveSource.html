@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Operator DNSPacketLiveSource"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_operator"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Operator DNSPacketLiveSource</title>
+</head>
+<body id="spldoc_operator">
+
+
+<h1 class="title topictitle1">Operator <tt class="ph tt">DNSPacketLiveSource</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketLiveSource</p>
+
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketLiveSource.svg" width="672" height="112"/>
+</div>
+
+<div class="section">
+
+<p class="p">DNSPacketLiveSource is an operator for the IBM Streams product that captures live DNS packets from an ethernet interface, parses their network headers and the fields of the DNS message, and emits tuples containing packet data.  The operator may be configured with one or more output ports, and each port may be configured to emit different tuples, as specified by output filters. The tuples may contain the entire packet, the payload portion of the packet, or individual fields from the network headers and DNS message, as specified by output attribute assignments.  
+</p>
+
+<p class="p">The DNSPacketLiveSource operator  reads raw network packets from an ethernet adapter, selects DNS packets to process with an input filter, parses individual fields in the packet's network headers and DNS message,  selects messages to emit as output tuples with output filter expressions, and assigns values to them with output attribute assignment expressions.
+</p>
+
+<p class="p">Input filters are PCAP filter expressions, as described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.tcpdump.org/manpages/pcap-filter.7.html">http://www.tcpdump.org/manpages/pcap-filter.7.html</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/man/7/pcap-filter">http://linux.die.net/man/7/pcap-filter</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">Output filters and attribute assignments are SPL expressions. They may use any of the built-in SPL functions, and any of these functions, which are specific to the PacketFileSource operator: 
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">network header parser result functions</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The DNSPacketLiveSource operator recognizes these types of packet encapsulation,  and steps quietly over their headers:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> Juniper Networks 'jmirror' encapsulation</li>
+
+<li class="li"> Cisco Systems 'Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation</li>
+
+</ul>
+
+</div>
+
+<p class="p">The DNSPacketLiveSource operator is part of the network toolkit. To use it in an application, include this statement in the SPL source file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+use com.ibm.streamsx.network.dns::*;
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Capabilities
+</h2>
+
+<p class="p">The PacketLiveSource operator requires special privileges to receive 'raw' network packets from an ethernet interface.
+</p>
+
+<p class="p">On machines where 'extended file attributes' (see <a class="xref" href="https://en.wikipedia.org/wiki/Extended_file_attributes">https://en.wikipedia.org/wiki/Extended_file_attributes</a>) are enabled in the Linux kernel, these Linux capabilities should be granted to a PE that includes the  PacketLiveSource operator:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> CAP_NET_RAW+eip</li>
+
+<li class="li"> CAP_NET_ADMIN+eip</li>
+
+</ul>
+
+</div>
+
+<p class="p">Linux capabilities can only be granted to an executable that resides on a local disk volume such as /tmp.
+</p>
+
+<p class="p">For 'standalone' Streams applications (that is, SPL source files compiled with a 'standalone' configuration), the user must grant these capabilities to the program before executing it. This requires 'root' privileges. To do this:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> the SPL source must be compiled with the '--static-link' option</li>
+
+<li class="li">
+<p class="p"> the 'application bundle' must be unpacked with the 'spl-app-info' command into a directory on a local disk volume such as /tmp
+</p>
+</li>
+
+<li class="li">
+<p class="p"> Linux capabilities must be granted to the unbundled program with this command:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
+</pre>
+
+
+</div>
+</li>
+
+</ul>
+
+</div>
+
+<p class="p">For 'distributed' Streams applications, (that is, SPL source files compiled with a 'distributed' configuration), the Streams runtime must grant these capabilities to the program before executing it. This requires 'root' privileges.  To do this:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> the Streams runtime must be installed as 'root'</li>
+
+<li class="li">
+<p class="p"> the Streams domain must be registered as a Linux system service
+</p>
+</li>
+
+<li class="li">
+<p class="p"> the Streams instance must have the 'instance.canSetPeOSCapabilities=true' property
+</p>
+</li>
+
+<li class="li">
+<p class="p"> the Streams instance must have the 'instance.runAsUser=$USER' property
+</p>
+</li>
+
+<li class="li">
+<p class="p"> the Streams instance must have the 'instance.applicationBundlesPath=/tmp/...' property
+</p>
+</li>
+
+<li class="li">
+<p class="p"> the SPL source must be compiled with the '--static-link' option
+</p>
+</li>
+
+</ul>
+
+</div>
+
+<p class="p">On machines where 'extended file attributes' are not enabled in the Linux kernel, 'standalone' PEs that include the PacketLiveSource operator can be executed with 'root' privileges like this:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo STREAMS_INSTALL=$STREAMS_INSTALL .../bin/standalone.exe
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Promiscuous Mode
+</h2>
+
+<p class="p">Network interfaces normally ignore packets that are not addressed to them. However, when 'promiscious' mode is enabled on a network interface, it can capture all network packets on its ethernet segment, even those that are not addressed to it.  This is sometimes referred to as "network sniffing".  Modern ethernet switches normally send network interfaces only packets that are addressed to them; 'promiscious' mode is useful only when a switch has been specifically configured to send packets to a network interface that are not addressed to it. This is sometimes referred to as "mirroring".
+</p>
+
+<p class="p">The DNSPacketLiveSource operator will enable 'promiscuous' mode in a ethernet interface when its 'promiscous' parameter is set to <tt class="ph tt">true</tt>.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Dependencies
+</h2>
+
+<p class="p">The DNSPacketLiveSource operator depends upon the Linux 'packet capture library (libpcap)'.  The library must be installed on the machine where this operator executes. It is available as an installable 'repository package (RPM)' from the 'base' RHEL and CentOS repositories.  It can be installed with administrator tools such as 'yum'.  This requires root privileges, which can be acquired temporarily with administrator tools such as 'sudo'.
+</p>
+
+<p class="p">To install <tt class="ph tt">libpcap</tt>, enter this command at a Linux command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo yum install libpcap-devel
+</pre>
+
+
+</div>
+
+<p class="p">Alternatively, you can download the source code for a newer version of <tt class="ph tt">libpcap</tt> and build the library yourself. The new library can then be installed in system directories, or used where built without being installed.
+</p>
+
+<p class="p">To do this, download the distribution package for the latest version of <tt class="ph tt">libpcap</tt> from this address:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.tcpdump.org/">http://www.tcpdump.org/</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">To build libpcap from source code, open a 'terminal' window and type this at a command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+cd .../directory
+tar -xvf .../libpcap-X.Y.Z.tar.gz
+cd .../directory/libpcap-X.Y.Z
+./configure
+make
+</pre>
+
+
+</div>
+
+<p class="p">To instruct the Streams compiler (that is, the 'sc' command) to use your version of <tt class="ph tt">libpcap</tt> instead of the system version, set these environment variables before compiling an application that contains the DNSPacketLiveSource operator:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+export STREAMS_ADAPTERS_LIBPCAP_INCLUDEPATH=.../directory/libpcap-X.Y.Z
+export STREAMS_ADAPTERS_LIBPCAP_LIBPATH=.../directory/libpcap-X.Y.Z
+</pre>
+
+
+</div>
+
+<p class="p">For more information on configuring, building, and installing <tt class="ph tt">libpcap</tt>, refer to its 'INSTALL.txt' file.
+</p>
+
+<p class="p">This operator has been tested with these versions of <tt class="ph tt">libpcap</tt>:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> libpcap 0.9.4, included in RHEL/CentOS 5.x</li>
+
+<li class="li"> libpcap 0.9.8, included in SLES 11</li>
+
+<li class="li"> libpcap 1.0.0, included in RHEL/CentOS 6.2</li>
+
+<li class="li"> libpcap 1.4.0, included in RHEL/CentOS 6.5</li>
+
+<li class="li"> libpcap 1.5.3, included in RHEL/CentOS 7.1</li>
+
+<li class="li"> libpcap 1.6.1</li>
+
+<li class="li"> libpcap 1.6.2</li>
+
+<li class="li"> libpcap 1.7.4</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Tuning
+</h2>
+
+<p class="p">The DNSPacketLiveSource operator is often used in applications that ingest packets at very high rates.  In these situations, the rate may be limited by the size of the Linux network buffers.  If so, you can increase the size of these buffers by setting Linux network configuration parameters.  Note that root privileges are required to do this.
+</p>
+
+<p class="p">You can display the current values of the ethernet and IP configuration parameters by entering these commands at a Linux prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+/sbin/sysctl net.core
+/sbin/sysctl net.ipv4
+</pre>
+
+
+</div>
+
+<p class="p">For example, these are typical default values for Linux configuration parameters in RHEL/CentOS 5 and 6:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+net.core.wmem_default = 124928
+net.core.rmem_default = 124928
+net.core.rmem_max = 131071
+net.core.wmem_max = 131071
+net.core.netdev_max_backlog = 1000
+
+net.ipv4.tcp_rmem = 4096        87380   4194304
+net.ipv4.tcp_wmem = 4096        16384   4194304
+net.ipv4.tcp_window_scaling=1
+</pre>
+
+
+</div>
+
+<p class="p">You can change the current values of Linux configuration parameters by executing these commands at a Linux prompt.  For example:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+# allow packet buffers to increase up to 64MB
+sudo /sbin/sysctl -w net.core.rmem_max=67108864
+sudo /sbin/sysctl -w net.core.wmem_max=67108864
+
+# increase the length of the processor input queue to 50,000
+sudo /sbin/sysctl -w net.core.netdev_max_backlog=50000
+
+# increase autotuning TCP buffer limit to 32MB
+sudo /sbin/sysctl -w net.ipv4.tcp_rmem=10240 87380 33554432
+sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
+</pre>
+
+
+</div>
+
+<p class="p">Changes to Linux configuration parameters with <tt class="ph tt">/sbin/sysctl</tt> persist only for the current instance of Linux; they will revert to their default values when Linux is rebooted. To change the default values used when Linux boots, specify them in the Linux system file <tt class="ph tt">/etc/sysctl.cfg</tt>.
+</p>
+
+<p class="p">For more information, refer to <a class="xref" href="http://fasterdata.es.net/host-tuning/linux/">http://fasterdata.es.net/host-tuning/linux/</a>.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Threads
+</h2>
+
+<p class="p">The DNSPacketLiveSource operator contains a separate thread for running <tt class="ph tt">libpcap</tt>, which receives network packets from the operating system and produces tuples from them.
+</p>
+
+<p class="p">The PacketLiveOperator contains a separate thread for reporting its metrics to the Streams runtime if the <tt class="ph tt">metricsInterval</tt> parameter is greater than zero.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Exceptions
+</h2>
+
+<p class="p">The DNSPacketLiveSource operator will throw an exception and terminate in these situations:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> The parameter 'networkInterface' does not specify a network interface defined on the machine where the operator executes.</li>
+
+<li class="li">
+<p class="p"> The 'inputFilter' and 'outputFilters' parameters do not specify a valid PCAP filter expression.
+</p>
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Sample Applications
+</h2>
+
+<p class="p">The network toolkit includes several <a class="xref" href="https://github.com/IBMStreams/streamsx.network/tree/master/samples">sample applications</a> that illustrate how to use this operator.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">References
+</h2>
+
+<p class="p">The ethernet frame format is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Ethernet_frame">http://en.wikipedia.org/wiki/Ethernet_frame</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The ethernet header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://linux.die.net/include/net/ethernet.h">http://linux.die.net/include/net/ethernet.h</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/linux/if_ether.h">http://linux.die.net/include/linux/if_ether.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The IPv4 header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/IPv4">http://en.wikipedia.org/wiki/IPv4</a></li>
+
+<li class="li"> <a class="xref" href="http://www.ietf.org/rfc/rfc791.txt">http://www.ietf.org/rfc/rfc791.txt</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/in.h">http://linux.die.net/include/netinet/in.h</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip.h">http://linux.die.net/include/netinet/ip.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The IPv6 header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://en.wikipedia.org/wiki/IPv6_packet">https://en.wikipedia.org/wiki/IPv6_packet</a></li>
+
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc2460">https://tools.ietf.org/html/rfc2460</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip6.h">http://linux.die.net/include/netinet/ip6.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The UDP header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/User_Datagram_Protocol">http://en.wikipedia.org/wiki/User_Datagram_Protocol</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc768">http://tools.ietf.org/html/rfc768</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/udp.h">http://linux.die.net/include/netinet/udp.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The TCP header and the fields it contains are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Transmission_Control_Protocol">http://en.wikipedia.org/wiki/Transmission_Control_Protocol</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc793">http://tools.ietf.org/html/rfc793</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/tcp.h">http://linux.die.net/include/netinet/tcp.h</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">DNS messages and the fields they contain are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/Domain_Name_System">http://en.wikipedia.org/wiki/Domain_Name_System</a></li>
+
+<li class="li"> <a class="xref" href="http://en.wikipedia.org/wiki/List_of_DNS_record_types">http://en.wikipedia.org/wiki/List_of_DNS_record_types</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc1035">http://tools.ietf.org/html/rfc1035</a></li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2308">http://tools.ietf.org/html/rfc2308</a> for SOA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc2872">http://tools.ietf.org/html/rfc2872</a> for SRV resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3403">http://tools.ietf.org/html/rfc3403</a> for NAPTR resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc3596">http://tools.ietf.org/html/rfc3596</a> for AAAA resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4034">http://tools.ietf.org/html/rfc4034</a> for DS, RRSIG, NSEC, and DNSKEY resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc4408">http://tools.ietf.org/html/rfc4408</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc5155">http://tools.ietf.org/html/rfc5155</a> for NSEC3 and NSEC3PARAM resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc6891">http://tools.ietf.org/html/rfc6891</a> for OPT resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7208">http://tools.ietf.org/html/rfc7208</a> for SPF resource records</li>
+
+<li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc7505">http://tools.ietf.org/html/rfc7505</a> for MX resource records</li>
+
+</ul>
+
+</div>
+
+<p class="p">The Juniper Networks 'jmirror' encapsulation header is described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://wiki.wireshark.org/jmirror">http://wiki.wireshark.org/jmirror</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The Cisco Systems ''Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/draft-foschiano-erspan-00">https://tools.ietf.org/html/draft-foschiano-erspan-00</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The 'Generic Route Encapsulation (GRE)' headers used by Cisco ERSPAN encapsulation are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc2784">https://tools.ietf.org/html/rfc2784</a></li>
+
+<li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc1701">https://tools.ietf.org/html/rfc1701</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">Linux capabilities are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://linux.die.net/man/7/capabilities">http://linux.die.net/man/7/capabilities</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">For more information about using Linux capabilities with Streams applications, see:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.install.doc/doc/ibminfospherestreams-install-programs-packages.html?lang=en">http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.install.doc/doc/ibminfospherestreams-install-programs-packages.html?lang=en</a></li>
+
+<li class="li"> <a class="xref" href="http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.cfg.doc/doc/creating-enterprise-domain.html?lang=en">http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.cfg.doc/doc/creating-enterprise-domain.html?lang=en</a></li>
+
+<li class="li"> <a class="xref" href="http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.cfg.doc/doc/ibminfospherestreams-user-security-run-authority.html?lang=en">http://www-01.ibm.com/support/knowledgecenter/SSCRJU_4.0.1/com.ibm.streams.cfg.doc/doc/ibminfospherestreams-user-security-run-authority.html?lang=en</a></li>
+
+</ul>
+
+</div>
+
+<p class="p"><tt class="ph tt">libpcap</tt> filter expressions,  which are used with the <tt class="ph tt">inputFilter</tt> parameter, are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.tcpdump.org/manpages/pcap-filter.7.html">http://www.tcpdump.org/manpages/pcap-filter.7.html</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/man/7/pcap-filter">http://linux.die.net/man/7/pcap-filter</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The result functions that can be used in boolean expressions for the <tt class="ph tt">outputFilters</tt> parameter and in output attribute assignment expressions are described here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">network header parser result functions</a>.  </li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Ports</dt>
+
+  <dd class="dd">This operator has 0 input ports and 1 or more output ports.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Windowing</dt>
+
+  <dd class="dd">This operator does not accept any windowing configurations.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Parameters</dt>
+
+  <dd class="dd">This operator supports 12 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__networkInterface">networkInterface</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
+
+</p>
+</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Metrics</dt>
+
+  <dd class="dd">This operator reports 4 metrics.</dd>
+
+ 
+</dl>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Properties</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Implementation</dt>
+
+  <dd class="dd">C++</dd>
+
+ 
+ 
+  <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__providessinglethreadedexecutioncontext">Threading</a></dt>
+
+  <dd class="dd"><tt class="ph tt">Always</tt> - Operator always provides a single threaded execution context.</dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set">Output Ports</a></strong></p>
+<dl class="dl">
+  
+     <dt class="dt dlterm">Assignments</dt>
+
+     <dd class="dd">This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+
+  
+</dl>
+
+<dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0...)</dt>
+
+   <dd class="dd">
+
+<p class="p">The DNSPacketLiveSource operator requires one or more output ports:
+</p>
+
+<p class="p">Each output port will produce one output tuple for each packet received (and passed by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter is specified) if the corresponding expression in the <tt class="ph tt">outputFilters</tt> parameter evaluates <tt class="ph tt">true</tt>, or if no <tt class="ph tt">outputFilters</tt> parameter is specified. 
+</p>
+
+<p class="p">Output attributes can be assigned values with any SPL expression that evaluates to the proper type, and the expressions may include any of the  <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html">DNSPacketLiveSource result functions</a>.   Output attributes that match input attributes in name and type are copied automatically.
+</p>
+
+   <p class="p"/>
+
+    <p class="p"/>
+
+   <dl class="dl">
+    
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Generating
+     </li>
+
+   </ul>
+
+</dd>
+    
+   </dl>
+
+   <p class="p"/>
+
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
+
+<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__networkInterface"><!-- --></a><tt class="ph tt">networkInterface</tt></dt>
+
+     <dd class="dd">
+<p class="p">This required parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies which network interface the operator will capture packets from.  The value must be one of the network interface names configured in Linux on the machine where the operator will execute.  To display a list of configured network interface names, type this at a Linux command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+/sbin/ifconfig
+</pre>
+
+
+</div>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__maximumLength"><!-- --></a><tt class="ph tt">maximumLength</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">uint16</tt> that specifies the maximum length in bytes of the packet data that will be produced by the operator.  This length includes all network headers; packets longer than the specified length will be truncated.
+</p>
+
+<p class="p">The default value is 65,535 bytes.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint16
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__inputFilter"><!-- --></a><tt class="ph tt">inputFilter</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies which input packets should be processed. The value of this string must be a valid PCAP filter expression, as defined here:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> <a class="xref" href="http://www.tcpdump.org/manpages/pcap-filter.7.html">http://www.tcpdump.org/manpages/pcap-filter.7.html</a></li>
+
+<li class="li"> <a class="xref" href="http://linux.die.net/man/7/pcap-filter">http://linux.die.net/man/7/pcap-filter</a></li>
+
+</ul>
+
+</div>
+
+<p class="p">The default value is 'udp port 53', which causes only DNS packets received to be processed.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes a list of SPL expressions that specify which packets should be emitted by the corresponding output port. The number of expressions in the list must match the number of output ports, and each expression must evaluate to a <tt class="ph tt">boolean</tt> value.  The output filter expressions may include any of the <a class="xref" href="../tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html">DNSPacketLiveSource result functions</a>.  
+</p>
+
+<p class="p">The default value of the <tt class="ph tt">outputFilters</tt> parameter is an empty list, which causes all packets processed to be emitted by all output ports.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">boolean</tt> that specifies whether or not 'promiscuous' mode should be enabled on the network interface. If 'promiscious' mode is enabled, the operator must execute with special Linux capabilities, as described above.
+</p>
+
+<p class="p">The default value is <tt class="ph tt">false</tt>.  However, some values of the <tt class="ph tt">inputFilter</tt> parameter, including the default value, require that 'promiscuous' mode be enabled on the network interface, even if the <tt class="ph tt">promiscous</tt> parameter is not specified, or set to <tt class="ph tt">false</tt>.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__initDelay"><!-- --></a><tt class="ph tt">initDelay</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the number of seconds the operator will wait before it begins to produce tuples.  This parameter is allowed only when the <tt class="ph tt">pcapFilename</tt> parameter is also specified.
+</p>
+
+<p class="p">The default value is '0.0'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__bufferSize"><!-- --></a><tt class="ph tt">bufferSize</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">uint32</tt> that specifies the size, in bytes, of the <tt class="ph tt">libpcap</tt> buffer used for receiving packets.  The maximum value allowed is 2,147,483,647 (that is, 2**31-1).
+</p>
+
+<p class="p">The default value of the <tt class="ph tt">bufferSize</tt> parameter is determined by <tt class="ph tt">libpcap</tt>.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__processorAffinity"><!-- --></a><tt class="ph tt">processorAffinity</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">uint32</tt> that specifies which processor core the operator's thread will run on.  The maximum value is <em class="ph i">P-1</em>, where <em class="ph i">P</em> is the number of processors on the machine where the operator will run.  If this parameter is specified, then the operator's thread will be dispatched only on the specified processor.  
+</p>
+
+<p class="p">The default is to dispatch the operator's thread on any available processor.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__timeout"><!-- --></a><tt class="ph tt">timeout</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies a timeout for the <tt class="ph tt">libpcap</tt> interface.  If this value is specified, the operator will call the <tt class="ph tt">libpcap</tt> interface again whenever it times out, until the PE containing the operator receives a shutdown signal.
+</p>
+
+<p class="p">The default is no timeout.  This may cause the thread that runs the <tt class="ph tt">libpcap</tt> interface to hang on shutdown until another packet is received.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__timestampType"><!-- --></a><tt class="ph tt">timestampType</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes a value of 'host', 'adapter', or 'adapter_unsynced', which specifies which type of timestamp will be assigned to packets as they are received.
+</p>
+
+<p class="p">The default value is 'host'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: TimestampType
+ (<tt class="ph tt">host, adapter, adapter_unsynced</tt>)     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: CustomLiteral
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+</p>
+
+<p class="p">The default value is '10.0'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
+<dl class="dl">
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsReceivedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts the number of packets received by the network interface,  as counted by <tt class="ph tt">libpcap</tt>
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsDroppedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts the number of packets dropped because there was no room in the operating system's buffer when they arrived, as counted by <tt class="ph tt">libpcap</tt>.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts number of packets processed by the operator.  When     an input filter is specified, this includes only packets that pass the     filter.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nBytesProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">This metric counts number of bytes of packet data processed by the operator.  When an input filter is specified, this includes only packets that pass the filter.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies">Libraries</a></strong></p>
+<dl class="dl">
+ 
+  <dt class="dt dlterm"><tt class="ph tt"/>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: ../../impl/bin/libpcapPath.pl
+  </dd>
+
+ 
+ 
+  <dt class="dt dlterm"><tt class="ph tt"/>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../../impl/include</tt></dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
