@@ -16,6 +16,8 @@ baseurl                  : "/streamsx.network" # the subpath of your site, e.g. 
 repository               : "IBMStreams/streamsx.network" # GitHub username/repo-name
 github_base_url          : "https://github.com" # your github server, will differ when enterprise github
 github_editme_path       : https://github.com/IBMStreams/streamsx.network/blob/gh-pages
+spldoc_path              : &default_cta_url "/doc/spldoc/html"
+toolkit_excerpt          : &default_excerpt "The com.ibm.streamsx.network toolkit provides operators and functions for processing network data."
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
 words_per_minute         : 200
@@ -190,6 +192,10 @@ defaults:
     values:
       layout: single
       author_profile: true
+      header:
+        cta_url: *default_cta_url
+        cta_label: "SPLDOC"
+      excerpt: *default_excerpt
   # _docs
   - scope:
       path: ""
