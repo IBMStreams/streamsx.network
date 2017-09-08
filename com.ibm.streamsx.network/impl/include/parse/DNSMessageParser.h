@@ -49,12 +49,13 @@ class DNSMessageParserErrorDescriptions {
     description[114] = "invalid address family in resource record";
     description[115] = "";
     description[116] = "message too short";
-    description[117] = "counts too large";
+    description[117] = "resource record counts too large";
     description[118] = "data overruns resource record";
     description[119] = "missing data in resource record";
     description[120] = "extra data in resource record";
     description[121] = "label compression offset invalid";
     description[122] = "extra data following resource records";
+    description[123] = "resource record data too long";
   }
 };
 
@@ -194,12 +195,15 @@ class DNSMessageParser {
     // if this is a question resource, that's all there is
     if ( !fullResource ) { dnsPointer += 4; return true; }
 
-    // copy remaining resource fields to fixed-size structure
+    // copy resource record's 'time-to-live' field to fixed-size structure
     record.ttl = ntohl(rr->ttl);
+
+    // check for unreasonably long resource record data 
     record.rdlength = ntohs(rr->rdlength);
-    record.rdata = rr->rdata;
+    if ( record.rdlength > MAXIMUM_RR_DATA_LENGTH ) { error = 123; return false; } // ... "resource record data too long"
 
     // check for truncated resource record
+    record.rdata = rr->rdata;
     if ( record.rdata+record.rdlength > dnsEnd ) { error = 113; return false; } // ... "resource record data truncated"
 
     // step over the fixed-length portion of this resource record to its 'data' field
@@ -659,6 +663,9 @@ class DNSMessageParser {
   struct Record canonicalRecords[MAXIMUM_RRFIELDS];
   struct Record addressRecords[MAXIMUM_RRFIELDS];
 
+  // The data field of a resource record should not be longer than this
+  static const uint32_t MAXIMUM_RR_DATA_LENGTH = 1500;
+
   // The parseDNSMessage() function below returns an error code in this
   // variable, if an encoding error is found, or 0, if no errors are
   // found. Descriptions for the error codes are in the table.
@@ -1068,7 +1075,7 @@ void parseDNSMessage(char* buffer, int length) {
     if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS_Q ||
          ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS ||
-         ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = 117; return; } // ... "counts too large"
+         ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = 117; return; } // ... "resource record ounts too large"
 
     // store pointers to the DNS message in the buffer
     dnsHeader = (struct DNSHeader*)buffer;
