@@ -124,7 +124,7 @@ class NetworkHeaderParser {
     // those with extension headers
 
 
-    void parseNetworkHeaders(char* buffer, int length) {
+    void parseNetworkHeaders(char* buffer, int length, bool jmirrorEnable = false) {
 
         // store address and length of packet for the output attribute assignment functions
         packetBuffer = buffer;
@@ -171,7 +171,7 @@ class NetworkHeaderParser {
 
         // if the buffer contains a Juniper Networks mirror packet, step over the 'jmirror' headers
         // (note that field tests are not in natural order so the inner 'if' will fail faster in the usual case)
-        if ( length>=sizeof(struct JMirrorHeaders) ) {
+        if ( jmirrorEnable && length>=sizeof(struct JMirrorHeaders) ) {
             struct JMirrorHeaders* jmirror = (struct JMirrorHeaders*)buffer;
             if ( ntohs(jmirror->udpHeader.dest)==jmirrorPort &&
                  jmirror->ipHeader.version==4 &&

@@ -355,20 +355,25 @@ that pass the filter.
           <value>adapter_unsynced</value>
         </enumeration>
       </customLiterals>
+
       <libraryDependencies>
+
         <library>
           <cmn:description> </cmn:description>
           <cmn:managedLibrary>
             <cmn:command>../../impl/bin/libpcapPath.pl</cmn:command>
           </cmn:managedLibrary>
         </library>
+
         <library>
           <cmn:description> </cmn:description>
           <cmn:managedLibrary>
             <cmn:includePath>../../impl/include</cmn:includePath>
           </cmn:managedLibrary>
         </library>
+
       </libraryDependencies>
+
       <providesSingleThreadedContext>Always</providesSingleThreadedContext>
       <allowCustomLogic>true</allowCustomLogic>
       <capability>CAP_NET_RAW+eip</capability>
@@ -573,6 +578,25 @@ The default value is 'host'.
         <type>TimestampType</type>
         <cardinality>1</cardinality>
       </parameter>
+
+    <parameter>
+      <name>jMirrorCheck</name>
+      <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on
+packets, and step over them when found.
+
+The default value is 'false'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>boolean</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
       <parameter>
         <name>metricsInterval</name>
         <description>

@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (C) 2015, International Business Machines Corporation
+ * Copyright (C) 2015, 2017 International Business Machines Corporation
  * All Rights Reserved
  ********************************************************************/
 
@@ -11,6 +11,8 @@
 #include <string.h>
 #include <set> 
 #include <iomanip> 
+#include <string>
+#include <sstream>
 
 #include <linux/if_ether.h>
 #include <arpa/inet.h>
@@ -26,6 +28,9 @@
 
 #include <sched.h>
 #include "streams_source.h"
+
+#include <streams_boost/lexical_cast.hpp>
+
 #include <SPL/Runtime/Common/Metric.h>
 #include <SPL/Runtime/Operator/OperatorMetrics.h>
 
@@ -58,29 +63,35 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
         // Method called out of the DPDK callback interface as each packet
         // arrives for processing.
-        void packetProcess(uint8_t *packet,
-                uint32_t packetLen,
-                uint64_t tscTimestamp);
+        void packetProcess(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp);
 
     private:
-        // ----------- input and output tuples ----------
-        <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { 
-  	     print "OPort$i\Type outTuple$i;"; } %> ;
-      
-        // ----------- operator state variables ----------
-        uint64_t packetCounter;
-        uint64_t octetCounter;
-        struct port_stats stats; 
-        double now, then, metricsInterval;
-        int32_t processorAffinity;
+
+        // ----------- operator parameters (constant after constructor executes) ----------
 
         uint16_t lcoreMaster, lcore, nicPort, nicQueue;
+        int32_t processorAffinity;
+        std::string buffersizes;
+        double metricsInterval;
+        bool jMirrorCheck;
+
+        // ----------- output tuples ----------
+
+        <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
+      
+        // ----------- operator state variables ----------
+
+        double now, then;
+        uint64_t packetCounter, packetCounterNow, packetCounterThen;
+        uint64_t byteCounter, byteCounterNow, byteCounterThen;
+        bool metricsUpdate;
+        struct port_stats portStatisticsNow, portStatisticsThen; 
 
         uint32_t captureSeconds, captureMicroseconds;
         uint64_t tscHz, tscMicrosecondAdjust, tscMicroseconds;
 
-	uint8_t *packetPtr;
-	uint32_t packetLen; 
+        uint8_t *packetPtr;
+        uint32_t packetLen; 
 
         // This method is called during the start up of the first of the 
         // operator's threads.  It calls into the DPDK libraries, where 
@@ -98,11 +109,36 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 	NetworkHeaderParser headers;
 	
 	// ----------- assignment functions for output attributes ----------
-	uint64_t packetsReceived() { return stats.received; }
-	uint64_t packetsDropped() { return stats.dropped; }
-	uint64_t packetsDroppedByInterface() { return 0; }
-	uint64_t packetsProcessed() { return packetCounter; }
-	uint64_t octetsProcessed() { return octetCounter; }
+
+    inline __attribute__((always_inline))
+	uint64_t packetsReceived() { return portStatisticsNow.received; }
+
+    inline __attribute__((always_inline))
+    uint64_t packetsDropped() { return portStatisticsNow.dropped; }
+    
+    inline __attribute__((always_inline))
+    uint64_t packetsProcessed() { return packetCounter; }
+    
+    inline __attribute__((always_inline))
+    uint64_t bytesProcessed() { return byteCounter; }
+    
+    inline __attribute__((always_inline))
+    SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
+    
+    inline __attribute__((always_inline))
+    SPL::uint64 metricsIntervalPacketsReceived() { return then ? portStatisticsNow.received - portStatisticsThen.received : 0; }
+    
+    inline __attribute__((always_inline))
+    SPL::uint64 metricsIntervalPacketsDropped() { return then ? portStatisticsNow.dropped - portStatisticsThen.dropped : 0; }
+    
+    inline __attribute__((always_inline))
+    SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
+    
+    inline __attribute__((always_inline))
+    SPL::uint64 metricsIntervalBytesProcessed() { return then ? byteCounterNow - byteCounterThen : 0; }
+    
+    inline __attribute__((always_inline))
+    SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
 	SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
 	SPL::uint32 CAPTURE_MICROSECONDS() { return captureMicroseconds; }

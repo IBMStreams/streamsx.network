@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <time.h>
 #include <getopt.h>
 #include <semaphore.h>
 #include <pwd.h>
@@ -22,6 +23,7 @@
 #include <rte_ethdev.h>
 #include <rte_ip.h>
 #include <rte_lcore.h>
+#include <rte_errno.h>
 
 #include "init.h"
 #include "rxtx.h"
@@ -29,7 +31,6 @@
 
 #include "streams_source.h"
 
-#define ARGN 7
 
 // TODO : make the port# use the interface name
 
@@ -81,9 +82,29 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
                           int promiscuous, streams_packet_cb_t dpdkCallback, void *user) {
 
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_operator_init starting.\n"); 
+    printf("STREAMS_SOURCE: streams_operator_init(lcoreMaster=%d, lcore=%d, nicPort=%d, nicQueue=%d, promiscuous=%d, ...) starting ...\n", lcoreMaster, lcore, nicPort, nicQueue, promiscuous); 
     
     if(firstInitComplete == 0) {
+
+        int time_ok = 0;
+        struct timespec now_ts;
+        memset(&now_ts, 0, sizeof(struct timespec));
+        if(clock_gettime(CLOCK_REALTIME, &now_ts) == 0) {
+            struct tm now_struct;
+            memset(&now_struct, 0, sizeof(struct tm));
+            if(gmtime_r(&now_ts.tv_sec, &now_struct) != NULL) {
+                char now_string[64];
+                memset(now_string, 0, 64);
+                if(strftime(now_string, 64, "%Y-%m-%d %H:%M:%S", &now_struct) > 0) {
+                    printf("STREAMS_SOURCE: streams_operator_init() entered for first time, at %sZ\n", now_string);
+                    time_ok = 1;
+                }
+            }
+        }
+        if(!time_ok) {
+            printf("STREAMS_SOURCE: streams_operator_init() entered for first time, but not sure when.\n");
+        }
+
         const char *homeDir = getenv("HOME");
         const uid_t uid = getuid(); 
         const char *newHomeDir = getpwuid(getuid())->pw_dir;
@@ -197,6 +218,9 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
     printf("STREAMS_SOURCE: lcoreList = %s\n", lcoreList); 
 
     numOperators++;  // Keep a count of the number of operators that are constructed.
+
+    printf("STREAMS_SOURCE: ... streams_operator_init(...) finished\n"); 
+
     pthread_mutex_unlock(&mutexInit); 
     return(0); 
 }
@@ -204,9 +228,9 @@ int streams_operator_init(int lcoreMaster, int lcore, int nicPort, int nicQueue,
 /*
  *  Initialize the DPDK library.
  */
-int streams_dpdk_init() {
+int streams_dpdk_init(const char* buffersizes) {
     pthread_mutex_lock(&mutexInit);   
-    printf("STREAMS_SOURCE: streams_dpdk_init starting.\n"); 
+    printf("STREAMS_SOURCE: streams_dpdk_init(buffersizes='%s') starting ...\n", buffersizes); 
 
     if(dpdkInitComplete != 0) {
 	// Not the first thread through the init code so just return.
@@ -223,43 +247,40 @@ int streams_dpdk_init() {
         return(-1);
     }
 
-    uint32_t nb_ports;
-    char *rte_arg[ARGN];
+    printf("STREAMS_SOURCE: Queues per port = %d, Number of operators = %d.\n", numQueues_, numOperators);
 
-    char arg0[]="dpdk";
-    char arg1[]="-l";
-    char arg2[MAX_CORESTRING];
-    strcpy(arg2, lcoreList); 
-    char arg3[]="-n";
-    char arg4[]="4";
-    char arg5[]="--master-lcore";
-    char arg6[16];
-    sprintf(arg6, "%d", coreMaster_); 
-
-    rte_arg[0]=arg0;
-    rte_arg[1]=arg1;
-    rte_arg[2]=arg2;
-    rte_arg[3]=arg3;
-    rte_arg[4]=arg4;
-    rte_arg[5]=arg5;
-    rte_arg[6]=arg6;
-
-    printf("STREAMS_SOURCE: Queues per port = %d, Number of operators = %d.\n", 
-           numQueues_, numOperators);
-    printf("STREAMS_SOURCE: args = %s %s %s %s %s %s %s.\n", 
-           arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+    //int memoryChannelCount = 4; // what is this for?
 
     optind = 0; // Reset getopt state as it is called again in rte_eal_init.
 
-    // This function is to be executed on the master lcore only.
-    // Because no master core is specified, the default master_lcore is set by
-    // the DPDK library to be the first core in the coremask.
-    unsigned int ret = rte_eal_init(ARGN, rte_arg);
-    if (ret < 0) {
-        pthread_mutex_unlock(&mutexInit);
-	rte_panic("Cannot init EAL\n");
-        return(-1);
+    // initialize DPDK by executing a command with rte_eal_init() using arguments defined here:
+    // see: http://dpdk.org/doc/api-2.2/rte__eal_8h.html#a5c3f4dddc25e38c5a186ecd8a69260e3
+    // see: http://dpdk.org/doc/guides/testpmd_app_ug/run_app.html#eal-command-line-options
+
+    // format a command to initialize DPDK
+    char command[1000];
+    sprintf(command, "dpdk -l %s --master-lcore %d%s%s", lcoreList, coreMaster_, (strlen(buffersizes) ? " --socket-mem=" : ""), buffersizes);
+    printf("STREAMS_SOURCE: streams_dpdk_init() calling rte_eal_init('%s')\n", command);
+
+    // convert command into argc&argv format
+    int argc = 0;
+    char *argv[100];
+    char *a = strtok(command, " ");
+    while (a) { argv[argc++] = a; a = strtok(0, " "); }
+    argv[argc] = NULL;
+    //int i; for (i=0; i<argc; i++) printf("new argv[%d] '%s'\n", i, argv[i]);
+
+    // initialize DPDK
+    int rc = rte_eal_init(argc, argv);
+    printf("STREAMS_SOURCE: rte_eal_init() returned %d\n", rc);
+    if (rc < 0) {
+      pthread_mutex_unlock(&mutexInit);
+      printf("STREAMS_SOURCE: rte_eal_init() failed, rte_errno=%d, %s\n", rte_errno, rte_strerror(rte_errno));
+      rte_panic("Cannot init EAL, rte_eal_init() failed\n");
+      return(-1);
     }
+
+
 
 #ifdef RTE_LIBRTE_TIMER
     rte_timer_subsystem_init();
@@ -267,7 +288,7 @@ int streams_dpdk_init() {
 
     rte_set_log_level(8); 
 
-    nb_ports = rte_eth_dev_count();
+    uint32_t nb_ports = rte_eth_dev_count();
     if (nb_ports == 0) {
         pthread_mutex_unlock(&mutexInit);
         RTE_LOG(ERR, STREAMS_SOURCE, "No ethernet device found.\n");
@@ -278,6 +299,8 @@ int streams_dpdk_init() {
         RTE_LOG(ERR, STREAMS_SOURCE, "A PacketDPDKSource operator specified an invalid port.\n");
         return(-1);
     }
+
+    printf("STREAMS_SOURCE: ... streams_dpdk_init() finished\n"); 
 
     dpdkInitComplete = 1;
     pthread_mutex_unlock(&mutexInit);
@@ -321,8 +344,14 @@ int streams_port_stats(int nicPort, struct port_stats *outStats) {
 
     rte_eth_stats_get(nicPort, &rteStats);
 
+    // The basic stats have RX metrics for:
+    //   ierror   : RX error packets
+    //   imissed  : RX packets dropped by the NIC
+    //   rx_nombuf: RX mbuf allocation failures
+    // For the dropped stat we current report, imissed is used as it indicates
+    // valid packets we were not able to receive quickly enough so they were dropped.
     outStats->received = rteStats.ipackets;
-    outStats->dropped  = rteStats.ierrors;
+    outStats->dropped  = rteStats.imissed;
     outStats->bytes    = rteStats.ibytes;
 
     return 0;

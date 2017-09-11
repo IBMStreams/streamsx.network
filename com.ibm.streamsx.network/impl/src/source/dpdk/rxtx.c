@@ -22,6 +22,12 @@ void receive_loop(struct lcore_conf *conf) {
     RTE_LOG(INFO, STREAMS_SOURCE, "conf = 0x%lx, num_rx_queue = %d\n",
 	    conf, conf->num_rx_queue);
 
+    for (i = 0; i < conf->num_rx_queue; i++) {
+        RTE_LOG(INFO, STREAMS_SOURCE, "port_id = %d, queue_id = %d\n", 
+                conf->rx_queue_list[i].port_id,
+                conf->rx_queue_list[i].queue_id);
+    }
+
     while(1) {
 	// Read rx packets from the queue.
 	for (i = 0; i < conf->num_rx_queue; i++) {

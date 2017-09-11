@@ -1,5 +1,5 @@
 <%
-# Copyright (C) 2011, 2015  International Business Machines Corporation
+# Copyright (C) 2011, 2017  International Business Machines Corporation
 # All Rights Reserved
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
@@ -28,6 +28,7 @@ my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterBy
 my $bufferSize = $model->getParameterByName("bufferSize") ? $model->getParameterByName("bufferSize")->getValueAt(0)->getCppExpression() : 0;
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
+my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $timeout = $model->getParameterByName("timeout") ? $model->getParameterByName("timeout")->getValueAt(0)->getCppExpression() : 0;
 my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : undef;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
@@ -75,6 +76,7 @@ MY_OPERATOR::MY_OPERATOR()
   initDelay = <%=$initDelay%>;
   bufferSize = <%=$bufferSize%>;
   promiscuous = <%=$promiscuous%>;
+  jMirrorCheck = <%=$jMirrorCheck%>;
   processorAffinity = <%=$processorAffinity%>;
   timeout = <%=$timeout%>;
   inputFilter = <%= $inputFilter ? $inputFilter : '""' %>;
@@ -298,7 +300,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   byteCounter += header->len;
 
   // parse the network headers in the packet
-  headers.parseNetworkHeaders((char*)buffer, header->caplen);
+  headers.parseNetworkHeaders((char*)buffer, header->caplen, jMirrorCheck);
   if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLAPPTRC(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketLiveSource");  return; }
 
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
@@ -309,7 +311,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
       SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketLiveSource");
       submit(outTuple<%=$i%>, <%=$i%>);
     }
-    <% } %> ;
+  <% } %> ;
 
   // reset the 'metrics updated' flag, in case one of the output filters or assignments references it
   metricsUpdate = false;

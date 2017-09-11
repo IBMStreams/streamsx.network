@@ -30,6 +30,8 @@ my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParamet
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
+my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParameterByName("buffersizes")->getValueAt(0)->getCppExpression() : '""';
+my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
 
@@ -88,7 +90,9 @@ MY_OPERATOR::MY_OPERATOR() {
   lcore = <%=$lcore%>;
   nicPort = <%=$nicPort%>;
   nicQueue = <%=$nicQueue%>;
+  buffersizes = <%=$buffersizes%>;
   const bool promiscuous = <%=$promiscuous%>;
+  jMirrorCheck = <%=$jMirrorCheck%>;
   metricsInterval = <%=$metricsInterval%>;
 
   // initialize operator state variables
@@ -97,6 +101,13 @@ MY_OPERATOR::MY_OPERATOR() {
   byteCounter = byteCounterNow = byteCounterThen = 0;
   now = then = 0;
   metricsUpdate = false;
+#ifdef __ATOMIC_RELAXED
+  __atomic_store_n(&realMetricsUpdate, false, __ATOMIC_RELEASE);
+#else
+  #pragma message "Using old sync builtins, with GCC " __VERSION__
+  // __sync_synchronize();  // Unnecessary here, in startup, as we're not yet protecting anything from any other threads.  Leaving as reminder that this variable is an atomic.
+  realMetricsUpdate = false;
+#endif
 
   // clear the output tuples
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
@@ -131,8 +142,25 @@ MY_OPERATOR::~MY_OPERATOR() {
 void MY_OPERATOR::allPortsReady() { 
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> allPortsReady() ...", "DNSPacketDPDKSource");
 
-    int rc = streams_dpdk_init();
+    // Retreive the pinnings before we call into the DPDK library
+    cpu_set_t cpumask;
+    CPU_ZERO(&cpumask);
+    pid_t mytid = (pid_t)syscall(SYS_gettid);
+    bool restore_affinity = true;
+    if(sched_getaffinity(mytid, sizeof(cpumask), &cpumask) != 0) {
+        SPLAPPTRC(L_ERROR, "sched_getaffinity() returned errno = " << errno, "DNSPacketDPDKSource");
+        restore_affinity = false;
+    }
+
+    int rc = streams_dpdk_init(buffersizes.c_str());
     if (rc != 0) THROW (SPLRuntimeOperator, "Error in streams_dpdk_init.");
+
+    // Restore the pinning of this thread after DPDK library may have messed it up
+    if(restore_affinity) {
+        if(sched_setaffinity(mytid, sizeof(cpumask), &cpumask) != 0) {
+            SPLAPPTRC(L_ERROR, "sched_setaffinity() returned errno = " << errno, "DNSPacketDPDKSource");
+        }
+    }
 
     tscHz = streams_source_get_tsc_hz(); 
     tscMicrosecondAdjust = (tscHz + 500000ul) / 1000000ul; 
@@ -206,7 +234,7 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
   tscMicroseconds = tscTimestamp / tscMicrosecondAdjust;
   
   // parse the network headers in the packet.
-  headers.parseNetworkHeaders((char*)packetPtr, packetLen);
+  headers.parseNetworkHeaders((char*)packetPtr, packetLen, jMirrorCheck);
 
   // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
   if ( ! headers.ipv4Header ) { return; }
@@ -224,6 +252,29 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
   packetCounter++;
   byteCounter += packetLen;
 
+  // Determine if the metrics were updated prior to this packet.
+  // Update the "local" version of the metrics updated flag, so that all output filters/assignments reference a stable copy.
+  /// @todo Under extremely low packet rates, or very short metrics update intervals, it's possible that the previous
+  // metrics copy hasn't yet been consumed when a new one comes in, causing either a total loss of a metrics update,
+  // or, if it lines up just right with an incoming packet, a metrics update with "odd" or part old/part new values.
+  // This should be very uncommon, and not catastrophic, so we are not attempted to protect against this just yet.
+  // This could be addressed at some future time.
+
+#ifdef __ATOMIC_RELAXED
+  bool expected = true;
+  if(__atomic_compare_exchange_n(&realMetricsUpdate, &expected, false, false, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) {
+      metricsUpdate = true;
+  } else {
+      metricsUpdate = false;
+  }
+#else
+  if(__sync_bool_compare_and_swap(&realMetricsUpdate, true, false)) {
+      metricsUpdate = true;
+  } else {
+      metricsUpdate = false;
+  }
+#endif
+
   // fill in and submit output tuples to output ports, as selected by output filters, if specified
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
     <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
@@ -234,7 +285,9 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
     }
     <% } %> ;
 
-  // reset the 'metrics updated' flag, in case one of the output filters or assignments references it
+  // reset the "local" version of the 'metrics updated' flag, in case one of the output filters or assignments references it
+  // The "real" version of the flag, as updated by the metricsThread() is unaffected, so we don't lose metrics updates under high-packet-rate
+  // conditions.
   metricsUpdate = false;
 }
 
@@ -303,7 +356,13 @@ void MY_OPERATOR::metricsThread() {
       totalBytesProcessed->setValue(byteCounter);
       
       // updated metrics will be available to the next output tuple emitted
-      metricsUpdate = true;
+#ifdef __ATOMIC_RELAXED
+      __atomic_store_n(&realMetricsUpdate, true, __ATOMIC_RELEASE);
+#else
+      __sync_synchronize();
+      realMetricsUpdate = true;
+#endif
+
     }
 
     SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");

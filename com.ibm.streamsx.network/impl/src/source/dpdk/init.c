@@ -31,16 +31,13 @@ int maxPort_;
 int numQueues_;
 int coreMaster_;
 
-static uint16_t num_rxd_ = STREAMS_SOURCE_RX_DESC_DEFAULT;
-static uint16_t num_txd_ = STREAMS_SOURCE_TX_DESC_DEFAULT;
-
 static const struct rte_eth_conf port_conf_ = {
     .rxmode = {
 	.max_rx_pkt_len = ETHER_MAX_LEN,
 	.split_hdr_size = 0,
 	.header_split   = 0, /**< Header Split disabled */
 	.hw_ip_checksum = 1, /**< IP checksum offload enabled */
-	.hw_vlan_filter = 1, /**< VLAN filtering disabled */
+	.hw_vlan_filter = 0, /**< VLAN filtering disabled */
 	.hw_vlan_extend = 0, /**< Extended VLAN disabled. */
 	.jumbo_frame    = 0, /**< Jumbo frame support disabled */
 	.hw_strip_crc   = 0, /**< CRC stripped by hardware */
@@ -49,7 +46,7 @@ static const struct rte_eth_conf port_conf_ = {
     .rx_adv_conf = {
 	.rss_conf = {
 	    .rss_key = NULL,
-	    .rss_hf =  ETH_RSS_IPV4 | ETH_RSS_IPV6,
+	    .rss_hf =  ETH_RSS_IP | ETH_RSS_UDP | ETH_RSS_TCP | ETH_RSS_SCTP,
 	},
     },
     .txmode = {
@@ -81,37 +78,59 @@ static struct rte_eth_txconf tx_conf_ = {
  * Create a memory pool for every enabled socket.
  */
 static void init_pools(void) {
-    unsigned i;
+    unsigned i, j;
     unsigned socket_id;
     struct rte_mempool *mp;
-    char s[64];
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() starting ...\n");
+
+    for (i = 0; i < MAX_SOCKETS; ++i) {
+        socket_mempool_[i] = NULL;
+    }
 
     for (i = 0; i < RTE_MAX_LCORE; ++i) {
-	if (rte_lcore_is_enabled(i) == 0) {
-	    continue;
+        if (rte_lcore_is_enabled(i) == 0) {
+            continue;
         }
 
-	socket_id = rte_lcore_to_socket_id(i);
-	if (socket_id > MAX_SOCKETS) {
-	    rte_exit(EXIT_FAILURE, "socket_id %d > MAX_SOCKETS\n",
-		    socket_id);
+        socket_id = rte_lcore_to_socket_id(i);
+        if (socket_id >= MAX_SOCKETS) {
+            rte_exit(EXIT_FAILURE, "socket_id %d >= MAX_SOCKETS\n",
+                    socket_id);
         }
 
-	if (socket_mempool_[socket_id] != NULL) {
-	    continue;
+        if (socket_mempool_[socket_id] != NULL) {
+            continue;
         }
 
-	mp = rte_mempool_create(s, NB_MBUF, MBUF_SIZE, MEMPOOL_CACHE_SIZE,
-		sizeof(struct rte_pktmbuf_pool_private),
-		rte_pktmbuf_pool_init, NULL,
-		rte_pktmbuf_init, NULL, socket_id, 0);
+        // format a name for the buffer pool
+        char s[64];
+        sprintf(s, "%d", socket_id);
 
-	if (mp == NULL) {
-	    rte_exit(EXIT_FAILURE, "Error on rte_mempool_create");
+        // calculate the number of buffers the pool will need
+        int queueCount = 0; 
+        for (j = 0; j<RTE_MAX_LCORE; j++) {
+            if (rte_lcore_is_enabled(j)==0) continue;
+            struct lcore_conf *conf = &lcore_conf_[j];
+            queueCount += conf->num_rx_queue;
         }
+        int bufferCount = 2 * queueCount * STREAMS_SOURCE_RX_DESC_DEFAULT; // ... was ... NB_MBUF;
 
-	socket_mempool_[socket_id] = mp;
+        // allocate the buffer pool using either rte_pktmbuf_pool_create() or rte_mempool_create()
+#if 1
+        RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_pktmbuf_pool_create(name='%s', bufferCount=%d, cacheSize=%d, privateSize=%d, bufferSize=%d, numaSocket=%d)\n", s, bufferCount, MEMPOOL_CACHE_SIZE, 0, MBUF_SIZE, socket_id);
+        mp = rte_pktmbuf_pool_create(s, bufferCount, MEMPOOL_CACHE_SIZE, 0, MBUF_SIZE, socket_id);
+        if (mp == NULL) { rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_pktmbuf_pool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno)); }
+#else
+        RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_pools() calling rte_mempool_create(name='%s', bufferCount=%d, bufferSize=%d, cacheSize=%d, privateDataSize=%d, ,,,, numaSocket=%d, flags=0)\n", s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), socket_id);
+        mp = rte_mempool_create(s, bufferCount, MBUF_SIZE, MEMPOOL_CACHE_SIZE, sizeof(struct rte_pktmbuf_pool_private), rte_pktmbuf_pool_init, NULL, rte_pktmbuf_init, NULL, socket_id, 0);
+        if (mp == NULL) { rte_exit(EXIT_FAILURE, "Error in STREAMS_SOURCE init.c init_pools() calling rte_mempool_create(), rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno)); }
+#endif
+        socket_mempool_[socket_id] = mp;
     }
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "... init.c init_pools() finished\n");
+
 }
 
 static void init_ports(void) {
@@ -122,6 +141,9 @@ static void init_ports(void) {
     struct rte_eth_link link;
     struct rte_eth_dev_info dev_info;
     struct ether_addr eth_addr;
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_ports() starting ...\n");
+
     uint32_t num_ports = rte_eth_dev_count();
     uint32_t if_index;
     char     ifname[IF_NAMESIZE];
@@ -192,10 +214,20 @@ static void init_ports(void) {
 		    port_id, ret);
 	}
 
+    // set the MTU size, if possible
+    RTE_LOG(INFO, STREAMS_SOURCE, "setting MTU size for port %d to %d\n", port_id, STREAMS_SOURCE_MTU_DEFAULT);
+    ret = rte_eth_dev_set_mtu(port_id, STREAMS_SOURCE_MTU_DEFAULT);
+    if (ret) { RTE_LOG(WARNING, STREAMS_SOURCE, "rte_eth_dev_set_mtu() failed to set MTU size, status %d\n", ret); }
+
+    // log the MTU size in any case
+    uint16_t mtu;
+    ret = rte_eth_dev_get_mtu(port_id, &mtu);
+    if (ret) { RTE_LOG(WARNING, STREAMS_SOURCE, "rte_eth_dev_get_mtu() failed to get MTU size, status %d\n", ret); }
+    else { RTE_LOG(INFO, STREAMS_SOURCE, "MTU size for port %d is %d\n", port_id, mtu); }
+
 	/* Initialize tx queues for the port */
 	queue_id = 0;
-	ret = rte_eth_tx_queue_setup(port_id, queue_id, num_txd_,
-		socket_id, &tx_conf_);
+	ret = rte_eth_tx_queue_setup(port_id, queue_id, STREAMS_SOURCE_TX_DESC_DEFAULT, socket_id, &tx_conf_);
 	if (ret < 0) {
 	    rte_exit(EXIT_FAILURE, "rte_eth_tx_queue_setup: err=%d"
 		    " port=%u\n", ret, port_id);
@@ -207,27 +239,23 @@ static void init_ports(void) {
 
     /* Initialize rx queues */
     for (lcore_id = 0; lcore_id < RTE_MAX_LCORE; lcore_id++) {
-	if (rte_lcore_is_enabled(lcore_id) == 0)
-	    continue;
 
-	conf = &lcore_conf_[lcore_id];
-	RTE_LOG(INFO, STREAMS_SOURCE, "Init rx queues on lcore %u num_rx_queue: %d, callback: 0x%lx\n", lcore_id, conf->num_rx_queue, conf->rx_queue_list[0].packetCallbackFunction);
-	for (queue = 0; queue < conf->num_rx_queue; queue++) {
+      // skip this core if its not enabled for DPDK
+      if (rte_lcore_is_enabled(lcore_id) == 0) continue;
+
+      conf = &lcore_conf_[lcore_id];
+      RTE_LOG(INFO, STREAMS_SOURCE, "Initializing receive queues on lcore %u: number of queues: %d, callback: 0x%lx\n", lcore_id, conf->num_rx_queue, conf->rx_queue_list[0].packetCallbackFunction);
+      for (queue = 0; queue < conf->num_rx_queue; queue++) {
 	    port_id = conf->rx_queue_list[queue].port_id;
 	    queue_id = conf->rx_queue_list[queue].queue_id;
 	    socket_id = rte_lcore_to_socket_id(lcore_id);
-
-	    RTE_LOG(INFO, STREAMS_SOURCE, "  port: %d, queue: %d, socket: %d\n", 
-		    port_id, queue_id, socket_id);
-	    RTE_LOG(INFO, STREAMS_SOURCE, "  num_rxd_: %d, mempool: 0x%lx\n", 
-		    num_rxd_, socket_mempool_[socket_id]) ;
-	    ret = rte_eth_rx_queue_setup(port_id, queue_id, num_rxd_,
-		    socket_id, &rx_conf_, socket_mempool_[socket_id]);
+        RTE_LOG(INFO, STREAMS_SOURCE, "init.c init_ports() calling rte_eth_rx_queue_setup(port_id=%d, rx_queue_id=%d, nb_rx_desc=%d, socket_id=%d, ...)\n", port_id, queue_id, STREAMS_SOURCE_RX_DESC_DEFAULT, socket_id);
+	    ret = rte_eth_rx_queue_setup(port_id, queue_id, STREAMS_SOURCE_RX_DESC_DEFAULT, socket_id, &rx_conf_, socket_mempool_[socket_id]);
 	    if (ret < 0) {
-		rte_exit(EXIT_FAILURE, "rte_eth_rx_queue_setup: err=%d"
-			" port=%u\n", ret, port_id);
+          printf("STREAMS_SOURCE: rte_eth_rx_queue_setup() failed, rte_errno=%d, %s\n", rte_errno, rte_strerror(rte_errno));
+          rte_exit(EXIT_FAILURE, "rte_eth_rx_queue_setup: err=%d port=%u\n", ret, port_id);
 	    }
-	}
+      }
     }
 
     /* Start ports */
@@ -256,10 +284,14 @@ static void init_ports(void) {
 
 	if (port_info_[port_id].promiscuous) rte_eth_promiscuous_enable(port_id);
     }
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "... init.c init_ports() finished\n");
 }
 
 int init(void) {
     int i;
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "init.c init() starting ...\n");
 
     /* Assign socket id's */
     for(i = 0; i < RTE_MAX_LCORE; ++i) {
@@ -273,6 +305,8 @@ int init(void) {
 
     init_pools();
     init_ports();
+
+    RTE_LOG(INFO, STREAMS_SOURCE, "... init.c init() finished\n");
 
     return(0);
 }

@@ -4,12 +4,13 @@
     <context>
     <description>
 
-# introduction 
-
 DNSPacketDPDKSource is an operator for the IBM Streams product that
-captures live network packets from one of the network interfaces attached to the
-machine where it executes. The operator function and structure are
-similar to the PacketLiveSource and DNSMessageParser operators; 
+receives network packets from a supported ethernet adapter. The operator function and structure are
+similar to the 
+[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketLiveSource.html|PacketLiveSource]
+and 
+[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.parse$DNSMessageParser.html|DNSMessageParser]
+operators;
 see the documentation for those for details
 of common functions and general background.  
 The primary difference between
@@ -17,13 +18,27 @@ these related operators is that DNSPacketDPDKSource leverages
 the [http://www.dpdk.org|data plane development kit (DPDK)]
 for higher performance.
 
+DPDK supports a variety of [http://www.dpdk.org/doc/nics|ethernet adapters]. 
+The PacketDPDKSource operator has been tested with these adapters:
+
+* Mellanox ConnectX-3
+* Mellanox ConnectX-3 Pro
+* Intel e1000
+* Intel I350
+
+DPDK stores network packets received by a supported ethernet adapter in memory that is 
+directly accessible by the DNSPacketDPDKSource operator, bypassing the Linux kernel.
+This reduces overhead and allows the PacketDPDKSource operator to ingest packets
+at a higher rate than the PacketLiveSource operator. 
+The DNSPacketDPDKSource operator requires a dedicated processor core,
+which must be specified explicitly, and which runs at 100% CPU utilization.
+
 Output filters and attribute assignments are SPL expressions. They may use any
-of the built-in SPL functions, and any of these functions, which are specific to
-the PacketFileSource operator:
+of the built-in SPL functions, and any of these functions:
 
 * [tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header parser result functions]
 
-The DNSPacketDPDKSource operator steps quietly over 'jmirror' headers prepended to packets
+The DNSPacketDPDKSource operator can be configured to step quietly over 'jmirror' headers prepended to packets
 by Juniper Networks 'mirror encapsulation'.
 
 This operator is part of the network toolkit. To use it in an
@@ -32,340 +47,46 @@ application, include this statement in the SPL source file:
     use com.ibm.streamsx.network.dns::*;
 
 
-# promiscuous mode 
-
-Ethernet interfaces normally ignore packets that are not addressed to them.
-However, when 'promiscious' mode is enabled, they can
-capture all network packets on their ethernet segment, even those that are not
-addressed to them.  This is sometimes referred to as 'network sniffing'.  
-However, modern ethernet routers normally send only packets that are
-addressed to the ethernet device; 'promiscious' mode is useful only when a switch has been
-specifically configured to send packets to an ethernet interface that are not
-addressed to it. This is sometimes referred to as 'mirroring'.
-
-The DNSPacketDPDKSource operator will enable 'promiscuous' mode in a ethernet
-interface when its 'promiscous' parameter is set to `true`.
-
-
-# hardware dependencies
-
-DPDK supports a variety of [http://www.dpdk.org/doc/nics|ethernet devices]. 
-The DNSPacketDPDKSource operator has been tested with these adapters:
-
-* Mellanox ConnectX-3
-* Mellanox ConnectX-3 Pro
-* Intel e1000
-* Intel I350
-
-The [http://dpdk.org|DPDK libraries] must be compiled from source code and installed on the machine where
-the network adapter is installed. Streams processing elements (PEs) must be placed
-on this machine.
-
-# software dependencies
-
-DPDK depends upon additional Linux software packages, beyond those required for Streams.
-In particular, it requires libraries that match the specific version of the kernel your machine uses.
-To install these libraries, type these commands at a prompt:
-
-    bash&gt; sudo yum install glibc-devel
-    bash&gt; sudo yum install libibverbs-devel
-    bash&gt; sudo yum install "kernel-devel-$(uname -r)"
-
-
-# installing and configuring DPDK
-
-The [http://dpdk.org/doc/guides/linux_gsg/index.html|DPDK user guide] has detailed instructions for
-installing DPDK and configuring it for particular ethernet devices. These notes are a summary of those instructions.
-They include many Linux commands that should be entered at a command prompt in a Terminal window.
-In the instructions below, these commands are prefixed with 'bash&gt;'.
-Many of the commands require 'root' privileges; they are prefixed with 'bash&gt; sudo'.
-
-
-*identify ethernet device and network interface*
-
-Your machine probably has multiple ethernet interfaces.
-To configure the DPDK device driver, you will need to specify which ethernet device
-you intend to use with DPDK, 
-and which Linux network interface is assigned to it.
-
-First, display a list of ethernet devices installed in your machine by typing this at a command prompt:
-
-    bash&gt; lspci | grep -i ethernet
-    0002:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
-    0003:05:00.0 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
-    0003:05:00.1 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
-    0003:05:00.2 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
-    0003:05:00.3 Ethernet controller: Broadcom Corporation NetXtreme BCM5719 Gigabit Ethernet PCIe (rev 01)
-    0005:01:00.0 Ethernet controller: Mellanox Technologies MT27520 Family [ConnectX-3 Pro]
-
-If none of the supported ethernet devices listed above under 'hardware dependencies' is displayed, the DNSPacketDPDKSource operator is not supported.
-
-Otherwise, note the numbers preceding the word 'Ethernet' for the device you intend to use with DPDK.
-These numbers are the PCI 'bus:slot.function' address of the device: 
-they identify the PCI bus the device uses,
-the physical slot the device is installed in, 
-and the function number (the port number, for cards with multiple ethernet ports).
-
-Then, display a list of Linux network interfaces, and the ethernet devices they are assigned to, by typing this at a command prompt:
-
-    bash&gt; ls -la /sys/class/net
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP2p1s0 -&gt; ../../devices/pci0002:00/0002:00:00.0/0002:01:00.0/net/enP2p1s0
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP2p1s0d1 -&gt; ../../devices/pci0002:00/0002:00:00.0/0002:01:00.0/net/enP2p1s0d1
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f0 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.0/net/enP3p5s0f0
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f1 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.1/net/enP3p5s0f1
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f2 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.2/net/enP3p5s0f2
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP3p5s0f3 -&gt; ../../devices/pci0003:00/0003:00:00.0/0003:01:00.0/0003:02:09.0/0003:05:00.3/net/enP3p5s0f3
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP5p1s0 -&gt; ../../devices/pci0005:00/0005:00:00.0/0005:01:00.0/net/enP5p1s0
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 enP5p1s0d1 -&gt; ../../devices/pci0005:00/0005:00:00.0/0005:01:00.0/net/enP5p1s0d1
-    lrwxrwxrwx.  1 root root 0 Sep 28 09:49 lo -&gt; ../../devices/virtual/net/lo
-
-Find the Linux network interface of your ethernet device by matching its PCI 'bus:slot:function' address to those listed, preceding the string '/net/'.
-
-For example, the 'lspci' list shows two Mellanox ethernet devices with PCI addresses '0002:01:00.0' and '0005:01:00.0'. 
-The 'ls' list shows the adapters are assigned to network interfaces 'enP2p1s0' and 'enP5p1s0', respectively.
-
-Select the Linux network interface and PCI 'bus:slot.function' address of the ethernet device you intend to use with DPDK,
-and remember them for use below under 'prepare Linux user account for DPDK'.
-To verify your selection, type this command at a prompt, substituting your network interface name, and verify that 'bus-info:' shows the PCI address of your ethernet device:
-
-    bash&gt; ethtool -i enP2p1s0
-    driver: mlx4_en
-    version: 3.3-2.0.0 (28 Jul 2016)
-    firmware-version: 2.36.5150
-    bus-info: 0002:01:00.0
-
-
-
-*create Linux user group for DPDK*
-
-DPDK will lock the memory pages containing its buffers to prevent the kernel from swapping them out to disk while it is using them.
-Users who run the DNSPacketDPDKSource operator will need permission to do this.
-
-To grant this permission, create a Linux user group for DPDK and add the user accounts that will run the DNSPacketDPDKSource operator to the group.
-
-For example, to create a Linux user group 'dpdk' and add your own user account to it, open a Terminal window and type these commands at the prompt:
-
-    bash&gt; sudo groupadd dpdk
-    bash&gt; sudo usermod -a -G dpdk $USER
-
-To verify that your user account is in the 'dpdk' group, type this at a command prompt:
-
-    bash&gt; groups $USER
-    streamsdpdk : streamsdpdk dpdk
-
-To grant permission to lock memory pages, edit the '/etc/security/limits.conf' system file:
-
-    bash&gt; sudo vi /etc/security/limits.conf
-
- and insert this line into the 'limits.conf' file:
-
-    \@dpdk - memlock unlimited
-
-
-*prepare Linux user account for DPDK*
-
-You will need some environment variables whenever you use DPDK.
-To set these variables permanently, edit the '$HOME/.bashrc' script by typing this at a command prompt:
-
-    vi $HOME/.bashrc
-
-and insert these lines into the '.bashrc' file, 
-substituting the Linux network interface and
-PCI 'bus:slot.function' address of the ethernet device you intend to use with DPDK:
-
-    export RTE_SDK=$HOME/dpdk-2.2.0
-    [[ $( uname -m ) == "x86_64" ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
-    [[ $( uname -m ) == "ppc64le" ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
-    export DPDK_INTERFACE=network-interface-name
-    export DPDK_DEVICE=$( ethtool -i $DPDK_INTERFACE | gawk '/bus-info:/ { print $2 }' )
-
-
-*log off and log back on*
-
-After creating the 'dpdk' user group and making the changes to $HOME/.bashrc described above, 
-log off your user account and log back in to put the changes into effect.
-
-
-*configure Linux 'hugepages'*
-
-DPDK uses [https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt|Linux kernel 'hugepages' support] 
-to allocate large buffers with minimal 'translation lookaside buffer (TLB)' overhead.
-The size and number of 'hugepages' available for DPDK must be configured in the Linux kernel. 
-This requires 'root' access, and may require rebooting the machine.
-
-Note that the memory allocated for hugepages will reduce the memory available for Streams and other applications.
-
-To display the amount of memory installed in your machine, and the amount of memory available, type this at a a command prompt:
-
-    bash&gt; cat /proc/meminfo | grep -i mem
-    MemTotal:       263636096 kB
-    MemFree:        226797632 kB
-    MemAvailable:   249287680 kB
-    Shmem:            131776 kB
-
-To display the size and number of hugepages currently allocated, type this at a command prompt:
-
-    bash&gt; cat /proc/meminfo | grep -i hugepages
-    AnonHugePages:         0 kB
-    HugePages_Total:      10
-    HugePages_Free:        0
-    HugePages_Rsvd:        0
-    HugePages_Surp:        0
-    Hugepagesize:      16384 kB
-
-The supported sizes of hugepages depend upon the machine architecture. 
-Typical sizes for the architectures supported by IBM Streams include: 
-
-* 4KB, 8KB, 64KB, 256KB, 1MB, 4MB, 16MB, or 256MB *for 'x86_64' (x86_64 machines)*
-* 4KB, 16MB, or 16GB *for 'ppc64le' (Power8 little-endian machines)*
-
-The size of hugepages on your machine is set by Linux kernel parameters when the machine is booted.
-If you want to change the size of hugepages on your machine, please refer to these documents for details:
-
-* https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
-* https://www.kernel.org/doc/Documentation/kernel-parameters.txt
-
-The number of hugepages is determined by the 'vm.nr_hugepages' system control parameter.
-This parameter can be set when the system is booted, and it can be changed later while the system is running.
-
-For example, to set the 'vm.nr_hugepages' parameter to 1000 when the system boots, edit the '/etc/sysctl.conf' system file and set the parameter like this:
-
-    vm.nr_hugepages=1000
-
-To set the 'vm.nr_hugepages' parameter to 1000 while the system is running, type this at a command prompt:
-
-    bash&gt; sudo sysctl -w vm.nr_hugepages=1000
-
-To verify that the 'vm.nr_hugepages' parameter is set to 1000, type this at a command prompt:
-
-    bash&gt; sysctl vm.nr_hugepages
-    vm.nr_hugepages = 1000
-
-To verify that the number of hugepages available is actually 1000, type this at a command prompt:
-
-    bash&gt; cat /proc/meminfo | grep -i hugepages
-    AnonHugePages:         0 kB
-    HugePages_Total:    1000
-    HugePages_Free:        0
-    HugePages_Rsvd:        0
-    HugePages_Surp:        0
-    Hugepagesize:      16384 kB
-
-If the number of hugepages has not 1000, memory may be too fragemented.
-In this case, you will need to reboot the machine and then set the number of hugepages.
-
-To make the hugepages accessible to the user accounts that will run the DNSPacketDPDKSource operator,
-create and mount a directory for them by typing these commands at a prompt:
-
-    bash&gt; sudo mkdir /dev/hugepages
-    bash&gt; sudo mount -t hugetlbfs nodev /dev/hugepages -o gid=dpdk,mode=1770
-
-To ensure the hugepages are mounted in the '/dev/hugepages' directory when the machine is rebooted, 
-edit the '/etc/fstab' system file by typing this command at a prompt:
-
-    bash&gt; sudo vi /etc/fstab
-
-and inserting this line into the file:
-
-    nodev  /dev/hugepages  hugetlbfs  gid=dpdk,mode=1770  0  0
-
-
-*get DPDK library and utilities*
-
-The DPDK source code needs to be downloaded,
-configured for your machine's architecture and ethernet device,
-and compiled into libraries and utilities.
-
-First, download the DPDK source code and configure it for your machine's architecture
-by typing these commands at a prompt:
-
-    bash&gt; wget http://fast.dpdk.org/rel/dpdk-2.2.0.tar.xz
-    bash&gt; tar -xvf dpdk-2.2.0.tar.xz
-    bash&gt; cd $RTE_SDK
-    bash&gt; make config T=$RTE_TARGET
-
-Then, edit the DPDK configuration file by typing this command:
-
-    bash&gt; vi ./build/.config
-
-and change these parameters in the '.config' file:
-
-    CONFIG_RTE_BUILD_COMBINE_LIBS=y
-    CONFIG_RTE_MAX_MEMSEG=1024
-
-and, if your machine has a Mellanox ethernet device, change this parameter in the '.config' file, too:
-
-    CONFIG_RTE_LIBRTE_MLX4_PMD=y 
-
-Then, compile DPDK by typing this command at a prompt:
-
-    bash&gt; EXTRA_CFLAGS=-fPIC make                
-    bash&gt; EXTRA_CFLAGS=-fPIC make install T=$RTE_TARGET
-
-
-*re-compile Streams network toolkit*
-
-
-If you don't already have the Streams network toolkit installed in the $STREAMS_INSTALL/toolkits directory, get it by typing these commands at a prompt:
-
-    bash&gt; cd $HOME/git
-    bash&gt; git clone git@github.com:IBMStreams/streamsx.network.git
-
-In any case, you will need to compile the Streams DPDK glue library.
-To do this, type these commands at a prompt:
-
-    bash&gt; .../streamsx.network
-    bash&gt; ant
-
-
-# bind 'e1000' ethernet device to DPDK
-
-Before Streams can use an ethernet device with DPDK, it must be bound to a DPDK device driver.
-
-For the 'e1000' family of devices, load the DPDK device driver into the Linux kernel by typing these commands at a prompt:
-
-    bash&gt; sudo modprobe uio
-    bash&gt; sudo insmod $RTE_SDK/build/kmod/igb_uio.ko || true
-
-The DPDK device driver requires exclusive use of the ethernet device.
-To stop the Linux device driver, type these commands at a prompt:
-
-    bash&gt; sudo ip link set dev $DPDK_INTERFACE down
-    bash&gt; ip link show dev $DPDK_INTERFACE
-
-To bind an ethernet device of the 'e1000' family to the DPDK device drier, type these commands at a prompt:
-
-    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb_uio $DPDK_DEVICE
-    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
-
-Then grant read/write access to the DPDK device driver's files to the 'dpdk' user group by typing these commands at a prompt:
-
-    bash&gt; sudo chown root:dpdk /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
-    bash&gt; sudo chmod 664 /dev/uio0 /sys/class/uio/uio0/device/config /sys/class/uio/uio0/device/resource*
-
-You can now run one of the sample applications that use DPDK, or run your own SPL application.
-
-
-# unbind 'e1000' ethernet device from DPDK
-
-After Streams has finished using an ethernet device with DPDK, it should be rebound to the Linux device driver.
-
-To bind an ethernet device of the 'e1000' family to the Linux device driver, type these commands at a prompt:
-
-    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --bind=igb $DPDK_DEVICE
-    bash&gt; sudo $RTE_SDK/tools/dpdk_nic_bind.py --status
-
-Then start the Linux device driver by typing these commands at a prompt:
-
-    bash&gt; sudo ip link set dev $DPDK_INTERFACE up
-    bash&gt; ip link show dev $DPDK_INTERFACE
-
-
-# sample applications
-
-The network toolkit includes several
-[https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
-that illustrate how to use this operator.
+# parallelization
+
+DPDK can distribute network packets received by one ethernet adapter 
+across multiple DNSPacketDPDKSource operators. 
+This can increase an application's packet rate by parallelizing its analytics.
+Note that each DNSPacketDPDKSource operator requires a separate processor core,
+which runs at 100% CPU utiliziation.
+
+DPDK requires that the total number of DNSPacketDPDKSource operators be a power of 2,
+that is, the total number of DNSPacketDPDKSource operators must be 1, 2, 4, 8, or 16.
+Packets received by the network adapter will be distributed across all of the operators,
+which will run in parallel. 
+Packets are distributed according to a hash of their source and destination addresses and ports,
+so request and response packets that belong to the same TCP transaction are all sent to 
+the same operator.
+
+
+# promiscuous mode
+
+Ethernet adapters normally ignore packets that are not addressed to them.
+However, when 'promiscious' mode is enabled, and adapter can
+capture all network packets on its ethernet segment, even those that are not
+addressed to it.  This is sometimes referred to as &quot;network sniffing&quot;.  
+However, ethernet switches normally send only packets that are
+addressed to the adapter; 'promiscious' mode is useful only when a switch has been
+specifically configured to send packets that are not
+addressed to the adapter. This is sometimes referred to as &quot;mirroring&quot;.
+
+The DNSPacketDPDKSource operator will enable 'promiscuous' mode 
+when its 'promiscous' parameter is set to `true`.
+
+
+# setup for DPDK
+
+The DPDK library requires some setup that is specific to the hardware and software configuration
+of your machine. The documentation for the 
+[tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketDPDKSource.html|PacketDPDKSource] operator offers guidelines for this setup, 
+and examples for an
+Intel processor with a Mellanox ethernet adapter. You will need to adapt the guidelines to match
+your configuration.
 
 
 # references
@@ -418,7 +139,7 @@ The Juniper Networks 'jmirror' encapsulation header is described here:
 
 * [http://wiki.wireshark.org/jmirror]
 
-The Cisco Systems ''Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
+The Cisco Systems 'Encapsulated Remote Switch Port Analyzer (ERSPAN)' encapsulation headers are described here:
 
 * [https://tools.ietf.org/html/draft-foschiano-erspan-00]
 
@@ -450,7 +171,7 @@ and in output attribute assignment expressions are described here:
           <name>nPacketsReceivedCurrent</name>
           <description>
 
-This metric counts the number of packets received by the network interface,
+This metric counts the number of packets received by the ethernet adapter,
 as counted by DPDK.
 
 	  </description>
@@ -461,7 +182,7 @@ as counted by DPDK.
           <name>nPacketsDroppedCurrent</name>
           <description>
 	  
-This metric counts the number of packets dropped by the network interface,
+This metric counts the number of packets dropped by the ethernet adapter,
 as counted by DPDK.
 
 	  </description>
@@ -472,7 +193,7 @@ as counted by DPDK.
           <name>nBytesReceivedCurrent</name>
           <description>
 	  
-This metric counts the number of bytes received by the network interface,
+This metric counts the number of bytes received by the ethernet adapter,
 as counted by DPDK.
 
 	  </description>
@@ -483,7 +204,7 @@ as counted by DPDK.
           <name>nPacketsProcessedCurrent</name>
           <description>
 	  
-This metric counts number of bytes of packet data processed by the
+This metric counts number of packets processed by the
 operator.
 	  
 	  </description>
@@ -502,128 +223,165 @@ operator.
        </metric>
     </metrics>
 
-      <libraryDependencies>
-	<library>
-	<cmn:description>
+    <libraryDependencies>
 
-General support functions.
+	  <library>
+	    <cmn:description>
+          Functions for parsing network headers.
+	    </cmn:description>
+	    <cmn:managedLibrary>
+	      <cmn:includePath>../../impl/include</cmn:includePath>
+	    </cmn:managedLibrary>
+	  </library>
 
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:includePath>../../impl/include</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
+	  <library>
+	    <cmn:description>
+	      Streams DPDK 'glue' library 'libstreams_source.a'.
+	    </cmn:description>
+	    <cmn:managedLibrary>
+	      <cmn:lib>streams_source</cmn:lib>
+	      <cmn:libPath>../../impl/src/source/dpdk/build/lib</cmn:libPath>
+	      <cmn:includePath>../../impl/src/source/dpdk</cmn:includePath>
+	    </cmn:managedLibrary>
 
-	<library>
-	<cmn:description>
-	
-streams_source interface library to dpdk.
-	
-	</cmn:description>
-	<cmn:managedLibrary>
-	<cmn:lib>streams_source</cmn:lib>
-	<cmn:libPath>../../impl/src/source/dpdk/build/lib</cmn:libPath>
-	<cmn:includePath>../../impl/src/source/dpdk</cmn:includePath>
-	</cmn:managedLibrary>
-	</library>
+	  </library>
 
-      </libraryDependencies>
+    </libraryDependencies>
 
-      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
-      <allowCustomLogic>true</allowCustomLogic>
-    </context>
+    <providesSingleThreadedContext>Never</providesSingleThreadedContext>
+    <allowCustomLogic>true</allowCustomLogic>
+  </context>
 
-    <parameters>
-      <allowAny>false</allowAny>
+  <parameters>
+    <allowAny>false</allowAny>
+
     <parameter>
       <name>lcoreMaster</name>
       <description>
 
-Logical core number to be used for the master DPDK thread.
+This optional parameter specifies a logical processor core for the DPDK master thread. 
+This thread is not used for receiving packets, and does not have high CPU utiliztion.
+If the machine has more than one NUMA node, specify a core on a node that does not
+have the ethernet adapter connected to it. 
+
+When multiple PacketDPDKSource operators are configured for the same ethernet adapter,
+all operators must specify the same value with their 'lcoreMaster' parameters.
+
+To determine how many processor cores your machine has, and which cores are connected to 
+which NUMA nodes, execute the `lscpu` command at a Linux prompt.
 
       </description>
       <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
       <type>int32</type>
-      <cardinality>-1</cardinality>
+      <cardinality>1</cardinality>
     </parameter>
 
     <parameter>
       <name>lcore</name>
       <description>
 
-Logical core number on which this operator will run.
+This required parameter specifies a logical processor core for the DPDK packet receive thread.
+The core specified must belong to the NUMA node the ethernet adapter is connected to.
+The receive thread will run the specified core at 100% CPU utilization.
+
+If multiple PacketDPDKSource operators are configured for the same ethernet adapter,
+each operator must specify a different value with its 'lcoreMaster' parameter. 
+The total number of PacketDPDKSource operators must be a power of 2,
+that is, the total number of PacketDPDKSource operators must be 1, 2, 4, 8, or 16.
+Packets received by the network adapter will be distributed across all of the operators,
+which will run in parallel.
+
+To determine how many processor cores your machine has, and which cores are connected to 
+which NUMA nodes, execute the `lscpu` command at a Linux prompt. 
+To determine which NUMA node your ethernet adapter is connected to, look in the file
+'/sys/class/net/$DPDK_INTERFACE/device/numa_node'.
 
       </description>
       <optional>false</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
       <type>int32</type>
-      <cardinality>-1</cardinality>
+      <cardinality>1</cardinality>
     </parameter>
 
     <parameter>
       <name>nicPort</name>
       <description>
 
-NIC port of type uint32 which sources packets for this
-operator instance.  Obtaining the proper mapping may require
-use of multiple tools, and varies by NIC.  
+This optional parameter specifies which port of the ethernet adapter 
+the operator will receive network packets from.
+This applies only to adapters with multiple ports. 
 
-Suggested tools to help identify NIC ports:
-
-   \- ifconfig
-
-   \- dpdk-\*/tools/dpdk_nic_bind.py --status
-
-   \- ibstat (for Mellanox NICs)
-
-   \- lspci | grep -i net
+The default value is '0' if this parameter is not specified.
 
       </description>
       <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
       <type>int32</type>
-      <cardinality>-1</cardinality>
+      <cardinality>1</cardinality>
     </parameter>
 
     <parameter>
       <name>nicQueue</name>
       <description>
 
-NIC queue of type int32 which sources packets for this operator instance.
+This optional parameter specifies which queue of received packets the operator will receive.
+This applies only when multiple PacketDPDKSource operators are configured for the same ethernet adapter.
+The value must be between 0 and 'N-1', where N is the total number of operators,
+and each operator must specify a different queue, so that all queues are connected to an operator.
+
+Note that DPDK requires the total number of queues and operators be a power of 2, that is,
+the total number of queues and operators must be 1, 2, 4, 8, or 16.
+DPDK will distribute packets across all of the queues, and therefore across all of the operators.
+
+The default value is '0' if this parameter is not specified.
 
       </description>
       <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
       <expressionMode>Expression</expressionMode>
       <type>int32</type>
-      <cardinality>-1</cardinality>
+      <cardinality>1</cardinality>
     </parameter>
 
-      <parameter>
-        <name>outputFilters</name>
-        <description>
+    <parameter>
+      <name>buffersizes</name>
+      <description>
 
-This optional parameter takes a list of SPL expressions that specify which packets
-should be emitted by the corresponding output port. The number of
-expressions in the list must match the number of output ports, and each
-expression must evaluate to a `boolean` value.  The output filter expressions may include any
-of the
-[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|DNSPacketDPDKSource result functions].  
+This optional parameter specifies how much buffer space, in megabytes, 
+to allocate from available 2MB Linux 'hugepages' for each NUMA node,
+specified as a string containing comma-separated values. 
+For the NUMA node the ethernet adapter is connected to, specify an even number of megabytes.
+For other NUMA nodes, if any, specify zero.
 
-The default value of the `outputFilters` parameter is an empty list, which
-causes all packets processed to be emitted by all output ports.
+For example, on a machine with one NUMA node,
+specify "100" to allocate 100 megabytes of buffer space.
+For another example, on a machine with two NUMA nodes, 
+where the ethernet adapter is connected to the second node,
+specify "0,100" to allocate 100 megabytes of buffer space on the second NUMA node.
+If multiple PacketDPDKSource operators are configured for the same network adapter, 
+all operators should specify the same values for their 'buffersizes' parameter.
 
-        </description>
-        <optional>true</optional>
-        <rewriteAllowed>true</rewriteAllowed>
-        <expressionMode>Expression</expressionMode>
-        <type>boolean</type>
-        <cardinality>-1</cardinality>
-      </parameter>
+To determine which NUMA node your ethernet adapter is connected to, enter the command
+`cat /sys/class/net/$DPDK_INTERFACE/device/numa_node` at a Linux prompt.
+To determine how much buffer space is available in the 'hugepages' for that NUMA node,
+enter the command
+`grep -i -h hugepages /sys/devices/system/node/node\*/meminfo`
+at a Linux prompt.
+
+If this parameter is not specified, 
+DPDK will allocate all available 2MB Linux 'hugepages' for its buffer space.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>AttributeFree</expressionMode>
+      <type>rstring</type>
+      <cardinality>1</cardinality>
+    </parameter>
 
     <parameter>
       <name>promiscuous</name>
@@ -633,6 +391,48 @@ This optional parameter takes an expression of type 'boolean'
 that specifies whether or not 'promiscuous' mode should be enabled on the
 network interface.
 
+The default value is 'false'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>boolean</type>
+      <cardinality>1</cardinality>
+    </parameter>
+
+    <parameter>
+      <name>jMirrorCheck</name>
+      <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on
+packets, and step over them when found.
+
+The default value is 'false'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>boolean</type>
+      <cardinality>1</cardinality>
+    </parameter>
+
+    <parameter>
+      <name>outputFilters</name>
+      <description>
+
+This optional parameter takes a list of SPL expressions that specify which packets
+should be emitted by the corresponding output port. The number of
+expressions in the list must match the number of output ports, and each
+expression must evaluate to a `boolean` value.  The output filter expressions may include any
+of the
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.dns.html|network header parser result functions].  
+
+The default value of the `outputFilters` parameter is an empty list, which
+causes all packets processed to be emitted by all output ports.
+
       </description>
       <optional>true</optional>
       <rewriteAllowed>true</rewriteAllowed>
@@ -640,12 +440,11 @@ network interface.
       <type>boolean</type>
       <cardinality>-1</cardinality>
     </parameter>
-
+    
     <parameter>
       <name>metricsInterval</name>
       <description>
-     
-
+        
 This optional parameter takes an expression of type
 `float64` that specifies the interval, in seconds, for sending operator
 metrics to the Streams runtime. If the value is zero or less, the operator
@@ -663,9 +462,13 @@ The default value is '10.0'.
     </parameter>
 
     </parameters>
+
     <inputPorts>
+
     </inputPorts>
+
     <outputPorts>
+
       <outputPortOpenSet>
         <description>
 
@@ -677,7 +480,7 @@ or if no `outputFilters` parameter is specified.
 
 Output attributes can be assigned values with any SPL expression that evaluates
 to the proper type, and the expressions may include any of the
-[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|DNSPacketDPDKSource result functions].
+[tk$com.ibm.streamsx.network/fc$com.ibm.streamsx.network.source.html|network header parser result functions].
 Output attributes that match input attributes in name and
 type are copied automatically.
 

@@ -5,13 +5,17 @@
 
 namespace sample;
 
-rstring trancateNonASCII(rstring data) {
+rstring truncateNonASCII(rstring data) {
   for (int32 i in range(length(data))) {
     uint32 c = toCharacterCode(substring(data,i,1));
     if ( c==0x00000009u || c==0x0000000Au || c==0x0000000Du || ( c>=0x00000020u && c<=0x0000007Eu ) ) continue;
     return substring(data,0,i) + "...[" + (rstring)(length(data)-i) + " bytes of binary data]...";
   }
   return data;
+}
+
+rstring elideNonASCII(rstring data) {
+  return regexReplacePerl(data, "[^[:print:]]", ".", true);
 }
 
 rstring mimetype2extension(rstring contentType) {

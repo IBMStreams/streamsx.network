@@ -1,5 +1,5 @@
 <%
-## Copyright (C) 2011, 2015  International Business Machines Corporation
+## Copyright (C) 2011, 2017  International Business Machines Corporation
 ## All Rights Reserved
 %>
 
@@ -64,11 +64,12 @@ private:
   int32_t maximumLength;
   int32_t bufferSize;
   bool promiscuous;
+  bool jMirrorCheck;
   double timeout;
   double metricsInterval;
   std::string inputFilter;
 
-  // ----------- input and output tuples ----------
+  // ----------- output tuples ----------
 
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
 

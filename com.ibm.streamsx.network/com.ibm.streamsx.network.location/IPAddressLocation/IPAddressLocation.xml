@@ -40,7 +40,7 @@ provided by [https://www.maxmind.com/|Maxmind, Inc.]:
 
 * GeoLite2 data is available free from [http://dev.maxmind.com/geoip/geoip2/geolite2/]
 
-* GeoIP2 data, which is more accurate, may be purchased from [https://www.maxmind.com/en/geoip2-city/]
+* GeoIP2 data, which is more accurate, may be purchased from [https://www.maxmind.com/en/geoip2-city]
 
 The required parameter `geographyDiectory` parameter must point to a directory containing
 geography files, after downloading and unpacking. 
@@ -59,7 +59,7 @@ For GeoIP2 data, the geography files are:
 
 The format of the geography files is described here:
 
-* [http://dev.maxmind.com/geoip/geoip2/geoip2-csv-databases/]
+* [https://dev.maxmind.com/geoip/geoip2/geoip2-city-country-csv-databases/]
 
 # Threads
 
@@ -92,7 +92,7 @@ and in output attribute assignment expressions are described here:
 
 The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind.com/|Maxmind, Inc.] is described here:
 
-* [http://dev.maxmind.com/geoip/geoip2/geoip2-csv-databases/]
+* [https://dev.maxmind.com/geoip/geoip2/geoip2-city-country-csv-databases/]
 
       </description>
       <libraryDependencies>

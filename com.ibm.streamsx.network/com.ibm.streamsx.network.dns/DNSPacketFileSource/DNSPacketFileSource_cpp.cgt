@@ -26,6 +26,7 @@ my $pcapFilename = $model->getParameterByName("pcapFilename") ? $model->getParam
 my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : "\"udp port 53\"";
 my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterByName("initDelay")->getValueAt(0)->getCppExpression() : 0;
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
+my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
@@ -80,6 +81,7 @@ MY_OPERATOR::MY_OPERATOR()
   inputFilter = <%= $inputFilter ? $inputFilter : '""' %>;
   initDelay = <%=$initDelay%>;
   processorAffinity = <%=$processorAffinity%>;
+  jMirrorCheck = <%=$jMirrorCheck%>;
   metricsInterval = <%=$metricsInterval%>;
 
   // initialize operator state variables
@@ -296,7 +298,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
     }
 
     // parse the network headers in the packet
-    headers.parseNetworkHeaders(packetBuffer, packetBufferLength);
+    headers.parseNetworkHeaders(packetBuffer, packetBufferLength, jMirrorCheck);
 
     // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
     if ( ! headers.ipv4Header ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 header found", "DNSPacketFileSource");  continue; }

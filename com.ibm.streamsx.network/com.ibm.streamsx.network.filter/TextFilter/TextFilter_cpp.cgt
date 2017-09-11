@@ -1,0 +1,188 @@
+<%
+## Copyright (C) 2017  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/*
+ */
+
+#include <string>
+#include <arpa/inet.h>
+#include "NetworkResources.h"
+
+#define TEXT_FILTER "TEXT_FILTER"
+
+using namespace SPL;
+using namespace std;
+
+<%
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort0 = $model->getInputPortAt(0);
+my $inputPort1 = $model->getInputPortAt(1);
+
+my $inputPort1CppName = "";
+my $textFilterAttribute = "";
+if(defined $inputPort1) {
+    $inputPort1CppName = $inputPort1->getCppTupleName();
+    $textFilterAttribute = $inputPort1->getAttributeAt(0)->getName();
+}
+
+# get C++ expressions for getting the values of this operator's parameters
+my $inputTextAttrParamCppValue = $model->getParameterByName("inputTextAttr")->getValueAt(0)->getCppExpression();
+
+%>
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR() {
+    textListRSel_ = 0;
+    textListWSel_ = 1;
+    firstInGroup = true;
+
+    textList_[textListRSel_] = "";
+    textList_[textListWSel_] = "";
+
+    textListValid_[textListRSel_] = false;
+    textListValid_[textListWSel_] = false;
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() {
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() {
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() {
+    // This is an asynchronous call
+}
+
+// Tuple processing for mutating ports
+// Because this operator only filters tuples & does not modify them, this 
+// function does not get called.
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() mutating.", TEXT_FILTER);
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() non-mutating.", TEXT_FILTER);
+
+	if(port == 0) {
+    	const IPort0Type& iport$0 = tuple;
+        bool textMatch = false;
+		
+        SPLAPPTRC(L_TRACE, "Process non-mutating, port 0.", TEXT_FILTER);
+		{
+			AutoPortMutex amR(mutex_[textListRSel_], *this);
+			textMatch = lookupText(<%=$inputTextAttrParamCppValue%>);
+			
+        }
+        if(textMatch) {	
+            <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
+            <% CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
+            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, TEXT_FILTER);
+            submit(outTuple, 0);
+        }
+    }
+    <% if(defined $inputPort1) {%>
+        else if(port == 1) {
+            const IPort1Type& iport$1 = tuple;
+
+            SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.", TEXT_FILTER);
+            rstring text = firstInGroup ? 
+                SPL::Functions::String::concat("(", <%=$inputPort1CppName%>.get_<%=$textFilterAttribute%>()) :
+                SPL::Functions::String::concat("|", <%=$inputPort1CppName%>.get_<%=$textFilterAttribute%>());
+
+            AutoPortMutex amW(mutex_[textListWSel_], *this);
+            firstInGroup = false;
+            textListValid_[textListWSel_] = true;
+            textList_[textListWSel_] = SPL::Functions::String::concat(textList_[textListWSel_], text);
+            SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.  textList_ = " << textList_[textListWSel_], TEXT_FILTER);
+            return;
+        }
+    <%}%>
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() punctuation.", TEXT_FILTER);
+
+	if(port == 1) {
+        if(punct==Punctuation::WindowMarker) {
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: window.", TEXT_FILTER);
+            // Take both the R & W mutexes so we can close out the current filter list
+            // and swap lists atomically. This is the very uncommon case
+            // so the locking overhead is not important.
+            AutoPortMutex amR(mutex_[textListRSel_], *this);
+            AutoPortMutex amW(mutex_[textListWSel_], *this);
+
+            if(textListValid_[textListWSel_]) {
+                textList_[textListWSel_] = SPL::Functions::String::concat(textList_[textListWSel_], ")");
+            }
+
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() sending WindowMarker out port 0. textList_ = " << textList_[textListWSel_], TEXT_FILTER);
+            submit(Punctuation::WindowMarker, 0);
+
+            uint32_t tmpList = textListWSel_;
+            textListWSel_ = textListRSel_;
+            textListRSel_ = tmpList;
+
+            textListValid_[textListWSel_] = false;
+            firstInGroup = true;
+            textList_[textListWSel_] = "";
+        } else if(punct==Punctuation::FinalMarker) {
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: final.", TEXT_FILTER);
+        }
+    }
+}
+
+bool inline MY_OPERATOR::lookupText(const SPL::list<rstring> &textList) {
+    bool addrMatch = false;
+
+    SPL::list<SPL::rstring>::const_iterator it;
+    for(it = textList.begin(); it != textList.end(); ++it) {
+        addrMatch = lookupText(*it); 
+        if(addrMatch) return (addrMatch);
+    }
+
+    return addrMatch;
+}
+
+bool inline MY_OPERATOR::lookupText(const rstring &text) {
+    if(!textListValid_[textListRSel_]) {
+        return false;
+    }
+
+    SPL::list<rstring> matches = SPL::Functions::String::regexMatch(text, textList_[textListRSel_]);
+
+    SPLAPPTRC(L_TRACE, "lookupText.  matches = " << matches << ", size = " << matches.size() << ", text = " << text << ", textList = " << textList_[textListRSel_], TEXT_FILTER);
+
+    if(matches.size()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

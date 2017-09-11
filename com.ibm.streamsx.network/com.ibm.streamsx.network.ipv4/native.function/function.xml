@@ -37,8 +37,12 @@
         <function:prototype cppName="convertIPV4AddressNumericToHostname">public rstring convertIPV4AddressNumericToHostname(uint32 ip4AddressNumeric)</function:prototype>
       </function:function>
       <function:function>
-        <function:description sampleUri="">Returns a list of all IP addresses in the network. The *networkCIDR* argument must be in CIDR format (i.e. 0.0.0.0/24), otherwise an empty list will be returned.</function:description>
+        <function:description sampleUri="">Returns a list of all IP addresses in the network as rstring values. The *networkCIDR* argument must be in CIDR format (i.e. 0.0.0.0/24), otherwise an empty list will be returned.</function:description>
         <function:prototype>public list&lt;rstring> getAllAddressesInNetwork(rstring networkCIDR)</function:prototype>
+      </function:function>
+      <function:function>
+        <function:description sampleUri="">Returns a list of all IP addresses in the network as uint32 values. The *networkCIDR* argument must be in CIDR format (i.e. 0.0.0.0/24), otherwise an empty list will be returned.</function:description>
+        <function:prototype>public list&lt;uint32> getAllAddressesInNetworkInt(rstring networkCIDR)</function:prototype>
       </function:function>
       <function:function>
         <function:description>Returns `true` if a valid IPv4 address was provided and the IP address is not a reserved address. Also returns `true` if the IP address is a &quot;6to4 Relay Anycast&quot; address, since these can be globally routed (RFC6890). In all other cases, will return `false`.</function:description>

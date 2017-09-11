@@ -56,7 +56,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_http+https.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_http+https.pcap
+pcapFilename=/mnt/scratch/data.garanti-bank/Ayca_Test_wireshark.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -80,6 +81,7 @@ step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite submission-time parameters:\n${submitParameterList[*]}" )
 echo -e "\ntrace level: $traceLevel"
+echo -e "\nPAM library: $libpamDirectory"
 
 step "building standalone application '$namespace.$composite' ..."
 sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$namespace::$composite', $?" 
