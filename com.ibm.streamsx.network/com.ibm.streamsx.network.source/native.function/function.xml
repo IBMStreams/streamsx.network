@@ -18,6 +18,7 @@ This function always returns zero for the PacketFileSource operator.
             </function:description>
             <function:prototype>public uint64 packetsReceived()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -61,6 +62,7 @@ if the `inputFilter` parameter was specified.
             </function:description>
             <function:prototype>public uint64 packetsProcessed()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -127,6 +129,7 @@ according to the system clock on the machine that captured it.
             </function:description>
             <function:prototype>public uint32 CAPTURE_SECONDS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -162,6 +165,7 @@ if the packet was truncated when it was captured.
             </function:description>
             <function:prototype>public uint32 PACKET_LENGTH()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -172,6 +176,7 @@ Note that the data may have been truncated when the packet was captured.
             </function:description>
             <function:prototype>public blob PACKET_DATA()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -184,6 +189,7 @@ packet was truncated when it was captured.
             </function:description>
             <function:prototype>public uint32 PAYLOAD_LENGTH()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -203,6 +209,7 @@ This function returns the ethernet source address of the current packet.
             </function:description>
             <function:prototype>public list&lt;uint8>[6] ETHER_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -211,6 +218,7 @@ This function returns the ethernet destination address of the current packet.
             </function:description>
             <function:prototype>public list&lt;uint8>[6] ETHER_DST_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -220,6 +228,7 @@ current packet, for example, '2048' for IP version 4, or '34,525' for IP version
             </function:description>
             <function:prototype>public uint16 ETHER_PROTOCOL()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -230,6 +239,7 @@ if the ethernet packet contains an IP packet, or zero otherwise.
             </function:description>
             <function:prototype>public uint8 IP_VERSION()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -240,6 +250,60 @@ or zero if the ethernet packet does not contain an IP packet.
             </function:description>
             <function:prototype>public uint8 IP_PROTOCOL()</function:prototype>
           </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP identifier of the current packet.
+When a packet is fragmented in transit, this identifer is copied into all of the fragments.
+The receiver combines this identifier with the packet's 
+source and destination addresses to gather the fragments, 
+and uses the fragment offset (see the IP_FRAGMENT_OFFSET() function) to reassemble 
+them into original packet.
+
+            </function:description>
+            <function:prototype>public uint32 IP_IDENTIFIER()</function:prototype>
+          </function:function>
+
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "don't fragment" flag of the current packet.
+When a sender sets this flag in a packet, it prohibits routers from fragmenting
+the packet in transit. If the packet's length exceeds the maximum size of a link,
+it will be discarded by the router instead of being fragmented.
+
+            </function:description>
+            <function:prototype>public boolean IP_DONT_FRAGMENT()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "more fragments" flag of the current packet.
+When a router fragments a packet, it sets this flag in all fragments except the last one.
+
+            </function:description>
+            <function:prototype>public boolean IP_MORE_FRAGMENTS()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "fragment offset" field of the current packet, multiplied by eight,
+When a router fragments a packet, it stores the offset from the front of the packet to
+the front of the fragment, measured in eight-byte steps, in each fragment.
+That is, the size of each fragment is always a multiple of eight bytes, 
+and the value stored is the offset in bytes, divided by eight.
+This function returns that value, multiplied by eight, so that it gives the offset from the front
+of the packet to the front of the fragment in bytes.
+
+            </function:description>
+            <function:prototype>public uint16 IP_FRAGMENT_OFFSET()</function:prototype>
+          </function:function>
+
+
           <function:function>
             <function:description>
 
@@ -258,6 +322,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint32 IPV4_DST_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -267,6 +332,7 @@ if it has one, or an empty list otherwise.
             </function:description>
             <function:prototype>public list&lt;uint8>[16] IPV6_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -276,6 +342,7 @@ if it has one, or an empty list otherwise.
             </function:description>
             <function:prototype>public list&lt;uint8>[16] IPV6_DST_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -285,6 +352,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 IP_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -294,6 +362,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 IP_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -304,6 +373,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean UDP_PORT(uint16)</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -313,6 +383,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 UDP_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -322,6 +393,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 UDP_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -331,6 +403,7 @@ or `false` if not.
             </function:description>
             <function:prototype>public boolean TCP_PORT(uint16)</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -340,6 +413,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 TCP_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -349,6 +423,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 TCP_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -358,6 +433,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 TCP_SEQUENCE()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -367,6 +443,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 TCP_ACKNOWLEDGEMENT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -376,6 +453,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_URGENT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -385,6 +463,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_ACK()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -394,6 +473,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_PUSH()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -403,6 +483,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_RESET()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -412,6 +493,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_SYN()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -421,6 +503,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_FIN()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -430,6 +513,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint16 TCP_WINDOW()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -439,6 +523,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 JMIRROR_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -448,6 +533,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 JMIRROR_DST_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -457,6 +543,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint16 JMIRROR_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -466,6 +553,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint16 JMIRROR_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -475,6 +563,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 JMIRROR_INTERCEPT_ID()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -503,6 +592,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 ERSPAN_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 

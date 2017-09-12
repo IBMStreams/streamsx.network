@@ -9,7 +9,7 @@
 #set -o pipefail
 
 namespace=sample
-composite=TestDNSMessageParserFull
+composite=TestDNSPacketFileSourceFragments
 
 here=$( cd ${0%/*} ; pwd )
 projectDirectory=$( cd $here/.. ; pwd )
@@ -43,7 +43,7 @@ compilerOptionsList=(
 --static-link
 --main-composite=$namespace::$composite
 --output-directory=$buildDirectory 
---data-directory=data
+--data-directory=$dataDirectory
 --num-make-threads=$coreCount
 )
 
@@ -51,25 +51,8 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_errors.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_102.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_105.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_107.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_110.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_111.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_112.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_113.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_121.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_xxx.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_yyy.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_RR_NAPTR_NSEC.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_RR_ZERO.pcap
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_EXTRA_DATA.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_twentyfour_hours.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_twelve_hours_overnight.pcap
-pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_twelve_hours_primeshift.pcap
-#pcapFilename=$HOME/data.yorktown/splanet02_firewall_one_hour.pcap
+#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only.pcap
+pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_fragments.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace
@@ -98,7 +81,8 @@ sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, co
 
 step "executing standalone application '$namespace.$composite' ..."
 executable=$buildDirectory/bin/$namespace.$composite
-time $executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
+###???$here/debugthis.sh 
+$executable -t $traceLevel ${submitParameterList[*]} || die "sorry, application '$composite' failed, $?"
 
 exit 0
 

@@ -140,39 +140,112 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
     inline __attribute__((always_inline))
     SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
+  inline __attribute__((always_inline))
 	SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
+
+  inline __attribute__((always_inline))
 	SPL::uint32 CAPTURE_MICROSECONDS() { return captureMicroseconds; }
+
+  inline __attribute__((always_inline))
 	SPL::uint64 CAPTURE_TSC_MICROSECONDS() { return (tscMicroseconds); }
 
+  inline __attribute__((always_inline))
 	SPL::uint32 PACKET_LENGTH() { return packetLen; }
+
+  inline __attribute__((always_inline))
 	SPL::blob PACKET_DATA() { return SPL::blob((const unsigned char*)packetPtr, packetLen); }
+
+  inline __attribute__((always_inline))
 	SPL::uint32 PAYLOAD_LENGTH() { return headers.payloadLength; }
+
+  inline __attribute__((always_inline))
 	SPL::blob PAYLOAD_DATA() { return headers.payload ? SPL::blob((const unsigned char*)headers.payload, headers.payloadLength) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
 	SPL::list<SPL::uint8> ETHER_SRC_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_source, headers.etherHeader->h_source+sizeof(headers.etherHeader->h_source)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
 	SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
 	SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::uint8 IP_VERSION() { return headers.ipv4Header ? headers.ipv4Header->version : ( headers.ipv6Header ? headers.ipv6Header->ip6_vfc>>4 : 0 ); }
+
+  inline __attribute__((always_inline))
 	SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::uint32 IP_IDENTIFIER() { return headers.ipv4Header ? ntohs(headers.ipv4Header->id) : ( headers.ipv6FragmentHeader ? ntohs(headers.ipv6FragmentHeader->ip6f_ident) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_DONT_FRAGMENT() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x4000) : 0; }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_MORE_FRAGMENTS() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x2000) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0x0001) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::uint16 IP_FRAGMENT_OFFSET() { return headers.ipv4Header ? ((ntohs(headers.ipv4Header->frag_off)&0x1FFF)*8) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0xFFF8) : 0 ); }
+
+  inline __attribute__((always_inline))
 	SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::uint32 IPV4_DST_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->daddr) : 0; }
 
+  inline __attribute__((always_inline))
 	SPL::list<SPL::uint8> IPV6_SRC_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_src.s6_addr, headers.ipv6Header->ip6_src.s6_addr+sizeof(headers.ipv6Header->ip6_src.s6_addr)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
 	SPL::list<SPL::uint8> IPV6_DST_ADDRESS() { return headers.ipv6Header ? SPL::list<SPL::uint8>(headers.ipv6Header->ip6_dst.s6_addr, headers.ipv6Header->ip6_dst.s6_addr+sizeof(headers.ipv6Header->ip6_dst.s6_addr)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
 	SPL::uint16 IP_SRC_PORT() { return UDP_SRC_PORT() + TCP_SRC_PORT(); }
+
+  inline __attribute__((always_inline))
 	SPL::uint16 IP_DST_PORT() { return UDP_DST_PORT() + TCP_DST_PORT(); }
+
+  inline __attribute__((always_inline))
 	SPL::uint16 UDP_SRC_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->source) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::uint16 UDP_DST_PORT() { return headers.udpHeader ? ntohs(headers.udpHeader->dest) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::uint16 TCP_SRC_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->source) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::uint16 TCP_DST_PORT() { return headers.tcpHeader ? ntohs(headers.tcpHeader->dest) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::uint32 TCP_SEQUENCE() { return headers.tcpHeader ? ntohl(headers.tcpHeader->seq) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::uint32 TCP_ACKNOWLEDGEMENT() { return headers.tcpHeader ? ntohl(headers.tcpHeader->ack_seq) : 0; }
+
+  inline __attribute__((always_inline))
 	SPL::boolean TCP_FLAGS_URGENT() { return headers.tcpHeader ? headers.tcpHeader->urg : false; }
+
+  inline __attribute__((always_inline))
 	SPL::boolean TCP_FLAGS_ACK() { return headers.tcpHeader ? headers.tcpHeader->ack : false; }
+
+  inline __attribute__((always_inline))
 	SPL::boolean TCP_FLAGS_PUSH() { return headers.tcpHeader ? headers.tcpHeader->psh : false; }
+
+  inline __attribute__((always_inline))
 	SPL::boolean TCP_FLAGS_RESET() { return headers.tcpHeader ? headers.tcpHeader->rst : false; }
+
+  inline __attribute__((always_inline))
 	SPL::boolean TCP_FLAGS_SYN() { return headers.tcpHeader ? headers.tcpHeader->syn : false; }
+
+  inline __attribute__((always_inline))
 	SPL::boolean TCP_FLAGS_FIN() { return headers.tcpHeader ? headers.tcpHeader->fin : false; }
+
+  inline __attribute__((always_inline))
 	SPL::uint16 TCP_WINDOW() { return headers.tcpHeader ? ntohs(headers.tcpHeader->window) : 0; }	
+
+  inline __attribute__((always_inline))
     SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
 }; 
 
