@@ -165,6 +165,20 @@ public:
   inline __attribute__((always_inline))
   SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
 
+
+  inline __attribute__((always_inline))
+    SPL::uint32 IP_IDENTIFIER() { return headers.ipv4Header ? ntohs(headers.ipv4Header->id) : ( headers.ipv6FragmentHeader ? ntohs(headers.ipv6FragmentHeader->ip6f_ident) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_DONT_FRAGMENT() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x4000) : 0; }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_MORE_FRAGMENTS() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x2000) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0x0001) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::uint16 IP_FRAGMENT_OFFSET() { return headers.ipv4Header ? ((ntohs(headers.ipv4Header->frag_off)&0x1FFF)*8) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0xFFF8) : 0 ); }
+
+
   inline __attribute__((always_inline))
   SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
 

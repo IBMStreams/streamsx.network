@@ -1,39 +1,44 @@
 /*
-** Copyright (C) 2011, 2015  International Business Machines Corporation
+** Copyright (C) 2011, 2017  International Business Machines Corporation
 ** All Rights Reserved
 */
 
 namespace sample;
 
+use com.ibm.streamsx.network.mac::*;
 use com.ibm.streamsx.network.ipv4::*;
 use com.ibm.streamsx.network.ipv6::*;
-use com.ibm.streamsx.network.source::*;
-use com.ibm.streamsx.network.parse::*;
-use com.ibm.streamsx.network.datetimeformat::*;
+use com.ibm.streamsx.network.dns::*;
 
-composite TestDNSMessageParserFull {
+composite TestDNSPacketFileSourceFragments {
 
     param
     expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
 
     type
 
-    PacketType =
-        uint64 packetNumber,            // sequence number of packet, as emitted by operator
-        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
-        rstring ipSourceAddress,        // IP source address
-        rstring ipDestinationAddress,   // IP destination address
-        blob dnsMessage;                // the DNS message from a packet, excluding all network headers
-
-    DNSMessageType =
-      rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
-      rstring ipSourceAddress,          // IP source address
-      rstring ipDestinationAddress,     // IP destination address
+    DNSPacketType =
+        uint64 packetsProcessed,            // total number of packets processed by operator, so far
+        uint32 CAPTURE_SECONDS,             // time that packet was captured, in seconds since Unix epoch
+        uint32 CAPTURE_MICROSECONDS,        // time since CAPTURE_SECONDS, in microseconds
+        uint8 IP_VERSION,                   // IP version: 4 for IPv4, 6 for IPv6
+        uint8 IP_PROTOCOL,                  // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+        uint32 IP_IDENTIFIER,               // IP identifier, used mainly for reassembling fragmented packets
+        boolean IP_DONT_FRAGMENT,           // IP "don't fragment" flag (IPv4 only)
+        boolean IP_MORE_FRAGMENTS,          // IP "more fragments" flag, false or unfragmented or last fragment, true for all fragments except last
+        uint16 IP_FRAGMENT_OFFSET,          // IP fragment offset, offset to beginning of fragment in bytes (not eight-byte steps)
+        uint32 IPV4_SRC_ADDRESS,            // IPv4 source address, or zero if not IPv4 packet
+        uint32 IPV4_DST_ADDRESS,            // IPv4 destination address, or zero if not IPv4 packet
+        list<uint8>[16] IPV6_SRC_ADDRESS,   // IPv6 source address, or zero if not IPv6 packet
+        list<uint8>[16] IPV6_DST_ADDRESS,   // IPv6 destination address, or zero if not IPv6 packet
+        uint16 UDP_SRC_PORT,                 // UDP source port, or zero if not UDP packet
+        uint16 UDP_DST_PORT,                 // UDP destination port, or zero if not UDP packet
+        uint32 PACKET_LENGTH,               // original length of packet (not necessarily all captured)
+        uint32 PAYLOAD_LENGTH,              // length of packet payload, following all network headers
       boolean parseError,
       int32 parseErrorCode,
       rstring parseErrorDescription,
       uint32 parseErrorOffset,
-      uint64 messagesProcessed,
       uint16 DNS_IDENTIFIER,
       uint8 DNS_OPCODE,
       boolean DNS_RESPONSE_FLAG,
@@ -80,50 +85,45 @@ composite TestDNSMessageParserFull {
       blob DNS_EXTRA_DATA,
       int32 DNS_INCOMPATIBLE_FLAGS;
 
-    // error output from DNSMessageParser operator
-    DNSErrorType =
-      uint64 packetNumber,              // sequence number of packet, as emitted by operator
-      rstring captureTime,              // time that packet was captured, in seconds since Unix epoch
-      rstring ipSourceAddress,          // binary representation of IP source address
-      rstring ipDestinationAddress,     // IP destination address
-      int32 parseErrorCode,
-      rstring parseErrorDescription,
-      uint32 parseErrorOffset,
-      rstring dnsMessage;
+    FlattenedDNSPacketType = 
+        uint64 packetNumber,            // sequence number of packet
+        boolean parseError,
+        rstring flattenedDNSPacket;
 
     graph
 
-    stream<PacketType> PacketStream as Out = PacketFileSource() {
+    ( stream<DNSPacketType> DNSPacketStream ; 
+      stream<FlattenedDNSPacketType> FlattenedDNSPacketStream ) = DNSPacketFileSource() {
+        logic state: {
+            map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
+            map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; }
         param
             pcapFilename: $pcapFilename;
-            inputFilter: "udp port 53";
             metricsInterval: 0.0;
-        output Out:
-            packetNumber = packetsProcessed(),
-            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
-            ipSourceAddress = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),
-            ipDestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
-            dnsMessage = PAYLOAD_DATA();
-    }
-    //???????????() as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSMessageParserFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
-
-    ( stream<DNSMessageType> DNSMessageStream as OutMessage ;
-      stream<DNSErrorType> DNSErrorStream as OutError ) = DNSMessageParser(PacketStream) {
-      logic state: {
-        map<uint16,rstring> dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
-        map<uint8,rstring> dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" };
-      }
-      param
-          messageAttribute: dnsMessage;
-          //???outputFilters: true, parseError();
-          outputFilters: DNS_QUESTION_COUNT()!=1uh || parseError(), parseError(); // ........ temporary ........
-      output OutMessage:
-          captureTime = formatEpochDateTime(captureTime),
+            outputFilters: UDP_PORT(53uh) && IP_FRAGMENT_OFFSET()==0uh, true;
+        output 
+        DNSPacketStream:
+            packetsProcessed = packetsProcessed(),
+            CAPTURE_SECONDS = CAPTURE_SECONDS(),
+            CAPTURE_MICROSECONDS = CAPTURE_MICROSECONDS(),
+            IP_VERSION = IP_VERSION(),
+            IP_PROTOCOL = IP_PROTOCOL(),
+            IP_IDENTIFIER = IP_IDENTIFIER(),
+            IP_DONT_FRAGMENT = IP_DONT_FRAGMENT(), 
+            IP_MORE_FRAGMENTS = IP_MORE_FRAGMENTS(),
+            IP_FRAGMENT_OFFSET = IP_FRAGMENT_OFFSET(),
+            IPV4_SRC_ADDRESS = IPV4_SRC_ADDRESS(),
+            IPV4_DST_ADDRESS = IPV4_DST_ADDRESS(),
+            IPV6_SRC_ADDRESS = IPV6_SRC_ADDRESS(),
+            IPV6_DST_ADDRESS = IPV6_DST_ADDRESS(),
+            UDP_SRC_PORT = UDP_SRC_PORT(),
+            UDP_DST_PORT = UDP_DST_PORT(),
+            PACKET_LENGTH = PACKET_LENGTH(),
+            PAYLOAD_LENGTH = PAYLOAD_LENGTH(),
           parseError = parseError(),
           parseErrorCode = parseErrorCode(),
           parseErrorDescription = parseErrorDescription(),
           parseErrorOffset = parseErrorOffset(),
-          messagesProcessed = messagesProcessed(),
           DNS_IDENTIFIER = DNS_IDENTIFIER(),
           DNS_OPCODE = DNS_OPCODE(),
           DNS_RESPONSE_FLAG = DNS_RESPONSE_FLAG(),
@@ -169,16 +169,17 @@ composite TestDNSMessageParserFull {
           DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
           DNS_EXTRA_DATA = DNS_EXTRA_DATA(),
           DNS_INCOMPATIBLE_FLAGS = DNS_INCOMPATIBLE_FLAGS();
-
-      OutError:
-          captureTime = formatEpochTime(captureTime),
-          parseErrorCode = parseErrorCode(),
-          parseErrorDescription = parseErrorDescription(),
-          parseErrorOffset = parseErrorOffset(),
-          dnsMessage = substring((rstring)dnsMessage, 0, 2*(int32)parseErrorOffset()) + "_" + substring((rstring)dnsMessage, 2*(int32)parseErrorOffset(), 2*size(dnsMessage)-2*(int32)parseErrorOffset());
+    FlattenedDNSPacketStream:
+          packetNumber = packetsProcessed(),
+          parseError = parseError(),
+          flattenedDNSPacket = DNS_ALL_FIELDS("\n", " ", ", "); 
     }
-    () as DNSMessageSink = FileSink(DNSMessageStream) { param file: "debug.TestDNSMessageParserFull.DNSMessageStream.out"; format: txt; hasDelayField: true; flush: 1u; }
-    () as DNSErrorSink = FileSink(DNSErrorStream) { param file: "debug.TestDNSMessageParserFull.DNSErrorStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+    () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFragments.DNSPacketStream.out"; format: txt; hasDelayField: false; }
 
+
+    stream<rstring text> _FlattenedDNSPacketStream as Out = Functor(FlattenedDNSPacketStream) {
+      //param filter: parseError;
+      output Out: text = "packet=" + (rstring)packetNumber + " " + flattenedDNSPacket + "\n"; }
+    () as FlattenedDNSPacketSink = FileSink(_FlattenedDNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFragments.FlattenedDNSPacketStream.out"; format: line; }
 
 }
