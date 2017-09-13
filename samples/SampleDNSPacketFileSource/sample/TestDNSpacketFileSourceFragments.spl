@@ -100,7 +100,6 @@ composite TestDNSPacketFileSourceFragments {
         param
             pcapFilename: $pcapFilename;
             metricsInterval: 0.0;
-            outputFilters: UDP_PORT(53uh) && IP_FRAGMENT_OFFSET()==0uh, true;
         output 
         DNSPacketStream:
             packetsProcessed = packetsProcessed(),

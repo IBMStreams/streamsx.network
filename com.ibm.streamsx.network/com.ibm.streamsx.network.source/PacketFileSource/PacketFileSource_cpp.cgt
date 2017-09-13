@@ -98,7 +98,7 @@ MY_OPERATOR::MY_OPERATOR()
 
 #if defined(lib_pcap_pcap_h)
   // log the 'libpcap' version that will be used
-  SPLAPPTRC(L_INFO, "using " << pcap_lib_version(), "PacketFileSource");
+  SPLAPPTRC(L_INFO, "PacketFileSource using " << pcap_lib_version(), "PacketFileSource");
 #endif
 
   SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketFileSource");
