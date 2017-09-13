@@ -53,14 +53,15 @@ MY_OPERATOR::MY_OPERATOR()
   SPLAPPTRC(L_INFO, "PacketFileSink using " << pcap_lib_version(), "PacketFileSink");
 #endif
 
+  // reset tuple counter
+  tupleCounter = 0;
+
+  // open PCAP file
   pcapFilename = <%=$pcapFilename%>;
   pcapDescriptor = pcap_open_dead_with_tstamp_precision(DLT_EN10MB, 65535, PCAP_TSTAMP_PRECISION_MICRO);
   pcapDumper = pcap_dump_open(pcapDescriptor, pcapFilename.c_str());
   if (!pcapDumper) THROW (SPLRuntimeOperator, "error opening PCAP file '" << pcapFilename << "', " << pcap_geterr(pcapDescriptor));
-
   SPLAPPTRC(L_INFO, "opened PCAP file '" << pcapFilename << "'", "PacketFileSink");
-
-  tupleCounter = 0;
 
   SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> constructor ...", "PacketFileSink");
 }
@@ -70,9 +71,9 @@ MY_OPERATOR::~MY_OPERATOR()
 {
   SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "PacketFileSink");
 
+  // close PCAP file
   pcap_close(pcapDescriptor);
   pcap_dump_close(pcapDumper);
-
   SPLAPPTRC(L_INFO, "closed PCAP file '" << pcapFilename << "'", "PacketFileSink");
 
   SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "PacketFileSink");
@@ -107,6 +108,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
   SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> process() ...", "PacketFileSink");
 
+  // count the tuple
   tupleCounter++;
 
   // point at the input tuple
