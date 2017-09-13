@@ -105,7 +105,7 @@ This operator has been tested with these versions of `libpcap`:
 
 # Threads 
 
-The PacketFileOperator contains a separate thread for reporting its metrics to
+The PacketFileSource operator contains a separate thread for reporting its metrics to
 the Streams runtime if the `metricsInterval` parameter is greater than zero.
 
 When the PacketFileSource operator is configured without an input port, it
@@ -224,6 +224,7 @@ that pass the filter.
           <kind>Counter</kind>
         </metric>
       </metrics>
+
       <libraryDependencies>
         <library>
           <cmn:description> </cmn:description>

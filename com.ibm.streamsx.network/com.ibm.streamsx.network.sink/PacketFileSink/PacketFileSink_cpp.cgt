@@ -1,0 +1,170 @@
+<%
+
+# Copyright (C) 2017  International Business Machines Corporation
+# All Rights Reserved
+
+# module for i18n messages
+require NetworkResources;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort = $model->getInputPortAt(0);
+
+# get C++ expressions for getting the values of this operator's parameters
+my $pcapFilename = $model->getParameterByName("pcapFilename")->getValueAt(0)->getCppExpression();
+my $packetAttribute = $model->getParameterByName("packetAttribute")->getValueAt(0)->getCppExpression();
+my $timestampAttribute = $model->getParameterByName("timestampAttribute")->getValueAt(0)->getCppExpression();
+my $timestampAttributeName = $model->getParameterByName("timestampAttribute")->getValueAt(0)->getSPLExpression();
+my $timestampAttributeType = $model->getParameterByName("timestampAttribute")->getValueAt(0)->getSPLType();
+my $timestampMicrosecondsAttribute = $model->getParameterByName("timestampMicrosecondsAttribute") ? $model->getParameterByName("timestampMicrosecondsAttribute")->getValueAt(0)->getCppExpression() : undef;
+my $timestampMicrosecondsAttributeName = $model->getParameterByName("timestampMicrosecondsAttribute") ? $model->getParameterByName("timestampMicrosecondsAttribute")->getValueAt(0)->getSPLExpression() : undef;
+my $timestampMicrosecondsAttributeType = $model->getParameterByName("timestampMicrosecondsAttribute") ? $model->getParameterByName("timestampMicrosecondsAttribute")->getValueAt(0)->getSPLType() : undef;
+
+# basic safety checks
+
+SPL::CodeGen::exit("sorry, type of 'timestampAttribute' attribute must be 'timestamp', 'float64', 'int64', 'uint64', or 'uint32'\n") unless ( $timestampAttributeType ~~ [ 'timestamp', 'float64', 'int64', 'uint64', 'uint32' ] );
+if ($timestampMicrosecondsAttribute) {
+  SPL::CodeGen::exit("sorry, 'timestampMicrosecondsAttribute' allowed only when type of 'timestampAttribute' attribute is one of 'int64', 'uint64', or 'uint32'\n") unless ( $timestampAttributeType ~~ [ 'int64', 'uint64', 'uint32' ] );
+  SPL::CodeGen::exit("sorry, type of 'timestampMicrosecondsAttribute' attribute must be 'uint64' or 'uint32'\n") unless ( $timestampMicrosecondsAttributeType ~~ [ 'uint64', 'uint32' ] );
+ }
+
+%>
+
+#include <sys/types.h>
+#include <sys/time.h>
+#include <math.h>
+#include <errno.h>
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR()
+{
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> constructor ...", "PacketFileSink");
+
+#if defined(lib_pcap_pcap_h)
+  // log the 'libpcap' version that will be used
+  SPLAPPTRC(L_INFO, "PacketFileSink using " << pcap_lib_version(), "PacketFileSink");
+#endif
+
+  pcapFilename = <%=$pcapFilename%>;
+  pcapDescriptor = pcap_open_dead_with_tstamp_precision(DLT_EN10MB, 65535, PCAP_TSTAMP_PRECISION_MICRO);
+  pcapDumper = pcap_dump_open(pcapDescriptor, pcapFilename.c_str());
+  if (!pcapDumper) THROW (SPLRuntimeOperator, "error opening PCAP file '" << pcapFilename << "', " << pcap_geterr(pcapDescriptor));
+
+  SPLAPPTRC(L_INFO, "opened PCAP file '" << pcapFilename << "'", "PacketFileSink");
+
+  tupleCounter = 0;
+
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> constructor ...", "PacketFileSink");
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() 
+{
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> destructor ...", "PacketFileSink");
+
+  pcap_close(pcapDescriptor);
+  pcap_dump_close(pcapDumper);
+
+  SPLAPPTRC(L_INFO, "closed PCAP file '" << pcapFilename << "'", "PacketFileSink");
+
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> destructor ...", "PacketFileSink");
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() 
+{
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> allPortsReady() ...", "PacketFileSink");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> allPortsReady() ...", "PacketFileSink");
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() 
+{
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> prepareToShutdown() ...", "PacketFileSink");
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> prepareToShutdown() ...", "PacketFileSink");
+}
+
+// Processing for source and threaded operators   
+void MY_OPERATOR::process(uint32_t idx)
+{
+}
+
+// Tuple processing for mutating ports 
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port)
+{
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
+{
+  SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> process() ...", "PacketFileSink");
+
+  tupleCounter++;
+
+  // point at the input tuple
+  const IPort0Type& iport$0 = tuple;
+
+  // get address and length of packet data from input tuple
+  const u_char* packetData = (const u_char*)<%=$packetAttribute%>.getData();
+  const int packetLength = <%=$packetAttribute%>.getSize();
+
+  // create a timestamp or the PCAP header for the packet
+  struct timeval ts;
+<% if ($timestampAttributeType eq "timestamp")  { %>
+  // get timestamp from 'timestamp <%=$timestampAttributeName%>' attribute
+  ts.tv_sec = (time_t)(<%=$timestampAttribute%>.getSeconds());
+  ts.tv_usec = (useconds_t)(<%=$timestampAttribute%>.getNanoseconds()/1000);
+<% } elsif ($timestampAttributeType eq "float64")  { %>
+  // get timestamp from 'float64 <%=$timestampAttributeName%>' attribute
+  ts.tv_sec = (time_t)<%=$timestampAttribute%>;
+  ts.tv_usec = (useconds_t)( remainder(<%=$timestampAttribute%>, 1.0) * 1000000.0 );
+<% } elsif ($timestampAttributeType eq "int64")  { %>
+  // get seconds portion of timestamp from 'int64 <%=$timestampAttributeName%>' attribute
+  ts.tv_sec = (time_t)<%=$timestampAttribute%>;
+  ts.tv_usec = 0;
+<% } elsif ($timestampAttributeType eq "uint64")  { %>
+  // get seconds portion of timestamp from 'uint64 <%=$timestampAttributeName%>' attribute
+  ts.tv_sec = (time_t)<%=$timestampAttribute%>;
+  ts.tv_usec = 0;
+<% } elsif ($timestampAttributeType eq "uint32")  { %>
+  // get seconds portion of timestamp from 'uint32 <%=$timestampAttributeName%>' attribute
+  ts.tv_sec = (time_t)<%=$timestampAttribute%>;
+  ts.tv_usec = 0;
+<% } else { %>
+  // this should never happen
+  ts.tv_sec = 0;
+  ts.tv_usec = 0;
+<% } %>
+
+<% if ($timestampMicrosecondsAttribute)  { %>
+  // get microseconds portion of timestamp from '<%=$timestampMicrosecondsAttributeName%>' attribute
+  ts.tv_usec =(useconds_t)<%=$timestampMicrosecondsAttribute%>;
+<% } %>
+
+  // create a PCAP header for the packet
+  struct pcap_pkthdr pcapHeader;
+  pcapHeader.ts = ts;
+  pcapHeader.caplen = packetLength;
+  pcapHeader.len = packetLength;
+
+  // write the packet into the PCAP file
+  pcap_dump((u_char *)pcapDumper, &pcapHeader, packetData);
+
+  SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> process() ...", "PacketFileSink");
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port)
+{
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

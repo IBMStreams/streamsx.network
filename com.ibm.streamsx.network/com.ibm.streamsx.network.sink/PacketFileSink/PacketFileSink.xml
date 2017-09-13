@@ -1,0 +1,156 @@
+<?xml version="1.0" ?>
+<operatorModel
+  xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" 
+  xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+
+      <description>
+
+PacketFileSink is an operator for the IBM InfoSphere Streams product that
+writes network packets into 'packet capture (PCAP)' files. 
+Each input tuple must contain a complete network packet, including all network headers,
+in an attribute of type `blob`, such as produced by the PacketXxxxSource operators in this toolkit.
+
+# Dependencies
+
+The PacketFileSink operator depends upon the Linux 'packet capture library
+(libpcap)'.  The library must be installed on the machine where this operator
+executes. For instructions on installing this library, see the PacketFileSource operator in this toolkit.
+
+# Threads 
+
+The PacketFileSink operator runs on the thread of the upstream operator that 
+sends tuples to it. The 'libpcap' library buffers its file output, but disk writes
+are synchronous and may temporarily block the upstream operator.
+
+# Exceptions 
+
+The PacketFileSource operator will throw an exception and terminate in these situations:
+
+* The `pcapFilename` parameter does not specify a writable pathname.
+
+      </description>
+
+      <libraryDependencies>
+        <library>
+          <cmn:description> </cmn:description>
+          <cmn:managedLibrary>
+            <cmn:command>../../impl/bin/libpcapPath.pl</cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description> </cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_filesystem</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:lib>streams_boost_system</cmn:lib>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+    </context>  
+
+    <parameters>
+      <allowAny>false</allowAny>
+
+      <parameter>
+        <name>pcapFilename</name>
+        <description>
+
+This parameter takes an expression of type `rstring` that specifies the pathname
+of an output PCAP file for the operator to write. 
+
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>packetAttribute</name>
+        <description>
+
+This required parameter specifies an input attribute of type `blob` that
+contains a packet to be written into the output file specified by the `pcapFilenae` attribute.
+The attribute must contain a complete network packet, including all network headers.
+For example, the PacketXxxxSource operators in this toolkit can create tuples with such attributes.
+
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <type>blob</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>timestampAttribute</name>
+        <description>
+
+This required parameter specifies an input attribute that
+contains the timestamp of the packet in the `packetAttribute` attribute.
+It may be of type `float`, `int64`, `uint64`, `uint32`, or `timestamp`.
+If this attribute is of type `int64`, `uint64` or `uint32`, 
+then the optional parameter `timestampMicrosecondsAttribute` may also be specified.
+
+        </description>
+        <optional>false</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>timestampMicrosecondsAttribute</name>
+        <description>
+
+This optional parameter specifies an input attribute that
+contains the microseconds portion of the timestamp of the packet in the `packetAttribute` attribute,
+when that attribute is of type `int64`, `uint64` or `uint32`.
+This attribute may be of type `uint64` or `uint32`.
+
+If the type of the `timestampAttribute` attribute is `int64`, `uint64` or `uint32`
+and the `timestampMicrosecondsAttribute` attribute is not specified, 
+the microseconds portion of the timestamp of the packet will be set to zero.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <cardinality>1</cardinality>
+      </parameter>
+
+    </parameters>
+
+    <inputPorts>
+      <inputPortSet>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>      
+    </inputPorts>
+
+    <outputPorts>
+    </outputPorts>
+
+  </cppOperatorModel>
+
+</operatorModel>

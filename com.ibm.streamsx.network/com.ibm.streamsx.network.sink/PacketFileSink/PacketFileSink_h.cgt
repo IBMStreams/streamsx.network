@@ -1,0 +1,62 @@
+<%
+
+## Copyright (C) 2017  International Business Machines Corporation
+## All Rights Reserved
+
+%>
+
+//#include <iostream>
+//#include <iomanip>
+//#include <limits>
+//#include <locale>
+//#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdint.h>
+//#include <sys/time.h>
+//#include <errno.h>
+#include <string.h>
+//#include <sched.h>
+#include <pcap.h>
+#include <pcap-bpf.h>
+
+//#include <streams_boost/filesystem.hpp>
+//#include <streams_boost/lexical_cast.hpp>
+
+#include <SPL/Runtime/Common/Metric.h>
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+public:
+
+  // ----------- standard operator methods ----------
+
+  MY_OPERATOR();
+  virtual ~MY_OPERATOR(); 
+  void allPortsReady(); 
+  void prepareToShutdown(); 
+  void process(uint32_t idx);
+  void process(Tuple & tuple, uint32_t port);
+  void process(Tuple const & tuple, uint32_t port);
+  void process(Punctuation const & punct, uint32_t port);
+
+  // ----------- operator parameters (constant after constructor executes) ----------
+
+private:
+
+  std::string pcapFilename;
+  int64_t tupleCounter;
+
+  // ----------- libpcap-specific variables ----------
+
+  pcap_t* pcapDescriptor;
+  pcap_dumper_t *pcapDumper;
+  struct pcap_pkthdr* pcapHeader;
+  const u_char* pcapBuffer;
+
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

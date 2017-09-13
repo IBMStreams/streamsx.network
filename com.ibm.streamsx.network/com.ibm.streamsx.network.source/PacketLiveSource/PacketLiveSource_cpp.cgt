@@ -99,7 +99,7 @@ MY_OPERATOR::MY_OPERATOR()
 #if defined(lib_pcap_pcap_h)
 
   // log the 'libpcap' version that will be used
-  SPLAPPTRC(L_INFO, "using " << pcap_lib_version(), "PacketLiveSource");
+  SPLAPPTRC(L_INFO, "PacketLiveSource using " << pcap_lib_version(), "PacketLiveSource");
 
   // open the network interface with 'libpcap' version 1.0 or later (for RHEL 6)
   SPLAPPTRC(L_INFO, "opening network interface '" << networkInterface << "'", "PacketLiveSource");
