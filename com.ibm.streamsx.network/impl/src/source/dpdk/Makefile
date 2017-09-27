@@ -1,25 +1,13 @@
-#
-# Copyright (C) 2015, International Business Machines Corporation
-# All Rights Reserved
-#
-SRCS-y := streams_source.c init.c rxtx.c 
+.PHONY: streams_source port-tool all clean
 
-# Can run 'make remote-build' to build on a remote machine - see else statement
-ifeq ($(RTE_SDK),)
-$(error "Please define RTE_SDK environment variable")
-endif
+all: streams_source port-tool
 
-# Default target, can be overriden by command line or environment
-RTE_TARGET ?= x86_64-native-linuxapp-gcc
+streams_source:
+	make -C streams_source O=../build
 
-include $(RTE_SDK)/mk/rte.vars.mk
+port-tool:
+	make -C port-tool O=../build
 
-# this works w/standalone LIB = libstreams_source.a
-LIB = libstreams_source.a
-
-CFLAGS += -O3 -fPIC
-
-LDFLAGS += --whole-archive
-
-include $(RTE_SDK)/mk/rte.lib.mk
+clean:
+	rm -rf build/
 

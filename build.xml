@@ -48,7 +48,7 @@
 		</exec>
 	</target>
 
-	<target name="clean" description="clean up">
+	<target name="clean" description="clean up" depends="dpdkglue-clean">
 		<ant dir="${toolkit}" target="clean" />
 	</target>
 
@@ -94,6 +94,13 @@
 	<target name="dpdkglue" if="exists.dpdkEnvironmentVariable">
 		<echo message="DPDK glue library: ${basedir}/com.ibm.streamsx.network/impl/src/source/dpdk" />
 		<exec executable="make" dir="${basedir}/com.ibm.streamsx.network/impl/src/source/dpdk">
+		</exec>
+	</target>
+
+	<target name="dpdkglue-clean" if="exists.dpdkEnvironmentVariable">
+		<echo message="Cleaning DPDK glue library: ${basedir}/com.ibm.streamsx.network/impl/src/source/dpdk" />
+		<exec executable="make" dir="${basedir}/com.ibm.streamsx.network/impl/src/source/dpdk">
+                  <arg line="clean" />
 		</exec>
 	</target>
 

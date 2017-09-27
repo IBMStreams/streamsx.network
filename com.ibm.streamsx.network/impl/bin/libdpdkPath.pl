@@ -41,7 +41,7 @@ help(), exit 1 if scalar(@ARGV)!=1 || $ARGV[0] =~ m/^(\?|-h|-help|--help)$/;
 
 # check for required directory and files
 
-my $directory = $ENV{$env} . "/build/lib";
+my $directory = $ENV{$env} . "/$ENV{RTE_TARGET}/lib";
 my $error = "";
 if ( ! exists $ENV{$env} ) { $error = "sorry, enviroment variable '$env' not found by PacketDPDKSource operator\n"; }
 if ( ! $error && ! -d $directory ) { $error = "sorry, enviroment variable '$env' set, but directory '$directory' not found by PacketDPDKSource operator\n"; }
