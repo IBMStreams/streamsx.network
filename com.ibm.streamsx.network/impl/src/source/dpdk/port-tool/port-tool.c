@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
                eth_addr.addr_bytes[3],
                eth_addr.addr_bytes[4],
                eth_addr.addr_bytes[5]);
-        printf("port %d pci-bus-addr: %04x:%02x:%02x:%x\n",
+        printf("port %d pci-bus-addr: %04x:%02x:%02x.%x\n",
                port_id,
                dev_info.pci_dev->addr.domain,
                dev_info.pci_dev->addr.bus,
