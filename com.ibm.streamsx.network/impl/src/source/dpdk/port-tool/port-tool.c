@@ -4,10 +4,13 @@
  *********************************************************************/
 
 #include <stdio.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <net/if.h>
 #include <string.h>
+#include <error.h>
 
 #include <rte_byteorder.h>
 #include <rte_cycles.h>
@@ -26,13 +29,24 @@
 
 
 int main(int argc, char *argv[]) {
+    // Disable core dumps for this tool.  rte_eal_init() core dumps in places that are not what I want.
+    struct rlimit rlim;
+    int rc = getrlimit(RLIMIT_CORE, &rlim);
+    if(rc < 0) {
+        error(255, errno, "getrlimit(RLIMIT_CORE) failed");
+    } else {
+        rlim.rlim_cur = 0;
+        rc = setrlimit(RLIMIT_CORE, &rlim);
+        if(rc < 0) {
+            error(255, errno, "setrlimit(RLIMIT_CORE) failed");
+        }
+    }
+
     // initialize DPDK. No args are really needed, but if we pass any into this tool, just pass them along to DPDK.
     argv[0] = "dpdk";
-    int rc = rte_eal_init(argc, argv);
+    rc = rte_eal_init(argc, argv);
     if (rc < 0) {
-      printf("rte_eal_init() failed, rte_errno=%d, %s\n", rte_errno, rte_strerror(rte_errno));
-      rte_panic("Cannot init EAL, rte_eal_init() failed\n");
-      return(-1);
+        error(255, 0, "rte_eal_init() failed, rte_errno=%d, %s", rte_errno, rte_strerror(rte_errno));
     }
 
 
