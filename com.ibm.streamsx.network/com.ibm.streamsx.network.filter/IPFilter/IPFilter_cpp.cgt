@@ -42,7 +42,7 @@ if(defined $inputPort1) {
 
 # get C++ expressions for getting the values of this operator's parameters
 my $inputIPAttrParamCppValue = $model->getParameterByName("inputIPAttr")->getValueAt(0)->getCppExpression();
-
+my $inputIPAttrParam2 = $model->getParameterByName("inputIPAttr2");
 %>
 
 <%SPL::CodeGen::implementationPrologue($model);%>
@@ -87,21 +87,26 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() non-mutating.", IP_FILTER);
 
-	if(port == 0) {
-    	const IPort0Type& iport$0 = tuple;
+    if(port == 0) {
+        const IPort0Type& iport$0 = tuple;
         bool ipAddrMatch = false;
-		
+
         SPLAPPTRC(L_TRACE, "Process non-mutating, port 0.", IP_FILTER);
-		{
-			AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
-			ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
-			
+
+        {
+            AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
+            ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
+<% if(defined $inputIPAttrParam2) { %>
+            ipAddrMatch = ipAddrMatch || lookupIPv4(<%=$inputIPAttrParam2->getValueAt(0)->getCppExpression()%>);
+<% } %>
         }
-        if(ipAddrMatch) {	
-            <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
-            <% CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
-            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, IP_FILTER);
-            submit(outTuple, 0);
+
+        if(ipAddrMatch) {
+//            <% # CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
+//            <% # CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
+//            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, IP_FILTER);
+//            submit(outTuple, 0);
+            submit(iport$0, 0);
         }
     }
     <% if(defined $inputPort1) {%>
@@ -123,7 +128,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
             }
             return;
         }
-	<%}%>
+    <%}%>
 }
 
 // Punctuation processing

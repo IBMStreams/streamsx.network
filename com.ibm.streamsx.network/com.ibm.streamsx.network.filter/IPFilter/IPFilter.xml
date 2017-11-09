@@ -30,6 +30,15 @@ The supported data types for this attribute are `uint32` and `list&lt;uint32>`.<
         <expressionMode>Expression</expressionMode>
         <cardinality>1</cardinality>
       </parameter>
+      <parameter>
+        <name>inputIPAttr2</name>
+        <description>Specifies an additional input attribute containing an additional IPv4 address (or IPv4 addresses) that the filter will be applied against.
+The supported data types for this attribute are `uint32` and `list&lt;uint32>`.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <cardinality>1</cardinality>
+      </parameter>
    </parameters>
     <inputPorts>
       <inputPortSet>
@@ -58,9 +67,9 @@ This control port can be used to dynamically update the list of addresses being 
     <outputPorts>
       <outputPortSet>
         <description>Submits a tuple for each input tuple received on input port 0 if one or more of the attributes defined in the inputIPAttr paramater match an IPv4 address that has been input on the control port.</description>
-        <expressionMode>Expression</expressionMode>
+        <expressionMode>Nonexistent</expressionMode>
         <autoAssignment>true</autoAssignment>
-        <completeAssignment>false</completeAssignment>
+        <completeAssignment>true</completeAssignment>
         <rewriteAllowed>true</rewriteAllowed>
         <windowPunctuationOutputMode>Preserving</windowPunctuationOutputMode>
         <windowPunctuationInputPort>0</windowPunctuationInputPort>

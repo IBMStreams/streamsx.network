@@ -87,21 +87,23 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() non-mutating.", TEXT_FILTER);
 
-	if(port == 0) {
-    	const IPort0Type& iport$0 = tuple;
+    if(port == 0) {
+        const IPort0Type& iport$0 = tuple;
         bool textMatch = false;
-		
+
         SPLAPPTRC(L_TRACE, "Process non-mutating, port 0.", TEXT_FILTER);
-		{
-			AutoPortMutex amR(mutex_[textListRSel_], *this);
-			textMatch = lookupText(<%=$inputTextAttrParamCppValue%>);
-			
+
+        {
+            AutoPortMutex amR(mutex_[textListRSel_], *this);
+            textMatch = lookupText(<%=$inputTextAttrParamCppValue%>);
         }
-        if(textMatch) {	
-            <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
-            <% CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
-            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, TEXT_FILTER);
-            submit(outTuple, 0);
+
+        if(textMatch) {
+//            <% # CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
+//            <% # CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
+//            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, TEXT_FILTER);
+//            submit(outTuple, 0);
+            submit(iport$0, 0);
         }
     }
     <% if(defined $inputPort1) {%>
