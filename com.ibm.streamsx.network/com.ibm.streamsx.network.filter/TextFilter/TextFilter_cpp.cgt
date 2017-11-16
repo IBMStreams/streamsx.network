@@ -55,10 +55,26 @@ MY_OPERATOR::MY_OPERATOR() {
 
     textListValid_[textListRSel_] = false;
     textListValid_[textListWSel_] = false;
+
+    memset(&compiledRe_[textListRSel_], 0, sizeof(regex_t));
+    memset(&compiledRe_[textListWSel_], 0, sizeof(regex_t));
+
+    regexCompiled_[textListRSel_] = false;
+    regexCompiled_[textListWSel_] = false;
 }
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR() {
+    // Free up any compiled REs
+    if(regexCompiled_[textListRSel_]) {
+        regfree(&compiledRe_[textListRSel_]);
+        regexCompiled_[textListRSel_] = false;
+    }
+
+    if(regexCompiled_[textListWSel_]) {
+        regfree(&compiledRe_[textListWSel_]);
+        regexCompiled_[textListWSel_] = false;
+    }
 }
 
 // Notify port readiness
@@ -110,7 +126,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
         else if(port == 1) {
             const IPort1Type& iport$1 = tuple;
 
-            SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.", TEXT_FILTER);
+            SPLAPPTRC(L_WARN, "Process non-mutating, port 1.", TEXT_FILTER);
             rstring text = firstInGroup ? 
                 SPL::Functions::String::concat("(", <%=$inputPort1CppName%>.get_<%=$textFilterAttribute%>()) :
                 SPL::Functions::String::concat("|", <%=$inputPort1CppName%>.get_<%=$textFilterAttribute%>());
@@ -118,8 +134,9 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
             AutoPortMutex amW(mutex_[textListWSel_], *this);
             firstInGroup = false;
             textListValid_[textListWSel_] = true;
+            regexCompiled_[textListWSel_] = false;
             textList_[textListWSel_] = SPL::Functions::String::concat(textList_[textListWSel_], text);
-            SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.  textList_ = " << textList_[textListWSel_], TEXT_FILTER);
+            SPLAPPTRC(L_WARN, "Process non-mutating, port 1.  textList_ = " << textList_[textListWSel_], TEXT_FILTER);
             return;
         }
     <%}%>
@@ -131,29 +148,67 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
 
 	if(port == 1) {
         if(punct==Punctuation::WindowMarker) {
-            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: window.", TEXT_FILTER);
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: window.", TEXT_FILTER);
+
             // Take both the R & W mutexes so we can close out the current filter list
             // and swap lists atomically. This is the very uncommon case
             // so the locking overhead is not important.
-            AutoPortMutex amR(mutex_[textListRSel_], *this);
+            // However, we first grab just the writer's mutex while compiling,
+            // to avoid slowing down tuple processing.
             AutoPortMutex amW(mutex_[textListWSel_], *this);
 
-            if(textListValid_[textListWSel_]) {
-                textList_[textListWSel_] = SPL::Functions::String::concat(textList_[textListWSel_], ")");
+            // Free up this regex's pattern space, if it was previously compiled
+            if(regexCompiled_[textListWSel_]) {
+                regfree(&compiledRe_[textListWSel_]);
+                regexCompiled_[textListWSel_] = false;
+                memset(&compiledRe_[textListWSel_], 0, sizeof(regex_t));
             }
 
-            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() sending WindowMarker out port 0. textList_ = " << textList_[textListWSel_], TEXT_FILTER);
+            // Only need to actually compile a new regex if there is actually one for us to use.
+            if(textListValid_[textListWSel_]) {
+                textList_[textListWSel_] = SPL::Functions::String::concat(textList_[textListWSel_], ")");
+
+                // Actually compile the new regex
+                int rc = regcomp(&compiledRe_[textListWSel_], textList_[textListWSel_].c_str(), REG_EXTENDED | REG_NOSUB);
+                if(rc) {
+                    // RE compilation error!  Must be a bad regex.
+                    char errbuf[1024];
+                    memset(errbuf, 0, 1024);
+                    regerror(rc, &compiledRe_[textListWSel_], errbuf, 1024);
+                    SPLAPPTRC(L_ERROR, "<%=$myOperatorKind%> Regular Expression /" << textList_[textListWSel_] << "/ failed to compile properly.  Until fixed, this group won't match anything.  regerror reports: " << errbuf, TEXT_FILTER);
+                    regfree(&compiledRe_[textListWSel_]);
+                    regexCompiled_[textListWSel_] = false;
+                    memset(&compiledRe_[textListWSel_], 0, sizeof(regex_t));
+                } else {
+                    // RE compiled fine.  We can proceed.
+                    regexCompiled_[textListWSel_] = true;
+                    SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() Regex compiled and ready. textList_ = " << textList_[textListWSel_], TEXT_FILTER);
+                }
+            } else {
+                // No regex.  That's fine, just leave textListValid and regexCompiled false, so lookupText() short circuits, later.
+                SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() No Regex to compile for this group.", TEXT_FILTER);
+            }
+
+            // Ok, all ready to do the swap, so grab the reader mutex as well now.
+            AutoPortMutex amR(mutex_[textListRSel_], *this);
+
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() sending Window punctuation out port 0", TEXT_FILTER);
             submit(Punctuation::WindowMarker, 0);
 
             uint32_t tmpList = textListWSel_;
             textListWSel_ = textListRSel_;
             textListRSel_ = tmpList;
 
+            // Keep in mind that at this point textListWSel_ refers to what _used_ to be textListRSel_.
+            // That is, the previous regex that was actively being used for matches until just a moment ago.
+            // We need to clear the regex string out here to allow for its re-use in the future, when new regex terms come in.
+            // However, we will avoid freeing the actual compiled regex until we compile it next time, to avoid
+            // keeping the (new) read lock longer than we need to.
             textListValid_[textListWSel_] = false;
             firstInGroup = true;
             textList_[textListWSel_] = "";
         } else if(punct==Punctuation::FinalMarker) {
-            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: final.", TEXT_FILTER);
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: final.", TEXT_FILTER);
         }
     }
 }
@@ -171,19 +226,15 @@ bool inline MY_OPERATOR::lookupText(const SPL::list<rstring> &textList) {
 }
 
 bool inline MY_OPERATOR::lookupText(const rstring &text) {
-    if(!textListValid_[textListRSel_]) {
+    if(!textListValid_[textListRSel_] || !regexCompiled_[textListRSel_]) {
         return false;
     }
 
-    SPL::list<rstring> matches = SPL::Functions::String::regexMatch(text, textList_[textListRSel_]);
+    int rc = regexec(&compiledRe_[textListRSel_], text.c_str(), 0, NULL, 0);
 
-    SPLAPPTRC(L_TRACE, "lookupText.  matches = " << matches << ", size = " << matches.size() << ", text = " << text << ", textList = " << textList_[textListRSel_], TEXT_FILTER);
+    SPLAPPTRC(L_TRACE, "lookupText.  regexec rc = " << rc << ", text = " << text << ", textList = " << textList_[textListRSel_], TEXT_FILTER);
 
-    if(matches.size()) {
-        return true;
-    } else {
-        return false;
-    }
+    return (rc == 0) ? true : false;
 }
 
 <%SPL::CodeGen::implementationEpilogue($model);%>
