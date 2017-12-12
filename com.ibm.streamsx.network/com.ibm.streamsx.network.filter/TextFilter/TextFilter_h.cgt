@@ -4,6 +4,8 @@
 %>
 
 /* Additional includes go here */
+#include <sys/types.h>
+#include <regex.h>
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
@@ -39,6 +41,8 @@ private:
   SPL::Mutex mutex_[2] ;
   TextList textList_[2];
   bool       textListValid_[2];
+  regex_t    compiledRe_[2];
+  bool       regexCompiled_[2];
 
   int32_t textListRSel_;
   int32_t textListWSel_;

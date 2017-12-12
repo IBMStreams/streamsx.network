@@ -42,7 +42,7 @@ if(defined $inputPort1) {
 
 # get C++ expressions for getting the values of this operator's parameters
 my $inputIPAttrParamCppValue = $model->getParameterByName("inputIPAttr")->getValueAt(0)->getCppExpression();
-
+my $inputIPAttrParam2 = $model->getParameterByName("inputIPAttr2");
 %>
 
 <%SPL::CodeGen::implementationPrologue($model);%>
@@ -87,21 +87,26 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() non-mutating.", IP_FILTER);
 
-	if(port == 0) {
-    	const IPort0Type& iport$0 = tuple;
+    if(port == 0) {
+        const IPort0Type& iport$0 = tuple;
         bool ipAddrMatch = false;
-		
-        SPLAPPTRC(L_TRACE, "Process non-mutating, port 0.", IP_FILTER);
-		{
-			AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
-			ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
-			
+
+        SPLAPPTRC(L_TRACE, "Process() non-mutating, port 0.", IP_FILTER);
+
+        {
+            AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
+            ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
+<% if(defined $inputIPAttrParam2) { %>
+            ipAddrMatch = ipAddrMatch || lookupIPv4(<%=$inputIPAttrParam2->getValueAt(0)->getCppExpression()%>);
+<% } %>
         }
-        if(ipAddrMatch) {	
-            <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
-            <% CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
-            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, IP_FILTER);
-            submit(outTuple, 0);
+
+        if(ipAddrMatch) {
+//            <% # CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
+//            <% # CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
+//            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, IP_FILTER);
+//            submit(outTuple, 0);
+            submit(iport$0, 0);
         }
     }
     <% if(defined $inputPort1) {%>
@@ -109,11 +114,12 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
             const IPort1Type& iport$1 = tuple;
             rstring ipv4Addr = <%=$inputPort1CppName%>.get_<%=$ipv4AddrFilterAttribute%>();
 
-            SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.  ipv4FilterAddr = " << ipv4Addr, IP_FILTER);
+            SPLAPPTRC(L_WARN, "Process() non-mutating, port 1.  ipv4FilterAddr = " << ipv4Addr, IP_FILTER);
+
+            SPL::list<SPL::uint32> addrList = getAllAddressesInNetworkInt(ipv4Addr);
+            SPLAPPTRC(L_WARN, "Process() non-mutating, port 1.  Adding count = " << addrList.size(), IP_FILTER);
 
             AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
-            SPL::list<SPL::uint32> addrList = getAllAddressesInNetworkInt(ipv4Addr);
-            SPLAPPTRC(L_TRACE, "Process non-mutating, port 1 in lock.  size = " << addrList.size(), IP_FILTER);
             SPL::list<SPL::uint32>::const_iterator it;
             for(it = addrList.begin(); it != addrList.end(); ++it) {
                 ip4List_[ip4ListWSel_]->insert(*it);
@@ -123,7 +129,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
             }
             return;
         }
-	<%}%>
+    <%}%>
 }
 
 // Punctuation processing
@@ -132,15 +138,15 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
 
 	if(port == 1) {
         if(punct==Punctuation::WindowMarker) {
-            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: window.", IP_FILTER);
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: window.", IP_FILTER);
 
             // Take both the R & W mutexes so we can close out the current filter list 
             // and swap lists atomically. This is the very uncommon case
             // so the locking overhead is not important.
-            AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
             AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
+            AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
 
-            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() sending WindowMarker out port 0.", IP_FILTER);
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() sending WindowMarker out port 0.", IP_FILTER);
             submit(Punctuation::WindowMarker, 0);
 
             uint32_t tmpList = ip4ListWSel_;
@@ -149,7 +155,7 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
 
             ip4List_[ip4ListWSel_]->clear();
         } else if(punct==Punctuation::FinalMarker) {
-            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: final.", IP_FILTER);
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: final.", IP_FILTER);
             // ...;
         }
     }
