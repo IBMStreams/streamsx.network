@@ -22,12 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.content.html">com.ibm.streamsx.network.content</a> &gt; PacketContentAssembler</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.8</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.content.html">com.ibm.streamsx.network.content</a> &gt; PacketContentAssembler</p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.content$PacketContentAssembler.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.content$PacketContentAssembler.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
@@ -44,13 +44,13 @@
 <p class="p"><strong class="ph b">FlowStart</strong> The operator emits this event whenever it detects the beginning of a 'flow' of packets.  A 'flow' is a sequence of related packets exchanged by a pair of network endpoints, as identified by their addresses and port numbers, which are available from result functions.  The flow is assigned a unique identifier, which will be used with all subsequent events related to the flow, allowing downstream operators to correlate tuples related to the flow.
 </p>
 
-<p class="p"> <strong class="ph b">FlowEnd</strong> The operator emits this event whenever it detects the end of a 'flow' of packets.  The number of packets and bytes exchanged between the endpoints are available from result functions. The flow's identifier will not be used again in any subsequent event.
+<p class="p"><strong class="ph b">FlowEnd</strong> The operator emits this event whenever it detects the end of a 'flow' of packets.  The number of packets and bytes exchanged between the endpoints are available from result functions. The flow's identifier will not be used again in any subsequent event.
 </p>
 
 <p class="p"><strong class="ph b">FlowData</strong> The operator emits this event   with the payload data from packets related to a flow, excluding the network headers, which is available from result functions.
 </p>
 
-<p class="p">  <strong class="ph b">FlowTLS</strong> The operator emits this event for flows that  are encrypted with 'transport layer security (TLS)'. The individual fields of the TLS headers and the encrypted data are available from result functions. Note that the toolkit does not have access to encryption certificates, and cannot decrypt flow data.
+<p class="p"><strong class="ph b">FlowTLS</strong> The operator emits this event for flows that  are encrypted with 'transport layer security (TLS)'. The individual fields of the TLS headers and the encrypted data are available from result functions. Note that the toolkit does not have access to encryption certificates, and cannot decrypt flow data.
 </p>
 
 <p class="p"><strong class="ph b">Request</strong> The operator emits this event for flows that use a 'request/response' protocol (for example, SMTP, HTTP, or FTP), after all request headers have been received. The URI and header values are availble from result functions.

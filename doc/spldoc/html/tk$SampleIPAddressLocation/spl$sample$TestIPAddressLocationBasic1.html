@@ -139,7 +139,7 @@
      stream&lt;LocatedPacketType&gt; LocatedPacketStream as Out = IPAddressLocation(PacketStream) {
        param
          geographyDirectory: $geographyDirectory;
-         outputFilters: locationCityName(ipSourceAddress)!="" &amp;&amp; locationCityName(ipDestinationAddress)!="";
+         outputFilters: locationCityName(ipSourceAddress)!="" || locationCityName(ipDestinationAddress)!="";
        output Out:
          ipSourceAddress = convertIPV4AddressNumericToString(ipSourceAddress),
          ipSourceSubnet = locationSubnet(ipSourceAddress),

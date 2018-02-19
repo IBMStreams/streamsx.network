@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.8</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; C++ Native Functions</p>
 
 </div>
 
@@ -78,27 +78,27 @@ This page documents native functions that can be invoked from SPL, including the
 </li>
 
 <li class="li">
-<p class="p"> 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
+<p class="p"> 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the domain name.
 </p>
 </li>
 
 <li class="li">
-<p class="p"> 105 for 'label compression offset overruns packet': The offset of a compressed domain name label points beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+<p class="p"> 105 for 'label compression offset forward reference': The offset of a compressed domain name label points beyond the current label. The sender misencoded the domain name.
 </p>
 </li>
 
 <li class="li">
-<p class="p"> 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
+<p class="p"> 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the domain name.
 </p>
 </li>
 
 <li class="li">
-<p class="p"> 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the DNS message.
+<p class="p"> 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the domain name.
 </p>
 </li>
 
 <li class="li">
-<p class="p"> 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the DNS message.
+<p class="p"> 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the domain name.
 </p>
 </li>
 
@@ -113,12 +113,12 @@ This page documents native functions that can be invoked from SPL, including the
 </li>
 
 <li class="li">
-<p class="p"> 112 for 'resource record truncated': A DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+<p class="p"> 112 for 'resource record truncated': A DNS resource record was truncated. The packet containing the DNS message was probably truncated.
 </p>
 </li>
 
 <li class="li">
-<p class="p"> 113 for 'resource record data truncated': The 'rdata' field of a DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+<p class="p"> 113 for 'resource record data truncated': The 'rdata' field of a DNS resource record was truncated. The packet containing the DNS message was probably truncated.
 </p>
 </li>
 
@@ -128,17 +128,42 @@ This page documents native functions that can be invoked from SPL, including the
 </li>
 
 <li class="li">
-<p class="p"> 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
+<p class="p"> 116 for 'message too short': The DNS message is shorter than the length of the DNS header. The packet probably does not contain a DNS message.
 </p>
 </li>
 
 <li class="li">
-<p class="p"> 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
+<p class="p"> 117 for 'resource record counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The packet probably does not contain a DNS message.
 </p>
 </li>
 
 <li class="li">
-<p class="p"> 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
+<p class="p"> 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resource record is larger than the record's data field. The sender misencoded the resource record.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 119 for 'missing data in resource record': The data field of a resource record is too short; some fields may be truncated or missing entirely. The sender misencoded the resource record.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 120 for 'extra data in resource record': The data field of a resource record is too long; there is unexpected data following the last field. The sender misencoded the resource record.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender misencoded the domain name.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 122 for 'extra data following resource records': There are extra bytes of data in the DNS message following the last resource record. The sender probably miscalculated the packet length.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 123 for 'resource record data too long': The 'data length' field of a resource record is unreasonably large. The packet probably does not contain a DNS message.
 </p>
 </li>
 
@@ -167,91 +192,6 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This DNS parser result function returns the offset from the beginning of the message to the encoding error found,           or zero if no encoding errors were found.
-</p>
-
-   </dd>
-
- 
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> DNSPacketLiveSource_result_functions  </dd>
-
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
-<dl class="dl" compact="compact">
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__bytesReceived"><tt class="ph tt">      public uint64 bytesReceived()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalBytesReceived"><tt class="ph tt">      public uint64 metricsIntervalBytesReceived()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of bytes received from the network interface  during the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsDropped"><tt class="ph tt">      public uint64 metricsIntervalPacketsDropped()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsReceived"><tt class="ph tt">      public uint64 metricsIntervalPacketsReceived()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets received from the network interface  during the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__packetsDropped"><tt class="ph tt">      public uint64 packetsDropped()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__packetsReceived"><tt class="ph tt">      public uint64 packetsReceived()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">This function returns the number of packets received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
 </p>
 
    </dd>
@@ -387,6 +327,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from all DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:"><tt class="ph tt">      public rstring DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from seleccted DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter. DNS resource records are selected by specifying DNS types in a list of unsigned 16-bit integers as the fourth parameter of the function.
 </p>
 
    </dd>
@@ -537,6 +487,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the 'authoritative' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_EXTRA_DATA"><tt class="ph tt">      public blob DNS_EXTRA_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns any extra data in the DNS message that follows the last resource record.           Note that the parseError() function returns 'true' if there is any extra data following the last resource record,           even though no errors were found in any resource record,            and the parseErrorCode() function returns '122'.
 </p>
 
    </dd>
@@ -820,6 +780,16 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__ETHER_DST_ADDRESS_64"><tt class="ph tt">      public uint64 ETHER_DST_ADDRESS_64()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__ETHER_PROTOCOL"><tt class="ph tt">      public uint16 ETHER_PROTOCOL()      </tt>   </dt>
 
    <dd class="dd">
@@ -874,6 +844,46 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">This function returns the IP version 6 source address of the current packet, if it has one, or an empty list otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_DONT_FRAGMENT"><tt class="ph tt">      public boolean IP_DONT_FRAGMENT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP "don't fragment" flag of the current packet. When a sender sets this flag in a packet, it prohibits routers from fragmenting the packet in transit. If the packet's length exceeds the maximum size of a link, it will be discarded by the router instead of being fragmented.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_FRAGMENT_OFFSET"><tt class="ph tt">      public uint16 IP_FRAGMENT_OFFSET()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP "fragment offset" field of the current packet, multiplied by eight, When a router fragments a packet, it stores the offset from the front of the packet to the front of the fragment, measured in eight-byte steps, in each fragment. That is, the size of each fragment is always a multiple of eight bytes,  and the value stored is the offset in bytes, divided by eight. This function returns that value, multiplied by eight, so that it gives the offset from the front of the packet to the front of the fragment in bytes.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_IDENTIFIER"><tt class="ph tt">      public uint32 IP_IDENTIFIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP identifier of the current packet. When a packet is fragmented in transit, this identifer is copied into all of the fragments. The receiver combines this identifier with the packet's  source and destination addresses to gather the fragments,  and uses the fragment offset (see the IP_FRAGMENT_OFFSET() function) to reassemble  them into original packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_MORE_FRAGMENTS"><tt class="ph tt">      public boolean IP_MORE_FRAGMENTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP "more fragments" flag of the current packet. When a router fragments a packet, it sets this flag in all fragments except the last one.
 </p>
 
    </dd>
@@ -990,10 +1000,30 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__bytesReceived"><tt class="ph tt">      public uint64 bytesReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the DNSPacketLiveSource and DNSPacketFileSource operators.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalBytesProcessed"><tt class="ph tt">      public uint64 metricsIntervalBytesProcessed()      </tt>   </dt>
 
    <dd class="dd">
 <p class="p">This function returns the number of bytes of network data processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalBytesReceived"><tt class="ph tt">      public uint64 metricsIntervalBytesReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of bytes received from the network interface  during the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the DNSPacketLiveSource and DNSPacketFileSource operators.
 </p>
 
    </dd>
@@ -1010,10 +1040,30 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsDropped"><tt class="ph tt">      public uint64 metricsIntervalPacketsDropped()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the DNSPacketFileSource operator.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsProcessed"><tt class="ph tt">      public uint64 metricsIntervalPacketsProcessed()      </tt>   </dt>
 
    <dd class="dd">
 <p class="p">This function returns the number of network packets processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__metricsIntervalPacketsReceived"><tt class="ph tt">      public uint64 metricsIntervalPacketsReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets received from the network interface  during the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the DNSPacketFileSource operator.
 </p>
 
    </dd>
@@ -1030,10 +1080,30 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__packetsDropped"><tt class="ph tt">      public uint64 packetsDropped()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the DNSPacketFileSource operator.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__packetsProcessed"><tt class="ph tt">      public uint64 packetsProcessed()      </tt>   </dt>
 
    <dd class="dd">
 <p class="p">This function returns the number of network packets processed by the operator since it started, including the current packet, but excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__packetsReceived"><tt class="ph tt">      public uint64 packetsReceived()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the number of packets received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not. This function always returns zero for the DNSPacketFileSource operator.
 </p>
 
    </dd>

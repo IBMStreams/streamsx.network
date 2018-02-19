@@ -7,22 +7,22 @@
 <meta name="copyright" content="(C) Copyright 2005"/>
 <meta name="DC.rights.owner" content="(C) Copyright 2005"/>
 <meta name="DC.Type" content="reference"/>
-<meta name="DC.Title" content="Functions: com.ibm.streamsx.network 3.0.0"/>
+<meta name="DC.Title" content="Functions: com.ibm.streamsx.network 3.0.8"/>
 <meta name="DC.Format" content="XHTML"/>
 <meta name="DC.Identifier" content="spldoc_index"/>
 <link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
-<title>Functions: com.ibm.streamsx.network 3.0.0</title>
+<title>Functions: com.ibm.streamsx.network 3.0.8</title>
 </head>
 <body id="spldoc_index">
 
 
-<h1 class="title topictitle1">Functions: com.ibm.streamsx.network 3.0.0</h1>
+<h1 class="title topictitle1">Functions: com.ibm.streamsx.network 3.0.8</h1>
 
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.8</a> &gt; Functions</p>
 
 </div>
 
@@ -666,6 +666,24 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring">DNS_ALL_FIELDS(rstring, rstring, rstring)</a></dt>
+
+  <dd class="dd">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from all DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:">DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;)</a></dt>
+
+  <dd class="dd">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from seleccted DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:">DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;)</a></dt>
+
+  <dd class="dd">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from seleccted DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></dt>
 
   <dd class="dd">          This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.</dd>
@@ -843,6 +861,18 @@
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_AUTHORITATIVE_FLAG">DNS_AUTHORITATIVE_FLAG()</a></dt>
 
   <dd class="dd">          This parser result function returns <tt class="ph tt">true</tt> if the 'authoritative' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_EXTRA_DATA">DNS_EXTRA_DATA()</a></dt>
+
+  <dd class="dd">          This parser result function returns any extra data in the DNS message that follows the last resource record.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_EXTRA_DATA">DNS_EXTRA_DATA()</a></dt>
+
+  <dd class="dd">          This parser result function returns any extra data in the DNS message that follows the last resource record.</dd>
 
 
 
@@ -1107,6 +1137,12 @@
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_DST_ADDRESS">ETHER_DST_ADDRESS()</a></dt>
 
   <dd class="dd">This function returns the ethernet destination address of the current packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__ETHER_DST_ADDRESS_64">ETHER_DST_ADDRESS_64()</a></dt>
+
+  <dd class="dd">This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.</dd>
 
 
 
@@ -2628,9 +2664,57 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__IP_DONT_FRAGMENT">IP_DONT_FRAGMENT()</a></dt>
+
+  <dd class="dd">This function returns the IP "don't fragment" flag of the current packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_DONT_FRAGMENT">IP_DONT_FRAGMENT()</a></dt>
+
+  <dd class="dd">This function returns the IP "don't fragment" flag of the current packet.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_DST_PORT">IP_DST_PORT()</a></dt>
 
   <dd class="dd">This function returns the TCP or UDP destination port number of the current packet,  if it has one, or zero otherwise.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__IP_FRAGMENT_OFFSET">IP_FRAGMENT_OFFSET()</a></dt>
+
+  <dd class="dd">This function returns the IP "fragment offset" field of the current packet, multiplied by eight, When a router fragments a packet, it stores the offset from the front of the packet to the front of the fragment, measured in eight-byte steps, in each fragment.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_FRAGMENT_OFFSET">IP_FRAGMENT_OFFSET()</a></dt>
+
+  <dd class="dd">This function returns the IP "fragment offset" field of the current packet, multiplied by eight, When a router fragments a packet, it stores the offset from the front of the packet to the front of the fragment, measured in eight-byte steps, in each fragment.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__IP_IDENTIFIER">IP_IDENTIFIER()</a></dt>
+
+  <dd class="dd">This function returns the IP identifier of the current packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_IDENTIFIER">IP_IDENTIFIER()</a></dt>
+
+  <dd class="dd">This function returns the IP identifier of the current packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__IP_MORE_FRAGMENTS">IP_MORE_FRAGMENTS()</a></dt>
+
+  <dd class="dd">This function returns the IP "more fragments" flag of the current packet.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_MORE_FRAGMENTS">IP_MORE_FRAGMENTS()</a></dt>
+
+  <dd class="dd">This function returns the IP "more fragments" flag of the current packet.</dd>
 
 
 
@@ -3708,9 +3792,27 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.geohash.html#spldoc_functions__geohashDecode.rstring">geohashDecode(rstring)</a></dt>
+
+  <dd class="dd">The geohashDecode() function decodes a <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> as the latitude and longitude of its center point and bounding box. The 'geohash' argument is a string value of 1 to 12 characters composed of the characters '0123456789bcdefghjkmnpqrstuvwxyz'. </dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.geohash.html#spldoc_functions__geohashEncode.float64.float64.int32">geohashEncode(float64, float64, int32)</a></dt>
+
+  <dd class="dd">The geohashEncode() function encodes a latitude/longitude pair as a <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of a specified precision. The argument values are limited to these ranges: </dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__getAllAddressesInNetwork.rstring">getAllAddressesInNetwork(rstring)</a></dt>
 
-  <dd class="dd">Returns a list of all IP addresses in the network.</dd>
+  <dd class="dd">Returns a list of all IP addresses in the network as rstring values.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.ipv4.html#spldoc_functions__getAllAddressesInNetworkInt.rstring">getAllAddressesInNetworkInt(rstring)</a></dt>
+
+  <dd class="dd">Returns a list of all IP addresses in the network as uint32 values.</dd>
 
 
 
@@ -3999,6 +4101,18 @@
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationFound.uint32">locationFound(uint32)</a></dt>
 
   <dd class="dd">          This parser result function returns true            if the location of the specified IP version 4 address was found, or false if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationGeohash.list:.:uint8:.::..:16:..:.int32">locationGeohash(list&lt;uint8&gt;[16], int32)</a></dt>
+
+  <dd class="dd">          This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 6 address,           if its location was found, or an empty string if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationGeohash.uint32.int32">locationGeohash(uint32, int32)</a></dt>
+
+  <dd class="dd">          This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 4 address,           if its location was found, or an empty string if not.</dd>
 
 
 
@@ -4431,6 +4545,24 @@
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__parseErrorOffset">parseErrorOffset()</a></dt>
 
   <dd class="dd">          This parser result function returns the offset from the beginning of the message to the encoding error found,           or zero if no encoding errors were found.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.misc.html#spldoc_functions__stringEscape.list:.:rstring:.:.uint8.uint8.uint8">stringEscape(list&lt;rstring&gt;, uint8, uint8, uint8)</a></dt>
+
+  <dd class="dd">TODO: Describe.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.misc.html#spldoc_functions__stringEscape.rstring.uint8.uint8.uint8">stringEscape(rstring, uint8, uint8, uint8)</a></dt>
+
+  <dd class="dd">TODO: Describe.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.misc.html#spldoc_functions__stringEscapeConcat.list:.:rstring:.:.uint8.uint8.uint8.uint8">stringEscapeConcat(list&lt;rstring&gt;, uint8, uint8, uint8, uint8)</a></dt>
+
+  <dd class="dd">TODO: Describe.</dd>
 
 
 </dl>

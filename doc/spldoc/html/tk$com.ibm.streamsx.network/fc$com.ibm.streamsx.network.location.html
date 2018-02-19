@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.location.html">com.ibm.streamsx.network.location</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.8</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.location.html">com.ibm.streamsx.network.location</a> &gt; C++ Native Functions</p>
 
 </div>
 
@@ -216,6 +216,26 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This parser result function returns true            if the location of the specified IP version 4 address was found, or false if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationGeohash.list:.:uint8:.::..:16:..:.int32"><tt class="ph tt">      public rstring locationGeohash(list&lt;uint8&gt;[16] ipv6Address, int32 precision)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 6 address,           if its location was found, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationGeohash.uint32.int32"><tt class="ph tt">      public rstring locationGeohash(uint32 ipv4Address, int32 precision)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 4 address,           if its location was found, or an empty string if not.
 </p>
 
    </dd>

@@ -101,9 +101,15 @@
      type
  
      DNSPacketType =
+         uint64 packetsReceived,             // total number of packets received by network interface, so far
+         uint64 packetsDropped,              // total number of packets dropped by network interface, so far
+         uint64 bytesReceived,               // total number of bytes received by network interface, so far
          uint64 packetsProcessed,            // total number of packets processed by operator, so far
-         uint64 bytesProcessed,             // total number of bytes of packet data processed by operator, so far
+         uint64 bytesProcessed,              // total number of bytes of packet data processed by operator, so far
          float64 metricsIntervalElapsed,     // elapsed time since last metrics interval, in seconds
+         uint64 metricsIntervalPacketsReceived, // number of packets received since last metrics interval
+         uint64 metricsIntervalPacketsDropped, // number of packets dropped since last metrics interval
+         uint64 metricsIntervalBytesReceived, // number of bytes received since last metrics interval
          uint64 metricsIntervalPacketsProcessed, // number of packets processed since last metrics interval
          uint64 metricsIntervalBytesProcessed,  // number of bytes processed since last metrics interval
          boolean metricsUpdated,             // true if metrics have been updated since previous output tuple
@@ -175,6 +181,7 @@
        list&lt;uint16&gt; DNS_ADDITIONAL_CLASSES,
        list&lt;uint32&gt; DNS_ADDITIONAL_TTLS,
        list&lt;rstring&gt; DNS_ADDITIONAL_DATA,
+       blob DNS_EXTRA_DATA,
        rstring DNS_ALL_FIELDS,
        int32 DNS_INCOMPATIBLE_FLAGS,
          uint32 PACKET_LENGTH,               // original length of packet (not necessarily all captured)
@@ -196,9 +203,15 @@
              promiscuous: true;
              metricsInterval: 0.0;
          output Out:
+             packetsReceived = packetsReceived(),
+             packetsDropped = packetsDropped(),
+             bytesReceived = bytesReceived(),
              packetsProcessed = packetsProcessed(),
              bytesProcessed = bytesProcessed(),
              metricsIntervalElapsed = metricsIntervalElapsed(),
+             metricsIntervalPacketsReceived = metricsIntervalPacketsReceived(),
+             metricsIntervalPacketsDropped = metricsIntervalPacketsDropped(),
+             metricsIntervalBytesReceived = metricsIntervalBytesReceived(),
              metricsIntervalPacketsProcessed = metricsIntervalPacketsProcessed(),
              metricsIntervalBytesProcessed = metricsIntervalBytesProcessed(),
              metricsUpdated = metricsUpdated(),
@@ -270,6 +283,7 @@
            DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
            DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
            DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
+           DNS_EXTRA_DATA = DNS_EXTRA_DATA(),
            DNS_ALL_FIELDS = DNS_ALL_FIELDS("\n", "|", "^"),
            DNS_INCOMPATIBLE_FLAGS = DNS_INCOMPATIBLE_FLAGS(),
              PACKET_LENGTH = PACKET_LENGTH(),

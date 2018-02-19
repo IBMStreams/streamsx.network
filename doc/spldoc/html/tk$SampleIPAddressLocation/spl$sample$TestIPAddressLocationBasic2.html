@@ -151,8 +151,8 @@
        stream&lt;UnlocatedPacketType&gt; UnlocatedPacketStream as OutUnlocated ) = IPAddressLocation(PacketStream) {
        param
          geographyDirectory: $geographyDirectory;
-         outputFilters: locationCityName(ipSourceAddress)!="" &amp;&amp; locationCityName(ipDestinationAddress)!="",
-                        locationCityName(ipSourceAddress)=="" || locationCityName(ipDestinationAddress)=="";
+         outputFilters: locationCityName(ipSourceAddress)!="" || locationCityName(ipDestinationAddress)!="",
+                        locationCityName(ipSourceAddress)=="" &amp;&amp; locationCityName(ipDestinationAddress)=="";
        output 
        OutLocated:
          ipSourceAddress = convertIPV4AddressNumericToString(ipSourceAddress),

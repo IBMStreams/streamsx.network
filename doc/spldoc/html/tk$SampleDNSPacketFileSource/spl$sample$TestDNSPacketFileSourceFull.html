@@ -58,7 +58,7 @@
 </div>
 
 <div class="section splgraph">
-  <embed class="image" src="../../image/tk$SampleDNSPacketFileSource/op$sample$TestDNSPacketFileSourceFull.svg" width="232" height="107"/>
+  <embed class="image" src="../../image/tk$SampleDNSPacketFileSource/op$sample$TestDNSPacketFileSourceFull.svg" width="337" height="152"/>
 </div>
 
 <div class="section"><h2 class="title sectiontitle">Parameters</h2>
@@ -92,10 +92,16 @@
  
      type
  
-     PacketType =
+     DNSPacketType =
+         uint64 packetsReceived,             // total number of packets received by network interface, so far
+         uint64 packetsDropped,              // total number of packets dropped by network interface, so far
+         uint64 bytesReceived,               // total number of bytes received by network interface, so far
          uint64 packetsProcessed,            // total number of packets processed by operator, so far
          uint64 bytesProcessed,             // total number of bytes of packet data processed by operator, so far
          float64 metricsIntervalElapsed,     // elapsed time since last metrics interval, in seconds
+         uint64 metricsIntervalPacketsReceived, // number of packets received since last metrics interval
+         uint64 metricsIntervalPacketsDropped, // number of packets dropped since last metrics interval
+         uint64 metricsIntervalBytesReceived, // number of bytes received since last metrics interval
          uint64 metricsIntervalPacketsProcessed, // number of packets processed since last metrics interval
          uint64 metricsIntervalBytesProcessed,  // number of bytes processed since last metrics interval
          boolean metricsUpdated,             // true if metrics have been updated since previous output tuple
@@ -167,6 +173,7 @@
        list&lt;uint16&gt; DNS_ADDITIONAL_CLASSES,
        list&lt;uint32&gt; DNS_ADDITIONAL_TTLS,
        list&lt;rstring&gt; DNS_ADDITIONAL_DATA,
+       blob DNS_EXTRA_DATA,
        rstring DNS_ALL_FIELDS,
        int32 DNS_INCOMPATIBLE_FLAGS,
          uint32 PACKET_LENGTH,               // original length of packet (not necessarily all captured)
@@ -174,9 +181,15 @@
          blob PACKET_DATA,                   // contents of packet captured, including network headers (not necessarily complete)
          blob PAYLOAD_DATA;                  // contents of packet payload, following all network headers
  
+     FlattenedDNSPacketType = 
+         uint64 packetNumber,            // sequence number of packet
+         boolean parseError,
+         rstring flattenedDNSPacket;
+ 
      graph
  
-     stream&lt;PacketType&gt; PacketStream as Out = DNSPacketFileSource() {
+     ( stream&lt;DNSPacketType&gt; DNSPacketStream ; 
+       stream&lt;FlattenedDNSPacketType&gt; FlattenedDNSPacketStream ) = DNSPacketFileSource() {
          logic state: {
              map&lt;uint16,rstring&gt; dnsTypes = { 1: "A", 2: "NS", 3: "MD", 4: "MF", 5: "CNAME", 6: "SOA", 7: "MB", 8: "MG", 9: "MR", 10: "NULL", 11: "WKS", 12: "PTR", 13: "HINFO", 14: "MINFO", 15: "MX", 16: "TXT", 28: "AAAA" };
              map&lt;uint8,rstring&gt; dnsResponseCodes = { 0: "OK", 1: "Format Error", 2: "Server Failure", 3: "Name Error", 4: "[not implemented]", 5: "Server Refused" }; }
@@ -184,10 +197,17 @@
              pcapFilename: $pcapFilename;
              //inputFilter: "udp port 30030"; // ... for 'jmirror' packets only
              metricsInterval: 0.0;
-         output Out:
+         output 
+         DNSPacketStream:
+             packetsReceived = packetsReceived(),
+             packetsDropped = packetsDropped(),
+             bytesReceived = bytesReceived(),
              packetsProcessed = packetsProcessed(),
              bytesProcessed = bytesProcessed(),
              metricsIntervalElapsed = metricsIntervalElapsed(),
+             metricsIntervalPacketsReceived = metricsIntervalPacketsReceived(),
+             metricsIntervalPacketsDropped = metricsIntervalPacketsDropped(),
+             metricsIntervalBytesReceived = metricsIntervalBytesReceived(),
              metricsIntervalPacketsProcessed = metricsIntervalPacketsProcessed(),
              metricsIntervalBytesProcessed = metricsIntervalBytesProcessed(),
              metricsUpdated = metricsUpdated(),
@@ -259,14 +279,25 @@
            DNS_ADDITIONAL_CLASSES = DNS_ADDITIONAL_CLASSES(),
            DNS_ADDITIONAL_TTLS = DNS_ADDITIONAL_TTLS(),
            DNS_ADDITIONAL_DATA = DNS_ADDITIONAL_DATA(),
+           DNS_EXTRA_DATA = DNS_EXTRA_DATA(),
            DNS_ALL_FIELDS = DNS_ALL_FIELDS("\n", "|", "^"),
            DNS_INCOMPATIBLE_FLAGS = DNS_INCOMPATIBLE_FLAGS(),
              PACKET_LENGTH = PACKET_LENGTH(),
              PAYLOAD_LENGTH = PAYLOAD_LENGTH(),
              PACKET_DATA = PACKET_DATA(),
              PAYLOAD_DATA = PAYLOAD_DATA();
+     FlattenedDNSPacketStream:
+           packetNumber = packetsProcessed(),
+           parseError = parseError(),
+           flattenedDNSPacket = DNS_ALL_FIELDS("\n", " ", ", "); 
      }
-     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestDNSPacketFileSourceFull.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as DNSPacketSink = FileSink(DNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFull.DNSPacketStream.out"; format: txt; hasDelayField: false; }
+ 
+ 
+     stream&lt;rstring text&gt; _FlattenedDNSPacketStream as Out = Functor(FlattenedDNSPacketStream) {
+       //param filter: parseError;
+       output Out: text = "packet=" + (rstring)packetNumber + " " + flattenedDNSPacket + "\n"; }
+     () as FlattenedDNSPacketSink = FileSink(_FlattenedDNSPacketStream) { param file: "debug.TestDNSPacketFileSourceFull.FlattenedDNSPacketStream.out"; format: line; }
  
  }
 

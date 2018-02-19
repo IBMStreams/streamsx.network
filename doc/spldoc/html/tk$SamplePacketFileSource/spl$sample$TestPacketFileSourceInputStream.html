@@ -94,9 +94,9 @@
  composite TestPacketFileSourceInputStream {
  
      param
-     expression&lt;rstring&gt; $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "data" );
+     expression&lt;rstring&gt; $pcapDirectory: getSubmissionTimeValue("pcapDirectory", "." /* default is data-directory */ );
      expression&lt;uint32&gt; $processorAffinity: (uint32)getSubmissionTimeValue("processorAffinity", "1" );
-     expression&lt;float64&gt; $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "1.0" );
+     expression&lt;float64&gt; $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "5.0" );
  
      type
  

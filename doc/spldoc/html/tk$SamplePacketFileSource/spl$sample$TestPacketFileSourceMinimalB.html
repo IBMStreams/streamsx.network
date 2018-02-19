@@ -111,9 +111,9 @@
              ipv4DestinationAddress = convertIPV4AddressNumericToString(IPV4_DST_ADDRESS()),
              dnsPacket = PACKET_DATA();
      }
-     //() as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalB.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceMinimalB.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
  
-     stream&lt;PacketType&gt; FilteredPacketStream = Filter(PacketStream) { param filter: true; }
+     //stream&lt;PacketType&gt; FilteredPacketStream = Filter(PacketStream) { param filter: true; }
  
  }
 

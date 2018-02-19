@@ -93,9 +93,13 @@
      type
  
      PacketType =
+         uint64 packetsReceived,             // total number of packet received, as of last metrics interval
+         uint64 packetsDropped,              // total number of packet dropped, as of last metrics interval
          uint64 packetsProcessed,            // total number of packets processed by operator, so far
          uint64 bytesProcessed,             // total number of bytes of packet data processed by operator, so far
          float64 metricsIntervalElapsed,     // elapsed time since last metrics interval, in seconds
+         uint64 metricsIntervalPacketsReceived,  // number of packets received since last metrics interval
+         uint64 metricsIntervalPacketsDropped,   // number of packets dropped since last metrics interval
          uint64 metricsIntervalPacketsProcessed, // number of packets processed since last metrics interval
          uint64 metricsIntervalBytesProcessed,  // number of bytes processed since last metrics interval
          boolean metricsUpdated,             // true if metrics have been updated since previous output tuple
@@ -109,6 +113,10 @@
          rstring VLAN_TAGS,                  // string representation of ethernet VLAN tags, if any
          uint8 IP_VERSION,                   // IP version: 4 for IPv4, 6 for IPv6
          uint8 IP_PROTOCOL,                  // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+         uint32 IP_IDENTIFIER,               // IP identifier, used mainly for reassembling fragmented packets
+         boolean IP_DONT_FRAGMENT,           // IP "don't fragment" flag (IPv4 only)
+         boolean IP_MORE_FRAGMENTS,          // IP "more fragments" flag, false or unfragmented or last fragment, true for all fragments except last
+         uint16 IP_FRAGMENT_OFFSET,          // IP fragment offset, offset to beginning of fragment in bytes (not eight-byte steps)
          uint32 IPV4_SRC_ADDRESS,            // IPv4 source address, or zero if not IPv4 packet
          uint32 IPV4_DST_ADDRESS,            // IPv4 destination address, or zero if not IPv4 packet
          rstring IPV4_SRC_ADDRESS_AS_STRING, // string representation of IPv4 source address
@@ -153,9 +161,13 @@
          param
              pcapFilename: $pcapFilename;
          output Out:
+             packetsReceived = packetsReceived(),
+             packetsDropped = packetsDropped(),
              packetsProcessed = packetsProcessed(),
              bytesProcessed = bytesProcessed(),
              metricsIntervalElapsed = metricsIntervalElapsed(),
+             metricsIntervalPacketsReceived = metricsIntervalPacketsReceived(),
+             metricsIntervalPacketsDropped = metricsIntervalPacketsDropped(),
              metricsIntervalPacketsProcessed = metricsIntervalPacketsProcessed(),
              metricsIntervalBytesProcessed = metricsIntervalBytesProcessed(),
              metricsUpdated = metricsUpdated(),
@@ -169,6 +181,10 @@
              VLAN_TAGS = (rstring)VLAN_TAGS(),
              IP_VERSION = IP_VERSION(),
              IP_PROTOCOL = IP_PROTOCOL(),
+             IP_IDENTIFIER = IP_IDENTIFIER(),
+             IP_DONT_FRAGMENT = IP_DONT_FRAGMENT(), 
+             IP_MORE_FRAGMENTS = IP_MORE_FRAGMENTS(),
+             IP_FRAGMENT_OFFSET = IP_FRAGMENT_OFFSET(),
              IPV4_SRC_ADDRESS = IPV4_SRC_ADDRESS(),
              IPV4_DST_ADDRESS = IPV4_DST_ADDRESS(),
              IPV4_SRC_ADDRESS_AS_STRING = convertIPV4AddressNumericToString(IPV4_SRC_ADDRESS()),

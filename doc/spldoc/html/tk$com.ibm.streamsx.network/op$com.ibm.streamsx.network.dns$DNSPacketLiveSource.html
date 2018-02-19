@@ -22,12 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketLiveSource</p>
+<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.8</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketLiveSource</p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketLiveSource.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketLiveSource.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
@@ -91,7 +91,10 @@ use com.ibm.streamsx.network.dns::*;
 <div class="section"><h2 class="title sectiontitle">Capabilities
 </h2>
 
-<p class="p">The DNSPacketLiveSource operator requires these Linux capabilities to receive 'raw' network packets from an ethernet interface:
+<p class="p">The PacketLiveSource operator requires special privileges to receive 'raw' network packets from an ethernet interface.
+</p>
+
+<p class="p">On machines where 'extended file attributes' (see <a class="xref" href="https://en.wikipedia.org/wiki/Extended_file_attributes">https://en.wikipedia.org/wiki/Extended_file_attributes</a>) are enabled in the Linux kernel, these Linux capabilities should be granted to a PE that includes the  PacketLiveSource operator:
 </p>
 
 <div class="p">
@@ -125,7 +128,7 @@ use com.ibm.streamsx.network.dns::*;
 
 <div class="p">
 <pre class="pre codeblock">
-sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /tmp/.../bin/standalone.exe
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' .../bin/standalone.exe
 </pre>
 
 
@@ -172,8 +175,16 @@ sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /tmp/.../bin/standalone.exe
 
 </div>
 
-<p class="p">The sample applications included in the toolkit have scripts that illustrate all of the steps needed to build and run applications containing the DNSPacketLiveSource operator in both 'standalone' and 'distributed' mode.
+<p class="p">On machines where 'extended file attributes' are not enabled in the Linux kernel, 'standalone' PEs that include the PacketLiveSource operator can be executed with 'root' privileges like this:
 </p>
+
+<div class="p">
+<pre class="pre codeblock">
+sudo STREAMS_INSTALL=$STREAMS_INSTALL .../bin/standalone.exe
+</pre>
+
+
+</div>
 
 </div>
 
@@ -610,14 +621,14 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 11 parameters.
+  <dd class="dd">This operator supports 12 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__networkInterface">networkInterface</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>
+<a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>
 
 </p>
 </dd>
@@ -725,7 +736,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>
+<a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>
 
 </p>
 <dl class="dl">
@@ -834,6 +845,41 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
