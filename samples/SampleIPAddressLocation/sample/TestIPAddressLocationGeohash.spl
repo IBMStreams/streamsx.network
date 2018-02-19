@@ -1,0 +1,182 @@
+/*
+** Copyright (C) 2015  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use spl.file::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.location::*;
+use com.ibm.streamsx.network.geohash::*;
+
+/*
+  type GeohashType = 
+    rstring geohash, 
+    rstring latitude, 
+    rstring longitude,
+    rstring geoname_id,
+    rstring country_iso_code,
+    rstring country_name,
+    rstring subdivision_1_iso_code,
+    rstring subdivision_1_name,
+    rstring subdivision_2_iso_code,
+    rstring subdivision_2_name,
+    rstring city_name;
+*/
+type GeohashType = 
+  rstring geohash, 
+  float64 latitude, 
+  float64 longitude,
+  rstring country,
+  rstring division,
+  rstring city;
+
+stateful map<rstring,GeohashType> loadGeohashTable(rstring filename) {
+
+  mutable map<rstring,GeohashType> table = {};
+  mutable int32 error = 0;
+  mutable boolean header = true;
+
+  appTrc(Trace.info, "loading geohash table from file " + filename + " ..."); 
+
+  uint64 file = fopen(filename, "r", error);
+  if (error!=0) { appLog(Log.error, "sorry, could not open file " + filename + ", " + strerror(error)); abort(); }
+
+  mutable int32 counter = 0;
+  while (true) {
+
+    rstring line = freadLine(file, error);
+    if (feof(file)) break;
+    if (error!=0) { appLog(Log.error, "sorry, could not read file " + filename + ", " + strerror(error)); abort(); }
+
+    //printStringLn(line);
+    counter++;
+    if (header) { header = false; continue; }
+    
+    list<rstring> tokens = csvTokenize(line);
+    if (size(tokens)!=11) { appLog(Log.error, "sorry, unexpected number of tokens in line '" + line + "' of file " + filename); abort(); }
+    if (length(tokens[1])==0 || length(tokens[2])==0) { continue; }
+  
+    GeohashType location = { geohash=tokens[0], latitude=(float64)tokens[1], longitude=(float64)tokens[2], country=tokens[5], division=tokens[7], city=tokens[10] };
+    table[tokens[0]] = location;
+  }
+
+  fclose(file, error);
+
+  appTrc(Trace.info, "... loaded " + (rstring)(size(keys(table))) + " of " + (rstring)counter + " geohashes from file " + filename); 
+  return table;
+}
+
+
+
+composite TestIPAddressLocationGeohash {
+
+    param
+    expression<rstring> $geographyDirectory: getSubmissionTimeValue("geographyDirectory", "./www.maxmind.com" );
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_locations_ipv4_only.pcap" );
+    expression<rstring> $geohashFilename: getSubmissionTimeValue("geohashFilename", "../../SampleNetworkToolkitData/data/geohashes.csv" );
+
+    type
+
+    PacketType =
+        uint64 packetNumber,                // sequence number of packet, as emitted by operator
+        float64 captureTime,                // time that packet was captured, in seconds since Unix epoch
+        uint32 ipSourceAddress,             // IPv4 source address, or empty if not IPv4 packet
+        uint16 ipSourcePort,                // IP source port, or zero if not UDP or TCP packet
+        uint32 ipDestinationAddress,        // IPv4 destination address, or empty if not IPv4 packet
+        uint16 ipDestinationPort,           // IP destination port, or zero if not UDP or TCP packet
+        uint32 packetLength;                // original length of packet (not necessarily all captured)
+
+    EndpointGeohashType =
+        uint64 packetNumber,               // sequence number of packet, as emitted by operator
+        float64 captureTime,               // time that packet was captured, in seconds since Unix epoch
+        rstring ipSourceAddress,  
+        rstring ipSourceSubnet,  
+        rstring ipSourceLabel,
+        rstring ipSourceGeohash,
+        rstring ipDestinationAddress,  
+        rstring ipDestinationSubnet,  
+        rstring ipDestinationLabel,
+        rstring ipDestinationGeohash;
+
+    EndpointLocationType =
+        uint64 packetNumber,               // sequence number of packet, as emitted by operator
+        float64 captureTime,               // time that packet was captured, in seconds since Unix epoch
+        rstring ipSourceAddress,  
+        rstring ipSourceSubnet,  
+        rstring ipSourceLabel,
+        rstring ipSourceGeohash,
+        float64 sourceLatitude,
+        float64 sourceLongitude,
+        rstring sourceCountry,
+        rstring sourceDivision,
+        rstring sourceCity,
+        rstring ipDestinationAddress,  
+        rstring ipDestinationSubnet,  
+        rstring ipDestinationLabel,
+        rstring ipDestinationGeohash,
+        float64 destinationLatitude,
+        float64 destinationLongitude,
+        rstring destinationCountry,
+        rstring destinationDivision,
+        rstring destinationCity;
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            outputFilters: IP_VERSION()==4ub;
+        output Out:
+            packetNumber = packetsProcessed() - 1ul,
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipSourceAddress = IPV4_SRC_ADDRESS(),
+            ipSourcePort = IP_SRC_PORT(),
+            ipDestinationAddress = IPV4_DST_ADDRESS(),
+            ipDestinationPort = IP_DST_PORT(),
+            packetLength = PACKET_LENGTH(); }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPAddressLocationGeohash.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+    stream<EndpointGeohashType> EndpointGeohashStream as Out = IPAddressLocation(PacketStream) {
+      param
+        geographyDirectory: $geographyDirectory;
+        outputFilters: locationCityName(ipSourceAddress)!="" || locationCityName(ipDestinationAddress)!="";
+      output Out:
+        ipSourceAddress = convertIPV4AddressNumericToString(ipSourceAddress),
+        ipSourceSubnet = locationSubnet(ipSourceAddress),
+        ipSourceLabel = locationCityName(ipSourceAddress) + ", " + locationSubdivision1Name(ipSourceAddress) + ", " + locationCountryName(ipSourceAddress),
+        ipSourceGeohash = locationGeohash(ipSourceAddress,6),
+        ipDestinationAddress = convertIPV4AddressNumericToString(ipDestinationAddress),
+        ipDestinationSubnet = locationSubnet(ipDestinationAddress),
+        ipDestinationLabel = locationCityName(ipDestinationAddress) + ", " + locationSubdivision1Name(ipDestinationAddress) + ", " + locationCountryName(ipDestinationAddress),
+        ipDestinationGeohash = locationGeohash(ipDestinationAddress,6); }
+    () as EndpointGeohashSink = FileSink(EndpointGeohashStream) { param file: "debug.TestIPAddressLocationGeohash.EndpointGeohashStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+    stream<EndpointLocationType> EndpointLocationStream as Out = Custom(EndpointGeohashStream as In) {
+      logic state: {
+        map<rstring,GeohashType> geohashTable = loadGeohashTable($geohashFilename); }
+      onTuple In: {
+        mutable EndpointLocationType outTuple = {};
+        assignFrom(outTuple, In);
+        if (ipSourceGeohash in geohashTable) { 
+          GeohashType location = geohashTable[ipSourceGeohash];
+          outTuple.sourceLatitude = location.latitude;
+          outTuple.sourceLongitude = location.longitude;
+          outTuple.sourceCountry = location.country;
+          outTuple.sourceDivision = location.division;
+          outTuple.sourceCity = location.city; }
+        if (ipDestinationGeohash in geohashTable) { 
+          GeohashType location = geohashTable[ipDestinationGeohash];
+          outTuple.destinationLatitude = location.latitude;
+          outTuple.destinationLongitude = location.longitude;
+          outTuple.destinationCountry = location.country;
+          outTuple.destinationDivision = location.division;
+          outTuple.destinationCity = location.city; }
+        submit(outTuple, Out); } }
+    () as EndpointLocationSink = FileSink(EndpointLocationStream) { param file: "debug.TestIPAddressLocationGeohash.EndpointLocationStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+}

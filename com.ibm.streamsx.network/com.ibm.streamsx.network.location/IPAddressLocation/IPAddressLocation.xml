@@ -94,27 +94,44 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
 
 * [https://dev.maxmind.com/geoip/geoip2/geoip2-city-country-csv-databases/]
 
+The format of 'geohash' codes for latitude and longitude coordinates is described here:
+
+* [https://en.wikipedia.org/wiki/Geohash/]
+
       </description>
+
       <libraryDependencies>
+
         <library>
           <cmn:description/>
           <cmn:managedLibrary>
             <cmn:lib>streams_boost_filesystem</cmn:lib>
           </cmn:managedLibrary>
         </library>
+
         <library>
           <cmn:description/>
           <cmn:managedLibrary>
             <cmn:lib>streams_boost_system</cmn:lib>
           </cmn:managedLibrary>
         </library>
+
         <library>
           <cmn:description/>
           <cmn:managedLibrary>
             <cmn:lib>streams_boost_regex</cmn:lib>
           </cmn:managedLibrary>
         </library>
+
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+
       </libraryDependencies>
+
       <providesSingleThreadedContext>Always</providesSingleThreadedContext>
       <allowCustomLogic>true</allowCustomLogic>
     </context>

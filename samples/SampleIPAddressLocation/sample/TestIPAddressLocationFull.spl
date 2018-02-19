@@ -56,6 +56,7 @@ composite TestIPAddressLocationFull {
         rstring ipSourcePostalCode,
         float64 ipSourceLatitude,
         float64 ipSourceLongitude,
+        rstring ipSourceGeohash,
         float64 ipSourceRadius,
         rstring ipDestinationAddress,  
         uint16  ipDestinationPort,  
@@ -77,7 +78,8 @@ composite TestIPAddressLocationFull {
         rstring ipDestinationTimezone,
         rstring ipDestinationPostalCode,
         float64 ipDestinationLatitude,
-        float64 ipDestinationLongitude;
+        float64 ipDestinationLongitude,
+        rstring ipDestinationGeohash;
 
     graph
 
@@ -123,6 +125,7 @@ composite TestIPAddressLocationFull {
         ipSourcePostalCode = ipVersion==4ub ? locationPostalCode(ipv4SourceAddress) : ipVersion==6ub ? locationPostalCode(ipv6SourceAddress) : "",
         ipSourceLatitude = ipVersion==4ub ? locationLatitude(ipv4SourceAddress) : ipVersion==6ub ? locationLatitude(ipv6SourceAddress) : 0.0,
         ipSourceLongitude = ipVersion==4ub ? locationLongitude(ipv4SourceAddress) : ipVersion==6ub ? locationLongitude(ipv6SourceAddress) : 0.0,
+        ipSourceGeohash = ipVersion==4ub ? locationGeohash(ipv4SourceAddress,6) : ipVersion==6ub ? locationGeohash(ipv6SourceAddress,6) : "",
         ipSourceRadius = ipVersion==4ub ? locationRadius(ipv4SourceAddress) : ipVersion==6ub ? locationRadius(ipv6SourceAddress) : 0.0,
         ipDestinationAddress = ipVersion==4ub ? convertIPV4AddressNumericToString(ipv4DestinationAddress) : ipVersion==6ub ? convertIPV6AddressNumericToString(ipv6DestinationAddress) : "",
         ipDestinationLocationFound = ipVersion==4ub ? locationFound(ipv4DestinationAddress) : ipVersion==6ub ? locationFound(ipv6DestinationAddress) : false,
@@ -143,7 +146,8 @@ composite TestIPAddressLocationFull {
         ipDestinationTimezone = ipVersion==4ub ? locationTimezone(ipv4DestinationAddress) : ipVersion==6ub ? locationTimezone(ipv6DestinationAddress) : "",
         ipDestinationPostalCode = ipVersion==4ub ? locationPostalCode(ipv4DestinationAddress) : ipVersion==6ub ? locationPostalCode(ipv6DestinationAddress) : "",
         ipDestinationLatitude = ipVersion==4ub ? locationLatitude(ipv4DestinationAddress) : ipVersion==6ub ? locationLatitude(ipv6DestinationAddress) : 0.0,
-        ipDestinationLongitude = ipVersion==4ub ? locationLongitude(ipv4DestinationAddress) : ipVersion==6ub ? locationLongitude(ipv6DestinationAddress) : 0.0;
+        ipDestinationLongitude = ipVersion==4ub ? locationLongitude(ipv4DestinationAddress) : ipVersion==6ub ? locationLongitude(ipv6DestinationAddress) : 0.0,
+        ipDestinationGeohash = ipVersion==4ub ? locationGeohash(ipv4DestinationAddress,6) : ipVersion==6ub ? locationGeohash(ipv6DestinationAddress,6) : "";
     }
     () as LocatedPacketSink = FileSink(LocatedPacketStream) { param file: "debug.TestIPAddressLocationFull.LocatedPacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ASCII"?>
+<function:functionModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:function="http://www.ibm.com/xmlns/prod/streams/spl/function">
+
+  <function:functionSet>
+    <function:headerFileName>GeohashFunctions.h</function:headerFileName>
+    <function:cppNamespaceName>com::ibm::streamsx::network::geohash</function:cppNamespaceName>
+
+    <function:functions>
+
+      <function:function>
+        <function:description>
+
+The geohashEncode() function encodes a latitude/longitude pair as a [https://en.wikipedia.org/wiki/Geohash|geohash] of a specified precision. The argument values are limited to these ranges:
+
+* 'latitude' is a float64 value limited to the range -90 to +90, representing degrees of latitude
+* 'longitude' is a float64 value limited to the range -180 to +180, representing degrees of longitude
+* 'precision' is an int32 value limited to the range 1 to 12, specifying the length of the 'geohash'
+
+The function returns a string of length 'precision' containing the encoded 'geohash' if all of the parameters are within range. The 'geohash' string is composed of the characters '0123456789bcdefghjkmnpqrstuvwxyz'.
+
+The function returns an empty string if any of the parameters are out of range.
+
+        </function:description>
+        <function:prototype>public rstring geohashEncode(float64 latitude, float64 longitude, int32 precision)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+
+The geohashDecode() function decodes a [https://en.wikipedia.org/wiki/Geohash|geohash] as the latitude and longitude of its center point and bounding box. The 'geohash' argument is a string value of 1 to 12 characters composed of the characters '0123456789bcdefghjkmnpqrstuvwxyz'.
+
+The function returns a list of six float64 values if the 'geohash' value is valid:
+
+* 0: the latitude of the center point
+* 1: the longitude of the center point
+* 2: the latitude of the top edge (that is, the northern edge) of the bounding box
+* 3: the longitude of the right edge (that is, the eastern edge) of the bounding box
+* 4: the latitude of the bottom edge (that is, the southern edge) of the bounding box
+* 5: the longitude of the left edge (that is, the western edge) of the bounding box
+
+The function returns an empty list if the 'geohash' value is not valid.
+
+        </function:description>
+        <function:prototype>public list&lt;float64> geohashDecode(rstring geohash)</function:prototype>
+      </function:function>
+
+    </function:functions>
+
+    <function:dependencies>
+      <function:library>
+        <common:description/>
+        <common:managedLibrary>
+          <common:includePath>../../impl/include</common:includePath>
+        </common:managedLibrary>
+      </function:library>
+    </function:dependencies>
+
+  </function:functionSet>
+
+</function:functionModel>

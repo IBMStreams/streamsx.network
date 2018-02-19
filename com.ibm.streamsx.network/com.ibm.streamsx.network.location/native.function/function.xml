@@ -79,6 +79,15 @@
 
       <function:function>
         <function:description>
+          This result function returns the [https://en.wikipedia.org/wiki/Geohash|geohash] of the specified precision
+          for the specified IP version 4 address,
+          if its location was found, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationGeohash(uint32 ipv4Address, int32 precision)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
           This result function returns the accuracy of the latitude and longitude
           for the specified IP version 4 address,
           expressed as a radius,
@@ -257,6 +266,15 @@
           if its location was found, or zero if not.
         </function:description>
         <function:prototype>public float64 locationLongitude(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns the [https://en.wikipedia.org/wiki/Geohash|geohash] of the specified precision
+          for the specified IP version 6 address,
+          if its location was found, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationGeohash(list&lt;uint8>[16] ipv6Address, int32 precision)</function:prototype>
       </function:function>
 
       <function:function>
