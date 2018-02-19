@@ -1,0 +1,52 @@
+/*
+** Copyright (C) 2018  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.geohash::*;
+
+stateful void doAssertEqual(rstring result, rstring expected, rstring id)
+{
+    printString("[" + id + "] ... ");
+    if(result!=expected) {
+        printStringLn("FAIL");
+        printStringLn("    expected: '" + expected + "'");
+        printStringLn("      result: '" + result + "'");
+        abort();
+    } else {
+        printStringLn("pass"); 
+    }
+}
+
+composite TestGeohashFunctions1 {
+
+    graph
+
+        () as TestGeohashStream = Custom() {
+            logic
+                onProcess:
+                {
+
+                  // test geohashEncode() function
+
+                  doAssertEqual(geohashEncode(42.60498046875, -5.60302734375, 5), "ezs42", "geohashEncode(42.60498046875, -5.60302734375, 5)");
+                  
+                  doAssertEqual(geohashEncode(40.018141, -105.274858, 12), "9xj5smj4w40m", "geohashEncode(40.018141, -105.274858, 12)");
+                  
+                  doAssertEqual(geohashEncode(40.018141, -105.274858, 6), "9xj5sm", "geohashEncode(40.018141, -105.2, 6)");
+    
+                  doAssertEqual(geohashEncode(40.018141, -105.274858, 2), "9x", "geohashEncode(40.018141, -105.274858, 2)");
+
+                  // test geohashDecode() function
+
+                  doAssertEqual((rstring)geohashDecode("ezs42"), (rstring)[42.60498046875, -5.60302734375, 42.626953125, -5.5810546875, 42.5830078125, -5.625], "geohashDecode(ezs42)");
+                  
+                  doAssertEqual((rstring)geohashDecode("ezs42gx"), (rstring)[42.602920532226562, -5.5817413330078125, 42.603607177734375, -5.581054687500000, 42.60223388671875, -5.582427978515625], "geohashDecode(ezs42gx)");
+                  
+                  doAssertEqual((rstring)geohashDecode("9xj5smj4w40"), (rstring)[40.018140748143196, -105.27485780417919, 40.01814141869545, -105.27485713362694, 40.018140077590942, -105.27485847473145], "geohashDecode(9xj5smj4w40)");
+
+                }
+        }
+}

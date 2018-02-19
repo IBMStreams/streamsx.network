@@ -69,8 +69,8 @@ composite TestIPAddressLocationBasic2 {
       stream<UnlocatedPacketType> UnlocatedPacketStream as OutUnlocated ) = IPAddressLocation(PacketStream) {
       param
         geographyDirectory: $geographyDirectory;
-        outputFilters: locationCityName(ipSourceAddress)!="" && locationCityName(ipDestinationAddress)!="",
-                       locationCityName(ipSourceAddress)=="" || locationCityName(ipDestinationAddress)=="";
+        outputFilters: locationCityName(ipSourceAddress)!="" || locationCityName(ipDestinationAddress)!="",
+                       locationCityName(ipSourceAddress)=="" && locationCityName(ipDestinationAddress)=="";
       output 
       OutLocated:
         ipSourceAddress = convertIPV4AddressNumericToString(ipSourceAddress),
