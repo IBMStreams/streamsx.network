@@ -20,6 +20,8 @@ $here/getGeographyData.sh
 $here/test*.sh
 )
 
+#export GCCSTD=c++11
+
 ################### functions used in this script #############################
 
 die() { echo ; echo -e "\e[1;31m$*\e[0m" >&2 ; exit 1 ; }

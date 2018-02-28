@@ -228,7 +228,7 @@ void MY_OPERATOR::loadCityLocations(std::string filename) {
    
     // insert this location structure into the hash table
     SPLAPPTRC(L_TRACE, "loading location " << location->locationID << ": continent=" << location->continentName << ", country=" << location->countryName << ", state=" << location->subdivision1Name << ", city=" << location->cityName , "IPAddressLocation");
-    cityLocations.insert( std::make_pair<std::string,CityLocation*>(location->locationID, location) );
+    cityLocations.insert( std::make_pair(location->locationID, location) );
     locationCount++;
   }				 
 
