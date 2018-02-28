@@ -39,15 +39,16 @@ compilerOptionsList=(
 --spl-path=$( IFS=: ; echo "${toolkitList[*]}" )
 --standalone-application
 --optimized-code-generation
---static-link
+#--c++std=c++11--static-link
 --main-composite=$namespace::$composite
 --output-directory=$buildDirectory 
 --data-directory=data
 --num-make-threads=$coreCount
 )
 
-[[ $GCCSTD != "c++11" ]] && gccOptions="-g3"
-[[ $GCCSTD == "c++11" ]] && gccOptions="-g3 -std=c++11 -Dtypeof=__typeof__"
+gccOptions="-g3"
+
+ldOptions=""
 
 compileTimeParameterList=(
 )
