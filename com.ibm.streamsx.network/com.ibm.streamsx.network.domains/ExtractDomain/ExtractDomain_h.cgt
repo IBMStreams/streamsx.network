@@ -1,0 +1,45 @@
+<%
+## Copyright (C) 2017  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/* Additional includes go here */
+#include <sys/types.h>
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR {
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR(); 
+
+  // Notify port readiness
+  void allPortsReady(); 
+
+  // Notify pending shutdown
+  void prepareToShutdown(); 
+    
+  void process(Tuple & tuple, uint32_t port);
+    
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+  
+private:
+  typedef std::tr1::unordered_set<std::string> TLDSet;
+
+  // Members
+  SPL::Mutex mutex_[2] ;
+  TLDSet *tlds_[2];
+  size_t tldsRSel_;
+  size_t tldsWSel_;
+  bool firstListLoaded_;
+}; 
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+
