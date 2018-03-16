@@ -116,7 +116,7 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
             if(!firstListLoaded_) {
                 ProcessingElement &pe = getPE();
 
-                SPLAPPTRC(L_TRACE, "Waiting for the initial TLD list to be loaded in. R="<<tldsRSel_, EXTRACT_DOMAIN);
+                SPLAPPTRC(L_WARN, "Waiting for the initial TLD list to be loaded in. R="<<tldsRSel_, EXTRACT_DOMAIN);
 
                 while(!firstListLoaded_ && !pe.getShutdownRequested()) {
                     // We haven't finished reading in a TLD list on the other port.
@@ -135,7 +135,7 @@ void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
                 }
 
                 if(firstListLoaded_) {
-                    SPLAPPTRC(L_TRACE, "Initial TLD list is loaded.  We can proceed. R="<<tldsRSel_, EXTRACT_DOMAIN);
+                    SPLAPPTRC(L_WARN, "Initial TLD list is loaded.  We can proceed. R="<<tldsRSel_, EXTRACT_DOMAIN);
                 }
             }
 
@@ -203,7 +203,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
     if(port == 1) {
         const IPort1Type& iport$1 = tuple;
 
-        SPLAPPTRC(L_WARN, "Process non-mutating, port 1.", EXTRACT_DOMAIN);
+        SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.", EXTRACT_DOMAIN);
 
         AutoPortMutex amW(mutex_[tldsWSel_], *this);
 
