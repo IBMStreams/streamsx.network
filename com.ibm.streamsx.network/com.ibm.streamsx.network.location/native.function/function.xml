@@ -189,11 +189,20 @@
 
       <function:function>
         <function:description>
-          This result function returns the continent time zone
+          This result function returns the time zone
           for the specified IP version 4 address,
           if its location was found and it has one, or an empty string if not.
         </function:description>
         <function:prototype>public rstring locationTimezone(uint32 ipv4Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns an indication of whether or not
+          the specified IP version 4 address is in the European Union,
+          if its location was found and it has an indication, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationInEU(uint32 ipv4Address)</function:prototype>
       </function:function>
 
 
@@ -379,11 +388,20 @@
 
       <function:function>
         <function:description>
-          This result function returns the continent time zone
+          This result function returns the time zone
           for the specified IP version 6 address,
           if its location was found and it has one, or an empty string if not.
         </function:description>
         <function:prototype>public rstring locationTimezone(list&lt;uint8>[16] ipv6Address)</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+          This result function returns an indication of whether or not
+          the specified IP version 6 address is in the European Union,
+          if its location was found and it has an indication, or an empty string if not.
+        </function:description>
+        <function:prototype>public rstring locationInEU(list&lt;uint8>[16] ipv6Address)</function:prototype>
       </function:function>
 
 
