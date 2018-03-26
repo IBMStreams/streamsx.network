@@ -3,14 +3,6 @@ namespace com.ibm.streamsx.network.domains;
 use com.ibm.streamsx.network.domains::*;
 
 composite TestExtractDomain {
-//    param
-//        expression <uint32>  $iterations     : (uint32)getSubmissionTimeValue("iterations", "1000");
-//        expression <uint64>  $expectedSetSize : (uint64)getSubmissionTimeValue("expectedSetSize", "1000");
-//        expression <float64>  $collisionRate     : (float64)getSubmissionTimeValue("collisionRate","0.1");
-//        expression <float64>  $metricsInterval     : (float64)getSubmissionTimeValue("metricsInterval","60");
-//        expression <uint64> $rotationTupleCount : (uint64)getSubmissionTimeValue("rotationTupleCount", "0");
-//        expression <float64> $prefillRatio : (float64)getSubmissionTimeValue("prefillRatio", "0.0");
-
 
     graph
 
@@ -18,7 +10,6 @@ composite TestExtractDomain {
         param
             file: "testDomains.txt";
             format: line;
-//            initDelay: 15.0;
 
         output
             InputStream: domain="";
