@@ -578,7 +578,7 @@ class NetflowMessageParser {
       if ( ntohs( ((struct NetflowCommonHeader*)buffer)->version) != 5 &&
            ntohs( ((struct NetflowCommonHeader*)buffer)->version) != 9 ) { error = "version not 5 or 9"; return; }
       if ( ntohs( ((struct NetflowCommonHeader*)buffer)->count) <  1   ) { error = "header count too small"; return; }
-      if ( ntohs( ((struct NetflowCommonHeader*)buffer)->count) > 32   ) { error = "header count too large"; return; }
+      if ( ntohs( ((struct NetflowCommonHeader*)buffer)->count) > 50   ) { error = "header count too large"; return; }
 
       // store pointers to the Netflow message in the buffer
       messageLength = length;

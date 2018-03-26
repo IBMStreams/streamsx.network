@@ -63,6 +63,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
     std::string cityName;         // column 10
     std::string metroCode;        // column 11
     std::string timezone;         // column 12 
+    std::string inEU;             // column 13
   };
   std::tr1::unordered_map<std::string, CityLocation*> cityLocations; // indexed by 'locationID'
 
@@ -204,6 +205,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
   inline __attribute__((always_inline))
     SPL::rstring locationTimezone(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->timezone : ""; }
 
+  inline __attribute__((always_inline))
+    SPL::rstring locationInEU(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->inEU : ""; }
+
 
   inline __attribute__((always_inline))
     SPL::boolean locationFound(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return !!subnet; }
@@ -267,6 +271,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   inline __attribute__((always_inline))
     SPL::rstring locationTimezone(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->timezone : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationInEU(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->inEU : ""; }
 
 
   inline __attribute__((always_inline))
