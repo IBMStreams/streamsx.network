@@ -349,9 +349,9 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
 
   // check for duplicate addresses
   for (int i=0; i<ipv4Subnets.size()-1; i++) {
-    if (ipv4Subnets[i].subnet.ipv4Address==ipv4Subnets[i+1].subnet.ipv4Address)
+    if (ipv4Subnets[i].subnet.ipv4Address==ipv4Subnets[i+1].subnet.ipv4Address) {
       SPLAPPTRC(L_ERROR,
-                "duplicate IPv4 address: " <<
+                ( ipv4Subnets[i].subnet.ipv4Mask==ipv4Subnets[i+1].subnet.ipv4Mask ? "duplicate IPv4 addresses: " : "nested IPv4 addresses: " ) <<
                 formatIPv4cidrAddress(ipv4Subnets[i].subnet.ipv4Address, ipv4Subnets[i].subnet.ipv4Mask) <<
                 " at location " <<
                 ipv4Subnets[i].subnet.location->locationID <<
@@ -359,7 +359,8 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
                 formatIPv4cidrAddress(ipv4Subnets[i+1].subnet.ipv4Address, ipv4Subnets[i+1].subnet.ipv4Mask) <<
                 " at location " <<
                 ipv4Subnets[i+1].subnet.location->locationID,
-                "IPAddressLocation"); }
+                "IPAddressLocation");
+    } }
 
   SPLAPPTRC(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv4 subnets", "IPAddressLocation");
 }
@@ -494,10 +495,10 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
 
   // check for duplicate addresses
   for (int i=0; i<ipv6Subnets.size()-1; i++) {
-    if (ipv6Subnets[i].subnet.ipv6Address==ipv6Subnets[i+1].subnet.ipv6Address)
+    if (ipv6Subnets[i].subnet.ipv6Address==ipv6Subnets[i+1].subnet.ipv6Address) {
       SPLAPPTRC(
                 L_ERROR,
-                "duplicate IPv6 address: " <<
+                ( ipv6Subnets[i].subnet.ipv6Mask==ipv6Subnets[i+1].subnet.ipv6Mask ? "duplicate IPv6 addresses: " : "nested IPv6 addresses: " ) <<
                 formatIPv6cidrAddress(ipv6Subnets[i].subnet.ipv6Address, ipv6Subnets[i].subnet.ipv6Mask) <<
                 " at location " <<
                 ipv6Subnets[i].subnet.location->locationID <<
@@ -505,8 +506,9 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
                 formatIPv6cidrAddress(ipv6Subnets[i+1].subnet.ipv6Address, ipv6Subnets[i+1].subnet.ipv6Mask) <<
                 " at location " <<
                 ipv6Subnets[i+1].subnet.location->locationID,
-                "IPAddressLocation"); }
-
+                "IPAddressLocation");
+    } }
+  
   SPLAPPTRC(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv6 subnets", "IPAddressLocation");
 }
 
