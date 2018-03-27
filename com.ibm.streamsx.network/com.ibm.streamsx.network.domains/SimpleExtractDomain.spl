@@ -1,0 +1,31 @@
+namespace com.ibm.streamsx.network.domains;
+
+public composite SimpleExtractDomain(input DomainNamesStream; output OutputStream) {
+    param
+        attribute $domainNameAttr;
+        attribute $outputAttr;
+        expression<rstring> $tldsDir;
+        expression<rstring> $tldsFilenamePattern;
+        expression<boolean> $blankOnInvalidTLD: true;
+
+    graph
+        stream<rstring filepath> FilepathFilterStream as Out = DirectoryScan() {
+            param
+                directory: $tldsDir;
+                pattern: $tldsFilenamePattern;
+            output Out:
+                filepath = FullPath();
+        }
+
+        stream<rstring line> TLDStream = FileSource(FilepathFilterStream) {
+            param
+                format: line;
+        }
+
+        stream<DomainNamesStream> OutputStream = ExtractDomain(DomainNamesStream; TLDStream) {
+            param
+                inputFQDNAttr: $domainNameAttr;
+                outputDomainAttr: $outputAttr;
+                blankOnInvalidTLD: $blankOnInvalidTLD;
+        }
+}
