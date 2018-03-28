@@ -23,17 +23,38 @@ others. All Rights Reserved.
       <allowAny>false</allowAny>
       <parameter>
         <name>inputTextAttr</name>
-        <description>Specifies the input attribute(s) containing the text that the filter will be applied against.
-The supported data types for this attribute are `rstring` and `list&lt;rstring>`.</description>
+        <description>
+Specifies the input attribute(s) containing the text that the filter will be
+applied against.  The supported data types for this attribute are `rstring`
+and `list&lt;rstring>`.
+        </description>
         <optional>false</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>Expression</expressionMode>
         <cardinality>1</cardinality>
       </parameter>
+      <parameter>
+        <name>invertMatch</name>
+        <description>
+If set to true, the meaning of the filter is basically inverted.  If any of the
+specified input attribute(s) of a tuple match the current state of the filter,
+the tuple will NOT be passed through.  Only tuples that do not match the filter
+will be passed through.  The default setting is false, where only tuples that DO
+match the filter are passed through.
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Constant</expressionMode>
+        <type>boolean</type>
+        <cardinality>1</cardinality>
+      </parameter>
    </parameters>
     <inputPorts>
       <inputPortSet>
-        <description>Ingests tuples containing text and filters the data based on the text. The `inputTextAttr` parameter specifies the attribute containing the text.</description>
+        <description>
+Ingests tuples containing text and filters the data based on the text. The
+`inputTextAttr` parameter specifies the attribute containing the text.
+        </description>
         <windowingDescription></windowingDescription>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
@@ -43,9 +64,17 @@ The supported data types for this attribute are `rstring` and `list&lt;rstring>`
         <optional>false</optional>
       </inputPortSet>
       <inputPortSet>
-        <description>Control port that takes in tuples containing IPv4 addresses in CIDR format for use in the filter operation.  All packets that match one of the input address ranges are passed through the filter.
+        <description>
+Control port that takes in tuples containing regex fragments for use in the
+filter operation.  By default, all packets that match any of the fragments are
+passed through the filter.
 
-This control port can be used to dynamically update the list of addresses being filtered. Each time a tuple is received containing an address it is saved in a temporary list that is applied after a window punctuation is received.  This input port expects a tuple containing a single attribute of type `rstring` which is an IPv4 address in CIDR format (e.g. 192.168.0.0/24).</description>
+This control port can be used to dynamically update the list of regex fragments
+in the filter. Each time a tuple is received containing a fragment it is added
+to a temporary regex string being built up, which is compiled and applied after
+a window punctuation is received.  The regex fragments should be in ERE form,
+and are combined with a simple '|'.
+        </description>
         <windowingDescription></windowingDescription>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
@@ -57,7 +86,15 @@ This control port can be used to dynamically update the list of addresses being 
     </inputPorts>
     <outputPorts>
       <outputPortSet>
-        <description>Submits a tuple for each input tuple received on input port 0 if one or more of the attributes defined in the inputIPAttr paramater match an IPv4 address that has been input on the control port.</description>
+        <description>
+By default, submits a tuple for each input tuple received on input port 0 if one
+or more of the attributes defined in the inputTextAttr parameter match the regex
+built up from the fragments sent in on the control port.
+
+If invertMatch is set, submits a tuple for each input tuple received on input
+port 0 only if NONE of the attributes defined on the inputTextAttr parameter
+match the built up regex.
+        </description>
         <expressionMode>Nonexistent</expressionMode>
         <autoAssignment>true</autoAssignment>
         <completeAssignment>true</completeAssignment>
