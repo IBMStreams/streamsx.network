@@ -40,6 +40,9 @@ if(defined $inputPort1) {
 # get C++ expressions for getting the values of this operator's parameters
 my $inputTextAttrParamCppValue = $model->getParameterByName("inputTextAttr")->getValueAt(0)->getCppExpression();
 
+my $invertMatch = $model->getParameterByName("invertMatch");
+$invertMatch = $invertMatch ? $invertMatch->getValueAt(0)->getSPLExpression() eq "true" : undef;
+
 %>
 
 <%SPL::CodeGen::implementationPrologue($model);%>
@@ -114,7 +117,11 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
             textMatch = lookupText(<%=$inputTextAttrParamCppValue%>);
         }
 
+<% if(!$invertMatch) { %>
         if(textMatch) {
+<% } else { %>
+        if(!textMatch) {
+<% } %>
 //            <% # CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
 //            <% # CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
 //            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, TEXT_FILTER);
