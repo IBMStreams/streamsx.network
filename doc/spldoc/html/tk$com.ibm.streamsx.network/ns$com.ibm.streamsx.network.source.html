@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; com.ibm.streamsx.network.source</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; com.ibm.streamsx.network.source</p>
 
 </div>
 
@@ -81,7 +81,19 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IPV6_SRC_ADDRESS">IPV6_SRC_ADDRESS()</a></strong>: This function returns the IP version 6 source address of the current packet, if it has one, or an empty list otherwise.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_DONT_FRAGMENT">IP_DONT_FRAGMENT()</a></strong>: This function returns the IP "don't fragment" flag of the current packet.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_DST_PORT">IP_DST_PORT()</a></strong>: This function returns the TCP or UDP destination port number of the current packet,  if it has one, or zero otherwise.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_FRAGMENT_OFFSET">IP_FRAGMENT_OFFSET()</a></strong>: This function returns the IP "fragment offset" field of the current packet, multiplied by eight, When a router fragments a packet, it stores the offset from the front of the packet to the front of the fragment, measured in eight-byte steps, in each fragment.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_IDENTIFIER">IP_IDENTIFIER()</a></strong>: This function returns the IP identifier of the current packet.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_MORE_FRAGMENTS">IP_MORE_FRAGMENTS()</a></strong>: This function returns the IP "more fragments" flag of the current packet.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__IP_PROTOCOL">IP_PROTOCOL()</a></strong>: This function returns the IP protocol of the current packet, for example, '6' for TCP, or '17' for UDP, or zero if the ethernet packet does not contain an IP packet.

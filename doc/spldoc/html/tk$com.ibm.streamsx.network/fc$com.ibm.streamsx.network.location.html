@@ -22,30 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.location.html">com.ibm.streamsx.network.location</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.location.html">com.ibm.streamsx.network.location</a> &gt; C++ Native Functions</p>
 
 </div>
 
 <div class="section">
 This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> IPAddressLocation_result_functions  </dd>
-
-</dl>
-
 </div>
 
 <div class="section">
@@ -222,6 +204,26 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationGeohash.list:.:uint8:.::..:16:..:.int32"><tt class="ph tt">      public rstring locationGeohash(list&lt;uint8&gt;[16] ipv6Address, int32 precision)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 6 address,           if its location was found, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationGeohash.uint32.int32"><tt class="ph tt">      public rstring locationGeohash(uint32 ipv4Address, int32 precision)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 4 address,           if its location was found, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__locationID.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationID(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
@@ -246,6 +248,26 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This result function returns a list of IDs corresponding to the specified list of IP version 4 addresses.           Empty strings are returned for IP addresses where no location is found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationInEU.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationInEU(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns an indication of whether or not           the specified IP version 6 address is in the European Union,           if its location was found and it has an indication, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__locationInEU.uint32"><tt class="ph tt">      public rstring locationInEU(uint32 ipv4Address)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This result function returns an indication of whether or not           the specified IP version 4 address is in the European Union,           if its location was found and it has an indication, or an empty string if not.
 </p>
 
    </dd>
@@ -605,7 +627,7 @@ This page documents native functions that can be invoked from SPL, including the
    <dt class="dt dlterm splpart" id="spldoc_functions__locationTimezone.list:.:uint8:.::..:16:..:"><tt class="ph tt">      public rstring locationTimezone(list&lt;uint8&gt;[16] ipv6Address)      </tt>   </dt>
 
    <dd class="dd">
-<p class="p">          This result function returns the continent time zone           for the specified IP version 6 address,           if its location was found and it has one, or an empty string if not.
+<p class="p">          This result function returns the time zone           for the specified IP version 6 address,           if its location was found and it has one, or an empty string if not.
 </p>
 
    </dd>
@@ -615,7 +637,7 @@ This page documents native functions that can be invoked from SPL, including the
    <dt class="dt dlterm splpart" id="spldoc_functions__locationTimezone.uint32"><tt class="ph tt">      public rstring locationTimezone(uint32 ipv4Address)      </tt>   </dt>
 
    <dd class="dd">
-<p class="p">          This result function returns the continent time zone           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
+<p class="p">          This result function returns the time zone           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
 </p>
 
    </dd>

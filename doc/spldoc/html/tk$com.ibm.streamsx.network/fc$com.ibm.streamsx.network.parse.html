@@ -22,186 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.parse.html">com.ibm.streamsx.network.parse</a> &gt; C++ Native Functions</p>
 
 </div>
 
 <div class="section">
 This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> common_result_functions  </dd>
-
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
-<dl class="dl" compact="compact">
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__messagesProcessed"><tt class="ph tt">      public uint64 messagesProcessed()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of messages processed by the operator since it started,           including the current message.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__parseError"><tt class="ph tt">      public boolean parseError()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if an encoding error was detected while decoding the current packet,           or <tt class="ph tt">false</tt> otherwise. Note that a value of <tt class="ph tt">false</tt> does not necessarily mean the packet has           no encoding errors, since the operator only decodes the fields needed.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorCode"><tt class="ph tt">      public int32 parseErrorCode()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
-</p>
-
-<div class="p">
-<ul class="ul">
-<li class="li"> 102 for 'label overruns packet': The length of an uncompressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.</li>
-
-<li class="li">
-<p class="p"> 103 for 'label compression length overruns packet': The length field of a compressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 105 for 'label compression offset overruns packet': The offset of a compressed domain name label points beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the DNS message.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the DNS message.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 110 for 'resource record missing': The DNS message contains fewer resource records than the 'count' fields in the message header indicate. The DNS message may have been truncated.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 111 for 'question resource record truncated': The DNS 'question' resource record was truncated. The packet containing the message was probably truncated.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 112 for 'resource record truncated': A DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 113 for 'resource record data truncated': The 'rdata' field of a DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
-</p>
-</li>
-
-<li class="li">
-<p class="p"> 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
-</p>
-</li>
-
-</ul>
-
-</div>
-
-<p class="p">          <em class="ph i">Note:</em> <a class="xref" href="https://www.ietf.org/rfc/rfc1035.txt">RFC 1035</a> explains the format of DNS messages;            in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorDescription"><tt class="ph tt">      public rstring parseErrorDescription()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns a description of an encoding error found while decoding the current packet,           or an empty string if no enoding errors were found.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorOffset"><tt class="ph tt">      public uint32 parseErrorOffset()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the offset from the beginning of the message to the encoding error found,           or zero if no encoding errors were found.
-</p>
-
-   </dd>
-
- 
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> DHCPMessageParser_result_functions  </dd>
-
-</dl>
-
 </div>
 
 <div class="section">
@@ -1079,31 +905,6 @@ This page documents native functions that can be invoked from SPL, including the
    </dd>
 
  
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> DNSMessageParser_result_functions  </dd>
-
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
-<dl class="dl" compact="compact">
  
    <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ADDITIONAL_CLASSES"><tt class="ph tt">      public list&lt;uint16&gt; DNS_ADDITIONAL_CLASSES()      </tt>   </dt>
 
@@ -1169,6 +970,26 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This parser result function returns a list of the 'type' fields in the 'additional' resource records in the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring"><tt class="ph tt">      public rstring DNS_ALL_FIELDS(rstring, rstring, rstring)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from all DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:"><tt class="ph tt">      public rstring DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from seleccted DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter. DNS resource records are selected by specifying DNS types in a list of unsigned 16-bit integers as the fourth parameter of the function.
 </p>
 
    </dd>
@@ -1319,6 +1140,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          This parser result function returns <tt class="ph tt">true</tt> if the 'authoritative' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__DNS_EXTRA_DATA"><tt class="ph tt">      public blob DNS_EXTRA_DATA()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns any extra data in the DNS message that follows the last resource record.           Note that the parseError() function returns 'true' if there is any extra data following the last resource record,           even though no errors were found in any resource record,            and the parseErrorCode() function returns '122'.
 </p>
 
    </dd>
@@ -1591,966 +1422,6 @@ This page documents native functions that can be invoked from SPL, including the
    </dd>
 
  
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> NetflowMessageParser_result_functions  </dd>
-
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
-<dl class="dl" compact="compact">
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_DESCRIPTION"><tt class="ph tt">      public rstring NETFLOW_APPLICATION_DESCRIPTION()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the application description.           For Netflow version 9, this is field 94.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_NAME"><tt class="ph tt">      public rstring NETFLOW_APPLICATION_NAME()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the name associated with a classification.           For Netflow version 9, this is field 96.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_TAG"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_APPLICATION_TAG()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns 8 bits of engine ID, followed by <em class="ph i">n</em> bits of classification.           For Netflow version 9, this is field 95.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_BGP_IPV4_NEXT_HOP"><tt class="ph tt">      public uint32 NETFLOW_BGP_IPV4_NEXT_HOP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 4 address of the next router in the BGP domain.           For Netflow version 9, this is field 18. 
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_BPG_IPV6_NEXT_HOP"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_BPG_IPV6_NEXT_HOP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the next router in the BGP domain.            For Netflow version 9, this is field 63.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_COUNT"><tt class="ph tt">      public uint16 NETFLOW_COUNT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of Netflow records in the current message,           including templates, options, and flows.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DIRECTION"><tt class="ph tt">      public uint8 NETFLOW_DIRECTION()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the direction of the flow,           '0' for ingress, '1' for egress.            For Netflow version 9, this is field 61.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_AS"><tt class="ph tt">      public uint32 NETFLOW_DST_AS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the BGP autonomous system number of the destination endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">dst_as</tt> field.           For Netflow version 9, this is field 17. 
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_MASK"><tt class="ph tt">      public uint8 NETFLOW_DST_MASK()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of significant bits in the            IP version 4 address of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dst_mask</tt> field.           For Netflow version 9, this is field 13.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_PORT"><tt class="ph tt">      public uint16 NETFLOW_DST_PORT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the TCP or UDP port number of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dstport</tt> field.           For Netflow version 9, this is field 11.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_TOS"><tt class="ph tt">      public uint8 NETFLOW_DST_TOS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the 'type of service' byte setting for the flow when exiting the outgoing interface.            For Netflow version 9, this is field 55.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_TRAFFIC_INDEX"><tt class="ph tt">      public uint32 NETFLOW_DST_TRAFFIC_INDEX()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns BGP policy accounting destination traffic index.            For Netflow version 9, this is field 93.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_VLAN"><tt class="ph tt">      public uint16 NETFLOW_DST_VLAN()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the virtual LAN identifier associated with the egress interface.            For Netflow version 9, this is field 59.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ENGINE_ID"><tt class="ph tt">      public uint8 NETFLOW_ENGINE_ID()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the identifier of the switching engine in the router.           For Netflow version 9, this is field 39.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ENGINE_TYPE"><tt class="ph tt">      public uint8 NETFLOW_ENGINE_TYPE()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the type code of the switching engine in the router.           For Netflow version 9, this is field 38.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_BYTE_LIST.int32"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_FIELD_AS_BYTE_LIST(int32)      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,            represented as list of unsigned bytes, or an empty list if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_INTEGER.int32"><tt class="ph tt">      public uint64 NETFLOW_FIELD_AS_INTEGER(int32)      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,           represented as an unsigned integer, or zero if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_STRING.int32"><tt class="ph tt">      public rstring NETFLOW_FIELD_AS_STRING(int32)      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,            represented as a string, or an empty string if not.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIRST_SWITCHED"><tt class="ph tt">      public uint32 NETFLOW_FIRST_SWITCHED()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the first packet of the current flow,           that is,           the time that the first packet in this flow           passed through the router, relative to when the router was booted, in milliseconds.           For Netflow version 5, this is the <tt class="ph tt">first</tt> field.           For Netflow version 9, this is field 22.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOWS"><tt class="ph tt">      public uint64 NETFLOW_FLOWS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of flows that were aggregated for the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 3.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_ACTIVE_TIMEOUT"><tt class="ph tt">      public uint16 NETFLOW_FLOW_ACTIVE_TIMEOUT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the timeout value, in seconds, for active flow entries in the Netflow cache.            For Netflow version 9, this is field 36.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_INACTIVE_TIMEOUT"><tt class="ph tt">      public uint16 NETFLOW_FLOW_INACTIVE_TIMEOUT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the timeout value, in seconds, for inactive flow entries in the Netflow cache.            For Netflow version 9, this is field 37.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_ID"><tt class="ph tt">      public uint8 NETFLOW_FLOW_SAMPLER_ID()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the identifier shown in "show flow-sampler".            For Netflow version 9, this is field 48.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_MODE"><tt class="ph tt">      public uint8 NETFLOW_FLOW_SAMPLER_MODE()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the sampling mode, when Netflow is sampled,           For Netflow version 9, this is field 49.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL"><tt class="ph tt">      public uint32 NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the packet sampling interval, when Netflow is sampled.           For Netflow version 9, this is field 50.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FORWARDING_STATUS"><tt class="ph tt">      public uint8 NETFLOW_FORWARDING_STATUS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the forwarding status, with the 2 left bits giving the status and the 6 remaining bits giving the reason code.           For Netflow version 9, this is field 89.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FRAGMENT_OFFSET"><tt class="ph tt">      public uint16 NETFLOW_FRAGMENT_OFFSET()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the fragment offset value from fragmented IP packets.            For Netflow version 9, this is field 88.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ICMP_TYPE"><tt class="ph tt">      public uint16 NETFLOW_ICMP_TYPE()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the ICMP packet type.           For Netflow version 9, this is field 32.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IF_DESC"><tt class="ph tt">      public rstring NETFLOW_IF_DESC()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the router's interface description.            For Netflow version 9, this is field 83. 
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IF_NAME"><tt class="ph tt">      public rstring NETFLOW_IF_NAME()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the router's interface name.            For Netflow version 9, this is field 82. 
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_INPUT_INTERFACE"><tt class="ph tt">      public uint32 NETFLOW_INPUT_INTERFACE()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the interface index where the current flow entered the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">input</tt> field.           For Netflow version 9, this is field 10.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_BYTES"><tt class="ph tt">      public uint64 NETFLOW_IN_BYTES()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of bytes that entered the router for the current flow record,            if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dOctets</tt> field.           For Netflow version 9, this is field 1.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PERMANENT_BYTES"><tt class="ph tt">      public uint64 NETFLOW_IN_PERMANENT_BYTES()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the running byte counter for a permanent flow.            For Netflow version 9, this is field 85.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PERMANENT_PKTS"><tt class="ph tt">      public uint64 NETFLOW_IN_PERMANENT_PKTS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the running packet counter for a permanent flow.            For Netflow version 9, this is field 86.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PKTS"><tt class="ph tt">      public uint64 NETFLOW_IN_PKTS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of packets that entered the router for the current flow record,            if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dPkts</tt> field.           For Netflow version 9, this is field 2.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_DST_ADDR"><tt class="ph tt">      public uint32 NETFLOW_IPV4_DST_ADDR()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 4 address of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dstaddr</tt> field.           For Netflow version 9, this is field 12.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_DST_PREFIX"><tt class="ph tt">      public uint32 NETFLOW_IPV4_DST_PREFIX()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 4 destination address prefix (specific for Cisco Catalyst architecture).            For Netflow version 9, this is field 45.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_IDENT"><tt class="ph tt">      public uint16 NETFLOW_IPV4_IDENT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns The IP version 4 identification field of the flow.            For Netflow version 9, this is field 54.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_NEXT_HOP"><tt class="ph tt">      public uint32 NETFLOW_IPV4_NEXT_HOP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 4 address of the next router towards the destination endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">nexthop</tt> field.           For Netflow version 9, this is field 15.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_SRC_ADDR"><tt class="ph tt">      public uint32 NETFLOW_IPV4_SRC_ADDR()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 4 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">srcaddr</tt> field.           For Netflow version 9, this is field 8.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_SRC_PREFIX"><tt class="ph tt">      public uint32 NETFLOW_IPV4_SRC_PREFIX()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 4 source address prefix (specific for Cisco Catalyst architecture).            For Netflow version 9, this is field 44.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_DST_ADDR"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_DST_ADDR()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 6 address of the destination endpoint of the current flow record,           if available, or an empty list if not.           For Netflow version 9, this is field 28.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_DST_MASK"><tt class="ph tt">      public uint8 NETFLOW_IPV6_DST_MASK()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of significant bits in the            IP version 6 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 30.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_FLOW_LABEL"><tt class="ph tt">      public uint32 NETFLOW_IPV6_FLOW_LABEL()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 6 flow label.           For Netflow version 9, this is field 31.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_NEXT_HOP"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_NEXT_HOP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 6 address of the next-hop router.            For Netflow version 9, this is field 62.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_OPTION_HEADERS"><tt class="ph tt">      public uint32 NETFLOW_IPV6_OPTION_HEADERS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 6 option headers found in the flow.            For Netflow version 9, this is field 64.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_SRC_ADDR"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_SRC_ADDR()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version 6 address of the source endpoint of the current flow record,           if available, or an empty list if not.           For Netflow version 9, this is field 27.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_SRC_MASK"><tt class="ph tt">      public uint8 NETFLOW_IPV6_SRC_MASK()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of significant bits in the            IP version 6 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 29.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IP_PROTOCOL_VERSION"><tt class="ph tt">      public uint8 NETFLOW_IP_PROTOCOL_VERSION()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP version for the flow, either '4' or '6'.           For Netflow version 9, this is field 60.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_LAST_SWITCHED"><tt class="ph tt">      public uint32 NETFLOW_LAST_SWITCHED()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the last packet of the current flow,           that is,           the time that the last packet in this flow           passed through the router, relative to when the router was booted, in milliseconds.           For Netflow version 5, this is the <tt class="ph tt">last</tt> field.           For Netflow version 9, this is field 21.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_DST_ADDR_IN"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_DST_ADDR_IN()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the incoming destination MAC address.            For Netflow version 9, this is field 80.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_DST_ADDR_OUT"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_DST_ADDR_OUT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the incoming destination MAC address for the flow.            For Netflow version 9, this is field 56.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_SRC_ADDR_IN"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_SRC_ADDR_IN()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the incoming source MAC address for the flow.            For Netflow version 9, this is field 56.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_SRC_ADDR_OUT"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_SRC_ADDR_OUT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the outgoing source MAC address.            For Netflow version 9, this is field 81.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAX_PKT_LNGTH"><tt class="ph tt">      public uint16 NETFLOW_MAX_PKT_LNGTH()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the maximum packet length for the current flow.           For Netflow version 9, this is field 26.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAX_TTL"><tt class="ph tt">      public uint8 NETFLOW_MAX_TTL()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the maximum 'time to live' for incoming packets of the flow.            For Netflow version 9, this is field 53.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MIN_PKT_LNGTH"><tt class="ph tt">      public uint16 NETFLOW_MIN_PKT_LNGTH()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the minimum packet length for the current flow.           For Netflow version 9, this is field 25.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MIN_TTL"><tt class="ph tt">      public uint8 NETFLOW_MIN_TTL()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the minimum 'time to live' for incoming packets of the flow.            For Netflow version 9, this is field 52.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_LABEL.int32"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_MPLS_LABEL(int32)      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the MPLS label at the specified position in the stack,           where the position is specified with an argument between 1 and 10.           This comprises 20 bits of MPLS label, 3 experimental bits and 1 end-of-stack bit.           For Netflow version 9, these are fields 71 through 79.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_PAL_RD"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_MPLS_PAL_RD()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the MPLS PAL Route Distinguisher.            For Netflow version 9, this is field 90.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_PREFIX_LEN"><tt class="ph tt">      public uint8 NETFLOW_MPLS_PREFIX_LEN()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of consecutive bits in the MPLS prefix length.           For Netflow version 9, this is field 91.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR"><tt class="ph tt">      public uint32 NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the Forwarding Equivalent Class corresponding to the MPLS Top Label.            For Netflow version 9, this is field 47.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_TOP_LABEL_TYPE"><tt class="ph tt">      public uint8 NETFLOW_MPLS_TOP_LABEL_TYPE()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the MPLS top label type, '0' for  UNKNOWN, '1' for TE-MIDPT, '2' for ATOM, '3' for VPN '4' for BGP, '5' for LDP.            For Netflow version 9, this is field 46.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_DST_BYTES"><tt class="ph tt">      public uint64 NETFLOW_MUL_DST_BYTES()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of outgoing multicast bytes in the current flow.           For Netflow version 9, this is field 20.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_DST_PKTS"><tt class="ph tt">      public uint64 NETFLOW_MUL_DST_PKTS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of outgoing multicast packets in the current flow.           For Netflow version 9, this is field 19.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_IGMP_TYPE"><tt class="ph tt">      public uint8 NETFLOW_MUL_IGMP_TYPE()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IGMP packet type.           For Netflow version 9, this is field 33.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUTPUT_INTERFACE"><tt class="ph tt">      public uint32 NETFLOW_OUTPUT_INTERFACE()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the interface index where the current flow left the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">output</tt> field.           For Netflow version 9, this is field 14.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUT_BYTES"><tt class="ph tt">      public uint64 NETFLOW_OUT_BYTES()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of bytes that left the router for the current flow.           For Netflow version 9, this is field 23.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUT_PKTS"><tt class="ph tt">      public uint64 NETFLOW_OUT_PKTS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of packets that left the router for the current flow.           For Netflow version 9, this is field 24.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_POST_IP_DSCP"><tt class="ph tt">      public uint8 NETFLOW_POST_IP_DSCP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.           For Netflow version 9, this is field 98.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_PROTOCOL"><tt class="ph tt">      public uint8 NETFLOW_PROTOCOL()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP protocol number for the current flow record,            if available,           for example, '17' for UDP, or '6' for TCP, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">prot</tt> field.           For Netflow version 9, this is field 4.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_REPLICATION_FACTOR"><tt class="ph tt">      public uint32 NETFLOW_REPLICATION_FACTOR()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the multicast replication factor.           For Netflow version 9, this is field 99.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLER_NAME"><tt class="ph tt">      public rstring NETFLOW_SAMPLER_NAME()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the name of the flow sampler, when Netflow is sampled.           For Netflow version 9, this is field 84.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLING_ALGORITHM"><tt class="ph tt">      public uint8 NETFLOW_SAMPLING_ALGORITHM()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the sampling algorithm, when Netflow is sampled, with            '1' for deterministic sampling, and '2' for random sampling.            For Netflow version 9, this is field 35.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLING_INTERVAL"><tt class="ph tt">      public uint32 NETFLOW_SAMPLING_INTERVAL()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the sampling rate, when Netflow is sampled,           for example, a value of 100 indicates that one of every 100 packets is sampled.           For Netflow version 9, this is field 34. 
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SEQUENCE_NUMBER"><tt class="ph tt">      public uint32 NETFLOW_SEQUENCE_NUMBER()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the sequence number assigned to the current message by the router.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SOURCE_ID"><tt class="ph tt">      public uint32 NETFLOW_SOURCE_ID()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the port identifier of the router.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_AS"><tt class="ph tt">      public uint32 NETFLOW_SRC_AS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the BGP autonomous system number of the source endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">src_as</tt> field.           For Netflow version 9, this is field 16. 
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_MASK"><tt class="ph tt">      public uint8 NETFLOW_SRC_MASK()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of significant bits in the            IP version 4 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">src_mask</tt> field.           For Netflow version 9, this is field 9.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_PORT"><tt class="ph tt">      public uint16 NETFLOW_SRC_PORT()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the TCP or UDP port number of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">srcport</tt> field.           For Netflow version 9, this is field 7.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_TOS"><tt class="ph tt">      public uint8 NETFLOW_SRC_TOS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the IP 'type of service' byte for the current flow record on entering the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">tos</tt> field.           For Netflow version 9, this is field 5.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_TRAFFIC_INDEX"><tt class="ph tt">      public uint32 NETFLOW_SRC_TRAFFIC_INDEX()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns BGP policy accounting source traffic index.            For Netflow version 9, this is field 92.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_VLAN"><tt class="ph tt">      public uint16 NETFLOW_SRC_VLAN()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the virtual LAN identifier associated with the ingress interface.            For Netflow version 9, this is field 58.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SYSTEM_UPTIME"><tt class="ph tt">      public uint32 NETFLOW_SYSTEM_UPTIME()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the elapsed time from when the router started until the current message was sent,           in milliseconds.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TCP_FLAGS"><tt class="ph tt">      public uint8 NETFLOW_TCP_FLAGS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the cumulative value of all TCP flags in the current flow record,            that is, the logical 'or' of the TCP flags in all packets in the flow,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">tcp_flags</tt> field.           For Netflow version 9, this is field 6.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_BYTES_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_BYTES_EXP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of bytes exported by the Observation Domain.            For Netflow version 9, this is field 40.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_FLOWS_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_FLOWS_EXP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of flows exported by the Observation Domain.            For Netflow version 9, this is field 42.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_PKTS_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_PKTS_EXP()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the number of packets exported by the Observation Domain.            For Netflow version 9, this is field 41.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_UNIX_NANOSECONDS"><tt class="ph tt">      public uint32 NETFLOW_UNIX_NANOSECONDS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the fractional part of NETFLOW_UNIX_SECONDS(), in nanoseconds,           for Netflow version 5 messages only.
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_UNIX_SECONDS"><tt class="ph tt">      public uint32 NETFLOW_UNIX_SECONDS()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the time that the current message was sent, in seconds,           according to the router's clock, relative to the beginning of the Unix epoch            (at midnight on the first of January in Greenwich, England).
-</p>
-
-   </dd>
-
- 
- 
-   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_VERSION"><tt class="ph tt">      public uint16 NETFLOW_VERSION()      </tt>   </dt>
-
-   <dd class="dd">
-<p class="p">          This parser result function returns the Netflow version of the current message, either '5' or '9'.
-</p>
-
-   </dd>
-
- 
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> IPFIXMessageParser_result_functions  </dd>
-
-</dl>
-
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
-<dl class="dl" compact="compact">
  
    <dt class="dt dlterm splpart" id="spldoc_functions__IPFIX_bgpDestinationAsNumber"><tt class="ph tt">      public uint32 IPFIX_bgpDestinationAsNumber()      </tt>   </dt>
 
@@ -4450,6 +3321,1072 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">          IPFIX field 147:            The Service Set IDentifier (SSID) identifying an 802.11           (Wi-Fi) network used.  According to IEEE.802-11.1999, the           SSID is encoded into a string of up to 32 characters.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_DESCRIPTION"><tt class="ph tt">      public rstring NETFLOW_APPLICATION_DESCRIPTION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the application description.           For Netflow version 9, this is field 94.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_NAME"><tt class="ph tt">      public rstring NETFLOW_APPLICATION_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the name associated with a classification.           For Netflow version 9, this is field 96.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_APPLICATION_TAG"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_APPLICATION_TAG()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns 8 bits of engine ID, followed by <em class="ph i">n</em> bits of classification.           For Netflow version 9, this is field 95.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_BGP_IPV4_NEXT_HOP"><tt class="ph tt">      public uint32 NETFLOW_BGP_IPV4_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the next router in the BGP domain.           For Netflow version 9, this is field 18. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_BPG_IPV6_NEXT_HOP"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_BPG_IPV6_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the next router in the BGP domain.            For Netflow version 9, this is field 63.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_COUNT"><tt class="ph tt">      public uint16 NETFLOW_COUNT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of Netflow records in the current message,           including templates, options, and flows.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DIRECTION"><tt class="ph tt">      public uint8 NETFLOW_DIRECTION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the direction of the flow,           '0' for ingress, '1' for egress.            For Netflow version 9, this is field 61.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_AS"><tt class="ph tt">      public uint32 NETFLOW_DST_AS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the BGP autonomous system number of the destination endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">dst_as</tt> field.           For Netflow version 9, this is field 17. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_MASK"><tt class="ph tt">      public uint8 NETFLOW_DST_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 4 address of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dst_mask</tt> field.           For Netflow version 9, this is field 13.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_PORT"><tt class="ph tt">      public uint16 NETFLOW_DST_PORT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the TCP or UDP port number of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dstport</tt> field.           For Netflow version 9, this is field 11.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_TOS"><tt class="ph tt">      public uint8 NETFLOW_DST_TOS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the 'type of service' byte setting for the flow when exiting the outgoing interface.            For Netflow version 9, this is field 55.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_TRAFFIC_INDEX"><tt class="ph tt">      public uint32 NETFLOW_DST_TRAFFIC_INDEX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns BGP policy accounting destination traffic index.            For Netflow version 9, this is field 93.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_DST_VLAN"><tt class="ph tt">      public uint16 NETFLOW_DST_VLAN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the virtual LAN identifier associated with the egress interface.            For Netflow version 9, this is field 59.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ENGINE_ID"><tt class="ph tt">      public uint8 NETFLOW_ENGINE_ID()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the identifier of the switching engine in the router.           For Netflow version 9, this is field 39.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ENGINE_TYPE"><tt class="ph tt">      public uint8 NETFLOW_ENGINE_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the type code of the switching engine in the router.           For Netflow version 9, this is field 38.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_BYTE_LIST.int32"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_FIELD_AS_BYTE_LIST(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,            represented as list of unsigned bytes, or an empty list if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_INTEGER.int32"><tt class="ph tt">      public uint64 NETFLOW_FIELD_AS_INTEGER(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,           represented as an unsigned integer, or zero if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIELD_AS_STRING.int32"><tt class="ph tt">      public rstring NETFLOW_FIELD_AS_STRING(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of the specified Netflow version 9 field in the current flow record,            if present,            represented as a string, or an empty string if not.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FIRST_SWITCHED"><tt class="ph tt">      public uint32 NETFLOW_FIRST_SWITCHED()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the first packet of the current flow,           that is,           the time that the first packet in this flow           passed through the router, relative to when the router was booted, in milliseconds.           For Netflow version 5, this is the <tt class="ph tt">first</tt> field.           For Netflow version 9, this is field 22.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOWS"><tt class="ph tt">      public uint64 NETFLOW_FLOWS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of flows that were aggregated for the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 3.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_ACTIVE_TIMEOUT"><tt class="ph tt">      public uint16 NETFLOW_FLOW_ACTIVE_TIMEOUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the timeout value, in seconds, for active flow entries in the Netflow cache.            For Netflow version 9, this is field 36.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_INACTIVE_TIMEOUT"><tt class="ph tt">      public uint16 NETFLOW_FLOW_INACTIVE_TIMEOUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the timeout value, in seconds, for inactive flow entries in the Netflow cache.            For Netflow version 9, this is field 37.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_ID"><tt class="ph tt">      public uint8 NETFLOW_FLOW_SAMPLER_ID()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the identifier shown in "show flow-sampler".            For Netflow version 9, this is field 48.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_MODE"><tt class="ph tt">      public uint8 NETFLOW_FLOW_SAMPLER_MODE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sampling mode, when Netflow is sampled,           For Netflow version 9, this is field 49.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL"><tt class="ph tt">      public uint32 NETFLOW_FLOW_SAMPLER_RANDOM_INTERVAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the packet sampling interval, when Netflow is sampled.           For Netflow version 9, this is field 50.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FORWARDING_STATUS"><tt class="ph tt">      public uint8 NETFLOW_FORWARDING_STATUS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the forwarding status, with the 2 left bits giving the status and the 6 remaining bits giving the reason code.           For Netflow version 9, this is field 89.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_FRAGMENT_OFFSET"><tt class="ph tt">      public uint16 NETFLOW_FRAGMENT_OFFSET()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the fragment offset value from fragmented IP packets.            For Netflow version 9, this is field 88.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_ICMP_TYPE"><tt class="ph tt">      public uint16 NETFLOW_ICMP_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the ICMP packet type.           For Netflow version 9, this is field 32.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IF_DESC"><tt class="ph tt">      public rstring NETFLOW_IF_DESC()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the router's interface description.            For Netflow version 9, this is field 83. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IF_NAME"><tt class="ph tt">      public rstring NETFLOW_IF_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the router's interface name.            For Netflow version 9, this is field 82. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_INPUT_INTERFACE"><tt class="ph tt">      public uint32 NETFLOW_INPUT_INTERFACE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the interface index where the current flow entered the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">input</tt> field.           For Netflow version 9, this is field 10.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_BYTES"><tt class="ph tt">      public uint64 NETFLOW_IN_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of bytes that entered the router for the current flow record,            if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dOctets</tt> field.           For Netflow version 9, this is field 1.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PERMANENT_BYTES"><tt class="ph tt">      public uint64 NETFLOW_IN_PERMANENT_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the running byte counter for a permanent flow.            For Netflow version 9, this is field 85.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PERMANENT_PKTS"><tt class="ph tt">      public uint64 NETFLOW_IN_PERMANENT_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the running packet counter for a permanent flow.            For Netflow version 9, this is field 86.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IN_PKTS"><tt class="ph tt">      public uint64 NETFLOW_IN_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of packets that entered the router for the current flow record,            if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dPkts</tt> field.           For Netflow version 9, this is field 2.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_DST_ADDR"><tt class="ph tt">      public uint32 NETFLOW_IPV4_DST_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the destination endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">dstaddr</tt> field.           For Netflow version 9, this is field 12.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_DST_PREFIX"><tt class="ph tt">      public uint32 NETFLOW_IPV4_DST_PREFIX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 destination address prefix (specific for Cisco Catalyst architecture).            For Netflow version 9, this is field 45.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_IDENT"><tt class="ph tt">      public uint16 NETFLOW_IPV4_IDENT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns The IP version 4 identification field of the flow.            For Netflow version 9, this is field 54.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_NEXT_HOP"><tt class="ph tt">      public uint32 NETFLOW_IPV4_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the next router towards the destination endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">nexthop</tt> field.           For Netflow version 9, this is field 15.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_SRC_ADDR"><tt class="ph tt">      public uint32 NETFLOW_IPV4_SRC_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">srcaddr</tt> field.           For Netflow version 9, this is field 8.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV4_SRC_PREFIX"><tt class="ph tt">      public uint32 NETFLOW_IPV4_SRC_PREFIX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 4 source address prefix (specific for Cisco Catalyst architecture).            For Netflow version 9, this is field 44.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_DST_ADDR"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_DST_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 address of the destination endpoint of the current flow record,           if available, or an empty list if not.           For Netflow version 9, this is field 28.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_DST_MASK"><tt class="ph tt">      public uint8 NETFLOW_IPV6_DST_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 6 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 30.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_FLOW_LABEL"><tt class="ph tt">      public uint32 NETFLOW_IPV6_FLOW_LABEL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 flow label.           For Netflow version 9, this is field 31.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_NEXT_HOP"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_NEXT_HOP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 address of the next-hop router.            For Netflow version 9, this is field 62.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_OPTION_HEADERS"><tt class="ph tt">      public uint32 NETFLOW_IPV6_OPTION_HEADERS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 option headers found in the flow.            For Netflow version 9, this is field 64.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_SRC_ADDR"><tt class="ph tt">      public list&lt;uint8&gt;[16] NETFLOW_IPV6_SRC_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version 6 address of the source endpoint of the current flow record,           if available, or an empty list if not.           For Netflow version 9, this is field 27.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IPV6_SRC_MASK"><tt class="ph tt">      public uint8 NETFLOW_IPV6_SRC_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 6 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 9, this is field 29.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_IP_PROTOCOL_VERSION"><tt class="ph tt">      public uint8 NETFLOW_IP_PROTOCOL_VERSION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP version for the flow, either '4' or '6'.           For Netflow version 9, this is field 60.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_LAST_SWITCHED"><tt class="ph tt">      public uint32 NETFLOW_LAST_SWITCHED()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of NETFLOW_SYSTEM_UPTIME() for the last packet of the current flow,           that is,           the time that the last packet in this flow           passed through the router, relative to when the router was booted, in milliseconds.           For Netflow version 5, this is the <tt class="ph tt">last</tt> field.           For Netflow version 9, this is field 21.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_DST_ADDR_IN"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_DST_ADDR_IN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the incoming destination MAC address.            For Netflow version 9, this is field 80.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_DST_ADDR_OUT"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_DST_ADDR_OUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the incoming destination MAC address for the flow.            For Netflow version 9, this is field 56.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_SRC_ADDR_IN"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_SRC_ADDR_IN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the incoming source MAC address for the flow.            For Netflow version 9, this is field 56.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAC_SRC_ADDR_OUT"><tt class="ph tt">      public list&lt;uint8&gt;[6] NETFLOW_MAC_SRC_ADDR_OUT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the outgoing source MAC address.            For Netflow version 9, this is field 81.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAX_PKT_LNGTH"><tt class="ph tt">      public uint16 NETFLOW_MAX_PKT_LNGTH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the maximum packet length for the current flow.           For Netflow version 9, this is field 26.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MAX_TTL"><tt class="ph tt">      public uint8 NETFLOW_MAX_TTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the maximum 'time to live' for incoming packets of the flow.            For Netflow version 9, this is field 53.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MIN_PKT_LNGTH"><tt class="ph tt">      public uint16 NETFLOW_MIN_PKT_LNGTH()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the minimum packet length for the current flow.           For Netflow version 9, this is field 25.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MIN_TTL"><tt class="ph tt">      public uint8 NETFLOW_MIN_TTL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the minimum 'time to live' for incoming packets of the flow.            For Netflow version 9, this is field 52.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_LABEL.int32"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_MPLS_LABEL(int32)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the MPLS label at the specified position in the stack,           where the position is specified with an argument between 1 and 10.           This comprises 20 bits of MPLS label, 3 experimental bits and 1 end-of-stack bit.           For Netflow version 9, these are fields 71 through 79.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_PAL_RD"><tt class="ph tt">      public list&lt;uint8&gt; NETFLOW_MPLS_PAL_RD()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the MPLS PAL Route Distinguisher.            For Netflow version 9, this is field 90.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_PREFIX_LEN"><tt class="ph tt">      public uint8 NETFLOW_MPLS_PREFIX_LEN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of consecutive bits in the MPLS prefix length.           For Netflow version 9, this is field 91.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR"><tt class="ph tt">      public uint32 NETFLOW_MPLS_TOP_LABEL_IPV4_ADDR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the Forwarding Equivalent Class corresponding to the MPLS Top Label.            For Netflow version 9, this is field 47.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MPLS_TOP_LABEL_TYPE"><tt class="ph tt">      public uint8 NETFLOW_MPLS_TOP_LABEL_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the MPLS top label type, '0' for  UNKNOWN, '1' for TE-MIDPT, '2' for ATOM, '3' for VPN '4' for BGP, '5' for LDP.            For Netflow version 9, this is field 46.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_DST_BYTES"><tt class="ph tt">      public uint64 NETFLOW_MUL_DST_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of outgoing multicast bytes in the current flow.           For Netflow version 9, this is field 20.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_DST_PKTS"><tt class="ph tt">      public uint64 NETFLOW_MUL_DST_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of outgoing multicast packets in the current flow.           For Netflow version 9, this is field 19.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_MUL_IGMP_TYPE"><tt class="ph tt">      public uint8 NETFLOW_MUL_IGMP_TYPE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IGMP packet type.           For Netflow version 9, this is field 33.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUTPUT_INTERFACE"><tt class="ph tt">      public uint32 NETFLOW_OUTPUT_INTERFACE()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the interface index where the current flow left the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">output</tt> field.           For Netflow version 9, this is field 14.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUT_BYTES"><tt class="ph tt">      public uint64 NETFLOW_OUT_BYTES()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of bytes that left the router for the current flow.           For Netflow version 9, this is field 23.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_OUT_PKTS"><tt class="ph tt">      public uint64 NETFLOW_OUT_PKTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of packets that left the router for the current flow.           For Netflow version 9, this is field 24.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_POST_IP_DSCP"><tt class="ph tt">      public uint8 NETFLOW_POST_IP_DSCP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the value of a Differentiated Services Code Point (DSCP) encoded in the Differentiated Services Field, after modification.           For Netflow version 9, this is field 98.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_PROTOCOL"><tt class="ph tt">      public uint8 NETFLOW_PROTOCOL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP protocol number for the current flow record,            if available,           for example, '17' for UDP, or '6' for TCP, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">prot</tt> field.           For Netflow version 9, this is field 4.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_REPLICATION_FACTOR"><tt class="ph tt">      public uint32 NETFLOW_REPLICATION_FACTOR()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the multicast replication factor.           For Netflow version 9, this is field 99.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLER_NAME"><tt class="ph tt">      public rstring NETFLOW_SAMPLER_NAME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the name of the flow sampler, when Netflow is sampled.           For Netflow version 9, this is field 84.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLING_ALGORITHM"><tt class="ph tt">      public uint8 NETFLOW_SAMPLING_ALGORITHM()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sampling algorithm, when Netflow is sampled, with            '1' for deterministic sampling, and '2' for random sampling.            For Netflow version 9, this is field 35.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SAMPLING_INTERVAL"><tt class="ph tt">      public uint32 NETFLOW_SAMPLING_INTERVAL()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sampling rate, when Netflow is sampled,           for example, a value of 100 indicates that one of every 100 packets is sampled.           For Netflow version 9, this is field 34. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SEQUENCE_NUMBER"><tt class="ph tt">      public uint32 NETFLOW_SEQUENCE_NUMBER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the sequence number assigned to the current message by the router.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SOURCE_ID"><tt class="ph tt">      public uint32 NETFLOW_SOURCE_ID()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the port identifier of the router.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_AS"><tt class="ph tt">      public uint32 NETFLOW_SRC_AS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the BGP autonomous system number of the source endpoint of the current flow.           For Netflow version 5, this is the <tt class="ph tt">src_as</tt> field.           For Netflow version 9, this is field 16. 
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_MASK"><tt class="ph tt">      public uint8 NETFLOW_SRC_MASK()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of significant bits in the            IP version 4 address of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">src_mask</tt> field.           For Netflow version 9, this is field 9.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_PORT"><tt class="ph tt">      public uint16 NETFLOW_SRC_PORT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the TCP or UDP port number of the source endpoint of the current flow record,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">srcport</tt> field.           For Netflow version 9, this is field 7.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_TOS"><tt class="ph tt">      public uint8 NETFLOW_SRC_TOS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the IP 'type of service' byte for the current flow record on entering the router,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">tos</tt> field.           For Netflow version 9, this is field 5.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_TRAFFIC_INDEX"><tt class="ph tt">      public uint32 NETFLOW_SRC_TRAFFIC_INDEX()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns BGP policy accounting source traffic index.            For Netflow version 9, this is field 92.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SRC_VLAN"><tt class="ph tt">      public uint16 NETFLOW_SRC_VLAN()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the virtual LAN identifier associated with the ingress interface.            For Netflow version 9, this is field 58.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_SYSTEM_UPTIME"><tt class="ph tt">      public uint32 NETFLOW_SYSTEM_UPTIME()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the elapsed time from when the router started until the current message was sent,           in milliseconds.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TCP_FLAGS"><tt class="ph tt">      public uint8 NETFLOW_TCP_FLAGS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the cumulative value of all TCP flags in the current flow record,            that is, the logical 'or' of the TCP flags in all packets in the flow,           if available, or zero if not.           For Netflow version 5, this is the <tt class="ph tt">tcp_flags</tt> field.           For Netflow version 9, this is field 6.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_BYTES_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_BYTES_EXP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of bytes exported by the Observation Domain.            For Netflow version 9, this is field 40.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_FLOWS_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_FLOWS_EXP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of flows exported by the Observation Domain.            For Netflow version 9, this is field 42.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_TOTAL_PKTS_EXP"><tt class="ph tt">      public uint64 NETFLOW_TOTAL_PKTS_EXP()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of packets exported by the Observation Domain.            For Netflow version 9, this is field 41.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_UNIX_NANOSECONDS"><tt class="ph tt">      public uint32 NETFLOW_UNIX_NANOSECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the fractional part of NETFLOW_UNIX_SECONDS(), in nanoseconds,           for Netflow version 5 messages only.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_UNIX_SECONDS"><tt class="ph tt">      public uint32 NETFLOW_UNIX_SECONDS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the time that the current message was sent, in seconds,           according to the router's clock, relative to the beginning of the Unix epoch            (at midnight on the first of January in Greenwich, England).
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__NETFLOW_VERSION"><tt class="ph tt">      public uint16 NETFLOW_VERSION()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the Netflow version of the current message, either '5' or '9'.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__messagesProcessed"><tt class="ph tt">      public uint64 messagesProcessed()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the number of messages processed by the operator since it started,           including the current message.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseError"><tt class="ph tt">      public boolean parseError()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns <tt class="ph tt">true</tt> if an encoding error was detected while decoding the current packet,           or <tt class="ph tt">false</tt> otherwise. Note that a value of <tt class="ph tt">false</tt> does not necessarily mean the packet has           no encoding errors, since the operator only decodes the fields needed.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorCode"><tt class="ph tt">      public int32 parseErrorCode()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a non-zero integer to indicate that an encoding error was found while decoding the current packet,           or zero if no enoding errors were found. The error codes are:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 102 for 'label overruns packet': The length of an uncompressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.</li>
+
+<li class="li">
+<p class="p"> 103 for 'label compression length overruns packet': The length field of a compressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the domain name.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 105 for 'label compression offset forward reference': The offset of a compressed domain name label points beyond the current label. The sender misencoded the domain name.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the domain name.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the domain name.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the domain name.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 110 for 'resource record missing': The DNS message contains fewer resource records than the 'count' fields in the message header indicate. The DNS message may have been truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 111 for 'question resource record truncated': The DNS 'question' resource record was truncated. The packet containing the message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 112 for 'resource record truncated': A DNS resource record was truncated. The packet containing the DNS message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 113 for 'resource record data truncated': The 'rdata' field of a DNS resource record was truncated. The packet containing the DNS message was probably truncated.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 116 for 'message too short': The DNS message is shorter than the length of the DNS header. The packet probably does not contain a DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 117 for 'resource record counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The packet probably does not contain a DNS message.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resource record is larger than the record's data field. The sender misencoded the resource record.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 119 for 'missing data in resource record': The data field of a resource record is too short; some fields may be truncated or missing entirely. The sender misencoded the resource record.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 120 for 'extra data in resource record': The data field of a resource record is too long; there is unexpected data following the last field. The sender misencoded the resource record.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender misencoded the domain name.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 122 for 'extra data following resource records': There are extra bytes of data in the DNS message following the last resource record. The sender probably miscalculated the packet length.
+</p>
+</li>
+
+<li class="li">
+<p class="p"> 123 for 'resource record data too long': The 'data length' field of a resource record is unreasonably large. The packet probably does not contain a DNS message.
+</p>
+</li>
+
+</ul>
+
+</div>
+
+<p class="p">          <em class="ph i">Note:</em> <a class="xref" href="https://www.ietf.org/rfc/rfc1035.txt">RFC 1035</a> explains the format of DNS messages;            in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorDescription"><tt class="ph tt">      public rstring parseErrorDescription()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns a description of an encoding error found while decoding the current packet,           or an empty string if no enoding errors were found.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__parseErrorOffset"><tt class="ph tt">      public uint32 parseErrorOffset()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">          This parser result function returns the offset from the beginning of the message to the encoding error found,           or zero if no encoding errors were found.
 </p>
 
    </dd>

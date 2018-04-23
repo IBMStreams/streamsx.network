@@ -22,30 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.source.html">com.ibm.streamsx.network.source</a> &gt; C++ Native Functions</p>
 
 </div>
 
 <div class="section">
 This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
-</div>
-
-<div class="section">
-<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model____functionset">Function Set</a></strong></p>
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__headerfilename">Header File</a>  </dt>
-
-  <dd class="dd">   </dd>
-
-</dl>
-
-<dl class="dl">
-  <dt class="dt dlterm"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__cppnamespacename">CPP Namespace Name</a>  </dt>
-
-  <dd class="dd"> PacketSource_result_functions  </dd>
-
-</dl>
-
 </div>
 
 <div class="section">
@@ -172,10 +154,50 @@ This page documents native functions that can be invoked from SPL, including the
 
  
  
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_DONT_FRAGMENT"><tt class="ph tt">      public boolean IP_DONT_FRAGMENT()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP "don't fragment" flag of the current packet. When a sender sets this flag in a packet, it prohibits routers from fragmenting the packet in transit. If the packet's length exceeds the maximum size of a link, it will be discarded by the router instead of being fragmented.
+</p>
+
+   </dd>
+
+ 
+ 
    <dt class="dt dlterm splpart" id="spldoc_functions__IP_DST_PORT"><tt class="ph tt">      public uint16 IP_DST_PORT()      </tt>   </dt>
 
    <dd class="dd">
 <p class="p">This function returns the TCP or UDP destination port number of the current packet,  if it has one, or zero otherwise.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_FRAGMENT_OFFSET"><tt class="ph tt">      public uint16 IP_FRAGMENT_OFFSET()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP "fragment offset" field of the current packet, multiplied by eight, When a router fragments a packet, it stores the offset from the front of the packet to the front of the fragment, measured in eight-byte steps, in each fragment. That is, the size of each fragment is always a multiple of eight bytes,  and the value stored is the offset in bytes, divided by eight. This function returns that value, multiplied by eight, so that it gives the offset from the front of the packet to the front of the fragment in bytes.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_IDENTIFIER"><tt class="ph tt">      public uint32 IP_IDENTIFIER()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP identifier of the current packet. When a packet is fragmented in transit, this identifer is copied into all of the fragments. The receiver combines this identifier with the packet's  source and destination addresses to gather the fragments,  and uses the fragment offset (see the IP_FRAGMENT_OFFSET() function) to reassemble  them into original packet.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__IP_MORE_FRAGMENTS"><tt class="ph tt">      public boolean IP_MORE_FRAGMENTS()      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">This function returns the IP "more fragments" flag of the current packet. When a router fragments a packet, it sets this flag in all fragments except the last one.
 </p>
 
    </dd>

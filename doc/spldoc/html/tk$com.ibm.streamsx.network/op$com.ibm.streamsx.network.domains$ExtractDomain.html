@@ -7,34 +7,34 @@
 <meta name="copyright" content="(C) Copyright 2005"/>
 <meta name="DC.rights.owner" content="(C) Copyright 2005"/>
 <meta name="DC.Type" content="reference"/>
-<meta name="DC.Title" content="Operator TextFilter"/>
+<meta name="DC.Title" content="Operator ExtractDomain"/>
 <meta name="DC.Format" content="XHTML"/>
 <meta name="DC.Identifier" content="spldoc_operator"/>
 <link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
-<title>Operator TextFilter</title>
+<title>Operator ExtractDomain</title>
 </head>
 <body id="spldoc_operator">
 
 
-<h1 class="title topictitle1">Operator <tt class="ph tt">TextFilter</tt></h1>
+<h1 class="title topictitle1">Operator <tt class="ph tt">ExtractDomain</tt></h1>
 
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.filter.html">com.ibm.streamsx.network.filter</a> &gt; TextFilter</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.domains.html">com.ibm.streamsx.network.domains</a> &gt; ExtractDomain</p>
 
 </div>
 
 <div class="section">
 
-<p class="p">This operator filters text (e.g. domain names) based on a list of text input.
+<p class="p">This operator extracts the domain+tld portion of a fqdn in a tuple, and sets a pre-existing field in the tuple to that value.
 </p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.filter$TextFilter.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.domains$ExtractDomain.svg" width="672" height="112"/>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -55,14 +55,14 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 2 parameters.
+  <dd class="dd">This operator supports 3 parameters.
 <p class="p"> Required: 
-<a class="xref" href="#spldoc_operator__parameter__inputTextAttr">inputTextAttr</a>
+<a class="xref" href="#spldoc_operator__parameter__inputFQDNAttr">inputFQDNAttr</a>, <a class="xref" href="#spldoc_operator__parameter__outputDomainAttr">outputDomainAttr</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__invertMatch">invertMatch</a>
+<a class="xref" href="#spldoc_operator__parameter__blankOnInvalidTLD">blankOnInvalidTLD</a>
 
 </p>
 </dd>
@@ -103,7 +103,7 @@
    <dt class="dt dlterm">Ports (0)</dt>
 
    <dd class="dd">
-<p class="p">Ingests tuples containing text and filters the data based on the text. The <tt class="ph tt">inputTextAttr</tt> parameter specifies the attribute containing the text.
+<p class="p">Ingests tuples containing FQDNs in the <tt class="ph tt">inputFQDNAttr</tt> field, extracts the domain, and sets it into the <tt class="ph tt">outputDomainAttr</tt> field before sending the tuple on.
 </p>
 
    <dl class="dl">
@@ -120,7 +120,7 @@
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__controlport">ControlPort</a>: false
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__tuplemutationallowed">TupleMutationAllowed</a>: true
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__windowingmode">WindowingMode</a>: NonWindowed
@@ -143,10 +143,7 @@
    <dt class="dt dlterm">Ports (1)</dt>
 
    <dd class="dd">
-<p class="p">Control port that takes in tuples containing regex fragments for use in the filter operation.  By default, all packets that match any of the fragments are passed through the filter.
-</p>
-
-<p class="p">This control port can be used to dynamically update the list of regex fragments in the filter. Each time a tuple is received containing a fragment it is added to a temporary regex string being built up, which is compiled and applied after a window punctuation is received.  The regex fragments should be in ERE form, and are combined with a simple '|'.
+<p class="p">Control port that takes in tuples containing TLDs for use in later extractions. This control port can be used to dynamically update the list of TLDs used for extraction. Each time a tuple is received containing a TLD it is saved in a temporary TLD list that is applied after a window punctuation is received on this port.  This input port expects a tuple containing a single attribute of type <tt class="ph tt">rstring</tt> which is a TLD name.
 </p>
 
    <dl class="dl">
@@ -203,10 +200,7 @@
 
    <dd class="dd">
 
-<p class="p">By default, submits a tuple for each input tuple received on input port 0 if one or more of the attributes defined in the inputTextAttr parameter match the regex built up from the fragments sent in on the control port.
-</p>
-
-<p class="p">If invertMatch is set, submits a tuple for each input tuple received on input port 0 only if NONE of the attributes defined on the inputTextAttr parameter match the built up regex.
+<p class="p">Submits each input tuple after updating the field indicated by the <tt class="ph tt">outputDomainAttr</tt> parameter with the domain+TLD extracted from the FQDN field (indicated by the <tt class="ph tt">inputFQDNAttr</tt> parameter).
 </p>
 
     <p class="p"/>
@@ -222,7 +216,7 @@
    </ul>
 
    <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: true
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Preserving
@@ -248,10 +242,10 @@
 
 <dl class="dl">
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__inputTextAttr"><!-- --></a><tt class="ph tt">inputTextAttr</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__inputFQDNAttr"><!-- --></a><tt class="ph tt">inputFQDNAttr</tt></dt>
 
      <dd class="dd">
-<p class="p">Specifies the input attribute(s) containing the text that the filter will be applied against.  The supported data types for this attribute are <tt class="ph tt">rstring</tt> and <tt class="ph tt">list&lt;rstring&gt;</tt>.
+<p class="p">Specifies the input attribute containing the FQDN that the extraction will be performed on. The supported data type for this attribute is <tt class="ph tt">rstring</tt>.
 </p>
 
   <dl class="dl">
@@ -259,6 +253,9 @@
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
      </li>
 
@@ -280,10 +277,45 @@
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__invertMatch"><!-- --></a><tt class="ph tt">invertMatch</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputDomainAttr"><!-- --></a><tt class="ph tt">outputDomainAttr</tt></dt>
 
      <dd class="dd">
-<p class="p">If set to true, the meaning of the filter is basically inverted.  If any of the specified input attribute(s) of a tuple match the current state of the filter, the tuple will NOT be passed through.  Only tuples that do not match the filter will be passed through.  The default setting is false, where only tuples that DO match the filter are passed through.
+<p class="p">Specifies the output attribute to write the extracted domain+TLD data to.  Existing data will be overwritten. If the FQDN is malformed, or doesn't match a known TLD, this field will be empty. The supported data type for this attribute is <tt class="ph tt">rstring</tt>.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__blankOnInvalidTLD"><!-- --></a><tt class="ph tt">blankOnInvalidTLD</tt></dt>
+
+     <dd class="dd">
+<p class="p">By default, if the FQDN doesn't match any TLD, the outputDomainAttr field is filled in with the entire incoming FQDN. If blankOnInvalidTLD is set, when no valid TLD is found, the outputDomainAttr field is left blank.
 </p>
 
   <dl class="dl">
@@ -301,6 +333,9 @@
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Constant
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__portscope">PortScope</a>: 0
      </li>
 
    </ul>

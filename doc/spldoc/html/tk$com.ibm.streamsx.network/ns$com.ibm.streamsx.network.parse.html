@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; com.ibm.streamsx.network.parse</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; com.ibm.streamsx.network.parse</p>
 
 </div>
 
@@ -324,6 +324,12 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ADDITIONAL_TYPES">DNS_ADDITIONAL_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'additional' resource records in the current message.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring">DNS_ALL_FIELDS(rstring, rstring, rstring)</a></strong>:           This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from all DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:">DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;)</a></strong>:           This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from seleccted DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></strong>:           This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.
 </li>
 
@@ -367,6 +373,9 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_AUTHORITATIVE_FLAG">DNS_AUTHORITATIVE_FLAG()</a></strong>:           This parser result function returns <tt class="ph tt">true</tt> if the 'authoritative' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_EXTRA_DATA">DNS_EXTRA_DATA()</a></strong>:           This parser result function returns any extra data in the DNS message that follows the last resource record.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_IDENTIFIER">DNS_IDENTIFIER()</a></strong>:           This parser result function returns the DNS client's request correlator in the current message, and returned by the server in its response.
@@ -765,7 +774,7 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelIPv6Address">IPFIX_mplsTopLabelIPv6Address()</a></strong>:           IPFIX field 140:            The IPv6 address of the system that the MPLS top label will           cause this Flow to be forwarded to.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelStackSection">IPFIX_mplsTopLabelStackSection()</a></strong>:           IPFIX field 70:            The Label, Exp, and S fields from the top MPLS label           stack entry, i.e., from the last label that was pushed.           The size of this Information Element is 3 octets.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelStackSection">IPFIX_mplsTopLabelStackSection()</a></strong>:           IPFIX field 70:            The Label, Exp, and S fields from the top MPLS label           stack entry, i.e., from the last label that was pushed.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelTTL">IPFIX_mplsTopLabelTTL()</a></strong>:           IPFIX field 200:            The TTL field from the top MPLS label stack entry,           i.e., the last label that was pushed.

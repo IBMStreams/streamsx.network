@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.5</a> &gt; com.ibm.streamsx.network.location</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; com.ibm.streamsx.network.location</p>
 
 </div>
 
@@ -90,6 +90,12 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationFound.uint32">locationFound(uint32)</a></strong>:           This parser result function returns true            if the location of the specified IP version 4 address was found, or false if not.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationGeohash.list:.:uint8:.::..:16:..:.int32">locationGeohash(list&lt;uint8&gt;[16], int32)</a></strong>:           This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 6 address,           if its location was found, or an empty string if not.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationGeohash.uint32.int32">locationGeohash(uint32, int32)</a></strong>:           This result function returns the <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of the specified precision           for the specified IP version 4 address,           if its location was found, or an empty string if not.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationID.list:.:uint8:.::..:16:..:">locationID(list&lt;uint8&gt;[16])</a></strong>:           This result function returns the location identifier           for the specified IP version 6 address,           if one was found, or an empty string if not.
 </li>
 
@@ -97,6 +103,12 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationIDs.list:.:uint32:.:">locationIDs(list&lt;uint32&gt;)</a></strong>:           This result function returns a list of IDs corresponding to the specified list of IP version 4 addresses.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationInEU.list:.:uint8:.::..:16:..:">locationInEU(list&lt;uint8&gt;[16])</a></strong>:           This result function returns an indication of whether or not           the specified IP version 6 address is in the European Union,           if its location was found and it has an indication, or an empty string if not.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationInEU.uint32">locationInEU(uint32)</a></strong>:           This result function returns an indication of whether or not           the specified IP version 4 address is in the European Union,           if its location was found and it has an indication, or an empty string if not.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationLatitude.list:.:uint8:.::..:16:..:">locationLatitude(list&lt;uint8&gt;[16])</a></strong>:           This result function returns the latitude           for the specified IP version 6 address,           if its location was found, or zero if not.
@@ -204,10 +216,10 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationSubnets.list:.:uint32:.:">locationSubnets(list&lt;uint32&gt;)</a></strong>:           This result function returns a list of IP subnets and masks, in CIDR notation, corresponding to the specified list of IP version 4 addresses.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationTimezone.list:.:uint8:.::..:16:..:">locationTimezone(list&lt;uint8&gt;[16])</a></strong>:           This result function returns the continent time zone           for the specified IP version 6 address,           if its location was found and it has one, or an empty string if not.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationTimezone.list:.:uint8:.::..:16:..:">locationTimezone(list&lt;uint8&gt;[16])</a></strong>:           This result function returns the time zone           for the specified IP version 6 address,           if its location was found and it has one, or an empty string if not.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationTimezone.uint32">locationTimezone(uint32)</a></strong>:           This result function returns the continent time zone           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationTimezone.uint32">locationTimezone(uint32)</a></strong>:           This result function returns the time zone           for the specified IP version 4 address,           if its location was found and it has one, or an empty string if not.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.location.html#spldoc_functions__locationTimezones.list:.:uint32:.:">locationTimezones(list&lt;uint32&gt;)</a></strong>:           This result function returns a list of time zones corresponding to the specified list of IP version 4 addresses.

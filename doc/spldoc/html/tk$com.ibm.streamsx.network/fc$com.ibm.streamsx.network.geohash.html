@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="C++ Native Functions: com.ibm.streamsx.network.geohash"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_functions"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>C++ Native Functions: com.ibm.streamsx.network.geohash</title>
+</head>
+<body id="spldoc_functions">
+
+
+<h1 class="title topictitle1">C++ Native Functions: <tt class="ph tt">com.ibm.streamsx.network.geohash</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.geohash.html">com.ibm.streamsx.network.geohash</a> &gt; C++ Native Functions</p>
+
+</div>
+
+<div class="section">
+This page documents native functions that can be invoked from SPL, including the SPL interfaces that can be used to invoke each of the native functions.
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/FunctionModel.html#spldoc_reference_function_model__functionset__functions">Functions</a></strong></p>
+<dl class="dl" compact="compact">
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__geohashDecode.rstring"><tt class="ph tt">      public list&lt;float64&gt; geohashDecode(rstring geohash)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">The geohashDecode() function decodes a <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> as the latitude and longitude of its center point and bounding box. The 'geohash' argument is a string value of 1 to 12 characters composed of the characters '0123456789bcdefghjkmnpqrstuvwxyz'.
+</p>
+
+<p class="p">The function returns a list of six float64 values if the 'geohash' value is valid:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 0: the latitude of the center point</li>
+
+<li class="li"> 1: the longitude of the center point</li>
+
+<li class="li"> 2: the latitude of the top edge (that is, the northern edge) of the bounding box</li>
+
+<li class="li"> 3: the longitude of the right edge (that is, the eastern edge) of the bounding box</li>
+
+<li class="li"> 4: the latitude of the bottom edge (that is, the southern edge) of the bounding box</li>
+
+<li class="li"> 5: the longitude of the left edge (that is, the western edge) of the bounding box</li>
+
+</ul>
+
+</div>
+
+<p class="p">The function returns an empty list if the 'geohash' value is not valid.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__geohashEncode.float64.float64.int32"><tt class="ph tt">      public rstring geohashEncode(float64 latitude, float64 longitude, int32 precision)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">The geohashEncode() function encodes a latitude/longitude pair as a <a class="xref" href="https://en.wikipedia.org/wiki/Geohash">geohash</a> of a specified precision. The argument values are limited to these ranges:
+</p>
+
+<div class="p">
+<ul class="ul">
+<li class="li"> 'latitude' is a float64 value limited to the range -90 to +90, representing degrees of latitude</li>
+
+<li class="li"> 'longitude' is a float64 value limited to the range -180 to +180, representing degrees of longitude</li>
+
+<li class="li"> 'precision' is an int32 value limited to the range 1 to 12, specifying the length of the 'geohash'</li>
+
+</ul>
+
+</div>
+
+<p class="p">The function returns a string of length 'precision' containing the encoded 'geohash' if all of the parameters are within range. The 'geohash' string is composed of the characters '0123456789bcdefghjkmnpqrstuvwxyz'.
+</p>
+
+<p class="p">The function returns an empty string if any of the parameters are out of range.
+</p>
+
+   </dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
