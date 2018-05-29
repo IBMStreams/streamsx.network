@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; com.ibm.streamsx.network.parse</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.10</a> &gt; com.ibm.streamsx.network.parse</p>
 
 </div>
 
@@ -141,7 +141,7 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MERIT_DUMP_FILE">DHCP_MERIT_DUMP_FILE()</a></strong>:           This parser result function returns the pathname           of a file for client's core dump image, if DHCP option 14 is included in           the message, or an empty string if not.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MESSAGE_TYPE">DHCP_MESSAGE_TYPE()</a></strong>:           This parser result function returns the type of this DHCP message, if DHCP option 53 is included in the message, or zero if           not, for example:  '1' for Discover,  '2' for Offer,  '3' for Request,  '4' for Decline,  '5' for Positive Acknowledge,  '6' for Negative Acknowledge,  '7' for Release, or '8' for Inform.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MESSAGE_TYPE">DHCP_MESSAGE_TYPE()</a></strong>:           This parser result function returns the type of this DHCP message, if DHCP option 53 is included in the message, or zero if           not, for example: 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DHCP_MOBILE_IP_HOME_AGENTS">DHCP_MOBILE_IP_HOME_AGENTS()</a></strong>:           This parser result function returns a           list of mobile IP home agents, represented as IP version 4 addresses, if DHCP           option 68 is included in the message, or an empty list if not.
@@ -405,10 +405,10 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_NAMESERVER_TYPES">DNS_NAMESERVER_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'name server' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_OPCODE">DNS_OPCODE()</a></strong>:           This parser result function returns the operation code requested by the DNS client in the current message, for example,  '1' for standard queries,  '2' for inverse queries, or '3' for server status requests.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_OPCODE">DNS_OPCODE()</a></strong>:           This parser result function returns the operation code requested by the DNS client in the current message, for example, 
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_CLASS">DNS_QUESTION_CLASS()</a></strong>:           This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records),
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_CLASS">DNS_QUESTION_CLASS()</a></strong>:           This parser result function returns the 'class' field of the first 'question' resource record in the current message,           for example, '1' for Internet adddresses ('IN' records), 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_CLASSES">DNS_QUESTION_CLASSES()</a></strong>:           This parser result function returns a list of the 'class' fields in the 'question' resource records in the current message.
@@ -423,13 +423,13 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_NAMES">DNS_QUESTION_NAMES()</a></strong>:           This parser result function returns a list of the 'name' fields in the 'question' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_TYPE">DNS_QUESTION_TYPE()</a></strong>:           This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example:  '1' for IP version 4 address to domain name lookup ('A' records), '5' for domain name to canonical domain name lookup ('CNAME' records), '12' for domain name to IP address lookup ('TXT' records), or '28' for IP version 6 address to domain name lookup ('AAAA' records).
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_TYPE">DNS_QUESTION_TYPE()</a></strong>:           This parser result function returns the 'type' field of the first 'question' resource record in the current message,           for example: 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_QUESTION_TYPES">DNS_QUESTION_TYPES()</a></strong>:           This parser result function returns a list of the 'type' fields in the 'question' resource records in the current message.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_RESPONSE_CODE">DNS_RESPONSE_CODE()</a></strong>:           This parser result function returns the response code from the DNS server in the current message, for example,  '0' for OK,  '1' for Format Error,  '2' for Server Failure,  '3' for Name Error,  '4' for not implemented, or '5' for Server Refused.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_RESPONSE_CODE">DNS_RESPONSE_CODE()</a></strong>:           This parser result function returns the response code from the DNS server in the current message, for example, 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_RESPONSE_FLAG">DNS_RESPONSE_FLAG()</a></strong>:           This parser result function returns <tt class="ph tt">true</tt> if the current message is a response sent by a DNS server,           or <tt class="ph tt">false</tt> if it is a request sent by a DNS client.
@@ -765,7 +765,7 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsPayloadLength">IPFIX_mplsPayloadLength()</a></strong>:           IPFIX field 194:            The size of the MPLS packet without the label stack.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelExp">IPFIX_mplsTopLabelExp()</a></strong>:           IPFIX field 203:            The Exp field from the top MPLS label stack entry,           i.e., the last label that was pushed.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelExp">IPFIX_mplsTopLabelExp()</a></strong>:           IPFIX field 203:            The Exp field from the top MPLS label stack entry,           i.e., the last label that was pushed. 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelIPv4Address">IPFIX_mplsTopLabelIPv4Address()</a></strong>:           IPFIX field 47:            The IPv4 address of the system that the MPLS top label will           cause this Flow to be forwarded to.
@@ -774,10 +774,10 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelIPv6Address">IPFIX_mplsTopLabelIPv6Address()</a></strong>:           IPFIX field 140:            The IPv6 address of the system that the MPLS top label will           cause this Flow to be forwarded to.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelStackSection">IPFIX_mplsTopLabelStackSection()</a></strong>:           IPFIX field 70:            The Label, Exp, and S fields from the top MPLS label           stack entry, i.e., from the last label that was pushed.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelStackSection">IPFIX_mplsTopLabelStackSection()</a></strong>:           IPFIX field 70:            The Label, Exp, and S fields from the top MPLS label           stack entry, i.e., from the last label that was pushed. 
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelTTL">IPFIX_mplsTopLabelTTL()</a></strong>:           IPFIX field 200:            The TTL field from the top MPLS label stack entry,           i.e., the last label that was pushed.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelTTL">IPFIX_mplsTopLabelTTL()</a></strong>:           IPFIX field 200:            The TTL field from the top MPLS label stack entry,           i.e., the last label that was pushed. 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_mplsTopLabelType">IPFIX_mplsTopLabelType()</a></strong>:           IPFIX field 46:            This field identifies the control protocol that allocated the           top-of-stack label.
@@ -978,7 +978,7 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_vlanId">IPFIX_vlanId()</a></strong>:           IPFIX field 58:            The IEEE 802.1Q VLAN identifier (VID) extracted from the Tag           Control Information field that was attached to the IP packet.
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_wlanChannelId">IPFIX_wlanChannelId()</a></strong>:           IPFIX field 146:            The identifier of the 802.11 (Wi-Fi) channel used.
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_wlanChannelId">IPFIX_wlanChannelId()</a></strong>:           IPFIX field 146:            The identifier of the 802.11 (Wi-Fi) channel used. 
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__IPFIX_wlanSSID">IPFIX_wlanSSID()</a></strong>:           IPFIX field 147:            The Service Set IDentifier (SSID) identifying an 802.11           (Wi-Fi) network used.

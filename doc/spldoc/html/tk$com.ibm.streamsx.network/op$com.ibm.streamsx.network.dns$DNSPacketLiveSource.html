@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketLiveSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.10</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketLiveSource</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketLiveSource.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
@@ -599,10 +603,6 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
 </div>
 
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketLiveSource.svg" width="672" height="112"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
 
 <dl class="dl" compact="compact">
@@ -628,7 +628,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
+<a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>
 
 </p>
 </dd>
@@ -650,6 +650,14 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
   <dt class="dt dlterm">Implementation</dt>
 
   <dd class="dd">C++</dd>
+
+ 
+ 
+  <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__capability">Capabilities</a></dt>
+
+  <dd class="dd">CAP_NET_RAW+eip</dd>
+
+  <dd class="dd">CAP_NET_ADMIN+eip</dd>
 
  
  
@@ -721,34 +729,39 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
 
-<dl class="dl">
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__networkInterface"><!-- --></a><tt class="ph tt">networkInterface</tt></dt>
 
-     <dd class="dd">
-<p class="p">This required parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies which network interface the operator will capture packets from.  The value must be one of the network interface names configured in Linux on the machine where the operator will execute.  To display a list of configured network interface names, type this at a Linux command prompt:
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__networkInterface">networkInterface</a>
+
 </p>
 
-<div class="p">
-<pre class="pre codeblock">
-/sbin/ifconfig
-</pre>
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__bufferSize">bufferSize</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__inputFilter">inputFilter</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__maximumLength">maximumLength</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__processorAffinity">processorAffinity</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__timeout">timeout</a>, <a class="xref" href="#spldoc_operator__parameter__timestampType">timestampType</a>
 
+</p>
+<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__bufferSize"><!-- --></a><tt class="ph tt">bufferSize</tt></dt>
 
-</div>
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">uint32</tt> that specifies the size, in bytes, of the <tt class="ph tt">libpcap</tt> buffer used for receiving packets.  The maximum value allowed is 2,147,483,647 (that is, 2**31-1).
+</p>
+
+<p class="p">The default value of the <tt class="ph tt">bufferSize</tt> parameter is determined by <tt class="ph tt">libpcap</tt>.
+</p>
 
   <dl class="dl">
     
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
@@ -766,13 +779,13 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__maximumLength"><!-- --></a><tt class="ph tt">maximumLength</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__initDelay"><!-- --></a><tt class="ph tt">initDelay</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">uint16</tt> that specifies the maximum length in bytes of the packet data that will be produced by the operator.  This length includes all network headers; packets longer than the specified length will be truncated.
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the number of seconds the operator will wait before it begins to produce tuples.  This parameter is allowed only when the <tt class="ph tt">pcapFilename</tt> parameter is also specified.
 </p>
 
-<p class="p">The default value is 65,535 bytes.
+<p class="p">The default value is '0.0'.
 </p>
 
   <dl class="dl">
@@ -780,7 +793,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint16
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -852,6 +865,160 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
   
   
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__maximumLength"><!-- --></a><tt class="ph tt">maximumLength</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">uint16</tt> that specifies the maximum length in bytes of the packet data that will be produced by the operator.  This length includes all network headers; packets longer than the specified length will be truncated.
+</p>
+
+<p class="p">The default value is 65,535 bytes.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint16
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+</p>
+
+<p class="p">The default value is '10.0'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__networkInterface"><!-- --></a><tt class="ph tt">networkInterface</tt></dt>
+
+     <dd class="dd">
+<p class="p">This required parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies which network interface the operator will capture packets from.  The value must be one of the network interface names configured in Linux on the machine where the operator will execute.  To display a list of configured network interface names, type this at a Linux command prompt:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+/sbin/ifconfig
+</pre>
+
+
+</div>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
 
      <dd class="dd">
@@ -887,120 +1054,6 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">boolean</tt> that specifies whether or not 'promiscuous' mode should be enabled on the network interface. If 'promiscious' mode is enabled, the operator must execute with special Linux capabilities, as described above.
-</p>
-
-<p class="p">The default value is <tt class="ph tt">false</tt>.  However, some values of the <tt class="ph tt">inputFilter</tt> parameter, including the default value, require that 'promiscuous' mode be enabled on the network interface, even if the <tt class="ph tt">promiscous</tt> parameter is not specified, or set to <tt class="ph tt">false</tt>.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__initDelay"><!-- --></a><tt class="ph tt">initDelay</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the number of seconds the operator will wait before it begins to produce tuples.  This parameter is allowed only when the <tt class="ph tt">pcapFilename</tt> parameter is also specified.
-</p>
-
-<p class="p">The default value is '0.0'.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__bufferSize"><!-- --></a><tt class="ph tt">bufferSize</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">uint32</tt> that specifies the size, in bytes, of the <tt class="ph tt">libpcap</tt> buffer used for receiving packets.  The maximum value allowed is 2,147,483,647 (that is, 2**31-1).
-</p>
-
-<p class="p">The default value of the <tt class="ph tt">bufferSize</tt> parameter is determined by <tt class="ph tt">libpcap</tt>.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__processorAffinity"><!-- --></a><tt class="ph tt">processorAffinity</tt></dt>
 
      <dd class="dd">
@@ -1016,6 +1069,44 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
      <dd class="dd">   <ul class="sl simple">
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">boolean</tt> that specifies whether or not 'promiscuous' mode should be enabled on the network interface. If 'promiscious' mode is enabled, the operator must execute with special Linux capabilities, as described above.
+</p>
+
+<p class="p">The default value is <tt class="ph tt">false</tt>.  However, some values of the <tt class="ph tt">inputFilter</tt> parameter, including the default value, require that 'promiscuous' mode be enabled on the network interface, even if the <tt class="ph tt">promiscous</tt> parameter is not specified, or set to <tt class="ph tt">false</tt>.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -1101,79 +1192,6 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: CustomLiteral
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
-</p>
-
-<p class="p">The default value is 'false'.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
-</p>
-
-<p class="p">The default value is '10.0'.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
      </li>
 
    </ul>

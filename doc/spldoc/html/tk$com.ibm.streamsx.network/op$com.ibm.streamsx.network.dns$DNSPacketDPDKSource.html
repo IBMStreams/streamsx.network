@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketDPDKSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.10</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketDPDKSource</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketDPDKSource.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
@@ -289,10 +293,6 @@ use com.ibm.streamsx.network.dns::*;
 
 </div>
 
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.dns$DNSPacketDPDKSource.svg" width="672" height="112"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
 
 <dl class="dl" compact="compact">
@@ -318,7 +318,7 @@ use com.ibm.streamsx.network.dns::*;
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__buffersizes">buffersizes</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>
+<a class="xref" href="#spldoc_operator__parameter__buffersizes">buffersizes</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>
 
 </p>
 </dd>
@@ -410,18 +410,31 @@ use com.ibm.streamsx.network.dns::*;
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 9 parameters.<dl class="dl">
+This operator supports 9 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__lcore">lcore</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__buffersizes">buffersizes</a>, <a class="xref" href="#spldoc_operator__parameter__jMirrorCheck">jMirrorCheck</a>, <a class="xref" href="#spldoc_operator__parameter__lcoreMaster">lcoreMaster</a>, <a class="xref" href="#spldoc_operator__parameter__metricsInterval">metricsInterval</a>, <a class="xref" href="#spldoc_operator__parameter__nicPort">nicPort</a>, <a class="xref" href="#spldoc_operator__parameter__nicQueue">nicQueue</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__promiscuous">promiscuous</a>
+
+</p>
+<dl class="dl">
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcoreMaster"><!-- --></a><tt class="ph tt">lcoreMaster</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__buffersizes"><!-- --></a><tt class="ph tt">buffersizes</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies a logical processor core for the DPDK master thread.  This thread is not used for receiving packets, and does not have high CPU utiliztion. If the machine has more than one NUMA node, specify a core on a node that does not have the ethernet adapter connected to it. 
+<p class="p">This optional parameter specifies how much buffer space, in megabytes,  to allocate from available 2MB Linux 'hugepages' for each NUMA node, specified as a string containing comma-separated values.  For the NUMA node the ethernet adapter is connected to, specify an even number of megabytes. For other NUMA nodes, if any, specify zero.
 </p>
 
-<p class="p">When multiple PacketDPDKSource operators are configured for the same ethernet adapter, all operators must specify the same value with their 'lcoreMaster' parameters.
+<p class="p">For example, on a machine with one NUMA node, specify "100" to allocate 100 megabytes of buffer space. For another example, on a machine with two NUMA nodes,  where the ethernet adapter is connected to the second node, specify "0,100" to allocate 100 megabytes of buffer space on the second NUMA node. If multiple PacketDPDKSource operators are configured for the same network adapter,  all operators should specify the same values for their 'buffersizes' parameter.
 </p>
 
-<p class="p">To determine how many processor cores your machine has, and which cores are connected to  which NUMA nodes, execute the <tt class="ph tt">lscpu</tt> command at a Linux prompt.
+<p class="p">To determine which NUMA node your ethernet adapter is connected to, enter the command <tt class="ph tt">cat /sys/class/net/$DPDK_INTERFACE/device/numa_node</tt> at a Linux prompt. To determine how much buffer space is available in the 'hugepages' for that NUMA node, enter the command <tt class="ph tt">grep -i -h hugepages /sys/devices/system/node/node*/meminfo</tt> at a Linux prompt.
+</p>
+
+<p class="p">If this parameter is not specified,  DPDK will allocate all available 2MB Linux 'hugepages' for its buffer space.
 </p>
 
   <dl class="dl">
@@ -429,7 +442,45 @@ This operator supports 9 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
+</p>
+
+<p class="p">The default value is 'false'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -477,6 +528,85 @@ This operator supports 9 parameters.<dl class="dl">
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__lcoreMaster"><!-- --></a><tt class="ph tt">lcoreMaster</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies a logical processor core for the DPDK master thread.  This thread is not used for receiving packets, and does not have high CPU utiliztion. If the machine has more than one NUMA node, specify a core on a node that does not have the ethernet adapter connected to it. 
+</p>
+
+<p class="p">When multiple PacketDPDKSource operators are configured for the same ethernet adapter, all operators must specify the same value with their 'lcoreMaster' parameters.
+</p>
+
+<p class="p">To determine how many processor cores your machine has, and which cores are connected to  which NUMA nodes, execute the <tt class="ph tt">lscpu</tt> command at a Linux prompt.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+</p>
+
+<p class="p">The default value is '10.0'.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
@@ -573,126 +703,6 @@ This operator supports 9 parameters.<dl class="dl">
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__buffersizes"><!-- --></a><tt class="ph tt">buffersizes</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter specifies how much buffer space, in megabytes,  to allocate from available 2MB Linux 'hugepages' for each NUMA node, specified as a string containing comma-separated values.  For the NUMA node the ethernet adapter is connected to, specify an even number of megabytes. For other NUMA nodes, if any, specify zero.
-</p>
-
-<p class="p">For example, on a machine with one NUMA node, specify "100" to allocate 100 megabytes of buffer space. For another example, on a machine with two NUMA nodes,  where the ethernet adapter is connected to the second node, specify "0,100" to allocate 100 megabytes of buffer space on the second NUMA node. If multiple PacketDPDKSource operators are configured for the same network adapter,  all operators should specify the same values for their 'buffersizes' parameter.
-</p>
-
-<p class="p">To determine which NUMA node your ethernet adapter is connected to, enter the command <tt class="ph tt">cat /sys/class/net/$DPDK_INTERFACE/device/numa_node</tt> at a Linux prompt. To determine how much buffer space is available in the 'hugepages' for that NUMA node, enter the command <tt class="ph tt">grep -i -h hugepages /sys/devices/system/node/node*/meminfo</tt> at a Linux prompt.
-</p>
-
-<p class="p">If this parameter is not specified,  DPDK will allocate all available 2MB Linux 'hugepages' for its buffer space.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
-</p>
-
-<p class="p">The default value is 'false'.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__jMirrorCheck"><!-- --></a><tt class="ph tt">jMirrorCheck</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on packets, and step over them when found.
-</p>
-
-<p class="p">The default value is 'false'.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__outputFilters"><!-- --></a><tt class="ph tt">outputFilters</tt></dt>
 
      <dd class="dd">
@@ -728,13 +738,13 @@ This operator supports 9 parameters.<dl class="dl">
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__metricsInterval"><!-- --></a><tt class="ph tt">metricsInterval</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__promiscuous"><!-- --></a><tt class="ph tt">promiscuous</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter takes an expression of type <tt class="ph tt">float64</tt> that specifies the interval, in seconds, for sending operator metrics to the Streams runtime. If the value is zero or less, the operator will not report metrics to the runtime, and the output assigment functions for <tt class="ph tt">libpcap</tt> statistics will be zero.
+<p class="p">This optional parameter takes an expression of type 'boolean' that specifies whether or not 'promiscuous' mode should be enabled on the network interface.
 </p>
 
-<p class="p">The default value is '10.0'.
+<p class="p">The default value is 'false'.
 </p>
 
   <dl class="dl">
@@ -742,7 +752,7 @@ This operator supports 9 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1

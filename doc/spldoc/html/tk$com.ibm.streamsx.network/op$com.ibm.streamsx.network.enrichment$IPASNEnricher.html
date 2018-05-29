@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.enrichment.html">com.ibm.streamsx.network.enrichment</a> &gt; IPASNEnricher</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.10</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.enrichment.html">com.ibm.streamsx.network.enrichment</a> &gt; IPASNEnricher</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.enrichment$IPASNEnricher.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
@@ -34,10 +38,6 @@
 <p class="p">In order to use this operator, you must download the MaxMind© GeoLite ASN database files in CSV format from the <a class="xref" href="http://dev.maxmind.com/geoip/legacy/geolite/">MaxMind©</a> website.  These files can then be loaded directly into the operator using the <strong class="ph b">asnIPv4File</strong> and <strong class="ph b">asnIPv6File</strong> parameters. To dynamically update the operator whenever a new version of the database is downloaded, a DirectoryScan operator can be connected to the control input port (input port 1) of this operator. Whenever a new version of the database files are downloaded into the directory being scanned, the DirectoryScan operator will submit the file paths to the IPASNEnricher operator.  The operator will parse the database files and update it's internal tables.
 </p>
 
-</div>
-
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.enrichment$IPASNEnricher.svg" width="672" height="112"/>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -60,7 +60,7 @@
 
   <dd class="dd">This operator supports 3 parameters.
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__inputIPAttr">inputIPAttr</a>, <a class="xref" href="#spldoc_operator__parameter__asnIPv4File">asnIPv4File</a>, <a class="xref" href="#spldoc_operator__parameter__asnIPv6File">asnIPv6File</a>
+<a class="xref" href="#spldoc_operator__parameter__asnIPv4File">asnIPv4File</a>, <a class="xref" href="#spldoc_operator__parameter__asnIPv6File">asnIPv6File</a>, <a class="xref" href="#spldoc_operator__parameter__inputIPAttr">inputIPAttr</a>
 
 </p>
 </dd>
@@ -344,39 +344,12 @@
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
 
-<dl class="dl">
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__inputIPAttr"><!-- --></a><tt class="ph tt">inputIPAttr</tt></dt>
 
-     <dd class="dd">
-<p class="p">Specifies the input attribute containing the IP address (or IP addresses). The attribute can contain either IPv4 or IPv6 addresses.  The supported data types for this attribute are <tt class="ph tt">rstring</tt> and <tt class="ph tt">list&lt;rstring&gt;</tt>. In the case where the input attributes refers to a type of <tt class="ph tt">list&lt;rstring&gt;</tt>, the list can contain a mixture of both IPv4 and IPv6 addresses.
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__asnIPv4File">asnIPv4File</a>, <a class="xref" href="#spldoc_operator__parameter__asnIPv6File">asnIPv6File</a>, <a class="xref" href="#spldoc_operator__parameter__inputIPAttr">inputIPAttr</a>
+
 </p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
+<dl class="dl">
   
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__asnIPv4File"><!-- --></a><tt class="ph tt">asnIPv4File</tt></dt>
 
@@ -434,6 +407,38 @@
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__inputIPAttr"><!-- --></a><tt class="ph tt">inputIPAttr</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies the input attribute containing the IP address (or IP addresses). The attribute can contain either IPv4 or IPv6 addresses.  The supported data types for this attribute are <tt class="ph tt">rstring</tt> and <tt class="ph tt">list&lt;rstring&gt;</tt>. In the case where the input attributes refers to a type of <tt class="ph tt">list&lt;rstring&gt;</tt>, the list can contain a mixture of both IPv4 and IPv6 addresses.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
      </li>
 
    </ul>

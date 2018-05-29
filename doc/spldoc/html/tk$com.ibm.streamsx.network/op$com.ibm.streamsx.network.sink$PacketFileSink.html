@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.sink.html">com.ibm.streamsx.network.sink</a> &gt; PacketFileSink</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.10</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.sink.html">com.ibm.streamsx.network.sink</a> &gt; PacketFileSink</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.sink$PacketFileSink.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
@@ -65,10 +69,6 @@
 
 </div>
 
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.sink$PacketFileSink.svg" width="672" height="112"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
 
 <dl class="dl" compact="compact">
@@ -89,7 +89,7 @@
 
   <dd class="dd">This operator supports 4 parameters.
 <p class="p"> Required: 
-<a class="xref" href="#spldoc_operator__parameter__pcapFilename">pcapFilename</a>, <a class="xref" href="#spldoc_operator__parameter__packetAttribute">packetAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__timestampAttribute">timestampAttribute</a>
+<a class="xref" href="#spldoc_operator__parameter__packetAttribute">packetAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__pcapFilename">pcapFilename</a>, <a class="xref" href="#spldoc_operator__parameter__timestampAttribute">timestampAttribute</a>
 
 </p>
 
@@ -173,42 +173,17 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 4 parameters.<dl class="dl">
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__pcapFilename"><!-- --></a><tt class="ph tt">pcapFilename</tt></dt>
+This operator supports 4 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__packetAttribute">packetAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__pcapFilename">pcapFilename</a>, <a class="xref" href="#spldoc_operator__parameter__timestampAttribute">timestampAttribute</a>
 
-     <dd class="dd">
-<p class="p">This parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies the pathname of an output PCAP file for the operator to write. 
 </p>
 
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__timestampMicrosecondsAttribute">timestampMicrosecondsAttribute</a>
 
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
+</p>
+<dl class="dl">
   
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__packetAttribute"><!-- --></a><tt class="ph tt">packetAttribute</tt></dt>
 
@@ -231,6 +206,41 @@ This operator supports 4 parameters.<dl class="dl">
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__pcapFilename"><!-- --></a><tt class="ph tt">pcapFilename</tt></dt>
+
+     <dd class="dd">
+<p class="p">This parameter takes an expression of type <tt class="ph tt">rstring</tt> that specifies the pathname of an output PCAP file for the operator to write. 
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
      </li>
 
    </ul>

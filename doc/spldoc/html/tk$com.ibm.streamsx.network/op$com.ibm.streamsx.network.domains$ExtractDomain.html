@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.9</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.domains.html">com.ibm.streamsx.network.domains</a> &gt; ExtractDomain</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.10</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.domains.html">com.ibm.streamsx.network.domains</a> &gt; ExtractDomain</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.domains$ExtractDomain.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
@@ -31,10 +35,6 @@
 <p class="p">This operator extracts the domain+tld portion of a fqdn in a tuple, and sets a pre-existing field in the tuple to that value.
 </p>
 
-</div>
-
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.domains$ExtractDomain.svg" width="672" height="112"/>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -240,7 +240,55 @@
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
 
+
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__inputFQDNAttr">inputFQDNAttr</a>, <a class="xref" href="#spldoc_operator__parameter__outputDomainAttr">outputDomainAttr</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__blankOnInvalidTLD">blankOnInvalidTLD</a>
+
+</p>
 <dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__blankOnInvalidTLD"><!-- --></a><tt class="ph tt">blankOnInvalidTLD</tt></dt>
+
+     <dd class="dd">
+<p class="p">By default, if the FQDN doesn't match any TLD, the outputDomainAttr field is filled in with the entire incoming FQDN. If blankOnInvalidTLD is set, when no valid TLD is found, the outputDomainAttr field is left blank.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Constant
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__portscope">PortScope</a>: 0
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
   
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__inputFQDNAttr"><!-- --></a><tt class="ph tt">inputFQDNAttr</tt></dt>
 
@@ -298,44 +346,6 @@
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__blankOnInvalidTLD"><!-- --></a><tt class="ph tt">blankOnInvalidTLD</tt></dt>
-
-     <dd class="dd">
-<p class="p">By default, if the FQDN doesn't match any TLD, the outputDomainAttr field is filled in with the entire incoming FQDN. If blankOnInvalidTLD is set, when no valid TLD is found, the outputDomainAttr field is left blank.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Constant
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__portscope">PortScope</a>: 0
      </li>
 
    </ul>
