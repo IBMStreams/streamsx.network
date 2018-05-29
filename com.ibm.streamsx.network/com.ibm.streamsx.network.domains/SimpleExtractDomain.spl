@@ -1,5 +1,17 @@
 namespace com.ibm.streamsx.network.domains;
 
+/**
+ * Composite to fill TLD of ExtractDomain operator with files scanned in tldsDir
+ * 
+ * @input  DomainNamesStream tuples containing FQDNs
+ * @output OutputStream tuples with domain+TLD extracted from the FQDN field
+ * 
+ * @param domainNameAttr specifies the input attribute containing the FQDN that the extraction will be performed on.
+ * @param outputAttr specifies the output attribute to write the extracted domain+TLD data to
+ * @param tldsDir directory containing TLDS files
+ * @param tldsFilenamePattern file name pattern
+ * @param blankOnInvalidTLD default true
+ */
 public composite SimpleExtractDomain(input DomainNamesStream; output OutputStream) {
     param
         attribute $domainNameAttr;
