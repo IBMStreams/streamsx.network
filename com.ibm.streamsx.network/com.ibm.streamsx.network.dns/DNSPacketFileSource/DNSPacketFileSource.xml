@@ -95,7 +95,6 @@ to its 'INSTALL.txt' file.
 This operator has been tested with these versions of `libpcap`:
 
 * libpcap 0.9.4, included in RHEL/CentOS 5.x
-* libpcap 0.9.8, included in SLES 11
 * libpcap 1.0.0, included in RHEL/CentOS 6.2
 * libpcap 1.4.0, included in RHEL/CentOS 6.5
 * libpcap 1.5.3, included in RHEL/CentOS 7.1
