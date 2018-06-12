@@ -4,7 +4,7 @@
     <context>
       <description>
 
-IPAddressLocation is an operator for the IBM InfoSphere Streams product that
+IPAddressLocation is an operator for the IBM Streams product that
 finds the geographical location of IP addresses received in input tuples,
 based on the subnets they are part of, and
 emits output tuples containing the country, state or province, city, latitude, and longitude of the subnets.

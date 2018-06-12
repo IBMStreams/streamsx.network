@@ -4,7 +4,7 @@
     <context>
       <description>
 
-PacketDPDKSource is an operator for the IBM InfoSphere Streams product that
+PacketDPDKSource is an operator for the IBM Streams product that
 receives network packets from a supported ethernet adapter. The operator function and structure are
 similar to 
 [tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.source$PacketLiveSource.html|PacketLiveSource]; 

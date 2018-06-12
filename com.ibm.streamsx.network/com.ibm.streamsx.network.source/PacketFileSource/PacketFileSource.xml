@@ -4,7 +4,7 @@
     <context>
       <description>
 
-PacketFileSource is an operator for the IBM InfoSphere Streams product that
+PacketFileSource is an operator for the IBM Streams product that
 reads prerecorded network packets from 'packet capture (PCAP)' files, parses
 the network headers, and emits tuples containing packet data.  
 The operator may be configured with one or more output ports,

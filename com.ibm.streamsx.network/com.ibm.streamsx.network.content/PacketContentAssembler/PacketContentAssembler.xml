@@ -5,7 +5,7 @@
       <description>
 
 
-PacketContentAssembler is an operator for the IBM InfoSphere Streams product that
+PacketContentAssembler is an operator for the IBM Streams product that
 reassembles application flows (such as SMTP, FTP, HTTP, and SIP)
 and files (such as GIF, JPEG, HTML, and and PDF)
 from raw network packets received in input tuples, 

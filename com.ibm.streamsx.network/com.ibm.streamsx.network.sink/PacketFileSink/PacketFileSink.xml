@@ -9,7 +9,7 @@
 
       <description>
 
-PacketFileSink is an operator for the IBM InfoSphere Streams product that
+PacketFileSink is an operator for the IBM Streams product that
 writes network packets into 'packet capture (PCAP)' files. 
 Each input tuple must contain a complete network packet, including all network headers,
 in an attribute of type `blob`, such as produced by the PacketXxxxSource operators in this toolkit.

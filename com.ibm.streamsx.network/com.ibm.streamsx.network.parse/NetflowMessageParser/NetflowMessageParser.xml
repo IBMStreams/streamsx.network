@@ -4,7 +4,7 @@
     <context>
       <description>
 
-NetflowMessageParser is an operator for the IBM InfoSphere Streams product that 
+NetflowMessageParser is an operator for the IBM Streams product that 
 parses individual fields of Netflow messages received in input tuples, 
 and emits tuples containing message data.  
 The operator may be configured with one or more output ports,
