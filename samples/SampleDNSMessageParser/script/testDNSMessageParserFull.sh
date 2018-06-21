@@ -51,7 +51,7 @@ compileTimeParameterList=(
 )
 
 submitParameterList=(
-#pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
+pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns+dhcp.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_errors.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_102.pcap
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_error_105.pcap
@@ -68,7 +68,7 @@ submitParameterList=(
 #pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_EXTRA_DATA.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_twentyfour_hours.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_twelve_hours_overnight.pcap
-pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_twelve_hours_primeshift.pcap
+#pcapFilename=$HOME/data.yorktown/splanet02_dns+dhcp_twelve_hours_primeshift.pcap
 #pcapFilename=$HOME/data.yorktown/splanet02_firewall_one_hour.pcap
 )
 
