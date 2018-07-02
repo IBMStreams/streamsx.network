@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.11</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketLiveSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.12</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.dns.html">com.ibm.streamsx.network.dns</a> &gt; DNSPacketLiveSource</p>
 
 </div>
 
@@ -404,19 +404,6 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
 </div>
 
-<p class="p">The ethernet header and the fields it contains are described here:
-</p>
-
-<div class="p">
-<ul class="ul">
-<li class="li"> <a class="xref" href="http://linux.die.net/include/net/ethernet.h">http://linux.die.net/include/net/ethernet.h</a></li>
-
-<li class="li"> <a class="xref" href="http://linux.die.net/include/linux/if_ether.h">http://linux.die.net/include/linux/if_ether.h</a></li>
-
-</ul>
-
-</div>
-
 <p class="p">The IPv4 header and the fields it contains are described here:
 </p>
 
@@ -426,9 +413,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
 <li class="li"> <a class="xref" href="http://www.ietf.org/rfc/rfc791.txt">http://www.ietf.org/rfc/rfc791.txt</a></li>
 
-<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/in.h">http://linux.die.net/include/netinet/in.h</a></li>
-
-<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip.h">http://linux.die.net/include/netinet/ip.h</a></li>
+<li class="li"> <a class="xref" href="https://linux.die.net/man/7/ip">https://linux.die.net/man/7/ip</a></li>
 
 </ul>
 
@@ -443,7 +428,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
 <li class="li"> <a class="xref" href="https://tools.ietf.org/html/rfc2460">https://tools.ietf.org/html/rfc2460</a></li>
 
-<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/ip6.h">http://linux.die.net/include/netinet/ip6.h</a></li>
+<li class="li"> <a class="xref" href="https://linux.die.net/man/7/ipv6">https://linux.die.net/man/7/ipv6</a></li>
 
 </ul>
 
@@ -458,7 +443,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
 <li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc768">http://tools.ietf.org/html/rfc768</a></li>
 
-<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/udp.h">http://linux.die.net/include/netinet/udp.h</a></li>
+<li class="li"> <a class="xref" href="https://linux.die.net/man/7/udp">https://linux.die.net/man/7/udp</a></li>
 
 </ul>
 
@@ -473,7 +458,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
 <li class="li"> <a class="xref" href="http://tools.ietf.org/html/rfc793">http://tools.ietf.org/html/rfc793</a></li>
 
-<li class="li"> <a class="xref" href="http://linux.die.net/include/netinet/tcp.h">http://linux.die.net/include/netinet/tcp.h</a></li>
+<li class="li"> <a class="xref" href="https://linux.die.net/man/7/tcp">https://linux.die.net/man/7/tcp</a></li>
 
 </ul>
 
@@ -607,7 +592,7 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
  
   <dt class="dt dlterm">Ports</dt>
 
-  <dd class="dd">This operator has 0 input ports and 0 or more output ports.</dd>
+  <dd class="dd">This operator has 0 input ports and 1 or more output ports.</dd>
 
  
  
@@ -1211,11 +1196,11 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
 <dl class="dl">
   
-    <dt class="dt dlterm"><tt class="ph tt">nBytesProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+    <dt class="dt dlterm"><tt class="ph tt">nPacketsReceivedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
 
     <dd class="dd">
 
-<p class="p">This metric counts number of bytes of packet data processed by the operator.  When an input filter is specified, this includes only packets that pass the filter.
+<p class="p">This metric counts the number of packets received by the network interface,  as counted by <tt class="ph tt">libpcap</tt>
 </p>
 
      <p class="p"/>
@@ -1250,11 +1235,11 @@ sudo /sbin/sysctl -w net.ipv4.tcp_wmem=10240 87380 33554432
 
   
   
-    <dt class="dt dlterm"><tt class="ph tt">nPacketsReceivedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+    <dt class="dt dlterm"><tt class="ph tt">nBytesProcessedCurrent</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
 
     <dd class="dd">
 
-<p class="p">This metric counts the number of packets received by the network interface,  as counted by <tt class="ph tt">libpcap</tt>
+<p class="p">This metric counts number of bytes of packet data processed by the operator.  When an input filter is specified, this includes only packets that pass the filter.
 </p>
 
      <p class="p"/>
