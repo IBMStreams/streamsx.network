@@ -8,7 +8,7 @@ others. All Rights Reserved.
     <context>
       <description>This operator enriches IPv4 and IPv6 addresses with geospatial data. Only the MaxMind© GeoIP2 (or GeoLite2) City database is supported. 
       
-In order to use this operator, you must download the MaxMind© GeoIP2 (or GeoLite2) City database from the [http://dev.maxmind.com/geoip/|MaxMind©] website. 
+In order to use this operator, you must download the MaxMind© GeoIP2 (or GeoLite2) City database from the [https://dev.maxmind.com/geoip/|MaxMind©] website. 
 These files can then be loaded directly into the operator using the **blocksIPv4File**, **blocksIPv6File** and **locationFile** parameters. To dynamically update the operator whenever
 a new version of the database is downloaded, a DirectoryScan operator can be connected to the control input port (input port 1) of this operator. Whenever a new
 version of the database is downloaded and extracted into the directory being scanned, the DirectoryScan operator will submit the file paths to the IPSpatialEnricher operator. 

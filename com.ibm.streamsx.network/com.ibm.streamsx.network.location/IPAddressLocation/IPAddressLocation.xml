@@ -38,7 +38,7 @@ include this statement in the SPL source file:
 The IPAddressLocation operator depends upon geographical location data 
 provided by [https://www.maxmind.com/|Maxmind, Inc.]:
 
-* GeoLite2 data is available free from [http://dev.maxmind.com/geoip/geoip2/geolite2/]
+* GeoLite2 data is available free from [https://dev.maxmind.com/geoip/geoip2/geolite2/]
 
 * GeoIP2 data, which is more accurate, may be purchased from [https://www.maxmind.com/en/geoip2-city]
 
@@ -96,7 +96,7 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
 
 The format of 'geohash' codes for latitude and longitude coordinates is described here:
 
-* [https://en.wikipedia.org/wiki/Geohash/]
+* [https://en.wikipedia.org/wiki/Geohash]
 
       </description>
 

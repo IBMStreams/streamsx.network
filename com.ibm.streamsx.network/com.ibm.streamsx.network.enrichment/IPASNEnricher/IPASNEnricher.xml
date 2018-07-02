@@ -8,7 +8,7 @@ others. All Rights Reserved.
     <context>
       <description>This operator enriches IPv4 and IPv6 addresses with ASN data. Only the MaxMind© GeoLite ASN database is supported. 
       
-In order to use this operator, you must download the MaxMind© GeoLite ASN database files in CSV format from the [http://dev.maxmind.com/geoip/legacy/geolite/|MaxMind©] website. 
+In order to use this operator, you must download the MaxMind© GeoLite ASN database files in CSV format from the [https://dev.maxmind.com/geoip/legacy/geolite/|MaxMind©] website. 
 These files can then be loaded directly into the operator using the **asnIPv4File** and **asnIPv6File** parameters. To dynamically update the operator whenever
 a new version of the database is downloaded, a DirectoryScan operator can be connected to the control input port (input port 1) of this operator. Whenever a new
 version of the database files are downloaded into the directory being scanned, the DirectoryScan operator will submit the file paths to the IPASNEnricher operator. 

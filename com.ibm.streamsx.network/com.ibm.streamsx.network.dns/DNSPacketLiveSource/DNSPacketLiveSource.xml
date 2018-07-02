@@ -233,35 +233,29 @@ The ethernet frame format is described here:
 
 * [http://en.wikipedia.org/wiki/Ethernet_frame]
 
-The ethernet header and the fields it contains are described here:
-
-* [http://linux.die.net/include/net/ethernet.h]
-* [http://linux.die.net/include/linux/if_ether.h]
-
 The IPv4 header and the fields it contains are described here:
 
 * [http://en.wikipedia.org/wiki/IPv4]
 * [http://www.ietf.org/rfc/rfc791.txt]
-* [http://linux.die.net/include/netinet/in.h]
-* [http://linux.die.net/include/netinet/ip.h]
+* [https://linux.die.net/man/7/ip]
 
 The IPv6 header and the fields it contains are described here:
 
 * [https://en.wikipedia.org/wiki/IPv6_packet]
 * [https://tools.ietf.org/html/rfc2460]
-* [http://linux.die.net/include/netinet/ip6.h]
+* [https://linux.die.net/man/7/ipv6]
 
 The UDP header and the fields it contains are described here:
 
 * [http://en.wikipedia.org/wiki/User_Datagram_Protocol]
 * [http://tools.ietf.org/html/rfc768]
-* [http://linux.die.net/include/netinet/udp.h]
+* [https://linux.die.net/man/7/udp]
 
 The TCP header and the fields it contains are described here:
 
 * [http://en.wikipedia.org/wiki/Transmission_Control_Protocol]
 * [http://tools.ietf.org/html/rfc793]
-* [http://linux.die.net/include/netinet/tcp.h]
+* [https://linux.die.net/man/7/tcp]
 
 DNS messages and the fields they contain are described here:
   
