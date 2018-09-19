@@ -1269,7 +1269,7 @@
           record and field delimiters, and for SOA resource records, 
           a subfield delimiter. DNS resource records are selected by specifying DNS types in a list of unsigned 16-bit integers as the fourth parameter of the function.
         </function:description>
-        <function:prototype>public rstring DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16>, uint64, uint32, uint32, uint32, uint16, uint16)</function:prototype>
+        <function:prototype>public rstring DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16>, uint64, uint32, uint32, uint32, uint16, uint16, uint8, uint32, uint16)</function:prototype>
       </function:function>
 
       <function:function>
