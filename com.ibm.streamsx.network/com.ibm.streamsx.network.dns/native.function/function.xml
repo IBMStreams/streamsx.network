@@ -897,6 +897,14 @@ if it has one, or zero otherwise.
         <function:prototype>public int32 DNS_INCOMPATIBLE_FLAGS()</function:prototype>
       </function:function>
 
+      <function:function>
+        <function:description>
+        This function returns false when an amount of time between packets has passed such that
+        the rate is limited to the value given in the rateLimit paramater.
+        </function:description>
+        <function:prototype>public boolean RATE_LIMITED()</function:prototype>
+      </function:function>
+
     </function:functions>
   </function:functionSet>
 
