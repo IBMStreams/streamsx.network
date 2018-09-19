@@ -46,7 +46,7 @@
 #define EM_TX_WTHRESH 8  /**< Default values of TX write-back threshold reg. */
 
 #define MAX_RX_QUEUE_PER_LCORE 4
-#define MAX_PKT_BURST  32
+#define MAX_PKT_BURST  128
 #define BURST_TX_DRAIN 220000ULL /* around 100us at 2.2 Ghz */
 
 /*
@@ -59,6 +59,7 @@
 #define STREAMS_SOURCE_RX_DESC_DEFAULT 512
 #define STREAMS_SOURCE_TX_DESC_DEFAULT 64
 #else
+// For the Intel x520, 4096 is the max number of RX descriptors
 #define STREAMS_SOURCE_RX_DESC_DEFAULT 4096
 #define STREAMS_SOURCE_TX_DESC_DEFAULT 64
 #endif

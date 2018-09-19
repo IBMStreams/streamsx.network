@@ -6,6 +6,7 @@
 %>
 
 #include "parse/DNSMessageParser.h"
+#include "dns/DNSPacketFlattener.h"
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
@@ -39,9 +40,10 @@ private:
   Mutex processMutex;
   uint64_t tupleCounter;
 
-  // ----------- DNS message parser ----------
+  // ----------- DNS message parser and flattener ----------
 
   DNSMessageParser parser;
+  DNSPacketFlattener flattener;
 
   // ----------- assignment functions for output attributes ----------
 
@@ -185,6 +187,10 @@ private:
 
   inline __attribute__((always_inline))
   SPL::blob DNS_EXTRA_DATA() { return parser.dnsExtra ? SPL::blob((const unsigned char*)parser.dnsExtra, (uint64_t)(parser.dnsEnd-parser.dnsExtra)) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
+  SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter, SPL::list<SPL::uint16> rrTypes, SPL::uint64 captureSeconds, SPL::uint32 packetLen, SPL::uint32 srcAddr, SPL::uint32 dstAddr, SPL::uint16 srcUdpPort, SPL::uint16 dstUdpPort) 
+    { return flattener.dnsAllFields(captureSeconds, packetLen, srcAddr, dstAddr, srcUdpPort, dstUdpPort, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str(), rrTypes); }
 
   inline __attribute__((always_inline))
   SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
