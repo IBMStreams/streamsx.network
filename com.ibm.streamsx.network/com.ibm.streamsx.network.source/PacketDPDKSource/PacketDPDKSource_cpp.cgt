@@ -42,6 +42,7 @@ my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParamet
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+my $rateLimit = $model->getParameterByName("rateLimit") ? $model->getParameterByName("rateLimit")->getValueAt(0)->getCppExpression() : 1000.0;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -107,6 +108,12 @@ MY_OPERATOR::MY_OPERATOR() {
   const bool promiscuous = <%=$promiscuous%>;
   jMirrorCheck = <%=$jMirrorCheck%>;
   metricsInterval = <%=$metricsInterval%>;
+
+  // Set up rate limiter parameters.  This approach scales to 1M pps, or 1 per usec and then
+  // goes unlimited. 
+  rateLimit = <%=$rateLimit%>;
+  rateLimitLastTime = 0;
+  rateLimitPeriodUsec = (uint64_t)((1.0 / rateLimit) * 1000000.0);
 
   // Initialize the DPDK subsystem.
   int rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue, (int)promiscuous, &dpdkCallback, (void *)this);

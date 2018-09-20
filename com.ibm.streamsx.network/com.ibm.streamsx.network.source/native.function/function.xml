@@ -222,6 +222,15 @@ This function returns the ethernet destination address of the current packet.
           <function:function>
             <function:description>
 
+This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.
+
+            </function:description>
+            <function:prototype>public uint64 ETHER_DST_ADDRESS_64()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
 This function returns the ethernet protocol (that is, the EtherType) of the
 current packet, for example, '2048' for IP version 4, or '34,525' for IP version 6.
 
@@ -601,6 +610,14 @@ if it has one, or zero if otherwise.
 
             </function:description>
             <function:prototype>public uint32 ERSPAN_DST_ADDRESS()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+            This function returns false when an amount of time between packets has passed such that
+            the rate is limited to the value given in the rateLimit paramater.
+            </function:description>
+            <function:prototype>public boolean RATE_LIMITED()</function:prototype>
           </function:function>
 
     </function:functions>
