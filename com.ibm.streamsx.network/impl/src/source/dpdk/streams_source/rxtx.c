@@ -14,16 +14,49 @@
 
 #define DPDK_INST_ENABLE
 
-#define DPDK_INST_BUCKET_SIZE 60000000000UL
+#define DPDK_INST_BUCKET_SIZE 60UL
+#define DPDK_INST_BUCKET_COUNT 10
+#define DPDK_INST_SCRATCH_SIZE 4096
 #ifdef DPDK_INST_ENABLE
-#define DPDK_INST_DELTA_TS_START clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts_before)
-#define DPDK_INST_DELTA_TS_END   clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts_after); \
-    deltaT = (ts_after.tv_sec - ts_before.tv_sec)*1000000000UL + ts_after.tv_nsec - ts_before.tv_nsec
-
+#define DPDK_INST_TS(var) var = rte_rdtsc_precise()
+#define DPDK_INST_UPDATE_METRIC(m, d) addToMetric(&buckets[bucketIndex].m, (d))
 #else
-#define DPDK_INST_DELTA_TS_START
-#define DPDK_INST_DELTA_TS_END
+#define DPDK_INST_TS(var)
+#define DPDK_INST_UPDATE_METRIC(m, d)
 #endif
+
+struct Metric {
+    uint64_t count;
+    uint64_t total;
+    uint64_t squareTotal;
+    uint64_t min;
+    uint64_t max;
+};
+
+struct Bucket {
+    uint64_t duration;
+    uint64_t priorWastedTime;
+    struct Metric packetCount;
+    struct Metric burstFoundDuration;
+    struct Metric noneFoundDuration;
+    struct Metric callbackDuration;
+    struct Metric packetFreeDuration;
+};
+
+inline __attribute__((__always_inline__))
+void addToMetric(struct Metric *m, uint64_t datum) {
+    ++m->count;
+    m->total += datum;
+    m->squareTotal += datum * datum;
+    if(datum < m->min) {
+        m->min = datum;
+    }
+    if(datum > m->max) {
+        m->max = datum;
+    }
+}
+
+
 
 #define PREFETCH_OFFSET 1
 void receive_loop(struct lcore_conf *conf) {
@@ -32,240 +65,163 @@ void receive_loop(struct lcore_conf *conf) {
     int j, num_rx, count;
 
 #ifdef DPDK_INST_ENABLE
+    // Some timestamp holders
+    uint64_t ts_A, ts_B, ts_C, ts_D, ts_E, ts_F, ts_G;
+
+    // save these off for easier display and computation later
+    const uint64_t bucketTargetSize = DPDK_INST_BUCKET_SIZE * rte_get_tsc_hz();
+    const unsigned lcore_id = rte_lcore_id();
+    const int port_id = conf->rx_queue_list[0].port_id;
+    const int queue_id = conf->rx_queue_list[0].queue_id;
+
     // The instrumentation variables
     uint64_t bucketStartTime = 0;
-    uint64_t bucketPriorWastedTime = 0;
-    uint64_t bucketBurstFoundCount = 0;
-    uint64_t bucketNoneFoundCount = 0;
-    uint64_t bucketPacketCountTotal = 0;
-    uint64_t bucketPacketCountSquareTotal = 0;
-    uint64_t bucketPacketCountMin = UINT64_MAX;
-    uint64_t bucketPacketCountMax = 0;
-    uint64_t bucketBurstFoundDurationTotal = 0;
-    uint64_t bucketBurstFoundDurationSquareTotal = 0;
-    uint64_t bucketBurstFoundDurationMin = UINT64_MAX;
-    uint64_t bucketBurstFoundDurationMax = 0;
-    uint64_t bucketNoneFoundDurationTotal = 0;
-    uint64_t bucketNoneFoundDurationSquareTotal = 0;
-    uint64_t bucketNoneFoundDurationMin = UINT64_MAX;
-    uint64_t bucketNoneFoundDurationMax = 0;
-    uint64_t bucketCallbackDurationTotal = 0;
-    uint64_t bucketCallbackDurationSquareTotal = 0;
-    uint64_t bucketCallbackDurationMin = UINT64_MAX;
-    uint64_t bucketCallbackDurationMax = 0;
-    uint64_t bucketPacketFreeDurationTotal = 0;
-    uint64_t bucketPacketFreeDurationSquareTotal = 0;
-    uint64_t bucketPacketFreeDurationMin = UINT64_MAX;
-    uint64_t bucketPacketFreeDurationMax = 0;
+    size_t bucketIndex = 0;
+    size_t k = 0;
+    struct Metric *m = NULL;
+
+    struct Bucket buckets[DPDK_INST_BUCKET_COUNT];
+    memset(&buckets, 0, sizeof(struct Bucket) * DPDK_INST_BUCKET_COUNT);
+    for(k = 0; k < DPDK_INST_BUCKET_COUNT; ++k) {
+        buckets[k].packetCount.min = UINT64_MAX;
+        buckets[k].burstFoundDuration.min = UINT64_MAX;
+        buckets[k].noneFoundDuration.min = UINT64_MAX;
+        buckets[k].callbackDuration.min = UINT64_MAX;
+        buckets[k].packetFreeDuration.min = UINT64_MAX;
+    }
+
+    // sprintf buffer
+    char scratch[DPDK_INST_SCRATCH_SIZE];
 #endif
 
-
     RTE_LOG(INFO, STREAMS_SOURCE, "Starting receive loop on lcore %u\n",
-	    rte_lcore_id());
+            rte_lcore_id());
     RTE_LOG(INFO, STREAMS_SOURCE, "conf = 0x%lx, num_rx_queue = %d\n",
-	    conf, conf->num_rx_queue);
+            conf, conf->num_rx_queue);
 
     for (i = 0; i < conf->num_rx_queue; i++) {
-        RTE_LOG(INFO, STREAMS_SOURCE, "port_id = %d, queue_id = %d\n", 
+        RTE_LOG(INFO, STREAMS_SOURCE, "port_id = %d, queue_id = %d\n",
                 conf->rx_queue_list[i].port_id,
                 conf->rx_queue_list[i].queue_id);
     }
+    RTE_LOG(INFO, STREAMS_SOURCE, "TSC Hz = %lu\n", rte_get_tsc_hz());
 
 #ifdef DPDK_INST_ENABLE
-    // Some other timestamp holders
-    struct timespec ts_before;
-    struct timespec ts_after;
-    uint64_t deltaT;
-
-    // save this off for easier display
-    unsigned lcore_id = rte_lcore_id();
-    int port_id = conf->rx_queue_list[0].port_id;
-    int queue_id = conf->rx_queue_list[0].queue_id;
-
     // Get the timestamp we started the first bucket
-    struct timespec ts_loop;
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts_loop);
-    bucketStartTime = ts_loop.tv_nsec + ts_loop.tv_sec * 1000000000UL;
+    DPDK_INST_TS(ts_A);
+    bucketStartTime = ts_A;
 #endif
 
     while(1) {
-	// Read rx packets from the queue.
-	for (i = 0; i < conf->num_rx_queue; i++) {
-	    portid = conf->rx_queue_list[i].port_id;
-	    streams_packet_cb_t packetCallback = conf->rx_queue_list[i].packetCallbackFunction;
+        // Read rx packets from the queue.
+        for (i = 0; i < conf->num_rx_queue; i++) {
+            portid = conf->rx_queue_list[i].port_id;
+            streams_packet_cb_t packetCallback = conf->rx_queue_list[i].packetCallbackFunction;
+            num_rx = rte_eth_rx_burst((uint32_t) portid, conf->rx_queue_list[i].queue_id,
+                                      pkts_burst, MAX_PKT_BURST);
+            DPDK_INST_TS(ts_B);
 
-            DPDK_INST_DELTA_TS_START;
-	    num_rx = rte_eth_rx_burst((uint32_t) portid, conf->rx_queue_list[i].queue_id,
-		                      pkts_burst, MAX_PKT_BURST);
-            DPDK_INST_DELTA_TS_END;
+            if (num_rx) {
+                DPDK_INST_UPDATE_METRIC(burstFoundDuration, ts_B - ts_A);
+                DPDK_INST_UPDATE_METRIC(packetCount, num_rx);
 
-	    if (num_rx) {
-#ifdef DPDK_INST_ENABLE
-                ++bucketBurstFoundCount;
-
-                bucketPacketCountTotal += num_rx;
-                bucketPacketCountSquareTotal += num_rx * num_rx;
-                if(num_rx < bucketPacketCountMin) {
-                    bucketPacketCountMin = num_rx;
-                }
-                if(num_rx > bucketPacketCountMax) {
-                    bucketPacketCountMax = num_rx;
+                for (j = 0; j < PREFETCH_OFFSET && j < num_rx; j++) {
+                    rte_prefetch0(rte_pktmbuf_mtod(pkts_burst[j], void *));
                 }
 
-                bucketBurstFoundDurationTotal += deltaT;
-                bucketBurstFoundDurationSquareTotal += deltaT*deltaT;
-                if(deltaT < bucketBurstFoundDurationMin) {
-                    bucketBurstFoundDurationMin = deltaT;
-                }
-                if(deltaT > bucketBurstFoundDurationMax) {
-                    bucketBurstFoundDurationMax = deltaT;
-                }
-#endif
+                for (j = 0; j < (num_rx - PREFETCH_OFFSET); j++) {
+                    rte_prefetch0(rte_pktmbuf_mtod(pkts_burst[j + PREFETCH_OFFSET], void *));
 
-		for (j = 0; j < PREFETCH_OFFSET && j < num_rx; j++) {
-		    rte_prefetch0(rte_pktmbuf_mtod(pkts_burst[j], void *));
-		}
-
-		for (j = 0; j < (num_rx - PREFETCH_OFFSET); j++) {
-		    rte_prefetch0(rte_pktmbuf_mtod(pkts_burst[j
-				+ PREFETCH_OFFSET], void *));
-
+                    DPDK_INST_TS(ts_C);
                     if(packetCallback) {
-                        DPDK_INST_DELTA_TS_START;
-		        packetCallback(conf->rx_queue_list[i].userData,
-		                       rte_pktmbuf_mtod(pkts_burst[j], char *),
-			    	       pkts_burst[j]->data_len, rte_rdtsc());
-                        DPDK_INST_DELTA_TS_END;
-#ifdef DPDK_INST_ENABLE
-                        bucketCallbackDurationTotal += deltaT;
-                        bucketCallbackDurationSquareTotal += deltaT*deltaT;
-                        if(deltaT < bucketCallbackDurationMin) {
-                            bucketCallbackDurationMin = deltaT;
-                        }
-                        if(deltaT > bucketCallbackDurationMax) {
-                            bucketCallbackDurationMax = deltaT;
-                        }
-#endif
+                        packetCallback(conf->rx_queue_list[i].userData,
+                                       rte_pktmbuf_mtod(pkts_burst[j], char *),
+                                       pkts_burst[j]->data_len, rte_rdtsc());
                     }
-                    DPDK_INST_DELTA_TS_START;
-		    rte_pktmbuf_free(pkts_burst[j]);
-                    DPDK_INST_DELTA_TS_END;
-#ifdef DPDK_INST_ENABLE
-                    bucketPacketFreeDurationTotal += deltaT;
-                    bucketPacketFreeDurationSquareTotal += deltaT*deltaT;
-                    if(deltaT < bucketPacketFreeDurationMin) {
-                        bucketPacketFreeDurationMin = deltaT;
-                    }
-                    if(deltaT > bucketPacketFreeDurationMax) {
-                        bucketPacketFreeDurationMax = deltaT;
-                    }
-#endif
+                    DPDK_INST_TS(ts_D);
+                    rte_pktmbuf_free(pkts_burst[j]);
+                    DPDK_INST_TS(ts_E);
 
-		    count++;
-		}
+                    DPDK_INST_UPDATE_METRIC(callbackDuration, ts_D - ts_C);
+                    DPDK_INST_UPDATE_METRIC(packetFreeDuration, ts_E - ts_D);
 
-		for (; j < num_rx; j++) {
+                    count++;
+                }
+
+                for (; j < num_rx; j++) {
+                    DPDK_INST_TS(ts_C);
                     if(packetCallback) {
-                        DPDK_INST_DELTA_TS_START;
-		        packetCallback(conf->rx_queue_list[i].userData,
-		                       rte_pktmbuf_mtod(pkts_burst[j], char *),
-			    	       pkts_burst[j]->data_len, rte_rdtsc());
-                        DPDK_INST_DELTA_TS_END;
-#ifdef DPDK_INST_ENABLE
-                        bucketCallbackDurationTotal += deltaT;
-                        bucketCallbackDurationSquareTotal += deltaT*deltaT;
-                        if(deltaT < bucketCallbackDurationMin) {
-                            bucketCallbackDurationMin = deltaT;
-                        }
-                        if(deltaT > bucketCallbackDurationMax) {
-                            bucketCallbackDurationMax = deltaT;
-                        }
-#endif
+                        packetCallback(conf->rx_queue_list[i].userData,
+                                       rte_pktmbuf_mtod(pkts_burst[j], char *),
+                                       pkts_burst[j]->data_len, rte_rdtsc());
                     }
-                    DPDK_INST_DELTA_TS_START;
-		    rte_pktmbuf_free(pkts_burst[j]);
-                    DPDK_INST_DELTA_TS_END;
-#ifdef DPDK_INST_ENABLE
-                    bucketPacketFreeDurationTotal += deltaT;
-                    bucketPacketFreeDurationSquareTotal += deltaT*deltaT;
-                    if(deltaT < bucketPacketFreeDurationMin) {
-                        bucketPacketFreeDurationMin = deltaT;
-                    }
-                    if(deltaT > bucketPacketFreeDurationMax) {
-                        bucketPacketFreeDurationMax = deltaT;
-                    }
-#endif
-		    count++;
-		}
-	    } else {
-#ifdef DPDK_INST_ENABLE
-                ++bucketNoneFoundCount;
-                bucketNoneFoundDurationTotal += deltaT;
-                bucketNoneFoundDurationSquareTotal += deltaT*deltaT;
-                if(deltaT < bucketNoneFoundDurationMin) {
-                    bucketNoneFoundDurationMin = deltaT;
+                    DPDK_INST_TS(ts_D);
+                    rte_pktmbuf_free(pkts_burst[j]);
+                    DPDK_INST_TS(ts_E);
+
+                    DPDK_INST_UPDATE_METRIC(callbackDuration, ts_D - ts_C);
+                    DPDK_INST_UPDATE_METRIC(packetFreeDuration, ts_E - ts_D);
+
+                    count++;
                 }
-                if(deltaT > bucketNoneFoundDurationMax) {
-                    bucketNoneFoundDurationMax = deltaT;
-                }
-#endif
+            } else {
+                DPDK_INST_UPDATE_METRIC(noneFoundDuration, ts_B - ts_A);
             }
-	}
+        }
 
 #ifdef DPDK_INST_ENABLE
         // Check to see if we should dump and reset the buckets
-        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts_loop);
-        uint64_t tempCurrentTime = ts_loop.tv_nsec + ts_loop.tv_sec * 1000000000UL;
+        DPDK_INST_TS(ts_F);
 
-        if(tempCurrentTime - bucketStartTime >= DPDK_INST_BUCKET_SIZE) {
-            // Record how much extra time we're wasting here
-            DPDK_INST_DELTA_TS_START;
+        if(ts_F - bucketStartTime >= bucketTargetSize) {
+            // This bucket is finished.
 
-            // Use this time to display only.
-            struct timespec ts_real;
-            clock_gettime(CLOCK_REALTIME, &ts_real);
+            buckets[bucketIndex].duration = ts_F - bucketStartTime;
 
-            // Display the data for this bucket/thread to stdout for now
-            printf("RXTX: receive_loop: METRICS %u %d %d %lu.%09lu %lu %lu : %lu %lu %lu %lu %lu : %lu %lu %lu %lu %lu : %lu %lu %lu %lu : %lu %lu %lu %lu : %lu %lu %lu %lu\n",
-                   lcore_id, port_id, queue_id, ts_real.tv_sec, ts_real.tv_nsec, bucketPriorWastedTime, (tempCurrentTime - bucketStartTime),
-                   bucketNoneFoundCount, bucketNoneFoundDurationTotal, bucketNoneFoundDurationSquareTotal, bucketNoneFoundDurationMin, bucketNoneFoundDurationMax,
-                   bucketBurstFoundCount, bucketBurstFoundDurationTotal, bucketBurstFoundDurationSquareTotal, bucketBurstFoundDurationMin, bucketBurstFoundDurationMax,
-                   bucketPacketCountTotal, bucketPacketCountSquareTotal, bucketPacketCountMin, bucketPacketCountMax,
-                   bucketCallbackDurationTotal, bucketCallbackDurationSquareTotal, bucketCallbackDurationMin, bucketCallbackDurationMax,
-                   bucketPacketFreeDurationTotal, bucketPacketFreeDurationSquareTotal, bucketPacketFreeDurationMin, bucketPacketFreeDurationMax);
+            // Move to the next bucket, unless we're out of buckets.
+            ++bucketIndex;
+            if(bucketIndex == DPDK_INST_BUCKET_COUNT) {
+                // Out of buckets!
+                // Now we really have to waste a bunch of time, dumping the buckets and clearing them.
 
-            // Reset the counters for next time around, other than the starttime and wasted time, which will be updated after this and kept.
-            // bucketStartTime = 0;
-            // bucketPriorWastedTime = 0;
-            bucketBurstFoundCount = 0;
-            bucketNoneFoundCount = 0;
-            bucketPacketCountTotal = 0;
-            bucketPacketCountSquareTotal = 0;
-            bucketPacketCountMin = UINT64_MAX;
-            bucketPacketCountMax = 0;
-            bucketBurstFoundDurationTotal = 0;
-            bucketBurstFoundDurationSquareTotal = 0;
-            bucketBurstFoundDurationMin = UINT64_MAX;
-            bucketBurstFoundDurationMax = 0;
-            bucketNoneFoundDurationTotal = 0;
-            bucketNoneFoundDurationSquareTotal = 0;
-            bucketNoneFoundDurationMin = UINT64_MAX;
-            bucketNoneFoundDurationMax = 0;
-            bucketCallbackDurationTotal = 0;
-            bucketCallbackDurationSquareTotal = 0;
-            bucketCallbackDurationMin = UINT64_MAX;
-            bucketCallbackDurationMax = 0;
-            bucketPacketFreeDurationTotal = 0;
-            bucketPacketFreeDurationSquareTotal = 0;
-            bucketPacketFreeDurationMin = UINT64_MAX;
-            bucketPacketFreeDurationMax = 0;
+                // Use this time to display only.
+                struct timespec ts_real;
+                clock_gettime(CLOCK_REALTIME, &ts_real);
 
-            // Reset the start time for the next bucket
-            clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts_loop);
-            bucketStartTime = ts_loop.tv_nsec + ts_loop.tv_sec * 1000000000UL;
+                for(k = 0; k < DPDK_INST_BUCKET_COUNT; ++k) {
+                    // Display the data for this bucket/thread to stdout for now
+                    size_t offset = 0;
+                    offset += snprintf(scratch + offset, DPDK_INST_SCRATCH_SIZE - offset, "RXTX: receive_loop: METRICS %u %d %d %lu.%09lu-%lu %lu %lu",
+                                     lcore_id, port_id, queue_id, ts_real.tv_sec, ts_real.tv_nsec, (uint64_t)DPDK_INST_BUCKET_COUNT - k - 1, buckets[k].priorWastedTime, buckets[k].duration);
+                    offset += snprintf(scratch + offset, DPDK_INST_SCRATCH_SIZE - offset, " : 0 0 0 0 0");
+                    for(m = &buckets[k].packetCount; m <= &buckets[k].packetFreeDuration; ++m) {
+                        offset += snprintf(scratch + offset, DPDK_INST_SCRATCH_SIZE - offset, " : %lu %lu %lu %lu %lu",
+                                           m->count, m->total, m->squareTotal, m->min, m->max);
+                    }
+                    puts(scratch);
+                }
 
-            DPDK_INST_DELTA_TS_END;
-            bucketPriorWastedTime = deltaT;
+                // Reset the counters for next time around, other than the starttime and wasted time, which will be updated after this and kept.
+                bucketIndex = 0;
+                memset(&buckets, 0, sizeof(struct Bucket) * DPDK_INST_BUCKET_COUNT);
+                for(k = 0; k < DPDK_INST_BUCKET_COUNT; ++k) {
+                    buckets[k].packetCount.min = UINT64_MAX;
+                    buckets[k].burstFoundDuration.min = UINT64_MAX;
+                    buckets[k].noneFoundDuration.min = UINT64_MAX;
+                    buckets[k].callbackDuration.min = UINT64_MAX;
+                    buckets[k].packetFreeDuration.min = UINT64_MAX;
+                }
+
+                // Reset the start time for the next bucket, and capture how much time we've wasted.
+                DPDK_INST_TS(ts_G);
+                buckets[0].priorWastedTime = ts_G - ts_F;
+                ts_A = ts_G;
+            } else {
+                ts_A = ts_F;
+            }
+            bucketStartTime = ts_A;
+        } else {
+            ts_A = ts_F;
         }
 #endif
     }
