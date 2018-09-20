@@ -288,6 +288,18 @@ This metric counts the number of packets dropped by the ethernet adapter, as cou
 	  </description>
           <kind>Counter</kind>
         </metric>
+
+       <metric>
+          <name>nBytesReceivedCurrent</name>
+          <description>
+
+This metric counts the number of bytes received by the ethernet adapter,
+as counted by DPDK.
+
+      </description>
+          <kind>Counter</kind>
+       </metric>
+
         <metric>
           <name>nPacketsProcessedCurrent</name>
           <description>

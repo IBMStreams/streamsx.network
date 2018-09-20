@@ -92,12 +92,23 @@ MY_OPERATOR::MY_OPERATOR() {
 
   SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor", "PacketDPDKSource");
 
-  // initialize state variables
-  now = then = 0;
+  // initialize operator state variables
+  dpdkThreadID = metricsThreadID = 0;
   packetCounter = packetCounterNow = packetCounterThen = 0;
   byteCounter = byteCounterNow = byteCounterThen = 0;
-  portStatisticsNow = portStatisticsThen = (const struct port_stats){0};
+  now = then = 0;
   metricsUpdate = false;
+#ifdef __ATOMIC_RELAXED
+  __atomic_store_n(&realMetricsUpdate, false, __ATOMIC_RELEASE);
+#else
+  #pragma message "Using old sync builtins, with GCC " __VERSION__
+  // __sync_synchronize();  // Unnecessary here, in startup, as we're not yet protecting anything from any other threads.  Leaving as reminder that this variable is an atomic.
+     realMetricsUpdate = false;
+  #endif
+
+  // initialize state variables
+  // TODO: this init is not in the DNSPacketDPDKSource, probably need to add?
+  statsNow = statsThen = (const struct port_stats){0};
 
   // Get the operator's parameters into variables.
   lcoreMaster = <%=$lcoreMaster%>;
@@ -240,17 +251,42 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
 	return; 
     }
 
+  // Determine if the metrics were updated prior to this packet.
+  // Update the "local" version of the metrics updated flag, so that all output filters/assignments reference a stable copy.
+  /// @todo Under extremely low packet rates, or very short metrics update intervals, it's possible that the previous
+  // metrics copy hasn't yet been consumed when a new one comes in, causing either a total loss of a metrics update,
+  // or, if it lines up just right with an incoming packet, a metrics update with "odd" or part old/part new values.
+  // This should be very uncommon, and not catastrophic, so we are not attempted to protect against this just yet.
+  // This could be addressed at some future time.
+
+#ifdef __ATOMIC_RELAXED
+  bool expected = true;
+  if(__atomic_compare_exchange_n(&realMetricsUpdate, &expected, false, false, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) {
+      metricsUpdate = true;
+  } else {
+      metricsUpdate = false;
+  }
+#else
+  if(__sync_bool_compare_and_swap(&realMetricsUpdate, true, false)) {
+      metricsUpdate = true;
+  } else {
+      metricsUpdate = false;
+  }
+#endif
+
     // Fill in and submit output tuples to output ports, as selected by output filters, if specified.
     <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
       <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
       {
          <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-         SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketDPDKSource");
+         //SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketDPDKSource");
          submit(outTuple<%=$i%>, <%=$i%>);
       }
     <% } %> ;
 
-    // reset the 'metrics updated' flag, in case one of the output filters or assignments references it
+    // reset the "local" version of the 'metrics updated' flag, in case one of the output filters or assignments references it
+    // The "real" version of the flag, as updated by the metricsThread() is unaffected, so we don't lose metrics updates under high-packet-rate
+    // conditions.
     metricsUpdate = false;
 }
 
@@ -259,52 +295,65 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
 } 
 
 void MY_OPERATOR::metricsThread() {
-    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> metricsThread()", "PacketDPDKSource");
+    SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
+
+    // remember our thread identifer
+    metricsThreadID = pthread_self();
 
     // expose the operator's statistics in these metrics
     OperatorMetrics& opm = getContext().getMetrics();
     Metric* totalPacketsReceived = &opm.getCustomMetricByName("nPacketsReceivedCurrent");
     Metric* totalPacketsDropped = &opm.getCustomMetricByName("nPacketsDroppedCurrent");
+    Metric* totalBytesReceived = &opm.getCustomMetricByName("nBytesReceivedCurrent");
     Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
     Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
 
     // get statistics periodically and send them to the runtime
     while (!getPE().getShutdownRequested()) {
 
-      // wait until the next interval or the PE is shutting down
+    // wait until the next interval or the PE is shutting down
       const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
       if (secondsToWait>0) {
-        SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "PacketDPDKSource");
+        SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
         getPE().blockUntilShutdownRequest(secondsToWait);
       } else {
-        SPLAPPTRC(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "PacketDPDKSource");
+        SPLAPPTRC(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "DNSPacketLiveSource");
       }
 
       // store the previous interval's metrics for difference calculations
       then = now;
       packetCounterThen = packetCounterNow;
       byteCounterThen = byteCounterNow;
-      portStatisticsThen.received = portStatisticsNow.received;
-      portStatisticsThen.dropped = portStatisticsNow.dropped;
+      statsThen.received = statsNow.received; // Packets RX
+      statsThen.dropped  = statsNow.dropped;  // All errors and drops
+      statsThen.bytes    = statsNow.bytes;    // Bytes RX
 
-      // get the current interval's counters from DPDK
+      // get the current interval's counters from the DPDK library
       now = SPL::Functions::Time::getTimestampInSecs();
-      streams_port_stats(nicPort, &portStatisticsNow);
+      streams_port_stats(nicPort, &statsNow);
       packetCounterNow = packetCounter;
       byteCounterNow = byteCounter;
 
       // expose the operator's statistics as metrics
-      totalPacketsReceived->setValue(portStatisticsNow.received);
-      totalPacketsDropped->setValue(portStatisticsNow.dropped); 
+      totalPacketsReceived->setValue(statsNow.received);
+      totalPacketsDropped->setValue(statsNow.dropped);
+      totalBytesReceived->setValue(statsNow.bytes);
       totalPacketsProcessed->setValue(packetCounter);
       totalBytesProcessed->setValue(byteCounter);
 
       // updated metrics will be available to the next output tuple emitted
-      metricsUpdate = true;
+#ifdef __ATOMIC_RELAXED
+      __atomic_store_n(&realMetricsUpdate, true, __ATOMIC_RELEASE);
+#else
+      __sync_synchronize();
+      realMetricsUpdate = true;
+#endif
+
     }
 
-    SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread()", "PacketDPDKSource");
+    SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
 }
+
 
 void MY_OPERATOR::processDpdkLoop() {
 

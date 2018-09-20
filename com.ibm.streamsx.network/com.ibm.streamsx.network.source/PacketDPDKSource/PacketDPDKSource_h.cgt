@@ -80,15 +80,21 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
       
         // ----------- operator state variables ----------
-
-        double now, then;
-        uint64_t packetCounter, packetCounterNow, packetCounterThen;
-        uint64_t byteCounter, byteCounterNow, byteCounterThen;
-        bool metricsUpdate;
-        struct port_stats portStatisticsNow, portStatisticsThen; 
+        pthread_t dpdkThreadID;
+        pthread_t metricsThreadID;
 
         uint32_t captureSeconds, captureMicroseconds;
         uint64_t tscHz, tscMicrosecondAdjust, tscMicroseconds;
+
+        // Variables related to metrics capture.
+        uint64_t packetCounter;
+        uint64_t byteCounter;
+        uint64_t packetCounterNow, packetCounterThen;
+        uint64_t byteCounterNow, byteCounterThen;
+        struct port_stats statsNow, statsThen;
+        double now, then;
+        bool metricsUpdate;
+        bool realMetricsUpdate;
 
         double    rateLimit;
         uint64_t  rateLimitLastTime;
@@ -114,35 +120,41 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 	
 	// ----------- assignment functions for output attributes ----------
 
-    inline __attribute__((always_inline))
-	uint64_t packetsReceived() { return portStatisticsNow.received; }
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsReceived() { return statsNow.received; }
 
-    inline __attribute__((always_inline))
-    uint64_t packetsDropped() { return portStatisticsNow.dropped; }
-    
-    inline __attribute__((always_inline))
-    uint64_t packetsProcessed() { return packetCounter; }
-    
-    inline __attribute__((always_inline))
-    uint64_t bytesProcessed() { return byteCounter; }
-    
-    inline __attribute__((always_inline))
-    SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalPacketsReceived() { return then ? portStatisticsNow.received - portStatisticsThen.received : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalPacketsDropped() { return then ? portStatisticsNow.dropped - portStatisticsThen.dropped : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalBytesProcessed() { return then ? byteCounterNow - byteCounterThen : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDropped() { return statsNow.dropped; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 bytesReceived() { return statsNow.bytes; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsProcessed() { return packetCounter; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 bytesProcessed() { return byteCounter; }
+
+  inline __attribute__((always_inline))
+  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsReceived() { return then ? statsNow.received - statsThen.received : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDropped() { return then ? statsNow.dropped - statsThen.dropped : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesReceived() { return then ? statsNow.bytes - statsThen.bytes : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesProcessed() { return then ? byteCounterNow - byteCounterThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
   inline __attribute__((always_inline))
 	SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
