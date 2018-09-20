@@ -642,6 +642,16 @@ if it has one, or zero if otherwise.
             <function:prototype>public boolean RATE_LIMITED()</function:prototype>
           </function:function>
 
+          <function:function>
+            <function:description>
+            This function speculatively returns the DNS response flag.  Full packet parsing with validation
+            is not performed.  Instead, simple basic checks are made and then the response bit is returned.
+            This means that all actual DNS packets that are responses are returned correctly, but some
+            non-DNS packets might also be flagged as a DNS response.
+            </function:description>
+            <function:prototype>public boolean DNS_RESPONSE_FLAG_HINT()</function:prototype>
+          </function:function>
+
     </function:functions>
   </function:functionSet>
 
