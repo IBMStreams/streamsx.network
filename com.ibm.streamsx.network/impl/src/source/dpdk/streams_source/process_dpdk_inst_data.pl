@@ -148,6 +148,8 @@ sub postProcessOld {
         $e->{dur} = 0;
         $e->{pkts} = 0;
         $e->{bursts} = 0;
+        $e->{min_ppb} = 9999999;
+        $e->{max_ppb} = 0;
         $e->{avg_ppb} = 0;
         $e->{avg_rxpp} = 0;
         $e->{avg_callpp} = 0;
@@ -161,6 +163,8 @@ sub postProcessOld {
             $e->{dur} += $d->{dur};
             $e->{pkts} += $d->{pkt_count};
             $e->{bursts} += $d->{burst_count};
+            $e->{min_ppb} = $d->{burst_min} if $d->{burst_min} < $e->{min_ppb};
+            $e->{max_ppb} = $d->{burst_max} if $d->{burst_max} > $e->{max_ppb};
             $e->{avg_ppb} += $d->{avg_burst_pkts} * $d->{burst_count};
             $e->{avg_rxpp} += $d->{avg_burst_time_per_pkt} * $d->{pkt_count};
             $e->{avg_callpp} += $d->{avg_call_time} * $d->{pkt_count};
@@ -211,8 +215,8 @@ sub displayOld {
 
     foreach(@{$s->{all}}) {
         my $e = $_;
-        printf("%20.6f %10d %3d %3d    %9d %9d    %9d %9d    %9d %9d    %9d %9d    %12.6f %12.6f\n",
-               $e->{ts}, $e->{pkts}, $e->{avg_ppb}, $e->{sdev_ppb}, $e->{avg_rxpp}, $e->{sdev_rxpp}, $e->{avg_callpp}, $e->{sdev_callpp}, $e->{avg_freepp}, $e->{sdev_freepp},
+        printf("%20.6f %10d %3d %3d %3d %3d    %9d %9d    %9d %9d    %9d %9d    %9d %9d    %12.6f %12.6f\n",
+               $e->{ts}, $e->{pkts}, $e->{avg_ppb}, $e->{sdev_ppb}, $e->{min_ppb}, $e->{max_ppb}, $e->{avg_rxpp}, $e->{sdev_rxpp}, $e->{avg_callpp}, $e->{sdev_callpp}, $e->{avg_freepp}, $e->{sdev_freepp},
                $e->{avg_total}, $e->{sdev_total}, $e->{avg_rate}/1000000, $e->{avg_comp_rate}/1000000);
     }
 }
@@ -315,6 +319,8 @@ sub postProcessNew {
         $e->{dur} = 0;
         $e->{pkts} = 0;
         $e->{bursts} = 0;
+        $e->{min_ppb} = 9999999;
+        $e->{max_ppb} = 0;
         $e->{avg_ppb} = 0;
         $e->{avg_rxpp} = 0;
         $e->{avg_callpp} = 0;
@@ -328,6 +334,8 @@ sub postProcessNew {
             $e->{dur} += $d->{dur};
             $e->{pkts} += $d->{m}->[0]->{total};
             $e->{bursts} += $d->{m}->[0]->{count};
+            $e->{min_ppb} = $d->{m}->[0]->{min} if $d->{m}->[0]->{min} < $e->{min_ppb};
+            $e->{max_ppb} = $d->{m}->[0]->{max} if $d->{m}->[0]->{max} > $e->{max_ppb};
             $e->{avg_ppb} += $d->{m}->[0]->{avg} * $d->{m}->[0]->{count};
             $e->{avg_rxpp} += $d->{avg_burst_time_per_pkt} * $d->{m}->[0]->{total};
             $e->{avg_callpp} += $d->{m}->[3]->{avg} * $d->{m}->[0]->{total};
@@ -382,8 +390,8 @@ sub displayNew {
 
     foreach(@{$s->{all}}) {
         my $e = $_;
-        printf("%20.6f %10d %3d %3d    %9d %9d    %9d %9d    %9d %9d    %9d %9d    %12.6f %12.6f\n",
-               $e->{ts}, $e->{pkts}, $e->{avg_ppb}, $e->{sdev_ppb}, $e->{avg_rxpp}, $e->{sdev_rxpp}, $e->{avg_callpp}, $e->{sdev_callpp}, $e->{avg_freepp}, $e->{sdev_freepp},
+        printf("%20.6f %10d %3d %3d %3d %3d    %9d %9d    %9d %9d    %9d %9d    %9d %9d    %12.6f %12.6f\n",
+               $e->{ts}, $e->{pkts}, $e->{avg_ppb}, $e->{sdev_ppb}, $e->{min_ppb}, $e->{max_ppb}, $e->{avg_rxpp}, $e->{sdev_rxpp}, $e->{avg_callpp}, $e->{sdev_callpp}, $e->{avg_freepp}, $e->{sdev_freepp},
                $e->{avg_total}, $e->{sdev_total}, $e->{avg_rate}/1000000, $e->{avg_comp_rate}/1000000);
     }
 }

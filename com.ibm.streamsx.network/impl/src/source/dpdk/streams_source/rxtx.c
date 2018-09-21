@@ -18,7 +18,7 @@
 #define DPDK_INST_BUCKET_COUNT 10
 #define DPDK_INST_SCRATCH_SIZE 4096
 #ifdef DPDK_INST_ENABLE
-#define DPDK_INST_TS(var) var = rte_rdtsc_precise()
+#define DPDK_INST_TS(var) var = rte_rdtsc()
 #define DPDK_INST_UPDATE_METRIC(m, d) addToMetric(&buckets[bucketIndex].m, (d))
 #else
 #define DPDK_INST_TS(var)
