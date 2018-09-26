@@ -95,11 +95,10 @@ public:
     }
 
 protected:
-    struct entry * const buffer;
+    struct entry * const buffer __attribute__((aligned(64)));
 
-    // TODO: Do we need to spread these apart somehow, to prevent false sharing?
-    std::atomic<size_t> head;
-    std::atomic<size_t> tail;
+    std::atomic<size_t> head __attribute__((aligned(64)));
+    std::atomic<size_t> tail __attribute__((aligned(64)));
 };
 
 
