@@ -36,6 +36,9 @@
 
 #include "parse/NetworkHeaderParser.h"
 
+#include "PacketRingBuffer.h"
+#include "Instrumentation.h"
+
 <%SPL::CodeGen::headerPrologue($model);%>
 
 class MY_OPERATOR : public MY_BASE_OPERATOR {
@@ -61,10 +64,13 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         // Punctuation processing
         void process(Punctuation const & punct, uint32_t port);
 
-        // Method called out of the DPDK callback interface as each packet
+        // Method called out of the ring buffer callback interface as each packet
         // arrives for processing.
         void packetProcess(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp);
 
+        // Method called from the DPDK callback interface as each packet arrives
+        void packetEnqueue(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp);
+   
     private:
   struct DNSResourceRecord {
     uint8_t name[0];
@@ -150,6 +156,16 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         uint8_t *packetPtr;
         uint32_t packetLen; 
 
+        PacketRingBuffer pktQueue;
+
+        // Counters and stats used by the queue production side
+        std::atomic<uint64_t> countDroppedTooBig;
+        std::atomic<uint64_t> countDroppedQueueFull;
+
+        // Counters and stats used by the queue consumption side
+        uint64_t queueHighWaterMark;
+        INST_BUCKETS_DEFINE(instBuckets);
+
         // This method is called during the start up of the first of the 
         // operator's threads.  It calls into the DPDK libraries, where 
         // the thread spins waiting for packets to arrive.  As each packet 
@@ -161,6 +177,13 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         // operator's threads.  It sits in a loop pulling stats from 
         // the DPDK libraries.
         void metricsThread();
+
+        // This method is called during the startup of the third of the
+        // operator's threads.  It sits in a loop pulling packets off the
+        // internal ring buffer, then parses, filters, and generates tuples
+        // from that data, and submits them downstream.
+        void processSubmitLoop();
+
 
 	// ----------- network header parser ----------
 	NetworkHeaderParser headers;

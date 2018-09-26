@@ -85,7 +85,14 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scala
 static void dpdkCallback(void *correlator, void *data, 
 	                 uint32_t length, uint64_t tscTimestamp) {
     MY_OPERATOR* self = (MY_OPERATOR*)correlator;
-    self->packetProcess((uint8_t *)data, length, tscTimestamp);
+    self->packetEnqueue((uint8_t *)data, length, tscTimestamp);
+}
+
+// Function called on the other side of the circular buffer
+static void submitCallback(void *correlator, void *data, 
+	                 uint32_t length) {
+    MY_OPERATOR* self = (MY_OPERATOR*)correlator;
+    self->packetProcess((uint8_t *)data, length, 0);
 }
 
 MY_OPERATOR::MY_OPERATOR() {
@@ -125,6 +132,11 @@ MY_OPERATOR::MY_OPERATOR() {
   rateLimit = <%=$rateLimit%>;
   rateLimitLastTime = 0;
   rateLimitPeriodUsec = (uint64_t)((1.0 / rateLimit) * 1000000.0);
+
+  countDroppedTooBig = 0;
+  countDroppedQueueFull = 0;
+  queueHighWaterMark = 0;
+  INST_BUCKETS_CLEAR(instBuckets);
 
   // Initialize the DPDK subsystem.
   int rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue, (int)promiscuous, &dpdkCallback, (void *)this);
@@ -174,7 +186,7 @@ void MY_OPERATOR::allPortsReady() {
     tscMicrosecondAdjust = (tscHz + 500000ul) / 1000000ul; 
 
     // create operator threads
-    createThreads(2);
+    createThreads(3);
 
     SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady()", "PacketDPDKSource");
 }
@@ -196,6 +208,7 @@ void MY_OPERATOR::process(uint32_t idx) {
   switch (idx) {
   case 0: processDpdkLoop(); break;
   case 1: if(metricsInterval > 0) metricsThread(); break;
+  case 2: processSubmitLoop(); break;
   default: break; 
   } 
 
@@ -365,6 +378,67 @@ void MY_OPERATOR::processDpdkLoop() {
 
     SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> processDpdkLoop()", "PacketDPDKSource");
 }
+
+void MY_OPERATOR::packetEnqueue(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp) {
+    // Simply enqueue the packet onto the ring buffer!
+    if(packetLen > PacketRingBuffer::MAX_DATA) {
+        ++countDroppedTooBig;
+    } else if(!pktQueue.produce(packet, packetLen)) {
+        ++countDroppedQueueFull;
+    }
+}
+
+void MY_OPERATOR::processSubmitLoop() {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> processSubmitLoop()", "PacketDPDKSource");
+
+    bool shutdown = getPE().getShutdownRequested();
+    INST_TS(instBuckets_startTime);
+    while(!shutdown) {
+        // In here, try to consume from the ring buffer
+        // If we consumed a packet, try for another one
+        // Otherwise, check if shutdown is requested (when really busy, don't bother checking for shutdown
+
+        uint64_t ts_A, ts_B;
+        INST_TS(ts_A);
+
+        size_t queueSizeSnapshot = pktQueue.size();
+        if(queueSizeSnapshot > queueHighWaterMark) {
+            queueHighWaterMark = queueSizeSnapshot;
+        }
+
+        if(pktQueue.consume(&submitCallback, this)) {
+            // Got & processed a packet!
+            INST_TS(ts_B);
+            INST_UPDATE_METRIC(instBuckets, 0, ts_B - ts_A);
+        } else {
+            // No packet.
+
+            // Update shutdown flag, since we're apparently not doing anything else.
+            shutdown = getPE().getShutdownRequested();
+
+            INST_TS(ts_B);
+            INST_UPDATE_METRIC(instBuckets, 1, ts_B - ts_A);
+        }
+
+        bool dumpMetrics = false;
+        INST_BUCKETS_HANDLE(instBuckets, ts_B, "processSubmitLoop", nicQueue, dumpMetrics);
+
+        if(dumpMetrics) {
+            // The full interval cycle has finished.
+            // In addition to the metrics already dumped above, we should dump the high water mark & the producer drop counts.
+            // Those will all get reset, too.
+            uint64_t lDroppedTooBig = countDroppedTooBig.exchange(0, std::memory_order_relaxed);
+            uint64_t lDroppedQueueFull = countDroppedQueueFull.exchange(0, std::memory_order_relaxed);
+            uint64_t lHighWaterMark = queueHighWaterMark;
+            queueHighWaterMark = 0;
+
+            printf("processSubmitLoop: LONGMETRICS %lu : %lu %lu %lu\n", (uint64_t)nicQueue, lHighWaterMark, lDroppedTooBig, lDroppedQueueFull);
+        }
+    }
+
+    SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> processSubmitLoop()", "PacketDPDKSource");
+}
+
 
 <%SPL::CodeGen::implementationEpilogue($model);%>
 
