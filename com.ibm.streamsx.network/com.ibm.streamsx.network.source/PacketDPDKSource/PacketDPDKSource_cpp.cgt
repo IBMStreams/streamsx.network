@@ -392,7 +392,9 @@ void MY_OPERATOR::processSubmitLoop() {
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> processSubmitLoop()", "PacketDPDKSource");
 
     bool shutdown = getPE().getShutdownRequested();
+
     INST_TS(instBuckets_startTime);
+
     while(!shutdown) {
         // In here, try to consume from the ring buffer
         // If we consumed a packet, try for another one

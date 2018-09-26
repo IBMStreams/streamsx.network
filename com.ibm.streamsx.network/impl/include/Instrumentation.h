@@ -22,12 +22,12 @@
 #define INST_METRIC_COUNT 2
 #ifdef INST_ENABLE
 #define INST_TS(d) d = __rdtsc()
-#define INST_UPDATE_METRIC(v, m, d) instAddToMetric(&v[v_index].metrics[m], (d))
-#define INST_SET_BUCKET_START(v, d) v_startTime = d
-#define INST_BUCKETS_DEFINE(v)                  \
-    InstBucket v[INST_BUCKET_COUNT];            \
-    size_t v_index;                             \
-    uint64_t v_startTime
+#define INST_UPDATE_METRIC(v, m, d) instAddToMetric(&v[v##_index].metrics[m], (d))
+#define INST_SET_BUCKET_START(v, d) v##_startTime) = d
+#define INST_BUCKETS_DEFINE(v)                    \
+    InstBucket v[INST_BUCKET_COUNT];              \
+    size_t v##_index;                             \
+    uint64_t v##_startTime
 
 #define INST_BUCKETS_CLEAR(v)                                           \
     memset(v, 0, sizeof(InstBucket) * INST_BUCKET_COUNT);               \
@@ -40,21 +40,21 @@
             }                                                           \
         }                                                               \
     }                                                                   \
-    v_startTime = 0;                                                    \
-    v_index = 0
+    v##_startTime = 0;                                                  \
+    v##_index = 0
 
-#define INST_BUCKETS_HANDLE(v, d, t, i, q)       \
-    q = false;                                   \
-    if(d - v_startTime >= INST_BUCKET_SIZE) {    \
-        v[v_index].duration = d - v_startTime;   \
-        ++v_index;                               \
-        if(v_index == INST_BUCKET_COUNT) {       \
-            instDumpMetricsBuckets(v, t, i);     \
-            INST_BUCKETS_CLEAR(v);               \
-            INST_TS(d);                          \
-            q = true;                            \
-        }                                        \
-        v_startTime = d;                         \
+#define INST_BUCKETS_HANDLE(v, d, t, i, q)           \
+    q = false;                                       \
+    if(d - v##_startTime >= INST_BUCKET_SIZE) {      \
+        v[v##_index].duration = d - v##_startTime;   \
+        ++v##_index;                                 \
+        if(v##_index == INST_BUCKET_COUNT) {         \
+            instDumpMetricsBuckets(v, t, i);         \
+            INST_BUCKETS_CLEAR(v);                   \
+            INST_TS(d);                              \
+            q = true;                                \
+        }                                            \
+        v##_startTime = d;                           \
     }
 
 
