@@ -36,6 +36,7 @@ my @outputPortList = @{ $model->getOutputPorts() };
 
 my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParameterByName("lcoreMaster")->getValueAt(0)->getCppExpression() : -1;
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
+my $dequeueThreadPinning = $model->getParameterByName("dequeueThreadPinning") ? $model->getParameterByName("dequeueThreadPinning")->getValueAt(0)->getCppExpression() : undef;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
 my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParameterByName("buffersizes")->getValueAt(0)->getCppExpression() : '""';
@@ -391,6 +392,33 @@ void MY_OPERATOR::packetEnqueue(uint8_t *packet, uint32_t packetLen, uint64_t ts
 void MY_OPERATOR::processSubmitLoop() {
     SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> processSubmitLoop()", "PacketDPDKSource");
 
+    int rc;
+
+<% if(defined $dequeueThreadPinning) { %>
+    // Pin ourselves, if requested
+    std::vector<uint64_t> a = <%=$dequeueThreadPinning%>;
+    cpu_set_t cpumask; // CPU affinity bit mask
+    CPU_ZERO(&cpumask);
+    for (std::vector<uint64_t>::iterator it = a.begin(); it != a.end(); ++it) {
+        CPU_SET(*it, &cpumask);
+    }
+    pid_t mytid = (pid_t)syscall(SYS_gettid);
+    rc = sched_setaffinity(mytid, sizeof cpumask, &cpumask);
+    if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to CPUs" << ", " << strerror(errno));
+<% } %>
+
+    // Name this thread something sensible.
+    // If on the same thread as some downstream SPL code that re-names on first tuple,
+    // that will override, of course.
+    SPL::rstring temp("ring-deq-");
+    temp += std::to_string(nicQueue);
+    if(temp.length() > 15) {
+        temp = temp.substr(0, 15);
+    }
+
+    rc = pthread_setname_np(pthread_self(), temp.c_str());
+    if(rc != 0) THROW (SPLRuntimeOperator, "could not set thread name to " << temp << ", " << strerror(rc));
+
     bool shutdown = getPE().getShutdownRequested();
 
     INST_TS(instBuckets_startTime);
@@ -429,12 +457,16 @@ void MY_OPERATOR::processSubmitLoop() {
             // The full interval cycle has finished.
             // In addition to the metrics already dumped above, we should dump the high water mark & the producer drop counts.
             // Those will all get reset, too.
+
+            struct timespec ts_real;
+            clock_gettime(CLOCK_REALTIME, &ts_real);
+
             uint64_t lDroppedTooBig = countDroppedTooBig.exchange(0, std::memory_order_relaxed);
             uint64_t lDroppedQueueFull = countDroppedQueueFull.exchange(0, std::memory_order_relaxed);
             uint64_t lHighWaterMark = queueHighWaterMark;
             queueHighWaterMark = 0;
 
-            printf("processSubmitLoop: LONGMETRICS %lu : %lu %lu %lu\n", (uint64_t)nicQueue, lHighWaterMark, lDroppedTooBig, lDroppedQueueFull);
+            printf("processSubmitLoop: LONGMETRICS %lu %lu.%09lu : %lu %lu %lu\n", (uint64_t)nicQueue, ts_real.tv_sec, ts_real.tv_nsec, lHighWaterMark, lDroppedTooBig, lDroppedQueueFull);
         }
     }
 

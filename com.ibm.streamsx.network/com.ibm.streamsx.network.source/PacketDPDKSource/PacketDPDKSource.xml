@@ -406,6 +406,23 @@ To determine which NUMA node your ethernet adapter is connected to, look in the 
       </parameter>
 
       <parameter>
+        <name>dequeueThreadPinning</name>
+        <description>
+This optional parameter specifies a set of logical processor cores to pin the
+internal ring buffer dequeue thread to.  This thread will run at 100% cpu
+utilization as it spins on the ring buffer tail.
+
+By default, this thread runs unpinned.
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type><![CDATA[list<uint64>]]></type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+
+      <parameter>
         <name>nicPort</name>
         <description>
 
