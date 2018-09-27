@@ -66,6 +66,9 @@ public:
                 return false;
             }
         } else {
+            // data doesn't fit in one entry.
+            // Caller should have already checked for this,
+            // since we're just going to drop it.
             // Unlikely path
             return false;
         }
@@ -89,7 +92,6 @@ public:
             return true;
         } else {
             // buffer is empty
-            // Unlikely path
             return false;
         }
     }
