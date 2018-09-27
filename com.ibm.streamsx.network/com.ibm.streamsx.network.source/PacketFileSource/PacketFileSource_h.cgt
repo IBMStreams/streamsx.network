@@ -62,6 +62,53 @@ public:
   void metricsThread();
 
  private:
+  struct DNSResourceRecord {
+    uint8_t name[0];
+    uint16_t type;
+    uint16_t classs;
+    uint32_t ttl;
+    uint16_t rdlength;
+    uint8_t rdata[0];
+  } __attribute__((packed)) ;
+
+  struct DNSHeader {
+    uint16_t identifier;
+    union {
+      struct {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+        uint8_t recursionDesiredFlag:1;
+        uint8_t truncatedFlag:1;
+        uint8_t authoritativeFlag:1;
+        uint8_t opcodeField:4;
+        uint8_t responseFlag:1;
+        uint8_t responseCode:4;
+        uint8_t nonauthenticatedFlag:1;
+        uint8_t authenticatedFlag:1;
+        uint8_t reserved:1;
+        uint8_t recursionAvailableFlag:1;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+        uint8_t responseFlag:1;
+        uint8_t opcodeField:4;
+        uint8_t authoritativeFlag:1;
+        uint8_t truncatedFlag:1;
+        uint8_t recursionDesiredFlag:1;
+        uint8_t recursionAvailableFlag:1;
+        uint8_t reserved:1;
+        uint8_t authenticatedFlag:1;
+        uint8_t nonauthenticatedFlag:1;
+        uint8_t responseCode:4;
+#else
+# error "sorry, __BYTE_ORDER not setm check <bits/endian.h>"
+#endif
+      } indFlags;
+      uint16_t allFlags;
+    } flags;
+    uint16_t questionCount;
+    uint16_t answerCount;
+    uint16_t nameserverCount;
+    uint16_t additionalCount;
+    struct DNSResourceRecord rrFields[0]; // see 'struct DNSResourceRecord'
+  } __attribute__((packed)) ;
 
   // ----------- operator parameters (constant after constructor executes) ----------
 
@@ -87,6 +134,10 @@ public:
   bool metricsUpdate;
   boolean done;
 
+  double    rateLimit;
+  uint64_t  rateLimitLastTime;
+  uint64_t  rateLimitPeriodUsec;
+
   // ----------- libpcap-specific variables ----------
 
   pcap_t* pcapDescriptor;
@@ -109,6 +160,9 @@ public:
   SPL::uint64 packetsDropped() { return 0; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 bytesReceived() { return byteCounter; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
   inline __attribute__((always_inline))
@@ -122,6 +176,9 @@ public:
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsDropped() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesReceived() { return then ? byteCounterNow - byteCounterThen : 0; }
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
@@ -155,6 +212,9 @@ public:
 
   inline __attribute__((always_inline))
   SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 ETHER_DST_ADDRESS_64() { return headers.etherHeader ? (((uint64_t)headers.etherHeader->h_dest[0] << 40) | ((uint64_t)headers.etherHeader->h_dest[1] << 32) | ((uint64_t)headers.etherHeader->h_dest[2] << 24) | ((uint64_t)headers.etherHeader->h_dest[3] << 16) | ((uint64_t)headers.etherHeader->h_dest[4] << 8) | ((uint64_t)headers.etherHeader->h_dest[5] << 0)) : 0; }
 
   inline __attribute__((always_inline))
   SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
@@ -262,6 +322,29 @@ public:
   
   inline __attribute__((always_inline))
   SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
+
+inline __attribute__((always_inline))
+  SPL::boolean RATE_LIMITED() {
+    // This gets the recorded time when the last packet came in which is close enough for what we need here.
+    uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
+    if(currentTime >= (rateLimitLastTime + rateLimitPeriodUsec)) {
+        rateLimitLastTime = currentTime;
+        return false;
+    }
+    return true;
+  }
+
+  inline __attribute__((always_inline))
+    SPL::boolean DNS_RESPONSE_FLAG_HINT() {
+        if(headers.udpHeader == NULL) return false;
+        if(ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53) return false;
+        if(!headers.payload) return false;
+        if(headers.payloadLength < sizeof(struct DNSHeader)) return false;
+
+        struct DNSHeader* dnsHeader = (struct DNSHeader*)(headers.payload);
+
+        return (dnsHeader->flags.indFlags.responseFlag);
+    }
 
   inline __attribute__((always_inline))
   SPL::uint32 ERSPAN_SRC_ADDRESS() { return headers.erspanHeader ? ntohl(headers.erspanHeader->ipHeader.saddr) : 0; }
