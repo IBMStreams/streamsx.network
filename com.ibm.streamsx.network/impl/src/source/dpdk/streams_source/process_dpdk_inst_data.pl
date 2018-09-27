@@ -10,6 +10,7 @@ our $TSC_HZ = 2194714309;
 our $old_new = undef;
 
 our $state = {entries=>{}, all=>[]};
+our $psl = {entries=>{}, all=>[], longentries=>{}, longall=>[]};
 
 while(<>) {
     chomp;
@@ -41,6 +42,14 @@ while(<>) {
             # too many groups!  bad!
             die "ERROR: Found line with too many groups (".(scalar @groups).", expected $old_new)\n";
         }
+    } elsif(/^processSubmitLoop: METRICS (.*)$/) {
+        my @groups = split / : /, $1;
+        processPSLEntry($psl, @groups);
+
+    } elsif(/^processSubmitLoop: LONGMETRICS (.*)$/) {
+        my @groups = split / : /, $1;
+        processPSLLongEntry($psl, @groups);
+
     } else {
         # ignore everything else.
     }
@@ -56,8 +65,10 @@ if($old_new == 6) {
     die "ERROR: How did I get this far with the initial group count at $old_new?\n";
 }
 
-exit(0);
+postProcessPSL($psl);
+displayPSL($psl);
 
+exit(0);
 
 
 
@@ -390,9 +401,218 @@ sub displayNew {
 
     foreach(@{$s->{all}}) {
         my $e = $_;
-        printf("%20.6f %10d %3d %3d %3d %3d    %9d %9d    %9d %9d    %9d %9d    %9d %9d    %12.6f %12.6f\n",
+        printf("DPDK %20.6f %10d %3d %3d %3d %3d    %9d %9d    %9d %9d    %9d %9d    %9d %9d    %12.6f %12.6f\n",
                $e->{ts}, $e->{pkts}, $e->{avg_ppb}, $e->{sdev_ppb}, $e->{min_ppb}, $e->{max_ppb}, $e->{avg_rxpp}, $e->{sdev_rxpp}, $e->{avg_callpp}, $e->{sdev_callpp}, $e->{avg_freepp}, $e->{sdev_freepp},
                $e->{avg_total}, $e->{sdev_total}, $e->{avg_rate}/1000000, $e->{avg_comp_rate}/1000000);
     }
 }
 
+sub processPSLEntry {
+    my ($s, @g) = @_;
+
+    my $e = {};
+    my $qid;
+
+    ($qid, $e->{ts_offs}, $e->{dur}) = split /\s+/,$g[0];
+    if($qid !~ /^[[:digit:]]+$/ || $e->{ts_offs} !~ /^[[:digit:].-]+$/ || $e->{dur} !~ /^[[:digit:]]+$/) {
+        print STDERR "WARNING: Found invalid queue id [$qid] or ts_offs [$e->{ts_offs}] or dur [$e->{dur}]\n";
+        return;
+    }
+    ($e->{ts}, $e->{offs}) = split '-',$e->{ts_offs};
+    $e->{ts} -= $e->{dur}/$TSC_HZ * $e->{offs};
+    if(scalar @g == 3) {
+        $e->{m} = [];
+        for(my $i = 0; $i < 2; ++$i) {
+            $e->{m}->[$i] = {};
+            ($e->{m}->[$i]->{count}, $e->{m}->[$i]->{total}, $e->{m}->[$i]->{tsquare}, $e->{m}->[$i]->{min}, $e->{m}->[$i]->{max}) = split /\s+/, $g[$i+1];
+        }
+    }
+    if(!defined $e->{m}->[1]->{max} || $e->{m}->[1]->{max} !~ /^[[:digit:]]+$/) {
+        $s->{entries}->{$qid} = [] if !defined $s->{entries}->{$qid};
+        push @{$s->{entries}->{$qid}}, undef;
+
+        print STDERR "WARNING: Found line with short last group.\n";
+        return;
+    } elsif((scalar (split /\s+/,$g[2])) > 5) {
+        $s->{entries}->{$qid} = [] if !defined $s->{entries}->{$qid};
+        push @{$s->{entries}->{$qid}}, undef;
+
+        print STDERR "WARNING: Found line with long last group.\n";
+        return;
+    }
+
+
+    foreach(@{$e->{m}}) {
+        my $m = $_;
+        if($m->{count}) {
+            $m->{avg} = $m->{total}/$m->{count};
+            $m->{sdev} = sqrt($m->{tsquare}/$m->{count} - $m->{avg}*$m->{avg});
+        }
+    }
+
+
+    $s->{entries}->{$qid} = [] if !defined $s->{entries}->{$qid};
+    push @{$s->{entries}->{$qid}}, $e;
+
+
+}
+
+sub processPSLLongEntry {
+    my ($s, @g) = @_;
+
+    my $e = {};
+    my $qid;
+
+    ($qid, $e->{ts}) = split /\s+/,$g[0];
+    if($qid !~ /^[[:digit:]]+$/ || $e->{ts} !~ /^[[:digit:].]+$/) {
+        print STDERR "WARNING: Found invalid queue id [$qid] or ts [$e->{ts}]\n";
+        return;
+    }
+    if(scalar @g == 2) {
+        ($e->{hwm}, $e->{dropbig}, $e->{dropfull}) = split /\s+/, $g[1];
+    }
+    if(!defined $e->{dropfull} || $e->{dropfull} !~ /^[[:digit:]]+$/) {
+        $s->{longentries}->{$qid} = [] if !defined $s->{longentries}->{$qid};
+        push @{$s->{longentries}->{$qid}}, undef;
+
+        print STDERR "WARNING: Found line with short last group.\n";
+        return;
+    } elsif((scalar (split /\s+/,$g[1])) > 3) {
+        $s->{longentries}->{$qid} = [] if !defined $s->{longentries}->{$qid};
+        push @{$s->{longentries}->{$qid}}, undef;
+
+        print STDERR "WARNING: Found line with long last group.\n";
+        return;
+    }
+
+
+
+    $s->{longentries}->{$qid} = [] if !defined $s->{longentries}->{$qid};
+    push @{$s->{longentries}->{$qid}}, $e;
+}
+
+sub postProcessPSL {
+    my ($s) = @_;
+
+    my @qids = keys %{$s->{entries}};
+#    print "ppo: $qids[0] has ".(scalar @{$s->{entries}->{$qids[0]}})." entries.\n";
+    GROUP2: for(my $i = 0; $i < scalar @{$s->{entries}->{$qids[0]}}; ++$i) {
+        foreach(@qids) {
+#            print "Checking $_\n";
+            if(!defined $s->{entries}->{$_}->[$i]) {
+                next GROUP2;
+            }
+#            print "$_ has entry $i\n";
+        }
+#        print "Handling entry $i\n";
+        # combine all the queue data into data for this point.
+        # We want to use the timestamp of the first queue, I guess
+        # - sum of pkt_count
+        # - new average of burst time per pkt
+        # - new stddev of burst time per pkt
+        # - new average of call time per pkt
+        # - new stddev of call time per pkt
+        # - new average of free time per pkt
+        # - new stddev of free time per pkt
+
+        # - average total time per pkt
+        # - sdev total time per pkt
+        # - back-computed pkt rate possible
+        # - forward-computed pkt rate in interval
+
+        my $e = {};
+        $e->{ts} = $s->{entries}->{$qids[0]}->[$i]->{ts};
+
+        $e->{dur} = 0;
+        $e->{pkts} = 0;
+        $e->{idle} = 0;
+        $e->{avg_found} = 0;
+        $e->{avg_notfound} = 0;
+        $e->{sdev_found} = 0;
+        $e->{sdev_notfound} = 0;
+        foreach(@qids) {
+            my $d = $s->{entries}->{$_}->[$i];
+            $e->{dur} += $d->{dur};
+            $e->{pkts} += $d->{m}->[0]->{count};
+            $e->{idle} += $d->{m}->[1]->{count};
+            $e->{avg_found} += $d->{m}->[0]->{avg} * $d->{m}->[0]->{count};
+            $e->{avg_notfound} += $d->{m}->[1]->{count} ? $d->{m}->[1]->{avg} * $d->{m}->[1]->{count} : 0;
+        }
+
+        $e->{dur} /= scalar @qids;
+        $e->{avg_found} /= $e->{pkts};
+        $e->{avg_notfound} /= $e->{idle} ? $e->{idle} : 1;
+
+        foreach(@qids) {
+            my $d = $s->{entries}->{$_}->[$i];
+            $e->{sdev_found} += ($d->{m}->[0]->{sdev} * $d->{m}->[0]->{sdev}  + (($d->{m}->[0]->{avg} - $e->{avg_found})**2.0)) * $d->{m}->[0]->{count};
+            $e->{sdev_notfound} += $d->{m}->[1]->{count} ? (($d->{m}->[1]->{sdev} * $d->{m}->[1]->{sdev}  + (($d->{m}->[1]->{avg} - $e->{avg_notfound})**2.0)) * $d->{m}->[1]->{count}) : 0;
+        }
+
+        $e->{sdev_found} /= $e->{pkts};
+        $e->{sdev_notfound} /= $e->{idle} ? $e->{idle} : 1;
+        $e->{sdev_found} = sqrt($e->{sdev_found});
+        $e->{sdev_notfound} = sqrt($e->{sdev_notfound});
+
+
+        $e->{avg_rate} = $e->{pkts}/($e->{dur}/$TSC_HZ);
+
+        $e->{avg_comp_rate} = (scalar @qids) * $TSC_HZ / $e->{avg_found};
+
+        push @{$s->{all}}, $e;
+
+    }
+
+
+
+
+    GROUP3: for(my $i = 0; $i < scalar @{$s->{longentries}->{$qids[0]}}; ++$i) {
+        foreach(@qids) {
+#            print "Checking $_\n";
+            if(!defined $s->{longentries}->{$_}->[$i]) {
+                next GROUP3;
+            }
+#            print "$_ has entry $i\n";
+        }
+#        print "Handling entry $i\n";
+
+        my $e = {};
+        $e->{ts} = $s->{longentries}->{$qids[0]}->[$i]->{ts};
+
+        $e->{total_hwm} = 0;
+        $e->{max_hwm} = 0;
+        $e->{dropbig} = 0;
+        $e->{dropfull} = 0;
+        foreach(@qids) {
+            my $d = $s->{longentries}->{$_}->[$i];
+            $e->{total_hwm} += $d->{hwm};
+            $e->{max_hwm} = $d->{hwm} if $d->{hwm} > $e->{max_hwm};
+            $e->{dropbig} += $d->{dropbig};
+            $e->{dropfull} += $d->{dropfull};
+        }
+
+        $e->{avg_hwm} = $e->{total_hwm}/ scalar @qids;
+
+        push @{$s->{longall}}, $e;
+
+    }
+
+}
+
+sub displayPSL {
+    my ($s) = @_;
+
+    foreach(@{$s->{all}}) {
+        my $e = $_;
+        printf("DEQ  %20.6f %10d    %9d %9d    %9d %9d    %12.6f %12.6f\n",
+               $e->{ts}, $e->{pkts}, $e->{avg_found}, $e->{sdev_found}, $e->{avg_notfound}, $e->{sdev_notfound},
+               $e->{avg_rate}/1000000, $e->{avg_comp_rate}/1000000);
+    }
+
+    foreach(@{$s->{longall}}) {
+        my $e = $_;
+        printf("LONG %20.6f    %9d %9d %9d    %9d    %9d\n",
+               $e->{ts}, $e->{total_hwm}, $e->{avg_hwm}, $e->{max_hwm}, $e->{dropbig}, $e->{dropfull});
+
+    }
+}
