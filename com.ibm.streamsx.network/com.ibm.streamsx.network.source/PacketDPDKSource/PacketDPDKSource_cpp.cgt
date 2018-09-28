@@ -382,9 +382,10 @@ void MY_OPERATOR::processDpdkLoop() {
 
 void MY_OPERATOR::packetEnqueue(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp) {
     // Simply enqueue the packet onto the ring buffer!
-    if(packetLen > PacketRingBuffer::MAX_DATA) {
-        ++countDroppedTooBig;
-    } else if(!pktQueue.produce(packet, packetLen)) {
+//    if(packetLen > PacketRingBuffer::MAX_DATA) {
+//        ++countDroppedTooBig;
+//    } else
+    if(!pktQueue.produce(packet, packetLen)) {
         ++countDroppedQueueFull;
     }
 }
