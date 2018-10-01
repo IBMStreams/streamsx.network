@@ -16,7 +16,7 @@ class PacketRingBuffer {
 public:
     // The entry size and entry count must be powers of 2 for everything to work out right.
     static const size_t ENTRY_SIZE_BITS = 7;
-    static const size_t ENTRY_COUNT_BITS = 19;
+    static const size_t ENTRY_COUNT_BITS = 18;
     static const size_t ENTRY_SIZE = 1 << ENTRY_SIZE_BITS;
     static const size_t ENTRY_COUNT = 1 << ENTRY_COUNT_BITS;
     static_assert(ENTRY_SIZE > sizeof(uint32_t)*2, "PacketRingBuffer::ENTRY_SIZE must be large enough for the entry header.");
