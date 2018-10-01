@@ -16,7 +16,7 @@ class PacketRingBuffer {
 public:
     // The entry size and entry count must be powers of 2 for everything to work out right.
     static const size_t ENTRY_SIZE_BITS = 7;
-    static const size_t ENTRY_COUNT_BITS = 24;
+    static const size_t ENTRY_COUNT_BITS = 19;
     static const size_t ENTRY_SIZE = 1 << ENTRY_SIZE_BITS;
     static const size_t ENTRY_COUNT = 1 << ENTRY_COUNT_BITS;
     static_assert(ENTRY_SIZE > sizeof(uint32_t)*2, "PacketRingBuffer::ENTRY_SIZE must be large enough for the entry header.");
@@ -29,8 +29,7 @@ protected:
     // the other entries are just raw data (in 128 byte chunks), right after this one.
     struct entry {
         uint32_t data_len;
-        uint32_t reserved     : 31;
-        uint32_t dummy_packet : 1;   // Indicates this is not actually packet data, and just used to pad the ring.  Ignore on dequeue.
+        uint32_t dummy_packet;   // Indicates (=1) this is not actually packet data, and just used to pad the ring.  Ignore on dequeue. 0 otherwise
         uint8_t data[ENTRY_SIZE - sizeof(uint32_t)*2];
     } __attribute__((aligned(128),packed));
 
