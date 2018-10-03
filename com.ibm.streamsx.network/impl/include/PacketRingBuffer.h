@@ -16,7 +16,7 @@ class PacketRingBuffer {
 public:
     // The entry size and entry count must be powers of 2 for everything to work out right.
     static const size_t ENTRY_SIZE_BITS = 7;
-    static const size_t ENTRY_COUNT_BITS = 18;
+    static const size_t ENTRY_COUNT_BITS = 18;    // 2^15 x 128 byte entries would allow 8 rings to fit in the L3 of one socket, but that's pretty small.
     static const size_t ENTRY_SIZE = 1 << ENTRY_SIZE_BITS;
     static const size_t ENTRY_COUNT = 1 << ENTRY_COUNT_BITS;
     static_assert(ENTRY_SIZE > sizeof(uint32_t)*2, "PacketRingBuffer::ENTRY_SIZE must be large enough for the entry header.");
@@ -177,6 +177,52 @@ public:
                 return false;
             }
         } while(__builtin_expect(true, 1));
+    }
+
+    // Consumes all available entries from the buffer, if there is any
+    // Returns the count of consumed items.
+    // Calls cb for each packet (if specified).
+    // Consumes up to max_burst items at once (0 implies as many as possible).
+    // Only updates the tail pointer after consuming all of the entries.
+    // Takes a single initial head snapshot, so the producer may be
+    // producing more entries after we start consuming, but we will
+    // only consume up to the point of entries that had been produced
+    // at the time we started.
+    size_t consumeAll(callback_t cb, void *user_data, size_t max_burst = 0) {
+        size_t ltail = tail.load(std::memory_order_relaxed);
+        size_t items_available = used_size(head.load(std::memory_order_acquire), ltail);
+        size_t items_consumed = 0;
+        size_t packets_consumed = 0;
+
+        // We won't attempt to predict this while loop clause ... empty queue might be just as likely as one thing in queue, and a whole bunch in queue.
+        while((items_consumed < items_available) && ((max_burst == 0) || (packets_consumed < max_burst))) {
+            size_t skip_len = computeEntryCount(buffer[ltail].data_len);
+            bool dummy_packet = (buffer[ltail].dummy_packet == 1);
+
+            if(__builtin_expect(!dummy_packet, 1)) {
+                // Real packet!
+
+                // Use the callback on it (if there is one)
+                if(__builtin_expect(cb != NULL, 1)) {
+                    cb(user_data, buffer[ltail].data, buffer[ltail].data_len);
+                } // else no callback? Unlikely.
+
+                ++packets_consumed;
+            } // else a dummy.  Have to keep going.  Unlikely path.
+
+            // Update local tail
+            ltail = next(ltail, skip_len);
+            items_consumed += skip_len;
+        }
+
+        // All done with this burst.
+        // Update the global tail, if we did anything.
+        // Won't attempt to predict this one, since the queue might be equally likely to be empty as not-empty.
+        if(items_consumed > 0) {
+            tail.store(ltail, std::memory_order_release);
+        }
+
+        return packets_consumed;
     }
 
 protected:
