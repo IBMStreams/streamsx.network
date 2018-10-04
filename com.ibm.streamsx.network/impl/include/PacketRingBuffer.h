@@ -10,7 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <atomic>
-
+#include <sys/uio.h>
 
 class PacketRingBuffer {
 public:
@@ -141,6 +141,83 @@ public:
         head.store(next(lhead, needed_space), std::memory_order_release);
 
         return true;
+    }
+
+    // Produces multiple items onto the buffer, to the extent there is room.
+    // Returns the count of produced items.
+    // Only updates the tail pointer after producing as many entries as we could.
+    // Takes a single initial tail snapshot, so the consumer may be
+    // consuming more entries after we start producing, but we will
+    // only produce up to the point of entries that were free
+    // at the time we started.
+    size_t produceMulti(const struct iovec *vector, size_t count) {
+        size_t lhead = head.load(std::memory_order_relaxed);
+        size_t ltail = tail.load(std::memory_order_acquire);
+        size_t slots_available = free_space(lhead, ltail);
+        size_t slots_available_end = free_space_contiguous(lhead, ltail);
+        size_t slots_consumed = 0;
+        size_t packets_produced = 0;
+
+        // If we're calling this function, we can assume at least one packet is in
+        // the vector, likely more, and assume best case the ring is not full.
+        while(__builtin_expect(slots_available > 0 && packets_produced < count, 1)) {
+            // Space is available and we have packets left.
+            size_t needed_slots = computeEntryCount(vector[packets_produced].iov_len);
+
+            if(__builtin_expect(needed_slots > slots_available_end, 0)) {
+                // Not enough contiguous room for the current packet.
+                // Unlikely path.
+                // Check to see if it would fit in the front (if free space is split).
+                if(__builtin_expect(needed_slots > (slots_available - slots_available_end), 0)) {
+                    // Doesn't fit in front, either.
+                    // Buffer is full, or full enough that this packet doesn't fit.
+                    // Unlikely path, even given the earlier unlikely path has been taken.
+
+                    // Update the global head, if we did anything.
+                    // Assuming the "better" case, where we did actually put some packets into
+                    // the ring, just not all.
+                    if(__builtin_expect(slots_consumed > 0,1)) {
+                        head.store(lhead, std::memory_order_release);
+                    }
+
+                    return packets_produced;
+                } else {
+                    // Seems like it will fit in the front.  Let's insert a dummy to wrap the buffer.
+                    buffer[lhead].data_len = computeDummyLength(slots_available_end);
+                    buffer[lhead].dummy_packet = 1; // This is just a dummy padding packet
+
+                    // Update just local variables for now.
+                    lhead = next(lhead, slots_available_end);
+                    slots_available -= slots_available_end;
+                    slots_consumed += slots_available_end;
+                    slots_available_end = slots_available;
+                }
+            }
+
+            // At this point, we know we should fit, contiguously, at the current lhead, or we would
+            // have returned already.  We may have already inserted a dummy padding packet.
+            buffer[lhead].data_len = vector[packets_produced].iov_len;
+            buffer[lhead].dummy_packet = 0; // Real packet.
+            memcpy(buffer[lhead].data, vector[packets_produced].iov_base, vector[packets_produced].iov_len);
+
+            // Update just local variables for now.
+            lhead = next(lhead, needed_slots);
+            slots_available -= needed_slots;
+            slots_available_end -= needed_slots;
+            slots_consumed += needed_slots;
+            ++packets_produced;
+        }
+
+        // All done with this vector of packets!
+        // Update the global head, if we did anything.
+        // Assume the good case, where there was room in the ring for our packets.
+        // Actually, since we return early in the buffer full case, this would only
+        // be false if the vector was empty...
+        if(__builtin_expect(slots_consumed > 0, 1)) {
+            head.store(lhead, std::memory_order_release);
+        }
+
+        return packets_produced;
     }
 
     // Consumes one item from the buffer, if there was an item to consume
