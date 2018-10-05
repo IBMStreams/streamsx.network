@@ -14,7 +14,7 @@
 
 
 
-#define INST_ENABLE
+//#define INST_ENABLE
 
 #define INST_BUCKET_SIZE (60UL * 2194707391UL)
 #define INST_BUCKET_COUNT 10

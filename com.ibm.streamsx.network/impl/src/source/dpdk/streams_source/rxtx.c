@@ -12,7 +12,7 @@
 #include "config.h"
 #include <time.h>
 
-#define DPDK_INST_ENABLE
+//#define DPDK_INST_ENABLE
 
 #define DPDK_INST_BUCKET_SIZE 60UL
 #define DPDK_INST_BUCKET_COUNT 10
