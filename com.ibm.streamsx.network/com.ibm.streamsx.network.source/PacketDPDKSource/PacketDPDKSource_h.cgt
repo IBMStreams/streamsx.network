@@ -148,6 +148,8 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         double now, then;
         bool metricsUpdate;
         bool realMetricsUpdate;
+        uint64_t packetDropSW, packetDropSWNow, packetDropSWThen;
+        uint64_t maxQueueDepthSW, maxQueueDepthSWNow, maxQueueDepthSWThen;
 
         double    rateLimit;
         uint64_t  rateLimitLastTime;
@@ -225,6 +227,15 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
   inline __attribute__((always_inline))
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return packetDropSWNow; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return then ? packetDropSWNow - packetDropSWThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return maxQueueDepthSWNow; }
 
   inline __attribute__((always_inline))
 	SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }

@@ -106,6 +106,8 @@ MY_OPERATOR::MY_OPERATOR() {
   byteCounter = byteCounterNow = byteCounterThen = 0;
   now = then = 0;
   metricsUpdate = false;
+  packetDropSW = packetDropSWNow = packetDropSWThen = 0;
+  maxQueueDepthSW = maxQueueDepthSWNow = maxQueueDepthSWThen = 0;
 #ifdef __ATOMIC_RELAXED
   __atomic_store_n(&realMetricsUpdate, false, __ATOMIC_RELEASE);
 #else
@@ -322,10 +324,13 @@ void MY_OPERATOR::metricsThread() {
     Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
     Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
 
+    Metric* totalPacketsDroppedSW = &opm.getCustomMetricByName("nPacketsDroppedSWCurrent");
+    Metric* maxQueueDepthSW = &opm.getCustomMetricByName("maxQueueDepthSWCurrent");
+
     // get statistics periodically and send them to the runtime
     while (!getPE().getShutdownRequested()) {
 
-    // wait until the next interval or the PE is shutting down
+      // wait until the next interval or the PE is shutting down
       const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
       if (secondsToWait>0) {
         SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
@@ -341,6 +346,8 @@ void MY_OPERATOR::metricsThread() {
       statsThen.received = statsNow.received; // Packets RX
       statsThen.dropped  = statsNow.dropped;  // All errors and drops
       statsThen.bytes    = statsNow.bytes;    // Bytes RX
+      packetDropSWThen = packetDropSWNow;
+      maxQueueDepthSWThen  = maxQueueDepthSWNow;
 
       // get the current interval's counters from the DPDK library
       now = SPL::Functions::Time::getTimestampInSecs();
@@ -348,12 +355,18 @@ void MY_OPERATOR::metricsThread() {
       packetCounterNow = packetCounter;
       byteCounterNow = byteCounter;
 
+      packetDropSWNow = countDroppedQueueFull;
+      maxQueueDepthSWNow = queueHighWaterMark;
+      queueHighWaterMark = 0;
+
       // expose the operator's statistics as metrics
       totalPacketsReceived->setValue(statsNow.received);
       totalPacketsDropped->setValue(statsNow.dropped);
       totalBytesReceived->setValue(statsNow.bytes);
       totalPacketsProcessed->setValue(packetCounter);
       totalBytesProcessed->setValue(byteCounter);
+      totalPacketsDroppedSW->setValue(packetDropSWNow);
+      maxQueueDepthSW->setValue(maxQueueDepthSWNow);
 
       // updated metrics will be available to the next output tuple emitted
 #ifdef __ATOMIC_RELAXED
@@ -453,22 +466,6 @@ void MY_OPERATOR::processSubmitLoop() {
 
         bool dumpMetrics = false;
         INST_BUCKETS_HANDLE(instBuckets, ts_B, "processSubmitLoop", nicQueue, dumpMetrics);
-
-        if(dumpMetrics) {
-            // The full interval cycle has finished.
-            // In addition to the metrics already dumped above, we should dump the high water mark & the producer drop counts.
-            // Those will all get reset, too.
-
-            struct timespec ts_real;
-            clock_gettime(CLOCK_REALTIME, &ts_real);
-
-            uint64_t lDroppedTooBig = countDroppedTooBig.exchange(0, std::memory_order_relaxed);
-            uint64_t lDroppedQueueFull = countDroppedQueueFull.exchange(0, std::memory_order_relaxed);
-            uint64_t lHighWaterMark = queueHighWaterMark;
-            queueHighWaterMark = 0;
-
-            printf("processSubmitLoop: LONGMETRICS %lu %lu.%09lu : %lu %lu %lu\n", (uint64_t)nicQueue, ts_real.tv_sec, ts_real.tv_nsec, lHighWaterMark, lDroppedTooBig, lDroppedQueueFull);
-        }
     }
 
     SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> processSubmitLoop()", "PacketDPDKSource");

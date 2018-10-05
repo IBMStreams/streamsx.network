@@ -318,6 +318,24 @@ This metric counts number of bytes of packet data processed by the operator.
 	  </description>
           <kind>Counter</kind>
         </metric>
+        <metric>
+          <name>nPacketsDroppedSWCurrent</name>
+          <description>
+
+This metric counts number of packets dropped by the initial software queue. 
+
+	  </description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>maxQueueDepthSWCurrent</name>
+          <description>
+
+This metric reports the high water mark of the first software queue. 
+
+	  </description>
+          <kind>Counter</kind>
+        </metric>
       </metrics>
 
       <libraryDependencies>
