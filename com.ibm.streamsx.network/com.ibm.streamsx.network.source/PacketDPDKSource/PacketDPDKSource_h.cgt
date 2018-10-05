@@ -161,11 +161,10 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         PacketRingBuffer pktQueue;
 
         // Counters and stats used by the queue production side
-        std::atomic<uint64_t> countDroppedTooBig __attribute__((aligned(64)));
-        std::atomic<uint64_t> countDroppedQueueFull;
+        std::atomic<uint64_t> countDroppedQueueFull __attribute__((aligned(64)));
 
         // Counters and stats used by the queue consumption side
-        uint64_t queueHighWaterMark __attribute__((aligned(64)));
+        std::atomic<uint64_t> queueHighWaterMark __attribute__((aligned(64)));
         INST_BUCKETS_DEFINE(instBuckets);
 
         // This method is called during the start up of the first of the 

@@ -136,9 +136,8 @@ MY_OPERATOR::MY_OPERATOR() {
   rateLimitLastTime = 0;
   rateLimitPeriodUsec = (uint64_t)((1.0 / rateLimit) * 1000000.0);
 
-  countDroppedTooBig = 0;
-  countDroppedQueueFull = 0;
-  queueHighWaterMark = 0;
+  countDroppedQueueFull.store(0, std::memory_order_release);
+  queueHighWaterMark.store(0, std::memory_order_release);
   INST_BUCKETS_CLEAR(instBuckets);
 
   // Initialize the DPDK subsystem.
@@ -341,6 +340,7 @@ void MY_OPERATOR::metricsThread() {
 
       // store the previous interval's metrics for difference calculations
       then = now;
+      now = SPL::Functions::Time::getTimestampInSecs();
       packetCounterThen = packetCounterNow;
       byteCounterThen = byteCounterNow;
       statsThen.received = statsNow.received; // Packets RX
@@ -349,15 +349,15 @@ void MY_OPERATOR::metricsThread() {
       packetDropSWThen = packetDropSWNow;
       maxQueueDepthSWThen  = maxQueueDepthSWNow;
 
-      // get the current interval's counters from the DPDK library
-      now = SPL::Functions::Time::getTimestampInSecs();
-      streams_port_stats(nicPort, &statsNow);
+      // get the current interval's counters from the DPDK library (only if we're the first queue, to avoid everybody getting the whole-nic metrics and resetting them)
+      if(nicQueue == 0) {
+          streams_port_stats(nicPort, &statsNow);
+      }
       packetCounterNow = packetCounter;
       byteCounterNow = byteCounter;
 
-      packetDropSWNow = countDroppedQueueFull;
-      maxQueueDepthSWNow = queueHighWaterMark;
-      queueHighWaterMark = 0;
+      packetDropSWNow = countDroppedQueueFull.load(std::memory_order_relaxed);
+      maxQueueDepthSWNow = queueHighWaterMark.exchange(0, std::memory_order_acq_rel);
 
       // expose the operator's statistics as metrics
       totalPacketsReceived->setValue(statsNow.received);
@@ -395,9 +395,6 @@ void MY_OPERATOR::processDpdkLoop() {
 
 void MY_OPERATOR::packetEnqueue(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp) {
     // Simply enqueue the packet onto the ring buffer!
-//    if(packetLen > PacketRingBuffer::MAX_DATA) {
-//        ++countDroppedTooBig;
-//    } else
     if(!pktQueue.produce(packet, packetLen)) {
         ++countDroppedQueueFull;
     }
@@ -445,10 +442,11 @@ void MY_OPERATOR::processSubmitLoop() {
         uint64_t ts_A, ts_B;
         INST_TS(ts_A);
 
+        // Update the HWM safely, if needed.
+        // The metrics thread might be resetting this value while we are reading here.
         size_t queueSizeSnapshot = pktQueue.size();
-        if(queueSizeSnapshot > queueHighWaterMark) {
-            queueHighWaterMark = queueSizeSnapshot;
-        }
+        size_t oldHWM = queueHighWaterMark.load(std::memory_order_acquire);
+        while(queueSizeSnapshot > oldHWM && !queueHighWaterMark.compare_exchange_weak(oldHWM, queueSizeSnapshot, std::memory_order_acq_rel, std::memory_order_acquire));
 
         if(pktQueue.consume(&submitCallback, this)) {
             // Got & processed a packet!
