@@ -183,7 +183,7 @@ To verify that 'hugepages' have been allocated, enter this command at a prompt:
 DPDK requires several environment variables. 
 To set them, enter these commands at a prompt, or append them to your $HOME/.bashrc script:
 
-    export RTE_SDK=$HOME/dpdk-17.02.1
+    export RTE_SDK=$HOME/dpdk-17.11.3
     [[ $( uname -m ) == &quot;x86_64&quot; ]] &amp;&amp; export RTE_TARGET=x86_64-native-linuxapp-gcc
     [[ $( uname -m ) == &quot;ppc64le&quot; ]] &amp;&amp; export RTE_TARGET=ppc_64-power8-linuxapp-gcc
     [[ -x /usr/sbin/lspci ]] &amp;&amp; export DPDK_DEVICE=$( /usr/sbin/lspci | grep -i mellanox | gawk '{print $1}' )
@@ -199,15 +199,15 @@ To verify that the environment variables are set, enter this command at a prompt
 
 **installing the DPDK library**
 
-The PacketDPDKSource operator depends upon DPDK library version 17.02.1, available from
+The PacketDPDKSource operator depends upon DPDK library version 17.11.3, available from
 [http://dpdk.org]. The library must be configured for your machine and ethernet adapter,
 and compiled from source code.
 
 To get the DPDK source code, enter these lines at a command prompt:
 
     mkdir -p $RTE_SDK
-    wget http://fast.dpdk.org/rel/dpdk-17.02.1.tar.xz
-    tar -x -v -f dpdk-17.02.1.tar.xz -C $RTE_SDK --strip-components=1
+    wget http://fast.dpdk.org/rel/dpdk-17.11.3.tar.xz
+    tar -x -v -f dpdk-17.11.3.tar.xz -C $RTE_SDK --strip-components=1
 
 To configure DPDK for your machine, enter these lines at a command prompt:
 

@@ -128,8 +128,8 @@ grep -i -h hugepages /sys/devices/system/node/node*/meminfo
 
 step "get DPDK source code, if necessary ..."
 [[ -d $RTE_SDK ]] || mkdir -p $RTE_SDK || die "sorry, could not create directory $RTE_SDK"
-[[ -f dpdk-17.02.1.tar.xz ]] || wget http://fast.dpdk.org/rel/dpdk-17.02.1.tar.xz || die "sorry, could not get DPDK source code from http://fast.dpdk.org/rel/dpdk-17.02.1.tar.xz"
-[[ -f $RTE_SDK/Makefile ]] || tar -x -v -f dpdk-17.02.1.tar.xz -C $RTE_SDK --strip-components=1 || die "sorry, could not unpack DPDK source code"
+[[ -f dpdk-17.11.3.tar.xz ]] || wget http://fast.dpdk.org/rel/dpdk-17.11.3.tar.xz || die "sorry, could not get DPDK source code from http://fast.dpdk.org/rel/dpdk-17.11.3.tar.xz"
+[[ -f $RTE_SDK/Makefile ]] || tar -x -v -f dpdk-17.11.3.tar.xz -C $RTE_SDK --strip-components=1 || die "sorry, could not unpack DPDK source code"
 
 # patch old DPDK 2.2.0 source code for RHEL/CentOS 7.3
 

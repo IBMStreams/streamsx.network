@@ -45,6 +45,10 @@
         <function:prototype>public list&lt;uint32> getAllAddressesInNetworkInt(rstring networkCIDR)</function:prototype>
       </function:function>
       <function:function>
+        <function:description sampleUri="">Returns the range of IP addresses in the network as a start and end values. The *networkCIDR* argument must be in CIDR format (i.e. 0.0.0.0/24), otherwise an empty range will be reported.</function:description>
+        <function:prototype>public uint32 getAddressRangeInNetworkInt(rstring networkCIDR, uint32 addressStart, uint32 addressEnd)</function:prototype>
+      </function:function>
+      <function:function>
         <function:description>Returns `true` if a valid IPv4 address was provided and the IP address is not a reserved address. Also returns `true` if the IP address is a &quot;6to4 Relay Anycast&quot; address, since these can be globally routed (RFC6890). In all other cases, will return `false`.</function:description>
         <function:prototype>public boolean isGlobal(rstring ip)</function:prototype>
       </function:function>

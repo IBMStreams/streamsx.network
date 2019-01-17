@@ -286,7 +286,7 @@ int streams_dpdk_init(const char* buffersizes) {
     rte_timer_subsystem_init();
 #endif
 
-    rte_set_log_level(8); 
+    rte_log_set_global_level(8); 
 
     uint32_t nb_ports = rte_eth_dev_count();
     if (nb_ports == 0) {

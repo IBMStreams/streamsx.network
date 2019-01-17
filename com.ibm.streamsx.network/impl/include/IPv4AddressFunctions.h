@@ -497,6 +497,21 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
             return addresses;
       }
 
+      static SPL::uint32 getAddressRangeInNetworkInt(SPL::rstring const & networkCIDR, SPL::uint32 &addressStart, SPL::uint32 &addressEnd)
+      {
+            network_cidr resultCIDR;
+            addressStart = 0; addressEnd = 0;
+            if(parseNetworkCIDR_(networkCIDR, resultCIDR) == false) return 0;
+
+            dec_network_range range;
+            GET_DEC_NET_RANGE(resultCIDR, range);
+
+            addressStart = range.network_start;
+            addressEnd = range.network_end;
+
+            return (range.network_end - range.network_start);
+      }
+
       static SPL::boolean isGlobal(SPL::rstring const & ip)
       {
             return isInNetwork("192.88.99.0/24", ip) || !isReserved(ip);
