@@ -42,3 +42,4 @@ dpdk-*.tar.xz
 
 # ignore files added by MacOS
 .DS_Store
+/.project

@@ -2,8 +2,22 @@
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
     <info:name>com.ibm.streamsx.network</info:name>
-    <info:description>Operators and functions for ingesting and parsing raw network data at the packet level.</info:description>
-    <info:version>3.0.12</info:version>
+    <info:description>
+Operators and functions for ingesting and parsing raw network data at the packet level.
+    
++ What's new
+
+This is an overview of changes for major and minor version upgrades.
+
+++ What is new in version 3.1.0
+
+* Support for newer version of DPDK, in support of RHEL7.4 and forward.
+* Additional CIDR functions to determine the range of addresses covered.
+* Improved IPFilter performance by avoiding needless creation of local list of IP addresses
+* IPFilter operator: Changed traces with WARN trace level to TRACE level.
+    
+    </info:description>
+    <info:version>3.1.0</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

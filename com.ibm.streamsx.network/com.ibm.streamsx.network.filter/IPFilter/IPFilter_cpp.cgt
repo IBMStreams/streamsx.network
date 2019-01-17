@@ -114,10 +114,10 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
             const IPort1Type& iport$1 = tuple;
             rstring ipv4Addr = <%=$inputPort1CppName%>.get_<%=$ipv4AddrFilterAttribute%>();
 
-            SPLAPPTRC(L_WARN, "Process() non-mutating, port 1.  ipv4FilterAddr = " << ipv4Addr, IP_FILTER);
+            SPLAPPTRC(L_TRACE, "Process() non-mutating, port 1.  ipv4FilterAddr = " << ipv4Addr, IP_FILTER);
 
             SPL::list<SPL::uint32> addrList = getAllAddressesInNetworkInt(ipv4Addr);
-            SPLAPPTRC(L_WARN, "Process() non-mutating, port 1.  Adding count = " << addrList.size(), IP_FILTER);
+            SPLAPPTRC(L_TRACE, "Process() non-mutating, port 1.  Adding count = " << addrList.size(), IP_FILTER);
 
             AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
             SPL::list<SPL::uint32>::const_iterator it;
@@ -138,7 +138,7 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
 
 	if(port == 1) {
         if(punct==Punctuation::WindowMarker) {
-            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: window.", IP_FILTER);
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: window.", IP_FILTER);
 
             // Take both the R & W mutexes so we can close out the current filter list 
             // and swap lists atomically. This is the very uncommon case
@@ -146,7 +146,7 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
             AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
             AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
 
-            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() sending WindowMarker out port 0.", IP_FILTER);
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() sending WindowMarker out port 0.", IP_FILTER);
             submit(Punctuation::WindowMarker, 0);
 
             uint32_t tmpList = ip4ListWSel_;
@@ -155,7 +155,7 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
 
             ip4List_[ip4ListWSel_]->clear();
         } else if(punct==Punctuation::FinalMarker) {
-            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: final.", IP_FILTER);
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: final.", IP_FILTER);
             // ...;
         }
     }
