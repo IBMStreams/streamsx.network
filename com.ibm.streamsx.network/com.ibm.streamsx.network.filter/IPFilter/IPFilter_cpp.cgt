@@ -116,18 +116,19 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
 
             SPLAPPTRC(L_WARN, "Process() non-mutating, port 1.  ipv4FilterAddr = " << ipv4Addr, IP_FILTER);
 
-            SPL::list<SPL::uint32> addrList = getAllAddressesInNetworkInt(ipv4Addr);
-            SPLAPPTRC(L_WARN, "Process() non-mutating, port 1.  Adding count = " << addrList.size(), IP_FILTER);
-
             AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
-            SPL::list<SPL::uint32>::const_iterator it;
-            for(it = addrList.begin(); it != addrList.end(); ++it) {
-                ip4List_[ip4ListWSel_]->insert(*it);
+            SPL::uint32 addrStart, addrEnd;
+            SPL::uint32 addrRange = getAddressRangeInNetworkInt(ipv4Addr, addrStart, addrEnd);
+            SPLAPPTRC(L_ERROR, "Process() non-mutating, port 1.  Adding count = " << addrRange << ", start = " << std::hex << addrStart << ", end = " << std::hex << addrEnd, IP_FILTER);
+            for(SPL::uint32 b = addrStart; b < addrEnd; b++) {
+                ip4List_[ip4ListWSel_]->insert(b);
                 SPLAPPTRC(L_TRACE, "IPv4 filter: " << "adding: " << 
-                        convertIPV4AddressNumericToString(*it) << 
-                        "(" << *it << ")", IP_FILTER);
+                        convertIPV4AddressNumericToString(b) << 
+                        "(" << b << ")", IP_FILTER);
             }
+            SPLAPPTRC(L_ERROR, "Process() non-mutating, port 1.  Done Adding", IP_FILTER);
             return;
+
         }
     <%}%>
 }
