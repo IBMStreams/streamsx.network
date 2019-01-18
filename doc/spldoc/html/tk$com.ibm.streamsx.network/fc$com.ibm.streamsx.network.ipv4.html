@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.0.12</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.ipv4.html">com.ibm.streamsx.network.ipv4</a> &gt; C++ Native Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.ipv4.html">com.ibm.streamsx.network.ipv4</a> &gt; C++ Native Functions</p>
 
 </div>
 
@@ -118,6 +118,16 @@ This page documents native functions that can be invoked from SPL, including the
 
    <dd class="dd">
 <p class="p">This function converts a string representing an IPv4 address into a string representation of the subnet address, using the specified number of mask bits. If the string does not represent a valid IPv4 address, or the count is negative, zero is returned.
+</p>
+
+   </dd>
+
+ 
+ 
+   <dt class="dt dlterm splpart" id="spldoc_functions__getAddressRangeInNetworkInt.rstring.uint32.uint32"><tt class="ph tt">      public uint32 getAddressRangeInNetworkInt(rstring networkCIDR, uint32 addressStart, uint32 addressEnd)      </tt>   </dt>
+
+   <dd class="dd">
+<p class="p">Returns the range of IP addresses in the network as a start and end values. The <em class="ph i">networkCIDR</em> argument must be in CIDR format (i.e. 0.0.0.0/24), otherwise an empty range will be reported.
 </p>
 
    </dd>
