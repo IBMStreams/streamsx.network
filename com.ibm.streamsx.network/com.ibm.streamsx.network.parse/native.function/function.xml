@@ -1255,7 +1255,8 @@
           fields from the DNS header, and all fields from seleccted DNS resource records, 
           represented as appropriate, separated by the specified
           record and field delimiters, and for SOA resource records, 
-          a subfield delimiter. DNS resource records are selected by specifying DNS types in a list of unsigned 16-bit integers as the fourth parameter of the function.
+          a subfield delimiter. DNS resource records are selected by specifying DNS types
+          in a list of unsigned 16-bit integers as the fourth parameter of the function.
         </function:description>
         <function:prototype>public rstring DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16>)</function:prototype>
       </function:function>
@@ -1267,7 +1268,10 @@
           fields from the DNS header, and all fields from seleccted DNS resource records, 
           represented as appropriate, separated by the specified
           record and field delimiters, and for SOA resource records, 
-          a subfield delimiter. DNS resource records are selected by specifying DNS types in a list of unsigned 16-bit integers as the fourth parameter of the function.
+          a subfield delimiter. DNS resource records are selected by specifying DNS types
+          in a list of unsigned 16-bit integers as the fourth parameter of the function.
+          Network header fields are passed in directly, since the this operator doesn't have
+          direct access to them.
         </function:description>
         <function:prototype>public rstring DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16>, uint64, uint32, uint32, uint32, uint16, uint16, uint8, uint32, uint16)</function:prototype>
       </function:function>

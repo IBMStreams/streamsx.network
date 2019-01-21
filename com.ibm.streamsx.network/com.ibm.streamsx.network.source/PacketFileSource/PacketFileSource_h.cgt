@@ -62,53 +62,6 @@ public:
   void metricsThread();
 
  private:
-  struct DNSResourceRecord {
-    uint8_t name[0];
-    uint16_t type;
-    uint16_t classs;
-    uint32_t ttl;
-    uint16_t rdlength;
-    uint8_t rdata[0];
-  } __attribute__((packed)) ;
-
-  struct DNSHeader {
-    uint16_t identifier;
-    union {
-      struct {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-        uint8_t recursionDesiredFlag:1;
-        uint8_t truncatedFlag:1;
-        uint8_t authoritativeFlag:1;
-        uint8_t opcodeField:4;
-        uint8_t responseFlag:1;
-        uint8_t responseCode:4;
-        uint8_t nonauthenticatedFlag:1;
-        uint8_t authenticatedFlag:1;
-        uint8_t reserved:1;
-        uint8_t recursionAvailableFlag:1;
-#elif __BYTE_ORDER == __BIG_ENDIAN
-        uint8_t responseFlag:1;
-        uint8_t opcodeField:4;
-        uint8_t authoritativeFlag:1;
-        uint8_t truncatedFlag:1;
-        uint8_t recursionDesiredFlag:1;
-        uint8_t recursionAvailableFlag:1;
-        uint8_t reserved:1;
-        uint8_t authenticatedFlag:1;
-        uint8_t nonauthenticatedFlag:1;
-        uint8_t responseCode:4;
-#else
-# error "sorry, __BYTE_ORDER not setm check <bits/endian.h>"
-#endif
-      } indFlags;
-      uint16_t allFlags;
-    } flags;
-    uint16_t questionCount;
-    uint16_t answerCount;
-    uint16_t nameserverCount;
-    uint16_t additionalCount;
-    struct DNSResourceRecord rrFields[0]; // see 'struct DNSResourceRecord'
-  } __attribute__((packed)) ;
 
   // ----------- operator parameters (constant after constructor executes) ----------
 
@@ -160,7 +113,7 @@ public:
   SPL::uint64 packetsDropped() { return 0; }
 
   inline __attribute__((always_inline))
-  SPL::uint64 bytesReceived() { return byteCounter; }
+  SPL::uint64 bytesReceived() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
@@ -178,7 +131,7 @@ public:
   SPL::uint64 metricsIntervalPacketsDropped() { return 0; }
 
   inline __attribute__((always_inline))
-  SPL::uint64 metricsIntervalBytesReceived() { return then ? byteCounterNow - byteCounterThen : 0; }
+  SPL::uint64 metricsIntervalBytesReceived() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
@@ -188,6 +141,15 @@ public:
 
   inline __attribute__((always_inline))
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
@@ -323,7 +285,7 @@ public:
   inline __attribute__((always_inline))
   SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
 
-inline __attribute__((always_inline))
+  inline __attribute__((always_inline))
   SPL::boolean RATE_LIMITED() {
     // This gets the recorded time when the last packet came in which is close enough for what we need here.
     uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
@@ -335,16 +297,23 @@ inline __attribute__((always_inline))
   }
 
   inline __attribute__((always_inline))
-    SPL::boolean DNS_RESPONSE_FLAG_HINT() {
+  SPL::boolean DNS_RESPONSE_FLAG_HINT() {
+        // Only UDP DNS packets will be analyzed at this time
         if(headers.udpHeader == NULL) return false;
+
+        // 53 is the UDP port used for DNS requests/responses
         if(ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53) return false;
         if(!headers.payload) return false;
-        if(headers.payloadLength < sizeof(struct DNSHeader)) return false;
 
-        struct DNSHeader* dnsHeader = (struct DNSHeader*)(headers.payload);
+        // DNS Header is 12 bytes minimum, so anything less than that can be dropped.
+        if(headers.payloadLength < 12) return false;
 
-        return (dnsHeader->flags.indFlags.responseFlag);
-    }
+        uint8_t* payloadBytes = (uint8_t*)(headers.payload);
+
+        // For DNS packets, the MSB of the 3rd byte of the payload is the response flag.
+        // The DNS packet header is in network-order, of course.
+        return (payloadBytes[2] & 0x80);
+  }
 
   inline __attribute__((always_inline))
   SPL::uint32 ERSPAN_SRC_ADDRESS() { return headers.erspanHeader ? ntohl(headers.erspanHeader->ipHeader.saddr) : 0; }

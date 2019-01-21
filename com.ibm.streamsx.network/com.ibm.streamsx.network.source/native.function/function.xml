@@ -35,7 +35,7 @@ This function always returns zero for the PacketFileSource operator.
 
 This function returns the number of bytes received from the network interface
 since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
-This function always returns zero for the DNSPacketLiveSource and DNSPacketFileSource operators.
+This function always returns zero for the PacketLiveSource and PacketFileSource operators.
 
             </function:description>
             <function:prototype>public uint64 bytesReceived()</function:prototype>
@@ -68,7 +68,7 @@ This function always returns zero for the PacketFileSource operator.
 
 This function returns the number of bytes received from the network interface
 during the most recent metrics interval, if there is one, or zero if not.
-This function always returns zero for the DNSPacketLiveSource and DNSPacketFileSource operators.
+This function always returns zero for the PacketLiveSource and PacketFileSource operators.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalBytesReceived()</function:prototype>
@@ -144,7 +144,8 @@ and returns `false` for all subsequent tuples produced in the same metrics inter
           <function:function>
             <function:description>
 
-This function returns the total number of packets dropped by the software packet receive queue.
+This function returns the total number of packets dropped by the software packet receive queue (if implemented).
+Otherwise, returns 0.
 
             </function:description>
             <function:prototype>public uint64 packetsDroppedSW()</function:prototype>
@@ -153,7 +154,8 @@ This function returns the total number of packets dropped by the software packet
           <function:function>
             <function:description>
 
-This function returns the number of packets dropped by the software packet receive queue in the most recent metrics interval.
+This function returns the number of packets dropped by the software packet receive queue (if implemented) in the
+most recent metrics interval.  Otherwise, returns 0.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsDroppedSW()</function:prototype>
@@ -162,7 +164,8 @@ This function returns the number of packets dropped by the software packet recei
           <function:function>
             <function:description>
 
-This function returns the software receive queue high water mark from the most recent metrics interval.
+This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.
+Otherwise, returns 0.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalMaxQueueDepthSW()</function:prototype>

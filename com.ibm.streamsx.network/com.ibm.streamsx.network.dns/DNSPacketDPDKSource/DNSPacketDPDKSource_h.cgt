@@ -153,6 +153,15 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
 
   inline __attribute__((always_inline))
