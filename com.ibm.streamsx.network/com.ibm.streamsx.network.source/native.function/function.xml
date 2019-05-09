@@ -33,6 +33,17 @@ This function always returns zero for the PacketFileSource operator.
           <function:function>
             <function:description>
 
+This function returns the number of bytes received from the network interface
+since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the PacketLiveSource and PacketFileSource operators.
+
+            </function:description>
+            <function:prototype>public uint64 bytesReceived()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
 This function returns the number of packets received from the network interface 
 during the most recent metrics interval, if there is one, or zero if not.
 This function always returns zero for the PacketFileSource operator.
@@ -50,6 +61,17 @@ This function always returns zero for the PacketFileSource operator.
 
             </function:description>
             <function:prototype>public uint64 metricsIntervalPacketsDropped()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of bytes received from the network interface
+during the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the PacketLiveSource and PacketFileSource operators.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalBytesReceived()</function:prototype>
           </function:function>
 
           <function:function>
@@ -117,6 +139,36 @@ and returns `false` for all subsequent tuples produced in the same metrics inter
 
             </function:description>
             <function:prototype>public boolean metricsUpdated()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the total number of packets dropped by the software packet receive queue (if implemented).
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 packetsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of packets dropped by the software packet receive queue (if implemented) in the
+most recent metrics interval.  Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalPacketsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalMaxQueueDepthSW()</function:prototype>
           </function:function>
 
           <function:function>
@@ -217,6 +269,15 @@ This function returns the ethernet destination address of the current packet.
 
             </function:description>
             <function:prototype>public list&lt;uint8>[6] ETHER_DST_ADDRESS()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.
+
+            </function:description>
+            <function:prototype>public uint64 ETHER_DST_ADDRESS_64()</function:prototype>
           </function:function>
 
           <function:function>
@@ -601,6 +662,24 @@ if it has one, or zero if otherwise.
 
             </function:description>
             <function:prototype>public uint32 ERSPAN_DST_ADDRESS()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+            This function returns false when an amount of time between packets has passed such that
+            the rate is limited to the value given in the rateLimit paramater.
+            </function:description>
+            <function:prototype>public boolean RATE_LIMITED()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+            This function speculatively returns the DNS response flag.  Full packet parsing with validation
+            is not performed.  Instead, simple basic checks are made and then the response bit is returned.
+            This means that all actual DNS packets that are responses are returned correctly, but some
+            non-DNS packets might also be flagged as a DNS response.
+            </function:description>
+            <function:prototype>public boolean DNS_RESPONSE_FLAG_HINT()</function:prototype>
           </function:function>
 
     </function:functions>

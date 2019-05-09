@@ -82,6 +82,10 @@ private:
   uint64_t byteCounter, byteCounterNow, byteCounterThen;
   bool metricsUpdate;
 
+  double    rateLimit;
+  uint64_t  rateLimitLastTime;
+  uint64_t  rateLimitPeriodUsec;
+
   // ----------- libpcap-specific variables ----------
 
   pcap_t* pcapDescriptor;
@@ -102,6 +106,9 @@ private:
   SPL::uint64 packetsDropped() { return pcapStatisticsNow.ps_drop; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 bytesReceived() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
   inline __attribute__((always_inline))
@@ -117,6 +124,9 @@ private:
   SPL::uint64 metricsIntervalPacketsDropped() { return then ? pcapStatisticsNow.ps_drop - pcapStatisticsThen.ps_drop : 0; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesReceived() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
 
   inline __attribute__((always_inline))
@@ -124,6 +134,15 @@ private:
 
   inline __attribute__((always_inline))
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
@@ -148,6 +167,9 @@ private:
 
   inline __attribute__((always_inline))
   SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 ETHER_DST_ADDRESS_64() { return headers.etherHeader ? (((uint64_t)headers.etherHeader->h_dest[0] << 40) | ((uint64_t)headers.etherHeader->h_dest[1] << 32) | ((uint64_t)headers.etherHeader->h_dest[2] << 24) | ((uint64_t)headers.etherHeader->h_dest[3] << 16) | ((uint64_t)headers.etherHeader->h_dest[4] << 8) | ((uint64_t)headers.etherHeader->h_dest[5] << 0)) : 0; }
 
   inline __attribute__((always_inline))
   SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
@@ -253,6 +275,36 @@ private:
   
   inline __attribute__((always_inline))
   SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
+
+  inline __attribute__((always_inline))
+  SPL::boolean RATE_LIMITED() {
+    // This gets the recorded time when the last packet came in which is close enough for what we need here.
+    uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
+    if(currentTime >= (rateLimitLastTime + rateLimitPeriodUsec)) {
+        rateLimitLastTime = currentTime;
+        return false;
+    }
+    return true;
+  }
+
+  inline __attribute__((always_inline))
+  SPL::boolean DNS_RESPONSE_FLAG_HINT() {
+        // Only UDP DNS packets will be analyzed at this time
+        if(headers.udpHeader == NULL) return false;
+
+        // 53 is the UDP port used for DNS requests/responses
+        if(ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53) return false;
+        if(!headers.payload) return false;
+
+        // DNS Header is 12 bytes minimum, so anything less than that can be dropped.
+        if(headers.payloadLength < 12) return false;
+
+        uint8_t* payloadBytes = (uint8_t*)(headers.payload);
+
+        // For DNS packets, the MSB of the 3rd byte of the payload is the response flag.
+        // The DNS packet header is in network-order, of course.
+        return (payloadBytes[2] & 0x80);
+  }
 
   inline __attribute__((always_inline))
   SPL::uint32 ERSPAN_SRC_ADDRESS() { return headers.erspanHeader ? ntohl(headers.erspanHeader->ipHeader.saddr) : 0; }

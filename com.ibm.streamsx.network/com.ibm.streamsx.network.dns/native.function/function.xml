@@ -229,6 +229,36 @@ and returns `false` for all subsequent tuples produced in the same metrics inter
           <function:function>
             <function:description>
 
+This function returns the total number of packets dropped by the software packet receive queue (if implemented).
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 packetsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of packets dropped by the software packet receive queue (if implemented) in the
+most recent metrics interval.  Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalPacketsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalMaxQueueDepthSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
 This function returns the number of seconds since the beginning of the Unix epoch
 (midnight on January 1st, 1970 in Greenwich, England) until the current packet was captured,
 according to the system clock on the machine that captured it.
@@ -895,6 +925,14 @@ if it has one, or zero otherwise.
           * 4 indicates that the Authoritative, Truncated, Recursion Desired, and Recursion Available flags in the DNS header are all set.
         </function:description>
         <function:prototype>public int32 DNS_INCOMPATIBLE_FLAGS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+        This function returns false when an amount of time between packets has passed such that
+        the rate is limited to the value given in the rateLimit paramater.
+        </function:description>
+        <function:prototype>public boolean RATE_LIMITED()</function:prototype>
       </function:function>
 
     </function:functions>

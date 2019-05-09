@@ -337,12 +337,24 @@ int streams_source_start(void) {
 }
 
 /*
- * Return port statistics to the Streams operator.
+ * Return port statistics to the Streams operator. NOT THREAD SAFE!
  */
 int streams_port_stats(int nicPort, struct port_stats *outStats) {
+    static struct rte_eth_stats oldStats[MAX_PORTS] = {{0}};
     struct rte_eth_stats rteStats;
 
     rte_eth_stats_get(nicPort, &rteStats);
+    // Ugh, we will probably lose some counts in here...
+    int rc = rte_eth_stats_reset(nicPort);
+
+    if(rc > 0) {
+        printf("STREAMS_SOURCE: streams_port_stats: rte_eth_stats_reset() returned rc=%d", rc);
+    }
+
+    oldStats[nicPort].ipackets += rteStats.ipackets;
+    oldStats[nicPort].imissed += rteStats.imissed;
+    oldStats[nicPort].ibytes += rteStats.ibytes;
+
 
     // The basic stats have RX metrics for:
     //   ierror   : RX error packets
@@ -350,9 +362,9 @@ int streams_port_stats(int nicPort, struct port_stats *outStats) {
     //   rx_nombuf: RX mbuf allocation failures
     // For the dropped stat we current report, imissed is used as it indicates
     // valid packets we were not able to receive quickly enough so they were dropped.
-    outStats->received = rteStats.ipackets;
-    outStats->dropped  = rteStats.imissed;
-    outStats->bytes    = rteStats.ibytes;
+    outStats->received = oldStats[nicPort].ipackets;
+    outStats->dropped  = oldStats[nicPort].imissed;
+    outStats->bytes    = oldStats[nicPort].ibytes;
 
     return 0;
 }

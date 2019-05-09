@@ -288,6 +288,18 @@ This metric counts the number of packets dropped by the ethernet adapter, as cou
 	  </description>
           <kind>Counter</kind>
         </metric>
+
+       <metric>
+          <name>nBytesReceivedCurrent</name>
+          <description>
+
+This metric counts the number of bytes received by the ethernet adapter,
+as counted by DPDK.
+
+      </description>
+          <kind>Counter</kind>
+       </metric>
+
         <metric>
           <name>nPacketsProcessedCurrent</name>
           <description>
@@ -302,6 +314,24 @@ This metric counts number of packets processed by the operator.
           <description>
 
 This metric counts number of bytes of packet data processed by the operator.
+
+	  </description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nPacketsDroppedSWCurrent</name>
+          <description>
+
+This metric counts number of packets dropped by the initial software queue. 
+
+	  </description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>maxQueueDepthSWCurrent</name>
+          <description>
+
+This metric reports the high water mark of the first software queue. 
 
 	  </description>
           <kind>Counter</kind>
@@ -392,6 +422,23 @@ To determine which NUMA node your ethernet adapter is connected to, look in the 
         <type>int32</type>
         <cardinality>1</cardinality>
       </parameter>
+
+      <parameter>
+        <name>dequeueThreadPinning</name>
+        <description>
+This optional parameter specifies a set of logical processor cores to pin the
+internal ring buffer dequeue thread to.  This thread will run at 100% cpu
+utilization as it spins on the ring buffer tail.
+
+By default, this thread runs unpinned.
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type><![CDATA[list<uint64>]]></type>
+        <cardinality>1</cardinality>
+      </parameter>
+
 
       <parameter>
         <name>nicPort</name>
@@ -546,6 +593,25 @@ The default value is '10.0'.
         <type>float64</type>
         <cardinality>1</cardinality>
       </parameter>
+
+    <parameter>
+      <name>rateLimit</name>
+      <description>
+
+This optional parameter takes an expression of type 'float64'
+that specifies the maximum number of times per second the RATE_LIMITED()
+function returns false.  This can be used to limit the rate of packets sent
+to an output port when used in a filter expression.
+
+The default value is '1000.0'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>float64</type>
+      <cardinality>1</cardinality>
+    </parameter>
 
     </parameters>
 

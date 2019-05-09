@@ -88,6 +88,9 @@ public:
   uint64_t byteCounter, byteCounterNow, byteCounterThen;
   bool metricsUpdate;
   boolean done;
+  double    rateLimit;
+  uint64_t  rateLimitLastTime;
+  uint64_t  rateLimitPeriodUsec;
 
   // ----------- libpcap-specific variables ----------
 
@@ -144,6 +147,15 @@ public:
 
   inline __attribute__((always_inline))
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
@@ -364,7 +376,16 @@ public:
   inline __attribute__((always_inline))
   SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
 
-
+  inline __attribute__((always_inline))
+  SPL::boolean RATE_LIMITED() {
+    // This gets the recorded time when the last packet came in which is close enough for what we need here.
+    uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
+    if(currentTime >= (rateLimitLastTime + rateLimitPeriodUsec)) {
+        rateLimitLastTime = currentTime;
+        return false;
+    }
+    return true;
+  }
 
   // ------------------------------------------------------------------------------------------
 

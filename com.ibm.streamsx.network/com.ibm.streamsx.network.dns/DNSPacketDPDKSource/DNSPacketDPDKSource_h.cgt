@@ -99,6 +99,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   double now, then;  
   bool metricsUpdate;
   bool realMetricsUpdate;
+  double    rateLimit;
+  uint64_t  rateLimitLastTime;
+  uint64_t  rateLimitPeriodUsec;
 
   // ----------- network header parser ----------
   
@@ -148,6 +151,15 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
   inline __attribute__((always_inline))
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
@@ -371,7 +383,16 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   inline __attribute__((always_inline))
   SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
 
-
+  inline __attribute__((always_inline))
+  SPL::boolean RATE_LIMITED() { 
+    // This gets the recorded time when the last packet came in which is close enough for what we need here.
+    uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
+    if(currentTime >= (rateLimitLastTime + rateLimitPeriodUsec)) {
+        rateLimitLastTime = currentTime;
+        return false;
+    }
+    return true; 
+  }
 }; 
 
 <%SPL::CodeGen::headerEpilogue($model);%>

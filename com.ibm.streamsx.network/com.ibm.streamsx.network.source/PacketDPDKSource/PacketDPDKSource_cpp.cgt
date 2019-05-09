@@ -36,12 +36,14 @@ my @outputPortList = @{ $model->getOutputPorts() };
 
 my $lcoreMaster = $model->getParameterByName("lcoreMaster") ? $model->getParameterByName("lcoreMaster")->getValueAt(0)->getCppExpression() : -1;
 my $lcore = $model->getParameterByName("lcore") ? $model->getParameterByName("lcore")->getValueAt(0)->getCppExpression() : 0;
+my $dequeueThreadPinning = $model->getParameterByName("dequeueThreadPinning") ? $model->getParameterByName("dequeueThreadPinning")->getValueAt(0)->getCppExpression() : undef;
 my $nicPort = $model->getParameterByName("nicPort") ? $model->getParameterByName("nicPort")->getValueAt(0)->getCppExpression() : 0;
 my $nicQueue = $model->getParameterByName("nicQueue") ? $model->getParameterByName("nicQueue")->getValueAt(0)->getCppExpression() : 0;
 my $buffersizes = $model->getParameterByName("buffersizes") ? $model->getParameterByName("buffersizes")->getValueAt(0)->getCppExpression() : '""';
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+my $rateLimit = $model->getParameterByName("rateLimit") ? $model->getParameterByName("rateLimit")->getValueAt(0)->getCppExpression() : 1000.0;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -84,19 +86,39 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scala
 static void dpdkCallback(void *correlator, void *data, 
 	                 uint32_t length, uint64_t tscTimestamp) {
     MY_OPERATOR* self = (MY_OPERATOR*)correlator;
-    self->packetProcess((uint8_t *)data, length, tscTimestamp);
+    self->packetEnqueue((uint8_t *)data, length, tscTimestamp);
+}
+
+// Function called on the other side of the circular buffer
+static void submitCallback(void *correlator, void *data, 
+	                 uint32_t length) {
+    MY_OPERATOR* self = (MY_OPERATOR*)correlator;
+    self->packetProcess((uint8_t *)data, length, 0);
 }
 
 MY_OPERATOR::MY_OPERATOR() {
 
   SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> constructor", "PacketDPDKSource");
 
-  // initialize state variables
-  now = then = 0;
+  // initialize operator state variables
+  dpdkThreadID = metricsThreadID = 0;
   packetCounter = packetCounterNow = packetCounterThen = 0;
   byteCounter = byteCounterNow = byteCounterThen = 0;
-  portStatisticsNow = portStatisticsThen = (const struct port_stats){0};
+  now = then = 0;
   metricsUpdate = false;
+  packetDropSW = packetDropSWNow = packetDropSWThen = 0;
+  maxQueueDepthSW = maxQueueDepthSWNow = maxQueueDepthSWThen = 0;
+#ifdef __ATOMIC_RELAXED
+  __atomic_store_n(&realMetricsUpdate, false, __ATOMIC_RELEASE);
+#else
+  #pragma message "Using old sync builtins, with GCC " __VERSION__
+  // __sync_synchronize();  // Unnecessary here, in startup, as we're not yet protecting anything from any other threads.  Leaving as reminder that this variable is an atomic.
+     realMetricsUpdate = false;
+  #endif
+
+  // initialize state variables
+  // TODO: this init is not in the DNSPacketDPDKSource, probably need to add?
+  statsNow = statsThen = (const struct port_stats){0};
 
   // Get the operator's parameters into variables.
   lcoreMaster = <%=$lcoreMaster%>;
@@ -107,6 +129,16 @@ MY_OPERATOR::MY_OPERATOR() {
   const bool promiscuous = <%=$promiscuous%>;
   jMirrorCheck = <%=$jMirrorCheck%>;
   metricsInterval = <%=$metricsInterval%>;
+
+  // Set up rate limiter parameters.  This approach scales to 1M pps, or 1 per usec and then
+  // goes unlimited. 
+  rateLimit = <%=$rateLimit%>;
+  rateLimitLastTime = 0;
+  rateLimitPeriodUsec = (uint64_t)((1.0 / rateLimit) * 1000000.0);
+
+  countDroppedQueueFull.store(0, std::memory_order_release);
+  queueHighWaterMark.store(0, std::memory_order_release);
+  INST_BUCKETS_CLEAR(instBuckets);
 
   // Initialize the DPDK subsystem.
   int rc = streams_operator_init(lcoreMaster, lcore, nicPort, nicQueue, (int)promiscuous, &dpdkCallback, (void *)this);
@@ -156,7 +188,7 @@ void MY_OPERATOR::allPortsReady() {
     tscMicrosecondAdjust = (tscHz + 500000ul) / 1000000ul; 
 
     // create operator threads
-    createThreads(2);
+    createThreads(3);
 
     SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> allPortsReady()", "PacketDPDKSource");
 }
@@ -178,6 +210,7 @@ void MY_OPERATOR::process(uint32_t idx) {
   switch (idx) {
   case 0: processDpdkLoop(); break;
   case 1: if(metricsInterval > 0) metricsThread(); break;
+  case 2: processSubmitLoop(); break;
   default: break; 
   } 
 
@@ -213,8 +246,8 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
 
     // Start a prefetch of the packet data.  This was found to help
     // in some situations, but results will vary.
-    __builtin_prefetch((void *)packet, 0, 0);
-    __builtin_prefetch((void *)((uint64_t)packet + packetLen), 0, 0);
+//    __builtin_prefetch((void *)packet, 0, 0);
+//    __builtin_prefetch((void *)((uint64_t)packet + packetLen), 0, 0);
 
   // get current time in microseconds
   struct timespec ts; 
@@ -233,17 +266,42 @@ void MY_OPERATOR::packetProcess(uint8_t *packet, uint32_t length, uint64_t tscTi
 	return; 
     }
 
+  // Determine if the metrics were updated prior to this packet.
+  // Update the "local" version of the metrics updated flag, so that all output filters/assignments reference a stable copy.
+  /// @todo Under extremely low packet rates, or very short metrics update intervals, it's possible that the previous
+  // metrics copy hasn't yet been consumed when a new one comes in, causing either a total loss of a metrics update,
+  // or, if it lines up just right with an incoming packet, a metrics update with "odd" or part old/part new values.
+  // This should be very uncommon, and not catastrophic, so we are not attempted to protect against this just yet.
+  // This could be addressed at some future time.
+
+#ifdef __ATOMIC_RELAXED
+  bool expected = true;
+  if(__atomic_compare_exchange_n(&realMetricsUpdate, &expected, false, false, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) {
+      metricsUpdate = true;
+  } else {
+      metricsUpdate = false;
+  }
+#else
+  if(__sync_bool_compare_and_swap(&realMetricsUpdate, true, false)) {
+      metricsUpdate = true;
+  } else {
+      metricsUpdate = false;
+  }
+#endif
+
     // Fill in and submit output tuples to output ports, as selected by output filters, if specified.
     <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
       <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
       {
          <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-         SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketDPDKSource");
+         //SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "PacketDPDKSource");
          submit(outTuple<%=$i%>, <%=$i%>);
       }
     <% } %> ;
 
-    // reset the 'metrics updated' flag, in case one of the output filters or assignments references it
+    // reset the "local" version of the 'metrics updated' flag, in case one of the output filters or assignments references it
+    // The "real" version of the flag, as updated by the metricsThread() is unaffected, so we don't lose metrics updates under high-packet-rate
+    // conditions.
     metricsUpdate = false;
 }
 
@@ -252,14 +310,21 @@ void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
 } 
 
 void MY_OPERATOR::metricsThread() {
-    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> metricsThread()", "PacketDPDKSource");
+    SPLAPPTRC(L_DEBUG, "entering <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
+
+    // remember our thread identifer
+    metricsThreadID = pthread_self();
 
     // expose the operator's statistics in these metrics
     OperatorMetrics& opm = getContext().getMetrics();
     Metric* totalPacketsReceived = &opm.getCustomMetricByName("nPacketsReceivedCurrent");
     Metric* totalPacketsDropped = &opm.getCustomMetricByName("nPacketsDroppedCurrent");
+    Metric* totalBytesReceived = &opm.getCustomMetricByName("nBytesReceivedCurrent");
     Metric* totalPacketsProcessed = &opm.getCustomMetricByName("nPacketsProcessedCurrent");
     Metric* totalBytesProcessed = &opm.getCustomMetricByName("nBytesProcessedCurrent");
+
+    Metric* totalPacketsDroppedSW = &opm.getCustomMetricByName("nPacketsDroppedSWCurrent");
+    Metric* maxQueueDepthSW = &opm.getCustomMetricByName("maxQueueDepthSWCurrent");
 
     // get statistics periodically and send them to the runtime
     while (!getPE().getShutdownRequested()) {
@@ -267,37 +332,55 @@ void MY_OPERATOR::metricsThread() {
       // wait until the next interval or the PE is shutting down
       const double secondsToWait = now + metricsInterval - SPL::Functions::Time::getTimestampInSecs();
       if (secondsToWait>0) {
-        SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "PacketDPDKSource");
+        SPLAPPTRC(L_DEBUG, "next statistics interval in " << streams_boost::lexical_cast<std::string>(secondsToWait) << " seconds", "DNSPacketLiveSource");
         getPE().blockUntilShutdownRequest(secondsToWait);
       } else {
-        SPLAPPTRC(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "PacketDPDKSource");
+        SPLAPPTRC(L_DEBUG, "missed statistics interval by " << streams_boost::lexical_cast<std::string>(-secondsToWait) << " seconds", "DNSPacketLiveSource");
       }
 
       // store the previous interval's metrics for difference calculations
       then = now;
+      now = SPL::Functions::Time::getTimestampInSecs();
       packetCounterThen = packetCounterNow;
       byteCounterThen = byteCounterNow;
-      portStatisticsThen.received = portStatisticsNow.received;
-      portStatisticsThen.dropped = portStatisticsNow.dropped;
+      statsThen.received = statsNow.received; // Packets RX
+      statsThen.dropped  = statsNow.dropped;  // All errors and drops
+      statsThen.bytes    = statsNow.bytes;    // Bytes RX
+      packetDropSWThen = packetDropSWNow;
+      maxQueueDepthSWThen  = maxQueueDepthSWNow;
 
-      // get the current interval's counters from DPDK
-      now = SPL::Functions::Time::getTimestampInSecs();
-      streams_port_stats(nicPort, &portStatisticsNow);
+      // get the current interval's counters from the DPDK library (only if we're the first queue, to avoid everybody getting the whole-nic metrics and resetting them)
+      if(nicQueue == 0) {
+          streams_port_stats(nicPort, &statsNow);
+      }
       packetCounterNow = packetCounter;
       byteCounterNow = byteCounter;
 
+      packetDropSWNow = countDroppedQueueFull.load(std::memory_order_relaxed);
+      maxQueueDepthSWNow = queueHighWaterMark.exchange(0, std::memory_order_acq_rel);
+
       // expose the operator's statistics as metrics
-      totalPacketsReceived->setValue(portStatisticsNow.received);
-      totalPacketsDropped->setValue(portStatisticsNow.dropped); 
+      totalPacketsReceived->setValue(statsNow.received);
+      totalPacketsDropped->setValue(statsNow.dropped);
+      totalBytesReceived->setValue(statsNow.bytes);
       totalPacketsProcessed->setValue(packetCounter);
       totalBytesProcessed->setValue(byteCounter);
+      totalPacketsDroppedSW->setValue(packetDropSWNow);
+      maxQueueDepthSW->setValue(maxQueueDepthSWNow);
 
       // updated metrics will be available to the next output tuple emitted
-      metricsUpdate = true;
+#ifdef __ATOMIC_RELAXED
+      __atomic_store_n(&realMetricsUpdate, true, __ATOMIC_RELEASE);
+#else
+      __sync_synchronize();
+      realMetricsUpdate = true;
+#endif
+
     }
 
-    SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> metricsThread()", "PacketDPDKSource");
+    SPLAPPTRC(L_DEBUG, "leaving <%=$myOperatorKind%> metricsThread()", "DNSPacketDPDKSource");
 }
+
 
 void MY_OPERATOR::processDpdkLoop() {
 
@@ -309,6 +392,83 @@ void MY_OPERATOR::processDpdkLoop() {
 
     SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> processDpdkLoop()", "PacketDPDKSource");
 }
+
+void MY_OPERATOR::packetEnqueue(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp) {
+    // Simply enqueue the packet onto the ring buffer!
+    if(!pktQueue.produce(packet, packetLen)) {
+        ++countDroppedQueueFull;
+    }
+}
+
+void MY_OPERATOR::processSubmitLoop() {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> processSubmitLoop()", "PacketDPDKSource");
+
+    int rc;
+
+<% if(defined $dequeueThreadPinning) { %>
+    // Pin ourselves, if requested
+    std::vector<uint64_t> a = <%=$dequeueThreadPinning%>;
+    cpu_set_t cpumask; // CPU affinity bit mask
+    CPU_ZERO(&cpumask);
+    for (std::vector<uint64_t>::iterator it = a.begin(); it != a.end(); ++it) {
+        CPU_SET(*it, &cpumask);
+    }
+    pid_t mytid = (pid_t)syscall(SYS_gettid);
+    rc = sched_setaffinity(mytid, sizeof cpumask, &cpumask);
+    if (rc<0) THROW (SPLRuntimeOperator, "could not set processor affinity to CPUs" << ", " << strerror(errno));
+<% } %>
+
+    // Name this thread something sensible.
+    // If on the same thread as some downstream SPL code that re-names on first tuple,
+    // that will override, of course.
+    SPL::rstring temp("ring-deq-");
+    temp += std::to_string(nicQueue);
+    if(temp.length() > 15) {
+        temp = temp.substr(0, 15);
+    }
+
+    rc = pthread_setname_np(pthread_self(), temp.c_str());
+    if(rc != 0) THROW (SPLRuntimeOperator, "could not set thread name to " << temp << ", " << strerror(rc));
+
+    bool shutdown = getPE().getShutdownRequested();
+
+    INST_TS(instBuckets_startTime);
+
+    while(!shutdown) {
+        // In here, try to consume from the ring buffer
+        // If we consumed a packet, try for another one
+        // Otherwise, check if shutdown is requested (when really busy, don't bother checking for shutdown
+
+        uint64_t ts_A, ts_B;
+        INST_TS(ts_A);
+
+        // Update the HWM safely, if needed.
+        // The metrics thread might be resetting this value while we are reading here.
+        size_t queueSizeSnapshot = pktQueue.size();
+        size_t oldHWM = queueHighWaterMark.load(std::memory_order_acquire);
+        while(queueSizeSnapshot > oldHWM && !queueHighWaterMark.compare_exchange_weak(oldHWM, queueSizeSnapshot, std::memory_order_acq_rel, std::memory_order_acquire));
+
+        if(pktQueue.consume(&submitCallback, this)) {
+            // Got & processed a packet!
+            INST_TS(ts_B);
+            INST_UPDATE_METRIC(instBuckets, 0, ts_B - ts_A);
+        } else {
+            // No packet.
+
+            // Update shutdown flag, since we're apparently not doing anything else.
+            shutdown = getPE().getShutdownRequested();
+
+            INST_TS(ts_B);
+            INST_UPDATE_METRIC(instBuckets, 1, ts_B - ts_A);
+        }
+
+        bool dumpMetrics = false;
+        INST_BUCKETS_HANDLE(instBuckets, ts_B, "processSubmitLoop", nicQueue, dumpMetrics);
+    }
+
+    SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> processSubmitLoop()", "PacketDPDKSource");
+}
+
 
 <%SPL::CodeGen::implementationEpilogue($model);%>
 

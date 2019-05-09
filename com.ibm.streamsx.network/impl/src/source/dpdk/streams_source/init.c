@@ -195,6 +195,10 @@ static void init_ports(void) {
 		"  RXQ Max      : %d\n", dev_info.max_rx_queues); 
 	RTE_LOG(INFO, STREAMS_SOURCE, 
 		"  TXQ Max      : %d\n", dev_info.max_tx_queues); 
+    RTE_LOG(INFO, STREAMS_SOURCE,
+        "  RX Desc Max  : %d\n", dev_info.rx_desc_lim.nb_max);
+    RTE_LOG(INFO, STREAMS_SOURCE,
+        "  RX Desc Min  : %d\n", dev_info.rx_desc_lim.nb_min);
 
 	num_rx_queues = numQueues_;
 	num_tx_queues = 1;

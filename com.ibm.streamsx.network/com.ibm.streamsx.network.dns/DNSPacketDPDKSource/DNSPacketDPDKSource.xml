@@ -396,6 +396,25 @@ The default value is 'false'.
     </parameter>
 
     <parameter>
+      <name>rateLimit</name>
+      <description> 
+
+This optional parameter takes an expression of type 'float64'
+that specifies the maximum number of times per second the RATE_LIMITED() 
+function returns false.  This can be used to limit the rate of packets sent 
+to an output port when used in a filter expression.
+
+The default value is '1000.0'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>float64</type>
+      <cardinality>1</cardinality>
+    </parameter>
+
+    <parameter>
       <name>jMirrorCheck</name>
       <description> 
 

@@ -36,6 +36,9 @@
 
 #include "parse/NetworkHeaderParser.h"
 
+#include "PacketRingBuffer.h"
+#include "Instrumentation.h"
+
 <%SPL::CodeGen::headerPrologue($model);%>
 
 class MY_OPERATOR : public MY_BASE_OPERATOR {
@@ -61,10 +64,13 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         // Punctuation processing
         void process(Punctuation const & punct, uint32_t port);
 
-        // Method called out of the DPDK callback interface as each packet
+        // Method called out of the ring buffer callback interface as each packet
         // arrives for processing.
         void packetProcess(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp);
 
+        // Method called from the DPDK callback interface as each packet arrives
+        void packetEnqueue(uint8_t *packet, uint32_t packetLen, uint64_t tscTimestamp);
+   
     private:
 
         // ----------- operator parameters (constant after constructor executes) ----------
@@ -80,18 +86,39 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { print "OPort$i\Type outTuple$i;"; } %> ;
       
         // ----------- operator state variables ----------
-
-        double now, then;
-        uint64_t packetCounter, packetCounterNow, packetCounterThen;
-        uint64_t byteCounter, byteCounterNow, byteCounterThen;
-        bool metricsUpdate;
-        struct port_stats portStatisticsNow, portStatisticsThen; 
+        pthread_t dpdkThreadID;
+        pthread_t metricsThreadID;
 
         uint32_t captureSeconds, captureMicroseconds;
         uint64_t tscHz, tscMicrosecondAdjust, tscMicroseconds;
 
+        // Variables related to metrics capture.
+        uint64_t packetCounter;
+        uint64_t byteCounter;
+        uint64_t packetCounterNow, packetCounterThen;
+        uint64_t byteCounterNow, byteCounterThen;
+        struct port_stats statsNow, statsThen;
+        double now, then;
+        bool metricsUpdate;
+        bool realMetricsUpdate;
+        uint64_t packetDropSW, packetDropSWNow, packetDropSWThen;
+        uint64_t maxQueueDepthSW, maxQueueDepthSWNow, maxQueueDepthSWThen;
+
+        double    rateLimit;
+        uint64_t  rateLimitLastTime;
+        uint64_t  rateLimitPeriodUsec;
+
         uint8_t *packetPtr;
         uint32_t packetLen; 
+
+        PacketRingBuffer pktQueue;
+
+        // Counters and stats used by the queue production side
+        std::atomic<uint64_t> countDroppedQueueFull __attribute__((aligned(64)));
+
+        // Counters and stats used by the queue consumption side
+        std::atomic<uint64_t> queueHighWaterMark __attribute__((aligned(64)));
+        INST_BUCKETS_DEFINE(instBuckets);
 
         // This method is called during the start up of the first of the 
         // operator's threads.  It calls into the DPDK libraries, where 
@@ -105,40 +132,62 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
         // the DPDK libraries.
         void metricsThread();
 
+        // This method is called during the startup of the third of the
+        // operator's threads.  It sits in a loop pulling packets off the
+        // internal ring buffer, then parses, filters, and generates tuples
+        // from that data, and submits them downstream.
+        void processSubmitLoop();
+
+
 	// ----------- network header parser ----------
 	NetworkHeaderParser headers;
 	
 	// ----------- assignment functions for output attributes ----------
 
-    inline __attribute__((always_inline))
-	uint64_t packetsReceived() { return portStatisticsNow.received; }
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsReceived() { return statsNow.received; }
 
-    inline __attribute__((always_inline))
-    uint64_t packetsDropped() { return portStatisticsNow.dropped; }
-    
-    inline __attribute__((always_inline))
-    uint64_t packetsProcessed() { return packetCounter; }
-    
-    inline __attribute__((always_inline))
-    uint64_t bytesProcessed() { return byteCounter; }
-    
-    inline __attribute__((always_inline))
-    SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalPacketsReceived() { return then ? portStatisticsNow.received - portStatisticsThen.received : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalPacketsDropped() { return then ? portStatisticsNow.dropped - portStatisticsThen.dropped : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::uint64 metricsIntervalBytesProcessed() { return then ? byteCounterNow - byteCounterThen : 0; }
-    
-    inline __attribute__((always_inline))
-    SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDropped() { return statsNow.dropped; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 bytesReceived() { return statsNow.bytes; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsProcessed() { return packetCounter; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 bytesProcessed() { return byteCounter; }
+
+  inline __attribute__((always_inline))
+  SPL::float64 metricsIntervalElapsed() { return then ? now-then : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsReceived() { return then ? statsNow.received - statsThen.received : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDropped() { return then ? statsNow.dropped - statsThen.dropped : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesReceived() { return then ? statsNow.bytes - statsThen.bytes : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesProcessed() { return then ? byteCounterNow - byteCounterThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return packetDropSWNow; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return then ? packetDropSWNow - packetDropSWThen : 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return maxQueueDepthSWNow; }
 
   inline __attribute__((always_inline))
 	SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
@@ -166,6 +215,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
   inline __attribute__((always_inline))
 	SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 ETHER_DST_ADDRESS_64() { return headers.etherHeader ? (((uint64_t)headers.etherHeader->h_dest[0] << 40) | ((uint64_t)headers.etherHeader->h_dest[1] << 32) | ((uint64_t)headers.etherHeader->h_dest[2] << 24) | ((uint64_t)headers.etherHeader->h_dest[3] << 16) | ((uint64_t)headers.etherHeader->h_dest[4] << 8) | ((uint64_t)headers.etherHeader->h_dest[5] << 0)) : 0; }
 
   inline __attribute__((always_inline))
 	SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
@@ -247,6 +299,37 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
   inline __attribute__((always_inline))
     SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
+
+  inline __attribute__((always_inline))
+  SPL::boolean RATE_LIMITED() {
+    // This gets the recorded time when the last packet came in which is close enough for what we need here.
+    uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
+    if(currentTime >= (rateLimitLastTime + rateLimitPeriodUsec)) {
+        rateLimitLastTime = currentTime;
+        return false;
+    }
+    return true;
+  }
+
+  inline __attribute__((always_inline))
+  SPL::boolean DNS_RESPONSE_FLAG_HINT() {
+        // Only UDP DNS packets will be analyzed at this time
+        if(headers.udpHeader == NULL) return false;
+
+        // 53 is the UDP port used for DNS requests/responses
+        if(ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53) return false;
+        if(!headers.payload) return false;
+
+        // DNS Header is 12 bytes minimum, so anything less than that can be dropped.
+        if(headers.payloadLength < 12) return false;
+
+        uint8_t* payloadBytes = (uint8_t*)(headers.payload);
+
+        // For DNS packets, the MSB of the 3rd byte of the payload is the response flag.
+        // The DNS packet header is in network-order, of course.
+        return (payloadBytes[2] & 0x80);
+  }
+
 }; 
 
 <%SPL::CodeGen::headerEpilogue($model);%>
