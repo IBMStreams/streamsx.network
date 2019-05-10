@@ -9,7 +9,7 @@ Operators and functions for ingesting and parsing raw network data at the packet
 
 This is an overview of changes for major and minor version upgrades.
 
-++ What is new in version 3.2.0
+++ What is new in version 3.2.1
 
 * Performance enhancements for the PacketDPDKSource.
       
@@ -21,7 +21,7 @@ This is an overview of changes for major and minor version upgrades.
 * IPFilter operator: Changed traces with WARN trace level to TRACE level.
     
     </info:description>
-    <info:version>3.2.0</info:version>
+    <info:version>3.2.1</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
