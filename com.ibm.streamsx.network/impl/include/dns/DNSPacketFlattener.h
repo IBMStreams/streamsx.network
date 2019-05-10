@@ -370,10 +370,10 @@ DNSResponseNames dnsResponseNames;
  public:
 
   SPL::rstring dnsAllFields(double captureTime, uint32_t packetLength, NetworkHeaderParser& headers, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter, SPL::list<SPL::uint16>& rrTypes) {
-    return dnsAllFields(captureTime, packetLength, headers.ipv4Header->saddr, headers.ipv4Header->daddr, headers.udpHeader->source, headers.udpHeader->dest, parser, recordDelimiter, fieldDelimiter, subfieldDelimiter, rrTypes);
+      return dnsAllFields(captureTime, packetLength, headers.ipv4Header->saddr, headers.ipv4Header->daddr, headers.udpHeader->source, headers.udpHeader->dest, headers.ipv4Header->protocol, headers.payloadLength, 0, parser, recordDelimiter, fieldDelimiter, subfieldDelimiter, rrTypes);
   }
 
-  SPL::rstring dnsAllFields(double captureTime, uint32_t packetLength, uint32_t srcAddr, uint32_t dstAddr, uint16_t udpSrcPort, uint16_t udpDstPort, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter, SPL::list<SPL::uint16>& rrTypes) {
+  SPL::rstring dnsAllFields(double captureTime, uint32_t packetLength, uint32_t srcAddr, uint32_t dstAddr, uint16_t udpSrcPort, uint16_t udpDstPort, uint8_t protocol, uint32_t payloadLength, uint16_t tag, DNSMessageParser& parser, const char* recordDelimiter, const char* fieldDelimiter, const char* subfieldDelimiter, SPL::list<SPL::uint16>& rrTypes) {
     // allocate a buffer large enough to hold the largest possible string representation of a DNS message
     char buffer[1024*1024];
     size_t bufferLength = 0;
