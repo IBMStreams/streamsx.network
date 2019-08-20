@@ -7,22 +7,22 @@
 <meta name="copyright" content="(C) Copyright 2005"/>
 <meta name="DC.rights.owner" content="(C) Copyright 2005"/>
 <meta name="DC.Type" content="reference"/>
-<meta name="DC.Title" content="Toolkit com.ibm.streamsx.network 3.1.0"/>
+<meta name="DC.Title" content="Toolkit com.ibm.streamsx.network 3.2.2"/>
 <meta name="DC.Format" content="XHTML"/>
 <meta name="DC.Identifier" content="spldoc_toolkit"/>
 <link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
-<title>Toolkit com.ibm.streamsx.network 3.1.0</title>
+<title>Toolkit com.ibm.streamsx.network 3.2.2</title>
 </head>
 <body id="spldoc_toolkit">
 
 
-<h1 class="title topictitle1 spltoolkitname">Toolkit <tt class="ph tt">com.ibm.streamsx.network 3.1.0</tt></h1>
+<h1 class="title topictitle1 spltoolkitname">Toolkit <tt class="ph tt">com.ibm.streamsx.network 3.2.2</tt></h1>
 
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; com.ibm.streamsx.network 3.1.0</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; com.ibm.streamsx.network 3.2.2</p>
 
 </div>
 
@@ -42,7 +42,7 @@
   
   <dt class="dt dlterm">Version</dt>
 
-  <dd class="dd">3.1.0</dd>
+  <dd class="dd">3.2.2</dd>
 
   
   
@@ -474,6 +474,8 @@
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__PAYLOAD_LENGTH">PAYLOAD_LENGTH()</a></li>
 
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__RATE_LIMITED">RATE_LIMITED()</a></li>
+
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__UDP_DST_PORT">UDP_DST_PORT()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__UDP_PORT.uint16">UDP_PORT(uint16)</a></li>
@@ -492,7 +494,11 @@
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalElapsed">metricsIntervalElapsed()</a></li>
 
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalMaxQueueDepthSW">metricsIntervalMaxQueueDepthSW()</a></li>
+
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalPacketsDropped">metricsIntervalPacketsDropped()</a></li>
+
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalPacketsDroppedSW">metricsIntervalPacketsDroppedSW()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalPacketsProcessed">metricsIntervalPacketsProcessed()</a></li>
 
@@ -501,6 +507,8 @@
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsUpdated">metricsUpdated()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__packetsDropped">packetsDropped()</a></li>
+
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__packetsDroppedSW">packetsDroppedSW()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__packetsProcessed">packetsProcessed()</a></li>
 
@@ -1173,6 +1181,8 @@
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring">DNS_ALL_FIELDS(rstring, rstring, rstring)</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:">DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;)</a></li>
+
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:.uint64.uint32.uint32.uint32.uint16.uint16.uint8.uint32.uint16">DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;, uint64, uint32, uint32, uint32, uint16, uint16, uint8, uint32, uint16)</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></li>
 
@@ -1862,11 +1872,15 @@
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__CAPTURE_TSC_MICROSECONDS">CAPTURE_TSC_MICROSECONDS()</a></li>
 
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__DNS_RESPONSE_FLAG_HINT">DNS_RESPONSE_FLAG_HINT()</a></li>
+
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ERSPAN_DST_ADDRESS">ERSPAN_DST_ADDRESS()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ERSPAN_SRC_ADDRESS">ERSPAN_SRC_ADDRESS()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_DST_ADDRESS">ETHER_DST_ADDRESS()</a></li>
+
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_DST_ADDRESS_64">ETHER_DST_ADDRESS_64()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_PROTOCOL">ETHER_PROTOCOL()</a></li>
 
@@ -1916,6 +1930,8 @@
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_LENGTH">PAYLOAD_LENGTH()</a></li>
 
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__RATE_LIMITED">RATE_LIMITED()</a></li>
+
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_ACKNOWLEDGEMENT">TCP_ACKNOWLEDGEMENT()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_DST_PORT">TCP_DST_PORT()</a></li>
@@ -1950,11 +1966,19 @@
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__bytesProcessed">bytesProcessed()</a></li>
 
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__bytesReceived">bytesReceived()</a></li>
+
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalBytesProcessed">metricsIntervalBytesProcessed()</a></li>
+
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalBytesReceived">metricsIntervalBytesReceived()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalElapsed">metricsIntervalElapsed()</a></li>
 
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalMaxQueueDepthSW">metricsIntervalMaxQueueDepthSW()</a></li>
+
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsDropped">metricsIntervalPacketsDropped()</a></li>
+
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsDroppedSW">metricsIntervalPacketsDroppedSW()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsProcessed">metricsIntervalPacketsProcessed()</a></li>
 
@@ -1963,6 +1987,8 @@
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsUpdated">metricsUpdated()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsDropped">packetsDropped()</a></li>
+
+<li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsDroppedSW">packetsDroppedSW()</a></li>
 
 <li class="sli"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsProcessed">packetsProcessed()</a></li>
 

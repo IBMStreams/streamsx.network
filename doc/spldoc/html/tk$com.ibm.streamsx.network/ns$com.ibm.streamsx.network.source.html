@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.1.0</a> &gt; com.ibm.streamsx.network.source</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.2.2</a> &gt; com.ibm.streamsx.network.source</p>
 
 </div>
 
@@ -54,6 +54,9 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__CAPTURE_TSC_MICROSECONDS">CAPTURE_TSC_MICROSECONDS()</a></strong>: This function returns the value of the machine's timestamp counter when the packet was  captured, that is, the number of microseconds since the machine was booted.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__DNS_RESPONSE_FLAG_HINT">DNS_RESPONSE_FLAG_HINT()</a></strong>:             This function speculatively returns the DNS response flag.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ERSPAN_DST_ADDRESS">ERSPAN_DST_ADDRESS()</a></strong>: This function returns the value of the GRE ERSPAN destination address in the current packet,  if it has one, or zero if otherwise.
 </li>
 
@@ -61,6 +64,9 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_DST_ADDRESS">ETHER_DST_ADDRESS()</a></strong>: This function returns the ethernet destination address of the current packet.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_DST_ADDRESS_64">ETHER_DST_ADDRESS_64()</a></strong>: This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_PROTOCOL">ETHER_PROTOCOL()</a></strong>: This function returns the ethernet protocol (that is, the EtherType) of the current packet, for example, '2048' for IP version 4, or '34,525' for IP version 6.
@@ -135,6 +141,9 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__PAYLOAD_LENGTH">PAYLOAD_LENGTH()</a></strong>: This function returns the number of bytes of payload data in the current packet, excluding all network headers.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__RATE_LIMITED">RATE_LIMITED()</a></strong>:             This function returns false when an amount of time between packets has passed such that             the rate is limited to the value given in the rateLimit paramater.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_ACKNOWLEDGEMENT">TCP_ACKNOWLEDGEMENT()</a></strong>: This function returns the value of the TCP acknowledgement number in the current packet,  if it has one, or zero if otherwise.
 </li>
 
@@ -186,13 +195,25 @@
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__bytesProcessed">bytesProcessed()</a></strong>: This function returns the number of bytes of network data processed by the operator since it started, including the current packet, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__bytesReceived">bytesReceived()</a></strong>: This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalBytesProcessed">metricsIntervalBytesProcessed()</a></strong>: This function returns the number of bytes of network data processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalBytesReceived">metricsIntervalBytesReceived()</a></strong>: This function returns the number of bytes received from the network interface during the most recent metrics interval, if there is one, or zero if not.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalElapsed">metricsIntervalElapsed()</a></strong>: This function returns the duration of the most recent metrics interval, in seconds with a resolution of at least microseconds, if there is one, or zero if not.
 </li>
 
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalMaxQueueDepthSW">metricsIntervalMaxQueueDepthSW()</a></strong>: This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.
+</li>
+
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsDropped">metricsIntervalPacketsDropped()</a></strong>: This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsDroppedSW">metricsIntervalPacketsDroppedSW()</a></strong>: This function returns the number of packets dropped by the software packet receive queue (if implemented) in the most recent metrics interval.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsProcessed">metricsIntervalPacketsProcessed()</a></strong>: This function returns the number of network packets processed by the operator during the most recent metrics interval, excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.
@@ -205,6 +226,9 @@
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsDropped">packetsDropped()</a></strong>: This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsDroppedSW">packetsDroppedSW()</a></strong>: This function returns the total number of packets dropped by the software packet receive queue (if implemented).
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsProcessed">packetsProcessed()</a></strong>: This function returns the number of network packets processed by the operator since it started, including the current packet, but excluding any packets that were ignored by the input filter, if the <tt class="ph tt">inputFilter</tt> parameter was specified.

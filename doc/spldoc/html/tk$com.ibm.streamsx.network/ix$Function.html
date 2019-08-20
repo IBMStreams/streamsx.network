@@ -7,22 +7,22 @@
 <meta name="copyright" content="(C) Copyright 2005"/>
 <meta name="DC.rights.owner" content="(C) Copyright 2005"/>
 <meta name="DC.Type" content="reference"/>
-<meta name="DC.Title" content="Functions: com.ibm.streamsx.network 3.1.0"/>
+<meta name="DC.Title" content="Functions: com.ibm.streamsx.network 3.2.2"/>
 <meta name="DC.Format" content="XHTML"/>
 <meta name="DC.Identifier" content="spldoc_index"/>
 <link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
-<title>Functions: com.ibm.streamsx.network 3.1.0</title>
+<title>Functions: com.ibm.streamsx.network 3.2.2</title>
 </head>
 <body id="spldoc_index">
 
 
-<h1 class="title topictitle1">Functions: com.ibm.streamsx.network 3.1.0</h1>
+<h1 class="title topictitle1">Functions: com.ibm.streamsx.network 3.2.2</h1>
 
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.1.0</a> &gt; Functions</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.2.2</a> &gt; Functions</p>
 
 </div>
 
@@ -684,6 +684,12 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.parse.html#spldoc_functions__DNS_ALL_FIELDS.rstring.rstring.rstring.list:.:uint16:.:.uint64.uint32.uint32.uint32.uint16.uint16.uint8.uint32.uint16">DNS_ALL_FIELDS(rstring, rstring, rstring, list&lt;uint16&gt;, uint64, uint32, uint32, uint32, uint16, uint16, uint8, uint32, uint16)</a></dt>
+
+  <dd class="dd">          This parser result function returns a string containing 'flattened' representation           of the DNS packet, including selected fields from the IP and UDP headers, all            fields from the DNS header, and all fields from seleccted DNS resource records,            represented as appropriate, separated by the specified           record and field delimiters, and for SOA resource records,            a subfield delimiter.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_ALL_FLAGS">DNS_ALL_FLAGS()</a></dt>
 
   <dd class="dd">          This parser result function returns a 16-bit value containing all of the DNS header flags from the current message.</dd>
@@ -1104,6 +1110,12 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__DNS_RESPONSE_FLAG_HINT">DNS_RESPONSE_FLAG_HINT()</a></dt>
+
+  <dd class="dd">            This function speculatively returns the DNS response flag.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__DNS_TRUNCATION_FLAG">DNS_TRUNCATION_FLAG()</a></dt>
 
   <dd class="dd">          This parser result function returns <tt class="ph tt">true</tt> if the 'truncation' flag is set in the current message,            or <tt class="ph tt">false</tt> if not.</dd>
@@ -1141,6 +1153,12 @@
 
 
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__ETHER_DST_ADDRESS_64">ETHER_DST_ADDRESS_64()</a></dt>
+
+  <dd class="dd">This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__ETHER_DST_ADDRESS_64">ETHER_DST_ADDRESS_64()</a></dt>
 
   <dd class="dd">This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.</dd>
 
@@ -3402,6 +3420,18 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__RATE_LIMITED">RATE_LIMITED()</a></dt>
+
+  <dd class="dd">        This function returns false when an amount of time between packets has passed such that         the rate is limited to the value given in the rateLimit paramater.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__RATE_LIMITED">RATE_LIMITED()</a></dt>
+
+  <dd class="dd">            This function returns false when an amount of time between packets has passed such that             the rate is limited to the value given in the rateLimit paramater.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__TCP_ACKNOWLEDGEMENT">TCP_ACKNOWLEDGEMENT()</a></dt>
 
   <dd class="dd">This function returns the value of the TCP acknowledgement number in the current packet,  if it has one, or zero if otherwise.</dd>
@@ -3601,6 +3631,12 @@
 
 
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__bytesReceived">bytesReceived()</a></dt>
+
+  <dd class="dd">This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__bytesReceived">bytesReceived()</a></dt>
 
   <dd class="dd">This function returns the number of bytes received from the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.</dd>
 
@@ -4410,6 +4446,12 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalBytesReceived">metricsIntervalBytesReceived()</a></dt>
+
+  <dd class="dd">This function returns the number of bytes received from the network interface during the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalElapsed">metricsIntervalElapsed()</a></dt>
 
   <dd class="dd">This function returns the duration of the most recent metrics interval, in seconds with a resolution of at least microseconds, if there is one, or zero if not.</dd>
@@ -4422,6 +4464,18 @@
 
 
 
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalMaxQueueDepthSW">metricsIntervalMaxQueueDepthSW()</a></dt>
+
+  <dd class="dd">This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalMaxQueueDepthSW">metricsIntervalMaxQueueDepthSW()</a></dt>
+
+  <dd class="dd">This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.</dd>
+
+
+
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalPacketsDropped">metricsIntervalPacketsDropped()</a></dt>
 
   <dd class="dd">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not.</dd>
@@ -4431,6 +4485,18 @@
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsDropped">metricsIntervalPacketsDropped()</a></dt>
 
   <dd class="dd">This function returns the number of packets dropped by the network interface during the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__metricsIntervalPacketsDroppedSW">metricsIntervalPacketsDroppedSW()</a></dt>
+
+  <dd class="dd">This function returns the number of packets dropped by the software packet receive queue (if implemented) in the most recent metrics interval.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__metricsIntervalPacketsDroppedSW">metricsIntervalPacketsDroppedSW()</a></dt>
+
+  <dd class="dd">This function returns the number of packets dropped by the software packet receive queue (if implemented) in the most recent metrics interval.</dd>
 
 
 
@@ -4491,6 +4557,18 @@
   <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsDropped">packetsDropped()</a></dt>
 
   <dd class="dd">This function returns the number of packets dropped by the network interface since the operator started, as of the most recent metrics interval, if there is one, or zero if not.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.dns.html#spldoc_functions__packetsDroppedSW">packetsDroppedSW()</a></dt>
+
+  <dd class="dd">This function returns the total number of packets dropped by the software packet receive queue (if implemented).</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="fc$com.ibm.streamsx.network.source.html#spldoc_functions__packetsDroppedSW">packetsDroppedSW()</a></dt>
+
+  <dd class="dd">This function returns the total number of packets dropped by the software packet receive queue (if implemented).</dd>
 
 
 
