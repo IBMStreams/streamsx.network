@@ -270,7 +270,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
             return isInRange_(decStartIP, decEndIP, decIP);
       }
 
-      SPL::boolean isInNetwork(SPL::rstring const & networkCIDR, SPL::rstring const & ip)
+      static SPL::boolean isInNetwork(SPL::rstring const & networkCIDR, SPL::rstring const & ip)
       {
             SPL::list<SPL::rstring> tokens = SPL::Functions::String::tokenize(networkCIDR, "/", false);
             SPL::rstring networkIP = tokens[0];
@@ -312,7 +312,7 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
             return isInRange_(netStart, netEnd, decIP);
       }
 
-      SPL::boolean isInNetworkList(SPL::list<SPL::rstring> const & networkList, SPL::rstring const & ip)
+      static SPL::boolean isInNetworkList(SPL::list<SPL::rstring> const & networkList, SPL::rstring const & ip)
       {
             SPL::list<SPL::rstring>::const_iterator it;
             for(it = networkList.begin(); it != networkList.end(); ++it)
