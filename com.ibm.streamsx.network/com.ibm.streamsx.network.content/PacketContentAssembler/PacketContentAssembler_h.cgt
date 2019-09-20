@@ -26,7 +26,25 @@
 #include <arpa/inet.h>
 #include <netinet/ether.h>
 
+
+
+<%
+my $pamHeader = $model->getParameterByName("pamInclude") ? $model->getParameterByName("pamInclude")->getValueAt(0)->getSPLExpression() : "'pam.h'" ;
+# remove quotes
+$pamHeader = substr($pamHeader, 1, length($pamHeader)-2);
+
+# we try to find the pam.h in pamDir relativ to applicationDirectory
+my $applicationDirectory = $model->getContext()->getApplicationDirectory();
+my $pamHeader = $applicationDirectory."/".$pamHeader;
+if (-f $pamHeader) {%>
+#include "<%=$pamHeader%>"
+<%
+} else {%>
 #include "pam.h"
+<%
+}
+%>
+
 
 
 

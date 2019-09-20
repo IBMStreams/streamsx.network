@@ -9,6 +9,11 @@ Operators and functions for ingesting and parsing raw network data at the packet
 
 This is an overview of changes for major and minor version upgrades.
 
+++ What is changed in version 3.3.0
+
+* PacketContentAssembler operator does not depend anymore on environment variable STREAMS_ADAPTERS_ISS_PAM_DIRECTORY at build and run time.
+  The 'Packet Analysis Module (PAM)' library can be added to the application bundle and the location can be set with the parameters `pamLibrary` and `pamInclude`.
+
 ++ What is changed in version 3.2.2
 
 * Added the static keyword to a couple of IPv6 helper functions
@@ -25,7 +30,7 @@ This is an overview of changes for major and minor version upgrades.
 * IPFilter operator: Changed traces with WARN trace level to TRACE level.
     
     </info:description>
-    <info:version>3.2.2</info:version>
+    <info:version>3.3.0.__dev__</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
