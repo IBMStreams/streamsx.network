@@ -23,6 +23,8 @@ my @outputPortList = @{ $model->getOutputPorts() };
 # get C++ expressions for getting the values of this operator's parameters
 my $geographyDirectory = $model->getParameterByName("geographyDirectory") ? $model->getParameterByName("geographyDirectory")->getValueAt(0)->getCppExpression() : -1;
 
+my $initOnTuple = $model->getParameterByName("initOnTuple") ? $model->getParameterByName("initOnTuple")->getValueAt(0)->getCppExpression() : 0;
+
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
 my @outputFilterList;
@@ -540,20 +542,30 @@ MY_OPERATOR::MY_OPERATOR()
 
   // set operator parameters
   geographyDirectory = <%=$geographyDirectory%>;
+  
+  initOnTuple = <%=$initOnTuple%>;
 
   // initialize operator state variables
   tupleCounter = 0;
-
-  // clear the IPv4 address/subnet cache
-  for (int i=0; i<ipv4SubnetCacheSize; i++) {
-    ipv4SubnetCache[i].address = 0;
-    ipv4SubnetCache[i].subnet = NULL;
-  }
 
   // clear the output tuples
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
     outTuple<%=$i%>.clear();
     <% } %> ;
+
+  if (initOnTuple == false) {
+    loadGeoData();
+  }
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+}
+
+void MY_OPERATOR::loadGeoData() {
+  SPLAPPTRC(L_INFO, "loadGeoData ...", "IPAddressLocation");
+  // clear the IPv4 address/subnet cache
+  for (int i=0; i<ipv4SubnetCacheSize; i++) {
+    ipv4SubnetCache[i].address = 0;
+    ipv4SubnetCache[i].subnet = NULL;
+  }
 
   // load the city location data
   cityLocations.clear();
@@ -592,9 +604,9 @@ MY_OPERATOR::MY_OPERATOR()
   } else {
     THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Blocks-IPv6.csv' file");
   }
-
-  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+    SPLAPPTRC(L_INFO, "loadGeoData completed", "IPAddressLocation");
 }
+
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
@@ -637,6 +649,10 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
   SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 
   SPL::AutoPortMutex automutex(processMutex, *this);
+
+  if ((initOnTuple) && (0 == tupleCounter)) {
+    loadGeoData();
+  }
 
   // increment tuple counter
   tupleCounter++;

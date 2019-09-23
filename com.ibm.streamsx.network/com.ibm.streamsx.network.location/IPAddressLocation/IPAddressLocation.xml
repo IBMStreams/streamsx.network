@@ -169,6 +169,23 @@ The format of 'geohash' codes for latitude and longitude coordinates is describe
         <type>boolean</type>
         <cardinality>-1</cardinality>
       </parameter>
+      <parameter>
+        <name>initOnTuple</name>
+        <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not the operator should load the files specified with the `geographyDirectory` parameter on the first tuple.
+
+The default value is 'false' and the operator loads the files on operator startup.
+In some cases loading the files during operator startup might cause timeouts and setting this parameter value to 'true' resolves this.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
     </parameters>
     <inputPorts>
       <inputPortSet>
