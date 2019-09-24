@@ -42,6 +42,18 @@ SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@o
 SPL::CodeGen::exit(NetworkResources::NETWORK_NOT_ENOUGH_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
 SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
 
+
+# optional control port - inputPort1
+my $inputPort1 = $model->getInputPortAt(1);
+my $inputPort1CppType;
+my $inputPort1CppName;
+my $filenameAttribute;
+if(defined $inputPort1) {
+  $inputPort1CppType = $inputPort1->getCppTupleType();
+  $inputPort1CppName = $inputPort1->getCppTupleName();
+  $filenameAttribute = $inputPort1->getAttributeAt(0)->getName();	    	
+}
+
 %>
 
 
@@ -650,26 +662,71 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   SPL::AutoPortMutex automutex(processMutex, *this);
 
-  if ((initOnTuple) && (0 == tupleCounter)) {
-    loadGeoData();
-  }
-
-  // increment tuple counter
-  tupleCounter++;
-
-  // point at the input tuple
-  const IPort0Type& iport$0 = tuple;
-
-  // fill in and submit output tuples, as selected by output filters, if specified
-  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
-    {
-      <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
-      <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-      SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPAddressLocation");
-      submit(outTuple<%=$i%>, <%=$i%>);
+  if(port == 0)
+  {
+    if ((initOnTuple) && (0 == tupleCounter)) {
+      loadGeoData();
     }
-    <% } %> ;
+
+    // increment tuple counter
+    tupleCounter++;
+
+    // point at the input tuple
+    const IPort0Type& iport$0 = tuple;
+
+    // fill in and submit output tuples, as selected by output filters, if specified
+    <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+      <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+      {
+        <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
+        <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+        SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPAddressLocation");
+        submit(outTuple<%=$i%>, <%=$i%>);
+      }
+    <% } %>;
+
+  }
+<% if(defined $inputPort1) {%>
+  else if(port == 1)
+  {
+    	const <%=$inputPort1CppType%> & <%=$inputPort1CppName%> = static_cast <<%=$inputPort1CppType%>>(tuple);
+    	
+    	// regex to determine if incoming file is BLOCKS or LOCATION
+    	streams_boost::filesystem::path filePath(<%=$inputPort1CppName%>.get_<%=$filenameAttribute%>());
+		SPL::list<rstring> blocksMatch;
+		
+		// Blocks IPv4
+		const rstring blocksIPv4Regex("^(GeoIP2|GeoLite2)-City-Blocks-IPv4.csv");
+		blocksMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), blocksIPv4Regex);
+		if(blocksMatch.size() > 1)
+		{
+			ipv4Subnets.clear();
+			loadIPv4Subnets(filePath.string());
+			return;
+		}
+		
+		// Blocks IPv6
+		const rstring blocksIPv6Regex("^(GeoIP2|GeoLite2)-City-Blocks-IPv6.csv");
+		blocksMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), blocksIPv6Regex);
+		if(blocksMatch.size() > 1) 
+		{
+			ipv6Subnets.clear();
+			loadIPv6Subnets(filePath.string());
+			return;
+		}		
+		
+		// Location Regex
+		const rstring locationRegex("^(GeoIP2|GeoLite2)-City-Locations-en.csv");
+		SPL::list<rstring> locationMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), locationRegex);
+		
+		if(locationMatch.size() > 1)
+		{
+			cityLocations.clear();
+			loadCityLocations(filePath.string());
+			return;
+		}
+    }
+    <%}%>
 
   SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 }
