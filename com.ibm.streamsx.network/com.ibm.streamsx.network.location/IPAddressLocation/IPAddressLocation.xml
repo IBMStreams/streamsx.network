@@ -169,6 +169,23 @@ The format of 'geohash' codes for latitude and longitude coordinates is describe
         <type>boolean</type>
         <cardinality>-1</cardinality>
       </parameter>
+      <parameter>
+        <name>initOnTuple</name>
+        <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not the operator should load the files specified with the `geographyDirectory` parameter on the first tuple.
+
+The default value is 'false' and the operator loads the files on operator startup.
+In some cases loading the files during operator startup might cause timeouts and setting this parameter value to 'true' resolves this.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
     </parameters>
     <inputPorts>
       <inputPortSet>
@@ -183,6 +200,26 @@ The format of 'geohash' codes for latitude and longitude coordinates is describe
         <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
         <cardinality>1</cardinality>
         <optional>false</optional>
+      </inputPortSet>
+      <inputPortSet>
+        <description>Control port that ingests a file path pointing to a MaxMind GeoIP2 (or GeoLite2) database CSV files. The operator determines whether the incoming file path refers 
+to a &quot;locations&quot; file, &quot;IPv4 blocks&quot; file or &quot;IPv6 blocks&quot; file based on the name of the file. The expected file names are:
+
+  * For the &quot;locations&quot; file: `GeoIP2-City-Locations-en.csv` or `GeoLite2-City-Locations-en.csv`
+  * For IPv4 &quot;blocks&quot; file: `GeoIP2-City-Blocks-IPv4.csv` or `GeoLite2-City-Blocks-IPv4.csv`
+  * For IPv6 &quot;blocks&quot; file: `GeoIP2-City-Blocks-IPv6.csv` or `GeoLite2-City-Blocks-IPv6.csv`
+
+This control port can be used to dynamically update the operator's internal database. Each time a tuple is received containing a path to one of 
+the files listed above, the operator will update it's internal table with the data in the file.
+
+This input port expects a tuple containing a single attribute of type `rstring`.</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>true</controlPort>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
       </inputPortSet>
     </inputPorts>
     <outputPorts>
