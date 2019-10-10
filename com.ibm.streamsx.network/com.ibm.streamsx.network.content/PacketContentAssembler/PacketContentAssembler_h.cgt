@@ -29,21 +29,36 @@
 
 
 <%
-my $pamHeader = $model->getParameterByName("pamInclude") ? $model->getParameterByName("pamInclude")->getValueAt(0)->getSPLExpression() : "'pam.h'" ;
-# remove quotes
-$pamHeader = substr($pamHeader, 1, length($pamHeader)-2);
+my $pamInclude = $model->getParameterByName("pamInclude") ? $model->getParameterByName("pamInclude")->getValueAt(0)->getSPLExpression() : "'pam.h'";
+if ($pamInclude) {
+  # remove quotes
+  $pamInclude = substr($pamInclude, 1, length($pamInclude)-2);
+  SPL::CodeGen::printlnVerbose("pamInclude=".$pamInclude);
 
-# we try to find the pam.h in pamDir relativ to applicationDirectory
-my $applicationDirectory = $model->getContext()->getApplicationDirectory();
-my $pamHeader = $applicationDirectory."/".$pamHeader;
-if (-f $pamHeader) {%>
+  # we try to find the pam.h relativ to applicationDirectory
+  my $applicationDirectory = $model->getContext()->getApplicationDirectory();
+  SPL::CodeGen::printlnVerbose("applicationDirectory=".$applicationDirectory);
+
+  search_dir ($applicationDirectory);
+  sub search_dir {
+    my $path = shift;
+    my @dir_entries = glob("$path/*");
+    foreach my $entry (@dir_entries) {
+      SPL::CodeGen::printlnVerbose("$entry") if -f $entry;
+      SPL::CodeGen::printlnVerbose("$entry") and search_dir($entry) if -d $entry
+    }
+  }
+  my $pamHeader = $applicationDirectory."/".$pamInclude;
+  SPL::CodeGen::printlnVerbose("pamHeader=".$pamHeader);
+  if (-f $pamHeader) {%>
 #include "<%=$pamHeader%>"
-<%
+<%} else {
+    SPL::CodeGen::warnln("File not found:".$pamHeader);%>
+#include "pam.h"
+<%}
 } else {%>
 #include "pam.h"
-<%
-}
-%>
+<%}%>
 
 
 
