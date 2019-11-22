@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.2.2</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.content.html">com.ibm.streamsx.network.content</a> &gt; PacketContentAssembler</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.3.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.content.html">com.ibm.streamsx.network.content</a> &gt; PacketContentAssembler</p>
 
 </div>
 
@@ -109,6 +109,9 @@ export STREAMS_ADAPTERS_ISS_PAM_DIRECTORY=/home/username/com.ibm.iss.pam
 
 </div>
 
+<p class="p">Alternative you can apply the 'Packet Analysis Module (PAM)' library to the application bundle and  specify the location with the parameters <tt class="ph tt">pamLibrary</tt> and <tt class="ph tt">pamInclude</tt> (since release v3.3.0).
+</p>
+
 </div>
 
 <div class="section"><h2 class="title sectiontitle">Threads
@@ -182,14 +185,14 @@ specified does not match the number of output ports specified.
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 7 parameters.
+  <dd class="dd">This operator supports 8 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__packetAttribute">packetAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__timestampAttribute">timestampAttribute</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__fileChunkSize">fileChunkSize</a>, <a class="xref" href="#spldoc_operator__parameter__maximumFilesPerFlow">maximumFilesPerFlow</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pamLibrary">pamLibrary</a>, <a class="xref" href="#spldoc_operator__parameter__pamTuning">pamTuning</a>
+<a class="xref" href="#spldoc_operator__parameter__fileChunkSize">fileChunkSize</a>, <a class="xref" href="#spldoc_operator__parameter__maximumFilesPerFlow">maximumFilesPerFlow</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pamInclude">pamInclude</a>, <a class="xref" href="#spldoc_operator__parameter__pamLibrary">pamLibrary</a>, <a class="xref" href="#spldoc_operator__parameter__pamTuning">pamTuning</a>
 
 </p>
 </dd>
@@ -339,7 +342,7 @@ specified does not match the number of output ports specified.
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__fileChunkSize">fileChunkSize</a>, <a class="xref" href="#spldoc_operator__parameter__maximumFilesPerFlow">maximumFilesPerFlow</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pamLibrary">pamLibrary</a>, <a class="xref" href="#spldoc_operator__parameter__pamTuning">pamTuning</a>
+<a class="xref" href="#spldoc_operator__parameter__fileChunkSize">fileChunkSize</a>, <a class="xref" href="#spldoc_operator__parameter__maximumFilesPerFlow">maximumFilesPerFlow</a>, <a class="xref" href="#spldoc_operator__parameter__outputFilters">outputFilters</a>, <a class="xref" href="#spldoc_operator__parameter__pamInclude">pamInclude</a>, <a class="xref" href="#spldoc_operator__parameter__pamLibrary">pamLibrary</a>, <a class="xref" href="#spldoc_operator__parameter__pamTuning">pamTuning</a>
 
 </p>
 <dl class="dl">
@@ -487,10 +490,13 @@ specified does not match the number of output ports specified.
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__pamLibrary"><!-- --></a><tt class="ph tt">pamLibrary</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__pamInclude"><!-- --></a><tt class="ph tt">pamInclude</tt></dt>
 
      <dd class="dd">
-<p class="p">          This optional parameter is a pathname for the PAM library, a           Linux shared object library which implements the packet assembly engine.           If the pathname value specified is not absolute, then it is           relative to the directory specified by the STREAMS_ADAPTERS_ISS_PAM_DIRECTORY           environment variable at compile time.           The default value is 'iss-pam1.so'.
+<p class="p">          This optional parameter is a pathname for the PAM header file.           The pathname value specified is relative to the application directory at compile time.           The default value is 'pam.h'.           This parameter is required only if you have not set the            STREAMS_ADAPTERS_ISS_PAM_DIRECTORY environment variable at compile time.
+</p>
+
+<p class="p">          Example value for PAM directory: <tt class="ph tt">"etc/pam.h"</tt>
 </p>
 
   <dl class="dl">
@@ -507,7 +513,45 @@ specified does not match the number of output ports specified.
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Constant
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Expression
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__pamLibrary"><!-- --></a><tt class="ph tt">pamLibrary</tt></dt>
+
+     <dd class="dd">
+<p class="p">          This optional parameter is a pathname for the PAM library, a           Linux shared object library which implements the packet assembly engine.           The default value is 'iss-pam1.so'.           This parameter is required only if you have not set the            STREAMS_ADAPTERS_ISS_PAM_DIRECTORY environment variable.
+</p>
+
+<p class="p">          Example value for PAM directory: <tt class="ph tt">getThisToolkitDir()+"/etc/iss-pam1.so"</tt>
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
      </li>
 
    </ul>
