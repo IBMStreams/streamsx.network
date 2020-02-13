@@ -9,6 +9,10 @@ Operators and functions for ingesting and parsing raw network data at the packet
 
 This is an overview of changes for major and minor version upgrades.
 
+++ What is changed in version 3.3.1
+
+* Globalization support: Translated messages updated
+
 ++ What is changed in version 3.3.0
 
 * PacketContentAssembler operator does not depend anymore on environment variable STREAMS_ADAPTERS_ISS_PAM_DIRECTORY at build and run time.
@@ -32,7 +36,7 @@ This is an overview of changes for major and minor version upgrades.
 * IPFilter operator: Changed traces with WARN trace level to TRACE level.
     
     </info:description>
-    <info:version>3.3.0</info:version>
+    <info:version>3.3.1</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

@@ -128,7 +128,7 @@
         	 <EXPLANATION>An invalid annotation was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>以下运算符不能是一致区域的开头：{0}。</target>
+         <target>以下操作程序不能是一致区域的开头：{0}。</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0258E"
 		extraData="NETWORK_INVALID_OUTPUT_ATTRIBUTE_TYPE" resname="CDIST0258E">
@@ -151,7 +151,7 @@
         	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
        		 <USER_RESPONSE>Change the attribute type in the input stream.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>“{0}”参数必须引用 {1} 类型的属性。找到 {2}</target>
+         <target>“{0}”参数必须引用 {1} 类型的属性。 找到 {2}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0260E"
 		extraData="NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED" resname="CDIST0260E">

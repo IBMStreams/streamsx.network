@@ -151,7 +151,7 @@
         	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
        		 <USER_RESPONSE>Change the attribute type in the input stream.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>''{0}'' 參數必須參照下列類型的屬性：{1}。找到 {2}</target>
+         <target>''{0}'' 參數必須參照下列類型的屬性：{1}。 找到 {2}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0260E"
 		extraData="NETWORK_PARAMETER_NOT_ALLOWED_WHEN_INPUT_PORT_1_IS_DEFINED" resname="CDIST0260E">
