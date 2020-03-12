@@ -26,7 +26,9 @@ my $pcapFilename = $model->getParameterByName("pcapFilename") ? $model->getParam
 my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : undef;
 my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterByName("initDelay")->getValueAt(0)->getCppExpression() : 0;
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
+my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+my $rateLimit = $model->getParameterByName("rateLimit") ? $model->getParameterByName("rateLimit")->getValueAt(0)->getCppExpression() : 1000.0;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -78,7 +80,14 @@ MY_OPERATOR::MY_OPERATOR()
   inputFilter = <%= $inputFilter ? $inputFilter : '""' %>;
   initDelay = <%=$initDelay%>;
   processorAffinity = <%=$processorAffinity%>;
+  jMirrorCheck = <%=$jMirrorCheck%>;
   metricsInterval = <%=$metricsInterval%>;
+
+  // Set up rate limiter parameters.  This approach scales to 1M pps, or 1 per usec and then
+  // goes unlimited. 
+  rateLimit = <%=$rateLimit%>;
+  rateLimitLastTime = 0;
+  rateLimitPeriodUsec = (uint64_t)((1.0 / rateLimit) * 1000000.0);
 
   // initialize operator state variables
   startTimeInNanoseconds = SPL::Functions::Time::getCPUCounterInNanoSeconds();
@@ -96,7 +105,7 @@ MY_OPERATOR::MY_OPERATOR()
 
 #if defined(lib_pcap_pcap_h)
   // log the 'libpcap' version that will be used
-  SPLAPPTRC(L_INFO, "using " << pcap_lib_version(), "PacketFileSource");
+  SPLAPPTRC(L_INFO, "PacketFileSource using " << pcap_lib_version(), "PacketFileSource");
 #endif
 
   SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "PacketFileSource");
@@ -298,7 +307,7 @@ void MY_OPERATOR::processPCAPfile(const std::string filename)
     }
 
     // parse the network headers in the packet
-    headers.parseNetworkHeaders(packetBuffer, packetBufferLength);
+    headers.parseNetworkHeaders(packetBuffer, packetBufferLength, jMirrorCheck);
     if ( ! ( headers.ipv4Header || headers.ipv6Header ) ) { SPLAPPTRC(L_DEBUG, "ignoring packet, no IPv4 or IPv6 header found", "PacketFileSource");  continue; }
 
     // point at the input tuple with the name used by the code generator, if there is one

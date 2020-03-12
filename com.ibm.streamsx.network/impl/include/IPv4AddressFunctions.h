@@ -38,7 +38,7 @@ struct network_cidr {
 };
 
 #define GET_DEC_NET_RANGE(cidr, range) { \
-    range.network_start = cidr.ip; \
+    range.network_start = ((cidr.ip >> (32-cidr.prefix)) << (32-cidr.prefix)); \
     range.network_end = range.network_start + (uint32_t)(1 << (32-cidr.prefix)); \
 }
 
@@ -477,6 +477,39 @@ namespace com { namespace ibm { namespace streamsx { namespace network { namespa
             }
 
             return addresses;
+      }
+
+      static SPL::list<SPL::uint32> getAllAddressesInNetworkInt(SPL::rstring const & networkCIDR)
+      {
+            SPL::list<SPL::uint32> addresses;
+
+            network_cidr resultCIDR;
+            if(parseNetworkCIDR_(networkCIDR, resultCIDR) == false) return addresses; //empty list
+
+            dec_network_range range;
+            GET_DEC_NET_RANGE(resultCIDR, range);
+
+            for(uint32_t i = range.network_start; i < range.network_end; ++i)
+            {
+                addresses.push_back((SPL::uint32)i);
+            }
+
+            return addresses;
+      }
+
+      static SPL::uint32 getAddressRangeInNetworkInt(SPL::rstring const & networkCIDR, SPL::uint32 &addressStart, SPL::uint32 &addressEnd)
+      {
+            network_cidr resultCIDR;
+            addressStart = 0; addressEnd = 0;
+            if(parseNetworkCIDR_(networkCIDR, resultCIDR) == false) return 0;
+
+            dec_network_range range;
+            GET_DEC_NET_RANGE(resultCIDR, range);
+
+            addressStart = range.network_start;
+            addressEnd = range.network_end;
+
+            return (range.network_end - range.network_start);
       }
 
       static SPL::boolean isGlobal(SPL::rstring const & ip)

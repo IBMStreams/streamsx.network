@@ -215,7 +215,7 @@
         	 <EXPLANATION>The IP address could not be converted.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>開始 {0} を 10 進数に変換できません: {1}</target>
+         <target>{0} を 10 進数に変換できません: {1}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0266E"
 		extraData="NETWORK_ERROR_PARSING_RECORD" resname="CDIST0266E">

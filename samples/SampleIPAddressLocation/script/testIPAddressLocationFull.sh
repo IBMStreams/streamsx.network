@@ -39,13 +39,16 @@ compilerOptionsList=(
 --spl-path=$( IFS=: ; echo "${toolkitList[*]}" )
 --standalone-application
 --optimized-code-generation
---cxx-flags=-g3
---static-link
+#--c++std=c++11--static-link
 --main-composite=$namespace::$composite
 --output-directory=$buildDirectory 
 --data-directory=data
 --num-make-threads=$coreCount
 )
+
+gccOptions="-g3"
+
+ldOptions=""
 
 compileTimeParameterList=(
 )
@@ -72,12 +75,14 @@ cd $projectDirectory || die "Sorry, could not change to $projectDirectory, $?"
 step "configuration for standalone application '$namespace.$composite' ..."
 ( IFS=$'\n' ; echo -e "\nStreams toolkits:\n${toolkitList[*]}" )
 ( IFS=$'\n' ; echo -e "\nStreams compiler options:\n${compilerOptionsList[*]}" )
+echo -e "\nGNU compiler parameters:\n$gccOptions" 
+echo -e "\nGNU linker parameters:\n$ldOptions" 
 ( IFS=$'\n' ; echo -e "\n$composite compile-time parameters:\n${compileTimeParameterList[*]}" )
 ( IFS=$'\n' ; echo -e "\n$composite submission-time parameters:\n${submitParameterList[*]}" )
 echo -e "\ntrace level: $traceLevel"
 
 step "building standalone application '$namespace.$composite' ..."
-sc ${compilerOptionsList[*]} -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
+sc ${compilerOptionsList[*]} "--cxx-flags=$gccOptions" "--ld-flags=$ldOptions" -- ${compileTimeParameterList[*]} || die "Sorry, could not build '$composite', $?" 
 
 step "executing standalone application '$namespace.$composite' ..."
 executable=$buildDirectory/bin/$namespace.$composite

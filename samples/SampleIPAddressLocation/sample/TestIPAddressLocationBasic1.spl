@@ -56,11 +56,10 @@ composite TestIPAddressLocationBasic1 {
     }
     () as PacketSink = FileSink(PacketStream) { param file: "debug.TestIPAddressLocationBasic1.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
 
-
     stream<LocatedPacketType> LocatedPacketStream as Out = IPAddressLocation(PacketStream) {
       param
         geographyDirectory: $geographyDirectory;
-        outputFilters: locationCityName(ipSourceAddress)!="" && locationCityName(ipDestinationAddress)!="";
+        outputFilters: locationCityName(ipSourceAddress)!="" || locationCityName(ipDestinationAddress)!="";
       output Out:
         ipSourceAddress = convertIPV4AddressNumericToString(ipSourceAddress),
         ipSourceSubnet = locationSubnet(ipSourceAddress),

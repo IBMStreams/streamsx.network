@@ -1,0 +1,33 @@
+namespace com.ibm.streamsx.network.domains;
+
+use com.ibm.streamsx.network.domains::*;
+
+composite TestExtractDomain {
+
+    graph
+
+        stream<rstring fqdn, rstring domain> InputStream = FileSource() {
+        param
+            file: "testDomains.txt";
+            format: line;
+
+        output
+            InputStream: domain="";
+        }
+
+        stream<rstring fqdn, rstring domain> Extracted = SimpleExtractDomain(InputStream) {
+        param
+            tldsDir: "";
+            tldsFilenamePattern: "^ascii_tlds$";
+            domainNameAttr: fqdn;
+            outputAttr: domain;
+            blankOnInvalidTLD: false;
+        }
+
+        () as LogSink = Custom(Extracted) {
+            logic onTuple Extracted: {
+                printStringLn((rstring)"[" + fqdn + "] [" + domain + "]");
+            }
+        }
+
+}

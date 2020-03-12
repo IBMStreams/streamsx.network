@@ -32,11 +32,12 @@ class DNSMessageParserErrorDescriptions {
   const char* description[maximumErrorCode];
 
   DNSMessageParserErrorDescriptions() {
-    for (int i = 0; i<sizeof(maximumErrorCode); i++) description[i] = "";
+    for (int i = 0; i<sizeof(maximumErrorCode); i++) description[i] = "?";
+    description[0]   = "OK";
     description[102] = "label overruns packet";
     description[103] = "label compression length overruns packet";
     description[104] = "label compression offset underruns packet";
-    description[105] = "label compression offset overruns packet";
+    description[105] = "label compression forward reference";
     description[106] = "label compression offset loop";
     description[107] = "label flags invalid";
     description[108] = "label limit exceeded";
@@ -45,11 +46,16 @@ class DNSMessageParserErrorDescriptions {
     description[111] = "question resource record truncated";
     description[112] = "resource record truncated";
     description[113] = "resource record data truncated";
-    description[114] = "invalid address family";
-    description[115] = "unexpected resource type";
+    description[114] = "invalid address family in resource record";
+    description[115] = "";
     description[116] = "message too short";
-    description[117] = "counts too large";
-    description[118] = "text string overruns resource record";
+    description[117] = "resource record counts too large";
+    description[118] = "data overruns resource record";
+    description[119] = "missing data in resource record";
+    description[120] = "extra data in resource record";
+    description[121] = "label compression offset invalid";
+    description[122] = "extra data following resource records";
+    description[123] = "resource record data too long";
   }
 };
 
@@ -135,17 +141,117 @@ class DNSMessageParser {
 
  private:
 
-  // This function skips over an encoded DNS name in the variable-size DNS
-  // resource record located at 'dnsPointer'. If no problems are found, it
-  // returns 'true' and 'dnsPointer' is advanced to the next field in the same
-  // resource record. If an encoding problem is found, the function returns
-  // 'false' and 'dnsPointer' is advanced to the encoding error within the DNS
-  // name, and 'error' is set to a description of the problem.
 
-  bool skipDNSEncodedName() {
+  // This function parses a sequence of 'resourceCount' variable-size DNS
+  // resource record located at 'dnsPointer' and copies them into the array of
+  // fixed-size records located at 'records'. For 'question' records that do not
+  // have 'tt' or 'rdata' fields, 'fullResources' should be set to 'false'; for
+  // all other records, 'fulRecords' should be set to 'true'. If no parsing
+  // problems are found, it returns 'resourceCount', and 'dnsPointer' has been
+  // advanced to the next DNS resource record, and 'records' contains complete
+  // copies. If parsing problems are found, the function returns the number of
+  // DNS resource records successfully copied, and 'error' is set to a
+  // description of the problem, and 'dnsPointer' has been advanced only to the
+  // DNS resource record in error, and 'records' is not complete.
+
+  int parseResourceRecords(struct Record records[], const uint16_t resourceCount, const bool fullResources) {
+
+    for (int i=0; i<resourceCount; i++) { if (!parseResourceRecord(records[i], fullResources)) return i; }
+    return resourceCount;
+  }
+
+
+  // This function parses one variable-size DNS resource record located at
+  // 'dnsPointer' and copies its fields into the fixed-size temporary resource
+  // record located at 'record'. If no parsing problems are found, it returns
+  // 'true', and 'dnsPointer' has been advanced to the next record, and 'record'
+  // contains a complete copy. If parsing problems are found, the function
+  // returns 'false', and 'error' is set to a description of the problem, and
+  // 'dnsPointer' has been advanced only to the field in error, and 'record' is
+  // not complete.
+
+  bool parseResourceRecord(struct Record& record, const bool fullResource) {
 
     // don't proceed if we've already found an encoding error in this DNS message
     if (error) return false;
+
+    // don't proceed if we've reached the end of the DNS message
+    if ( dnsPointer >= dnsEnd ) { error = 110; return false; } // ... "resource record missing"
+
+    // copy the address of this resource's name into the fixed-size structure, and
+    // then step over it
+    record.name = dnsPointer;
+    if ( !parseEncodedName() ) return false;
+
+    // check for truncated resource record
+    if ( !fullResource && dnsPointer+4>dnsEnd ) { error = 111; return false; } // ... "question resource record truncated"
+    if ( fullResource && dnsPointer+sizeof(DNSResourceRecord) > dnsEnd) { error = 112; return false; } // ... "resource record truncated"
+
+    // copy the type and class of this resource into the fixed-size structure
+    struct DNSResourceRecord* rr = (struct DNSResourceRecord*)dnsPointer;
+    record.type = ntohs(rr->type);
+    record.classs = ntohs(rr->classs);
+
+    // if this is a question resource, that's all there is
+    if ( !fullResource ) { dnsPointer += 4; return true; }
+
+    // copy resource record's 'time-to-live' field to fixed-size structure
+    record.ttl = ntohl(rr->ttl);
+
+    // check for unreasonably long resource record data 
+    record.rdlength = ntohs(rr->rdlength);
+    if ( record.rdlength > MAXIMUM_RR_DATA_LENGTH ) { error = 123; return false; } // ... "resource record data too long"
+
+    // check for truncated resource record
+    record.rdata = rr->rdata;
+    if ( record.rdata+record.rdlength > dnsEnd ) { error = 113; return false; } // ... "resource record data truncated"
+
+    // step over the fixed-length portion of this resource record to its 'data' field
+    dnsPointer += sizeof(struct DNSResourceRecord);
+
+    // if the variable-length portion of the resource record contains some data,
+    // check it for parsing errors, and then step over it to the next resource record
+    if (record.rdlength) {
+      switch(record.type) {
+          /* A     */      case   1: error = parseResourceRecordDataA    (record.rdlength); break;
+          /* NS    */      case   2: error = parseResourceRecordDataNS   (record.rdlength); break;
+          /* CNAME */      case   5: error = parseResourceRecordDataCNAME(record.rdlength); break;
+          /* SOA   */      case   6: error = parseResourceRecordDataSOA  (record.rdlength); break;
+          /* PTR   */      case  12: error = parseResourceRecordDataPTR  (record.rdlength); break;
+          /* MX    */      case  15: error = parseResourceRecordDataMX   (record.rdlength); break;
+          /* TXT   */      case  16: error = parseResourceRecordDataTXT  (record.rdlength); break;
+          /* AFSDB */      case  18: error = parseResourceRecordDataAFSDB(record.rdlength); break;
+          /* AAAA  */      case  28: error = parseResourceRecordDataAAAA (record.rdlength); break;
+          /* SRV   */      case  33: error = parseResourceRecordDataSRV  (record.rdlength); break;
+          /* NAPTR */      case  35: error = parseResourceRecordDataNAPTR(record.rdlength); break;
+          /* DNAME */      case  39: error = parseResourceRecordDataCNAME(record.rdlength); break;
+          /* EDNS0 */      case  41: error = parseResourceRecordDataOPT  (record.rdlength); break;
+          /* RRSIG */      case  46: error = parseResourceRecordDataRRSIG(record.rdlength); break;
+          /* NSEC  */      case  47: error = parseResourceRecordDataNSEC (record.rdlength); break;
+          /* SPF   */      case  99: error = parseResourceRecordDataTXT  (record.rdlength); break;
+                           default:  dnsPointer += record.rdlength; break;
+      }
+      if (error) return false;
+    }
+
+    // check for missing or extranous data at the end of this resource record
+    if ( dnsPointer > record.rdata+record.rdlength ) { error = 119; return false; } // ... "missing data in resource record"
+    if ( dnsPointer < record.rdata+record.rdlength ) { error = 120; return false; } // ... "extraneous data in resource record"
+    return true;
+  }
+
+
+  // This function checks the encoding of the DNS name at 'dnsPointer'. If no
+  // problems are found, it returns 'true' and 'dnsPointer' is advanced to the
+  // next field in the resource record. If an encoding problem is found, the
+  // function returns 'false' and 'dnsPointer' is advanced to the encoding error
+  // within the name, and 'error' is set to a description of the problem.
+
+  bool parseEncodedName() {
+
+    // don't proceed if we've already found an encoding error in this DNS message
+    if (error) return false;
+    //???printf("parseEncodedName() entered at offset 0x%lx...\n", 0x2a+dnsPointer-dnsStart);
 
     // step through the labels in this DNS name, skipping over each one
     for (int32_t i = 0; i<253; i++) {
@@ -161,26 +267,32 @@ class DNSMessageParser {
         // for uncompressed labels, step over the label length byte and text, and then
         // continue with the next label
       case 0x00:
-        if (dnsPointer+1+length>dnsEnd) { error = 102; return false; } // ... "label overruns packet"
-        if (length==0) { dnsPointer++; return true; }
-        dnsPointer += 1+length;
+        if ( dnsPointer+length+1 > dnsEnd ) { error = 102; return false; } // ... "label overruns packet"
+        //???printf("    at offset 0x%lx, label of length %d\n", 0x2A+dnsPointer-dnsStart, length);
+        dnsLabelOffsets[dnsPointer-dnsStart] = 1;
+        dnsPointer += length + 1;
+        if ( length==0 ) { return true; }
         break;
 
-        // for compressed labels, step over the offset and return, since compressed
-        // labels are always the last in DNS name
+        // for compressed labels, step over the offset field and continue by re-checking
+        // the rest of this name's labels in some previous DNS name
       case 0xC0:
-        if (dnsPointer+2>dnsEnd) { error = 103; return false; } // ... "label compression length overruns packet"
-        offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FF;
-        if (offset<sizeof(DNSHeader)) { error = 104; return false; } // ... "label compression offset underruns packet"
-        if (offset==dnsPointer-dnsStart) { error = 106; return false; } // ... "label compression offset loop"
-        if (dnsStart+offset>dnsEnd) { error = 105; return false; } // ... "label compression offset overruns packet"
+        if ( dnsPointer+2 > dnsEnd ) { error = 103; return false; } // ... "label compression length overruns packet"
+        offset = ntohs(*((uint16_t*)dnsPointer)) & 0x03FFF;
+        if ( offset < sizeof(DNSHeader) ) { error = 104; return false; } // ... "label compression offset underruns packet"
+        if ( offset > dnsPointer-dnsStart ) { error = 105; return false; } // ... "label compression forward reference"
+        if ( offset == dnsPointer-dnsStart ) { error = 106; return false; } // ... "label compression offset loop"
+        //???printf("    at offset 0x%lx, pointer to label at offset 0x%x%s\n", 0x2a+dnsPointer-dnsStart, 0x2A+offset, dnsLabelOffsets[offset] ? "" : " ********* invalid offset ***********");
+        if ( !dnsLabelOffsets[offset] ) { error = 121; return false; } // ... "label compression offset invalid"
+        dnsLabelOffsets[dnsPointer-dnsStart] = 1;
         dnsPointer += 2;
         return true;
         break;
 
         // no DNS label should have other high-order bit settings in its length byte
       default:
-        error = 107; return false; // ... "label flags invalid"
+        error = 107; 
+        return false; // ... "label flags invalid"
       }
     }
 
@@ -189,70 +301,305 @@ class DNSMessageParser {
     return false;
   }
 
-  // This function parses one variable-size DNS resource record located at
-  // 'dnsPointer' and copies its fields into the fixed-size temporary resource
-  // record located at 'record'. If no parsing problems are found, it returns
-  // 'true', and 'dnsPointer' has been advanced to the next record, and 'record'
-  // contains a complete copy. If parsing problems are found, the function
-  // returns 'false', and 'error' is set to a description of the problem, and
-  // 'dnsPointer' has been advanced only to the field in error, and 'record' is
-  // not complete.
 
-  bool copyResourceRecord(struct Record& record, const bool fullResource) {
+  // This function checks a domain name in the 'data' field of an NS resource record
+  // for encoding errors. It assumes that 'dnsPointer' has already been set to
+  // the beginning of the 'data' field. If no problems are found, it advances
+  // 'dnsPointer' to the end of the 'data' field and returns zero. If a problem
+  // is found, 'dnsPointer' is left at the problem and the 'error' code is
+  // returned.
 
-    // don't proceed if we've already found an encoding error in this DNS message
-    if (error) return false;
+  int parseResourceRecordDataNS(uint16_t rdlength) { 
 
-    // don't proceed if we've reached the end of the DNS message
-    if (dnsPointer>=dnsEnd) { error = 110; return false; } // ... "resource record missing"
-
-    // copy the address of this resource's name into the fixed-size structure, and
-    // then step over it
-    record.name = dnsPointer;
-    if (!skipDNSEncodedName()) return false;
-
-    // check for truncated resource record
-    if (!fullResource && dnsPointer+4>dnsEnd) { error = 111; return false; } // ... "question resource record truncated"
-    if (fullResource && dnsPointer+sizeof(DNSResourceRecord)>dnsEnd) { error = 112; return false; } // ... "resource record truncated"
-
-    // copy the type and class of this resource into the fixed-size structure
-    struct DNSResourceRecord* rr = (struct DNSResourceRecord*)dnsPointer;
-    record.type = ntohs(rr->type);
-    record.classs = ntohs(rr->classs);
-
-    // if this is a question resource, that's all there is
-    if (!fullResource) { dnsPointer += 4; return true; }
-
-    // copy remaining resource fields to fixed-size structure
-    record.ttl = ntohl(rr->ttl);
-    record.rdlength = ntohs(rr->rdlength);
-    record.rdata = rr->rdata;
-
-    // check for truncated resource record
-    if (record.rdata+record.rdlength>dnsEnd) { error = 113; return false; } // ... "resource record data truncated"
-
-    // step over the remainder of this resource record
-    dnsPointer += sizeof(struct DNSResourceRecord) + record.rdlength;
-    return true;
+    // step over domain name field
+    if ( !parseEncodedName() ) return error;
+    return 0;
   }
 
-  // This function parses a sequence of 'resourceCount' variable-size DNS
-  // resource record located at 'dnsPointer' and copies them into the array of
-  // fixed-size records located at 'records'. For 'question' records that do not
-  // have 'tt' or 'rdata' fields, 'fullResources' should be set to 'false'; for
-  // all other records, 'fulRecords' should be set to 'true'. If no parsing
-  // problems are found, it returns 'resourceCount', and 'dnsPointer' has been
-  // advanced to the next DNS resource record, and 'records' contains complete
-  // copies. If parsing problems are found, the function returns the number of
-  // DNS resource records successfully copied, and 'error' is set to a
-  // description of the problem, and 'dnsPointer' has been advanced only to the
-  // DNS resource record in error, and 'records' is not complete.
 
-  int copyResourceRecords(struct Record records[], const uint16_t resourceCount, const bool fullResources) {
+  // This function checks a domain name in the 'data' field of a CNAME resource record
+  // for encoding errors. It assumes that 'dnsPointer' has already been set to
+  // the beginning of the 'data' field. If no problems are found, it advances
+  // 'dnsPointer' to the end of the 'data' field and returns zero. If a problem
+  // is found, 'dnsPointer' is left at the problem and the 'error' code is
+  // returned.
 
-    for (int i=0; i<resourceCount; i++) { if (!copyResourceRecord(records[i], fullResources)) return i; }
-    return resourceCount;
+  int parseResourceRecordDataCNAME(uint16_t rdlength) { 
+
+    // step over domain name field
+    if ( !parseEncodedName() ) return error;
+    return 0;
   }
+
+
+  // This function checks that the 'data' field of an A resource record is the
+  // right size for an IPv4 address. It assumes that 'dnsPointer' has already
+  // been set to the beginning of the 'data' field. If no problems are found, it
+  // advances 'dnsPointer' to the end of the 'data' field and returns zero. If a
+  // problem is found, 'dnsPointer' is left at the problem and the 'error' code
+  // is returned.
+
+  int parseResourceRecordDataA(uint16_t rdlength) { 
+
+    // step over a presumed IPv4 address and return for caller's length checks
+    dnsPointer += 4;
+    return 0;
+  }
+
+
+  // This function checks that the 'data' field of an A resource record is the
+  // right size for an IPv6 address. It assumes that 'dnsPointer' has already
+  // been set to the beginning of the 'data' field. If no problems are found, it
+  // advances 'dnsPointer' to the end of the 'data' field and returns zero. If a
+  // problem is found, 'dnsPointer' is left at the problem and the 'error' code
+  // is returned.
+
+  int parseResourceRecordDataAAAA(uint16_t rdlength) { 
+
+    // step over a presumed IPv6 address and return for caller's length checks
+    dnsPointer += 16;
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of an SOA resource record for two
+  // domain names followed by five 32-bit integers. It assumes that 'dnsPointer'
+  // has already been set to the beginning of the 'data' field. If no problems
+  // are found, it advances 'dnsPointer' to the end of the 'data' field and
+  // returns zero. If a problem is found, 'dnsPointer' is left at the problem
+  // and the 'error' code is returned.
+
+  int parseResourceRecordDataSOA(uint16_t rdlength) { 
+
+    // check that record has space for five integer fields and at least two bytes for two name fields
+    if (rdlength<5*4+1+1) return 119; // ... "missing data in resource record"
+
+    // remember where this resource record ends
+    uint8_t* rrEnd = dnsPointer + rdlength;
+
+    // step over two presumed domain names
+    if ( !parseEncodedName() ) return error;
+    if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
+    if ( !parseEncodedName() ) return error;
+    if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
+
+    // step over presumed five integers and return for caller's length checks
+    dnsPointer += 5*4;
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of a PTR resource record for a domain name.
+  // It assumes that 'dnsPointer' has already been set to
+  // the beginning of the 'data' field. If no problems are found, it advances
+  // 'dnsPointer' to the end of the 'data' field and returns zero. If a problem
+  // is found, 'dnsPointer' is left at the problem and the 'error' code is
+  // returned.
+
+  int parseResourceRecordDataPTR(uint16_t rdlength) { 
+
+    // step over presumed domain name 
+    if ( !parseEncodedName() ) return error;
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of an MX resource record for a 16-bit
+  // integer followed by a domain name. It assumes that 'dnsPointer' has already
+  // been set to the beginning of the 'data' field. If no problems are found, it
+  // advances 'dnsPointer' to the end of the 'data' field and returns zero. If a
+  // problem is found, 'dnsPointer' is left at the problem and the 'error' code
+  // is returned.
+
+  int parseResourceRecordDataMX(uint16_t rdlength) { 
+
+    // check that record has space for one integer field and at least one byte for a name field
+    if (rdlength<1*2+1) return 119; // ... "missing data in resource record"
+
+    // step over presumed integer and domain name
+    dnsPointer += 2;
+    if ( !parseEncodedName() ) return error;
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of a TXT resource record for zero or
+  // more variable-length strings. It assumes that 'dnsPointer' has already been
+  // set to the beginning of the 'data' field. If no problems are found, it
+  // advances 'dnsPointer' to the end of the 'data' field and returns zero. If a
+  // problem is found, 'dnsPointer' is left at the problem and the 'error' code
+  // is returned.
+
+  int parseResourceRecordDataTXT(uint16_t rdlength) { 
+
+    // check lengths of text field[s] in this resource record
+    while (rdlength>0) {
+
+      // make sure this text field does not extend beyond the end of this resource record
+      uint16_t txtlength = dnsPointer[0];
+      if (txtlength+1>rdlength) return 118; // ... "data overruns resource record"
+
+      // step over this field to the next field, if there is one
+      dnsPointer += txtlength + 1;
+      rdlength -= txtlength + 1; 
+    }
+
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of an AFSDB resource record for a
+  // 16-bit integer followed by a domain name. It assumes that 'dnsPointer' has
+  // already been set to the beginning of the 'data' field. If no problems are
+  // found, it advances 'dnsPointer' to the end of the 'data' field and returns
+  // zero. If a problem is found, 'dnsPointer' is left at the problem and the
+  // 'error' code is returned.
+
+  int parseResourceRecordDataAFSDB(uint16_t rdlength) { 
+
+    // check that record has space for one integer field and at least one byte for a name field
+    if (rdlength<1*2+1) return 119; // ... "missing data in resource record"
+
+    // step over presumed integer and domain name
+    dnsPointer += 2;
+    if ( !parseEncodedName() ) return error;
+
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of an SRV resource record for three
+  // 16-bit integers followed by a domain name. It assumes that 'dnsPointer' has
+  // already been set to the beginning of the 'data' field. If no problems are
+  // found, it advances 'dnsPointer' to the end of the 'data' field and returns
+  // zero. If a problem is found, 'dnsPointer' is left at the problem and the
+  // 'error' code is returned.
+
+  int parseResourceRecordDataSRV(uint16_t rdlength) { 
+
+    // check that record has space for three integer fields and at least one byte of name field
+    if (rdlength<3*2+1) return 119; // ... "missing data in resource record"
+
+    // step over presumed integers and domain name 
+    dnsPointer += 6;
+    if ( !parseEncodedName() ) return error;
+    return 0;
+  }
+
+
+
+  // This function checks the 'data' field of an NAPTR resource record for two
+  // 16-bit integers followed by three character strings and a domain name. It
+  // assumes that 'dnsPointer' has already been set to the beginning of the
+  // 'data' field. If no problems are found, it advances 'dnsPointer' to the end
+  // of the 'data' field and returns zero. If a problem is found, 'dnsPointer'
+  // is left at the problem and the 'error' code is returned.
+
+  int parseResourceRecordDataNAPTR(uint16_t rdlength) { 
+
+    // check that record has space for two integer fields, three strings, and a domain name
+    if (rdlength<2*2+1+1+1+1) return 119; // ... "missing data in resource record"
+
+    // remember where this resource record ends
+    uint8_t* rrEnd = dnsPointer + rdlength;
+
+    // step over two presumed integers 
+    dnsPointer += 2*2;
+
+    // step over three presumed character strings
+    for (int i=0; i<3; i++) {      
+      uint16_t txtlength = dnsPointer[0];
+      if ( dnsPointer+txtlength+1 >= rrEnd ) return 118; // ... "data overruns resource record"
+      dnsPointer += txtlength + 1;
+    }
+
+    // step over a presumed domain name
+    if ( !parseEncodedName() ) return error;
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of an OPT resource record for zero or
+  // more variable-length option sub-fields. It assumes that 'dnsPointer' has
+  // already been set to the beginning of the 'data' field. If no problems are
+  // found, it advances 'dnsPointer' to the end of the 'data' field and returns
+  // zero. If a problem is found, 'dnsPointer' is left at the problem and the
+  // 'error' code is returned.
+
+  int parseResourceRecordDataOPT(uint16_t rdlength) { 
+
+    // check lengths of each option in this record
+    while (rdlength>0) {
+
+      // check that record has space for two integer fields in this option
+      if (rdlength<2*2) return 119; // ... "missing data in resource record"
+
+      // check that record has space for option data
+      uint16_t optlength = ntohs(*((uint16_t*)(dnsPointer+2)));
+      if (optlength+4>rdlength) return 118; // ... "data overruns resource record"
+
+      // step over this option to the next option, if there is one
+      dnsPointer += optlength + 4;
+      rdlength -= optlength + 4;
+    }
+
+    return 0;
+  }
+
+
+  // This function checks the 'data' field of an RRSIG resource record for seven
+  // integers totaling 18 bytes, followed by a domain name, followed by another
+  // variable-length field that fills the remainder of the 'data' field. It
+  // assumes that 'dnsPointer' has already been set to the beginning of the
+  // 'data' field. If no problems are found, it advances 'dnsPointer' to the end
+  // of the 'data' field and returns zero. If a problem is found, 'dnsPointer'
+  // is left at the problem and the 'error' code is returned.
+
+  int parseResourceRecordDataRRSIG(uint16_t rdlength) { 
+
+    // check that record has space for seven integer fields and at least one byte of name field
+    if (rdlength<2+1+1+4+4+4+2+1) return 119; // ... "missing data in resource record"
+
+    // remember where this resource record ends and then step over presumed integers
+    uint8_t* rrEnd = dnsPointer + rdlength;
+    dnsPointer += 2+1+1+4+4+4+2;
+
+    // step over the presumed domain name and make sure it fit the resource record
+    if ( !parseEncodedName() ) return error;
+    if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
+
+    // step over the presumed variable-length field following the domain name to the end of the record
+    dnsPointer = rrEnd;
+    return 0;
+  }
+
+
+
+  // This function checks the 'data' field of an NSEC resource record for a
+  // domain name followed by a variable-length bit mask that fills the remainder
+  // of the 'data' field. It assumes that 'dnsPointer' has already been set to
+  // the beginning of the 'data' field. If no problems are found, it advances
+  // 'dnsPointer' to the end of the 'data' field and returns zero. If a problem
+  // is found, 'dnsPointer' is left at the problem and the 'error' code is
+  // returned.
+
+  int parseResourceRecordDataNSEC(uint16_t rdlength) { 
+
+    // check that record has space for at least one byte each of name field and bit mask
+    if (rdlength<1+1) return 119; // ... "missing data in resource record"
+
+    // remember where this resource record ends
+    uint8_t* rrEnd = dnsPointer + rdlength;
+
+    // step over the presumed domain name and make sure it fit the resource record
+    if ( !parseEncodedName() ) return error;
+    if (dnsPointer>rrEnd) return 113; // ... "resource record data truncated"
+
+    // step over the presumed variable-length bit mask following the domain name to the end of the record
+    dnsPointer = rrEnd;
+    return 0;
+  }
+
 
 
  public:
@@ -268,6 +615,13 @@ class DNSMessageParser {
   uint8_t* dnsStart;
   uint8_t* dnsEnd;
   uint8_t* dnsPointer;
+  uint8_t* dnsExtra;
+
+  // The parseDNSMessage() function below keeps track of the offsets to domain
+  // name labels in this array so that it can validate 'compressed' labels
+  // quickly.
+
+  uint8_t dnsLabelOffsets[65535];
 
   // The parseDNSMessage() function below returns the counts of each type of
   // resource record specified in the DNS message's header in these
@@ -297,13 +651,20 @@ class DNSMessageParser {
   // in these variables. The number of records of each type is returned in the
   // variables above.
 
-  static const uint32_t MAXIMUM_RRFIELDS = 64;
-  struct Record questionRecords[MAXIMUM_RRFIELDS];
+  // Assuming 11 bytes for the smallest resource record, and 1500B packets
+  // we should only need ~ 135 RR fields; 150 should cover any case we hit.
+  // Questions typically will have just one record, so set that value lower.
+  static const uint32_t MAXIMUM_RRFIELDS   = 150;
+  static const uint32_t MAXIMUM_RRFIELDS_Q =  10;
+  struct Record questionRecords[MAXIMUM_RRFIELDS_Q];
   struct Record answerRecords[MAXIMUM_RRFIELDS];
   struct Record nameserverRecords[MAXIMUM_RRFIELDS];
   struct Record additionalRecords[MAXIMUM_RRFIELDS];
   struct Record canonicalRecords[MAXIMUM_RRFIELDS];
   struct Record addressRecords[MAXIMUM_RRFIELDS];
+
+  // The data field of a resource record should not be longer than this
+  static const uint32_t MAXIMUM_RR_DATA_LENGTH = 1500;
 
   // The parseDNSMessage() function below returns an error code in this
   // variable, if an encoding error is found, or 0, if no errors are
@@ -323,8 +684,7 @@ class DNSMessageParser {
   // as well as any non-zero delimX characters passed in.
 
   inline __attribute__((always_inline))
-  void decodeDNSEncodedName(uint8_t** p, char* nameBuffer, int* nameLength, bool escapeNonPrintable = false,
-	 const uint8_t delim1 = 0, const uint8_t delim2 = 0, const uint8_t delim3 = 0 ) { 
+  void decodeDNSEncodedName(uint8_t** p, char* nameBuffer, int* nameLength, bool escapeNonPrintable=false, const uint8_t delim1=0, const uint8_t delim2=0, const uint8_t delim3=0 ) { 
 
     // alternate resource record pointer for '*p' (used for compressed DNS labels)
     uint8_t* pp;
@@ -366,16 +726,16 @@ class DNSMessageParser {
 
       else if (flags==0xC0) { 
         if (*p+2>dnsEnd) { error = 103; break; } // ... "label compression length overruns packet"
-        const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FF;
+        const uint16_t offset = ntohs(*((uint16_t*)*p)) & 0x03FFF;
         if (offset<sizeof(DNSHeader)) { error = 104; break; } // ... "label compression offset underruns packet"
-        if (dnsStart+offset>dnsEnd) { error = 105; break; } // ... "label compression offset overruns packet"
+        if (offset>*p-dnsStart) { error = 105; break; } // ... "label compression forward reference"
         if (offset==*p-dnsStart) { error = 106; break; } // ... "label compression offset loop"
         *p += 2;
         p = &pp;
         *p = dnsStart + offset;
       }
 
-      // no DNS label should have other high-order bit settings in its length byte
+      // no DNS label should have any other high-order bit settings in its length byte
       else {
         error = 107; break; // ... "label flags invalid"
       }
@@ -412,7 +772,12 @@ class DNSMessageParser {
   inline __attribute__((always_inline))
   SPL::rstring convertTXTResourceDataToString(const uint8_t* rdata, const uint16_t rdlength) { 
 
-    // make sure the length of the text string does not exceed the length of the resource data
+    // if the RDATA field is empty, return an empty SPL string
+    if (!rdlength) return SPL::rstring();
+
+    // if the RDATA field is not empty, asume that the first byte is the length
+    // of the text string in the field, and make sure the length of the string
+    // does not exceed the length of the field
     uint16_t txtlength = rdata[0];
     if (txtlength+1>rdlength) {
       error = 118;
@@ -681,12 +1046,13 @@ class DNSMessageParser {
   // encoding error is found, the 'error' variable is set to a description of
   // the error; otherwise it is set to NULL.
 
-  void parseDNSMessage(char* buffer, int length) {
+void parseDNSMessage(char* buffer, int length) {
 
     // clear return fields
     dnsHeader = NULL;
     dnsStart = NULL;
     dnsEnd = NULL;
+    dnsExtra = NULL;
     error = 0;
     dnsPointer = NULL;
 
@@ -706,10 +1072,10 @@ class DNSMessageParser {
 
     // basic safety checks
     if ( length < sizeof(struct DNSHeader) ) { error = 116; return; } // ... "message too short"
-    if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS ||
+    if ( ntohs( ((struct DNSHeader*)buffer)->questionCount )   > MAXIMUM_RRFIELDS_Q ||
          ntohs( ((struct DNSHeader*)buffer)->answerCount )     > MAXIMUM_RRFIELDS ||
          ntohs( ((struct DNSHeader*)buffer)->nameserverCount ) > MAXIMUM_RRFIELDS ||
-         ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = 117; return; } // ... "counts too large"
+         ntohs( ((struct DNSHeader*)buffer)->additionalCount ) > MAXIMUM_RRFIELDS ) { error = 117; return; } // ... "resource record counts too large"
 
     // store pointers to the DNS message in the buffer
     dnsHeader = (struct DNSHeader*)buffer;
@@ -717,6 +1083,9 @@ class DNSMessageParser {
     dnsEnd = (uint8_t*)buffer + length;
     dnsPointer = (uint8_t*)dnsHeader->rrFields;
 
+    // clear the portion of the label offset array that matches the DNS message.
+    memset(dnsLabelOffsets, 0, length);
+    
     // save the DNS header's resource record counts
     questionCount = ntohs(dnsHeader->questionCount);
     answerCount = ntohs(dnsHeader->answerCount);
@@ -724,10 +1093,11 @@ class DNSMessageParser {
     additionalCount = ntohs(dnsHeader->additionalCount);
 
     // parse the variable-size DNS resource records and copy them into fixed-size Record structures
-    if ( ( questionRecordCount   = copyResourceRecords(questionRecords,   questionCount,   false) ) < questionCount)    return;
-    if ( ( answerRecordCount     = copyResourceRecords(answerRecords,     answerCount,     true ) ) < answerCount)      return;
-    if ( ( nameserverRecordCount = copyResourceRecords(nameserverRecords, nameserverCount, true ) ) < nameserverCount)  return;
-    if ( ( additionalRecordCount = copyResourceRecords(additionalRecords, additionalCount, true ) ) < additionalCount)  return;
+    if ( ( questionRecordCount   = parseResourceRecords(questionRecords,   questionCount,   false) ) < questionCount)    return;
+    if ( ( answerRecordCount     = parseResourceRecords(answerRecords,     answerCount,     true ) ) < answerCount)      return;
+    if ( ( nameserverRecordCount = parseResourceRecords(nameserverRecords, nameserverCount, true ) ) < nameserverCount)  return;
+    if ( ( additionalRecordCount = parseResourceRecords(additionalRecords, additionalCount, true ) ) < additionalCount)  return;
+    if (dnsPointer<dnsEnd) { error = 122; dnsExtra = dnsPointer; return; }
 
     // copy the CNAME and A/AAAA 'answer' records into separate arrays
     for (int i=0; i<answerRecordCount; i++) {

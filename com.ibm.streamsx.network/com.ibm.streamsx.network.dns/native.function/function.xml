@@ -26,31 +26,41 @@
 
           * 103 for 'label compression length overruns packet': The length field of a compressed domain name label extends beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
 
-          * 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the DNS message.
+          * 104 for 'label compression offset underruns packet': The offset of a compressed domain name label points before the beginning of the DNS message. The sender misencoded the domain name.
 
-          * 105 for 'label compression offset overruns packet': The offset of a compressed domain name label points beyond the end of the DNS message. The packet containing the DNS message may have been truncated.
+          * 105 for 'label compression offset forward reference': The offset of a compressed domain name label points beyond the current label. The sender misencoded the domain name.
 
-          * 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the DNS message.
+          * 106 for 'label compression offset loop': The offset of a compressed domain name label points to itself. The sender misencoded the domain name.
 
-          * 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the DNS message.
+          * 107 for 'label flags invalid': The flag field of a compressed domain name label is invalid. The sender misencoded the domain name.
 
-          * 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the DNS message.
+          * 108 for 'label limit exceeded': A compressed domain name contains too many labels. The sender misencoded the domain name.
 
           * 110 for 'resource record missing': The DNS message contains fewer resource records than the 'count' fields in the message header indicate. The DNS message may have been truncated.
 
           * 111 for 'question resource record truncated': The DNS 'question' resource record was truncated. The packet containing the message was probably truncated.
 
-          * 112 for 'resource record truncated': A DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+          * 112 for 'resource record truncated': A DNS resource record was truncated. The packet containing the DNS message was probably truncated.
 
-          * 113 for 'resource record data truncated': The 'rdata' field of a DNS resouerce record was truncated. The packet containing the DNS message was probably truncated.
+          * 113 for 'resource record data truncated': The 'rdata' field of a DNS resource record was truncated. The packet containing the DNS message was probably truncated.
 
           * 114 for 'invalid address family': The 'class' field of a DNS resource record was neither 'AF_INET' nor 'AF_INET6' (meaning IP version 4 or IP version 6, respectively).
 
-          * 116 for 'message too short': The DNS message is shorter than the length of the DNS heaer. The packet containing the message was probably truncated.
+          * 116 for 'message too short': The DNS message is shorter than the length of the DNS header. The packet probably does not contain a DNS message.
 
-          * 117 for 'counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The sender probably misencoded the DNS message.
+          * 117 for 'resource record counts too large': A 'count' field in the DNS message header is larger than the maximum supported. The packet probably does not contain a DNS message.
 
-          * 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resoure record is larger than the record's data field. The sender probably misencoded the DNS message.
+          * 118 for 'text string overruns resource record': The text string length in a DNS 'TXT' resource record is larger than the record's data field. The sender misencoded the resource record.
+
+          * 119 for 'missing data in resource record': The data field of a resource record is too short; some fields may be truncated or missing entirely. The sender misencoded the resource record.
+
+          * 120 for 'extra data in resource record': The data field of a resource record is too long; there is unexpected data following the last field. The sender misencoded the resource record.
+
+          * 121 for 'label compression offset invalid': The offset of a compressed domain name label does not point to a previous label. The sender misencoded the domain name.
+
+          * 122 for 'extra data following resource records': There are extra bytes of data in the DNS message following the last resource record. The sender probably miscalculated the packet length.
+
+          * 123 for 'resource record data too long': The 'data length' field of a resource record is unreasonably large. The packet probably does not contain a DNS message.
 
           *Note:* [https://www.ietf.org/rfc/rfc1035.txt|RFC 1035] explains the format of DNS messages; 
           in particular, section 4.1.4 explains the format of compressed domain names in DNS messages.
@@ -219,6 +229,36 @@ and returns `false` for all subsequent tuples produced in the same metrics inter
           <function:function>
             <function:description>
 
+This function returns the total number of packets dropped by the software packet receive queue (if implemented).
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 packetsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of packets dropped by the software packet receive queue (if implemented) in the
+most recent metrics interval.  Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalPacketsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalMaxQueueDepthSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
 This function returns the number of seconds since the beginning of the Unix epoch
 (midnight on January 1st, 1970 in Greenwich, England) until the current packet was captured,
 according to the system clock on the machine that captured it.
@@ -337,8 +377,6 @@ This function returns a list of 0 to N VLAN tags found in the current packet.
             <function:prototype>public list&lt;uint16> VLAN_TAGS()</function:prototype>
           </function:function>          
 
-
-
           <function:function>
             <function:description>
 
@@ -359,6 +397,58 @@ or zero if the ethernet packet does not contain an IP packet.
             </function:description>
             <function:prototype>public uint8 IP_PROTOCOL()</function:prototype>
           </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP identifier of the current packet.
+When a packet is fragmented in transit, this identifer is copied into all of the fragments.
+The receiver combines this identifier with the packet's 
+source and destination addresses to gather the fragments, 
+and uses the fragment offset (see the IP_FRAGMENT_OFFSET() function) to reassemble 
+them into original packet.
+
+            </function:description>
+            <function:prototype>public uint32 IP_IDENTIFIER()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "don't fragment" flag of the current packet.
+When a sender sets this flag in a packet, it prohibits routers from fragmenting
+the packet in transit. If the packet's length exceeds the maximum size of a link,
+it will be discarded by the router instead of being fragmented.
+
+            </function:description>
+            <function:prototype>public boolean IP_DONT_FRAGMENT()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "more fragments" flag of the current packet.
+When a router fragments a packet, it sets this flag in all fragments except the last one.
+
+            </function:description>
+            <function:prototype>public boolean IP_MORE_FRAGMENTS()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "fragment offset" field of the current packet, multiplied by eight,
+When a router fragments a packet, it stores the offset from the front of the packet to
+the front of the fragment, measured in eight-byte steps, in each fragment.
+That is, the size of each fragment is always a multiple of eight bytes, 
+and the value stored is the offset in bytes, divided by eight.
+This function returns that value, multiplied by eight, so that it gives the offset from the front
+of the packet to the front of the fragment in bytes.
+
+            </function:description>
+            <function:prototype>public uint16 IP_FRAGMENT_OFFSET()</function:prototype>
+          </function:function>
+
           <function:function>
             <function:description>
 
@@ -789,6 +879,16 @@ if it has one, or zero otherwise.
 
       <function:function>
         <function:description>
+          This parser result function returns any extra data in the DNS message that follows the last resource record.
+          Note that the parseError() function returns 'true' if there is any extra data following the last resource record,
+          even though no errors were found in any resource record, 
+          and the parseErrorCode() function returns '122'.
+        </function:description>
+        <function:prototype>public blob DNS_EXTRA_DATA()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
           This parser result function returns a string containing 'flattened' representation
           of the DNS packet, including selected fields from the IP and UDP headers, all 
           fields from the DNS header, and all fields from all DNS resource records, 
@@ -825,6 +925,14 @@ if it has one, or zero otherwise.
           * 4 indicates that the Authoritative, Truncated, Recursion Desired, and Recursion Available flags in the DNS header are all set.
         </function:description>
         <function:prototype>public int32 DNS_INCOMPATIBLE_FLAGS()</function:prototype>
+      </function:function>
+
+      <function:function>
+        <function:description>
+        This function returns false when an amount of time between packets has passed such that
+        the rate is limited to the value given in the rateLimit paramater.
+        </function:description>
+        <function:prototype>public boolean RATE_LIMITED()</function:prototype>
       </function:function>
 
     </function:functions>

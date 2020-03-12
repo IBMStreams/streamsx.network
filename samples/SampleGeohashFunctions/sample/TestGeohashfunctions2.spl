@@ -1,0 +1,63 @@
+/*
+** Copyright (C) 2018  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use spl.math::*;
+use com.ibm.streamsx.network.geohash::*;
+
+composite TestGeohashFunctions2 {
+
+  param
+    expression<rstring> $geohashFilename: getSubmissionTimeValue("geohashFilename", "../../SampleNetworkToolkitData/data/geohashes.csv" );
+/*
+  type GeohashType = 
+    rstring geohash, 
+    rstring latitude, 
+    rstring longitude,
+    rstring geoname_id,
+    rstring country_iso_code,
+    rstring country_name,
+    rstring subdivision_1_iso_code,
+    rstring subdivision_1_name,
+    rstring subdivision_2_iso_code,
+    rstring subdivision_2_name,
+    rstring city_name;
+*/
+  graph
+
+    stream<rstring line> GeohashStream = FileSource() {
+      param
+        file: $geohashFilename;
+        format: line; }
+
+    () as CheckOut = Custom(GeohashStream as In) {
+      logic state: { 
+        float64 threshold = 0.01; 
+        mutable boolean header = true; }
+      onTuple In: {
+        //printStringLn((rstring)In);
+        if (header) { header = false; return; }
+
+        list<rstring> tokens = csvTokenize(line);
+        if (size(tokens)!=11) { appLog(Log.error, "sorry, unexpected number of tokens in line '" + line + "'"); abort(); }
+        if (length(tokens[1])==0 || length(tokens[2])==0) { return; }
+
+        rstring encoded = geohashEncode((float64)tokens[1], (float64)tokens[2], 6);
+        if (encoded!=tokens[0]) {
+          printStringLn("encodeGeohash(" + tokens[1] + "," + tokens[2] + ") failed:");
+          printStringLn("    expected: '" + tokens[0] + "'");
+          printStringLn("      result: '" + encoded + "'");
+          abort(); }
+
+        list<float64> decoded = geohashDecode(tokens[0]);
+        if ( abs( (float64)tokens[1] - decoded[0] ) > threshold || abs( (float64)tokens[2] - decoded[1] ) > threshold ) { 
+          printStringLn("decodeGeohash(" + tokens[0] + ") failed:");
+          printStringLn("    expected: '" + tokens[1] + "," + tokens[2] + "'");
+          printStringLn("      result: '" + (rstring)decoded[0] + "," + (rstring)decoded[1] + "'");
+          abort(); }
+      }}
+
+}

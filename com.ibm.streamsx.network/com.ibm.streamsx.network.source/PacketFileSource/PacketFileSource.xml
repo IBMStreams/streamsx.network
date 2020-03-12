@@ -4,7 +4,7 @@
     <context>
       <description>
 
-PacketFileSource is an operator for the IBM InfoSphere Streams product that
+PacketFileSource is an operator for the IBM Streams product that
 reads prerecorded network packets from 'packet capture (PCAP)' files, parses
 the network headers, and emits tuples containing packet data.  
 The operator may be configured with one or more output ports,
@@ -94,7 +94,6 @@ to its 'INSTALL.txt' file.
 This operator has been tested with these versions of `libpcap`:
 
 * libpcap 0.9.4, included in RHEL/CentOS 5.x
-* libpcap 0.9.8, included in SLES 11
 * libpcap 1.0.0, included in RHEL/CentOS 6.2
 * libpcap 1.4.0, included in RHEL/CentOS 6.5
 * libpcap 1.5.3, included in RHEL/CentOS 7.1
@@ -105,7 +104,7 @@ This operator has been tested with these versions of `libpcap`:
 
 # Threads 
 
-The PacketFileOperator contains a separate thread for reporting its metrics to
+The PacketFileSource operator contains a separate thread for reporting its metrics to
 the Streams runtime if the `metricsInterval` parameter is greater than zero.
 
 When the PacketFileSource operator is configured without an input port, it
@@ -135,35 +134,29 @@ The ethernet frame format is described here:
 
 * [http://en.wikipedia.org/wiki/Ethernet_frame]
 
-The ethernet header and the fields it contains are described here:
-
-* [http://linux.die.net/include/net/ethernet.h]
-* [http://linux.die.net/include/linux/if_ether.h]
-
 The IPv4 header and the fields it contains are described here:
 
 * [http://en.wikipedia.org/wiki/IPv4]
 * [http://www.ietf.org/rfc/rfc791.txt]
-* [http://linux.die.net/include/netinet/in.h]
-* [http://linux.die.net/include/netinet/ip.h]
+* [https://linux.die.net/man/7/ip]
 
 The IPv6 header and the fields it contains are described here:
 
 * [https://en.wikipedia.org/wiki/IPv6_packet]
 * [https://tools.ietf.org/html/rfc2460]
-* [http://linux.die.net/include/netinet/ip6.h]
+* [https://linux.die.net/man/7/ipv6]
 
 The UDP header and the fields it contains are described here:
 
 * [http://en.wikipedia.org/wiki/User_Datagram_Protocol]
 * [http://tools.ietf.org/html/rfc768]
-* [http://linux.die.net/include/netinet/udp.h]
+* [https://linux.die.net/man/7/udp]
 
 The TCP header and the fields it contains are described here:
 
 * [http://en.wikipedia.org/wiki/Transmission_Control_Protocol]
 * [http://tools.ietf.org/html/rfc793]
-* [http://linux.die.net/include/netinet/tcp.h]
+* [https://linux.die.net/man/7/tcp]
 
 The Juniper Networks 'jmirror' encapsulation header is described here:
 
@@ -224,6 +217,7 @@ that pass the filter.
           <kind>Counter</kind>
         </metric>
       </metrics>
+
       <libraryDependencies>
         <library>
           <cmn:description> </cmn:description>
@@ -364,6 +358,25 @@ The default is to dispatch the operator's thread on any available processor.
         <type>uint32</type>
         <cardinality>1</cardinality>
       </parameter>
+
+    <parameter>
+      <name>jMirrorCheck</name>
+      <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not the operator should check for Juniper Networks 'jMirror' headers on
+packets, and step over them when found.
+
+The default value is 'false'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>boolean</type>
+      <cardinality>-1</cardinality>
+    </parameter>
+
       <parameter>
         <name>metricsInterval</name>
         <description>
@@ -382,6 +395,26 @@ The default value is '10.0'.
         <type>float64</type>
         <cardinality>1</cardinality>
       </parameter>
+
+    <parameter>
+      <name>rateLimit</name>
+      <description>
+
+This optional parameter takes an expression of type 'float64'
+that specifies the maximum number of times per second the RATE_LIMITED()
+function returns false.  This can be used to limit the rate of packets sent
+to an output port when used in a filter expression.
+
+The default value is '1000.0'.
+
+      </description>
+      <optional>true</optional>
+      <rewriteAllowed>true</rewriteAllowed>
+      <expressionMode>Expression</expressionMode>
+      <type>float64</type>
+      <cardinality>1</cardinality>
+    </parameter>
+
     </parameters>
     <inputPorts>
       <inputPortSet>

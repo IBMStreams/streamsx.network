@@ -25,6 +25,7 @@
 			<arg value="-c"/>
 			<arg value="-i"/>
 			<arg value="."/>
+			<arg value="-m"/>
     	</exec>
 	</target>
 	
@@ -32,6 +33,7 @@
 		<exec executable="${spl-mt}" failonerror="true">
 			<arg value="-i"/>
 			<arg value="."/>
+			<arg value="-m"/>
 	    </exec>
 	</target>
 

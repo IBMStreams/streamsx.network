@@ -1,0 +1,150 @@
+/*
+** Copyright (C) 2017  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+rstring formatFloat64(float64 value) {
+  uint32 width = 7;
+  uint32 precision = 3;
+  if (value>1000000000.0) return formatNumber(value/1000000000.0, width, precision, false)+" G";
+  if (value>1000000.0) return formatNumber(value/1000000.0, width, precision, false)+" M";
+  if (value>1000.0) return formatNumber(value/1000.0, width, precision, false)+" K";
+  return formatNumber(value, width, precision, false)+"  "; }
+
+public rstring formatTimestringLocal(float64 when) {
+  timestamp ts = createTimestamp((int64)when, 0u);
+  mutable Sys.tm tm = {};
+  time(ts, tm);
+  return strftime(tm, "%m-%d %H:%M:%S"); }
+
+composite LivePacketDPDKSourceBasic {
+
+    param
+
+    expression<int32>   $adapterPort: (int32)getSubmissionTimeValue("adapterPort", "0" );
+    expression<int32>   $dpdkMasterCore: (int32)getSubmissionTimeValue("dpdkMasterCore", "0" );
+    expression<list<int32>> $dpdkIngestCores: (list<int32>)getSubmissionTimeValue("dpdkIngestCores", "[5,6]" );
+    expression<rstring> $dpdkBufferSizes: getSubmissionTimeValue("dpdkBufferSizes", "100" );
+    expression<int32>   $parallelWidth: (int32)getSubmissionTimeValue("parallelWidth", "1" );
+    expression<float64> $metricsInterval: 1.0;
+    expression<float64> $timeoutInterval: (float64)getSubmissionTimeValue("timeoutInterval", "30.0" );
+
+    graph
+
+    () as Parameters = Custom() {
+      logic onProcess: {
+        log(Sys.info, "parameter adapterPort: " + (rstring)$adapterPort);
+        log(Sys.info, "parameter dpdkMasterCore: " + (rstring)$dpdkMasterCore);
+        log(Sys.info, "parameter dpdkIngestCores: " + (rstring)$dpdkIngestCores);
+        log(Sys.info, "parameter dpdkBufferSizes: " + (rstring)$dpdkBufferSizes);
+        log(Sys.info, "parameter parallelWidth: " + (rstring)$parallelWidth);
+        log(Sys.info, "parameter metricsInterval: " + (rstring)$metricsInterval);
+        log(Sys.info, "parameter timeoutInterval: " + (rstring)$timeoutInterval);
+      } }
+
+
+    @parallel(width=$parallelWidth)
+    () as Out = IngestPackets() { 
+      param
+        adapterPort: $adapterPort;
+        dpdkMasterCore: $dpdkMasterCore;
+        dpdkIngestCores: $dpdkIngestCores;
+        dpdkBufferSizes: $dpdkBufferSizes;
+        metricsInterval: $metricsInterval; }
+
+    () as Timeout = Custom() { logic onProcess: { block($timeoutInterval); shutdownPE(); } }
+}
+
+
+composite IngestPackets {
+
+  param
+    expression<int32> $adapterPort;
+    expression<int32> $dpdkMasterCore;
+    expression<list<int32>> $dpdkIngestCores;
+    expression<rstring> $dpdkBufferSizes;
+    expression<float64> $metricsInterval; 
+
+  type 
+
+  PacketType =
+    float64 captureTime,              // time that packet was captured, in seconds since Unix epoch
+    int32 parallelChannel,            // parallel channel number, or -1 if not parallelized
+    uint64 packetNumber,              // sequence number of packet, as emitted by operator
+    uint8 ipVersion,                  // IP version: 4 for IPv4, 6 for IPv6
+    uint8 ipProtocol,                 // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+    uint32 sourceAddress,             // IPv4 source address
+    uint16 sourcePort,                // IP source port, or zero if not UDP or TCP packet
+    uint32 destinationAddress,        // IPv4 destination address
+    uint16 destinationPort,           // IP destination port, or zero if not UDP or TCP packet
+    uint32 payloadLength,             // length of packet payload, excluding network headers
+    uint32 packetLength,              // length of packet, including netwok headers
+    blob packetData;                  // contents of packet captured, including network headers
+  
+  MetricType =
+    float64 metricsTime,              // when metrics were recorded, in seconds since Unix epoch
+    int32 parallelChannel,            // parallel channel number, or -1 if not parallelized
+    float64 averagePacketSize,        // average size of packets, including network headers
+    float64 packetsProcessedPerSecond,// packets processed per second during last metrics interval
+    float64 bytesProcessedPerSecond,  // bytes proceessed per second during last metrics interval
+    float64 packetsDroppedPerSecond;  // packets dropped per second during last metrics interval
+
+  graph
+
+    ( stream<PacketType> PacketStream as PacketOut ; // output port 0 emits all packets processed
+      stream<MetricType> MetricStream as MetricOut ) // output port 1 emits operator metrics
+    = PacketDPDKSource() {
+        param
+            nicPort: $adapterPort; // bind to specified adapter port
+            nicQueue: getChannel(); // ingest packets from this DPDK queue
+            lcoreMaster: $dpdkMasterCore; // run the DPDK master thread on this core
+            lcore: $dpdkIngestCores[getChannel()]; // run this operator's ingest thread this core
+            buffersizes: $dpdkBufferSizes;
+            promiscuous: true;
+            //jMirrorCheck: true;
+            metricsInterval: $metricsInterval;
+            outputFilters: true,                        // output port 0 emits all packets processed
+                           metricsUpdated();            // output port 1 emits operator metrics
+                           
+        output
+        PacketOut: // output port 0 emits all packets processed
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            parallelChannel = getChannel(), 
+            packetNumber = packetsProcessed() - 1ul,
+            ipVersion = IP_VERSION(),
+            ipProtocol = IP_PROTOCOL(),
+            sourceAddress = IPV4_SRC_ADDRESS(),
+            destinationAddress = IPV4_DST_ADDRESS(),
+            sourcePort = IP_SRC_PORT(),
+            destinationPort = IP_DST_PORT(),
+            payloadLength = PAYLOAD_LENGTH(),
+            packetLength = PACKET_LENGTH(),
+            packetData = PACKET_DATA();
+        MetricOut: // output port 1 emits operator metrics once per second
+            metricsTime = getTimestampInSecs(),
+            parallelChannel = getChannel(), 
+            averagePacketSize = (float64)metricsIntervalBytesProcessed() / (float64)metricsIntervalPacketsProcessed(),
+            packetsProcessedPerSecond = (float64)metricsIntervalPacketsProcessed() / metricsIntervalElapsed(),
+            bytesProcessedPerSecond = (float64)metricsIntervalBytesProcessed() / metricsIntervalElapsed(),
+            packetsDroppedPerSecond = (float64)metricsIntervalPacketsDropped() / metricsIntervalElapsed();
+    }
+
+    //() as PacketSink = FileSink(PacketStream as In) { param file: "debug.LivePacketDPDKSourceBasic.PacketStream_" + (rstring)getChannel() + ".out"; format: txt; suppress: packetData; }
+
+    () as MetricSink = FileSink(MetricStream as In) { 
+      logic onTuple In: {
+        printStringLn( formatTimestringLocal(metricsTime) + " [" + (rstring)parallelChannel + "] " +
+                       formatFloat64(averagePacketSize) + "B/packet: " +
+                       formatFloat64(packetsProcessedPerSecond) + "P/sec, " + 
+                       formatFloat64(bytesProcessedPerSecond) + "B/sec, " + 
+                       formatFloat64(bytesProcessedPerSecond*8.0) + "b/sec" ); }
+      param 
+        file: "debug.LivePacketDPDKSourceBasic.MetricsStream_" + (rstring)getChannel() + ".out"; 
+        format: txt; 
+      config 
+        threadedPort: queue(In, Sys.Wait, 10000); }
+}

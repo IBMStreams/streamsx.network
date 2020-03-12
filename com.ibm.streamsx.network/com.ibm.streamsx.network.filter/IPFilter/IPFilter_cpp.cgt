@@ -1,0 +1,188 @@
+<%
+## Copyright (C) 2017  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+#include <string>
+#include <arpa/inet.h>
+#include "NetworkResources.h"
+#include "IPv4AddressFunctions.h"
+
+#define IP_FILTER "IP_FILTER"
+
+using namespace SPL;
+using namespace std;
+using namespace com::ibm::streamsx::network::ipv4;
+
+/*
+ * This code is modeled after the IPASNEnricher operator.  Future updates to add IPv6
+ * support could leverage examples from that code.
+ */
+<%
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort0 = $model->getInputPortAt(0);
+my $inputPort1 = $model->getInputPortAt(1);
+
+my $inputPort1CppName = "";
+my $ipv4AddrFilterAttribute = "";
+if(defined $inputPort1) {
+    $inputPort1CppName = $inputPort1->getCppTupleName();
+    $ipv4AddrFilterAttribute = $inputPort1->getAttributeAt(0)->getName();
+}
+
+# get C++ expressions for getting the values of this operator's parameters
+my $inputIPAttrParamCppValue = $model->getParameterByName("inputIPAttr")->getValueAt(0)->getCppExpression();
+my $inputIPAttrParam2 = $model->getParameterByName("inputIPAttr2");
+%>
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR() {
+	ip4List_[0] = new IPList();
+	ip4List_[1] = new IPList();
+    ip4ListRSel_ = 0;
+    ip4ListWSel_ = 1;
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() {
+	delete ip4List_[0];
+	delete ip4List_[1];
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() {
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() {
+    // This is an asynchronous call
+}
+
+// Tuple processing for mutating ports
+// Because this operator only filters tuples & does not modify them, this 
+// function does not get called.
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() mutating.", IP_FILTER);
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() non-mutating.", IP_FILTER);
+
+    if(port == 0) {
+        const IPort0Type& iport$0 = tuple;
+        bool ipAddrMatch = false;
+
+        SPLAPPTRC(L_TRACE, "Process() non-mutating, port 0.", IP_FILTER);
+
+        {
+            AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
+            ipAddrMatch = lookupIPv4(<%=$inputIPAttrParamCppValue%>);
+<% if(defined $inputIPAttrParam2) { %>
+            ipAddrMatch = ipAddrMatch || lookupIPv4(<%=$inputIPAttrParam2->getValueAt(0)->getCppExpression()%>);
+<% } %>
+        }
+
+        if(ipAddrMatch) {
+//            <% # CodeGenX::copyOutputAttributesFromInputAttributes("outTuple", $model->getOutputPortAt(0), $model->getInputPortAt(0)); %> ;
+//            <% # CodeGenX::assignOutputAttributeValues("outTuple", $model->getOutputPortAt(0)); %> ;
+//            SPLAPPTRC(L_TRACE, "submitting outTuple=" << outTuple, IP_FILTER);
+//            submit(outTuple, 0);
+            submit(iport$0, 0);
+        }
+    }
+    <% if(defined $inputPort1) {%>
+        else if(port == 1) {
+            const IPort1Type& iport$1 = tuple;
+            rstring ipv4Addr = <%=$inputPort1CppName%>.get_<%=$ipv4AddrFilterAttribute%>();
+
+            SPLAPPTRC(L_TRACE, "Process() non-mutating, port 1.  ipv4FilterAddr = " << ipv4Addr, IP_FILTER);
+
+            AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
+            SPL::uint32 addrStart, addrEnd;
+            SPL::uint32 addrRange = getAddressRangeInNetworkInt(ipv4Addr, addrStart, addrEnd);
+            SPLAPPTRC(L_TRACE, "Process() non-mutating, port 1.  Adding count = " << addrRange << ", start = " << std::hex << addrStart << ", end = " << std::hex << addrEnd, IP_FILTER);
+            for(SPL::uint32 b = addrStart; b < addrEnd; b++) {
+                ip4List_[ip4ListWSel_]->insert(b);
+                SPLAPPTRC(L_TRACE, "IPv4 filter: " << "adding: " << 
+                        convertIPV4AddressNumericToString(b) << 
+                        "(" << b << ")", IP_FILTER);
+            }
+            SPLAPPTRC(L_TRACE, "Process() non-mutating, port 1.  Done Adding", IP_FILTER);
+            return;
+
+        }
+    <%}%>
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() punctuation.", IP_FILTER);
+
+	if(port == 1) {
+        if(punct==Punctuation::WindowMarker) {
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: window.", IP_FILTER);
+
+            // Take both the R & W mutexes so we can close out the current filter list 
+            // and swap lists atomically. This is the very uncommon case
+            // so the locking overhead is not important.
+            AutoPortMutex amW(mutex_[ip4ListWSel_], *this);
+            AutoPortMutex amR(mutex_[ip4ListRSel_], *this);
+
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() sending WindowMarker out port 0.", IP_FILTER);
+            submit(Punctuation::WindowMarker, 0);
+
+            uint32_t tmpList = ip4ListWSel_;
+            ip4ListWSel_ = ip4ListRSel_;
+            ip4ListRSel_ = tmpList;
+
+            ip4List_[ip4ListWSel_]->clear();
+        } else if(punct==Punctuation::FinalMarker) {
+            SPLAPPTRC(L_TRACE, "<%=$myOperatorKind%> process() punctuation: final.", IP_FILTER);
+            // ...;
+        }
+    }
+}
+
+bool inline MY_OPERATOR::lookupIPv4(const SPL::list<uint32> &numIPList) {
+    bool addrMatch = false;
+
+    SPL::list<SPL::uint32>::const_iterator it;
+    for(it = numIPList.begin(); it != numIPList.end(); ++it) {
+        addrMatch = lookupIPv4(*it); 
+        if(addrMatch) return (addrMatch);
+    }
+
+    return addrMatch;
+}
+
+bool inline MY_OPERATOR::lookupIPv4(const uint32 &numIP) {
+    size_t keyCount = ip4List_[ip4ListRSel_]->count(numIP); 
+
+    if(keyCount) {
+        return true; 
+    } else {
+        return false; 
+    }
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

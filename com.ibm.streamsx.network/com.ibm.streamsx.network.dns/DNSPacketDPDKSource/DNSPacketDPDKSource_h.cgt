@@ -78,6 +78,8 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
       
   // ----------- operator parameters (constant after constructor executes) ----------
 
+  std::string buffersizes;
+  bool jMirrorCheck;
   double metricsInterval;
 
   // ----------- operator state variables ----------
@@ -96,6 +98,10 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   struct port_stats statsNow, statsThen; 
   double now, then;  
   bool metricsUpdate;
+  bool realMetricsUpdate;
+  double    rateLimit;
+  uint64_t  rateLimitLastTime;
+  uint64_t  rateLimitPeriodUsec;
 
   // ----------- network header parser ----------
   
@@ -147,6 +153,15 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint32 CAPTURE_SECONDS() { return captureSeconds; }
 
   inline __attribute__((always_inline))
@@ -187,6 +202,18 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
 
   inline __attribute__((always_inline))
   SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::uint32 IP_IDENTIFIER() { return headers.ipv4Header ? ntohs(headers.ipv4Header->id) : ( headers.ipv6FragmentHeader ? ntohs(headers.ipv6FragmentHeader->ip6f_ident) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_DONT_FRAGMENT() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x4000) : 0; }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_MORE_FRAGMENTS() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x2000) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0x0001) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::uint16 IP_FRAGMENT_OFFSET() { return headers.ipv4Header ? ((ntohs(headers.ipv4Header->frag_off)&0x1FFF)*8) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0xFFF8) : 0 ); }
 
   inline __attribute__((always_inline))
   SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
@@ -345,6 +372,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   SPL::list<rstring> DNS_ADDITIONAL_DATA(SPL::rstring fieldDelimiter) { return parser.convertResourceDataToStringList(parser.additionalRecords, parser.additionalRecordCount, fieldDelimiter); }
 
   inline __attribute__((always_inline))
+  SPL::blob DNS_EXTRA_DATA() { return parser.dnsExtra ? SPL::blob((const unsigned char*)parser.dnsExtra, (uint64_t)(parser.dnsEnd-parser.dnsExtra)) : SPL::blob(); }
+
+  inline __attribute__((always_inline))
   SPL::rstring DNS_ALL_FIELDS(SPL::rstring recordDelimiter, SPL::rstring fieldDelimiter, SPL::rstring subfieldDelimiter) { SPL::list<SPL::uint16> empty = SPL::list<SPL::uint16>(); return flattener.dnsAllFields(captureSeconds, packetLen, headers, parser, recordDelimiter.c_str(), fieldDelimiter.c_str(), subfieldDelimiter.c_str(), empty); }
 
   inline __attribute__((always_inline))
@@ -353,7 +383,16 @@ class MY_OPERATOR : public MY_BASE_OPERATOR {
   inline __attribute__((always_inline))
   SPL::int32 DNS_INCOMPATIBLE_FLAGS() { return parser.incompatibleFlags(); }
 
-
+  inline __attribute__((always_inline))
+  SPL::boolean RATE_LIMITED() { 
+    // This gets the recorded time when the last packet came in which is close enough for what we need here.
+    uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
+    if(currentTime >= (rateLimitLastTime + rateLimitPeriodUsec)) {
+        rateLimitLastTime = currentTime;
+        return false;
+    }
+    return true; 
+  }
 }; 
 
 <%SPL::CodeGen::headerEpilogue($model);%>

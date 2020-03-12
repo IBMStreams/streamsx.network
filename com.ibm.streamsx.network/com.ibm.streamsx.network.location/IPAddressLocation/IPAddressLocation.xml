@@ -4,7 +4,7 @@
     <context>
       <description>
 
-IPAddressLocation is an operator for the IBM InfoSphere Streams product that
+IPAddressLocation is an operator for the IBM Streams product that
 finds the geographical location of IP addresses received in input tuples,
 based on the subnets they are part of, and
 emits output tuples containing the country, state or province, city, latitude, and longitude of the subnets.
@@ -38,9 +38,9 @@ include this statement in the SPL source file:
 The IPAddressLocation operator depends upon geographical location data 
 provided by [https://www.maxmind.com/|Maxmind, Inc.]:
 
-* GeoLite2 data is available free from [http://dev.maxmind.com/geoip/geoip2/geolite2/]
+* GeoLite2 data is available free from [https://dev.maxmind.com/geoip/geoip2/geolite2/]
 
-* GeoIP2 data, which is more accurate, may be purchased from [https://www.maxmind.com/en/geoip2-city/]
+* GeoIP2 data, which is more accurate, may be purchased from [https://www.maxmind.com/en/geoip2-city]
 
 The required parameter `geographyDiectory` parameter must point to a directory containing
 geography files, after downloading and unpacking. 
@@ -59,7 +59,7 @@ For GeoIP2 data, the geography files are:
 
 The format of the geography files is described here:
 
-* [http://dev.maxmind.com/geoip/geoip2/geoip2-csv-databases/]
+* [https://dev.maxmind.com/geoip/geoip2/geoip2-city-country-csv-databases/]
 
 # Threads
 
@@ -92,29 +92,46 @@ and in output attribute assignment expressions are described here:
 
 The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind.com/|Maxmind, Inc.] is described here:
 
-* [http://dev.maxmind.com/geoip/geoip2/geoip2-csv-databases/]
+* [https://dev.maxmind.com/geoip/geoip2/geoip2-city-country-csv-databases/]
+
+The format of 'geohash' codes for latitude and longitude coordinates is described here:
+
+* [https://en.wikipedia.org/wiki/Geohash]
 
       </description>
+
       <libraryDependencies>
+
         <library>
           <cmn:description/>
           <cmn:managedLibrary>
             <cmn:lib>streams_boost_filesystem</cmn:lib>
           </cmn:managedLibrary>
         </library>
+
         <library>
           <cmn:description/>
           <cmn:managedLibrary>
             <cmn:lib>streams_boost_system</cmn:lib>
           </cmn:managedLibrary>
         </library>
+
         <library>
           <cmn:description/>
           <cmn:managedLibrary>
             <cmn:lib>streams_boost_regex</cmn:lib>
           </cmn:managedLibrary>
         </library>
+
+        <library>
+          <cmn:description/>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+
       </libraryDependencies>
+
       <providesSingleThreadedContext>Always</providesSingleThreadedContext>
       <allowCustomLogic>true</allowCustomLogic>
     </context>
@@ -152,6 +169,23 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
         <type>boolean</type>
         <cardinality>-1</cardinality>
       </parameter>
+      <parameter>
+        <name>initOnTuple</name>
+        <description> 
+
+This optional parameter takes an expression of type 'boolean'
+that specifies whether or not the operator should load the files specified with the `geographyDirectory` parameter on the first tuple.
+
+The default value is 'false' and the operator loads the files on operator startup.
+In some cases loading the files during operator startup might cause timeouts and setting this parameter value to 'true' resolves this.
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>boolean</type>
+        <cardinality>-1</cardinality>
+      </parameter>
     </parameters>
     <inputPorts>
       <inputPortSet>
@@ -166,6 +200,26 @@ The format of the GeoIP2 and GeoLite2 CSV files provided by [https://www.maxmind
         <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
         <cardinality>1</cardinality>
         <optional>false</optional>
+      </inputPortSet>
+      <inputPortSet>
+        <description>Control port that ingests a file path pointing to a MaxMind GeoIP2 (or GeoLite2) database CSV files. The operator determines whether the incoming file path refers 
+to a &quot;locations&quot; file, &quot;IPv4 blocks&quot; file or &quot;IPv6 blocks&quot; file based on the name of the file. The expected file names are:
+
+  * For the &quot;locations&quot; file: `GeoIP2-City-Locations-en.csv` or `GeoLite2-City-Locations-en.csv`
+  * For IPv4 &quot;blocks&quot; file: `GeoIP2-City-Blocks-IPv4.csv` or `GeoLite2-City-Blocks-IPv4.csv`
+  * For IPv6 &quot;blocks&quot; file: `GeoIP2-City-Blocks-IPv6.csv` or `GeoLite2-City-Blocks-IPv6.csv`
+
+This control port can be used to dynamically update the operator's internal database. Each time a tuple is received containing a path to one of 
+the files listed above, the operator will update it's internal table with the data in the file.
+
+This input port expects a tuple containing a single attribute of type `rstring`.</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>true</controlPort>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
       </inputPortSet>
     </inputPorts>
     <outputPorts>

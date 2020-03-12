@@ -2,8 +2,41 @@
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
     <info:name>com.ibm.streamsx.network</info:name>
-    <info:description>Operators and functions for ingesting and parsing raw network data at the packet level.</info:description>
-    <info:version>3.0.5</info:version>
+    <info:description>
+Operators and functions for ingesting and parsing raw network data at the packet level.
+    
++ What's new
+
+This is an overview of changes for major and minor version upgrades.
+
+++ What is changed in version 3.3.1
+
+* Globalization support: Translated messages updated
+
+++ What is changed in version 3.3.0
+
+* PacketContentAssembler operator does not depend anymore on environment variable STREAMS_ADAPTERS_ISS_PAM_DIRECTORY at build and run time.
+  The 'Packet Analysis Module (PAM)' library can be added to the application bundle and the location can be set with the parameters `pamLibrary` and `pamInclude`.
+* IPAddressLocation operator: New parameter `initOnTuple` added in order to initialize the operator with loading the geography files on the first tuple and not during operator startup.
+* IPAddressLocation operator supports dynamic loading of MaxMind database triggered by a tuple on control port.
+
+++ What is changed in version 3.2.2
+
+* Added the static keyword to a couple of IPv6 helper functions
+
+++ What is new in version 3.2.1
+
+* Performance enhancements for the PacketDPDKSource.
+      
+++ What is new in version 3.1.0
+
+* Support for newer version of DPDK, in support of RHEL7.4 and forward.
+* Additional CIDR functions to determine the range of addresses covered.
+* Improved IPFilter performance by avoiding needless creation of local list of IP addresses
+* IPFilter operator: Changed traces with WARN trace level to TRACE level.
+    
+    </info:description>
+    <info:version>3.3.1</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

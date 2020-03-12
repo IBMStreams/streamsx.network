@@ -1,6 +1,6 @@
 <%
 
-# Copyright (C) 2015  International Business Machines Corporation
+# Copyright (C) 2015, 2018  International Business Machines Corporation
 # All Rights Reserved
 
 unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
@@ -23,6 +23,8 @@ my @outputPortList = @{ $model->getOutputPorts() };
 # get C++ expressions for getting the values of this operator's parameters
 my $geographyDirectory = $model->getParameterByName("geographyDirectory") ? $model->getParameterByName("geographyDirectory")->getValueAt(0)->getCppExpression() : -1;
 
+my $initOnTuple = $model->getParameterByName("initOnTuple") ? $model->getParameterByName("initOnTuple")->getValueAt(0)->getCppExpression() : 0;
+
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
 my @outputFilterList;
@@ -39,6 +41,18 @@ if ($outputFilterParameter) {
 SPL::CodeGen::exit(NetworkResources::NETWORK_NO_OUTPUT_PORTS()) unless scalar(@outputPortList);
 SPL::CodeGen::exit(NetworkResources::NETWORK_NOT_ENOUGH_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) < scalar(@outputPortList);
 SPL::CodeGen::exit(NetworkResources::NETWORK_TOO_MANY_OUTPUT_FILTERS()) if scalar(@outputFilterList) && scalar(@outputFilterList) > scalar(@outputPortList);
+
+
+# optional control port - inputPort1
+my $inputPort1 = $model->getInputPortAt(1);
+my $inputPort1CppType;
+my $inputPort1CppName;
+my $filenameAttribute;
+if(defined $inputPort1) {
+  $inputPort1CppType = $inputPort1->getCppTupleType();
+  $inputPort1CppName = $inputPort1->getCppTupleName();
+  $filenameAttribute = $inputPort1->getAttributeAt(0)->getName();	    	
+}
 
 %>
 
@@ -172,7 +186,17 @@ SPL::blist<SPL::uint8,16> MY_OPERATOR::combineIPv6AddressAndMask(const SPL::blis
 // indexed by the location identifier at the beginning of the line. For
 // example:
 
-/****************************** GeoLite2-City-Locations-en.csv *************************************************************************************************************************************************************************
+/****************************** new GeoLite2-City-Locations-en.csv *******************************************************************************************************************************************************************************************
+0-----------1------------2---------------3-----------------4-----------------5-----------------6-----------------------7--------------------8-----------------------9-------------------10------------------11----------12----------------13------------------
+
+geoname_id, locale_code, continent_code, continent_name,   country_iso_code, country_name,     subdivision_1_iso_code, subdivision_1_name,  subdivision_2_iso_code, subdivision_2_name, city_name,          metro_code, time_zone,        is_in_european_union
+2057277,    en,          OC,             Oceania,          AU,               Australia,        WA,                     Western Australia,   ,                       ,                   York,               ,         Australia/Perth,    0
+2633352,    en,          EU,             Europe,           GB,               United Kingdom,   ENG,                    England,             YOR,                    York,               York,               ,           Europe/London,    1
+5145253,    en,          ,               North America,    US,               United States,    NY,                     New York,            ,                       ,                   Yorktown Heights,   501,        America/New_York, 0
+*************************************************************************************************************************************************************************************************************************************************************/
+
+
+/****************************** old GeoLite2-City-Locations-en.csv *********************************************************************************************************************************************************************
 0-----------1------------2---------------3-----------------4-----------------5-----------------6-----------------------7--------------------8-----------------------9-------------------10------------------11----------12--------------
 geoname_id, locale_code, continent_code, continent_name,   country_iso_code, country_name,     subdivision_1_iso_code, subdivision_1_name,  subdivision_2_iso_code, subdivision_2_name, city_name,          metro_code, time_zone
 2057277,    en,          OC,             Oceania,          AU,               Australia,        WA,                     "Western Australia", ,                       ,                   York,               ,           Australia/Perth
@@ -191,7 +215,7 @@ void MY_OPERATOR::loadCityLocations(std::string filename) {
   // verify that the first line of the location file contains the expected header
   std::string line;
   std::getline(file, line);
-  const std::string header("geoname_id,locale_code,continent_code,continent_name,country_iso_code,country_name,subdivision_1_iso_code,subdivision_1_name,subdivision_2_iso_code,subdivision_2_name,city_name,metro_code,time_zone");
+  const std::string header("geoname_id,locale_code,continent_code,continent_name,country_iso_code,country_name,subdivision_1_iso_code,subdivision_1_name,subdivision_2_iso_code,subdivision_2_name,city_name,metro_code,time_zone,is_in_european_union");
   if (line!=header) THROW(SPLRuntimeOperator, "sorry, expected header '" << header << "' instead of '" << line << "' in location file " << filename);
 
   // load the location file's contents into a hash table
@@ -224,11 +248,12 @@ void MY_OPERATOR::loadCityLocations(std::string filename) {
     location->cityName = *k++;
     location->metroCode = *k++;
     location->timezone = *k++;
+    location->inEU = *k++;
     if (k!=tokens.end()) { SPLAPPTRC(L_ERROR, "too many tokens for location " << location->locationID << " on line " << lineCount << " of file " << filename, "IPAddressLocation"); }
    
     // insert this location structure into the hash table
     SPLAPPTRC(L_TRACE, "loading location " << location->locationID << ": continent=" << location->continentName << ", country=" << location->countryName << ", state=" << location->subdivision1Name << ", city=" << location->cityName , "IPAddressLocation");
-    cityLocations.insert( std::make_pair<std::string,CityLocation*>(location->locationID, location) );
+    cityLocations.insert( std::make_pair(location->locationID, location) );
     locationCount++;
   }				 
 
@@ -338,7 +363,18 @@ void MY_OPERATOR::loadIPv4Subnets(std::string filename) {
 
   // check for duplicate addresses
   for (int i=0; i<ipv4Subnets.size()-1; i++) {
-    if (ipv4Subnets[i].subnet.ipv4Address==ipv4Subnets[i+1].subnet.ipv4Address) SPLAPPTRC(L_ERROR, "duplicate IPv4 address: " << formatIPv4cidrAddress(ipv4Subnets[i].subnet.ipv4Address, ipv4Subnets[i].subnet.ipv4Mask) << " and " << formatIPv4cidrAddress(ipv4Subnets[i+1].subnet.ipv4Address, ipv4Subnets[i+1].subnet.ipv4Mask), "IPAddressLocation"); }
+    if (ipv4Subnets[i].subnet.ipv4Address==ipv4Subnets[i+1].subnet.ipv4Address) {
+      SPLAPPTRC(L_WARN,
+                ( ipv4Subnets[i].subnet.ipv4Mask==ipv4Subnets[i+1].subnet.ipv4Mask ? "duplicate IPv4 addresses: " : "nested IPv4 addresses: " ) <<
+                formatIPv4cidrAddress(ipv4Subnets[i].subnet.ipv4Address, ipv4Subnets[i].subnet.ipv4Mask) <<
+                " at location " <<
+                ipv4Subnets[i].subnet.location->locationID <<
+                " and " <<
+                formatIPv4cidrAddress(ipv4Subnets[i+1].subnet.ipv4Address, ipv4Subnets[i+1].subnet.ipv4Mask) <<
+                " at location " <<
+                ipv4Subnets[i+1].subnet.location->locationID,
+                "IPAddressLocation");
+    } }
 
   SPLAPPTRC(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv4 subnets", "IPAddressLocation");
 }
@@ -473,8 +509,20 @@ void MY_OPERATOR::loadIPv6Subnets(std::string filename) {
 
   // check for duplicate addresses
   for (int i=0; i<ipv6Subnets.size()-1; i++) {
-    if (ipv6Subnets[i].subnet.ipv6Address==ipv6Subnets[i+1].subnet.ipv6Address) SPLAPPTRC(L_ERROR, "duplicate IPv6 address: " << formatIPv6cidrAddress(ipv6Subnets[i].subnet.ipv6Address, ipv6Subnets[i].subnet.ipv6Mask) << " and " << formatIPv6cidrAddress(ipv6Subnets[i+1].subnet.ipv6Address, ipv6Subnets[i+1].subnet.ipv6Mask), "IPAddressLocation"); }
-
+    if (ipv6Subnets[i].subnet.ipv6Address==ipv6Subnets[i+1].subnet.ipv6Address) {
+      SPLAPPTRC(
+                L_WARN,
+                ( ipv6Subnets[i].subnet.ipv6Mask==ipv6Subnets[i+1].subnet.ipv6Mask ? "duplicate IPv6 addresses: " : "nested IPv6 addresses: " ) <<
+                formatIPv6cidrAddress(ipv6Subnets[i].subnet.ipv6Address, ipv6Subnets[i].subnet.ipv6Mask) <<
+                " at location " <<
+                ipv6Subnets[i].subnet.location->locationID <<
+                " and " <<
+                formatIPv6cidrAddress(ipv6Subnets[i+1].subnet.ipv6Address, ipv6Subnets[i+1].subnet.ipv6Mask) <<
+                " at location " <<
+                ipv6Subnets[i+1].subnet.location->locationID,
+                "IPAddressLocation");
+    } }
+  
   SPLAPPTRC(L_INFO, "... loaded " << addressCount << " of " << lineCount << " IPv6 subnets", "IPAddressLocation");
 }
 
@@ -506,20 +554,30 @@ MY_OPERATOR::MY_OPERATOR()
 
   // set operator parameters
   geographyDirectory = <%=$geographyDirectory%>;
+  
+  initOnTuple = <%=$initOnTuple%>;
 
   // initialize operator state variables
   tupleCounter = 0;
-
-  // clear the IPv4 address/subnet cache
-  for (int i=0; i<ipv4SubnetCacheSize; i++) {
-    ipv4SubnetCache[i].address = 0;
-    ipv4SubnetCache[i].subnet = NULL;
-  }
 
   // clear the output tuples
   <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
     outTuple<%=$i%>.clear();
     <% } %> ;
+
+  if (initOnTuple == false) {
+    loadGeoData();
+  }
+  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+}
+
+void MY_OPERATOR::loadGeoData() {
+  SPLAPPTRC(L_INFO, "loadGeoData ...", "IPAddressLocation");
+  // clear the IPv4 address/subnet cache
+  for (int i=0; i<ipv4SubnetCacheSize; i++) {
+    ipv4SubnetCache[i].address = 0;
+    ipv4SubnetCache[i].subnet = NULL;
+  }
 
   // load the city location data
   cityLocations.clear();
@@ -558,9 +616,9 @@ MY_OPERATOR::MY_OPERATOR()
   } else {
     THROW(SPLRuntimeOperator, "Sorry, " << geographyDirectory << " does not contain a 'City-Blocks-IPv6.csv' file");
   }
-
-  SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> constructor ...", "IPAddressLocation");
+    SPLAPPTRC(L_INFO, "loadGeoData completed", "IPAddressLocation");
 }
+
 
 // Destructor
 MY_OPERATOR::~MY_OPERATOR()
@@ -604,22 +662,71 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 
   SPL::AutoPortMutex automutex(processMutex, *this);
 
-  // increment tuple counter
-  tupleCounter++;
-
-  // point at the input tuple
-  const IPort0Type& iport$0 = tuple;
-
-  // fill in and submit output tuples, as selected by output filters, if specified
-  <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
-    <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
-    {
-      <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
-      <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
-      SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPAddressLocation");
-      submit(outTuple<%=$i%>, <%=$i%>);
+  if(port == 0)
+  {
+    if ((initOnTuple) && (0 == tupleCounter)) {
+      loadGeoData();
     }
-    <% } %> ;
+
+    // increment tuple counter
+    tupleCounter++;
+
+    // point at the input tuple
+    const IPort0Type& iport$0 = tuple;
+
+    // fill in and submit output tuples, as selected by output filters, if specified
+    <% for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) { %> ;
+      <% if (scalar($outputFilterList[$i])) { print "if ($outputFilterList[$i])"; } %> 
+      {
+        <% CodeGenX::copyOutputAttributesFromInputAttributes("outTuple$i", $model->getOutputPortAt($i), $model->getInputPortAt(0)); %> ;
+        <% CodeGenX::assignOutputAttributeValues("outTuple$i", $model->getOutputPortAt($i)); %> ;
+        SPLAPPTRC(L_TRACE, "submitting outTuple<%=$i%>=" << outTuple<%=$i%>, "IPAddressLocation");
+        submit(outTuple<%=$i%>, <%=$i%>);
+      }
+    <% } %>;
+
+  }
+<% if(defined $inputPort1) {%>
+  else if(port == 1)
+  {
+    	const <%=$inputPort1CppType%> & <%=$inputPort1CppName%> = static_cast <<%=$inputPort1CppType%>>(tuple);
+    	
+    	// regex to determine if incoming file is BLOCKS or LOCATION
+    	streams_boost::filesystem::path filePath(<%=$inputPort1CppName%>.get_<%=$filenameAttribute%>());
+		SPL::list<rstring> blocksMatch;
+		
+		// Blocks IPv4
+		const rstring blocksIPv4Regex("^(GeoIP2|GeoLite2)-City-Blocks-IPv4.csv");
+		blocksMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), blocksIPv4Regex);
+		if(blocksMatch.size() > 1)
+		{
+			ipv4Subnets.clear();
+			loadIPv4Subnets(filePath.string());
+			return;
+		}
+		
+		// Blocks IPv6
+		const rstring blocksIPv6Regex("^(GeoIP2|GeoLite2)-City-Blocks-IPv6.csv");
+		blocksMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), blocksIPv6Regex);
+		if(blocksMatch.size() > 1) 
+		{
+			ipv6Subnets.clear();
+			loadIPv6Subnets(filePath.string());
+			return;
+		}		
+		
+		// Location Regex
+		const rstring locationRegex("^(GeoIP2|GeoLite2)-City-Locations-en.csv");
+		SPL::list<rstring> locationMatch = SPL::Functions::String::regexMatchPerl(filePath.filename().string(), locationRegex);
+		
+		if(locationMatch.size() > 1)
+		{
+			cityLocations.clear();
+			loadCityLocations(filePath.string());
+			return;
+		}
+    }
+    <%}%>
 
   SPLAPPTRC(L_TRACE, "leaving <%=$myOperatorKind%> process() ...", "IPAddressLocation");
 }

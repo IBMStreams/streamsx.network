@@ -194,7 +194,7 @@
         	 <EXPLANATION>An invalid csv file was detected.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>Il numero dei campi nel record è inferiore al previsto (trovato: {0}, minimo previsto: {1}, riga: {2}).</target>
+         <target>Il numero dei campi nel record è inferiore al previsto (trovati: {0}, minimo previsto: {1}, riga: {2}).</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0264E"
 		extraData="NETWORK_UNABLE_TO_PARSE_CIDR" resname="CDIST0264E">
@@ -204,7 +204,7 @@
         	 <EXPLANATION>The network CIDR field could not be determined.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the file specified with the blocksIPv4File/blocksIPv6File parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>Impossibile analizzare CIDR di rete da file blocchi: {0}</target>
+         <target>Impossibile analizzare il campo CIDR di rete dal file di blocchi: {0}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0265E"
 		extraData="NETWORK_UNABLE_TO_CONVERT_TO_DECIMAL" resname="CDIST0265E">
@@ -215,7 +215,7 @@
         	 <EXPLANATION>The IP address could not be converted.</EXPLANATION>
        		 <USER_RESPONSE>Check or replace the parameter file.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>Impossibile convertire {0} di inizio in decimale: {1}</target>
+         <target>Impossibile convertire {0} di avvio in decimale: {1}</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0266E"
 		extraData="NETWORK_ERROR_PARSING_RECORD" resname="CDIST0266E">
