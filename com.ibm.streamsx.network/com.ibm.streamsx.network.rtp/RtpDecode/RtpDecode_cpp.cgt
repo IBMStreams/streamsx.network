@@ -1,0 +1,98 @@
+/*******************************************************************************
+ * Copyright (C) 2020, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
+<%
+my $payload = $model->getParameterByName("payload")->getValueAt(0)->getCppExpression();
+%>
+
+/* Additional includes go here */
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR() {
+    // Initialization code goes here
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() {
+    // Finalization code goes here
+}
+
+int16_t  MY_OPERATOR::MuLaw_Decode(int8_t number)
+{
+   const uint16_t MULAW_BIAS = 33;
+   uint8_t sign = 0, position = 0;
+   int16_t decoded = 0;
+   number = ~number;
+   if (number & 0x80)
+   {
+      number &= ~(1 << 7);
+      sign = -1;
+   }
+   position = ((number & 0xF0) >> 4) + 5;
+   decoded = ((1 << position) | ((number & 0x0F) << (position - 4))
+             | (1 << (position - 5))) - MULAW_BIAS;
+   return (sign == 0) ? (decoded) : (-(decoded));
+} 
+
+unsigned int MY_OPERATOR::getNumberOfSamples(unsigned int length) {
+    return length;
+}
+
+SPL::blob MY_OPERATOR::getPcmPayload(unsigned char * decompressed, unsigned int length) {
+    return blob(decompressed, length * sizeof(int16_t));
+}
+
+// Tuple processing for non-mutating ports 
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
+	<% 
+	my $inputPort = $model->getInputPortAt(0);
+	my $inputTuple = $inputPort->getCppTupleName();
+	%>
+	IPort0Type const & <%=$inputTuple%> = static_cast<IPort0Type const&> (tuple);
+
+	SPL::blob const & inputblob = <%=$payload%>;
+	char * incomingPayload = (char *)inputblob.getData();
+	const uint64_t length = inputblob.getSize();
+	unsigned char * decompressed = (unsigned char *)malloc(length*2);
+
+	for ( int i = 0; i < length; i++ ) {
+		int8_t oneByte = (int8_t)incomingPayload[i];
+		int16_t twoBytes =  MuLaw_Decode(oneByte);
+		*(int16_t *)(decompressed+(i*2)) = twoBytes;
+	}
+
+	// assign results to output and auto assign
+	OPort0Type otuple;
+<%
+	my $oport = $model->getOutputPortAt(0);
+	foreach my $attribute (@{$oport->getAttributes()}) {
+		my $name = $attribute->getName();
+		my $operation = $attribute->getAssignmentOutputFunctionName();
+
+		if ($operation eq "AsIs") {
+			my $init = $attribute->getAssignmentOutputFunctionParameterValueAt(0)->getCppExpression();
+%>
+			otuple.set_<%=$name%>(<%=$init%>);
+<%		} elsif ($operation eq "getPcmPayload") { %>
+			otuple.set_<%=$name%>(MY_OPERATOR::<%=$operation%>(decompressed, length));
+<%		} elsif ($operation eq "getNumberOfSamples") { %>
+			otuple.set_<%=$name%>(MY_OPERATOR::<%=$operation%>(length));
+<%		}
+	}
+%>
+
+	submit(otuple, 0);
+	free(decompressed);
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
+	if(punct==Punctuation::WindowMarker) {
+		submit(Punctuation::WindowMarker, 0);
+	}
+}
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
