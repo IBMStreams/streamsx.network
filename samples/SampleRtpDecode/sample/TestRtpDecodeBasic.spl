@@ -1,0 +1,51 @@
+/*
+** Copyright (C) 2019, 2020  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.rtp::*;
+use spl.math::*;
+
+composite TestRtpDecodeBasic {
+	param
+		expression<rstring> $filename: getSubmissionTimeValue("filename", "../../SampleNetworkToolkitData/data/sample_rtp_decode_basic_ulaw.gsm" );
+	graph
+		stream<rstring filename, blob mulawspeech> MuLawSamplesStream as O = FileSource() {
+			param
+				file: $filename;
+				format: block;
+				blockSize: 128u;
+			output O:
+				filename = $filename;
+		}
+		
+		stream<rstring filename, blob mulawspeech, blob decoded, uint64 noSamples, rstring conversationId> OutStream as O = RtpDecode(MuLawSamplesStream) {
+			param
+				payload: mulawspeech;
+			output O:
+				conversationId = filename,
+				decoded = getPcmPayload(),
+				noSamples = getNumberOfSamples();
+		}
+		
+		() as Sink1 = Custom(OutStream as I) {
+			logic
+				onTuple I: printStringLn("filename=" + I.filename + " noSamples=" + (rstring)noSamples);
+				onPunct I: println(currentPunct());
+		}
+		() as Sink2 = FileSink(OutStream) {
+			param
+				file: "debug.TestRtpDecodeBasic.OutStreamText.out";
+				format: txt;
+				flush: 1u;
+				suppress: mulawspeech, decoded;
+		}
+		() as Sink3 = FileSink(OutStream) {
+			param
+				file: "debug.TestRtpDecodeBasic.OutStreamSamples.out";
+				format: block;
+				suppress: filename, mulawspeech, noSamples, conversationId;
+		}
+}

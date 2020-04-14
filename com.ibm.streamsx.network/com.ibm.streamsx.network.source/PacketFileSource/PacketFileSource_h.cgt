@@ -68,6 +68,7 @@ public:
   std::string pcapFilename;
   double initDelay;
   int32_t processorAffinity;
+  bool jMirrorCheck;
   double metricsInterval;
   std::string inputFilter;
 
@@ -85,6 +86,10 @@ public:
   uint64_t byteCounter, byteCounterNow, byteCounterThen;
   bool metricsUpdate;
   boolean done;
+
+  double    rateLimit;
+  uint64_t  rateLimitLastTime;
+  uint64_t  rateLimitPeriodUsec;
 
   // ----------- libpcap-specific variables ----------
 
@@ -108,6 +113,9 @@ public:
   SPL::uint64 packetsDropped() { return 0; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 bytesReceived() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 packetsProcessed() { return packetCounter; }
 
   inline __attribute__((always_inline))
@@ -123,6 +131,9 @@ public:
   SPL::uint64 metricsIntervalPacketsDropped() { return 0; }
 
   inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalBytesReceived() { return 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint64 metricsIntervalPacketsProcessed() { return then ? packetCounterNow - packetCounterThen : 0; }
 
   inline __attribute__((always_inline))
@@ -130,6 +141,15 @@ public:
 
   inline __attribute__((always_inline))
   SPL::boolean metricsUpdated() { return then && metricsUpdate; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 packetsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalPacketsDroppedSW() { return 0; }
+
+  inline __attribute__((always_inline))
+  SPL::uint64 metricsIntervalMaxQueueDepthSW() { return 0; }
 
   inline __attribute__((always_inline))
   SPL::uint32 CAPTURE_SECONDS() { return pcapHeader->ts.tv_sec; }
@@ -156,6 +176,9 @@ public:
   SPL::list<SPL::uint8> ETHER_DST_ADDRESS() { return headers.etherHeader ? SPL::list<SPL::uint8>(headers.etherHeader->h_dest, headers.etherHeader->h_dest+sizeof(headers.etherHeader->h_dest)) : SPL::list<uint8>(); }
 
   inline __attribute__((always_inline))
+  SPL::uint64 ETHER_DST_ADDRESS_64() { return headers.etherHeader ? (((uint64_t)headers.etherHeader->h_dest[0] << 40) | ((uint64_t)headers.etherHeader->h_dest[1] << 32) | ((uint64_t)headers.etherHeader->h_dest[2] << 24) | ((uint64_t)headers.etherHeader->h_dest[3] << 16) | ((uint64_t)headers.etherHeader->h_dest[4] << 8) | ((uint64_t)headers.etherHeader->h_dest[5] << 0)) : 0; }
+
+  inline __attribute__((always_inline))
   SPL::uint32 ETHER_PROTOCOL() { return headers.etherHeader ? ntohs(headers.etherHeader->h_proto) : 0; }
 
   inline __attribute__((always_inline))
@@ -163,6 +186,20 @@ public:
 
   inline __attribute__((always_inline))
   SPL::uint8 IP_PROTOCOL() { return headers.ipv4Header ? headers.ipv4Header->protocol : ( headers.ipv6Header ? headers.ipv6Header->ip6_nxt : 0 ); }
+
+
+  inline __attribute__((always_inline))
+    SPL::uint32 IP_IDENTIFIER() { return headers.ipv4Header ? ntohs(headers.ipv4Header->id) : ( headers.ipv6FragmentHeader ? ntohs(headers.ipv6FragmentHeader->ip6f_ident) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_DONT_FRAGMENT() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x4000) : 0; }
+
+  inline __attribute__((always_inline))
+    SPL::boolean IP_MORE_FRAGMENTS() { return headers.ipv4Header ? (ntohs(headers.ipv4Header->frag_off)&0x2000) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0x0001) : 0 ); }
+
+  inline __attribute__((always_inline))
+    SPL::uint16 IP_FRAGMENT_OFFSET() { return headers.ipv4Header ? ((ntohs(headers.ipv4Header->frag_off)&0x1FFF)*8) : ( headers.ipv6FragmentHeader ? (ntohs(headers.ipv6FragmentHeader->ip6f_offlg)&0xFFF8) : 0 ); }
+
 
   inline __attribute__((always_inline))
   SPL::uint32 IPV4_SRC_ADDRESS() { return headers.ipv4Header ? ntohl(headers.ipv4Header->saddr) : 0; }
@@ -247,6 +284,36 @@ public:
   
   inline __attribute__((always_inline))
   SPL::list<uint16> VLAN_TAGS() { return (headers.convertVlanTagsToList()); }  
+
+  inline __attribute__((always_inline))
+  SPL::boolean RATE_LIMITED() {
+    // This gets the recorded time when the last packet came in which is close enough for what we need here.
+    uint64_t currentTime = ((uint64)CAPTURE_SECONDS()*1000000ul)+(uint64)CAPTURE_MICROSECONDS();
+    if(currentTime >= (rateLimitLastTime + rateLimitPeriodUsec)) {
+        rateLimitLastTime = currentTime;
+        return false;
+    }
+    return true;
+  }
+
+  inline __attribute__((always_inline))
+  SPL::boolean DNS_RESPONSE_FLAG_HINT() {
+        // Only UDP DNS packets will be analyzed at this time
+        if(headers.udpHeader == NULL) return false;
+
+        // 53 is the UDP port used for DNS requests/responses
+        if(ntohs(headers.udpHeader->source)!=53 && ntohs(headers.udpHeader->dest)!=53) return false;
+        if(!headers.payload) return false;
+
+        // DNS Header is 12 bytes minimum, so anything less than that can be dropped.
+        if(headers.payloadLength < 12) return false;
+
+        uint8_t* payloadBytes = (uint8_t*)(headers.payload);
+
+        // For DNS packets, the MSB of the 3rd byte of the payload is the response flag.
+        // The DNS packet header is in network-order, of course.
+        return (payloadBytes[2] & 0x80);
+  }
 
   inline __attribute__((always_inline))
   SPL::uint32 ERSPAN_SRC_ADDRESS() { return headers.erspanHeader ? ntohl(headers.erspanHeader->ipHeader.saddr) : 0; }

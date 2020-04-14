@@ -64,7 +64,7 @@
         	 <EXPLANATION>An invalid operator configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Add an output port to the operator declaration.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>Não há portas de saída especificadas. </target>
+         <target>Não há portas de saída especificadas.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0251E"
 		extraData="NETWORK_NOT_ENOUGH_OUTPUT_FILTERS" resname="CDIST0251E">
@@ -73,7 +73,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>Não há filtros de saída suficientes, deve ser especificado um para cada porta de saída. </target>
+         <target>Não há filtros de saída suficientes, deve ser especificado um para cada porta de saída.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0252E"
 		extraData="NETWORK_TOO_MANY_OUTPUT_FILTERS" resname="CDIST0252E">
@@ -82,7 +82,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>Excessivos filtros de saída, deve ser especificado um para cada porta de saída. </target>
+         <target>Excessivos filtros de saída, deve ser especificado um para cada porta de saída.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0253E"
 		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME_OR_INPUT_PORT" resname="CDIST0253E">
@@ -91,7 +91,7 @@
         	 <EXPLANATION>The pcap source was not specified.</EXPLANATION>
        		 <USER_RESPONSE>Either add the input port or add the parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>O parâmetro ''pcapFilename'' ou uma porta de entrada deve ser especificada. </target>
+         <target>O parâmetro ''pcapFilename'' ou uma porta de entrada deve ser especificada.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0254E"
 		extraData="NETWORK_INVALID_PARAMETER_PCAP_FILENAME" resname="CDIST0254E">
@@ -100,7 +100,7 @@
         	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
        		 <USER_RESPONSE>Either remove the input port or the parameter.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>O parâmetro ''pcapFilename'' e uma porta de entrada não podem ser especificados juntos. </target>
+         <target>O parâmetro ''pcapFilename'' e uma porta de entrada não podem ser especificados juntos.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0255E"
 		extraData="NETWORK_MISSING_PARAMETER_PCAP_FILENAME" resname="CDIST0255E">
@@ -109,7 +109,7 @@
         	 <EXPLANATION>An invalid parameter set was specified.</EXPLANATION>
        		 <USER_RESPONSE>Refer to the operator description for information about valid options.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>''initDelay'' pode ser especificado somente quando ''pcapFilename'' também for especificado </target>
+         <target>''initDelay'' pode ser especificado somente quando ''pcapFilename'' também for especificado</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0256E"
 		extraData="NETWORK_CONSISTENT_REGION_INPUT_PORT_ERROR" resname="CDIST0256E">
@@ -118,7 +118,7 @@
         	 <EXPLANATION>An invalid annotation was specified.</EXPLANATION>
        		 <USER_RESPONSE>Either remove the input port or the consistent region annotation.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>Uma porta de entrada não pode ser especificada durante o início de uma região consistente </target>
+         <target>Uma porta de entrada não pode ser especificada durante o início de uma região consistente</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0257E"
 		extraData="NETWORK_CONSISTENT_REGION_START_ERROR" resname="CDIST0257E">
@@ -139,7 +139,7 @@
         	 <EXPLANATION>An invalid attribute type was specified.</EXPLANATION>
        		 <USER_RESPONSE>Change the attribute type in the output stream.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>O atributo de saída {0} deve ser do tipo {1}. </target>
+         <target>O atributo de saída {0} deve ser do tipo {1}.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0259E"
 		extraData="NETWORK_ATTRIBUTE_PARAMETER_HAS_WRONG_TYPE" resname="CDIST0259E">
@@ -161,7 +161,7 @@
         	 <EXPLANATION>An invalid parameter was specified.</EXPLANATION>
        		 <USER_RESPONSE>Remove the parameter from the parameter section.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>O parâmetro ''{0}'' não pode ser especificado quando a porta de entrada 1 estiver definida. </target>
+         <target>O parâmetro ''{0}'' não pode ser especificado quando a porta de entrada 1 estiver definida.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0261E"
 		extraData="NETWORK_EITHER_PARAMETER_A_OR_B_MUST_BE_SPECIFIED" resname="CDIST0261E">
@@ -172,7 +172,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>O parâmetro ''{0}'' ou o parâmetro ''{1}'' ou a porta de entrada 1 deve ser especificada. </target>
+         <target>O parâmetro ''{0}'' ou o parâmetro ''{1}'' ou a porta de entrada 1 deve ser especificada.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0262E"
 		extraData="NETWORK_EITHER_PARAMETER_OR_INPUT_PORT_1_MUST_BE_SPECIFIED" resname="CDIST0262E">
@@ -182,7 +182,7 @@
         	 <EXPLANATION>An invalid configuration was specified.</EXPLANATION>
        		 <USER_RESPONSE>Add the required parameter or a second input port.</USER_RESPONSE>
        		</MSGDOC -->
-         <target>O parâmetro ''{0}'' ou a porta de entrada 1 deve ser especificada. </target>
+         <target>O parâmetro ''{0}'' ou a porta de entrada 1 deve ser especificada.</target>
         </trans-unit>
         <trans-unit id="StreamsNetworkToolkitMessages_CDIST0263E"
 		extraData="NETWORK_LESS_FIELDS_IN_RECORD" resname="CDIST0263E">

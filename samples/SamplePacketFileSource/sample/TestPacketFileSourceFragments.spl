@@ -1,0 +1,71 @@
+/*
+** Copyright (C) 2011, 2017  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.mac::*;
+use com.ibm.streamsx.network.ipv4::*;
+use com.ibm.streamsx.network.ipv6::*;
+use com.ibm.streamsx.network.source::*;
+
+composite TestPacketFileSourceFragments {
+
+    param
+    expression<rstring> $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
+
+    type
+
+    PacketType =
+        uint64 packetsProcessed,            // total number of packets processed by operator, so far
+        uint32 CAPTURE_SECONDS,             // time that packet was captured, in seconds since Unix epoch
+        uint32 CAPTURE_MICROSECONDS,        // time since CAPTURE_SECONDS, in microseconds
+        uint8 IP_VERSION,                   // IP version: 4 for IPv4, 6 for IPv6
+        uint8 IP_PROTOCOL,                  // IP protocol: 0x01==1 for ICMP, 0x6==6 for TCP, 0x11==17 for UDP
+        uint32 IP_IDENTIFIER,               // IP identifier, used mainly for reassembling fragmented packets
+        boolean IP_DONT_FRAGMENT,           // IP "don't fragment" flag (IPv4 only)
+        boolean IP_MORE_FRAGMENTS,          // IP "more fragments" flag, false or unfragmented or last fragment, true for all fragments except last
+        uint16 IP_FRAGMENT_OFFSET,          // IP fragment offset, offset to beginning of fragment in bytes (not eight-byte steps)
+        uint32 IPV4_SRC_ADDRESS,            // IPv4 source address, or zero if not IPv4 packet
+        uint32 IPV4_DST_ADDRESS,            // IPv4 destination address, or zero if not IPv4 packet
+        list<uint8>[16] IPV6_SRC_ADDRESS,   // IPv6 source address, or zero if not IPv6 packet
+        list<uint8>[16] IPV6_DST_ADDRESS,   // IPv6 destination address, or zero if not IPv6 packet
+        uint16 IP_SRC_PORT,                 // IP source port, or zero if not UDP or TCP packet
+        uint16 IP_DST_PORT,                 // IP destination port, or zero if not UDP or TCP packet
+        uint32 PACKET_LENGTH,               // original length of packet (not necessarily all captured)
+        uint32 PAYLOAD_LENGTH,              // length of packet payload, following all network headers
+        blob PACKET_DATA,                   // contents of packet captured, including network headers (not necessarily complete)
+        blob PAYLOAD_DATA;                  // contents of packet payload, following all network headers
+
+    graph
+
+    stream<PacketType> PacketStream as Out = PacketFileSource() {
+        param
+            pcapFilename: $pcapFilename;
+            metricsInterval: 0.0;
+            outputFilters: IP_MORE_FRAGMENTS() || IP_FRAGMENT_OFFSET()>0uh;
+        output Out:
+            packetsProcessed = packetsProcessed(),
+            CAPTURE_SECONDS = CAPTURE_SECONDS(),
+            CAPTURE_MICROSECONDS = CAPTURE_MICROSECONDS(),
+            IP_VERSION = IP_VERSION(),
+            IP_PROTOCOL = IP_PROTOCOL(),
+            IP_IDENTIFIER = IP_IDENTIFIER(),
+            IP_DONT_FRAGMENT = IP_DONT_FRAGMENT(), 
+            IP_MORE_FRAGMENTS = IP_MORE_FRAGMENTS(),
+            IP_FRAGMENT_OFFSET = IP_FRAGMENT_OFFSET(),
+            IPV4_SRC_ADDRESS = IPV4_SRC_ADDRESS(),
+            IPV4_DST_ADDRESS = IPV4_DST_ADDRESS(),
+            IPV6_SRC_ADDRESS = IPV6_SRC_ADDRESS(),
+            IPV6_DST_ADDRESS = IPV6_DST_ADDRESS(),
+            IP_SRC_PORT = IP_SRC_PORT(),
+            IP_DST_PORT = IP_DST_PORT(),
+            PACKET_LENGTH = PACKET_LENGTH(),
+            PAYLOAD_LENGTH = PAYLOAD_LENGTH(),
+            PACKET_DATA = PACKET_DATA(),
+            PAYLOAD_DATA = PAYLOAD_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSourceFragments.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+}

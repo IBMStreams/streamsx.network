@@ -5,7 +5,7 @@
       <description>
 
 
-PacketContentAssembler is an operator for the IBM InfoSphere Streams product that
+PacketContentAssembler is an operator for the IBM Streams product that
 reassembles application flows (such as SMTP, FTP, HTTP, and SIP)
 and files (such as GIF, JPEG, HTML, and and PDF)
 from raw network packets received in input tuples, 
@@ -110,6 +110,9 @@ environment variable. For example, before executing the `sc` command to compile 
 set the environment variable like this:
 
     export STREAMS_ADAPTERS_ISS_PAM_DIRECTORY=/home/username/com.ibm.iss.pam
+
+Alternative you can apply the 'Packet Analysis Module (PAM)' library to the application bundle and 
+specify the location with the parameters `pamLibrary` and `pamInclude` (since release v3.3.0).
 
 # Threads
 
@@ -247,15 +250,36 @@ memory.
 
           This optional parameter is a pathname for the PAM library, a
           Linux shared object library which implements the packet assembly engine.
-          If the pathname value specified is not absolute, then it is
-          relative to the directory specified by the STREAMS_ADAPTERS_ISS_PAM_DIRECTORY
-          environment variable at compile time.
           The default value is 'iss-pam1.so'.
+          This parameter is required only if you have not set the 
+          STREAMS_ADAPTERS_ISS_PAM_DIRECTORY environment variable.
+          
+          Example value for PAM directory: `getThisToolkitDir()+"/etc/iss-pam1.so"`
+
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+
+      <parameter>
+        <name>pamInclude</name>
+        <description>
+
+          This optional parameter is a pathname for the PAM header file.
+          The pathname value specified is relative to the application directory at compile time.
+          The default value is 'pam.h'.
+          This parameter is required only if you have not set the 
+          STREAMS_ADAPTERS_ISS_PAM_DIRECTORY environment variable at compile time.
+          
+          Example value for PAM directory: `"etc/pam.h"`
 
         </description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
-        <expressionMode>Constant</expressionMode>
+        <expressionMode>Expression</expressionMode>
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>

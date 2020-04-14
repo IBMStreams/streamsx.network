@@ -29,7 +29,7 @@ my $timestampAttribute = $model->getParameterByName("timestampAttribute")->getVa
 
 my $fileChunkSize = $model->getParameterByName("fileChunkSize") ? $model->getParameterByName("fileChunkSize")->getValueAt(0)->getCppExpression() : 100*1024;
 my $maximumFilesPerFlow = $model->getParameterByName("maximumFilesPerFlow") ? $model->getParameterByName("maximumFilesPerFlow")->getValueAt(0)->getCppExpression() : 0 ;
-my $pamLibrary = $model->getParameterByName("pamLibrary") ? $model->getParameterByName("pamLibrary")->getValueAt(0)->getCppExpression() : "iss-pam1.so" ;
+my $pamLibraryParameter = $model->getParameterByName("pamLibrary");
 
 # get string arrays for optional parameters that have lists of values
 
@@ -69,7 +69,6 @@ for (my $i=0; $i<$model->getNumberOfOutputPorts(); $i++) {
 
 print "// operator parameter 'packetAttribute': $packetAttribute\n";
 print "// operator parameter 'timestampAttribute': $timestampAttribute\n";
-print "// operator parameter 'pamLibrary': $pamLibrary\n";
 print "// operator parameter 'fileChunkSize': $fileChunkSize\n";
 foreach my $p (@pamTuning) { print "// operator parameter 'pamTuning': $p\n"; }
 foreach my $f (sort keys %resultFunctions) { print "// assembler result function $f()\n"; }
@@ -1066,8 +1065,6 @@ void MY_OPERATOR::submitOutputTuple(const OutputEvent event, const uint8_t* data
 }
 
 
-
-
 // Constructor
 MY_OPERATOR::MY_OPERATOR()
 {
@@ -1076,7 +1073,12 @@ MY_OPERATOR::MY_OPERATOR()
   // initialize operator parameters
   fileChunkSize = <%=$fileChunkSize%>;
   maximumFilesPerFlow = <%=$maximumFilesPerFlow%>;
-  pamLibrary = "<%=$pamLibrary%>";
+<% if ($pamLibraryParameter) {%>
+  SPL::rstring pamLibraryStr = <%=$model->getParameterByName("pamLibrary")->getValueAt(0)->getCppExpression()%>;
+  pamLibrary = pamLibraryStr.c_str(); 
+<% } else {%>
+  pamLibrary = "iss-pam1.so";
+<% }%>
   <% foreach my $parameter (@pamTuning) { print "pamTuning.push_back($parameter); " } %> ;
 
   // initialize operator state variables

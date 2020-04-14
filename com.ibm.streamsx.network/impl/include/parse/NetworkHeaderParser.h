@@ -110,6 +110,7 @@ class NetworkHeaderParser {
     struct VLANHeader* vlanHeader; int vlanHeaderLength;
     struct iphdr*   ipv4Header;  int ipv4HeaderLength;
     struct ip6_hdr* ipv6Header;  int ipv6HeaderLength;
+    struct ip6_frag* ipv6FragmentHeader;  int ipv6FragmentHeaderLength;
     struct udphdr*  udpHeader;   int udpHeaderLength;
     struct tcphdr*  tcpHeader;   int tcpHeaderLength;
     char*           payload;     int payloadLength;
@@ -124,7 +125,7 @@ class NetworkHeaderParser {
     // those with extension headers
 
 
-    void parseNetworkHeaders(char* buffer, int length) {
+    void parseNetworkHeaders(char* buffer, int length, bool jmirrorEnable = false) {
 
         // store address and length of packet for the output attribute assignment functions
         packetBuffer = buffer;
@@ -137,6 +138,7 @@ class NetworkHeaderParser {
         etherHeader = NULL; etherHeaderLength = 0;
         ipv4Header = NULL; ipv4HeaderLength = 0;
         ipv6Header = NULL; ipv6HeaderLength = 0;
+        ipv6FragmentHeader = NULL; ipv6FragmentHeaderLength = 0;
         udpHeader = NULL; udpHeaderLength = 0;
         tcpHeader = NULL; tcpHeaderLength = 0;
         payload = NULL; payloadLength = 0;
@@ -171,7 +173,7 @@ class NetworkHeaderParser {
 
         // if the buffer contains a Juniper Networks mirror packet, step over the 'jmirror' headers
         // (note that field tests are not in natural order so the inner 'if' will fail faster in the usual case)
-        if ( length>=sizeof(struct JMirrorHeaders) ) {
+        if ( jmirrorEnable && length>=sizeof(struct JMirrorHeaders) ) {
             struct JMirrorHeaders* jmirror = (struct JMirrorHeaders*)buffer;
             if ( ntohs(jmirror->udpHeader.dest)==jmirrorPort &&
                  jmirror->ipHeader.version==4 &&
@@ -232,7 +234,7 @@ class NetworkHeaderParser {
         if ( ! (ipv4Header || ipv6Header ) ) return;
 
         // if the buffer contains a UDP packet, and it has a UDP header, overlay a UDP header on it
-        if ( ( ipv4Header && ipv4Header->protocol==IPPROTO_UDP && length>=sizeof(struct udphdr) ) ||
+        if ( ( ipv4Header && ipv4Header->protocol==IPPROTO_UDP && (ntohs(ipv4Header->frag_off)&0x1FFF)==0 && length>=sizeof(struct udphdr) ) ||
              ( ipv6Header && ipv6Header->ip6_nxt==IPPROTO_UDP && length>=sizeof(struct udphdr) ) ) {
             udpHeader = (struct udphdr*)buffer;
             udpHeaderLength = sizeof(struct udphdr);
@@ -242,7 +244,7 @@ class NetworkHeaderParser {
         }
 
         // if the buffer contains a TCP packet, and it has a TCP header, overlay a TCP header on it
-        if ( ( ipv4Header && ipv4Header->protocol==IPPROTO_TCP && length>=sizeof(struct tcphdr) ) ||
+        if ( ( ipv4Header && ipv4Header->protocol==IPPROTO_TCP && (ntohs(ipv4Header->frag_off)&0x1FFF)==0 && length>=sizeof(struct tcphdr) ) ||
              ( ipv6Header && ipv6Header->ip6_nxt==IPPROTO_TCP && length>=sizeof(struct tcphdr) ) ) {
             tcpHeader = (struct tcphdr*)buffer;
             tcpHeaderLength = tcpHeader->doff * 4;

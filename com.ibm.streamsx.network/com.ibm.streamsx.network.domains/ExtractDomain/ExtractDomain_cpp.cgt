@@ -1,0 +1,262 @@
+<%
+## Copyright (C) 2017  International Business Machines Corporation
+## All Rights Reserved
+%>
+
+/*
+ */
+
+#include <string>
+#include <arpa/inet.h>
+#include "NetworkResources.h"
+
+#define EXTRACT_DOMAIN "EXTRACT_DOMAIN"
+
+using namespace SPL;
+using namespace std;
+
+<%
+unshift @INC, dirname($model->getContext()->getOperatorDirectory()) . "/../impl/bin";
+require CodeGenX;
+
+# These fragments of Perl code get strings from the operator's declaration
+# in the SPL source code for use in generating C/C++ code for the operator's
+# implementation below
+
+# get the name of this operator's template
+my $myOperatorKind = $model->getContext()->getKind();
+
+# get Perl objects for input and output ports
+my $inputPort0 = $model->getInputPortAt(0);
+my $inTupleType0 = $inputPort0->getCppTupleType();
+my $inputPort1 = $model->getInputPortAt(1);
+
+my $outputPort = $model->getOutputPortAt(0);
+my $outTupleType = $outputPort->getCppTupleType();
+
+# Verify the main input port and output port are of the same type.
+# They need to be!
+SPL::CodeGen::exitln(SPL::Msg::STDTK_OUTPUT_SCHEMA_NOT_MATCHING_INPUT(0, 0),
+                         $inputPort0->getSourceLocation()) if ($inTupleType0 ne $outTupleType);
+
+my $inputPort1CppName = $inputPort1->getCppTupleName();
+my $tldAttribute = $inputPort1->getAttributeAt(0)->getName();
+
+# get C++ expressions for getting the values of this operator's parameters
+my $inputFQDNAttrParamCppValue = $model->getParameterByName("inputFQDNAttr")->getValueAt(0)->getCppExpression();
+
+my $outputDomainAttr = $model->getParameterByName("outputDomainAttr")->getValueAt(0)->getSPLExpression();
+# remove the stream name from the attribute
+$outputDomainAttr =~ s/^.*\.//;
+
+my $blankOnInvalid = $model->getParameterByName("blankOnInvalidTLD");
+$blankOnInvalid = $blankOnInvalid ? $blankOnInvalid->getValueAt(0)->getSPLExpression() eq "true" : undef;
+
+%>
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR() {
+    tldsRSel_ = 0;
+    tldsWSel_ = 1;
+    firstListLoaded_ = false;
+
+    tlds_[0] = new TLDSet();
+    tlds_[1] = new TLDSet();
+}
+
+// Destructor
+MY_OPERATOR::~MY_OPERATOR() {
+    delete tlds_[0];
+    delete tlds_[1];
+}
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() {
+    // Notifies that all ports are ready. No tuples should be submitted before
+    // this. Source operators can use this method to spawn threads.
+
+    /*
+      createThreads(1); // Create source thread
+    */
+}
+ 
+// Notify pending shutdown
+void MY_OPERATOR::prepareToShutdown() {
+    // This is an asynchronous call
+}
+
+// Tuple processing for mutating ports
+void MY_OPERATOR::process(Tuple & tuple, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() mutating.", EXTRACT_DOMAIN);
+
+    if(port == 0) {
+        IPort0Type& iport$0 = (IPort0Type &)tuple;
+
+        std::string fqdn = <%=$inputFQDNAttrParamCppValue%>;
+        SPLAPPTRC(L_TRACE, "Process mutating, port 0: " << fqdn, EXTRACT_DOMAIN);
+
+        // Switch it to lower case, since that's how the TLDs will be
+        for(size_t i = 0; i < fqdn.length(); ++i) {
+            fqdn[i] = ::tolower(fqdn[i]);
+        }
+
+
+        // search the input tuple's FQDN string looking for the longest suffix that matches any TLD.
+        // Back up one label, and that's what gets copied to the output domain field.
+        // If nothing matches, set the output domain field to the empty string.
+
+        const char *ts = NULL;
+        const char *ds = NULL;
+
+        {
+            mutex_[tldsRSel_].lock();
+
+            if(!firstListLoaded_) {
+                ProcessingElement &pe = getPE();
+
+                SPLAPPTRC(L_WARN, "Waiting for the initial TLD list to be loaded in. R="<<tldsRSel_, EXTRACT_DOMAIN);
+
+                while(!firstListLoaded_ && !pe.getShutdownRequested()) {
+                    // We haven't finished reading in a TLD list on the other port.
+                    // We'll just block here forever, waiting for the TLD list.
+                    // That means upstream will be blocked as well, or backpressure if there
+                    // are threaded ports up there.  Seems like the right thing to do though,
+                    // since without a TLD list, we're just going to claim all domains are invalid
+                    // anyway.
+                    /// @TODO Maybe a parameter on the operator to do this vs just mark them all
+                    /// invalid?
+                    // Sleep for a ms or so.  Doesn't really matter, just something to keep us
+                    // from soaking up a core while we wait.
+                    mutex_[tldsRSel_].unlock();
+                    pe.blockUntilShutdownRequest(0.001);
+                    mutex_[tldsRSel_].lock();
+                }
+
+                if(firstListLoaded_) {
+                    SPLAPPTRC(L_WARN, "Initial TLD list is loaded.  We can proceed. R="<<tldsRSel_, EXTRACT_DOMAIN);
+                }
+            }
+
+            for(const char *p = fqdn.c_str(); p && *p; ) {
+                // Check the suffix starting at p to see if it is a TLD
+                if(tlds_[tldsRSel_]->count(p)) {
+                    // Looks like its a TLD!
+                    ts = p;
+                    break;
+                }
+
+                // Probably not a TLD
+                ds = p;
+                p = ::index(p, '.');
+                if(p) {
+                    // Move past the dot.  This might put us at the \0 null terminator, but that's ok, and will be handled fine.
+                    ++p;
+                }
+            }
+
+            mutex_[tldsRSel_].unlock();
+        }
+
+        if(!ts) {
+            // Rather than allow a NULL ptr, set ts (and thus ds, eventually) to the \0 at the end of fqdn.c_str().
+            ts = fqdn.c_str() + fqdn.length();
+            ds = ts;
+            SPLAPPTRC(L_TRACE, "No TLD found.", EXTRACT_DOMAIN);
+        } else {
+            SPLAPPTRC(L_TRACE, "Found TLD: " << std::string(ts), EXTRACT_DOMAIN);
+        }
+
+        if(!ds) {
+            // If no domain, just use the TLD itself, since that's apparently what was being questioned, anyway.
+            ds = ts;
+            SPLAPPTRC(L_TRACE, "No separate domain found.  Just using TLD.", EXTRACT_DOMAIN);
+        } else if(ds != ts) {
+            SPLAPPTRC(L_TRACE, "Found a separate domain: " << std::string(ds, ts - ds - 1), EXTRACT_DOMAIN);
+        }
+
+        if(*ds) {
+            // We have something set here, so use the entire domain+TLD for this field
+            SPLAPPTRC(L_TRACE, "Setting output field to: " << std::string(ds), EXTRACT_DOMAIN);
+            iport$0.set_<%=$outputDomainAttr%>(ds);
+        } else {
+            // No domain/TLD found.
+<% if($blankOnInvalid) { %>
+            // blankOnInvalidTLD is set, so force the field to empty (ds points to the \0, so that will work fine)
+            SPLAPPTRC(L_TRACE, "Setting output field to blank: " << std::string(ds), EXTRACT_DOMAIN);
+            iport$0.set_<%=$outputDomainAttr%>(ds);
+<% } else { %>
+            // blankOnInvalidTLD is NOT set, so use the full fqdn instead
+            SPLAPPTRC(L_TRACE, "Setting output field to full FQDN: " << fqdn, EXTRACT_DOMAIN);
+            iport$0.set_<%=$outputDomainAttr%>(fqdn);
+<% } %>
+        }
+
+        submit(iport$0, 0);
+    }
+}
+
+// Tuple processing for non-mutating ports
+void MY_OPERATOR::process(Tuple const & tuple, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() non-mutating.", EXTRACT_DOMAIN);
+    if(port == 1) {
+        const IPort1Type& iport$1 = tuple;
+
+        SPLAPPTRC(L_TRACE, "Process non-mutating, port 1.", EXTRACT_DOMAIN);
+
+        AutoPortMutex amW(mutex_[tldsWSel_], *this);
+
+        tlds_[tldsWSel_]->insert(<%=$inputPort1CppName%>.get_<%=$tldAttribute%>());
+
+        return;
+    }
+}
+
+// Punctuation processing
+void MY_OPERATOR::process(Punctuation const & punct, uint32_t port) {
+    SPLAPPTRC(L_TRACE, "entering <%=$myOperatorKind%> process() punctuation.", EXTRACT_DOMAIN);
+
+    if(port == 1) {
+        if(punct==Punctuation::WindowMarker) {
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: window.", EXTRACT_DOMAIN);
+
+            // Take both the R & W mutexes so we can close out the current filter list
+            // and swap lists atomically. This is the very uncommon case
+            // so the locking overhead is not important.
+            // However, we first grab just the writer's mutex,
+            // to avoid slowing down tuple processing.
+            mutex_[tldsWSel_].lock();
+
+            // Ok, all ready to do the swap, so grab the reader mutex as well now.
+            mutex_[tldsRSel_].lock();
+
+            firstListLoaded_ = true;
+
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() sending Window punctuation out port 0", EXTRACT_DOMAIN);
+            submit(Punctuation::WindowMarker, 0);
+
+            size_t tmpList = tldsWSel_;
+            tldsWSel_ = tldsRSel_;
+            tldsRSel_ = tmpList;
+
+            // Drop the lock for the _new_ reader's tld set (was the writer's tld set, when locked)
+            mutex_[tldsRSel_].unlock();
+
+            // At this point, we've already swapped, so tldsWSel points to the old set we were using,
+            // which should now be cleared before new stuff goes in it.
+            tlds_[tldsWSel_]->clear();
+
+            // Finally, drop the new writer's tld set lock (was the reader's tld set, when locked)
+            // so new tld files can be read in (eventually)
+            mutex_[tldsWSel_].unlock();
+
+        } else if(punct==Punctuation::FinalMarker) {
+            SPLAPPTRC(L_WARN, "<%=$myOperatorKind%> process() punctuation: final.", EXTRACT_DOMAIN);
+        }
+    }
+}
+
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
+

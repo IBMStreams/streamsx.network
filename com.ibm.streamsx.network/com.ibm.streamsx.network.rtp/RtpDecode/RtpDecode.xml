@@ -4,80 +4,75 @@
   xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
- <cppOperatorModel>
+  <cppOperatorModel>
     <context>
-	  <customOutputFunctions>
-	      <customOutputFunction>
-	      	<name>DefaultFunctions</name>
-	      	<function>
-            	<description>The default function for output attributes. By default, this function assigns the output attribute to the value of the input attribute with the same name.</description>
-            	<prototype><![CDATA[<any T> T AsIs(T)]]></prototype> 
-         	 </function>
-	      	<function>
-	      		<description>Return number of PCM samples.</description>
-	      		<prototype><![CDATA[uint32 getNumberOfSamples()]]></prototype>
-	      	</function>
-	      	<function>
-	      		<description>Return PCM payload.</description>
-	      		<prototype><![CDATA[blob getPcmPayload()]]></prototype>
-	      	</function>
-	      </customOutputFunction>
+      <description>
+      The RtpDecode Operator converts an input blob with 8 bit mylaw encoded PCM samples into uncompressed 16 bit samples. 
+      The output stream attribute with the 16 bit samples must be of type `blob` and the 16 bit samples are stored in little 
+      endian signed integer format.
+      </description>
+      <customOutputFunctions>
+        <customOutputFunction>
+          <name>DefaultFunctions</name>
+          <function>
+            <description>The default function for output attributes. By default, this function assigns the output attribute to the value of the input attribute with the same name.</description>
+            <prototype><![CDATA[<any T> T AsIs(T)]]></prototype> 
+          </function>
+          <function>
+            <description>Return the number of converted PCM samples in the current tuple.</description>
+            <prototype><![CDATA[uint64 getNumberOfSamples()]]></prototype>
+          </function>
+          <function>
+            <description>Return the converted PCM payload (uncompressed 16 bit little endian integer samples).</description>
+            <prototype><![CDATA[blob getPcmPayload()]]></prototype>
+          </function>
+        </customOutputFunction>
       </customOutputFunctions>
-      <providesSingleThreadedContext>Never</providesSingleThreadedContext>
-    </context>  
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+    </context>
     <parameters>
       <allowAny>false</allowAny>
-      <!-- some optional elements
       <parameter>
-        <name>paramName</name>
-        <description>brief description of the parameter</description>
-        <optional>true</optional>
-        <rewriteAllowed>true</rewriteAllowed>
-        <expressionMode>AttributeFree</expressionMode>
-        <type>rstring</type>
+        <name>payload</name>
+        <description>The input stream attribute with the 8 bit mulaw encoded PCM samples to convert.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <type>blob</type>
         <cardinality>1</cardinality>
       </parameter>
-      -->
     </parameters>
     <inputPorts>
-      <!-- some optional elements
       <inputPortSet>
+        <description>
+        The input port with an blob attribute containing the PCM samples.
+        </description>
         <tupleMutationAllowed>false</tupleMutationAllowed>
         <windowingMode>NonWindowed</windowingMode>
         <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
-        <cardinality>2</cardinality>
+        <cardinality>1</cardinality>
         <optional>false</optional>
-      </inputPortSet>      
-      -->
-      <inputPortOpenSet>
-        <tupleMutationAllowed>true</tupleMutationAllowed>
-        <windowingMode>OptionallyWindowed</windowingMode>
-        <windowPunctuationInputMode>WindowBound</windowPunctuationInputMode>
-      </inputPortOpenSet>
+      </inputPortSet>
     </inputPorts>
     <outputPorts>
       <outputPortSet>
+        <description>
+        The output port with an blob attribute containing the converted PCM samples. The other attributes are auto 
+        assigned from input port to output port.
+        </description>
         <expressionMode>Expression</expressionMode> 
         <autoAssignment>true</autoAssignment>
-        <completeAssignment>true</completeAssignment>
-        <rewriteAllowed>true</rewriteAllowed>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>false</rewriteAllowed>
         <outputFunctions>
-			<default>AsIs</default>
-			<type>DefaultFunctions</type>
-		</outputFunctions>
-        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+          <default>AsIs</default>
+          <type>DefaultFunctions</type>
+        </outputFunctions>
+        <windowPunctuationOutputMode>Preserving</windowPunctuationOutputMode>
         <tupleMutationAllowed>true</tupleMutationAllowed>
         <cardinality>1</cardinality>
         <optional>false</optional>
       </outputPortSet>
-      <outputPortOpenSet>
-        <expressionMode>Expression</expressionMode> 
-        <autoAssignment>false</autoAssignment>
-        <completeAssignment>false</completeAssignment>
-        <rewriteAllowed>true</rewriteAllowed>
-        <windowPunctuationOutputMode>Generating</windowPunctuationOutputMode>
-        <tupleMutationAllowed>true</tupleMutationAllowed>
-      </outputPortOpenSet>    
     </outputPorts>
   </cppOperatorModel>
 </operatorModel>

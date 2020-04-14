@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  
+Copyright (C)2017, International Business Machines Corporation and  
+others. All Rights Reserved. 
+-->
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>This operator extracts the domain+tld portion of a fqdn in a tuple, and sets a pre-existing field in the tuple to that value.</description>
+      <libraryDependencies>
+        <library>
+          <cmn:description>   </cmn:description>
+          <cmn:managedLibrary>
+            <cmn:includePath>../../impl/include</cmn:includePath>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Never</providesSingleThreadedContext>
+      <allowCustomLogic>false</allowCustomLogic>
+    </context>
+    <parameters>
+      <description></description>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>inputFQDNAttr</name>
+        <description>Specifies the input attribute containing the FQDN that the extraction will be performed on.
+The supported data type for this attribute is `rstring`.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Expression</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>outputDomainAttr</name>
+        <description>Specifies the output attribute to write the extracted domain+TLD data to.  Existing data will be overwritten.
+If the FQDN is malformed, or doesn't match a known TLD, this field will be empty.
+The supported data type for this attribute is `rstring`.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Attribute</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>blankOnInvalidTLD</name>
+        <description>
+By default, if the FQDN doesn't match any TLD, the outputDomainAttr field is filled in with the entire incoming FQDN.
+If blankOnInvalidTLD is set, when no valid TLD is found, the outputDomainAttr field is left blank.
+        </description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>Constant</expressionMode>
+        <type>boolean</type>
+        <cardinality>1</cardinality>
+        <portScope><port>0</port></portScope>
+      </parameter>
+   </parameters>
+    <inputPorts>
+      <inputPortSet>
+        <description>Ingests tuples containing FQDNs in the `inputFQDNAttr` field, extracts the domain, and sets it into the `outputDomainAttr` field before sending the tuple on.</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>false</controlPort>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+      <inputPortSet>
+        <description>Control port that takes in tuples containing TLDs for use in later extractions.
+This control port can be used to dynamically update the list of TLDs used for extraction. Each time a tuple is received containing a TLD it is saved in a temporary TLD list that is applied after a window punctuation is received on this port.  This input port expects a tuple containing a single attribute of type `rstring` which is a TLD name.</description>
+        <windowingDescription></windowingDescription>
+        <tupleMutationAllowed>false</tupleMutationAllowed>
+        <windowingMode>NonWindowed</windowingMode>
+        <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
+        <controlPort>true</controlPort>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </inputPortSet>
+    </inputPorts>
+    <outputPorts>
+      <outputPortSet>
+        <description>Submits each input tuple after updating the field indicated by the `outputDomainAttr` parameter with the domain+TLD extracted from the FQDN field (indicated by the `inputFQDNAttr` parameter).</description>
+        <expressionMode>Nonexistent</expressionMode>
+        <autoAssignment>true</autoAssignment>
+        <completeAssignment>true</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Preserving</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>0</windowPunctuationInputPort>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

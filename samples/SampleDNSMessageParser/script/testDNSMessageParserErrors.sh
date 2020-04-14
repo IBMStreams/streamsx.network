@@ -51,7 +51,7 @@ compileTimeParameterList=(
 
 submitParameterList=(
 pcapFilename=$samplesDirectory/SampleNetworkToolkitData/data/sample_dns_only_errors.pcap
-#pcapFilename=/home/streams4/data.haifa/dns_tunneling_long.pcap
+#pcapFilename=/home/streamsdev/data.miscellaneous/parser_error_107_b.pcap
 )
 
 traceLevel=3 # ... 0 for off, 1 for error, 2 for warn, 3 for info, 4 for debug, 5 for trace

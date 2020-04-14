@@ -28,9 +28,11 @@ my $initDelay = $model->getParameterByName("initDelay") ? $model->getParameterBy
 my $bufferSize = $model->getParameterByName("bufferSize") ? $model->getParameterByName("bufferSize")->getValueAt(0)->getCppExpression() : 0;
 my $promiscuous = $model->getParameterByName("promiscuous") ? $model->getParameterByName("promiscuous")->getValueAt(0)->getCppExpression() : 0;
 my $processorAffinity = $model->getParameterByName("processorAffinity") ? $model->getParameterByName("processorAffinity")->getValueAt(0)->getCppExpression() : -1;
+my $jMirrorCheck = $model->getParameterByName("jMirrorCheck") ? $model->getParameterByName("jMirrorCheck")->getValueAt(0)->getCppExpression() : 0;
 my $timeout = $model->getParameterByName("timeout") ? $model->getParameterByName("timeout")->getValueAt(0)->getCppExpression() : 0;
 my $inputFilter = $model->getParameterByName("inputFilter") ? $model->getParameterByName("inputFilter")->getValueAt(0)->getCppExpression() : undef;
 my $metricsInterval = $model->getParameterByName("metricsInterval") ? $model->getParameterByName("metricsInterval")->getValueAt(0)->getCppExpression() : 10.0;
+my $rateLimit = $model->getParameterByName("rateLimit") ? $model->getParameterByName("rateLimit")->getValueAt(0)->getCppExpression() : 1000.0;
 
 # special handling for 'outputFilters' parameter, which may include SPL functions that reference input tuples indirectly
 my $outputFilterParameter = $model->getParameterByName("outputFilters");
@@ -77,10 +79,17 @@ MY_OPERATOR::MY_OPERATOR()
   initDelay = <%=$initDelay%>;
   bufferSize = <%=$bufferSize%>;
   promiscuous = <%=$promiscuous%>;
+  jMirrorCheck = <%=$jMirrorCheck%>;
   processorAffinity = <%=$processorAffinity%>;
   timeout = <%=$timeout%>;
   inputFilter = <%= $inputFilter ? $inputFilter : '""' %>;
   metricsInterval = <%=$metricsInterval%>;
+
+  // Set up rate limiter parameters.  This approach scales to 1M pps, or 1 per usec and then
+  // goes unlimited. 
+  rateLimit = <%=$rateLimit%>;
+  rateLimitLastTime = 0;
+  rateLimitPeriodUsec = (uint64_t)((1.0 / rateLimit) * 1000000.0);
 
   // initialize operator state variables
   pcapThreadID = metricsThreadID = 0;
@@ -296,7 +305,7 @@ void MY_OPERATOR::processPCAPbuffer(const struct pcap_pkthdr* header, const u_ch
   pcapHeader = (pcap_pkthdr*)header;
 
   // parse the network headers in the packet
-  headers.parseNetworkHeaders((char*)buffer, header->caplen);
+  headers.parseNetworkHeaders((char*)buffer, header->caplen, jMirrorCheck);
 
   // ignore the packet if its not IPv4, or not UDP, or not to/from port 53, or has no payload
   if ( ! headers.ipv4Header ) { SPLAPPTRC(L_DEBUG, "ignoring packet " << packetCounter << ", no IPv4 header found", "DNSPacketLiveSource");  return; }

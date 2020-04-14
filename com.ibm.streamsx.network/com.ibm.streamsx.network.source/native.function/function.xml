@@ -18,6 +18,7 @@ This function always returns zero for the PacketFileSource operator.
             </function:description>
             <function:prototype>public uint64 packetsReceived()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -27,6 +28,17 @@ This function always returns zero for the PacketFileSource operator.
 
             </function:description>
             <function:prototype>public uint64 packetsDropped()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of bytes received from the network interface
+since the operator started, as of the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the PacketLiveSource and PacketFileSource operators.
+
+            </function:description>
+            <function:prototype>public uint64 bytesReceived()</function:prototype>
           </function:function>
 
           <function:function>
@@ -54,6 +66,17 @@ This function always returns zero for the PacketFileSource operator.
           <function:function>
             <function:description>
 
+This function returns the number of bytes received from the network interface
+during the most recent metrics interval, if there is one, or zero if not.
+This function always returns zero for the PacketLiveSource and PacketFileSource operators.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalBytesReceived()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
 This function returns the number of network packets processed by the operator since it started,
 including the current packet, but excluding any packets that were ignored by the input filter,
 if the `inputFilter` parameter was specified.
@@ -61,6 +84,7 @@ if the `inputFilter` parameter was specified.
             </function:description>
             <function:prototype>public uint64 packetsProcessed()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -120,6 +144,36 @@ and returns `false` for all subsequent tuples produced in the same metrics inter
           <function:function>
             <function:description>
 
+This function returns the total number of packets dropped by the software packet receive queue (if implemented).
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 packetsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the number of packets dropped by the software packet receive queue (if implemented) in the
+most recent metrics interval.  Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalPacketsDroppedSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the software receive queue (if implemented) high water mark from the most recent metrics interval.
+Otherwise, returns 0.
+
+            </function:description>
+            <function:prototype>public uint64 metricsIntervalMaxQueueDepthSW()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
 This function returns the number of seconds since the beginning of the Unix epoch
 (midnight on January 1st, 1970 in Greenwich, England) until the current packet was captured,
 according to the system clock on the machine that captured it.
@@ -127,6 +181,7 @@ according to the system clock on the machine that captured it.
             </function:description>
             <function:prototype>public uint32 CAPTURE_SECONDS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -162,6 +217,7 @@ if the packet was truncated when it was captured.
             </function:description>
             <function:prototype>public uint32 PACKET_LENGTH()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -172,6 +228,7 @@ Note that the data may have been truncated when the packet was captured.
             </function:description>
             <function:prototype>public blob PACKET_DATA()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -184,6 +241,7 @@ packet was truncated when it was captured.
             </function:description>
             <function:prototype>public uint32 PAYLOAD_LENGTH()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -203,6 +261,7 @@ This function returns the ethernet source address of the current packet.
             </function:description>
             <function:prototype>public list&lt;uint8>[6] ETHER_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -211,6 +270,16 @@ This function returns the ethernet destination address of the current packet.
             </function:description>
             <function:prototype>public list&lt;uint8>[6] ETHER_DST_ADDRESS()</function:prototype>
           </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the ethernet destination address of the current packet in the 48 low-order bits of a uint64.
+
+            </function:description>
+            <function:prototype>public uint64 ETHER_DST_ADDRESS_64()</function:prototype>
+          </function:function>
+
           <function:function>
             <function:description>
 
@@ -220,6 +289,7 @@ current packet, for example, '2048' for IP version 4, or '34,525' for IP version
             </function:description>
             <function:prototype>public uint16 ETHER_PROTOCOL()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -230,6 +300,7 @@ if the ethernet packet contains an IP packet, or zero otherwise.
             </function:description>
             <function:prototype>public uint8 IP_VERSION()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -240,6 +311,60 @@ or zero if the ethernet packet does not contain an IP packet.
             </function:description>
             <function:prototype>public uint8 IP_PROTOCOL()</function:prototype>
           </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP identifier of the current packet.
+When a packet is fragmented in transit, this identifer is copied into all of the fragments.
+The receiver combines this identifier with the packet's 
+source and destination addresses to gather the fragments, 
+and uses the fragment offset (see the IP_FRAGMENT_OFFSET() function) to reassemble 
+them into original packet.
+
+            </function:description>
+            <function:prototype>public uint32 IP_IDENTIFIER()</function:prototype>
+          </function:function>
+
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "don't fragment" flag of the current packet.
+When a sender sets this flag in a packet, it prohibits routers from fragmenting
+the packet in transit. If the packet's length exceeds the maximum size of a link,
+it will be discarded by the router instead of being fragmented.
+
+            </function:description>
+            <function:prototype>public boolean IP_DONT_FRAGMENT()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "more fragments" flag of the current packet.
+When a router fragments a packet, it sets this flag in all fragments except the last one.
+
+            </function:description>
+            <function:prototype>public boolean IP_MORE_FRAGMENTS()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+
+This function returns the IP "fragment offset" field of the current packet, multiplied by eight,
+When a router fragments a packet, it stores the offset from the front of the packet to
+the front of the fragment, measured in eight-byte steps, in each fragment.
+That is, the size of each fragment is always a multiple of eight bytes, 
+and the value stored is the offset in bytes, divided by eight.
+This function returns that value, multiplied by eight, so that it gives the offset from the front
+of the packet to the front of the fragment in bytes.
+
+            </function:description>
+            <function:prototype>public uint16 IP_FRAGMENT_OFFSET()</function:prototype>
+          </function:function>
+
+
           <function:function>
             <function:description>
 
@@ -258,6 +383,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint32 IPV4_DST_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -267,6 +393,7 @@ if it has one, or an empty list otherwise.
             </function:description>
             <function:prototype>public list&lt;uint8>[16] IPV6_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -276,6 +403,7 @@ if it has one, or an empty list otherwise.
             </function:description>
             <function:prototype>public list&lt;uint8>[16] IPV6_DST_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -285,6 +413,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 IP_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -294,6 +423,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 IP_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -304,6 +434,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean UDP_PORT(uint16)</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -313,6 +444,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 UDP_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -322,6 +454,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 UDP_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -331,6 +464,7 @@ or `false` if not.
             </function:description>
             <function:prototype>public boolean TCP_PORT(uint16)</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -340,6 +474,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 TCP_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -349,6 +484,7 @@ if it has one, or zero otherwise.
             </function:description>
             <function:prototype>public uint16 TCP_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -358,6 +494,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 TCP_SEQUENCE()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -367,6 +504,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 TCP_ACKNOWLEDGEMENT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -376,6 +514,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_URGENT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -385,6 +524,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_ACK()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -394,6 +534,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_PUSH()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -403,6 +544,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_RESET()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -412,6 +554,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_SYN()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -421,6 +564,7 @@ or `false` otherwise.
             </function:description>
             <function:prototype>public boolean TCP_FLAGS_FIN()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -430,6 +574,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint16 TCP_WINDOW()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -439,6 +584,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 JMIRROR_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -448,6 +594,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 JMIRROR_DST_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -457,6 +604,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint16 JMIRROR_SRC_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -466,6 +614,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint16 JMIRROR_DST_PORT()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -475,6 +624,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 JMIRROR_INTERCEPT_ID()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -503,6 +653,7 @@ if it has one, or zero if otherwise.
             </function:description>
             <function:prototype>public uint32 ERSPAN_SRC_ADDRESS()</function:prototype>
           </function:function>
+
           <function:function>
             <function:description>
 
@@ -511,6 +662,24 @@ if it has one, or zero if otherwise.
 
             </function:description>
             <function:prototype>public uint32 ERSPAN_DST_ADDRESS()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+            This function returns false when an amount of time between packets has passed such that
+            the rate is limited to the value given in the rateLimit paramater.
+            </function:description>
+            <function:prototype>public boolean RATE_LIMITED()</function:prototype>
+          </function:function>
+
+          <function:function>
+            <function:description>
+            This function speculatively returns the DNS response flag.  Full packet parsing with validation
+            is not performed.  Instead, simple basic checks are made and then the response bit is returned.
+            This means that all actual DNS packets that are responses are returned correctly, but some
+            non-DNS packets might also be flagged as a DNS response.
+            </function:description>
+            <function:prototype>public boolean DNS_RESPONSE_FLAG_HINT()</function:prototype>
           </function:function>
 
     </function:functions>

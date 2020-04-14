@@ -1,0 +1,45 @@
+/*
+** Copyright (C) 2017  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+use com.ibm.streamsx.network.sink::*;
+
+composite TestPacketFileSinkBasic {
+
+    param
+    expression<rstring> $inputFilename: getSubmissionTimeValue("inputFilename", "../../SampleNetworkToolkitData/data/sample_dns+dhcp.pcap" );
+
+    type
+
+    PacketType =
+        uint64 packetNumber,            // sequence number of packet, as emitted by operator
+        float64 packetTime,             // time that packet was captured, in seconds since Unix epoch
+        uint32 packetLength,            // original length of packet (not necessarily all captured)
+        blob packetData;                // contents of packet captured, including network headers (possibly truncated)
+
+    graph
+
+    stream<PacketType> PacketStream = PacketFileSource() {
+        param
+            pcapFilename: $inputFilename;
+            metricsInterval: 0.0;
+        output PacketStream:
+            packetNumber = packetsProcessed() - 1ul,
+            packetTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            packetLength = PACKET_LENGTH(),
+            packetData = PACKET_DATA();
+    }
+    () as PacketSink = FileSink(PacketStream) { param file: "debug.TestPacketFileSinkBasic.PacketStream.out"; format: txt; hasDelayField: true; flush: 1u; }
+
+
+    () as Out = PacketFileSink(PacketStream) {
+      param
+        pcapFilename: "./data/debug.TestPacketFileSinkBasic.PacketStream.pcap";
+        packetAttribute: packetData;
+        timestampAttribute: packetTime; }
+
+}

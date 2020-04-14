@@ -18,6 +18,8 @@
 #include <streams_boost/tokenizer.hpp>
 #include <streams_boost/regex.hpp> 
 
+#include <GeohashFunctions.h>
+
 <%SPL::CodeGen::headerPrologue($model);%>
 
 
@@ -46,6 +48,8 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
   void process(Tuple const & tuple, uint32_t port);
   void process(Punctuation const & punct, uint32_t port);
 
+  void loadGeoData();
+
   // ----------- this structure contains geographical locations ----------
 
   struct CityLocation {
@@ -61,6 +65,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
     std::string cityName;         // column 10
     std::string metroCode;        // column 11
     std::string timezone;         // column 12 
+    std::string inEU;             // column 13
   };
   std::tr1::unordered_map<std::string, CityLocation*> cityLocations; // indexed by 'locationID'
 
@@ -117,6 +122,7 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   std::string geographyDirectory;
   uint32_t ipAddressAttributesCount;
+  bool initOnTuple;
 
   // ----------- output tuples ----------
 
@@ -164,6 +170,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
     SPL::float64 locationLongitude(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->longitude : 0.0; }
 
   inline __attribute__((always_inline))
+    SPL::rstring locationGeohash(SPL::uint32 ipv4Address, SPL::int32 precision) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? com::ibm::streamsx::network::geohash::geohashEncode(subnet->latitude, subnet->longitude, precision)  : ""; }
+
+  inline __attribute__((always_inline))
     SPL::float64 locationRadius(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->radius : 0.0; }
 
   inline __attribute__((always_inline))
@@ -199,6 +208,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
   inline __attribute__((always_inline))
     SPL::rstring locationTimezone(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->timezone : ""; }
 
+  inline __attribute__((always_inline))
+    SPL::rstring locationInEU(SPL::uint32 ipv4Address) { IPSubnet* subnet = findIPv4Subnet(ipv4Address); return subnet ? subnet->location->inEU : ""; }
+
 
   inline __attribute__((always_inline))
     SPL::boolean locationFound(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return !!subnet; }
@@ -223,6 +235,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   inline __attribute__((always_inline))
     SPL::float64 locationLongitude(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->longitude : 0.0; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationGeohash(SPL::blist<SPL::uint8,16> ipv6Address, SPL::int32 precision) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? com::ibm::streamsx::network::geohash::geohashEncode(subnet->latitude,subnet->longitude,precision) : ""; }
 
   inline __attribute__((always_inline))
     SPL::float64 locationRadius(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->radius : 0.0; }
@@ -259,6 +274,9 @@ class MY_OPERATOR : public MY_BASE_OPERATOR
 
   inline __attribute__((always_inline))
     SPL::rstring locationTimezone(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->timezone : ""; }
+
+  inline __attribute__((always_inline))
+    SPL::rstring locationInEU(SPL::blist<SPL::uint8,16> ipv6Address) { IPSubnet* subnet = findIPv6Subnet(ipv6Address); return subnet ? subnet->location->inEU : ""; }
 
 
   inline __attribute__((always_inline))
