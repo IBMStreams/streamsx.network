@@ -1,0 +1,31 @@
+/*******************************************************************************
+ * Copyright (C) 2020, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR {
+public:
+  // Constructor
+  MY_OPERATOR();
+
+  // Destructor
+  virtual ~MY_OPERATOR();
+
+  // Tuple processing for non-mutating ports
+  void process(Tuple const & tuple, uint32_t port);
+
+  // Punctuation processing
+  void process(Punctuation const & punct, uint32_t port);
+  
+  unsigned int getNumberOfSamples(unsigned int length);
+  SPL::blob getPcmPayload(unsigned char * decompressed, unsigned int length);
+private:
+  // Members
+  int16_t MuLaw_Decode(int8_t number);
+  int recNumber;
+};
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+
