@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Operator RtpDecode"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_operator"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Operator RtpDecode</title>
+</head>
+<body id="spldoc_operator">
+
+
+<h1 class="title topictitle1">Operator <tt class="ph tt">RtpDecode</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.4.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.network.rtp.html">com.ibm.streamsx.network.rtp</a> &gt; RtpDecode</p>
+
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.network/op$com.ibm.streamsx.network.rtp$RtpDecode.svg" width="872" height="112"/>
+</div>
+
+<div class="section">
+
+<p class="p">      The RtpDecode Operator converts an input blob with 8 bit mylaw encoded PCM samples into uncompressed 16 bit samples.        The output stream attribute with the 16 bit samples must be of type <tt class="ph tt">blob</tt> and the 16 bit samples are stored in little        endian signed integer format.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Ports</dt>
+
+  <dd class="dd">This operator has 1 input port and 1 output port.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Windowing</dt>
+
+  <dd class="dd">This operator does not accept any windowing configurations.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Parameters</dt>
+
+  <dd class="dd">This operator supports 1 parameter.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__payload">payload</a>
+
+</p>
+</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Metrics</dt>
+
+  <dd class="dd">This operator does not report any metrics.</dd>
+
+ 
+</dl>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Properties</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Implementation</dt>
+
+  <dd class="dd">C++</dd>
+
+ 
+ 
+  <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__providessinglethreadedexecutioncontext">Threading</a></dt>
+
+  <dd class="dd"><tt class="ph tt">Always</tt> - Operator always provides a single threaded execution context.</dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set">Input Ports</a></strong></p>
+<dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0)</dt>
+
+   <dd class="dd">
+<p class="p">        The input port with an blob attribute containing the PCM samples.
+</p>
+
+   <dl class="dl">
+    
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__optional">Optional</a>: false
+     </li>
+
+   </ul>
+
+   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__controlport">ControlPort</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__tuplemutationallowed">TupleMutationAllowed</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__windowingmode">WindowingMode</a>: NonWindowed
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__input_port_set__windowpunctuationinputmode">WindowPunctuationInputMode</a>: Oblivious
+     </li>
+
+   </ul>
+
+      </dd>
+    
+   </dl>
+
+   <p class="p"/>
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set">Output Ports</a></strong></p>
+<dl class="dl">
+  
+     <dt class="dt dlterm">Assignments</dt>
+
+     <dd class="dd">This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+
+  
+</dl>
+
+<dl class="dl">
+      <dt class="dt dlterm"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__customoutputfunctions">Output Functions</a></dt>
+
+    <dd class="dd">
+      <dl class="dl">
+      
+        <dt class="dt dlterm">DefaultFunctions</dt>
+
+        <dd class="dd">
+          <dl class="dl">
+            <dt class="dt dlterm"/>
+<dd class="dd"/>
+
+            
+              <dt class="dt dlterm">
+                <tt class="ph tt">   &lt;any T&gt; T AsIs(T)</tt>              </dt>
+
+            <dd class="dd">
+
+<p class="p">The default function for output attributes. By default, this function assigns the output attribute to the value of the input attribute with the same name.
+</p>
+              <p class="p"/>
+
+            </dd>
+
+                        
+              <dt class="dt dlterm">
+                <tt class="ph tt">   uint64 getNumberOfSamples()</tt>              </dt>
+
+            <dd class="dd">
+
+<p class="p">Return the number of converted PCM samples in the current tuple.
+</p>
+              <p class="p"/>
+
+            </dd>
+
+                        
+              <dt class="dt dlterm">
+                <tt class="ph tt">   blob getPcmPayload()</tt>              </dt>
+
+            <dd class="dd">
+
+<p class="p">Return the converted PCM payload (uncompressed 16 bit little endian integer samples).
+</p>
+              <p class="p"/>
+
+            </dd>
+
+                      </dl>
+        </dd>
+
+      
+      </dl>
+
+    </dd>
+
+  </dl>
+
+ <dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0)</dt>
+
+   <dd class="dd">
+
+<p class="p">        The output port with an blob attribute containing the converted PCM samples. The other attributes are auto          assigned from input port to output port.
+</p>
+
+    <p class="p"/>
+
+    <dl class="dl">
+     
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__optional">Optional</a>: false
+     </li>
+
+   </ul>
+
+   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Preserving
+     </li>
+
+   </ul>
+
+</dd>
+     
+    </dl>
+
+    <p class="p"/>
+
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
+This operator supports 1 parameter.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__payload">payload</a>
+
+</p>
+<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__payload"><!-- --></a><tt class="ph tt">payload</tt></dt>
+
+     <dd class="dd">
+<p class="p">The input stream attribute with the 8 bit mulaw encoded PCM samples to convert.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: blob
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: Attribute
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
