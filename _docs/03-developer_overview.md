@@ -16,7 +16,7 @@ For the toolkit's source code, please see [https://github.com/IBMStreams/streams
 # Build the toolkit
 
 The toolkit needs to be build before you can use it in a SPL application.
-Run the following command in the `streamsx.shell` directory:
+Run the following command in the `streamsx.network` directory:
 
     ant all
 
