@@ -22,4 +22,7 @@ For the toolkit's documentation, please see [http://ibmstreams.github.io/streams
 
 For the toolkit's source code, please see [https://github.com/IBMStreams/streamsx.network/](https://github.com/IBMStreams/streamsx.network/).
 
+## Changes
+
+[CHANGELOG.md](com.ibm.streamsx.network/CHANGELOG.md)
 
