@@ -26,4 +26,4 @@ This project contains the sample (PCAP) input files for several sample applicati
 
 ## Samples for the IPASNEnricher and IPSpatialEnricher operators
 
-Samples for the operators IPASNEnricher and IPSpatialEnricher will be available on github: https://github.com/IBMStreams/streamsx.cybersecurity.starterApps/tree/master/PredictiveBlacklistingSamples/com.ibm.streamsx.cybersecurity.sample
+Samples for the operators IPASNEnricher and IPSpatialEnricher will be available on GitHub: https://github.com/IBMStreams/streamsx.cybersecurity.starterApps/tree/develop/PredictiveBlocklistingSamples
