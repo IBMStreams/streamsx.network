@@ -47,7 +47,7 @@ include this statement in the SPL source file:
 # Sample Applications
 
 The network toolkit includes several
-[https://github.com/IBMStreams/streamsx.network/tree/master/samples|sample applications]
+[https://github.com/IBMStreams/streamsx.network/tree/develop/samples|sample applications]
 that illustrate how to use this operator.
 
 # References
