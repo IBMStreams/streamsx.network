@@ -13,10 +13,10 @@ Incubation for projects is covered here: https://github.com/IBMStreams/administr
   * Status: See http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/
   
 - [x] :white_check_mark: Project has samples and instructions to help users get started easily
-  * Status: See https://github.com/IBMStreams/streamsx.network/tree/master/samples
+  * Status: See https://github.com/IBMStreams/streamsx.network/tree/develop/samples
   
 - [x] :white_check_mark: Sufficient testing
-  * Status: See https://github.com/IBMStreams/streamsx.network/tree/master/samples
+  * Status: See https://github.com/IBMStreams/streamsx.network/tree/develop/samples
   
 - [x] :white_check_mark: Instructions on how to get started with development and contributing to project
   * Status: See http://ibmstreams.github.io/streamsx.network/doc/spldoc/html/
