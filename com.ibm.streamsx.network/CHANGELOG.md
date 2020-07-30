@@ -1,6 +1,10 @@
 # Changes
 ==========
 
+## v3.4.2
+
+* [#205](https://github.com/IBMStreams/streamsx.network/issues/205) Links to samples updated in operator description
+
 ## v3.4.1
 
 * [#204](https://github.com/IBMStreams/streamsx.network/issues/204) CHANGELOG.md added
@@ -34,5 +38,4 @@
 * Additional CIDR functions to determine the range of addresses covered.
 * Improved IPFilter performance by avoiding needless creation of local list of IP addresses
 * IPFilter operator: Changed traces with WARN trace level to TRACE level.
-
 
