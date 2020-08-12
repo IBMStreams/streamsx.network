@@ -12,10 +12,90 @@ sidebar:
 {%include editme %}
 
 
+The network toolkit enables SPL applications to analyze low level network packets such as parsing DHCP, DNS, Netflow, IPFIX messages, enriching IPV4 and IPV6 addresses with geospatial data as well as converting IP address between binary and string representation. The following section will provide you with a high level overview on the capabilities of the operators within this toolkit and a simple example on how to use the operator to process network packet data.
+
+## Operator Overview (alphabetically sorted)
+
+**DHCPMessageParser**
+:
+ 
+The DHCPMessageParser is an operator that parses the DHCP message fields received as input tuples and emits tuples containing the DHCP message data. Users can then use DHCP parser result functions to further process the payload data. For example the DHCP_DOMAIN_NAME() function returns the domain name of the client and DHCP_SERVER_ADDRESS() function returns the IPV4 address of the DHCP server.
+
+**DNSMessageParser**
+:
+ 
+This operator parses individual DNS message field received in input tuples and emits tuples containing DNS message data. Users can then use DNS parser result functions to further process the payload data.
+
+**IPAddressLocation**
+:
+ 
+The IPAddressLocation operator utilizes geographical location data provided by the MaxMind Inc
+and finds the geographical location of IP address received in the input tuples and emits output tuples containing the country, state, province, city , latitude and logitude of the subnet.
+
+**IPASNEnricher**
+:
+ 
+This operator enriches IPV4 and IPV6 addresses by mapping them to ASN (Autonomous System Numbers) used by MaxMind GeoLite ASN database.
+
+**IPFIXMessageParser**
+:
+ 
+The IPFIXMessageParser is an operator that parses the IPFIX (Internet Protocol Flow Information Export protocol) message fields received in input tuples and emits tuples containing message data. Users can then uses IPFIX parser result functions to further process packet payload data.
+
+**IPSpatialEnricher**
+:
+ 
+This operator enriches IPV4 and IPV6 addresses by mapping them to geospatial data used by MaxMind GeoIP2 database.
+
+**PacketContentAssembler**
+:
+ 
+This operator reassembles flows such as SMTP,FTP,HTTP and files such as GIF,JPEG,HTML,PDF from raw network packets received as tuples and emits the fully assembled content to users.
+
+**PacketDPDKSource**
+:
+ 
+PacketDPDKSource operator provides the same functionality as the PacketLiveSource operator. The primary difference between these two operators is that the PacketDPDKSource operator utilizes the DPDK libraries at
+http://www.dpdk.org
+for improved performance with lower processing overhead.
+
+**PacketFileSource**
+:
+ 
+This operator reads network packet from ?pcap? packet capture files and parses network headers and emits tuples containing packet data. Users can then use the network toolkit functions to further process the packet such as retrieving its source and destination ip address, ip version,payload and protocol information etc?
+
+**PacketLiveSource**
+:
+ 
+PacketLiveSource operator is very similar to PacketFileSource operator. The difference is that instead of parsing static pcap files, it is able to capture live network packets from an ethernet interface. Users can then use a downstream operator such as DNS,DHCP or IPFIX message parser to further process its payload data.
+
 ## SPLDOC
 
 [SPLDoc for the com.ibm.streamsx.network toolkit](https://ibmstreams.github.io/streamsx.network/doc/spldoc/html/index.html)
 
+
+## Environment Setup
+
+1. Install libpcap-devel rpm from your linux repository.
+2. Import the SampleNetworkToolkitData spl project which contains sample PCAP files needed to run network sample applications.
+![Import](/doc/images/pcap1.jpg)
+3. Alternatively you can also generate a pcap file by running the tcpdump command against your ethernet interface.
+
+```
+[root@oc2756228212 tmp]# tcpdump -i wlp3s0 -w test.pcap
+
+tcpdump: listening on wlp3s0, link-type EN10MB (Ethernet), capture size 65535 bytes
+
+178 packets captured
+
+178 packets received by filter
+
+0 packets dropped by kernel
+```
+4. Import network sample spl applications to your Streams Studio work space.
+5. Locate the pcap file by editing the following spl code : expression $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/(your pcap file)" )
+6. Compile and submit the job.
+![Import](/doc/images/studio.jpg)
 
 ## Sample applications
 
