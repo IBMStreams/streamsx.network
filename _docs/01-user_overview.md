@@ -77,7 +77,9 @@ PacketLiveSource operator is very similar to PacketFileSource operator. The diff
 ## Environment Setup
 
 1. Install libpcap-devel rpm from your linux repository.
-2. Import the SampleNetworkToolkitData spl project which contains sample PCAP files needed to run network sample applications. ![Import](/streamsx.network/doc/images/pcap1.jpg)
+2. Import the SampleNetworkToolkitData spl project which contains sample PCAP files needed to run network sample applications.
+
+![Import](/streamsx.network/doc/images/pcap1.jpg)
 3. Alternatively you can also generate a pcap file by running the tcpdump command against your ethernet interface.
 
 ```
