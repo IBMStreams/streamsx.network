@@ -78,7 +78,7 @@ PacketLiveSource operator is very similar to PacketFileSource operator. The diff
 
 1. Install libpcap-devel rpm from your linux repository.
 2. Import the SampleNetworkToolkitData spl project which contains sample PCAP files needed to run network sample applications.
-![Import](images/pcap1.jpg)
+![Import](/streamsx.network/doc/images/pcap1.jpg)
 3. Alternatively you can also generate a pcap file by running the tcpdump command against your ethernet interface.
 
 ```
@@ -95,7 +95,8 @@ tcpdump: listening on wlp3s0, link-type EN10MB (Ethernet), capture size 65535 by
 4. Import network sample spl applications to your Streams Studio work space.
 5. Locate the pcap file by editing the following spl code : expression $pcapFilename: getSubmissionTimeValue("pcapFilename", "../../SampleNetworkToolkitData/data/(your pcap file)" )
 6. Compile and submit the job.
-![Import](images/studio.jpg)
+![Import](/streamsx.network/doc/images/studio.jpg)
+
 
 ## Sample applications
 
