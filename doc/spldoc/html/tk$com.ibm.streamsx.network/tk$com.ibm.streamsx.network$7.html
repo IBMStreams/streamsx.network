@@ -7,22 +7,22 @@
 <meta name="copyright" content="(C) Copyright 2005"/>
 <meta name="DC.rights.owner" content="(C) Copyright 2005"/>
 <meta name="DC.Type" content="reference"/>
-<meta name="DC.Title" content="What is changed in version 3.2.2"/>
+<meta name="DC.Title" content="What is changed in version 3.3.0"/>
 <meta name="DC.Format" content="XHTML"/>
 <meta name="DC.Identifier" content="spldoc_page"/>
 <link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
-<title>What is changed in version 3.2.2</title>
+<title>What is changed in version 3.3.0</title>
 </head>
 <body id="spldoc_page">
 
 
-<h1 class="title topictitle1">What is changed in version 3.2.2</h1>
+<h1 class="title topictitle1">What is changed in version 3.3.0</h1>
 
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.4.2</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network$1.html">What's new</a> &gt; What is changed in version 3.2.2</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.network Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network.html">com.ibm.streamsx.network 3.4.3</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.network$1.html">What's new</a> &gt; What is changed in version 3.3.0</p>
 
 </div>
 
@@ -30,7 +30,11 @@
 <div class="section">
 <div class="p">
 <ul class="ul">
-<li class="li"> Added the static keyword to a couple of IPv6 helper functions</li>
+<li class="li"> PacketContentAssembler operator does not depend anymore on environment variable STREAMS_ADAPTERS_ISS_PAM_DIRECTORY at build and run time.   The 'Packet Analysis Module (PAM)' library can be added to the application bundle and the location can be set with the parameters <tt class="ph tt">pamLibrary</tt> and <tt class="ph tt">pamInclude</tt>.</li>
+
+<li class="li"> IPAddressLocation operator: New parameter <tt class="ph tt">initOnTuple</tt> added in order to initialize the operator with loading the geography files on the first tuple and not during operator startup.</li>
+
+<li class="li"> IPAddressLocation operator supports dynamic loading of MaxMind database triggered by a tuple on control port.</li>
 
 </ul>
 
