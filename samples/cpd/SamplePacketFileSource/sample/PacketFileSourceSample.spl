@@ -1,0 +1,41 @@
+/*
+** Copyright (C) 2011, 2020  International Business Machines Corporation
+** All Rights Reserved
+*/
+
+namespace sample;
+
+use com.ibm.streamsx.network.source::*;
+
+public composite PacketFileSourceSample {
+    type
+
+    PacketType =
+        float64 captureTime,            // time that packet was captured, in seconds since Unix epoch
+        uint32 ipv4SourceAddress,       // IP source address, or zero if not IP packet
+        uint32 ipv4DestinationAddress,  // IP destination address, or zero if not IP packet
+        blob dnsMessage;                // DNS message, excluding all network headers
+
+    graph
+
+    stream<PacketType> PacketStream as OutPackets = PacketFileSource() {
+        param
+            pcapFilename: getThisToolkitDir()+ "/opt/sample_dns+dhcp.pcap";
+            inputFilter: "udp port 53";
+            metricsInterval: 0.0;
+        output OutPackets:
+            captureTime = (float64)CAPTURE_SECONDS() + (float64)CAPTURE_MICROSECONDS() / 1000000.0,
+            ipv4SourceAddress = IPV4_SRC_ADDRESS(),
+            ipv4DestinationAddress = IPV4_DST_ADDRESS(),
+            dnsMessage = PAYLOAD_DATA();
+    }
+
+	stream<rstring result> Result = Custom(PacketStream as I){
+		logic
+			onTuple I : {
+				printStringLn((rstring)I);
+				submit ({result=""}, Result);
+			}
+	}
+
+}

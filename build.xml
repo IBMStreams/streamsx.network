@@ -14,6 +14,7 @@
 	<property name="toolkit" location="com.ibm.streamsx.network" />
 	<property name="tkname" value="com.ibm.streamsx.network" />
 	<property name="tmp" location="tmp" />
+	<property name="samples_dir" location="samples" />
 
 	<target name="all" depends="toolkit, dpdkglue, samples" />
 
@@ -72,17 +73,20 @@
 
 	<target name="samples" depends="toolkit">
 		<subant target="indextoolkit" genericantfile="${basedir}/build.xml">
-			<dirset dir="samples" includes="*" />
+			<dirset dir="samples" includes="*" excludes="cpd" />
 		</subant>
 	</target>
 
 	<target name="cleansamples">
 		<subant target="cleantoolkit" genericantfile="${basedir}/build.xml">
-			<dirset dir="samples" includes="*" />
+			<dirset dir="samples" includes="*" excludes="cpd" />
 		</subant>
+		<exec executable="make" failonerror="false" dir="${samples_dir}/cpd">
+			<arg value="-f" />
+			<arg value="Makefile" />
+			<arg value="clean" />
+		</exec>
 	</target>
-
-
 
 
     <condition property="exists.dpdkEnvironmentVariable">
