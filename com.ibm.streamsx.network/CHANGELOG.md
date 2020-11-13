@@ -1,6 +1,11 @@
 # Changes
 ==========
 
+## v3.4.3
+
+* [#208](https://github.com/IBMStreams/streamsx.network/issues/208) Samples added for Streams in Cloud Pak for Data
+* [#207](https://github.com/IBMStreams/streamsx.network/issues/207) Build script updated to include samples in release package
+
 ## v3.4.2
 
 * [#205](https://github.com/IBMStreams/streamsx.network/issues/205) Links to samples updated in operator description

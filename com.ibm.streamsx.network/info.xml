@@ -9,6 +9,10 @@ Operators and functions for ingesting and parsing raw network data at the packet
 
 This is an overview of changes for major and minor version upgrades.
 
+++ What is new in version 3.4.3
+
+* Samples added for Streams in Cloud Pak for Data
+
 ++ What is new in version 3.4.2
 
 * Links to samples updated in operator description
@@ -48,7 +52,7 @@ This is an overview of changes for major and minor version upgrades.
 * IPFilter operator: Changed traces with WARN trace level to TRACE level.
     
     </info:description>
-    <info:version>3.4.2</info:version>
+    <info:version>3.4.3</info:version>
     <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
