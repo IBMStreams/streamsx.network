@@ -1,5 +1,7 @@
 # streamsx.network Samples
 
+[Sample applications for Streams in Cloud Pak for Data](cpd/README.md) are located in the `cpd` directory.
+
 ## Sample applications
 
 The sample projects contain several SPL applications to demonstrate the usage of an operator.
